@@ -5,10 +5,97 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Piet Suess — Client Portal</title>
 <style>
-body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif; }
+body {
+  margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif;
+  flex-direction: column; gap: 0;
+}
+p { font-size: 1.4rem; letter-spacing: 0.08em; opacity: 0.7; margin: 0; }
+canvas { display: block; width: 200px; height: 120px; margin-top: 24px; }
 </style>
 </head>
 <body>
 <p>Coming soon.</p>
+<canvas id="squares"></canvas>
+<script>
+(function() {
+  const c = document.getElementById('squares');
+  const bigS = 48, smS = 36;
+
+  function walkSquare(ctx, lineX, lineY, lineLen, size, dist, side) {
+    const totalLen = lineLen;
+    const rawDist = ((dist % totalLen) + totalLen) % totalLen;
+    const steps = rawDist / size;
+    const stepIdx = Math.floor(steps);
+    const frac = steps - stepIdx;
+    const eased = frac < 0.5
+      ? 0.5 * Math.pow(frac * 2, 0.7)
+      : 1 - 0.5 * Math.pow((1 - frac) * 2, 0.7);
+    const tipAngle = eased * (Math.PI / 2);
+    const pivotX = lineX + ((stepIdx + 1) * size) % totalLen;
+    ctx.save();
+    ctx.translate(pivotX, lineY);
+    ctx.rotate(tipAngle);
+    const s = size, r = s * 0.15;
+    const yOff = side === 'above' ? -s : 0;
+    const x = -s, y = yOff;
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+s-r,y);
+    ctx.quadraticCurveTo(x+s,y,x+s,y+r); ctx.lineTo(x+s,y+s-r);
+    ctx.quadraticCurveTo(x+s,y+s,x+s-r,y+s); ctx.lineTo(x+r,y+s);
+    ctx.quadraticCurveTo(x,y+s,x,y+s-r); ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function walkTreadmill(ctx, centerX, groundY, size, dist, color) {
+    const totalLen = size * 10000;
+    const rawDist = ((dist % totalLen) + totalLen) % totalLen;
+    const steps = rawDist / size;
+    const stepIdx = Math.floor(steps);
+    const frac = steps - stepIdx;
+    const eased = frac < 0.5
+      ? 0.5 * Math.pow(frac * 2, 0.7)
+      : 1 - 0.5 * Math.pow((1 - frac) * 2, 0.7);
+    const tipAngle = eased * (Math.PI / 2);
+    const pivotVirtual = (stepIdx + 1) * size;
+    const centerOffsetX = (size / 2) * (Math.sin(tipAngle) - Math.cos(tipAngle));
+    const tx = centerX - pivotVirtual - centerOffsetX;
+    ctx.save();
+    ctx.translate(tx, 0);
+    ctx.fillStyle = color;
+    walkSquare(ctx, 0, groundY, totalLen, size, dist, 'above');
+    ctx.restore();
+  }
+
+  let startTime = null;
+  function render(time) {
+    if (!startTime) startTime = time;
+    const elapsed = (time - startTime) * 0.001;
+    const rect = c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const w = rect.width, h = rect.height;
+    if (c.width !== Math.round(w*dpr) || c.height !== Math.round(h*dpr)) {
+      c.width = Math.round(w*dpr); c.height = Math.round(h*dpr);
+    }
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    const groundY = h * 0.75;
+    const centerX = w * 0.5;
+    const color = 'rgba(254,249,240,0.5)';
+    walkTreadmill(ctx, centerX - bigS * 0.6, groundY, bigS, elapsed * 60, color);
+    ctx.save();
+    ctx.translate(centerX + smS * 0.6, 0);
+    ctx.scale(-1, 1);
+    ctx.translate(-(centerX + smS * 0.6), 0);
+    walkTreadmill(ctx, centerX + smS * 0.6, groundY, smS, elapsed * 45 + 200, color);
+    ctx.restore();
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+})();
+</script>
 </body>
 </html>
