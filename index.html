@@ -4,19 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Piet Suess — Client Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-body {
-  margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif;
-  flex-direction: column; gap: 0;
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --gold: #f4c542;
+  --coral: #e8735a;
+  --cream: #fef9f0;
+  --ink: #1a0e2e;
 }
-p { font-size: 1.4rem; letter-spacing: 0.08em; opacity: 0.7; margin: 0; }
+html { font-size: 16px; }
+body {
+  margin: 0; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font-family: 'Poppins', sans-serif;
+  color: var(--cream);
+  background: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.bg-gradient {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(135deg,
+    #1a0e2e 0%, #2d1640 20%, #4a1942 35%, #7a2848 50%,
+    #b8475a 65%, #d4766a 78%, #e8a555 90%, #f4c542 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  z-index: 0;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.bg-gradient::after {
+  content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.content { position: relative; z-index: 1; text-align: center; }
+p {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1.6rem; font-weight: 300;
+  letter-spacing: 0.12em; opacity: 0.8; margin: 0;
+}
 canvas { display: block; width: 200px; height: 120px; margin-top: 24px; }
 </style>
 </head>
 <body>
-<p>Coming soon.</p>
-<canvas id="squares"></canvas>
+<div class="bg-gradient"></div>
+<div class="content">
+  <p>Coming soon.</p>
+  <canvas id="squares"></canvas>
+</div>
 <script>
 (function() {
   const c = document.getElementById('squares');
