@@ -10,7 +10,7 @@
   --color-accent: #8b7d6b;
   --color-accent-dark: #6b5d4b;
   --color-white: #ffffff;
-  --color-overlay: rgba(0,0,0,0.35);
+  --color-overlay: rgba(0,0,0,0);
   --font-heading: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Raleway', 'Helvetica Neue', sans-serif;
   --max-width: 1490px;
@@ -80,7 +80,7 @@ header.scrolled .nav-toggle span, header.solid .nav-toggle span { background: va
 /* ===== HERO ===== */
 .hero {
   position: relative; min-height: 85vh;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: flex-end; justify-content: flex-start;
   background-size: cover; background-position: center;
 }
 .hero::before {
@@ -88,12 +88,13 @@ header.scrolled .nav-toggle span, header.solid .nav-toggle span { background: va
   background: var(--color-overlay);
 }
 .hero-content {
-  position: relative; z-index: 1; text-align: center;
-  color: var(--color-white); padding: 40px 20px;
+  position: relative; z-index: 1; text-align: left;
+  color: var(--color-white); padding: 60px 4.5vw;
+  max-width: var(--max-width);
 }
 .hero h1 {
-  font-family: var(--font-heading); font-size: clamp(2.4rem, 5vw, 4rem);
-  font-weight: 400; line-height: 1.2; margin-bottom: 12px;
+  font-family: var(--font-heading); font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 300; line-height: 1.2; margin-bottom: 12px;
 }
 .hero p {
   font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 300;
