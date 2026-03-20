@@ -35,13 +35,18 @@ a:hover { color: var(--color-text); }
 
 /* ===== HEADER / NAV ===== */
 header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 100;
+  background: transparent;
+  transition: background .3s, backdrop-filter .3s;
+}
+header.scrolled, header.solid {
+  position: fixed;
   background: rgba(247,245,240,0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0,0,0,0.06);
-  transition: background .3s;
 }
+header.solid { position: fixed; }
 header .container {
   display: flex; align-items: center; justify-content: space-between;
   height: 80px;
@@ -51,25 +56,32 @@ header .container {
 nav { display: flex; align-items: center; gap: 28px; }
 nav a {
   font-size: 14px; font-weight: 500; letter-spacing: 0.5px;
-  text-transform: uppercase; color: var(--color-text-light);
+  text-transform: uppercase; color: rgba(255,255,255,0.85);
+  transition: color .3s;
 }
-nav a:hover { color: var(--color-heading); }
+nav a:hover { color: var(--color-white); }
+header.scrolled nav a, header.solid nav a { color: var(--color-text-light); }
+header.scrolled nav a:hover, header.solid nav a:hover { color: var(--color-heading); }
 nav a.btn-book {
-  background: var(--color-accent); color: var(--color-white);
+  background: rgba(255,255,255,0.2); color: var(--color-white);
   padding: 10px 22px; border-radius: 3px; font-size: 13px;
-  letter-spacing: 1px;
+  letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.4);
 }
-nav a.btn-book:hover { background: var(--color-accent-dark); color: var(--color-white); }
+nav a.btn-book:hover { background: rgba(255,255,255,0.35); color: var(--color-white); }
+header.scrolled nav a.btn-book, header.solid nav a.btn-book {
+  background: var(--color-accent); color: var(--color-white); border-color: transparent;
+}
+header.scrolled nav a.btn-book:hover, header.solid nav a.btn-book:hover { background: var(--color-accent-dark); }
 
 .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
-.nav-toggle span { display: block; width: 24px; height: 2px; background: var(--color-text); margin: 5px 0; transition: .3s; }
+.nav-toggle span { display: block; width: 24px; height: 2px; background: var(--color-white); margin: 5px 0; transition: .3s; }
+header.scrolled .nav-toggle span, header.solid .nav-toggle span { background: var(--color-text); }
 
 /* ===== HERO ===== */
 .hero {
   position: relative; min-height: 85vh;
   display: flex; align-items: center; justify-content: center;
   background-size: cover; background-position: center;
-  margin-top: 80px;
 }
 .hero::before {
   content: ''; position: absolute; inset: 0;
