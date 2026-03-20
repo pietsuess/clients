@@ -12,7 +12,7 @@
   --color-white: #ffffff;
   --font-heading: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
-  --max-width: 1500px;
+  --max-width: 100%;
   --page-padding: 4.5vw;
   --grid-gap: 11px;
   --section-pad: 80px;
@@ -318,6 +318,18 @@ footer .social-link {
   margin-top: 16px;
 }
 footer .social-link:hover { color: var(--color-heading); box-shadow: inset 0 0 0 1px var(--color-heading); }
+
+/* ===== NAV SOCIAL ICON ===== */
+.nav-social {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1px currentColor;
+  color: rgba(255,255,255,0.8);
+  transition: color .3s;
+}
+.nav-social:hover { color: var(--color-white); }
+header.scrolled .nav-social, header.solid .nav-social { color: var(--color-text-light); }
+header.scrolled .nav-social:hover, header.solid .nav-social:hover { color: var(--color-heading); }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
