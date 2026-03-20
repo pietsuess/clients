@@ -13,7 +13,7 @@
   --color-overlay: rgba(0,0,0,0.35);
   --font-heading: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Raleway', 'Helvetica Neue', sans-serif;
-  --max-width: 1200px;
+  --max-width: 1490px;
   --section-pad: 80px;
 }
 
@@ -31,7 +31,7 @@ img { max-width: 100%; height: auto; display: block; }
 a { color: var(--color-accent-dark); text-decoration: none; transition: color .2s; }
 a:hover { color: var(--color-text); }
 
-.container { max-width: var(--max-width); margin: 0 auto; padding: 0 30px; }
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 4.5vw; }
 
 /* ===== HEADER / NAV ===== */
 header {
@@ -90,7 +90,7 @@ nav a.btn-book:hover { background: var(--color-accent-dark); color: var(--color-
 
 /* ===== SECTIONS ===== */
 section { padding: var(--section-pad) 0; }
-section:nth-child(even) { background: var(--color-bg-alt); }
+/* no alternating bg — original uses same bg throughout */
 
 .section-title {
   font-family: var(--font-heading); font-size: clamp(1.8rem, 3.5vw, 2.8rem);
@@ -102,11 +102,12 @@ section:nth-child(even) { background: var(--color-bg-alt); }
   text-transform: uppercase; margin-bottom: 8px; font-weight: 500;
 }
 
-/* two-column layout */
+/* two-column layout — asymmetric like original (55/45 text-heavy) */
 .grid-2 {
   display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
   align-items: center;
 }
+.grid-2.text-wide { grid-template-columns: 55fr 45fr; }
 .grid-2.reverse { direction: rtl; }
 .grid-2.reverse > * { direction: ltr; }
 
@@ -149,13 +150,14 @@ section:nth-child(even) { background: var(--color-bg-alt); }
   font-style: italic;
 }
 
-/* ===== REVIEWS ===== */
+/* ===== REVIEWS — single column, stacked like original ===== */
 .reviews-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex; flex-direction: column;
   gap: 30px; margin-top: 40px;
+  max-width: 800px; margin-left: auto; margin-right: auto;
 }
 .review-card {
-  background: var(--color-white); padding: 36px; border-radius: 6px;
+  background: var(--color-white); padding: 40px 48px; border-radius: 6px;
   box-shadow: 0 2px 20px rgba(0,0,0,0.05);
 }
 .review-card p { font-size: 15px; line-height: 1.8; color: var(--color-text-light); margin-bottom: 16px; }
@@ -277,8 +279,9 @@ footer .social-link:hover { color: var(--color-white); }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-  .grid-2, .contact-grid { grid-template-columns: 1fr; gap: 30px; }
+  .grid-2, .grid-2.text-wide, .contact-grid { grid-template-columns: 1fr; gap: 30px; }
   .grid-2.reverse { direction: ltr; }
+  .container { padding: 0 6vw; }
   :root { --section-pad: 50px; }
 }
 @media (max-width: 768px) {
