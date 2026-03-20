@@ -121,10 +121,10 @@ header .container {
   padding-top: 4vh; padding-bottom: 4vh;
   transition: padding .3s;
 }
-header.scrolled .container { padding-top: 12px; padding-bottom: 12px; }
+header.scrolled .container, header.solid .container { padding-top: 12px; padding-bottom: 12px; }
 .logo { position: relative; }
 .logo img { height: 8vh; width: auto; transition: height .3s; }
-header.scrolled .logo img { height: 45px; }
+header.scrolled .logo img, header.solid .logo img { height: 45px; }
 .logo .logo-dark { position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .3s; }
 .logo .logo-light { transition: opacity .3s; }
 header.scrolled .logo .logo-light, header.solid .logo .logo-light { opacity: 0; }
@@ -267,6 +267,7 @@ section { padding: var(--section-pad) 0; position: relative; overflow: hidden; }
   align-items: center;
 }
 .grid-2.text-wide { grid-template-columns: 55fr 45fr; }
+.grid-2.img-small { grid-template-columns: 18fr 82fr; }
 .grid-2.reverse { direction: rtl; }
 .grid-2.reverse > * { direction: ltr; }
 
@@ -584,7 +585,7 @@ header.scrolled .nav-social:hover, header.solid .nav-social:hover { color: var(-
   .review-card { min-width: 320px; }
 }
 @media (max-width: 900px) {
-  .grid-2, .grid-2.text-wide, .contact-grid { grid-template-columns: 1fr; gap: 30px; }
+  .grid-2, .grid-2.text-wide, .grid-2.img-small, .contact-grid { grid-template-columns: 1fr; gap: 30px; }
   .grid-2.reverse { direction: ltr; }
   .container { padding: 0 6vw; }
   :root { --section-pad: 50px; }
