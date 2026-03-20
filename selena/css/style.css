@@ -118,10 +118,13 @@ header.scrolled, header.solid {
 header.solid { position: fixed; }
 header .container {
   display: flex; align-items: center; justify-content: space-between;
-  padding-top: 16px; padding-bottom: 16px;
+  padding-top: 4vh; padding-bottom: 4vh;
+  transition: padding .3s;
 }
+header.scrolled .container { padding-top: 12px; padding-bottom: 12px; }
 .logo { position: relative; }
-.logo img { height: 45px; width: auto; }
+.logo img { height: 8vh; width: auto; transition: height .3s; }
+header.scrolled .logo img { height: 45px; }
 .logo .logo-dark { position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .3s; }
 .logo .logo-light { transition: opacity .3s; }
 header.scrolled .logo .logo-light, header.solid .logo .logo-light { opacity: 0; }
@@ -193,24 +196,24 @@ header.scrolled .nav-toggle span, header.solid .nav-toggle span { background: va
 /* ===== HERO ===== */
 .hero {
   position: relative; min-height: 90vh;
-  display: flex; align-items: center; justify-content: flex-start;
+  display: flex; align-items: flex-end; justify-content: flex-start;
   background-size: cover; background-position: center;
   background-attachment: fixed;
 }
 .hero::before {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%);
   z-index: 0;
 }
 .hero-content {
   position: relative; z-index: 1; text-align: left;
   color: var(--color-white);
-  padding: 0 var(--page-padding);
-  max-width: 60%;
+  padding: 0 0 8% 10%;
+  max-width: none;
 }
 .hero h1 {
-  font-family: var(--font-heading); font-size: clamp(2.6rem, 5vw, 4rem);
-  font-weight: 700; line-height: 1.15; margin-bottom: 12px;
+  font-family: var(--font-heading); font-size: clamp(3rem, 5.5vw, 4.5rem);
+  font-weight: 700; line-height: 1.1; margin-bottom: 12px;
   color: #ffffff;
   animation: heroFadeUp 1s ease forwards;
   opacity: 0;
