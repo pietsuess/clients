@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact &mdash; Salt Spring Rolfing</title>
+  <meta name="description" content="Contact Selena La Brooy at Salt Spring Rolfing. Located at Unit 5 - 127 Rainbow Road, Salt Spring Island, BC.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo"><img src="images/logo-light.png" alt="Salt Spring Rolfing"></a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+      <nav>
+        <a href="about-sessions.html">About Sessions</a>
+        <a href="about-selena.html">About Selena</a>
+        <a href="faqs.html">FAQs</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="booking.html" class="btn-book">Book A Session</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" style="background-image: url('images/fern.jpg'); min-height:50vh;">
+    <div class="hero-content">
+      <h1>Contact Us</h1>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section>
+    <div class="container contact-grid">
+      <div class="contact-form">
+        <h2 class="section-title">Got questions? Send us a message.</h2>
+        <form id="contactForm">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required>
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required>
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+          <label for="message">Message</label>
+          <textarea id="message" name="message" required></textarea>
+          <button type="submit" class="btn">Send</button>
+        </form>
+        <p id="formSuccess" style="display:none; margin-top:16px; color:var(--color-accent-dark); font-weight:500;">Thank you! Your message has been sent.</p>
+      </div>
+      <div class="contact-info">
+        <h3>Get In Touch</h3>
+        <p><strong>Email:</strong> <a href="mailto:selena.rolfing@gmail.com">selena.rolfing@gmail.com</a></p>
+        <p><strong>Location:</strong><br>Unit 5 - 127 Rainbow Road<br>Salt Spring Island, BC</p>
+        <p><a href="https://www.facebook.com/profile.php?id=100064133013122" target="_blank" rel="noopener">Follow on Facebook</a></p>
+        <a href="booking.html" class="btn" style="margin-top:24px;">Book A Session</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="logo-footer"><img src="images/logo-dark.png" alt="Salt Spring Rolfing"></div>
+      <a href="booking.html" class="btn">Book A Session</a>
+      <p>Our Clinic is located at<br>Unit 5 - 127 Rainbow Road, Salt Spring Island, BC</p>
+      <a href="https://www.facebook.com/profile.php?id=100064133013122" target="_blank" rel="noopener" class="social-link">Facebook</a>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelector('.nav-toggle').addEventListener('click', function() {
+      document.querySelector('nav').classList.toggle('active');
+    });
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // In production, wire this to a form service (Formspree, Netlify Forms, etc.)
+      this.style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
