@@ -118,9 +118,14 @@ header.scrolled, header.solid {
 header.solid { position: fixed; }
 header .container {
   display: flex; align-items: center; justify-content: space-between;
-  padding-top: 4vh; padding-bottom: 4vh;
+  padding-top: 16px; padding-bottom: 16px;
 }
-.logo img { height: 8vh; width: auto; }
+.logo { position: relative; }
+.logo img { height: 45px; width: auto; }
+.logo .logo-dark { position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .3s; }
+.logo .logo-light { transition: opacity .3s; }
+header.scrolled .logo .logo-light, header.solid .logo .logo-light { opacity: 0; }
+header.scrolled .logo .logo-dark, header.solid .logo .logo-dark { opacity: 1; }
 
 nav { display: flex; align-items: center; gap: 28px; }
 nav a {
@@ -262,7 +267,7 @@ section { padding: var(--section-pad) 0; position: relative; overflow: hidden; }
 .grid-2.reverse { direction: rtl; }
 .grid-2.reverse > * { direction: ltr; }
 
-.grid-2 img { border-radius: 50px; width: 100%; max-height: 500px; object-fit: cover; }
+.grid-2 img { border-radius: 50px; width: 100%; object-fit: contain; }
 
 /* Image hover zoom */
 .img-hover-container {
@@ -585,7 +590,7 @@ header.scrolled .nav-social:hover, header.solid .nav-social:hover { color: var(-
   .review-card { min-width: 280px; }
 }
 @media (max-width: 768px) {
-  header .container { padding-top: 6vw; padding-bottom: 6vw; }
+  header .container { padding-top: 12px; padding-bottom: 12px; }
   nav { display: none; position: fixed; top: 80px; left: 0; right: 0;
     background: var(--color-bg); flex-direction: column;
     padding: 20px 30px; gap: 16px;
