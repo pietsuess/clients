@@ -211,6 +211,21 @@
       observer.observe(el);
     });
 
+    // Parallax — clamped so image never scrolls past its edges
+    window.addEventListener('scroll', function() {
+      document.querySelectorAll('.parallax-bg').forEach(function(el) {
+        var rect = el.getBoundingClientRect();
+        var winH = window.innerHeight;
+        // Only apply when section is in view
+        if (rect.bottom > 0 && rect.top < winH) {
+          var progress = (winH - rect.top) / (winH + rect.height);
+          // Clamp between 0% and 100%, map to 0%-30% offset
+          var offset = Math.min(Math.max(progress * 30, 0), 30);
+          el.style.backgroundPositionY = offset + '%';
+        }
+      });
+    });
+
     // Testimonial carousel: click arrow, show one card at a time, loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
