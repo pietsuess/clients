@@ -155,6 +155,14 @@
           <p>&ldquo;Selena is passionate about Rolfing, helping others to overcome their aches and pains and move with greater ease. She rebalances the body; but also through her observations and teachings, works with you to develop strategies to improve your health. I now move with greater ease and have made adjustments to &lsquo;old habits&rsquo; which, unknowingly, created my challenges. She &lsquo;gets&rsquo; what it&rsquo;s like to live with physical challenges and my sense is this makes her an even more compassionate practitioner. She listens and takes time with you.&rdquo;</p>
           <span class="reviewer">&mdash; Elaine S.</span>
         </div>
+        <div class="review-card reveal">
+          <p>&ldquo;After years of dealing with chronic shoulder tension from working at a desk, I finally found real relief through Rolfing with Selena. She has an incredible ability to identify where the root of the problem actually lies &mdash; which was not where I expected. After just a few sessions, I was sleeping better, standing taller, and feeling more at ease in my own skin. Her approach is thoughtful, skilled, and deeply caring.&rdquo;</p>
+          <span class="reviewer">&mdash; Michael T., Software Developer</span>
+        </div>
+        <div class="review-card reveal">
+          <p>&ldquo;I came to Selena after a difficult pregnancy left me with persistent lower back and hip pain. She not only helped me find relief but taught me so much about how my body had adapted and compensated during that time. I left each session feeling more connected and more confident in my body. Selena creates a space that feels safe, professional, and genuinely supportive. I cannot recommend her highly enough.&rdquo;</p>
+          <span class="reviewer">&mdash; Lauren D., New Mother</span>
+        </div>
       </div>
       <div class="carousel-nav">
         <button class="carousel-btn" id="carouselPrev" aria-label="Previous review">&#8592;</button>
@@ -211,17 +219,32 @@
       });
     });
 
-    // Testimonial carousel arrows
+    // Testimonial carousel: auto-loop + arrows
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      prevBtn.addEventListener('click', function() {
-        carousel.scrollBy({ left: -420, behavior: 'smooth' });
-      });
-      nextBtn.addEventListener('click', function() {
-        carousel.scrollBy({ left: 420, behavior: 'smooth' });
-      });
+      var cardWidth = 420;
+      function scrollNext() {
+        var maxScroll = carousel.scrollWidth - carousel.clientWidth;
+        if (carousel.scrollLeft >= maxScroll - 10) {
+          carousel.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          carousel.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        }
+      }
+      function scrollPrev() {
+        if (carousel.scrollLeft <= 10) {
+          carousel.scrollTo({ left: carousel.scrollWidth, behavior: 'smooth' });
+        } else {
+          carousel.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        }
+      }
+      prevBtn.addEventListener('click', scrollPrev);
+      nextBtn.addEventListener('click', scrollNext);
+      var autoLoop = setInterval(scrollNext, 5000);
+      carousel.addEventListener('mouseenter', function() { clearInterval(autoLoop); });
+      carousel.addEventListener('mouseleave', function() { autoLoop = setInterval(scrollNext, 5000); });
     }
   </script>
 </body>
