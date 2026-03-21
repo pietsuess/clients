@@ -34,11 +34,12 @@
   </header>
 
   <!-- HERO -->
-  <section class="hero" style="background-image: url('images/contact-hero.jpg'); min-height:50vh;">
+  <section class="hero parallax-bg" style="background-image: url('images/contact-hero.jpg');">
     <div class="hero-content">
       <h1>Contact Us</h1>
     </div>
   </section>
+  <div class="hero-spacer"></div>
 
   <!-- CONTACT -->
   <section>
@@ -95,6 +96,14 @@
       // In production, wire this to a form service (Formspree, Netlify Forms, etc.)
       this.style.display = 'none';
       document.getElementById('formSuccess').style.display = 'block';
+    });
+
+    // Hero drift
+    window.addEventListener('scroll', function() {
+      var hero = document.querySelector('.hero');
+      if (hero) {
+        hero.style.backgroundPositionY = (40 + window.scrollY * 0.02) + '%';
+      }
     });
   </script>
 </body>
