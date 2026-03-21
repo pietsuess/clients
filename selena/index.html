@@ -211,51 +211,26 @@
       observer.observe(el);
     });
 
-    // Simple parallax on scroll
-    window.addEventListener('scroll', function() {
-      var scrolled = window.scrollY;
-      document.querySelectorAll('.parallax-bg').forEach(function(el) {
-        el.style.backgroundPositionY = scrolled * 0.4 + 'px';
-      });
-    });
-
-    // Testimonial carousel: CSS marquee-style infinite loop
+    // Testimonial carousel: click arrow, show one card at a time, loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      // Clone all cards and append for seamless loop
-      var cards = Array.from(carousel.children);
-      cards.forEach(function(card) {
-        carousel.appendChild(card.cloneNode(true));
-      });
+      var cards = carousel.querySelectorAll('.review-card');
+      var current = 0;
+      var total = cards.length;
 
-      var scrollSpeed = 1; // pixels per frame
-      var paused = false;
-      var totalWidth = 0;
-      cards.forEach(function(c) {
-        totalWidth += c.offsetWidth + 30; // 30 = gap
-      });
-
-      function animateScroll() {
-        if (!paused) {
-          carousel.scrollLeft += scrollSpeed;
-          if (carousel.scrollLeft >= totalWidth) {
-            carousel.scrollLeft -= totalWidth;
-          }
-        }
-        requestAnimationFrame(animateScroll);
+      function showCard(index) {
+        cards[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
-      requestAnimationFrame(animateScroll);
 
-      carousel.addEventListener('mouseenter', function() { paused = true; });
-      carousel.addEventListener('mouseleave', function() { paused = false; });
-
-      prevBtn.addEventListener('click', function() {
-        carousel.scrollBy({ left: -400, behavior: 'smooth' });
-      });
       nextBtn.addEventListener('click', function() {
-        carousel.scrollBy({ left: 400, behavior: 'smooth' });
+        current = (current + 1) % total;
+        showCard(current);
+      });
+      prevBtn.addEventListener('click', function() {
+        current = (current - 1 + total) % total;
+        showCard(current);
       });
     }
   </script>

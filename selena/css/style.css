@@ -198,7 +198,7 @@ header.scrolled .nav-toggle span, header.solid .nav-toggle span { background: va
   position: relative; min-height: 90vh;
   display: flex; align-items: flex-end; justify-content: flex-start;
   background-size: cover; background-position: center;
-  background-attachment: fixed;
+  overflow: hidden;
 }
 .hero::before {
   content: ''; position: absolute; inset: 0;
@@ -347,8 +347,8 @@ footer .btn:hover {
 /* ===== QUOTE BLOCK ===== */
 .quote-section {
   background-size: cover; background-position: center;
-  background-attachment: fixed;
   position: relative; padding: 120px 0;
+  overflow: hidden;
 }
 .quote-section::before {
   content: ''; position: absolute; inset: 0;
@@ -371,7 +371,8 @@ footer .btn:hover {
   display: flex;
   gap: 30px;
   margin-top: 40px;
-  overflow-x: hidden;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: 10px;
@@ -384,6 +385,7 @@ footer .btn:hover {
   min-width: 380px;
   max-width: 420px;
   flex-shrink: 0;
+  scroll-snap-align: center;
   border-left: 4px solid var(--color-accent);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
