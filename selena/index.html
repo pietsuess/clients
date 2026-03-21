@@ -218,8 +218,8 @@
         var winH = window.innerHeight;
         if (rect.bottom > 0 && rect.top < winH) {
           var progress = (winH - rect.top) / (winH + rect.height);
-          // Map 0-1 progress to 35%-65% (centered on 50%)
-          var offset = 35 + (progress * 30);
+          // Map 0-1 progress to 20%-80% (centered on 50%, wide range)
+          var offset = 20 + (progress * 60);
           el.style.backgroundPositionY = offset + '%';
         }
       });
