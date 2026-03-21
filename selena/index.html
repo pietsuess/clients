@@ -231,6 +231,13 @@
 
     // Parallax — subtle shift centered around 50%, range 35%-65%
     window.addEventListener('scroll', function() {
+      // Hero: subtle upward drift as you scroll
+      var hero = document.querySelector('.hero');
+      if (hero) {
+        var speed = 0.15;
+        hero.style.backgroundPositionY = (40 + window.scrollY * speed * 0.05) + '%';
+      }
+
       document.querySelectorAll('.parallax-bg:not(.hero)').forEach(function(el) {
         var rect = el.getBoundingClientRect();
         var winH = window.innerHeight;
