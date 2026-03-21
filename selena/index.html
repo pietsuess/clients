@@ -226,22 +226,38 @@
       });
     });
 
-    // Testimonial carousel: horizontal row, click to shift, infinite loop
+    // Testimonial carousel: slide animation, infinite loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      // When clicking next: move first card to the end, scroll stays put
+      var shifting = false;
+      var cardW = carousel.firstElementChild.offsetWidth + 30; // card + gap
+
       nextBtn.addEventListener('click', function() {
-        var first = carousel.firstElementChild;
-        carousel.style.transition = 'none';
-        carousel.appendChild(first);
+        if (shifting) return;
+        shifting = true;
+        carousel.style.transition = 'transform 0.4s ease';
+        carousel.style.transform = 'translateX(-' + cardW + 'px)';
+        setTimeout(function() {
+          carousel.style.transition = 'none';
+          carousel.style.transform = '';
+          carousel.appendChild(carousel.firstElementChild);
+          shifting = false;
+        }, 400);
       });
-      // When clicking prev: move last card to the beginning
+
       prevBtn.addEventListener('click', function() {
-        var last = carousel.lastElementChild;
+        if (shifting) return;
+        shifting = true;
         carousel.style.transition = 'none';
-        carousel.insertBefore(last, carousel.firstElementChild);
+        carousel.insertBefore(carousel.lastElementChild, carousel.firstElementChild);
+        carousel.style.transform = 'translateX(-' + cardW + 'px)';
+        // Force reflow
+        carousel.offsetHeight;
+        carousel.style.transition = 'transform 0.4s ease';
+        carousel.style.transform = '';
+        setTimeout(function() { shifting = false; }, 400);
       });
     }
   </script>
