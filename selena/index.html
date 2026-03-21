@@ -226,65 +226,27 @@
       });
     });
 
-    // Testimonial carousel: infinite seamless loop with cloned cards
+    // Testimonial carousel: one at a time, fade, loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      var originalCards = Array.from(carousel.querySelectorAll('.review-card'));
-      var total = originalCards.length;
-
-      // Clone all cards and append so we can scroll past the end seamlessly
-      originalCards.forEach(function(card) {
-        carousel.appendChild(card.cloneNode(true));
-      });
-
-      var allCards = carousel.querySelectorAll('.review-card');
+      var cards = carousel.querySelectorAll('.review-card');
       var current = 0;
-      var scrolling = false;
+      cards[0].classList.add('active');
 
-      function getCardOffset(index) {
-        return allCards[index].offsetLeft - carousel.offsetLeft;
-      }
-
-      function scrollToCard(index, smooth) {
-        carousel.scrollTo({ left: getCardOffset(index), behavior: smooth ? 'smooth' : 'auto' });
+      function showCard(index) {
+        cards.forEach(function(c) { c.classList.remove('active'); });
+        cards[index].classList.add('active');
       }
 
       nextBtn.addEventListener('click', function() {
-        if (scrolling) return;
-        scrolling = true;
-        current++;
-        // Scroll to the next card (could be a clone)
-        scrollToCard(current, true);
-
-        setTimeout(function() {
-          // If we've scrolled into the cloned region, silently jump back
-          if (current >= total) {
-            current = 0;
-            scrollToCard(current, false);
-          }
-          scrolling = false;
-        }, 500);
+        current = (current + 1) % cards.length;
+        showCard(current);
       });
-
       prevBtn.addEventListener('click', function() {
-        if (scrolling) return;
-        scrolling = true;
-        if (current <= 0) {
-          // Jump to clone region at the end silently, then scroll back
-          current = total;
-          scrollToCard(current, false);
-          setTimeout(function() {
-            current = total - 1;
-            scrollToCard(current, true);
-            setTimeout(function() { scrolling = false; }, 500);
-          }, 50);
-        } else {
-          current--;
-          scrollToCard(current, true);
-          setTimeout(function() { scrolling = false; }, 500);
-        }
+        current = (current - 1 + cards.length) % cards.length;
+        showCard(current);
       });
     }
   </script>

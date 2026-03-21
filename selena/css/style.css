@@ -197,7 +197,7 @@ header.scrolled .nav-toggle span, header.solid .nav-toggle span { background: va
 .hero {
   position: relative; min-height: 90vh;
   display: flex; align-items: flex-end; justify-content: flex-start;
-  background-size: 110% auto; background-position: center top;
+  background-size: 110% auto; background-position: center center;
   overflow: hidden;
 }
 .hero::before {
@@ -346,7 +346,7 @@ footer .btn:hover {
 
 /* ===== QUOTE BLOCK ===== */
 .quote-section {
-  background-size: 110% auto; background-position: center top;
+  background-size: 110% auto; background-position: center center;
   position: relative; padding: 120px 0;
   overflow: hidden;
 }
@@ -368,30 +368,32 @@ footer .btn:hover {
   position: relative;
 }
 .reviews-grid {
-  display: flex;
-  gap: 30px;
+  position: relative;
   margin-top: 40px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 10px;
+  min-height: 300px;
 }
-.reviews-grid::-webkit-scrollbar { display: none; }
 .review-card {
   background: var(--color-bg-light);
-  padding: 40px 36px;
+  padding: 40px 48px;
   border-radius: 12px;
-  min-width: 380px;
-  max-width: 420px;
-  flex-shrink: 0;
-  scroll-snap-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  width: 90%;
   border-left: 4px solid var(--color-accent);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.review-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+.review-card.active {
+  opacity: 1;
+  pointer-events: auto;
+  position: relative;
+  transform: none;
+  left: auto;
 }
 .review-card p { font-size: 15px; line-height: 1.8; color: var(--color-text-light); margin-bottom: 16px; }
 .review-card .reviewer { font-weight: 600; color: var(--color-accent-dark); font-size: 14px; }
