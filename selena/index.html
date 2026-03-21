@@ -211,16 +211,15 @@
       observer.observe(el);
     });
 
-    // Parallax — clamped so image never scrolls past its edges
+    // Parallax — subtle shift centered around 50%, range 35%-65%
     window.addEventListener('scroll', function() {
       document.querySelectorAll('.parallax-bg').forEach(function(el) {
         var rect = el.getBoundingClientRect();
         var winH = window.innerHeight;
-        // Only apply when section is in view
         if (rect.bottom > 0 && rect.top < winH) {
           var progress = (winH - rect.top) / (winH + rect.height);
-          // Clamp between 0% and 100%, map to 0%-30% offset
-          var offset = Math.min(Math.max(progress * 30, 0), 30);
+          // Map 0-1 progress to 35%-65% (centered on 50%)
+          var offset = 35 + (progress * 30);
           el.style.backgroundPositionY = offset + '%';
         }
       });
