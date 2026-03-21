@@ -383,15 +383,19 @@ footer .btn:hover {
   display: flex;
   gap: 30px;
   margin-top: 40px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   transition: transform 0.4s ease;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.reviews-grid::-webkit-scrollbar { display: none; }
 .review-card {
   background: var(--color-bg-light);
-  padding: 28px 32px;
+  padding: 22px 36px;
   border-radius: 12px;
-  width: 400px;
-  min-width: 400px;
+  width: 520px;
+  min-width: 520px;
   flex-shrink: 0;
   border-left: 4px solid var(--color-accent);
   white-space: normal;
