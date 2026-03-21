@@ -219,27 +219,40 @@
       });
     });
 
-    // Testimonial carousel: auto-loop + arrows
+    // Testimonial carousel: infinite seamless loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      var cardWidth = 420;
-      function scrollNext() {
-        var maxScroll = carousel.scrollWidth - carousel.clientWidth;
-        if (carousel.scrollLeft >= maxScroll - 10) {
-          carousel.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          carousel.scrollBy({ left: cardWidth, behavior: 'smooth' });
+      // Duplicate all cards for seamless looping
+      var cards = carousel.querySelectorAll('.review-card');
+      cards.forEach(function(card) {
+        carousel.appendChild(card.cloneNode(true));
+      });
+      var totalOriginal = cards.length;
+      var cardEl = carousel.querySelector('.review-card');
+      var cardStyle = getComputedStyle(cardEl);
+      var cardWidth = cardEl.offsetWidth + parseInt(cardStyle.marginRight || 0) + 20;
+      var halfScroll = cardWidth * totalOriginal;
+
+      // Start in the middle so we can scroll both directions
+      carousel.scrollLeft = 0;
+
+      function checkLoop() {
+        if (carousel.scrollLeft >= halfScroll) {
+          carousel.style.scrollBehavior = 'auto';
+          carousel.scrollLeft -= halfScroll;
+          carousel.style.scrollBehavior = 'smooth';
+        } else if (carousel.scrollLeft <= 0) {
+          carousel.style.scrollBehavior = 'auto';
+          carousel.scrollLeft += halfScroll;
+          carousel.style.scrollBehavior = 'smooth';
         }
       }
-      function scrollPrev() {
-        if (carousel.scrollLeft <= 10) {
-          carousel.scrollTo({ left: carousel.scrollWidth, behavior: 'smooth' });
-        } else {
-          carousel.scrollBy({ left: -cardWidth, behavior: 'smooth' });
-        }
-      }
+      carousel.addEventListener('scroll', checkLoop);
+
+      function scrollNext() { carousel.scrollBy({ left: cardWidth, behavior: 'smooth' }); }
+      function scrollPrev() { carousel.scrollBy({ left: -cardWidth, behavior: 'smooth' }); }
       prevBtn.addEventListener('click', scrollPrev);
       nextBtn.addEventListener('click', scrollNext);
       var autoLoop = setInterval(scrollNext, 5000);
