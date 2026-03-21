@@ -254,6 +254,62 @@ h1, h2, h3, h4 {
   flex-direction: column;
 }
 
+.product-card.featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 2px solid var(--gold);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.2);
+}
+
+.product-card.featured .product-image {
+  aspect-ratio: auto;
+  min-height: 300px;
+}
+
+.product-card.featured .product-body {
+  padding: 32px;
+  justify-content: center;
+}
+
+.product-card.featured .product-title {
+  font-size: 1.6rem;
+}
+
+.product-card.featured .product-desc {
+  font-size: 0.9rem;
+}
+
+.product-card.featured .event-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.event-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.event-detail svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .product-card.featured {
+    grid-template-columns: 1fr;
+  }
+  .product-card.featured .product-image {
+    min-height: 200px;
+  }
+}
+
 .product-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px var(--shadow-md);
@@ -795,6 +851,7 @@ h1, h2, h3, h4 {
   <h2>Browse by Category</h2>
   <div class="category-filters" id="categoryFilters">
     <button class="cat-btn active" data-category="all">All Products</button>
+    <button class="cat-btn" data-category="tickets">Tickets &amp; Events</button>
     <button class="cat-btn" data-category="books">Books &amp; Media</button>
     <button class="cat-btn" data-category="apparel">Apparel &amp; Merch</button>
     <button class="cat-btn" data-category="yoga">Yoga &amp; Meditation</button>
@@ -936,6 +993,74 @@ h1, h2, h3, h4 {
 <script>
 // ===== PRODUCT DATA =====
 const PRODUCTS = [
+  // TICKETS & EVENTS -- MUSIC FOR PEACE SERIES
+  {
+    id: 100,
+    category: 'tickets',
+    title: 'Music for Peace: Carnatic Violin & Mridangam',
+    desc: 'An evening of South Indian classical music with Shriram Rajagopalan (violin) and Keerthy Raghavan (mridangam). Intricate melodic structures and rhythmic complexity in a contemplative setting. Limited seating.',
+    price: 40.00,
+    badge: 'Apr 11',
+    badgeClass: 'new',
+    featured: true,
+    event: {
+      date: 'Saturday, April 11, 2026',
+      time: '7:00 pm \u2013 9:00 pm',
+      venue: 'Satsang Room'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg',
+    icon: '\uD83C\uDFBB'
+  },
+  {
+    id: 101,
+    category: 'tickets',
+    title: 'Sound Bath + Meditation with Farhad Khan',
+    desc: 'Crystal bowls, gongs, and chimes for stress release, enhanced concentration, and chakra balancing. Over two decades of healing practice.',
+    price: 0,
+    priceLabel: 'By Donation',
+    badge: 'May 13',
+    badgeClass: 'new',
+    event: {
+      date: 'Tuesday, May 13, 2026',
+      time: '7:30 pm \u2013 8:30 pm',
+      venue: 'Salt Spring Centre of Yoga'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/11/SoundBath-SaltSpring.png',
+    icon: '\uD83D\uDD14'
+  },
+  {
+    id: 102,
+    category: 'tickets',
+    title: 'Music for Peace: Akhil Jobanputra & Tihai Ensemble',
+    desc: 'Hindustani classical concert featuring CBC\'s "30 under 30" vocalist Akhil Jobanputra with Mohan Bhide (harmonium) and Hriday Buddhdev (tabla). Expansive ragas and spontaneous improvisation.',
+    price: 40.00,
+    badge: 'Jun 27',
+    badgeClass: 'new',
+    event: {
+      date: 'Saturday, June 27, 2026',
+      time: 'Doors 6:30 pm, Concert 7:00 pm \u2013 9:00 pm',
+      venue: 'Pond Dome'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg',
+    icon: '\uD83C\uDFB6'
+  },
+  {
+    id: 103,
+    category: 'tickets',
+    title: 'Music for Peace: Deepak Ram \u2013 Bansuri Flute',
+    desc: 'Internationally celebrated bansuri master Deepak Ram performs Indian classical music on the bamboo flute. Deeply expressive and meditative sound.',
+    price: 40.00,
+    badge: 'Aug 1',
+    badgeClass: 'new',
+    event: {
+      date: 'Saturday, August 1, 2026',
+      time: 'Doors 6:30 pm, Concert 7:00 pm \u2013 9:00 pm',
+      venue: 'Satsang Room'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg',
+    icon: '\uD83C\uDFB5'
+  },
+
   // BOOKS & MEDIA
   {
     id: 1,
@@ -1190,7 +1315,7 @@ function renderProducts(category = 'all') {
   const filtered = category === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
 
   grid.innerHTML = filtered.map(p => `
-    <div class="product-card" data-category="${p.category}">
+    <div class="product-card${p.featured ? ' featured' : ''}" data-category="${p.category}">
       <div class="product-image">
         ${p.img ? `<img src="${p.img}" alt="${p.title}" loading="lazy">` : `<span class="placeholder-icon">${p.icon || '\u2728'}</span>`}
         ${p.badge ? `<span class="product-badge ${p.badgeClass || ''}">${p.badge}</span>` : ''}
@@ -1198,12 +1323,17 @@ function renderProducts(category = 'all') {
       <div class="product-body">
         <div class="product-category-label">${getCategoryLabel(p.category)}</div>
         <div class="product-title">${p.title}</div>
+        ${p.event ? `<div class="event-details">
+          <span class="event-detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${p.event.date}</span>
+          <span class="event-detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${p.event.time}</span>
+          <span class="event-detail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${p.event.venue}</span>
+        </div>` : ''}
         <div class="product-desc">${p.desc}</div>
         <div class="product-footer">
           <div class="product-price">
-            ${p.priceLabel ? `<span class="from">${p.priceLabel}</span>` : `$${p.price.toFixed(2)}`}
+            ${p.priceLabel ? `<span class="from">${p.priceLabel}</span>` : p.price > 0 ? `$${p.price.toFixed(2)}` : ''}
           </div>
-          <button class="add-to-cart" onclick="addToCart(${p.id})">Add to Cart</button>
+          <button class="add-to-cart" onclick="addToCart(${p.id})">${p.category === 'tickets' ? 'Get Tickets' : 'Add to Cart'}</button>
         </div>
       </div>
     </div>
@@ -1212,6 +1342,7 @@ function renderProducts(category = 'all') {
 
 function getCategoryLabel(cat) {
   const labels = {
+    tickets: 'Music for Peace',
     books: 'Books & Media',
     apparel: 'Apparel & Merch',
     yoga: 'Yoga & Meditation',
