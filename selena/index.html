@@ -214,7 +214,7 @@
 
     // Parallax — subtle shift centered around 50%, range 35%-65%
     window.addEventListener('scroll', function() {
-      document.querySelectorAll('.parallax-bg').forEach(function(el) {
+      document.querySelectorAll('.parallax-bg:not(.hero)').forEach(function(el) {
         var rect = el.getBoundingClientRect();
         var winH = window.innerHeight;
         if (rect.bottom > 0 && rect.top < winH) {
