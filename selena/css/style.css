@@ -621,9 +621,19 @@ header.scrolled .nav-social:hover, header.solid .nav-social:hover { color: var(-
   nav a { color: var(--color-text); }
   nav a.btn-book { color: var(--color-heading); border-color: var(--color-heading); }
   .nav-toggle { display: block; }
-  .hero { min-height: 65vh; background-attachment: scroll; }
-  .hero-content { max-width: 90%; }
+  .hero {
+    position: relative;
+    height: 70vh;
+    background-size: cover;
+    background-position: center center;
+    background-attachment: scroll;
+  }
+  .hero.hero-short { height: 50vh; }
+  .hero-spacer { display: none; }
+  .hero-content { max-width: 90%; padding: 0 0 8% 6%; }
+  .hero h1 { font-size: 2rem; }
   .blog-grid { grid-template-columns: 1fr; }
-  .quote-section { background-attachment: scroll; }
+  .quote-section { background-size: cover; background-attachment: scroll; }
   .floating-shape { display: none; }
+  .grid-2.img-small { padding: 0; }
 }
