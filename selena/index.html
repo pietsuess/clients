@@ -225,27 +225,22 @@
       });
     });
 
-    // Testimonial carousel: one at a time, fade, loop
+    // Testimonial carousel: horizontal row, click to shift, infinite loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      var cards = carousel.querySelectorAll('.review-card');
-      var current = 0;
-      cards[0].classList.add('active');
-
-      function showCard(index) {
-        cards.forEach(function(c) { c.classList.remove('active'); });
-        cards[index].classList.add('active');
-      }
-
+      // When clicking next: move first card to the end, scroll stays put
       nextBtn.addEventListener('click', function() {
-        current = (current + 1) % cards.length;
-        showCard(current);
+        var first = carousel.firstElementChild;
+        carousel.style.transition = 'none';
+        carousel.appendChild(first);
       });
+      // When clicking prev: move last card to the beginning
       prevBtn.addEventListener('click', function() {
-        current = (current - 1 + cards.length) % cards.length;
-        showCard(current);
+        var last = carousel.lastElementChild;
+        carousel.style.transition = 'none';
+        carousel.insertBefore(last, carousel.firstElementChild);
       });
     }
   </script>
