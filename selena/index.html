@@ -116,7 +116,7 @@
   </section>
 
   <!-- QUOTE -->
-  <section class="quote-section parallax-bg" style="background-image: url('images/forest-new.png');">
+  <section class="quote-section parallax-bg" style="background-image: url('images/sunset-person.jpg');">
     <div class="container">
       <p class="quote-text reveal">&ldquo;Finding peace with our bodies affects the way that we relate to others and the world around us.&rdquo;</p>
       <p class="reveal" style="color:#fff; text-align:center; max-width:700px; margin:0 auto 30px; opacity:0.85; font-size:15px; line-height:1.8;">When we live with chronic physical pain in our bodies daily, it affects our mood, emotions and thought patterns. This spirals out in destructive ways to all parts of our lives. Finding a solution to physical pain and regaining a sense of stability and strength is possible! This change will be reflected in the ways we relate to life.</p>
@@ -219,45 +219,44 @@
       });
     });
 
-    // Testimonial carousel: infinite seamless loop
+    // Testimonial carousel: CSS marquee-style infinite loop
     var carousel = document.getElementById('reviewsCarousel');
     var prevBtn = document.getElementById('carouselPrev');
     var nextBtn = document.getElementById('carouselNext');
     if (carousel && prevBtn && nextBtn) {
-      // Duplicate all cards for seamless looping
-      var cards = carousel.querySelectorAll('.review-card');
+      // Clone all cards and append for seamless loop
+      var cards = Array.from(carousel.children);
       cards.forEach(function(card) {
         carousel.appendChild(card.cloneNode(true));
       });
-      var totalOriginal = cards.length;
-      var cardEl = carousel.querySelector('.review-card');
-      var cardStyle = getComputedStyle(cardEl);
-      var cardWidth = cardEl.offsetWidth + parseInt(cardStyle.marginRight || 0) + 20;
-      var halfScroll = cardWidth * totalOriginal;
 
-      // Start in the middle so we can scroll both directions
-      carousel.scrollLeft = 0;
+      var scrollSpeed = 1; // pixels per frame
+      var paused = false;
+      var totalWidth = 0;
+      cards.forEach(function(c) {
+        totalWidth += c.offsetWidth + 30; // 30 = gap
+      });
 
-      function checkLoop() {
-        if (carousel.scrollLeft >= halfScroll) {
-          carousel.style.scrollBehavior = 'auto';
-          carousel.scrollLeft -= halfScroll;
-          carousel.style.scrollBehavior = 'smooth';
-        } else if (carousel.scrollLeft <= 0) {
-          carousel.style.scrollBehavior = 'auto';
-          carousel.scrollLeft += halfScroll;
-          carousel.style.scrollBehavior = 'smooth';
+      function animateScroll() {
+        if (!paused) {
+          carousel.scrollLeft += scrollSpeed;
+          if (carousel.scrollLeft >= totalWidth) {
+            carousel.scrollLeft -= totalWidth;
+          }
         }
+        requestAnimationFrame(animateScroll);
       }
-      carousel.addEventListener('scroll', checkLoop);
+      requestAnimationFrame(animateScroll);
 
-      function scrollNext() { carousel.scrollBy({ left: cardWidth, behavior: 'smooth' }); }
-      function scrollPrev() { carousel.scrollBy({ left: -cardWidth, behavior: 'smooth' }); }
-      prevBtn.addEventListener('click', scrollPrev);
-      nextBtn.addEventListener('click', scrollNext);
-      var autoLoop = setInterval(scrollNext, 5000);
-      carousel.addEventListener('mouseenter', function() { clearInterval(autoLoop); });
-      carousel.addEventListener('mouseleave', function() { autoLoop = setInterval(scrollNext, 5000); });
+      carousel.addEventListener('mouseenter', function() { paused = true; });
+      carousel.addEventListener('mouseleave', function() { paused = false; });
+
+      prevBtn.addEventListener('click', function() {
+        carousel.scrollBy({ left: -400, behavior: 'smooth' });
+      });
+      nextBtn.addEventListener('click', function() {
+        carousel.scrollBy({ left: 400, behavior: 'smooth' });
+      });
     }
   </script>
 </body>
