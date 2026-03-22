@@ -91,6 +91,26 @@ h1, h2, h3, h4 {
   margin: 0;
 }
 
+.donate-btn {
+  background: var(--terracotta);
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.donate-btn:hover {
+  background: #a8632e;
+}
+
 .cart-btn {
   position: relative;
   background: none;
@@ -769,11 +789,17 @@ h1, h2, h3, h4 {
       <img src="logo.png" alt="Salt Spring Centre of Yoga" onerror="this.style.display='none'">
       <h2 class="logo-heading">Shop &amp; Support</h2>
     </a>
+    <div style="display:flex;gap:10px;align-items:center;">
+    <button class="donate-btn" onclick="filterTo('support')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Donate
+    </button>
     <button class="cart-btn" onclick="toggleCart()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
       Cart
       <span class="cart-count hidden" id="cartCount">0</span>
     </button>
+    </div>
   </div>
 </header>
 
@@ -1157,7 +1183,58 @@ const PRODUCTS = [
     icon: '\uD83C\uDF1F'
   },
 
-  // SUPPORT THE CENTRE
+  // SUPPORT THE CENTRE -- DONATIONS
+  {
+    id: 55,
+    category: 'support',
+    title: 'One-Time Donation - $25',
+    desc: 'Every contribution helps preserve this 69-acre sanctuary. Direct your gift to basic needs, financial recovery, or Centre offerings.',
+    price: 25.00,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    icon: '\uD83D\uDC9A'
+  },
+  {
+    id: 56,
+    category: 'support',
+    title: 'One-Time Donation - $50',
+    desc: 'Your generosity keeps the gardens growing, the kitchen cooking, and the doors open for seekers and visitors.',
+    price: 50.00,
+    icon: '\uD83D\uDC9A'
+  },
+  {
+    id: 57,
+    category: 'support',
+    title: 'One-Time Donation - $108',
+    desc: 'A sacred number in yoga tradition. 108 beads on a mala, 108 sun salutations, 108 reasons to give.',
+    price: 108.00,
+    badge: 'Sacred',
+    badgeClass: 'new',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/09/Lotus-photo-jpeg.jpg',
+    icon: '\uD83D\uDC9A'
+  },
+  {
+    id: 58,
+    category: 'support',
+    title: 'One-Time Donation - $200',
+    desc: 'A substantial gift that makes a real difference. Help bring the Centre back into solid financial position.',
+    price: 200.00,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg',
+    icon: '\uD83D\uDC9A'
+  },
+  {
+    id: 59,
+    category: 'support',
+    title: 'Centre Sustainer - Monthly',
+    desc: 'Become a Centre Sustainer with a recurring monthly gift of any amount. Helps the Centre budget and plan for the future. The best way to support us long-term.',
+    price: 25.00,
+    priceLabel: 'From $25/mo',
+    badge: 'Monthly',
+    badgeClass: 'new',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg',
+    icon: '\uD83D\uDD04'
+  },
+
+  // SUPPORT THE CENTRE -- DIRECTED GIVING
   {
     id: 50,
     category: 'support',
@@ -1181,7 +1258,7 @@ const PRODUCTS = [
     title: 'Annual Membership',
     desc: 'Become a member of the Dharma Sara Satsang Society. Support the Centre\'s mission year-round.',
     price: 26.25,
-    img: 'https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2026/03/3-1.jpg',
     icon: '\uD83E\uDD1D'
   },
   {
@@ -1191,7 +1268,7 @@ const PRODUCTS = [
     desc: 'Help preserve the Centre\'s sacred spaces. Contributions support ongoing temple and shrine care.',
     price: 100.00,
     priceLabel: 'From $100',
-    img: 'https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg',
     icon: '\uD83C\uDFDB\uFE0F'
   }
 ];
@@ -1223,7 +1300,7 @@ function renderProducts(category = 'all') {
           <div class="product-price">
             ${p.priceLabel ? `<span class="from">${p.priceLabel}</span>` : p.price > 0 ? `$${p.price.toFixed(2)}` : ''}
           </div>
-          <button class="add-to-cart" onclick="addToCart(${p.id})">${p.category === 'tickets' ? 'Get Tickets' : 'Add to Cart'}</button>
+          <button class="add-to-cart" onclick="addToCart(${p.id})">${p.category === 'tickets' ? 'Get Tickets' : p.category === 'support' ? 'Donate' : 'Add to Cart'}</button>
         </div>
       </div>
     </div>
@@ -1348,6 +1425,15 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== FILTER TO CATEGORY =====
+function filterTo(category) {
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.category === category);
+  });
+  renderProducts(category);
+  document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ===== INIT =====
