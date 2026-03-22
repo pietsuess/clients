@@ -497,7 +497,8 @@ section { padding: var(--section-pad) 0; position: relative; overflow: hidden; b
 .faq-item.active .faq-answer { max-height: 600px; }
 
 /* ===== CONTACT ===== */
-.contact-grid { display: grid; grid-template-columns: 35fr 65fr; gap: 80px; align-items: start; }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; max-width: 1100px; margin: 0 auto; align-items: start; }
+.contact-form { max-width: 500px; }
 .contact-form label {
   display: block; font-size: 12px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 1px;
@@ -516,17 +517,16 @@ section { padding: var(--section-pad) 0; position: relative; overflow: hidden; b
 .contact-form textarea { height: 160px; resize: vertical; }
 
 .contact-info {
-  text-align: right;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
+.contact-info * { text-align: right !important; }
 .contact-info h3 {
   font-family: var(--font-heading); font-size: 3.5rem;
   margin-bottom: 30px; font-weight: 500;
-  text-align: right;
 }
-.contact-info p { margin-bottom: 20px; font-size: 24px; color: var(--color-text-light); text-align: right; }
+.contact-info p { margin-bottom: 20px; font-size: 24px; color: var(--color-text-light); }
 .contact-info .btn { margin-top: 80px; font-size: 16px; padding: 18px 44px; }
 .contact-info a { color: var(--color-accent-dark); }
 
