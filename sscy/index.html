@@ -817,11 +817,36 @@ h1, h2, h3, h4 {
   margin-bottom: 24px;
 }
 
-.donate-amount-display .amount {
+.donate-tiers {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.tier-btn {
+  padding: 12px 20px;
+  border: 2px solid rgba(0,0,0,0.12);
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
   font-family: 'Bitter', serif;
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: var(--teal-deep);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  transition: var(--transition);
+  min-width: 70px;
+}
+
+.tier-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal-dark);
+}
+
+.tier-btn.active {
+  background: var(--teal);
+  color: var(--white);
+  border-color: var(--teal);
 }
 
 .donate-amount-display .amount-label {
@@ -943,7 +968,7 @@ h1, h2, h3, h4 {
       <h2 class="logo-heading">Shop &amp; Support</h2>
     </a>
     <div style="display:flex;gap:10px;align-items:center;">
-    <button class="donate-btn" onclick="filterTo('support')">
+    <button class="donate-btn" onclick="openDonateGeneral()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       Donate
     </button>
@@ -1077,7 +1102,12 @@ h1, h2, h3, h4 {
     </div>
     <div class="donate-modal-body">
       <div class="donate-amount-display">
-        <div class="amount" id="donateAmount">$108.00</div>
+        <div class="donate-tiers" id="donateTiers">
+          <button class="tier-btn" onclick="setDonateAmount(25)">$25</button>
+          <button class="tier-btn" onclick="setDonateAmount(50)">$50</button>
+          <button class="tier-btn active" onclick="setDonateAmount(108)">$108</button>
+          <button class="tier-btn" onclick="setDonateAmount(200)">$200</button>
+        </div>
         <div class="amount-label" id="donateAmountLabel">One-time donation</div>
       </div>
       <div class="donate-field">
@@ -1377,58 +1407,7 @@ const PRODUCTS = [
     icon: '\uD83C\uDF1F'
   },
 
-  // SUPPORT THE CENTRE -- DONATIONS
-  {
-    id: 55,
-    category: 'support',
-    title: 'One-Time Donation - $25',
-    desc: 'Every contribution helps preserve this 69-acre sanctuary. Direct your gift to basic needs, financial recovery, or Centre offerings.',
-    price: 25.00,
-    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
-    icon: '\uD83D\uDC9A'
-  },
-  {
-    id: 56,
-    category: 'support',
-    title: 'One-Time Donation - $50',
-    desc: 'Your generosity keeps the gardens growing, the kitchen cooking, and the doors open for seekers and visitors.',
-    price: 50.00,
-    icon: '\uD83D\uDC9A'
-  },
-  {
-    id: 57,
-    category: 'support',
-    title: 'One-Time Donation - $108',
-    desc: 'A sacred number in yoga tradition. 108 beads on a mala, 108 sun salutations, 108 reasons to give.',
-    price: 108.00,
-    badge: 'Sacred',
-    badgeClass: 'new',
-    img: 'https://saltspringcentre.com/wp-content/uploads/2022/09/Lotus-photo-jpeg.jpg',
-    icon: '\uD83D\uDC9A'
-  },
-  {
-    id: 58,
-    category: 'support',
-    title: 'One-Time Donation - $200',
-    desc: 'A substantial gift that makes a real difference. Help bring the Centre back into solid financial position.',
-    price: 200.00,
-    img: 'https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg',
-    icon: '\uD83D\uDC9A'
-  },
-  {
-    id: 59,
-    category: 'support',
-    title: 'Centre Sustainer - Monthly',
-    desc: 'Become a Centre Sustainer with a recurring monthly gift of any amount. Helps the Centre budget and plan for the future. The best way to support us long-term.',
-    price: 25.00,
-    priceLabel: 'From $25/mo',
-    badge: 'Monthly',
-    badgeClass: 'new',
-    img: 'https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg',
-    icon: '\uD83D\uDD04'
-  },
-
-  // SUPPORT THE CENTRE -- DIRECTED GIVING
+  // SUPPORT THE CENTRE
   {
     id: 50,
     category: 'support',
@@ -1527,11 +1506,29 @@ function openDonate(productId) {
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return;
 
-  const isMonthly = product.title.includes('Monthly');
   document.getElementById('donateTitle').textContent = product.title;
-  document.getElementById('donateAmount').textContent = isMonthly ? '$25.00/mo' : '$' + product.price.toFixed(2);
-  document.getElementById('donateAmountLabel').textContent = isMonthly ? 'Monthly recurring donation' : 'One-time donation';
-  document.getElementById('donateSubmitBtn').textContent = isMonthly ? 'Start Monthly Donation' : 'Complete Donation - $' + product.price.toFixed(2);
+  document.getElementById('donateTiers').style.display = 'none';
+  document.getElementById('donateAmountLabel').textContent = 'Directed gift';
+  document.getElementById('donateSubmitBtn').textContent = 'Complete Donation - $' + product.price.toFixed(2);
+  document.getElementById('donateOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+let currentDonateAmount = 108;
+
+function setDonateAmount(amount) {
+  currentDonateAmount = amount;
+  document.querySelectorAll('.tier-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === '$' + amount);
+  });
+  document.getElementById('donateSubmitBtn').textContent = 'Complete Donation - $' + amount + '.00';
+}
+
+function openDonateGeneral() {
+  document.getElementById('donateTitle').textContent = 'Make a Donation';
+  document.getElementById('donateAmountLabel').textContent = 'One-time donation';
+  document.getElementById('donateTiers').style.display = 'flex';
+  setDonateAmount(108);
   document.getElementById('donateOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
