@@ -1274,7 +1274,37 @@
     toast('Page added. Add sections and a hero image, then Publish.');
   }
 
+  function renamePage() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    var newTitle = prompt('New page name:', pages[key].title);
+    if (!newTitle || !newTitle.trim()) return;
+    pages[key].title = newTitle.trim();
+    pages[key].navLabel = newTitle.trim();
+    markDirty('pages.json');
+    populatePagePicker();
+    pagePicker.value = key;
+    renderPagePreview();
+    renderNavList();
+    toast('Page renamed. Click Publish when ready.');
+  }
+
+  function deletePage() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    if (!confirm('Delete page "' + pages[key].title + '" and all its sections? This cannot be undone.')) return;
+    delete pages[key];
+    markDirty('pages.json');
+    populatePagePicker();
+    renderPagePreview();
+    renderNavList();
+    updateDashboard();
+    toast('Page deleted. Click Publish when ready.');
+  }
+
   $('add-page-btn').addEventListener('click', addPage);
+  $('rename-page-btn').addEventListener('click', renamePage);
+  $('delete-page-btn').addEventListener('click', deletePage);
 
   function initVisualEditor() {
     populatePagePicker();
