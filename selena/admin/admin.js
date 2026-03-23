@@ -79,6 +79,107 @@
     });
   }
 
+  // ===== IMAGE UPLOAD =====
+  var UPLOAD_PATH = 'selena/images/uploads/';
+
+  function uploadImage(file) {
+    return new Promise(function(resolve, reject) {
+      if (!file.type.match(/^image\//)) { reject(new Error('Not an image')); return; }
+      // Resize if needed (max 1600px wide)
+      var img = new Image();
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var maxW = 1600;
+          var w = img.width;
+          var h = img.height;
+          if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          // Convert to JPEG for smaller size, or keep PNG if it has transparency
+          var mime = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+          var quality = 0.85;
+          var dataUrl = canvas.toDataURL(mime, quality);
+          var base64 = dataUrl.split(',')[1];
+          var ext = mime === 'image/png' ? '.png' : '.jpg';
+          var filename = Date.now() + '-' + file.name.replace(/[^a-z0-9.]/gi, '-').toLowerCase().replace(/\.[^.]+$/, '') + ext;
+          var filePath = UPLOAD_PATH + filename;
+
+          // Commit to GitHub
+          var body = {
+            message: 'Upload image: ' + filename,
+            content: base64,
+            branch: BRANCH
+          };
+          fetch(API + '/repos/' + OWNER + '/' + REPO + '/contents/' + filePath, {
+            method: 'PUT',
+            headers: apiHeaders(),
+            body: JSON.stringify(body)
+          })
+          .then(function(r) {
+            if (!r.ok) return r.json().then(function(err) { throw new Error(err.message || 'Upload failed'); });
+            return r.json();
+          })
+          .then(function(result) {
+            // Return the GitHub Pages URL for the image
+            var url = 'https://clients.pietsuess.com/' + filePath;
+            resolve(url);
+          })
+          .catch(reject);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function setupQuillImageHandler(quill) {
+    // Toolbar button handler
+    quill.getModule('toolbar').addHandler('image', function() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function() {
+        if (!input.files.length) return;
+        toast('Uploading image...');
+        uploadImage(input.files[0])
+          .then(function(url) {
+            var range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'image', url);
+            quill.setSelection(range.index + 1);
+            toast('Image uploaded!');
+          })
+          .catch(function(err) { toast('Image upload failed: ' + err.message, true); });
+      };
+      input.click();
+    });
+
+    // Drag and drop handler
+    quill.root.addEventListener('drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      var file = files[0];
+      if (!file.type.match(/^image\//)) return;
+      toast('Uploading image...');
+      uploadImage(file)
+        .then(function(url) {
+          var range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', url);
+          quill.setSelection(range.index + 1);
+          toast('Image uploaded!');
+        })
+        .catch(function(err) { toast('Image upload failed: ' + err.message, true); });
+    });
+
+    quill.root.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+  }
+
   // ===== AUTH =====
   function checkSetupToken() {
     var hash = location.hash;
@@ -244,11 +345,12 @@
             [{ header: [2, 3, false] }],
             ['bold', 'italic', 'underline'],
             [{ list: 'ordered' }, { list: 'bullet' }],
-            ['link'],
+            ['link', 'image'],
             ['clean']
           ]
         }
       });
+      setupQuillImageHandler(postQuill);
     }
     postQuill.root.innerHTML = post ? post.body : '';
     showSection('blog-edit');
@@ -589,11 +691,12 @@
             [{ header: [2, 3, false] }],
             ['bold', 'italic', 'underline'],
             [{ list: 'ordered' }, { list: 'bullet' }],
-            ['link'],
+            ['link', 'image'],
             ['clean']
           ]
         }
       });
+      setupQuillImageHandler(pageSectionQuill);
     }
     pageSectionQuill.root.innerHTML = section.body;
     showSection('page-section-edit');
