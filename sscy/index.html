@@ -155,6 +155,7 @@ h1, h2, h3, h4 {
 .hero {
   background: linear-gradient(135deg, rgba(26,92,83,0.82) 0%, rgba(42,138,125,0.75) 40%, rgba(45,90,39,0.8) 100%),
               url('https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg') center/cover no-repeat;
+  background-attachment: fixed;
   color: var(--white);
   text-align: center;
   padding: 80px 24px;
@@ -1657,6 +1658,16 @@ function filterTo(category) {
   renderProducts(category);
   document.getElementById('productsGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ===== HERO PARALLAX =====
+window.addEventListener('scroll', function() {
+  var hero = document.querySelector('.hero-content');
+  if (hero) {
+    var scrolled = window.scrollY;
+    hero.style.transform = 'translateY(' + (scrolled * 0.3) + 'px)';
+    hero.style.opacity = Math.max(0, 1 - scrolled / 400);
+  }
+});
 
 // ===== INIT =====
 renderProducts();
