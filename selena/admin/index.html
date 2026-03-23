@@ -41,6 +41,7 @@
         <a href="#blog" class="nav-item" data-section="blog">Blog</a>
         <a href="#testimonials" class="nav-item" data-section="testimonials">Reviews</a>
         <a href="#faqs" class="nav-item" data-section="faqs">FAQs</a>
+        <a href="#pages" class="nav-item" data-section="pages">Pages</a>
         <a href="#settings" class="nav-item" data-section="settings">Settings</a>
       </nav>
     </header>
@@ -62,6 +63,10 @@
           <a href="#faqs" class="dash-card" data-section="faqs">
             <span class="dash-count" id="count-faqs">-</span>
             <span class="dash-label">FAQs</span>
+          </a>
+          <a href="#pages" class="dash-card" data-section="pages">
+            <span class="dash-count" id="count-pages">-</span>
+            <span class="dash-label">Pages</span>
           </a>
         </div>
       </section>
@@ -161,6 +166,40 @@
           <input type="text" id="faq-question" placeholder="e.g. How often can I come?">
           <label>Answer</label>
           <div id="faq-editor"></div>
+        </div>
+      </section>
+
+      <!-- PAGES LIST -->
+      <section id="section-pages" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Page Content</h1>
+        </div>
+        <div id="pages-list" class="item-list"></div>
+      </section>
+
+      <!-- PAGE EDITOR -->
+      <section id="section-page-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="page-edit-title">Edit Page</h1>
+          <button id="page-back-btn" class="btn-small">Back to Pages</button>
+        </div>
+        <div id="page-sections-list"></div>
+      </section>
+
+      <!-- PAGE SECTION EDITOR -->
+      <section id="section-page-section-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="page-section-edit-title">Edit Section</h1>
+          <div>
+            <button id="page-section-cancel-btn" class="btn-small">Cancel</button>
+            <button id="page-section-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Section Heading</label>
+          <input type="text" id="page-section-heading">
+          <label>Content</label>
+          <div id="page-section-editor"></div>
         </div>
       </section>
 

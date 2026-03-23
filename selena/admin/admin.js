@@ -16,9 +16,13 @@
   var testimonials = [];
   var faqs = [];
   var settings = {};
+  var pages = {};
   var editingIndex = -1; // -1 = new, >= 0 = editing existing
+  var editingPageKey = '';
+  var editingSectionIndex = -1;
   var postQuill = null;
   var faqQuill = null;
+  var pageSectionQuill = null;
 
   // ===== DOM =====
   var $ = function(id) { return document.getElementById(id); };
@@ -142,13 +146,15 @@
       getFile('blog-posts.json').then(function(d) { blogPosts = d; }),
       getFile('testimonials.json').then(function(d) { testimonials = d; }),
       getFile('faqs.json').then(function(d) { faqs = d; }),
-      getFile('site-settings.json').then(function(d) { settings = d; })
+      getFile('site-settings.json').then(function(d) { settings = d; }),
+      getFile('pages.json').then(function(d) { pages = d; })
     ])
     .then(function() {
       updateDashboard();
       renderBlogList();
       renderTestimonialsList();
       renderFaqsList();
+      renderPagesList();
       loadSettings();
     })
     .catch(function(err) {
@@ -186,6 +192,9 @@
     $('count-blog').textContent = blogPosts.filter(function(p) { return p.published; }).length;
     $('count-testimonials').textContent = testimonials.length;
     $('count-faqs').textContent = faqs.length;
+    var pageCount = 0;
+    Object.keys(pages).forEach(function(k) { pageCount += pages[k].sections.length; });
+    $('count-pages').textContent = pageCount;
   }
 
   // ===== TOAST =====
@@ -308,11 +317,27 @@
       if (t.credentials) html += ' <span style="color:#999;font-weight:400;">- ' + t.credentials + '</span>';
       html += '</h3><p>' + preview + '</p></div>';
       html += '<div class="item-actions">';
+      if (i > 0) html += '<button class="btn-small" onclick="CMS.moveTestimonial(' + i + ',-1)" title="Move up">&uarr;</button>';
+      if (i < testimonials.length - 1) html += '<button class="btn-small" onclick="CMS.moveTestimonial(' + i + ',1)" title="Move down">&darr;</button>';
       html += '<button class="btn-small" onclick="CMS.editTestimonial(' + i + ')">Edit</button>';
       html += '<button class="btn-danger" onclick="CMS.deleteTestimonial(' + i + ')">Delete</button>';
       html += '</div></div>';
     });
     $('testimonials-list').innerHTML = html || '<p style="color:#999;">No reviews yet.</p>';
+  }
+
+  function moveTestimonial(index, direction) {
+    var newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= testimonials.length) return;
+    var temp = testimonials[index];
+    testimonials[index] = testimonials[newIndex];
+    testimonials[newIndex] = temp;
+    putFile('testimonials.json', testimonials, 'Reorder reviews')
+      .then(function() {
+        toast('Review order updated.');
+        renderTestimonialsList();
+      })
+      .catch(function(err) { toast('Reorder failed: ' + err.message, true); });
   }
 
   function editTestimonial(index) {
@@ -515,15 +540,103 @@
 
   $('settings-save-btn').addEventListener('click', saveSettings);
 
+  // ===== PAGES =====
+  function renderPagesList() {
+    var html = '';
+    Object.keys(pages).forEach(function(key) {
+      var page = pages[key];
+      html += '<div class="item-row" style="cursor:pointer;" onclick="CMS.editPage(\'' + key + '\')">';
+      html += '<div class="item-info"><h3>' + page.title + '</h3>';
+      html += '<p>' + page.sections.length + ' editable section' + (page.sections.length !== 1 ? 's' : '') + '</p></div>';
+      html += '<div class="item-actions">';
+      html += '<button class="btn-small">Edit</button>';
+      html += '</div></div>';
+    });
+    $('pages-list').innerHTML = html || '<p style="color:#999;">No pages configured.</p>';
+  }
+
+  function editPage(key) {
+    editingPageKey = key;
+    var page = pages[key];
+    $('page-edit-title').textContent = page.title;
+    var html = '';
+    page.sections.forEach(function(section, i) {
+      var preview = section.body.replace(/<[^>]+>/g, '');
+      if (preview.length > 100) preview = preview.substring(0, 100) + '...';
+      html += '<div class="item-row">';
+      html += '<div class="item-info"><h3>' + section.heading + '</h3>';
+      html += '<p>' + preview + '</p></div>';
+      html += '<div class="item-actions">';
+      html += '<button class="btn-small" onclick="CMS.editPageSection(\'' + key + '\',' + i + ')">Edit</button>';
+      html += '</div></div>';
+    });
+    $('page-sections-list').innerHTML = html;
+    showSection('page-edit');
+  }
+
+  function editPageSection(key, index) {
+    editingPageKey = key;
+    editingSectionIndex = index;
+    var section = pages[key].sections[index];
+    $('page-section-edit-title').textContent = section.heading;
+    $('page-section-heading').value = section.heading;
+
+    if (!pageSectionQuill) {
+      pageSectionQuill = new Quill('#page-section-editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            [{ header: [2, 3, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link'],
+            ['clean']
+          ]
+        }
+      });
+    }
+    pageSectionQuill.root.innerHTML = section.body;
+    showSection('page-section-edit');
+  }
+
+  function savePageSection() {
+    var heading = $('page-section-heading').value.trim();
+    if (!heading) { toast('Heading is required', true); return; }
+
+    pages[editingPageKey].sections[editingSectionIndex].heading = heading;
+    pages[editingPageKey].sections[editingSectionIndex].body = pageSectionQuill.root.innerHTML;
+
+    $('page-section-save-btn').disabled = true;
+    $('page-section-save-btn').textContent = 'Saving...';
+
+    putFile('pages.json', pages, 'Update page content: ' + editingPageKey + ' / ' + heading)
+      .then(function() {
+        toast('Page content saved!');
+        editPage(editingPageKey);
+      })
+      .catch(function(err) { toast('Save failed: ' + err.message, true); })
+      .finally(function() {
+        $('page-section-save-btn').disabled = false;
+        $('page-section-save-btn').textContent = 'Save';
+      });
+  }
+
+  $('page-back-btn').addEventListener('click', function() { showSection('pages'); });
+  $('page-section-save-btn').addEventListener('click', savePageSection);
+  $('page-section-cancel-btn').addEventListener('click', function() { editPage(editingPageKey); });
+
   // ===== EXPOSE FOR ONCLICK =====
   window.CMS = {
     editPost: editPost,
     deletePost: deletePost,
     editTestimonial: editTestimonial,
     deleteTestimonial: deleteTestimonial,
+    moveTestimonial: moveTestimonial,
     editFaq: editFaq,
     deleteFaq: deleteFaq,
-    moveFaq: moveFaq
+    moveFaq: moveFaq,
+    editPage: editPage,
+    editPageSection: editPageSection
   };
 
   // ===== INIT =====

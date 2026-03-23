@@ -151,10 +151,51 @@
     });
   }
 
+  // ===== PAGE SECTIONS (data-cms-page="home" data-cms-section="what-is-rolfing") =====
+  function renderPageSections() {
+    var targets = document.querySelectorAll('[data-cms-section]');
+    if (!targets.length) return;
+    fetchJSON('pages.json', function(pages) {
+      targets.forEach(function(el) {
+        var pageKey = el.dataset.cmsPage;
+        var sectionId = el.dataset.cmsSection;
+        if (!pages[pageKey]) return;
+        var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+        if (!section) return;
+        // Update heading if there's a sibling or parent heading
+        var headingEl = el.previousElementSibling;
+        if (headingEl && headingEl.classList.contains('section-title')) {
+          headingEl.innerHTML = section.heading;
+        }
+        el.innerHTML = section.body;
+      });
+    });
+  }
+
+  // ===== SITE SETTINGS =====
+  function renderSettings() {
+    fetchJSON('site-settings.json', function(s) {
+      // Footer address on all pages
+      document.querySelectorAll('[data-cms-setting="address"]').forEach(function(el) {
+        el.innerHTML = 'Our Clinic is located at<br>' + s.address;
+      });
+      // Hero headline
+      var heroEl = document.querySelector('[data-cms-setting="heroHeadline"]');
+      if (heroEl) heroEl.innerHTML = s.heroHeadline;
+      // Quote text
+      var quoteEl = document.querySelector('[data-cms-setting="quoteText"]');
+      if (quoteEl) quoteEl.innerHTML = '&ldquo;' + s.quoteText + '&rdquo;';
+      // Quote body
+      var quoteBodyEl = document.querySelector('[data-cms-setting="quoteBody"]');
+      if (quoteBodyEl) quoteBodyEl.textContent = s.quoteBody;
+    });
+  }
+
   // ===== INIT =====
   renderBlogList();
   renderBlogPost();
   renderTestimonials();
   renderFAQs();
-  renderFooter();
+  renderPageSections();
+  renderSettings();
 })();
