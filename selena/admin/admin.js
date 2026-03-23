@@ -651,52 +651,204 @@
 
   $('settings-save-btn').addEventListener('click', saveSettings);
 
-  // ===== VISUAL PAGE EDITOR =====
+  // ===== VISUAL PAGE EDITOR (srcdoc approach) =====
   var modalQuill = null;
   var pageFrame = $('page-frame');
   var pagePicker = $('page-picker');
+  var siteCSS = '';
 
-  function loadPageInFrame() {
-    var url = pagePicker.value;
-    pageFrame.src = url + '?_=' + Date.now();
+  // Fetch site CSS once
+  function loadSiteCSS() {
+    return fetch('../css/style2.css').then(function(r) { return r.text(); }).then(function(css) {
+      siteCSS = css;
+    }).catch(function() {
+      return fetch('../css/style.css').then(function(r) { return r.text(); }).then(function(css) { siteCSS = css; });
+    });
   }
 
+  // Editable section helper
+  function editableSection(pageKey, sectionId, heading, body) {
+    return '<div class="cms-editable" data-cms-page="' + pageKey + '" data-cms-section="' + sectionId + '">' +
+      '<div class="cms-edit-btn" onclick="editSection(\'' + pageKey + '\',\'' + sectionId + '\')">Edit</div>' +
+      '<h2 class="section-title">' + heading + '</h2>' +
+      '<div>' + body + '</div>' +
+    '</div>';
+  }
+
+  function editableSetting(key, content) {
+    return '<span class="cms-editable cms-editable-inline" data-cms-setting="' + key + '" onclick="editSetting(\'' + key + '\')">' +
+      '<span class="cms-edit-btn">Edit</span>' + content + '</span>';
+  }
+
+  function getSection(pageKey, sectionId) {
+    var page = pages[pageKey];
+    if (!page) return { heading: '', body: '' };
+    var s = page.sections.find(function(sec) { return sec.id === sectionId; });
+    return s || { heading: '', body: '' };
+  }
+
+  // Build homepage preview
+  function buildHomePage() {
+    var s = settings;
+    var sec = function(id) { return getSection('home', id); };
+    var whatIs = sec('what-is-rolfing');
+    var whoBenefits = sec('who-benefits');
+    var meetSelena = sec('meet-selena');
+    var structural = sec('structural-integration');
+
+    return '' +
+    '<!-- HERO -->' +
+    '<section class="hero" style="background-image:url(\'../images/hero-stones.webp\');">' +
+      '<div class="hero-content">' +
+        editableSetting('heroHeadline', '<h1>' + (s.heroHeadline || '') + '</h1>') +
+      '</div>' +
+    '</section>' +
+
+    '<!-- WHAT IS ROLFING -->' +
+    '<section><div class="container grid-2">' +
+      '<div>' + editableSection('home', 'what-is-rolfing', whatIs.heading, whatIs.body) + '</div>' +
+      '<div>' + editableSection('home', 'who-benefits', whoBenefits.heading, whoBenefits.body) + '</div>' +
+    '</div></section>' +
+
+    '<!-- MEET SELENA -->' +
+    '<section class="section-accent"><div class="container grid-2 img-small">' +
+      '<div><img src="../images/selena-profile.webp" alt="Selena" style="border-radius:50px;width:100%;"></div>' +
+      '<div>' + editableSection('home', 'meet-selena', meetSelena.heading, meetSelena.body) + '</div>' +
+    '</div></section>' +
+
+    '<!-- STRUCTURAL INTEGRATION -->' +
+    '<section><div class="container grid-2">' +
+      '<div>' + editableSection('home', 'structural-integration', structural.heading, structural.body) + '</div>' +
+      '<div><img src="../images/rolfing-hands.webp" alt="Rolfing" style="border-radius:50px;width:100%;"></div>' +
+    '</div></section>' +
+
+    '<!-- QUOTE -->' +
+    '<section class="quote-section" style="background-image:url(\'../images/sunset-person.webp\');">' +
+      '<div class="container" style="text-align:center;">' +
+        editableSetting('quoteText', '<p class="quote-text">&ldquo;' + (s.quoteText || '') + '&rdquo;</p>') +
+      '</div>' +
+    '</section>' +
+
+    '<!-- REVIEWS -->' +
+    '<section style="padding:60px 0;"><div class="container">' +
+      '<h2 class="section-title" style="text-align:center;">Client Reviews</h2>' +
+      '<p style="text-align:center;color:#666;font-size:14px;">Manage reviews from the Reviews tab</p>' +
+      '<div style="display:flex;gap:20px;margin-top:30px;overflow:hidden;">' +
+        testimonials.slice(0, 3).map(function(t) {
+          return '<div class="review-card" style="flex:1;min-width:0;">' +
+            '<p>&ldquo;' + (t.quote.length > 120 ? t.quote.substring(0, 120) + '...' : t.quote) + '&rdquo;</p>' +
+            '<span class="reviewer">' + t.name + '</span></div>';
+        }).join('') +
+      '</div>' +
+    '</div></section>' +
+
+    '<!-- FOOTER -->' +
+    '<footer><div class="container">' +
+      '<div class="logo-footer"><img src="../images/logo-dark.webp" alt="Salt Spring Rolfing" style="height:50px;"></div>' +
+      '<div class="footer-address"><p>Our Clinic is located at<br>' + (s.address || '') + '</p></div>' +
+      '<div class="footer-cta"><span class="btn">Book A Session</span></div>' +
+    '</div></footer>';
+  }
+
+  function buildAboutSelenaPage() {
+    var bio1 = getSection('about-selena', 'bio-intro');
+    var bio2 = getSection('about-selena', 'bio-story');
+    var bio3 = getSection('about-selena', 'bio-passion');
+
+    return '' +
+    '<section class="hero hero-short" style="background-image:url(\'../images/AlderForest.png\');">' +
+      '<div class="hero-content"><h1>Selena La Brooy</h1><p>Certified Rolfer, Certified Movement Integration Practitioner</p></div>' +
+    '</section>' +
+    '<section><div class="container">' +
+      editableSection('about-selena', 'bio-intro', bio1.heading, bio1.body) +
+    '</div></section>' +
+    '<section class="section-accent"><div class="container">' +
+      editableSection('about-selena', 'bio-story', bio2.heading, bio2.body) +
+    '</div></section>' +
+    '<section><div class="container">' +
+      editableSection('about-selena', 'bio-passion', bio3.heading, bio3.body) +
+    '</div></section>';
+  }
+
+  function buildAboutSessionsPage() {
+    var details = getSection('about-sessions', 'session-details');
+
+    return '' +
+    '<section class="hero hero-short" style="background-image:url(\'../images/sessions-hero.jpg\');">' +
+      '<div class="hero-content"><h1>What\'s a Rolfing Session Like?</h1></div>' +
+    '</section>' +
+    '<section><div class="container">' +
+      editableSection('about-sessions', 'session-details', details.heading, details.body) +
+    '</div></section>';
+  }
+
+  // Build full srcdoc HTML
+  function buildPagePreview(pageKey) {
+    var bodyContent = '';
+    if (pageKey === 'home') bodyContent = buildHomePage();
+    else if (pageKey === 'about-selena') bodyContent = buildAboutSelenaPage();
+    else if (pageKey === 'about-sessions') bodyContent = buildAboutSessionsPage();
+
+    var overrideCSS = [
+      '.hero { position: relative; height: 50vh; background-size: cover; background-position: center center; background-repeat: no-repeat; overflow: hidden; z-index: 1; }',
+      '.hero.hero-short { height: 35vh; }',
+      '.hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.35)); }',
+      '.hero-content { position: absolute; bottom: 12%; left: 5%; z-index: 1; color: #fff; }',
+      '.hero h1 { font-family: var(--font-heading); font-size: clamp(2rem, 4vw, 4rem); font-weight: 700; color: #fff; opacity: 0.9; }',
+      '.hero p { font-size: 1.1rem; opacity: 0.85; color: #fff; }',
+      '.quote-section { background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; padding: 100px 0; }',
+      '.quote-section::before { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.5); }',
+      '.quote-section .container { position: relative; z-index: 1; }',
+      '.quote-text { font-family: var(--font-heading); font-size: 1.8rem; color: #fff; text-align: center; font-style: italic; line-height: 1.5; }',
+      '/* Edit overlay styles */',
+      '.cms-editable { position: relative; border: 2px dashed transparent; border-radius: 8px; padding: 8px; transition: all 0.2s; cursor: pointer; }',
+      '.cms-editable:hover { border-color: rgba(124,154,130,0.6); background: rgba(124,154,130,0.05); }',
+      '.cms-edit-btn { position: absolute; top: 4px; right: 4px; padding: 4px 14px; background: #7C9A82; color: #fff; border: none; border-radius: 5px; font-family: Poppins,sans-serif; font-size: 11px; font-weight: 500; cursor: pointer; opacity: 0; transition: opacity 0.2s; z-index: 10; pointer-events: none; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }',
+      '.cms-editable:hover .cms-edit-btn { opacity: 1; pointer-events: auto; }',
+      '.cms-editable-inline { display: block; }',
+      '.cms-editable-inline .cms-edit-btn { top: -8px; right: -8px; }',
+      'a { pointer-events: none; }',
+      '.btn { pointer-events: none; }',
+      'body::after { content: "EDIT MODE"; position: fixed; top: 8px; right: 12px; z-index: 9999; background: #7C9A82; color: #fff; padding: 4px 12px; border-radius: 4px; font-family: Poppins,sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; pointer-events: none; }'
+    ].join('\n');
+
+    return '<!DOCTYPE html><html><head>' +
+      '<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+      '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+      '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">' +
+      '<style>' + siteCSS + '</style>' +
+      '<style>' + overrideCSS + '</style>' +
+      '</head><body>' +
+      bodyContent +
+      '<script>' +
+        'function editSection(page, section) {' +
+        '  window.parent.postMessage({ type: "cms-edit", editType: "section", page: page, section: section }, "*");' +
+        '}' +
+        'function editSetting(key) {' +
+        '  window.parent.postMessage({ type: "cms-edit", editType: "setting", setting: key }, "*");' +
+        '}' +
+      '<\/script>' +
+      '</body></html>';
+  }
+
+  function loadPageInFrame() {
+    var pageKey = pagePicker.value;
+    if (!siteCSS) {
+      loadSiteCSS().then(function() {
+        pageFrame.srcdoc = buildPagePreview(pageKey);
+      });
+    } else {
+      pageFrame.srcdoc = buildPagePreview(pageKey);
+    }
+  }
+
+  // Auto-resize iframe
   pageFrame.addEventListener('load', function() {
     try {
-      var doc = pageFrame.contentDocument;
-      var win = pageFrame.contentWindow;
-      if (!doc || !doc.body) return;
-
-      // Kill all scroll event listeners by replacing the scroll handler
-      win.onscroll = null;
-      // Remove scroll listeners by cloning body/window trick isn't possible,
-      // so override the functions the page defines
-      if (win.checkScroll) win.checkScroll = function() {};
-
-      // Force header to solid state
-      var header = doc.querySelector('header');
-      if (header) {
-        header.classList.add('scrolled');
-        header.classList.remove('nav-open');
-      }
-
-      // Inject edit-mode script
-      var script = doc.createElement('script');
-      script.src = 'edit-mode2.js';
-      doc.body.appendChild(script);
-
-      // Auto-resize iframe to content height (with delay for content to render)
-      setTimeout(function() {
-        // Remove any inline background-position styles set by parallax JS
-        doc.querySelectorAll('.hero, .parallax-bg').forEach(function(el) {
-          el.style.backgroundPositionY = '';
-        });
-        var h = doc.documentElement.scrollHeight;
-        if (h > 400) pageFrame.style.height = h + 'px';
-      }, 800);
-    } catch(e) {
-      console.warn('Could not inject edit mode', e);
-    }
+      var h = pageFrame.contentDocument.documentElement.scrollHeight;
+      if (h > 400) pageFrame.style.height = h + 'px';
+    } catch(e) {}
   });
 
   pagePicker.addEventListener('change', loadPageInFrame);
@@ -723,6 +875,13 @@
 
     $('edit-modal-title').textContent = section.heading;
     $('modal-heading').value = section.heading;
+
+    // Show Quill
+    var editorWrap = $('modal-editor').parentElement;
+    editorWrap.querySelectorAll('label').forEach(function(l) { l.style.display = ''; });
+    $('modal-editor').style.display = '';
+    var toolbar = editorWrap.querySelector('.ql-toolbar');
+    if (toolbar) toolbar.style.display = '';
 
     if (!modalQuill) {
       modalQuill = new Quill('#modal-editor', {
@@ -752,15 +911,13 @@
     $('modal-heading').value = settings[settingKey] || '';
     $('modal-heading').parentElement.querySelector('label').textContent = label;
 
-    // Hide Quill for simple settings, show for rich ones
+    // Hide Quill for simple settings
     var editorWrap = $('modal-editor').parentElement;
-    editorWrap.querySelector('label').style.display = 'none';
+    var contentLabel = editorWrap.querySelectorAll('label')[1];
+    if (contentLabel) contentLabel.style.display = 'none';
     $('modal-editor').style.display = 'none';
-    if ($('modal-editor').previousElementSibling) {
-      // Hide the Quill toolbar if it exists
-      var toolbar = editorWrap.querySelector('.ql-toolbar');
-      if (toolbar) toolbar.style.display = 'none';
-    }
+    var toolbar = editorWrap.querySelector('.ql-toolbar');
+    if (toolbar) toolbar.style.display = 'none';
 
     $('edit-modal').style.display = 'flex';
   }
@@ -782,12 +939,10 @@
     var promise;
 
     if (editingPageKey === '__setting__') {
-      // Saving a setting
       var key = editingSectionIndex;
       settings[key] = $('modal-heading').value.trim();
       promise = putFile('site-settings.json', settings, 'Update setting: ' + key);
     } else {
-      // Saving a page section
       var heading = $('modal-heading').value.trim();
       if (!heading) { toast('Heading is required', true); $('modal-save-btn').disabled = false; $('modal-save-btn').textContent = 'Save'; return; }
       pages[editingPageKey].sections[editingSectionIndex].heading = heading;
@@ -799,8 +954,8 @@
       .then(function() {
         toast('Saved! Site updates in about a minute.');
         closeModal();
-        // Reload iframe to show changes (after a brief delay for JSON to commit)
-        setTimeout(function() { loadPageInFrame(); }, 1000);
+        // Rebuild preview instantly from updated JSON
+        loadPageInFrame();
       })
       .catch(function(err) { toast('Save failed: ' + err.message, true); })
       .finally(function() {
@@ -814,7 +969,7 @@
 
   // Load first page when Pages section is shown
   function initVisualEditor() {
-    if (!pageFrame.src || pageFrame.src === 'about:blank') {
+    if (!pageFrame.srcdoc) {
       loadPageInFrame();
     }
   }
