@@ -658,7 +658,7 @@
 
   function loadPageInFrame() {
     var url = pagePicker.value;
-    pageFrame.src = url;
+    pageFrame.src = url + '?_=' + Date.now();
   }
 
   pageFrame.addEventListener('load', function() {
@@ -800,7 +800,7 @@
         toast('Saved! Site updates in about a minute.');
         closeModal();
         // Reload iframe to show changes (after a brief delay for JSON to commit)
-        setTimeout(function() { pageFrame.src = pageFrame.src; }, 1000);
+        setTimeout(function() { loadPageInFrame(); }, 1000);
       })
       .catch(function(err) { toast('Save failed: ' + err.message, true); })
       .finally(function() {
