@@ -161,6 +161,61 @@ body {
 .toast.visible { transform: translateX(-50%) translateY(0); }
 .toast.error { background: var(--danger); }
 
+/* VISUAL PAGE EDITOR */
+.admin-section--visual { padding: 0 !important; }
+.visual-toolbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 20px;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 5;
+}
+.visual-toolbar select {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: inherit; font-size: 14px; font-weight: 500; background: var(--white);
+}
+.visual-hint { font-size: 13px; color: var(--text-light); }
+.visual-frame-wrap {
+  width: 100%; background: #e8e8e8;
+  display: flex; justify-content: center;
+  min-height: calc(100vh - 160px);
+}
+.visual-frame {
+  width: 100%; max-width: 1400px;
+  min-height: calc(100vh - 160px);
+  border: none; background: var(--white);
+  box-shadow: 0 0 30px rgba(0,0,0,0.08);
+}
+
+/* EDIT MODAL */
+.edit-modal {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 60px 20px 20px;
+  overflow-y: auto;
+}
+.edit-modal-inner {
+  background: var(--white); border-radius: 12px;
+  width: 100%; max-width: 800px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.edit-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.edit-modal-header h2 { font-size: 18px; font-weight: 600; }
+.edit-modal-header div { display: flex; gap: 8px; }
+.edit-modal-body { padding: 24px; }
+.edit-modal-body label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-bottom: 6px; margin-top: 16px; }
+.edit-modal-body label:first-child { margin-top: 0; }
+.edit-modal-body input {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: inherit; font-size: 14px;
+}
+.edit-modal-body input:focus { outline: none; border-color: var(--accent); }
+#modal-editor .ql-container { min-height: 200px; }
+
 /* IMAGES IN EDITOR */
 .ql-editor img {
   max-width: 100%;

@@ -169,39 +169,39 @@
         </div>
       </section>
 
-      <!-- PAGES LIST -->
-      <section id="section-pages" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1>Page Content</h1>
+      <!-- PAGES: VISUAL EDITOR -->
+      <section id="section-pages" class="admin-section admin-section--visual" style="display:none;">
+        <div class="visual-toolbar">
+          <select id="page-picker">
+            <option value="../index.html" data-key="home">Home</option>
+            <option value="../about-selena.html" data-key="about-selena">About Selena</option>
+            <option value="../about-sessions.html" data-key="about-sessions">About Sessions</option>
+          </select>
+          <span class="visual-hint">Click any highlighted section to edit</span>
         </div>
-        <div id="pages-list" class="item-list"></div>
+        <div class="visual-frame-wrap">
+          <iframe id="page-frame" class="visual-frame"></iframe>
+        </div>
       </section>
 
-      <!-- PAGE EDITOR -->
-      <section id="section-page-edit" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1 id="page-edit-title">Edit Page</h1>
-          <button id="page-back-btn" class="btn-small">Back to Pages</button>
-        </div>
-        <div id="page-sections-list"></div>
-      </section>
-
-      <!-- PAGE SECTION EDITOR -->
-      <section id="section-page-section-edit" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1 id="page-section-edit-title">Edit Section</h1>
-          <div>
-            <button id="page-section-cancel-btn" class="btn-small">Cancel</button>
-            <button id="page-section-save-btn" class="btn-primary">Save</button>
+      <!-- EDIT MODAL (overlays the iframe) -->
+      <div id="edit-modal" class="edit-modal" style="display:none;">
+        <div class="edit-modal-inner">
+          <div class="edit-modal-header">
+            <h2 id="edit-modal-title">Edit Section</h2>
+            <div>
+              <button id="modal-cancel-btn" class="btn-small">Cancel</button>
+              <button id="modal-save-btn" class="btn-primary">Save</button>
+            </div>
+          </div>
+          <div class="edit-modal-body">
+            <label>Heading</label>
+            <input type="text" id="modal-heading">
+            <label>Content</label>
+            <div id="modal-editor"></div>
           </div>
         </div>
-        <div class="editor-form">
-          <label>Section Heading</label>
-          <input type="text" id="page-section-heading">
-          <label>Content</label>
-          <div id="page-section-editor"></div>
-        </div>
-      </section>
+      </div>
 
       <!-- SETTINGS -->
       <section id="section-settings" class="admin-section" style="display:none;">

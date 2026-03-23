@@ -255,7 +255,6 @@
       renderBlogList();
       renderTestimonialsList();
       renderFaqsList();
-      renderPagesList();
       loadSettings();
     })
     .catch(function(err) {
@@ -271,6 +270,16 @@
     document.querySelectorAll('.nav-item').forEach(function(el) {
       el.classList.toggle('active', el.dataset.section === name);
     });
+    // Expand main for visual editor
+    var main = $('admin-main');
+    if (name === 'pages') {
+      main.style.maxWidth = 'none';
+      main.style.padding = '0';
+      if (typeof initVisualEditor === 'function') initVisualEditor();
+    } else {
+      main.style.maxWidth = '';
+      main.style.padding = '';
+    }
   }
 
   document.querySelectorAll('.nav-item, .dash-card').forEach(function(el) {
@@ -642,49 +651,61 @@
 
   $('settings-save-btn').addEventListener('click', saveSettings);
 
-  // ===== PAGES =====
-  function renderPagesList() {
-    var html = '';
-    Object.keys(pages).forEach(function(key) {
-      var page = pages[key];
-      html += '<div class="item-row" style="cursor:pointer;" onclick="CMS.editPage(\'' + key + '\')">';
-      html += '<div class="item-info"><h3>' + page.title + '</h3>';
-      html += '<p>' + page.sections.length + ' editable section' + (page.sections.length !== 1 ? 's' : '') + '</p></div>';
-      html += '<div class="item-actions">';
-      html += '<button class="btn-small">Edit</button>';
-      html += '</div></div>';
-    });
-    $('pages-list').innerHTML = html || '<p style="color:#999;">No pages configured.</p>';
+  // ===== VISUAL PAGE EDITOR =====
+  var modalQuill = null;
+  var pageFrame = $('page-frame');
+  var pagePicker = $('page-picker');
+
+  function loadPageInFrame() {
+    var url = pagePicker.value;
+    pageFrame.src = url;
   }
 
-  function editPage(key) {
-    editingPageKey = key;
-    var page = pages[key];
-    $('page-edit-title').textContent = page.title;
-    var html = '';
-    page.sections.forEach(function(section, i) {
-      var preview = section.body.replace(/<[^>]+>/g, '');
-      if (preview.length > 100) preview = preview.substring(0, 100) + '...';
-      html += '<div class="item-row">';
-      html += '<div class="item-info"><h3>' + section.heading + '</h3>';
-      html += '<p>' + preview + '</p></div>';
-      html += '<div class="item-actions">';
-      html += '<button class="btn-small" onclick="CMS.editPageSection(\'' + key + '\',' + i + ')">Edit</button>';
-      html += '</div></div>';
-    });
-    $('page-sections-list').innerHTML = html;
-    showSection('page-edit');
-  }
+  pageFrame.addEventListener('load', function() {
+    try {
+      var doc = pageFrame.contentDocument;
+      if (!doc || !doc.body) return;
+      // Inject edit-mode.js
+      var script = doc.createElement('script');
+      script.src = 'edit-mode.js';
+      doc.body.appendChild(script);
+      // Auto-resize iframe to content height
+      setTimeout(function() {
+        var h = doc.documentElement.scrollHeight;
+        if (h > 400) pageFrame.style.height = h + 'px';
+      }, 500);
+    } catch(e) {
+      console.warn('Could not inject edit mode', e);
+    }
+  });
 
-  function editPageSection(key, index) {
-    editingPageKey = key;
-    editingSectionIndex = index;
-    var section = pages[key].sections[index];
-    $('page-section-edit-title').textContent = section.heading;
-    $('page-section-heading').value = section.heading;
+  pagePicker.addEventListener('change', loadPageInFrame);
 
-    if (!pageSectionQuill) {
-      pageSectionQuill = new Quill('#page-section-editor', {
+  // Listen for edit messages from iframe
+  window.addEventListener('message', function(e) {
+    if (!e.data || e.data.type !== 'cms-edit') return;
+    var msg = e.data;
+    if (msg.editType === 'section') {
+      openSectionModal(msg.page, msg.section);
+    } else if (msg.editType === 'setting') {
+      openSettingModal(msg.setting);
+    }
+  });
+
+  function openSectionModal(pageKey, sectionId) {
+    editingPageKey = pageKey;
+    var page = pages[pageKey];
+    if (!page) { toast('Page not found: ' + pageKey, true); return; }
+    var idx = page.sections.findIndex(function(s) { return s.id === sectionId; });
+    if (idx < 0) { toast('Section not found: ' + sectionId, true); return; }
+    editingSectionIndex = idx;
+    var section = page.sections[idx];
+
+    $('edit-modal-title').textContent = section.heading;
+    $('modal-heading').value = section.heading;
+
+    if (!modalQuill) {
+      modalQuill = new Quill('#modal-editor', {
         theme: 'snow',
         modules: {
           toolbar: [
@@ -696,37 +717,87 @@
           ]
         }
       });
-      setupQuillImageHandler(pageSectionQuill);
+      setupQuillImageHandler(modalQuill);
     }
-    pageSectionQuill.root.innerHTML = section.body;
-    showSection('page-section-edit');
+    modalQuill.root.innerHTML = section.body;
+    $('edit-modal').style.display = 'flex';
   }
 
-  function savePageSection() {
-    var heading = $('page-section-heading').value.trim();
-    if (!heading) { toast('Heading is required', true); return; }
+  function openSettingModal(settingKey) {
+    editingPageKey = '__setting__';
+    editingSectionIndex = settingKey;
 
-    pages[editingPageKey].sections[editingSectionIndex].heading = heading;
-    pages[editingPageKey].sections[editingSectionIndex].body = pageSectionQuill.root.innerHTML;
+    var label = settingKey.replace(/([A-Z])/g, ' $1').replace(/^./, function(c) { return c.toUpperCase(); });
+    $('edit-modal-title').textContent = 'Edit: ' + label;
+    $('modal-heading').value = settings[settingKey] || '';
+    $('modal-heading').parentElement.querySelector('label').textContent = label;
 
-    $('page-section-save-btn').disabled = true;
-    $('page-section-save-btn').textContent = 'Saving...';
+    // Hide Quill for simple settings, show for rich ones
+    var editorWrap = $('modal-editor').parentElement;
+    editorWrap.querySelector('label').style.display = 'none';
+    $('modal-editor').style.display = 'none';
+    if ($('modal-editor').previousElementSibling) {
+      // Hide the Quill toolbar if it exists
+      var toolbar = editorWrap.querySelector('.ql-toolbar');
+      if (toolbar) toolbar.style.display = 'none';
+    }
 
-    putFile('pages.json', pages, 'Update page content: ' + editingPageKey + ' / ' + heading)
+    $('edit-modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    $('edit-modal').style.display = 'none';
+    // Restore Quill visibility
+    var editorWrap = $('modal-editor').parentElement;
+    editorWrap.querySelectorAll('label').forEach(function(l) { l.style.display = ''; });
+    $('modal-editor').style.display = '';
+    var toolbar = editorWrap.querySelector('.ql-toolbar');
+    if (toolbar) toolbar.style.display = '';
+  }
+
+  function saveModal() {
+    $('modal-save-btn').disabled = true;
+    $('modal-save-btn').textContent = 'Saving...';
+
+    var promise;
+
+    if (editingPageKey === '__setting__') {
+      // Saving a setting
+      var key = editingSectionIndex;
+      settings[key] = $('modal-heading').value.trim();
+      promise = putFile('site-settings.json', settings, 'Update setting: ' + key);
+    } else {
+      // Saving a page section
+      var heading = $('modal-heading').value.trim();
+      if (!heading) { toast('Heading is required', true); $('modal-save-btn').disabled = false; $('modal-save-btn').textContent = 'Save'; return; }
+      pages[editingPageKey].sections[editingSectionIndex].heading = heading;
+      pages[editingPageKey].sections[editingSectionIndex].body = modalQuill.root.innerHTML;
+      promise = putFile('pages.json', pages, 'Update: ' + editingPageKey + ' / ' + heading);
+    }
+
+    promise
       .then(function() {
-        toast('Page content saved!');
-        editPage(editingPageKey);
+        toast('Saved! Site updates in about a minute.');
+        closeModal();
+        // Reload iframe to show changes (after a brief delay for JSON to commit)
+        setTimeout(function() { pageFrame.src = pageFrame.src; }, 1000);
       })
       .catch(function(err) { toast('Save failed: ' + err.message, true); })
       .finally(function() {
-        $('page-section-save-btn').disabled = false;
-        $('page-section-save-btn').textContent = 'Save';
+        $('modal-save-btn').disabled = false;
+        $('modal-save-btn').textContent = 'Save';
       });
   }
 
-  $('page-back-btn').addEventListener('click', function() { showSection('pages'); });
-  $('page-section-save-btn').addEventListener('click', savePageSection);
-  $('page-section-cancel-btn').addEventListener('click', function() { editPage(editingPageKey); });
+  $('modal-save-btn').addEventListener('click', saveModal);
+  $('modal-cancel-btn').addEventListener('click', closeModal);
+
+  // Load first page when Pages section is shown
+  function initVisualEditor() {
+    if (!pageFrame.src || pageFrame.src === 'about:blank') {
+      loadPageInFrame();
+    }
+  }
 
   // ===== EXPOSE FOR ONCLICK =====
   window.CMS = {
@@ -738,8 +809,7 @@
     editFaq: editFaq,
     deleteFaq: deleteFaq,
     moveFaq: moveFaq,
-    editPage: editPage,
-    editPageSection: editPageSection
+    openSectionModal: openSectionModal
   };
 
   // ===== INIT =====
