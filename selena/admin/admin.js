@@ -726,12 +726,52 @@
     '</div>';
   }
 
+  // Hero card with text edit (bottom-left) and image edit (top-right)
+  function pvHero(pageKey, heroTitle, heroSubtitle) {
+    var page = pages[pageKey] || {};
+    var img = page.heroImage ? '../' + page.heroImage : '';
+    return '<div class="pv-hero" style="background-image:url(\'' + img + '\');">' +
+      '<div class="pv-hero-actions">' +
+        '<button class="pv-hero-btn" onclick="event.stopPropagation();CMS.changeHeroImage(\'' + pageKey + '\')">Change Image</button>' +
+      '</div>' +
+      '<div>' +
+        (heroTitle ? '<h1>' + heroTitle + '</h1>' : '') +
+        (heroSubtitle ? '<p>' + heroSubtitle + '</p>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  function changeHeroImage(pageKey) {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading hero image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          // Store relative path from site root
+          var relPath = url.replace('https://clients.pietsuess.com/selena/', '');
+          pages[pageKey].heroImage = relPath;
+          markDirty('pages.json');
+          toast('Hero image updated. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
   function buildHomePage() {
     var s = settings;
+    var headline = (s.heroHeadline || '').replace(/<br\s*\/?>/g, ' ');
     return '' +
-      '<div class="pv-hero" style="background-image:url(\'../images/hero-stones.webp\');" onclick="CMS.openSettingModal(\'heroHeadline\')">' +
-        '<div><div class="pv-section-label" style="opacity:1;position:static;display:inline-block;margin-bottom:8px;">Click to edit headline</div>' +
-        '<h1>' + (s.heroHeadline || '').replace(/<br\s*\/?>/g, ' ') + '</h1></div>' +
+      '<div class="pv-hero" style="background-image:url(\'../' + (pages.home.heroImage || 'images/hero-stones.webp') + '\');">' +
+        '<div class="pv-hero-actions">' +
+          '<button class="pv-hero-btn" onclick="event.stopPropagation();CMS.changeHeroImage(\'home\')">Change Image</button>' +
+        '</div>' +
+        '<button class="pv-hero-btn pv-hero-text-btn" onclick="event.stopPropagation();CMS.openSettingModal(\'heroHeadline\')">Edit Headline</button>' +
+        '<div><h1>' + headline + '</h1></div>' +
       '</div>' +
       '<div class="pv-grid">' +
         pvSection('home', 'what-is-rolfing') +
@@ -749,14 +789,12 @@
         '<div class="pv-section-label">Edit</div>' +
         '<p>&ldquo;' + (s.quoteText || '') + '&rdquo;</p>' +
       '</div>' +
-      '<div class="pv-note">Client Reviews &mdash; manage from the Reviews tab</div>';
+      '<div class="pv-note">Client Reviews -- manage from the Reviews tab</div>';
   }
 
   function buildAboutSelenaPage() {
     return '' +
-      '<div class="pv-hero" style="background-image:url(\'../images/AlderForest.png\');">' +
-        '<div><h1>Selena La Brooy</h1><p>Certified Rolfer, Certified Movement Integration Practitioner</p></div>' +
-      '</div>' +
+      pvHero('about-selena', 'Selena La Brooy', 'Certified Rolfer, Certified Movement Integration Practitioner') +
       pvSection('about-selena', 'bio-intro') +
       pvSection('about-selena', 'bio-story', 'pv-section-accent') +
       pvSection('about-selena', 'bio-passion');
@@ -764,19 +802,40 @@
 
   function buildAboutSessionsPage() {
     return '' +
-      '<div class="pv-hero" style="background-image:url(\'../images/sessions-hero.jpg\');">' +
-        '<div><h1>What\'s a Rolfing Session Like?</h1></div>' +
-      '</div>' +
+      pvHero('about-sessions', "What's a Rolfing Session Like?") +
       pvSection('about-sessions', 'session-details');
+  }
+
+  function buildBlogPage() {
+    return '' +
+      pvHero('blog', 'Blog', 'Learn about Rolfing') +
+      '<div class="pv-note">Blog posts -- manage from the Blog tab</div>';
+  }
+
+  function buildFaqsPage() {
+    return '' +
+      pvHero('faqs', 'Frequently Asked Questions') +
+      '<div class="pv-note">FAQs -- manage from the FAQs tab</div>';
+  }
+
+  function buildContactPage() {
+    return '' +
+      pvHero('contact', 'Contact Us') +
+      '<div class="pv-note">Contact info -- manage from Settings tab (address, email)</div>';
   }
 
   function renderPagePreview() {
     var key = pagePicker.value;
-    var html = '';
-    if (key === 'home') html = buildHomePage();
-    else if (key === 'about-selena') html = buildAboutSelenaPage();
-    else if (key === 'about-sessions') html = buildAboutSessionsPage();
-    pagePreview.innerHTML = html;
+    var builders = {
+      'home': buildHomePage,
+      'about-selena': buildAboutSelenaPage,
+      'about-sessions': buildAboutSessionsPage,
+      'blog': buildBlogPage,
+      'faqs': buildFaqsPage,
+      'contact': buildContactPage
+    };
+    var builder = builders[key];
+    pagePreview.innerHTML = builder ? builder() : '<div class="pv-note">Page not configured</div>';
   }
 
   pagePicker.addEventListener('change', renderPagePreview);
@@ -885,7 +944,8 @@
     deleteFaq: deleteFaq,
     moveFaq: moveFaq,
     openSectionModal: openSectionModal,
-    openSettingModal: openSettingModal
+    openSettingModal: openSettingModal,
+    changeHeroImage: changeHeroImage
   };
 
   // ===== PUBLISH/DISCARD BUTTONS =====
