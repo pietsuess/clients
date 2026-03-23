@@ -357,8 +357,8 @@
       renderFaqsList();
       loadSettings();
       updatePublishBar();
-      // Render page preview if we're on the pages section
-      if (pagePicker) renderPagePreview();
+      // Populate pages dropdown and render preview
+      if (pagePicker) { populatePagePicker(); renderPagePreview(); }
     })
     .catch(function(err) {
       toast('Error loading content: ' + err.message, true);
@@ -872,18 +872,29 @@
       '<div class="pv-note">Contact info -- manage from Settings tab (address, email)</div>';
   }
 
+  function buildGenericPage(key) {
+    var page = pages[key];
+    if (!page) return '<div class="pv-note">Page not found</div>';
+    var html = pvHero(key, page.title);
+    if (page.sections.length === 0) {
+      html += '<div class="pv-note">No sections yet. Add sections from the page editor to build this page.</div>';
+    }
+    page.sections.forEach(function(s) {
+      html += pvSection(key, s.id);
+    });
+    return html;
+  }
+
   function renderPagePreview() {
     var key = pagePicker.value;
+    if (!key || !pages[key]) return;
     var builders = {
       'home': buildHomePage,
       'about-selena': buildAboutSelenaPage,
-      'about-sessions': buildAboutSessionsPage,
-      'blog': buildBlogPage,
-      'faqs': buildFaqsPage,
-      'contact': buildContactPage
+      'about-sessions': buildAboutSessionsPage
     };
     var builder = builders[key];
-    pagePreview.innerHTML = builder ? builder() : '<div class="pv-note">Page not configured</div>';
+    pagePreview.innerHTML = builder ? builder() : buildGenericPage(key);
   }
 
   pagePicker.addEventListener('change', renderPagePreview);
@@ -977,7 +988,40 @@
   $('modal-save-btn').addEventListener('click', saveModal);
   $('modal-cancel-btn').addEventListener('click', closeModal);
 
+  function populatePagePicker() {
+    var current = pagePicker.value;
+    pagePicker.innerHTML = '';
+    Object.keys(pages).forEach(function(key) {
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = pages[key].title;
+      pagePicker.appendChild(opt);
+    });
+    if (current && pages[current]) pagePicker.value = current;
+  }
+
+  function addPage() {
+    var title = prompt('Page name:');
+    if (!title || !title.trim()) return;
+    var key = title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    if (pages[key]) { toast('A page with that key already exists', true); return; }
+    pages[key] = {
+      title: title.trim(),
+      heroImage: '',
+      sections: []
+    };
+    markDirty('pages.json');
+    populatePagePicker();
+    pagePicker.value = key;
+    renderPagePreview();
+    updateDashboard();
+    toast('Page added. Add sections and a hero image, then Publish.');
+  }
+
+  $('add-page-btn').addEventListener('click', addPage);
+
   function initVisualEditor() {
+    populatePagePicker();
     if (Object.keys(pages).length > 0) renderPagePreview();
   }
 
