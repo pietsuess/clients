@@ -719,10 +719,13 @@
     var delBtn = '<button class="pv-section-delete" onclick="event.stopPropagation();CMS.deletePageSection(\'' + pageKey + '\',\'' + sectionId + '\')">Delete</button>';
     var typeLabel = '<span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;">' + type + '</span>';
 
+    var imgLabel = s.image ? 'Change Image' : 'Add Image';
+    var imgBtnAny = '<button class="pv-section-img-btn" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">' + imgLabel + '</button>';
+
     if (type === 'banner') {
       return '<div class="pv-section pv-section-quote" style="' + (s.image ? 'background-image:url(\'../' + s.image + '\');' : '') + '">' +
         delBtn +
-        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">Change Image</button>' +
+        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">' + imgLabel + '</button>' +
         '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')" style="cursor:pointer;">' +
           '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Text</div>' +
           '<p>' + (s.heading || '') + '</p>' +
@@ -731,10 +734,10 @@
       '</div>';
     }
 
-    if (type === 'text-image') {
+    if (type === 'text-image' || (type !== 'two-column' && s.image)) {
       return '<div class="pv-section pv-img-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
         delBtn +
-        '<div style="position:relative;"><img src="../' + (s.image || '') + '" alt="">' + imgBtn + '</div>' +
+        '<div style="position:relative;"><img src="../' + (s.image || '') + '" alt="">' + imgBtnAny + '</div>' +
         '<div><div class="pv-section-label">Edit Text</div>' +
           typeLabel +
           '<h2>' + s.heading + '</h2>' +
@@ -766,9 +769,10 @@
       extraClass = (extraClass || '') + ' pv-section-accent';
     }
 
-    // Default: text
+    // Default: text / accent - always show image button
     return '<div class="pv-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
       delBtn +
+      imgBtnAny +
       '<div class="pv-section-label">Edit Text</div>' +
       typeLabel +
       '<h2>' + s.heading + '</h2>' +
