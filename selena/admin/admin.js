@@ -23,6 +23,7 @@
   var postQuill = null;
   var faqQuill = null;
   var pageSectionQuill = null;
+  var editingColumn = ''; // '' or 'right' for two-column sections
   var pendingChanges = {}; // { filename: true } tracks which files have unpublished changes
   var DRAFT_KEY = 'selena-cms-drafts';
 
@@ -713,25 +714,71 @@
 
   function pvSection(pageKey, sectionId, extraClass) {
     var s = getSection(pageKey, sectionId);
+    var type = s.type || 'text';
     var imgBtn = s.image ? '<button class="pv-section-img-btn" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">Change Image</button>' : '';
+    var delBtn = '<button class="pv-section-delete" onclick="event.stopPropagation();CMS.deletePageSection(\'' + pageKey + '\',\'' + sectionId + '\')">Delete</button>';
+    var typeLabel = '<span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;">' + type + '</span>';
 
-    // If section has both image and body text, show side-by-side
-    if (s.image && s.body) {
+    if (type === 'banner') {
+      return '<div class="pv-section pv-section-quote" style="' + (s.image ? 'background-image:url(\'../' + s.image + '\');' : '') + '">' +
+        delBtn +
+        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">Change Image</button>' +
+        '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')" style="cursor:pointer;">' +
+          '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Text</div>' +
+          '<p>' + (s.heading || '') + '</p>' +
+          (s.body ? '<p style="font-size:0.9rem;margin-top:10px;font-style:normal;">' + s.body.replace(/<[^>]+>/g, '') + '</p>' : '') +
+        '</div>' +
+      '</div>';
+    }
+
+    if (type === 'text-image') {
       return '<div class="pv-section pv-img-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
-        '<div style="position:relative;"><img src="../' + s.image + '" alt="">' + imgBtn + '</div>' +
+        delBtn +
+        '<div style="position:relative;"><img src="../' + (s.image || '') + '" alt="">' + imgBtn + '</div>' +
         '<div><div class="pv-section-label">Edit Text</div>' +
+          typeLabel +
           '<h2>' + s.heading + '</h2>' +
           s.body +
         '</div>' +
       '</div>';
     }
 
-    // Image-only section (like quote backgrounds) - not handled here, done in page builders
-    // Text-only section
+    if (type === 'two-column') {
+      return '<div class="pv-section ' + (extraClass || '') + '" style="cursor:default;">' +
+        delBtn +
+        typeLabel +
+        '<div class="pv-two-col">' +
+          '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')" style="cursor:pointer;">' +
+            '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Left</div>' +
+            '<h2>' + (s.heading || '') + '</h2>' +
+            (s.body || '') +
+          '</div>' +
+          '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\',\'right\')" style="cursor:pointer;">' +
+            '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Right</div>' +
+            '<h2>' + (s.heading2 || '') + '</h2>' +
+            (s.body2 || '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    if (type === 'accent') {
+      extraClass = (extraClass || '') + ' pv-section-accent';
+    }
+
+    // Default: text
     return '<div class="pv-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
+      delBtn +
       '<div class="pv-section-label">Edit Text</div>' +
+      typeLabel +
       '<h2>' + s.heading + '</h2>' +
       s.body +
+    '</div>';
+  }
+
+  function pvAddSection(pageKey) {
+    return '<div style="position:relative;">' +
+      '<button class="pv-add-section" onclick="CMS.toggleAddMenu(\'' + pageKey + '\',this)">+ Add Section</button>' +
     '</div>';
   }
 
@@ -803,55 +850,38 @@
   function buildHomePage() {
     var s = settings;
     var headline = (s.heroHeadline || '').replace(/<br\s*\/?>/g, ' ');
-    return '' +
-      '<div class="pv-hero" style="background-image:url(\'../' + (pages.home.heroImage || 'images/hero-stones.webp') + '\');">' +
+    var html = '' +
+      '<div class="pv-hero" style="background-image:url(\'../' + (pages.home.heroImage || '') + '\');">' +
         '<div class="pv-hero-actions">' +
           '<button class="pv-hero-btn" onclick="event.stopPropagation();CMS.changeHeroImage(\'home\')">Change Image</button>' +
         '</div>' +
         '<button class="pv-hero-btn pv-hero-text-btn" onclick="event.stopPropagation();CMS.openSettingModal(\'heroHeadline\')">Edit Headline</button>' +
         '<div><h1>' + headline + '</h1></div>' +
-      '</div>' +
-      '<div class="pv-grid">' +
-        pvSection('home', 'what-is-rolfing') +
-        pvSection('home', 'who-benefits') +
-      '</div>' +
-      '<div class="pv-section pv-section-accent pv-img-section" onclick="CMS.openSectionModal(\'home\',\'meet-selena\')">' +
-        '<div style="position:relative;"><img src="../' + (getSection('home','meet-selena').image || 'images/selena-profile.webp') + '" alt="Selena">' +
-          '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'home\',\'meet-selena\')">Change Image</button>' +
-        '</div>' +
-        '<div><div class="pv-section-label">Edit Text</div>' +
-          '<h2>' + getSection('home', 'meet-selena').heading + '</h2>' +
-          getSection('home', 'meet-selena').body +
-        '</div>' +
-      '</div>' +
-      pvSection('home', 'structural-integration') +
-      '<div class="pv-section pv-section-quote" style="background-image:url(\'../' + (getSection('home','quote').image || 'images/sunset-person.webp') + '\');">' +
-        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'home\',\'quote\')">Change Image</button>' +
-        '<div onclick="CMS.openSettingModal(\'quoteText\')" style="cursor:pointer;">' +
-          '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Text</div>' +
-          '<p>&ldquo;' + (s.quoteText || '') + '&rdquo;</p>' +
-        '</div>' +
-      '</div>' +
-      '<div class="pv-note">Client Reviews -- manage from the Reviews tab</div>';
+      '</div>';
+    pages.home.sections.forEach(function(sec) {
+      html += pvSection('home', sec.id);
+    });
+    html += '<div class="pv-note">Client Reviews -- manage from the Reviews tab</div>';
+    html += pvAddSection('home');
+    return html;
   }
 
   function buildAboutSelenaPage() {
-    return '' +
-      pvHero('about-selena', 'Selena La Brooy', 'Certified Rolfer, Certified Movement Integration Practitioner') +
-      pvSection('about-selena', 'bio-intro') +
-      pvSection('about-selena', 'bio-story', 'pv-section-accent') +
-      pvSection('about-selena', 'bio-passion');
+    var html = pvHero('about-selena', 'Selena La Brooy', 'Certified Rolfer, Certified Movement Integration Practitioner');
+    pages['about-selena'].sections.forEach(function(sec) {
+      html += pvSection('about-selena', sec.id);
+    });
+    html += pvAddSection('about-selena');
+    return html;
   }
 
   function buildAboutSessionsPage() {
-    var cta = getSection('about-sessions', 'session-cta');
-    return '' +
-      pvHero('about-sessions', "What's a Rolfing Session Like?") +
-      pvSection('about-sessions', 'session-details') +
-      '<div class="pv-section pv-section-quote" style="background-image:url(\'../' + (cta.image || 'images/MossyForest.png') + '\');">' +
-        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'about-sessions\',\'session-cta\')">Change Image</button>' +
-        '<p>' + (cta.heading || 'Ready to begin your journey?') + '</p>' +
-      '</div>';
+    var html = pvHero('about-sessions', "What's a Rolfing Session Like?");
+    pages['about-sessions'].sections.forEach(function(sec) {
+      html += pvSection('about-sessions', sec.id);
+    });
+    html += pvAddSection('about-sessions');
+    return html;
   }
 
   function buildBlogPage() {
@@ -877,11 +907,12 @@
     if (!page) return '<div class="pv-note">Page not found</div>';
     var html = pvHero(key, page.title);
     if (page.sections.length === 0) {
-      html += '<div class="pv-note">No sections yet. Add sections from the page editor to build this page.</div>';
+      html += '<div class="pv-note">No sections yet. Click "+ Add Section" below.</div>';
     }
     page.sections.forEach(function(s) {
       html += pvSection(key, s.id);
     });
+    html += pvAddSection(key);
     return html;
   }
 
@@ -899,7 +930,67 @@
 
   pagePicker.addEventListener('change', renderPagePreview);
 
-  function openSectionModal(pageKey, sectionId) {
+  // ===== ADD/DELETE SECTIONS =====
+  var SECTION_TYPES = [
+    { id: 'text', label: 'Text', desc: 'Heading + body text, white background' },
+    { id: 'accent', label: 'Accent', desc: 'Heading + body text, tan background' },
+    { id: 'text-image', label: 'Text + Image', desc: 'Side-by-side image and text' },
+    { id: 'banner', label: 'Banner', desc: 'Full-width background image with text overlay' },
+    { id: 'two-column', label: 'Two Column', desc: 'Two text blocks side by side' }
+  ];
+
+  function toggleAddMenu(pageKey, btn) {
+    var existing = btn.parentElement.querySelector('.pv-type-picker');
+    if (existing) { existing.remove(); return; }
+    var menu = document.createElement('div');
+    menu.className = 'pv-type-picker';
+    SECTION_TYPES.forEach(function(t) {
+      var opt = document.createElement('button');
+      opt.className = 'pv-type-option';
+      opt.innerHTML = t.label + '<span>' + t.desc + '</span>';
+      opt.addEventListener('click', function() {
+        addSection(pageKey, t.id);
+        menu.remove();
+      });
+      menu.appendChild(opt);
+    });
+    btn.parentElement.appendChild(menu);
+    // Close on outside click
+    setTimeout(function() {
+      document.addEventListener('click', function close(e) {
+        if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close); }
+      });
+    }, 10);
+  }
+
+  function addSection(pageKey, type) {
+    var title = prompt('Section heading:');
+    if (!title || !title.trim()) return;
+    var id = title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    var section = { id: id, type: type, heading: title.trim(), body: '' };
+    if (type === 'text-image' || type === 'banner') section.image = '';
+    if (type === 'two-column') { section.heading2 = ''; section.body2 = ''; }
+    pages[pageKey].sections.push(section);
+    markDirty('pages.json');
+    renderPagePreview();
+    updateDashboard();
+    toast('Section added. Click it to edit.');
+  }
+
+  function deletePageSection(pageKey, sectionId) {
+    var page = pages[pageKey];
+    if (!page) return;
+    var idx = page.sections.findIndex(function(s) { return s.id === sectionId; });
+    if (idx < 0) return;
+    if (!confirm('Delete section "' + page.sections[idx].heading + '"?')) return;
+    page.sections.splice(idx, 1);
+    markDirty('pages.json');
+    renderPagePreview();
+    updateDashboard();
+    toast('Section deleted. Click Publish when ready.');
+  }
+
+  function openSectionModal(pageKey, sectionId, column) {
     editingPageKey = pageKey;
     var page = pages[pageKey];
     if (!page) { toast('Page not found: ' + pageKey, true); return; }
@@ -908,8 +999,12 @@
     editingSectionIndex = idx;
     var section = page.sections[idx];
 
-    $('edit-modal-title').textContent = section.heading;
-    $('modal-heading').value = section.heading;
+    editingColumn = column || '';
+    var heading = editingColumn === 'right' ? (section.heading2 || '') : section.heading;
+    var body = editingColumn === 'right' ? (section.body2 || '') : section.body;
+
+    $('edit-modal-title').textContent = heading || 'Edit Section';
+    $('modal-heading').value = heading;
     $('modal-heading').parentElement.querySelector('label').textContent = 'Heading';
 
     // Show Quill
@@ -934,7 +1029,7 @@
       });
       setupQuillImageHandler(modalQuill);
     }
-    modalQuill.root.innerHTML = section.body;
+    modalQuill.root.innerHTML = body;
     $('edit-modal').style.display = 'flex';
   }
 
@@ -974,9 +1069,14 @@
       markDirty('site-settings.json');
     } else {
       var heading = $('modal-heading').value.trim();
-      if (!heading) { toast('Heading is required', true); return; }
-      pages[editingPageKey].sections[editingSectionIndex].heading = heading;
-      pages[editingPageKey].sections[editingSectionIndex].body = modalQuill.root.innerHTML;
+      var section = pages[editingPageKey].sections[editingSectionIndex];
+      if (editingColumn === 'right') {
+        section.heading2 = heading;
+        section.body2 = modalQuill.root.innerHTML;
+      } else {
+        section.heading = heading;
+        section.body = modalQuill.root.innerHTML;
+      }
       markDirty('pages.json');
     }
 
@@ -1038,7 +1138,9 @@
     openSectionModal: openSectionModal,
     openSettingModal: openSettingModal,
     changeHeroImage: changeHeroImage,
-    changeSectionImage: changeSectionImage
+    changeSectionImage: changeSectionImage,
+    toggleAddMenu: toggleAddMenu,
+    deletePageSection: deletePageSection
   };
 
   // ===== PUBLISH/DISCARD BUTTONS =====
