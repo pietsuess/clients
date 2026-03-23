@@ -23,6 +23,104 @@
   var postQuill = null;
   var faqQuill = null;
   var pageSectionQuill = null;
+  var pendingChanges = {}; // { filename: true } tracks which files have unpublished changes
+  var DRAFT_KEY = 'selena-cms-drafts';
+
+  // ===== DRAFTS =====
+  function saveDrafts() {
+    var drafts = {
+      blogPosts: blogPosts,
+      testimonials: testimonials,
+      faqs: faqs,
+      settings: settings,
+      pages: pages,
+      pending: pendingChanges
+    };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
+    updatePublishBar();
+  }
+
+  function loadDrafts() {
+    var raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    try {
+      var drafts = JSON.parse(raw);
+      if (drafts.pending && Object.keys(drafts.pending).length > 0) {
+        blogPosts = drafts.blogPosts || blogPosts;
+        testimonials = drafts.testimonials || testimonials;
+        faqs = drafts.faqs || faqs;
+        settings = drafts.settings || settings;
+        pages = drafts.pages || pages;
+        pendingChanges = drafts.pending || {};
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  }
+
+  function clearDrafts() {
+    pendingChanges = {};
+    localStorage.removeItem(DRAFT_KEY);
+    updatePublishBar();
+  }
+
+  function markDirty(filename) {
+    pendingChanges[filename] = true;
+    saveDrafts();
+  }
+
+  function updatePublishBar() {
+    var bar = $('publish-bar');
+    var count = Object.keys(pendingChanges).length;
+    if (count > 0) {
+      $('pending-count').textContent = count + ' unpublished change' + (count > 1 ? 's' : '');
+      bar.style.display = 'flex';
+    } else {
+      bar.style.display = 'none';
+    }
+  }
+
+  function publishAll() {
+    var files = Object.keys(pendingChanges);
+    if (!files.length) { toast('Nothing to publish'); return; }
+
+    $('publish-btn').disabled = true;
+    $('publish-btn').textContent = 'Publishing...';
+
+    var dataMap = {
+      'blog-posts.json': blogPosts,
+      'testimonials.json': testimonials,
+      'faqs.json': faqs,
+      'site-settings.json': settings,
+      'pages.json': pages
+    };
+
+    // Commit each changed file sequentially to avoid sha conflicts
+    var chain = Promise.resolve();
+    files.forEach(function(filename) {
+      chain = chain.then(function() {
+        return putFile(filename, dataMap[filename], 'Publish: ' + filename);
+      });
+    });
+
+    chain
+      .then(function() {
+        toast('Published! Site updates in about a minute.');
+        clearDrafts();
+      })
+      .catch(function(err) { toast('Publish failed: ' + err.message, true); })
+      .finally(function() {
+        $('publish-btn').disabled = false;
+        $('publish-btn').textContent = 'Publish';
+      });
+  }
+
+  function discardDrafts() {
+    if (!confirm('Discard all unpublished changes? This will reload content from GitHub.')) return;
+    clearDrafts();
+    loadAllContent();
+    toast('Drafts discarded.');
+  }
 
   // ===== DOM =====
   var $ = function(id) { return document.getElementById(id); };
@@ -251,11 +349,14 @@
       getFile('pages.json').then(function(d) { pages = d; })
     ])
     .then(function() {
+      // Apply any pending drafts over the fetched data
+      loadDrafts();
       updateDashboard();
       renderBlogList();
       renderTestimonialsList();
       renderFaqsList();
       loadSettings();
+      updatePublishBar();
     })
     .catch(function(err) {
       toast('Error loading content: ' + err.message, true);
@@ -385,33 +486,20 @@
       blogPosts.push(post);
     }
 
-    $('blog-save-btn').disabled = true;
-    $('blog-save-btn').textContent = 'Saving...';
-
-    putFile('blog-posts.json', blogPosts, (editingIndex >= 0 ? 'Update' : 'Add') + ' blog post: ' + title)
-      .then(function() {
-        toast('Blog post saved! Site updates in about a minute.');
-        renderBlogList();
-        updateDashboard();
-        showSection('blog');
-      })
-      .catch(function(err) { toast('Save failed: ' + err.message, true); })
-      .finally(function() {
-        $('blog-save-btn').disabled = false;
-        $('blog-save-btn').textContent = 'Publish';
-      });
+    markDirty('blog-posts.json');
+    toast('Draft saved. Click Publish when ready.');
+    renderBlogList();
+    updateDashboard();
+    showSection('blog');
   }
 
   function deletePost(index) {
     if (!confirm('Delete "' + blogPosts[index].title + '"? This cannot be undone.')) return;
     blogPosts.splice(index, 1);
-    putFile('blog-posts.json', blogPosts, 'Delete blog post')
-      .then(function() {
-        toast('Post deleted.');
-        renderBlogList();
-        updateDashboard();
-      })
-      .catch(function(err) { toast('Delete failed: ' + err.message, true); });
+    markDirty('blog-posts.json');
+    toast('Post deleted. Click Publish when ready.');
+    renderBlogList();
+    updateDashboard();
   }
 
   $('new-post-btn').addEventListener('click', function() { editPost(-1); });
@@ -443,12 +531,9 @@
     var temp = testimonials[index];
     testimonials[index] = testimonials[newIndex];
     testimonials[newIndex] = temp;
-    putFile('testimonials.json', testimonials, 'Reorder reviews')
-      .then(function() {
-        toast('Review order updated.');
-        renderTestimonialsList();
-      })
-      .catch(function(err) { toast('Reorder failed: ' + err.message, true); });
+    markDirty('testimonials.json');
+    toast('Order updated. Click Publish when ready.');
+    renderTestimonialsList();
   }
 
   function editTestimonial(index) {
@@ -478,33 +563,20 @@
       testimonials.push(t);
     }
 
-    $('testimonial-save-btn').disabled = true;
-    $('testimonial-save-btn').textContent = 'Saving...';
-
-    putFile('testimonials.json', testimonials, (editingIndex >= 0 ? 'Update' : 'Add') + ' review: ' + name)
-      .then(function() {
-        toast('Review saved!');
-        renderTestimonialsList();
-        updateDashboard();
-        showSection('testimonials');
-      })
-      .catch(function(err) { toast('Save failed: ' + err.message, true); })
-      .finally(function() {
-        $('testimonial-save-btn').disabled = false;
-        $('testimonial-save-btn').textContent = 'Save';
-      });
+    markDirty('testimonials.json');
+    toast('Draft saved. Click Publish when ready.');
+    renderTestimonialsList();
+    updateDashboard();
+    showSection('testimonials');
   }
 
   function deleteTestimonial(index) {
     if (!confirm('Delete review from "' + testimonials[index].name + '"?')) return;
     testimonials.splice(index, 1);
-    putFile('testimonials.json', testimonials, 'Delete review')
-      .then(function() {
-        toast('Review deleted.');
-        renderTestimonialsList();
-        updateDashboard();
-      })
-      .catch(function(err) { toast('Delete failed: ' + err.message, true); });
+    markDirty('testimonials.json');
+    toast('Review deleted. Click Publish when ready.');
+    renderTestimonialsList();
+    updateDashboard();
   }
 
   $('new-testimonial-btn').addEventListener('click', function() { editTestimonial(-1); });
@@ -568,35 +640,21 @@
       faqs.push(f);
     }
 
-    $('faq-save-btn').disabled = true;
-    $('faq-save-btn').textContent = 'Saving...';
-
-    putFile('faqs.json', faqs, (editingIndex >= 0 ? 'Update' : 'Add') + ' FAQ: ' + question)
-      .then(function() {
-        toast('FAQ saved!');
-        renderFaqsList();
-        updateDashboard();
-        showSection('faqs');
-      })
-      .catch(function(err) { toast('Save failed: ' + err.message, true); })
-      .finally(function() {
-        $('faq-save-btn').disabled = false;
-        $('faq-save-btn').textContent = 'Save';
-      });
+    markDirty('faqs.json');
+    toast('Draft saved. Click Publish when ready.');
+    renderFaqsList();
+    updateDashboard();
+    showSection('faqs');
   }
 
   function deleteFaq(index) {
     if (!confirm('Delete this FAQ?')) return;
     faqs.splice(index, 1);
-    // Reorder
     faqs.forEach(function(f, i) { f.order = i + 1; });
-    putFile('faqs.json', faqs, 'Delete FAQ')
-      .then(function() {
-        toast('FAQ deleted.');
-        renderFaqsList();
-        updateDashboard();
-      })
-      .catch(function(err) { toast('Delete failed: ' + err.message, true); });
+    markDirty('faqs.json');
+    toast('FAQ deleted. Click Publish when ready.');
+    renderFaqsList();
+    updateDashboard();
   }
 
   function moveFaq(index, direction) {
@@ -605,14 +663,10 @@
     var temp = faqs[index];
     faqs[index] = faqs[newIndex];
     faqs[newIndex] = temp;
-    // Update order values
     faqs.forEach(function(f, i) { f.order = i + 1; });
-    putFile('faqs.json', faqs, 'Reorder FAQs')
-      .then(function() {
-        toast('FAQ order updated.');
-        renderFaqsList();
-      })
-      .catch(function(err) { toast('Reorder failed: ' + err.message, true); });
+    markDirty('faqs.json');
+    toast('Order updated. Click Publish when ready.');
+    renderFaqsList();
   }
 
   $('new-faq-btn').addEventListener('click', function() { editFaq(-1); });
@@ -637,16 +691,8 @@
     settings.heroHeadline = $('setting-hero').value.trim();
     settings.quoteText = $('setting-quote').value.trim();
 
-    $('settings-save-btn').disabled = true;
-    $('settings-save-btn').textContent = 'Saving...';
-
-    putFile('site-settings.json', settings, 'Update site settings')
-      .then(function() { toast('Settings saved!'); })
-      .catch(function(err) { toast('Save failed: ' + err.message, true); })
-      .finally(function() {
-        $('settings-save-btn').disabled = false;
-        $('settings-save-btn').textContent = 'Save Settings';
-      });
+    markDirty('site-settings.json');
+    toast('Draft saved. Click Publish when ready.');
   }
 
   $('settings-save-btn').addEventListener('click', saveSettings);
@@ -804,34 +850,21 @@
   }
 
   function saveModal() {
-    $('modal-save-btn').disabled = true;
-    $('modal-save-btn').textContent = 'Saving...';
-
-    var promise;
-
     if (editingPageKey === '__setting__') {
       var key = editingSectionIndex;
       settings[key] = $('modal-heading').value.trim();
-      promise = putFile('site-settings.json', settings, 'Update setting: ' + key);
+      markDirty('site-settings.json');
     } else {
       var heading = $('modal-heading').value.trim();
-      if (!heading) { toast('Heading is required', true); $('modal-save-btn').disabled = false; $('modal-save-btn').textContent = 'Save'; return; }
+      if (!heading) { toast('Heading is required', true); return; }
       pages[editingPageKey].sections[editingSectionIndex].heading = heading;
       pages[editingPageKey].sections[editingSectionIndex].body = modalQuill.root.innerHTML;
-      promise = putFile('pages.json', pages, 'Update: ' + editingPageKey + ' / ' + heading);
+      markDirty('pages.json');
     }
 
-    promise
-      .then(function() {
-        toast('Saved! Site updates in about a minute.');
-        closeModal();
-        renderPagePreview();
-      })
-      .catch(function(err) { toast('Save failed: ' + err.message, true); })
-      .finally(function() {
-        $('modal-save-btn').disabled = false;
-        $('modal-save-btn').textContent = 'Save';
-      });
+    toast('Draft saved. Click Publish when ready.');
+    closeModal();
+    renderPagePreview();
   }
 
   $('modal-save-btn').addEventListener('click', saveModal);
@@ -854,6 +887,10 @@
     openSectionModal: openSectionModal,
     openSettingModal: openSettingModal
   };
+
+  // ===== PUBLISH/DISCARD BUTTONS =====
+  $('publish-btn').addEventListener('click', publishAll);
+  $('discard-btn').addEventListener('click', discardDrafts);
 
   // ===== INIT =====
   initAuth();
