@@ -1,6 +1,29 @@
 /* edit-mode.js -- injected into iframe pages to add edit overlays */
 (function() {
-  // Find all CMS-managed elements
+
+  // ===== FIX LAYOUT FOR IFRAME =====
+  var style = document.createElement('style');
+  style.textContent = [
+    /* Hero: make relative so it flows in the iframe */
+    '.hero { position: relative !important; height: 70vh !important; background-size: cover !important; background-position: center center !important; }',
+    '.hero-spacer { display: none !important; }',
+    /* Header: make relative, always solid */
+    'header { position: relative !important; background: rgba(250,248,245,0.98) !important; border-bottom: 1px solid rgba(0,0,0,0.06) !important; }',
+    'header .logo .logo-light { opacity: 0 !important; }',
+    'header .logo .logo-dark { opacity: 1 !important; }',
+    'nav a { color: #2D2D2D !important; }',
+    'nav a.btn-book { color: #1A1A1A !important; border-color: #1A1A1A !important; }',
+    '.nav-social { color: #666 !important; }',
+    /* Parallax sections: relative */
+    '.quote-section { background-size: cover !important; background-attachment: scroll !important; }',
+    /* Disable animations so content is visible immediately */
+    '.reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; }',
+    /* Edit mode indicator */
+    'body::before { content: "EDIT MODE"; position: fixed; top: 8px; right: 12px; z-index: 9999; background: #7C9A82; color: #fff; padding: 4px 12px; border-radius: 4px; font-family: Poppins, sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; pointer-events: none; }'
+  ].join('\n');
+  document.head.appendChild(style);
+
+  // ===== FIND CMS ELEMENTS =====
   var sections = document.querySelectorAll('[data-cms-section]');
   var settings = document.querySelectorAll('[data-cms-setting]');
 
@@ -63,8 +86,9 @@
     });
   });
 
-  // Hide nav and booking buttons to reduce clutter
+  // Disable buttons
   document.querySelectorAll('.btn, .btn-book').forEach(function(el) {
     el.style.pointerEvents = 'none';
   });
+
 })();
