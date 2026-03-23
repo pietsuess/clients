@@ -665,9 +665,9 @@
     try {
       var doc = pageFrame.contentDocument;
       if (!doc || !doc.body) return;
-      // Inject edit-mode.js
+      // Inject edit-mode2.js
       var script = doc.createElement('script');
-      script.src = 'edit-mode.js';
+      script.src = 'edit-mode2.js';
       doc.body.appendChild(script);
       // Auto-resize iframe to content height
       setTimeout(function() {
