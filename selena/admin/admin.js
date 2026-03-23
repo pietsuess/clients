@@ -357,6 +357,8 @@
       renderFaqsList();
       loadSettings();
       updatePublishBar();
+      // Render page preview if we're on the pages section
+      if (pagePicker) renderPagePreview();
     })
     .catch(function(err) {
       toast('Error loading content: ' + err.message, true);
@@ -712,12 +714,23 @@
   function pvSection(pageKey, sectionId, extraClass) {
     var s = getSection(pageKey, sectionId);
     var imgBtn = s.image ? '<button class="pv-section-img-btn" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">Change Image</button>' : '';
-    var imgPreview = s.image ? '<img src="../' + s.image + '" alt="" style="max-width:100%;border-radius:8px;margin-bottom:12px;">' : '';
+
+    // If section has both image and body text, show side-by-side
+    if (s.image && s.body) {
+      return '<div class="pv-section pv-img-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
+        '<div style="position:relative;"><img src="../' + s.image + '" alt="">' + imgBtn + '</div>' +
+        '<div><div class="pv-section-label">Edit Text</div>' +
+          '<h2>' + s.heading + '</h2>' +
+          s.body +
+        '</div>' +
+      '</div>';
+    }
+
+    // Image-only section (like quote backgrounds) - not handled here, done in page builders
+    // Text-only section
     return '<div class="pv-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
       '<div class="pv-section-label">Edit Text</div>' +
-      imgBtn +
       '<h2>' + s.heading + '</h2>' +
-      imgPreview +
       s.body +
     '</div>';
   }
@@ -965,7 +978,7 @@
   $('modal-cancel-btn').addEventListener('click', closeModal);
 
   function initVisualEditor() {
-    renderPagePreview();
+    if (Object.keys(pages).length > 0) renderPagePreview();
   }
 
   // ===== EXPOSE FOR ONCLICK =====
