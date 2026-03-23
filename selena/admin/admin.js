@@ -664,16 +664,36 @@
   pageFrame.addEventListener('load', function() {
     try {
       var doc = pageFrame.contentDocument;
+      var win = pageFrame.contentWindow;
       if (!doc || !doc.body) return;
-      // Inject edit-mode2.js
+
+      // Kill all scroll event listeners by replacing the scroll handler
+      win.onscroll = null;
+      // Remove scroll listeners by cloning body/window trick isn't possible,
+      // so override the functions the page defines
+      if (win.checkScroll) win.checkScroll = function() {};
+
+      // Force header to solid state
+      var header = doc.querySelector('header');
+      if (header) {
+        header.classList.add('scrolled');
+        header.classList.remove('nav-open');
+      }
+
+      // Inject edit-mode script
       var script = doc.createElement('script');
       script.src = 'edit-mode2.js';
       doc.body.appendChild(script);
-      // Auto-resize iframe to content height
+
+      // Auto-resize iframe to content height (with delay for content to render)
       setTimeout(function() {
+        // Remove any inline background-position styles set by parallax JS
+        doc.querySelectorAll('.hero, .parallax-bg').forEach(function(el) {
+          el.style.backgroundPositionY = '';
+        });
         var h = doc.documentElement.scrollHeight;
         if (h > 400) pageFrame.style.height = h + 'px';
-      }, 500);
+      }, 800);
     } catch(e) {
       console.warn('Could not inject edit mode', e);
     }

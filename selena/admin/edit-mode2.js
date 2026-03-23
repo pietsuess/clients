@@ -96,4 +96,24 @@
     el.style.pointerEvents = 'none';
   });
 
+  // Kill scroll/parallax handlers that fight with our CSS
+  window.onscroll = null;
+  // Remove all scroll listeners by replacing window event handling
+  var oldAddEventListener = window.addEventListener;
+  window.addEventListener = function(type) {
+    if (type === 'scroll') return; // block new scroll listeners
+    return oldAddEventListener.apply(this, arguments);
+  };
+
+  // Force header into scrolled/solid state
+  var header = document.querySelector('header');
+  if (header) {
+    header.className = 'solid scrolled';
+  }
+
+  // Clear any inline styles set by parallax JS
+  document.querySelectorAll('.hero, .parallax-bg, .quote-section').forEach(function(el) {
+    el.style.backgroundPositionY = '';
+  });
+
 })();
