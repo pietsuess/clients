@@ -895,6 +895,29 @@
       '</div>';
     }
 
+    if (type === 'images') {
+      var imgs = s.images || [];
+      var imgHtml = '';
+      imgs.forEach(function(src, i) {
+        imgHtml += '<div style="position:relative;flex:1;min-width:0;">' +
+          '<img src="../' + src + '" alt="" style="width:100%;border-radius:8px;display:block;">' +
+          '<button class="pv-section-img-btn" style="opacity:1;font-size:10px;padding:3px 8px;" onclick="event.stopPropagation();CMS.changeGalleryImage(\'' + pageKey + '\',\'' + sectionId + '\',' + i + ')">Change</button>' +
+          '<button class="pv-section-delete" style="opacity:1;top:4px;left:4px;font-size:10px;padding:2px 6px;" onclick="event.stopPropagation();CMS.removeGalleryImage(\'' + pageKey + '\',\'' + sectionId + '\',' + i + ')">X</button>' +
+        '</div>';
+      });
+      if (imgs.length < 3) {
+        imgHtml += '<div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;min-height:120px;border:2px dashed #e0e0e0;border-radius:8px;cursor:pointer;" onclick="event.stopPropagation();CMS.addGalleryImage(\'' + pageKey + '\',\'' + sectionId + '\')">' +
+          '<span style="color:#999;font-size:13px;">+ Add Image</span>' +
+        '</div>';
+      }
+      return '<div class="pv-section ' + (extraClass || '') + '">' +
+        delBtn +
+        typeLabel +
+        '<h2>' + s.heading + '</h2>' +
+        '<div style="display:flex;gap:12px;margin-top:12px;">' + imgHtml + '</div>' +
+      '</div>';
+    }
+
     if (type === 'two-column') {
       return '<div class="pv-section ' + (extraClass || '') + '" style="cursor:default;">' +
         delBtn +
@@ -977,6 +1000,61 @@
         .catch(function(err) { toast('Upload failed: ' + err.message, true); });
     };
     input.click();
+  }
+
+  function addGalleryImage(pageKey, sectionId) {
+    var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+    if (!section) return;
+    if (!section.images) section.images = [];
+    if (section.images.length >= 3) { toast('Maximum 3 images', true); return; }
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          var relPath = url.replace('https://clients.pietsuess.com/selena/', '');
+          section.images.push(relPath);
+          markDirty('pages.json');
+          toast('Image added. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
+  function changeGalleryImage(pageKey, sectionId, index) {
+    var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+    if (!section || !section.images) return;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          var relPath = url.replace('https://clients.pietsuess.com/selena/', '');
+          section.images[index] = relPath;
+          markDirty('pages.json');
+          toast('Image updated. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
+  function removeGalleryImage(pageKey, sectionId, index) {
+    var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+    if (!section || !section.images) return;
+    section.images.splice(index, 1);
+    markDirty('pages.json');
+    renderPagePreview();
+    toast('Image removed. Click Publish when ready.');
   }
 
   function changeHeroImage(pageKey) {
@@ -1092,7 +1170,8 @@
     { id: 'accent', label: 'Accent', desc: 'Heading + body text, tan background' },
     { id: 'text-image', label: 'Text + Image', desc: 'Side-by-side image and text' },
     { id: 'banner', label: 'Banner', desc: 'Full-width background image with text overlay' },
-    { id: 'two-column', label: 'Two Column', desc: 'Two text blocks side by side' }
+    { id: 'two-column', label: 'Two Column', desc: 'Two text blocks side by side' },
+    { id: 'images', label: 'Images', desc: '1 to 3 images across in a row' }
   ];
 
   function toggleAddMenu(pageKey, btn) {
@@ -1126,6 +1205,7 @@
     var section = { id: id, type: type, heading: title.trim(), body: '' };
     if (type === 'text-image' || type === 'banner') section.image = '';
     if (type === 'two-column') { section.heading2 = ''; section.body2 = ''; }
+    if (type === 'images') { section.images = []; section.body = ''; }
     pages[pageKey].sections.push(section);
     markDirty('pages.json');
     renderPagePreview();
@@ -1327,6 +1407,9 @@
     changeSectionImage: changeSectionImage,
     toggleAddMenu: toggleAddMenu,
     deletePageSection: deletePageSection,
+    addGalleryImage: addGalleryImage,
+    changeGalleryImage: changeGalleryImage,
+    removeGalleryImage: removeGalleryImage,
     togglePageNav: togglePageNav,
     editNavLink: editNavLink,
     deleteNavLink: deleteNavLink,
