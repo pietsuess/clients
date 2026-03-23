@@ -711,9 +711,13 @@
 
   function pvSection(pageKey, sectionId, extraClass) {
     var s = getSection(pageKey, sectionId);
+    var imgBtn = s.image ? '<button class="pv-section-img-btn" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">Change Image</button>' : '';
+    var imgPreview = s.image ? '<img src="../' + s.image + '" alt="" style="max-width:100%;border-radius:8px;margin-bottom:12px;">' : '';
     return '<div class="pv-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
-      '<div class="pv-section-label">Edit</div>' +
+      '<div class="pv-section-label">Edit Text</div>' +
+      imgBtn +
       '<h2>' + s.heading + '</h2>' +
+      imgPreview +
       s.body +
     '</div>';
   }
@@ -739,6 +743,27 @@
         (heroSubtitle ? '<p>' + heroSubtitle + '</p>' : '') +
       '</div>' +
     '</div>';
+  }
+
+  function changeSectionImage(pageKey, sectionId) {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          var relPath = url.replace('https://clients.pietsuess.com/selena/', '');
+          var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+          if (section) section.image = relPath;
+          markDirty('pages.json');
+          toast('Image updated. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
   }
 
   function changeHeroImage(pageKey) {
@@ -778,16 +803,21 @@
         pvSection('home', 'who-benefits') +
       '</div>' +
       '<div class="pv-section pv-section-accent pv-img-section" onclick="CMS.openSectionModal(\'home\',\'meet-selena\')">' +
-        '<img src="../images/selena-profile.webp" alt="Selena">' +
-        '<div><div class="pv-section-label">Edit</div>' +
+        '<div style="position:relative;"><img src="../' + (getSection('home','meet-selena').image || 'images/selena-profile.webp') + '" alt="Selena">' +
+          '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'home\',\'meet-selena\')">Change Image</button>' +
+        '</div>' +
+        '<div><div class="pv-section-label">Edit Text</div>' +
           '<h2>' + getSection('home', 'meet-selena').heading + '</h2>' +
           getSection('home', 'meet-selena').body +
         '</div>' +
       '</div>' +
       pvSection('home', 'structural-integration') +
-      '<div class="pv-section pv-section-quote" style="background-image:url(\'../images/sunset-person.webp\');" onclick="CMS.openSettingModal(\'quoteText\')">' +
-        '<div class="pv-section-label">Edit</div>' +
-        '<p>&ldquo;' + (s.quoteText || '') + '&rdquo;</p>' +
+      '<div class="pv-section pv-section-quote" style="background-image:url(\'../' + (getSection('home','quote').image || 'images/sunset-person.webp') + '\');">' +
+        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'home\',\'quote\')">Change Image</button>' +
+        '<div onclick="CMS.openSettingModal(\'quoteText\')" style="cursor:pointer;">' +
+          '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Text</div>' +
+          '<p>&ldquo;' + (s.quoteText || '') + '&rdquo;</p>' +
+        '</div>' +
       '</div>' +
       '<div class="pv-note">Client Reviews -- manage from the Reviews tab</div>';
   }
@@ -801,9 +831,14 @@
   }
 
   function buildAboutSessionsPage() {
+    var cta = getSection('about-sessions', 'session-cta');
     return '' +
       pvHero('about-sessions', "What's a Rolfing Session Like?") +
-      pvSection('about-sessions', 'session-details');
+      pvSection('about-sessions', 'session-details') +
+      '<div class="pv-section pv-section-quote" style="background-image:url(\'../' + (cta.image || 'images/MossyForest.png') + '\');">' +
+        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'about-sessions\',\'session-cta\')">Change Image</button>' +
+        '<p>' + (cta.heading || 'Ready to begin your journey?') + '</p>' +
+      '</div>';
   }
 
   function buildBlogPage() {
@@ -945,7 +980,8 @@
     moveFaq: moveFaq,
     openSectionModal: openSectionModal,
     openSettingModal: openSettingModal,
-    changeHeroImage: changeHeroImage
+    changeHeroImage: changeHeroImage,
+    changeSectionImage: changeSectionImage
   };
 
   // ===== PUBLISH/DISCARD BUTTONS =====
