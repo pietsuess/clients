@@ -221,27 +221,26 @@ h1, h2, h3, h4 {
 
 .category-filters {
   display: grid;
-  grid-template-columns: repeat(4, auto);
-  gap: 10px;
-  justify-content: center;
+  grid-template-columns: repeat(4, 1fr);
   margin-bottom: 32px;
 }
 
 .cat-btn {
   background: var(--white);
   border: 1px solid rgba(0,0,0,0.1);
-  padding: 10px 20px;
-  border-radius: 50px;
+  margin: -0.5px;
+  padding: 14px 12px;
+  border-radius: 0;
   cursor: pointer;
   font-family: 'Open Sans', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--text);
-  transition: var(--transition);
+  transition: background 0.2s, color 0.2s;
 }
 
 .cat-btn:hover {
-  border-color: var(--teal);
+  background: var(--cream-warm);
   color: var(--teal-dark);
 }
 
@@ -249,6 +248,8 @@ h1, h2, h3, h4 {
   background: var(--teal);
   color: var(--white);
   border-color: var(--teal);
+  z-index: 1;
+  position: relative;
 }
 
 /* ===== PRODUCTS GRID ===== */
@@ -953,8 +954,8 @@ h1, h2, h3, h4 {
 
 @media (max-width: 480px) {
   .products-grid { grid-template-columns: 1fr; }
-  .category-filters { gap: 6px; }
-  .cat-btn { padding: 8px 14px; font-size: 0.75rem; }
+  .category-filters { grid-template-columns: repeat(2, 1fr); }
+  .cat-btn { padding: 12px 8px; font-size: 0.75rem; }
 }
 </style>
 </head>
