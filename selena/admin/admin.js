@@ -360,6 +360,7 @@
       updatePublishBar();
       // Populate pages dropdown and render preview
       if (pagePicker) { populatePagePicker(); renderPagePreview(); }
+      renderNavList();
     })
     .catch(function(err) {
       toast('Error loading content: ' + err.message, true);
@@ -700,6 +701,154 @@
 
   $('settings-save-btn').addEventListener('click', saveSettings);
 
+  // ===== NAVIGATION MANAGER =====
+  function renderNavList() {
+    // Combine page nav items and custom links, sorted by navOrder
+    var items = [];
+
+    Object.keys(pages).forEach(function(key) {
+      var p = pages[key];
+      items.push({
+        type: 'page',
+        key: key,
+        label: p.navLabel || p.title,
+        url: p.url || '',
+        showInNav: p.showInNav || false,
+        order: p.navOrder || 99
+      });
+    });
+
+    (settings.customNavLinks || []).forEach(function(link, i) {
+      items.push({
+        type: 'custom',
+        index: i,
+        label: link.label,
+        url: link.url,
+        showInNav: true,
+        order: link.order || 99
+      });
+    });
+
+    items.sort(function(a, b) { return a.order - b.order; });
+
+    var html = '';
+    items.forEach(function(item, i) {
+      var checked = item.showInNav ? 'checked' : '';
+      html += '<div class="item-row">';
+      html += '<div class="item-info" style="display:flex;align-items:center;gap:12px;">';
+      if (item.type === 'page') {
+        html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;">';
+        html += '<input type="checkbox" ' + checked + ' onchange="CMS.togglePageNav(\'' + item.key + '\',this.checked)">';
+        html += '</label>';
+      }
+      html += '<div><h3>' + item.label + '</h3>';
+      html += '<p>' + (item.url || 'No URL set') + (item.type === 'custom' ? ' (custom link)' : '') + '</p></div>';
+      html += '</div>';
+      html += '<div class="item-actions">';
+      if (i > 0) html += '<button class="btn-small" onclick="CMS.moveNavItem(' + i + ',-1)">&uarr;</button>';
+      if (i < items.length - 1) html += '<button class="btn-small" onclick="CMS.moveNavItem(' + i + ',1)">&darr;</button>';
+      if (item.type === 'custom') {
+        html += '<button class="btn-small" onclick="CMS.editNavLink(' + item.index + ')">Edit</button>';
+        html += '<button class="btn-danger" onclick="CMS.deleteNavLink(' + item.index + ')">Delete</button>';
+      }
+      html += '</div></div>';
+    });
+    $('nav-list').innerHTML = html || '<p style="color:#999;">No navigation items.</p>';
+  }
+
+  function togglePageNav(pageKey, show) {
+    pages[pageKey].showInNav = show;
+    markDirty('pages.json');
+    renderNavList();
+  }
+
+  function addNavLink() {
+    var label = prompt('Link label (shown in nav):');
+    if (!label || !label.trim()) return;
+    var url = prompt('URL (e.g., blog/footwear.html or https://example.com):');
+    if (!url || !url.trim()) return;
+    if (!settings.customNavLinks) settings.customNavLinks = [];
+    settings.customNavLinks.push({
+      label: label.trim(),
+      url: url.trim(),
+      order: 99
+    });
+    markDirty('site-settings.json');
+    renderNavList();
+    toast('Link added. Click Publish when ready.');
+  }
+
+  function editNavLink(index) {
+    var link = settings.customNavLinks[index];
+    var label = prompt('Link label:', link.label);
+    if (label === null) return;
+    var url = prompt('URL:', link.url);
+    if (url === null) return;
+    link.label = label.trim();
+    link.url = url.trim();
+    markDirty('site-settings.json');
+    renderNavList();
+  }
+
+  function deleteNavLink(index) {
+    if (!confirm('Delete this nav link?')) return;
+    settings.customNavLinks.splice(index, 1);
+    markDirty('site-settings.json');
+    renderNavList();
+    toast('Link deleted. Click Publish when ready.');
+  }
+
+  function moveNavItem(fromIndex, direction) {
+    // Get the sorted combined list to figure out what moved
+    var items = [];
+    Object.keys(pages).forEach(function(key) {
+      items.push({ type: 'page', key: key, order: pages[key].navOrder || 99 });
+    });
+    (settings.customNavLinks || []).forEach(function(link, i) {
+      items.push({ type: 'custom', index: i, order: link.order || 99 });
+    });
+    items.sort(function(a, b) { return a.order - b.order; });
+
+    var toIndex = fromIndex + direction;
+    if (toIndex < 0 || toIndex >= items.length) return;
+    var temp = items[fromIndex];
+    items[fromIndex] = items[toIndex];
+    items[toIndex] = temp;
+
+    // Reassign orders
+    items.forEach(function(item, i) {
+      if (item.type === 'page') {
+        pages[item.key].navOrder = i + 1;
+      } else {
+        settings.customNavLinks[item.index].order = i + 1;
+      }
+    });
+
+    markDirty('pages.json');
+    markDirty('site-settings.json');
+    renderNavList();
+  }
+
+  $('add-nav-link-btn').addEventListener('click', addNavLink);
+
+  // ===== PAGE NAV TOGGLE + URL IN PREVIEW =====
+  var pageNavToggle = $('page-nav-toggle');
+  var pageUrlInput = $('page-url');
+
+  pageNavToggle.addEventListener('change', function() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    pages[key].showInNav = pageNavToggle.checked;
+    markDirty('pages.json');
+  });
+
+  pageUrlInput.addEventListener('change', function() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    pages[key].url = pageUrlInput.value.trim();
+    markDirty('pages.json');
+  });
+
   // ===== VISUAL PAGE EDITOR (direct render, no iframe) =====
   var modalQuill = null;
   var pagePicker = $('page-picker');
@@ -930,6 +1079,9 @@
     };
     var builder = builders[key];
     pagePreview.innerHTML = builder ? builder() : buildGenericPage(key);
+    // Update page settings bar
+    pageNavToggle.checked = pages[key].showInNav || false;
+    pageUrlInput.value = pages[key].url || '';
   }
 
   pagePicker.addEventListener('change', renderPagePreview);
@@ -1144,7 +1296,11 @@
     changeHeroImage: changeHeroImage,
     changeSectionImage: changeSectionImage,
     toggleAddMenu: toggleAddMenu,
-    deletePageSection: deletePageSection
+    deletePageSection: deletePageSection,
+    togglePageNav: togglePageNav,
+    editNavLink: editNavLink,
+    deleteNavLink: deleteNavLink,
+    moveNavItem: moveNavItem
   };
 
   // ===== PUBLISH/DISCARD BUTTONS =====

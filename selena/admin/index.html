@@ -42,6 +42,7 @@
         <a href="#testimonials" class="nav-item" data-section="testimonials">Reviews</a>
         <a href="#faqs" class="nav-item" data-section="faqs">FAQs</a>
         <a href="#pages" class="nav-item" data-section="pages">Pages</a>
+        <a href="#navigation" class="nav-item" data-section="navigation">Navigation</a>
         <a href="#settings" class="nav-item" data-section="settings">Settings</a>
       </nav>
     </header>
@@ -177,6 +178,12 @@
           </select>
           <button id="add-page-btn" class="btn-small" style="margin-left:4px;">+ Add Page</button>
           <span class="visual-hint">Click any highlighted section to edit</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:#666;">
+              <input type="checkbox" id="page-nav-toggle"> Show in Nav
+            </label>
+            <input type="text" id="page-url" placeholder="page-url.html" style="width:160px;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px;">
+          </div>
         </div>
         <div id="page-preview" class="page-preview"></div>
       </section>
@@ -199,6 +206,16 @@
           </div>
         </div>
       </div>
+
+      <!-- NAVIGATION -->
+      <section id="section-navigation" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Navigation</h1>
+          <button id="add-nav-link-btn" class="btn-primary">+ Add Link</button>
+        </div>
+        <p style="color:#666;font-size:13px;margin-bottom:20px;">Drag to reorder. Toggle pages on/off to show or hide them in the site navigation.</p>
+        <div id="nav-list" class="item-list"></div>
+      </section>
 
       <!-- SETTINGS -->
       <section id="section-settings" class="admin-section" style="display:none;">
