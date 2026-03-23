@@ -5,17 +5,22 @@
   var style = document.createElement('style');
   style.textContent = [
     /* Hero: make relative so it flows in the iframe */
-    '.hero { position: relative !important; height: 70vh !important; background-size: cover !important; background-position: center center !important; }',
+    '.hero { position: relative !important; height: 60vh !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; background-attachment: scroll !important; }',
     '.hero-spacer { display: none !important; }',
-    /* Header: make relative, always solid */
+    /* Header: compact, solid */
     'header { position: relative !important; background: rgba(250,248,245,0.98) !important; border-bottom: 1px solid rgba(0,0,0,0.06) !important; }',
-    'header .logo .logo-light { opacity: 0 !important; }',
-    'header .logo .logo-dark { opacity: 1 !important; }',
-    'nav a { color: #2D2D2D !important; }',
-    'nav a.btn-book { color: #1A1A1A !important; border-color: #1A1A1A !important; }',
+    'header .container { padding-top: 10px !important; padding-bottom: 10px !important; }',
+    '.logo img { height: 40px !important; }',
+    '.logo .logo-light { display: none !important; }',
+    '.logo .logo-dark { opacity: 1 !important; position: static !important; }',
+    'nav a { color: #2D2D2D !important; font-size: 12px !important; }',
+    'nav a.btn-book { color: #1A1A1A !important; border-color: #1A1A1A !important; font-size: 11px !important; padding: 6px 14px !important; }',
     '.nav-social { color: #666 !important; }',
+    '.nav-toggle { display: none !important; }',
     /* Parallax sections: relative */
-    '.quote-section { background-size: cover !important; background-attachment: scroll !important; }',
+    '.quote-section { background-size: cover !important; background-attachment: scroll !important; background-repeat: no-repeat !important; }',
+    /* Sections: no overflow hidden so overlays aren't clipped */
+    'section { overflow: visible !important; }',
     /* Disable animations so content is visible immediately */
     '.reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; }',
     /* Edit mode indicator */
