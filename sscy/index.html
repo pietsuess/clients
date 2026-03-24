@@ -197,7 +197,7 @@ img { max-width: 100%; display: block; }
 
 <!-- NAV -->
 <nav class="site-nav" id="siteNav">
-  <a href="index.html" class="nav-logo"><img src="logo-full.svg" alt="Salt Spring Centre of Yoga"></a>
+  <a href="index.html" class="nav-logo"><img src="logo-full-white.svg" alt="Salt Spring Centre of Yoga" id="navLogo"></a>
   <div class="nav-links">
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
@@ -427,7 +427,12 @@ setTimeout(function() { document.getElementById('heroText').classList.add('visib
 
 // Nav on scroll
 var nav = document.getElementById('siteNav');
-window.addEventListener('scroll', function() { nav.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.6); });
+var navLogo = document.getElementById('navLogo');
+window.addEventListener('scroll', function() {
+  var scrolled = window.scrollY > window.innerHeight * 0.6;
+  nav.classList.toggle('scrolled', scrolled);
+  navLogo.src = scrolled ? 'logo-full-teal.svg' : 'logo-full-white.svg';
+});
 
 // Scroll reveals (in AND out)
 var obs = new IntersectionObserver(function(entries) {
