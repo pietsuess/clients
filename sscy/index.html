@@ -3,219 +3,822 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Salt Spring Centre of Yoga | Peace Happens Here</title>
-<meta name="description" content="A 69-acre sanctuary for peace, yoga practice, and community on Salt Spring Island, BC. Founded 1981 by Baba Hari Dass.">
+<title>Salt Spring Centre of Yoga</title>
+<meta name="description" content="A 69-acre sanctuary for peace, yoga practice, and community on Salt Spring Island, BC.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #3bb8a8;
+  --teal-dark: #2a8a7d;
+  --teal-deep: #1a5c53;
+  --cream: #faf8f4;
+  --cream-warm: #f3ede3;
+  --gold: #c9a84c;
+  --terracotta: #c17838;
+  --white: #ffffff;
+  --charcoal: #2c2c2c;
+  --text: #3a3a3a;
+  --text-light: #6b6b6b;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--charcoal);
+}
+
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ===== NAV ===== */
+.site-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.5s ease;
+}
+
+.site-nav.scrolled {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  padding: 10px 28px;
+}
+
+.nav-logo img {
+  height: 38px;
+  transition: opacity 0.4s ease;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.5s ease;
+  pointer-events: none;
+}
+
+.site-nav.scrolled .nav-links {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.nav-links a {
+  padding: 8px 18px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text-light);
+  border-radius: 50px;
+  transition: 0.25s ease;
+}
+
+.nav-links a:hover {
+  background: var(--cream-warm);
+  color: var(--teal-dark);
+}
+
+/* ===== HERO ===== */
+.hero {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.hero-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 40px 80px;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%);
+  color: var(--white);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-text.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-text h1 {
+  font-size: clamp(2.8rem, 6vw, 4.5rem);
+  color: var(--white);
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.hero-text p {
+  font-size: 1.1rem;
+  font-weight: 300;
+  opacity: 0.85;
+  max-width: 440px;
+}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-left.in-view, .reveal-right.in-view {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.delay-1 { transition-delay: 0.15s; }
+.delay-2 { transition-delay: 0.3s; }
+.delay-3 { transition-delay: 0.45s; }
+
+/* ===== ANNOUNCEMENT BAR ===== */
+.announcement {
+  text-align: center;
+  padding: 52px 24px;
+  background: var(--cream);
+}
+
+.announcement a {
+  font-family: 'Lora', serif;
+  font-size: 1.1rem;
+  color: var(--teal-deep);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--teal);
+  padding-bottom: 2px;
+  transition: 0.25s ease;
+}
+
+.announcement a:hover {
+  color: var(--teal);
+}
+
+.announcement .date {
+  display: block;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-light);
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+/* ===== FULL BLEED IMAGE ===== */
+.full-image {
+  width: 100%;
+  height: 70vh;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.full-image-short {
+  height: 50vh;
+}
+
+/* ===== TEXT SECTIONS ===== */
+.text-section {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 96px 32px;
+}
+
+.text-section h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: var(--teal-deep);
+  letter-spacing: -0.01em;
+}
+
+.text-section .label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--teal);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.text-section p {
+  font-size: 1.02rem;
+  color: var(--text);
+  line-height: 1.75;
+  margin-bottom: 1.2em;
+}
+
+.text-section p:last-child { margin-bottom: 0; }
+
+/* ===== SPLIT SECTION ===== */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 80vh;
+}
+
+.split-img {
+  overflow: hidden;
+}
+
+.split-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.split-text {
+  display: flex;
+  align-items: center;
+  padding: 72px 64px;
+}
+
+.split-text-inner {
+  max-width: 440px;
+}
+
+.split-text h2 {
+  font-size: 1.85rem;
+  margin-bottom: 20px;
+  color: var(--teal-deep);
+}
+
+.split-text .label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--teal);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.split-text p {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  margin-bottom: 1em;
+}
+
+.split-text a.link {
+  display: inline-block;
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--teal-dark);
+  border-bottom: 1.5px solid var(--teal);
+  padding-bottom: 2px;
+}
+
+.split-text a.link:hover { color: var(--teal); }
+
+/* ===== QUOTE ===== */
+.quote-section {
+  text-align: center;
+  padding: 100px 32px;
+  background: var(--cream-warm);
+}
+
+.quote-section blockquote {
+  font-family: 'Lora', serif;
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-style: italic;
+  color: var(--teal-deep);
+  max-width: 620px;
+  margin: 0 auto 20px;
+  line-height: 1.55;
+}
+
+.quote-section cite {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8rem;
+  font-style: normal;
+  color: var(--text-light);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ===== STATS ===== */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+  padding: 56px 24px;
+  background: var(--teal-deep);
+  color: var(--white);
+}
+
+.stat-item { text-align: center; }
+
+.stat-num {
+  font-family: 'Lora', serif;
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+  margin-top: 6px;
+}
+
+/* ===== OFFERINGS GRID ===== */
+.offerings-section {
+  padding: 96px 24px;
+}
+
+.offerings-section h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: var(--teal-deep);
+  margin-bottom: 48px;
+}
+
+.offerings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.offering-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--white);
+  display: block;
+}
+
+.offering-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.offering-card:hover img {
+  transform: scale(1.05);
+}
+
+.offering-card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+}
+
+.offering-card-overlay .label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.offering-card-overlay h3 {
+  font-size: 1.2rem;
+  color: var(--white);
+  font-weight: 600;
+}
+
+/* ===== DONATE CTA ===== */
+.donate-section {
+  text-align: center;
+  padding: 100px 24px;
+  background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark));
+  color: var(--white);
+}
+
+.donate-section h2 {
+  font-size: 2rem;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+
+.donate-section p {
+  max-width: 480px;
+  margin: 0 auto 36px;
+  opacity: 0.8;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 34px;
+  border-radius: 50px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.25s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary { background: var(--teal); color: var(--white); }
+.btn-primary:hover { background: var(--teal-dark); color: var(--white); }
+
+.btn-donate { background: var(--terracotta); color: var(--white); }
+.btn-donate:hover { background: #a8632e; color: var(--white); }
+
+.btn-outline { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal); }
+.btn-outline:hover { background: var(--teal); color: var(--white); }
+
+.btn-sm { padding: 10px 24px; font-size: 0.82rem; }
+
+/* ===== PARTNERS ===== */
+.partners-section {
+  padding: 72px 24px;
+  text-align: center;
+  background: var(--white);
+}
+
+.partners-section h2 {
+  font-size: 1.6rem;
+  color: var(--teal-deep);
+  margin-bottom: 8px;
+}
+
+.partners-section .sub {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-bottom: 36px;
+}
+
+.partners-row {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.partner-link {
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  color: var(--teal-dark);
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: 0.25s ease;
+}
+
+.partner-link:hover { border-color: var(--teal); }
+
+/* ===== FOOTER ===== */
+.site-footer {
+  background: var(--teal-deep);
+  color: var(--white);
+  padding: 56px 24px 24px;
+}
+
+.footer-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 56px;
+  margin-bottom: 40px;
+}
+
+.footer-brand h3 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.footer-brand p {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  line-height: 1.65;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.social-links a {
+  color: var(--white);
+  opacity: 0.5;
+  transition: 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.35); }
+
+.footer-newsletter h4 {
+  font-family: 'Lora', serif;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.footer-newsletter p {
+  font-size: 0.82rem;
+  opacity: 0.55;
+  margin-bottom: 14px;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 8px;
+}
+
+.newsletter-form input {
+  flex: 1;
+  padding: 11px 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  border-radius: 50px;
+  color: var(--white);
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+}
+
+.newsletter-form input:focus { outline: none; border-color: rgba(255,255,255,0.35); }
+.newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
+
+.newsletter-form button {
+  padding: 11px 22px;
+  background: var(--teal);
+  color: var(--white);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: 0.25s ease;
+}
+
+.newsletter-form button:hover { background: var(--teal-dark); }
+
+.footer-nav {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 24px;
+  margin-bottom: 24px;
+}
+
+.footer-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  justify-content: center;
+}
+
+.footer-nav-links a {
+  color: var(--white);
+  font-size: 0.78rem;
+  opacity: 0.5;
+  transition: 0.25s ease;
+}
+
+.footer-nav-links a:hover { opacity: 1; }
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 16px;
+  text-align: center;
+}
+
+.footer-bottom p {
+  font-size: 0.68rem;
+  opacity: 0.35;
+  line-height: 1.8;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; min-height: auto; }
+  .split-img { height: 50vh; }
+  .split-text { padding: 56px 32px; }
+  .offerings-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .full-image { height: 50vh; }
+  .stats-bar { gap: 32px; flex-wrap: wrap; padding: 40px 24px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+}
+
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero-text h1 { font-size: 2.2rem; }
+  .hero-text { padding: 0 24px 60px; }
+  .text-section { padding: 64px 24px; }
+  .text-section h2 { font-size: 1.6rem; }
+  .split-text-inner { max-width: 100%; }
+  .quote-section { padding: 64px 24px; }
+  .stat-num { font-size: 2rem; }
+}
+</style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="header-inner">
-    <a href="index.html" class="logo-area">
-      <img src="logo.png" alt="Salt Spring Centre of Yoga">
-    </a>
-    <button class="nav-toggle" onclick="document.querySelector('.main-nav').classList.toggle('open')" aria-label="Toggle navigation">
-      <span></span><span></span><span></span>
-    </button>
-    <nav class="main-nav">
-      <a href="index.html" class="active">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="offerings.html">Offerings</a>
-      <a href="rentals.html">Rentals</a>
-      <a href="contact.html">Contact</a>
-    </nav>
+<!-- NAV -->
+<nav class="site-nav" id="siteNav">
+  <a href="index.html" class="nav-logo">
+    <img src="logo.png" alt="Salt Spring Centre of Yoga">
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="contact.html">Contact</a>
   </div>
-</header>
+</nav>
 
-<!-- HERO -->
-<section class="hero" style="background: linear-gradient(160deg, rgba(26,92,83,0.82) 0%, rgba(42,138,125,0.72) 50%, rgba(45,90,39,0.78) 100%), url('https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg') center/cover no-repeat;">
-  <div class="hero-content">
-    <div class="hero-badge"><a href="shop.html">Music for Peace 2026 &mdash; Tickets Available</a></div>
+<!-- HERO: Full screen image, text arrives after a beat -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg" alt="Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
+  <div class="hero-text" id="heroText">
     <h1>Peace Happens Here</h1>
-    <p>A sanctuary for yoga, practice, and community on 69 acres of Salt Spring Island.</p>
-    <a href="offerings.html" class="btn btn-primary">Explore Our Offerings</a>
+    <p>69 acres of sanctuary on Salt Spring Island</p>
   </div>
 </section>
 
-<!-- FEATURED EVENT -->
-<section class="section-sm">
-  <div class="container">
-    <div class="featured-event">
-      <img src="https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg" alt="Music for Peace: Carnatic Violin Concert" class="featured-event-img" loading="lazy">
-      <div class="featured-event-body">
-        <div class="card-label">Upcoming Event</div>
-        <h3>Music for Peace: Carnatic Violin &amp; Mridangam</h3>
-        <div class="event-meta">
-          <span>Saturday, April 11</span>
-          <span>7:00 &ndash; 9:00 pm</span>
-          <span>Satsang Room</span>
-        </div>
-        <p class="card-text mb-0">An evening of South Indian classical music with Shriram Rajagopalan and Keerthy Raghavan. Limited seating.</p>
-        <div class="mt-lg">
-          <a href="shop.html" class="btn btn-primary btn-sm">Get Tickets &mdash; $40</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- MUSIC FOR PEACE: Simple text line -->
+<div class="announcement reveal">
+  <a href="shop.html">Music for Peace: Carnatic Violin &amp; Mridangam with Shriram Rajagopalan</a>
+  <span class="date">Saturday, April 11 &bull; Satsang Room &bull; Tickets $40</span>
+</div>
+
+<!-- FULL IMAGE: Property -->
+<img src="https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png" alt="Program House with gardens" class="full-image" id="parallax1" loading="lazy">
 
 <!-- ABOUT -->
-<section class="section section-alt" id="about">
-  <div class="container">
-    <div class="grid-2">
-      <div>
-        <div class="card-label mb-md">Est. 1981</div>
-        <h2 class="section-title">A Rare and Sacred Place</h2>
-        <p>The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging.</p>
-        <p>Founded by venerated master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre. Here, the magic of 69 acres weaves together with the stories of those transformed by it.</p>
-        <p class="mb-0">Whether you're here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
-      </div>
-      <img src="https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png" alt="Program House with garden flowers" class="img-rounded" loading="lazy">
-    </div>
-  </div>
-</section>
+<div class="text-section">
+  <span class="label reveal">Est. 1981</span>
+  <h2 class="reveal delay-1">A Rare and Sacred Place</h2>
+  <p class="reveal delay-2">The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by venerated master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
+  <p class="reveal delay-3">Whether you're here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
+</div>
 
 <!-- QUOTE -->
-<section class="quote-block">
-  <p class="quote-text">"Work honestly, meditate every day, meet people without fear, and play."</p>
-  <p class="quote-attr">Baba Hari Dass</p>
+<section class="quote-section">
+  <blockquote class="reveal">"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
+  <cite class="reveal delay-1">Baba Hari Dass</cite>
 </section>
 
-<!-- THE LAND -->
-<section class="section">
-  <div class="container">
-    <div class="grid-2">
-      <img src="https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg" alt="The Centre grounds" class="img-rounded" loading="lazy">
-      <div>
-        <h2 class="section-title">The Land</h2>
-        <p>The 69-acre property sits in a spectacular natural setting of cedars, maples, alders, and cottonwoods, home to over 110 species, many endangered or vulnerable.</p>
-        <p>Walking the land you'll find a large organic farm, an abundant fruit orchard, a permaculture food forest growing nuts, medicinal herbs, and fruit, and beautiful streams and ponds.</p>
-        <p class="mb-0">The Centre also contains the Dandaka Forest, one of the most untouched, primordial cedar-swamp wetlands found in North America.</p>
-      </div>
+<!-- SPLIT: The Land -->
+<section class="split">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg" alt="The grounds" id="parallax2" loading="lazy">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner">
+      <span class="label reveal-right">The Land</span>
+      <h2 class="reveal-right delay-1">69 Acres of Living Sanctuary</h2>
+      <p class="reveal-right delay-2">An organic farm, fruit orchard, permaculture food forest, pristine streams and ponds, and the Dandaka Forest, one of the most untouched cedar-swamp wetlands in North America.</p>
+      <p class="reveal-right delay-3">Over 110 species call this land home. The Centre borders the Salt Spring Island Conservancy's Blackburn Lake nature reserve.</p>
     </div>
   </div>
 </section>
 
 <!-- STATS -->
-<section class="section-sm section-dark">
-  <div class="container">
-    <div class="stat-row">
-      <div class="stat">
-        <div class="stat-number">69</div>
-        <div class="stat-label">Acres</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">45</div>
-        <div class="stat-label">Years</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">15+</div>
-        <div class="stat-label">Teachers</div>
-      </div>
-      <div class="stat">
-        <div class="stat-number">110+</div>
-        <div class="stat-label">Species</div>
-      </div>
+<div class="stats-bar">
+  <div class="stat-item reveal"><div class="stat-num">69</div><div class="stat-label">Acres</div></div>
+  <div class="stat-item reveal delay-1"><div class="stat-num">45</div><div class="stat-label">Years</div></div>
+  <div class="stat-item reveal delay-2"><div class="stat-num">110+</div><div class="stat-label">Species</div></div>
+  <div class="stat-item reveal delay-3"><div class="stat-num">15+</div><div class="stat-label">Teachers</div></div>
+</div>
+
+<!-- SPLIT: Founder (reversed) -->
+<section class="split" style="direction:rtl;">
+  <div class="split-img" style="direction:ltr;">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg" alt="Baba Hari Dass" id="parallax3" loading="lazy">
+  </div>
+  <div class="split-text" style="direction:ltr;">
+    <div class="split-text-inner">
+      <span class="label reveal-left">Our Founder</span>
+      <h2 class="reveal-left delay-1">Baba Hari Dass</h2>
+      <p class="reveal-left delay-2">A master yogi, scholar, and mauni sadhu who undertook a vow of silence in 1952 and never spoke another word. He communicated by means of a small chalkboard, conveying a great deal in the fewest possible words.</p>
+      <p class="reveal-left delay-3">Babaji left his body on September 25, 2018. His wisdom lives on in the institutions he created, his writings, and all those he touched.</p>
+      <a href="https://www.babaharidass.org" target="_blank" rel="noopener" class="link reveal-left delay-3">Learn more</a>
     </div>
   </div>
 </section>
 
-<!-- FOUNDER -->
-<section class="section section-alt" id="founder">
-  <div class="container">
-    <div class="grid-2">
-      <div>
-        <div class="card-label mb-md">Our Founder</div>
-        <h2 class="section-title">Baba Hari Dass</h2>
-        <p>Babaji was a master yogi and scholar with remarkable skill in sculpture, music, architecture, yogic philosophy, writing, and storytelling. He was a leading proponent of Ayurveda and author of many books.</p>
-        <p>A mauni sadhu, he undertook a vow of continual silence in 1952 and never spoke another word aloud. He communicated by means of a small chalkboard worn around his neck, with the marvelous skill of conveying a great deal in the fewest possible words.</p>
-        <p>Babaji left his body on September 25, 2018. His wisdom, good works, and inspiration live on in the institutions he created, his writings, and all those he touched.</p>
-        <a href="https://www.babaharidass.org" target="_blank" rel="noopener" class="btn btn-outline btn-sm mt-lg">Learn More</a>
-      </div>
-      <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg" alt="Baba Hari Dass" class="img-rounded" loading="lazy">
-    </div>
-  </div>
-</section>
+<!-- FULL IMAGE -->
+<img src="https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg" alt="Annual Community Yoga Retreat" class="full-image full-image-short" id="parallax4" loading="lazy">
 
 <!-- OFFERINGS -->
-<section class="section">
-  <div class="container text-center mb-2xl">
-    <h2 class="section-title">What We Offer</h2>
-    <p class="section-subtitle" style="margin:0 auto;">Retreats, classes, sacred spaces, and everything you need for your practice.</p>
-  </div>
-  <div class="container">
-    <div class="grid-3">
-      <a href="offerings.html" class="card" style="text-decoration:none;color:inherit;">
-        <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg" alt="Retreats and Classes" class="card-img" loading="lazy">
-        <div class="card-body">
-          <div class="card-label">Programs</div>
-          <div class="card-title">Retreats &amp; Classes</div>
-          <p class="card-text">Weekend retreats, teacher training, silent retreats, Ayurveda cleanses, and weekly classes.</p>
-        </div>
-      </a>
-      <a href="rentals.html" class="card" style="text-decoration:none;color:inherit;">
-        <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Program-House-Rock-Wall.jpg" alt="Venue Rentals" class="card-img" loading="lazy">
-        <div class="card-body">
-          <div class="card-label">Spaces</div>
-          <div class="card-title">Rentals &amp; Venues</div>
-          <p class="card-text">Satsang Room, Garden House, Pond Dome, and Sauna. Host your retreat, workshop, or event.</p>
-        </div>
-      </a>
-      <a href="shop.html" class="card" style="text-decoration:none;color:inherit;">
-        <img src="https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-1.jpeg" alt="Shop and Support" class="card-img" loading="lazy">
-        <div class="card-body">
-          <div class="card-label">Support</div>
-          <div class="card-title">Shop &amp; Donate</div>
-          <p class="card-text">Books, music, apparel, yoga supplies, and event tickets. Every purchase supports the Centre.</p>
-        </div>
-      </a>
-    </div>
+<section class="offerings-section">
+  <h2 class="reveal">What We Offer</h2>
+  <div class="offerings-grid">
+    <a href="offerings.html" class="offering-card reveal delay-1">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg" alt="Retreats" loading="lazy">
+      <div class="offering-card-overlay">
+        <div class="label">Programs</div>
+        <h3>Retreats &amp; Classes</h3>
+      </div>
+    </a>
+    <a href="rentals.html" class="offering-card reveal delay-2">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Program-House-Rock-Wall.jpg" alt="Venues" loading="lazy">
+      <div class="offering-card-overlay">
+        <div class="label">Spaces</div>
+        <h3>Rentals &amp; Venues</h3>
+      </div>
+    </a>
+    <a href="shop.html" class="offering-card reveal delay-3">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg" alt="Shop" loading="lazy">
+      <div class="offering-card-overlay">
+        <div class="label">Support</div>
+        <h3>Shop &amp; Donate</h3>
+      </div>
+    </a>
   </div>
 </section>
 
 <!-- PARTNERS -->
-<section class="section-sm section-alt" id="partners">
-  <div class="container text-center mb-xl">
-    <h2 class="section-title">Our Family</h2>
-    <p class="section-subtitle" style="margin:0 auto;">Sister organizations founded through the teachings of Baba Hari Dass.</p>
-  </div>
-  <div class="container">
-    <div class="grid-3">
-      <div class="card" style="cursor:default;">
-        <div class="card-body text-center" style="padding:36px;">
-          <div class="card-title">Mount Madonna Center</div>
-          <p class="card-text mb-lg">Our sister centre in Santa Cruz, California. A community inspired by the yoga philosophy of Baba Hari Dass.</p>
-          <a href="https://www.mountmadonna.org" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Visit</a>
-        </div>
-      </div>
-      <div class="card" style="cursor:default;">
-        <div class="card-body text-center" style="padding:36px;">
-          <div class="card-title">Sri Ram Ashram</div>
-          <p class="card-text mb-lg">A loving home for orphaned children near Haridwar, India. Founded by Babaji in 1984.</p>
-          <a href="https://www.sriramashram.org" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Visit</a>
-        </div>
-      </div>
-      <div class="card" style="cursor:default;">
-        <div class="card-body text-center" style="padding:36px;">
-          <div class="card-title">Sri Ram Publishing</div>
-          <p class="card-text mb-lg">Publisher of Baba Hari Dass's 30+ books, audiobooks, and kirtan recordings.</p>
-          <a href="https://www.srirampublishing.org" target="_blank" rel="noopener" class="btn btn-outline btn-sm">Visit</a>
-        </div>
-      </div>
-    </div>
+<section class="partners-section reveal">
+  <h2>Our Family</h2>
+  <p class="sub">Sister organizations founded through the teachings of Baba Hari Dass</p>
+  <div class="partners-row">
+    <a href="https://www.mountmadonna.org" target="_blank" rel="noopener" class="partner-link">Mount Madonna Center</a>
+    <a href="https://www.sriramashram.org" target="_blank" rel="noopener" class="partner-link">Sri Ram Ashram</a>
+    <a href="https://www.srirampublishing.org" target="_blank" rel="noopener" class="partner-link">Sri Ram Publishing</a>
   </div>
 </section>
 
-<!-- DONATE CTA -->
-<section class="section section-dark text-center">
-  <div class="container">
-    <h2 class="section-title" style="color:var(--white);">Support This Sanctuary</h2>
-    <p class="section-subtitle" style="margin:0 auto 36px;color:rgba(255,255,255,0.8);">We could not do what we do without your generous support. Every donation helps preserve 69 acres of peace for future visitors.</p>
-    <a href="shop.html" class="btn btn-donate">Donate Now</a>
-  </div>
+<!-- DONATE -->
+<section class="donate-section">
+  <h2 class="reveal">Support This Sanctuary</h2>
+  <p class="reveal delay-1">Every donation helps preserve 69 acres of peace for future visitors.</p>
+  <a href="shop.html" class="btn btn-donate reveal delay-2">Donate Now</a>
 </section>
 
 <!-- FOOTER -->
@@ -226,44 +829,35 @@
         <h3>Salt Spring Centre of Yoga</h3>
         <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
         <div class="social-links">
-          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
-          </a>
-          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-          </a>
-          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
-          </a>
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
         </div>
       </div>
       <div class="footer-newsletter">
         <h4>Join Our Community</h4>
-        <p>Stay connected with news, courses, and upcoming retreats.</p>
-        <form class="newsletter-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.8;\'>Thank you for subscribing!</p>';">
-          <input type="email" placeholder="Your email" required aria-label="Email address">
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="newsletter-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.8;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
           <button type="submit">Subscribe</button>
         </form>
       </div>
     </div>
-
     <nav class="footer-nav">
       <div class="footer-nav-links">
         <a href="contact.html">Contact</a>
         <a href="#about">History</a>
         <a href="#partners">Partners</a>
         <a href="#founder">Baba Hari Dass</a>
-        <a href="https://saltspringcentre.com/blog/" target="_blank" rel="noopener">Blog</a>
+        <a href="https://saltspringcentre.com/blog/" target="_blank">Blog</a>
         <a href="offerings.html">Karma Yogis</a>
         <a href="offerings.html">Teacher Training</a>
         <a href="offerings.html">Wellness</a>
-        <a href="offerings.html">FAQ</a>
-        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank" rel="noopener">Terms</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
         <a href="contact.html">Getting Here</a>
         <a href="shop.html">Donate</a>
       </div>
     </nav>
-
     <div class="footer-bottom">
       <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
       <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
@@ -272,15 +866,43 @@
 </footer>
 
 <script>
-// Hero parallax (respects reduced motion)
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  window.addEventListener('scroll', function() {
-    var hero = document.querySelector('.hero-content');
-    if (hero) {
-      var scrolled = window.scrollY;
-      hero.style.transform = 'translateY(' + (scrolled * 0.25) + 'px)';
-      hero.style.opacity = Math.max(0, 1 - scrolled / 500);
+// Hero text arrives after a beat
+setTimeout(function() {
+  document.getElementById('heroText').classList.add('visible');
+}, 800);
+
+// Nav shows on scroll
+var nav = document.getElementById('siteNav');
+var heroH = window.innerHeight * 0.5;
+window.addEventListener('scroll', function() {
+  nav.classList.toggle('scrolled', window.scrollY > heroH);
+});
+
+// Scroll reveal with IntersectionObserver
+var reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.classList.add('in-view');
+    } else {
+      e.target.classList.remove('in-view');
     }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+reveals.forEach(function(el) { observer.observe(el); });
+
+// Parallax on images (subtle)
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var parallaxEls = document.querySelectorAll('.full-image, .split-img img, .hero-img');
+  window.addEventListener('scroll', function() {
+    var scrollY = window.scrollY;
+    parallaxEls.forEach(function(el) {
+      var rect = el.getBoundingClientRect();
+      var center = rect.top + rect.height / 2;
+      var offset = (center - window.innerHeight / 2) * 0.08;
+      el.style.transform = 'translateY(' + offset + 'px) scale(1.05)';
+    });
   });
 }
 </script>
