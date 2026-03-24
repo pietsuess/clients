@@ -6,10 +6,9 @@
 <title>Salt Spring Centre of Yoga</title>
 <meta name="description" content="A 69-acre sanctuary for peace, yoga practice, and community on Salt Spring Island, BC.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --teal: #3bb8a8;
   --teal-dark: #2a8a7d;
@@ -18,670 +17,176 @@
   --cream-warm: #f3ede3;
   --gold: #c9a84c;
   --terracotta: #c17838;
-  --white: #ffffff;
+  --white: #fff;
   --charcoal: #2c2c2c;
   --text: #3a3a3a;
-  --text-light: #6b6b6b;
+  --text-light: #7a7a7a;
 }
-
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1 !important; transform: none !important; }
+  .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; }
 }
-
-body {
-  font-family: 'Raleway', sans-serif;
-  background: var(--cream);
-  color: var(--text);
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
-
-h1, h2, h3 {
-  font-family: 'Lora', serif;
-  font-weight: 600;
-  line-height: 1.25;
-  color: var(--charcoal);
-}
-
+body { font-family: 'Montserrat', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 15px; }
+h1, h2, h3 { font-family: 'Cormorant', serif; font-weight: 500; line-height: 1.2; color: var(--charcoal); }
 a { color: var(--teal-dark); text-decoration: none; }
 img { max-width: 100%; display: block; }
 
-/* ===== NAV ===== */
-.site-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 16px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.5s ease;
-}
+/* NAV */
+.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; }
+.site-nav.scrolled { background: rgba(250,248,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 32px; }
+.nav-logo img { height: 36px; }
+.nav-links { display: flex; gap: 2px; opacity: 0; transform: translateY(-10px); transition: all 0.6s ease; pointer-events: none; }
+.site-nav.scrolled .nav-links { opacity: 1; transform: none; pointer-events: auto; }
+.nav-links a { padding: 8px 18px; font-size: 0.8rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
+.nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
-.site-nav.scrolled {
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
-  padding: 10px 28px;
-}
+/* HERO */
+.hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.18); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); opacity: 0; transform: scale(0.96); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-content.visible { opacity: 1; transform: scale(1); }
+.hero-content h1 { font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 400; letter-spacing: -0.03em; margin-bottom: 12px; color: var(--white); }
+.hero-content p { font-size: 1rem; font-weight: 300; opacity: 0.8; letter-spacing: 0.12em; text-transform: uppercase; font-family: 'Montserrat', sans-serif; }
 
-.nav-logo img {
-  height: 38px;
-  transition: opacity 0.4s ease;
-}
+/* WAVE DIVIDER */
+.wave { width: 100%; display: block; margin-top: -2px; }
+.wave-flip { transform: scaleY(-1); margin-bottom: -2px; margin-top: 0; }
 
-.nav-links {
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transform: translateY(-8px);
-  transition: all 0.5s ease;
-  pointer-events: none;
-}
+/* QUICK LINKS */
+.quick-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 48px 24px; background: var(--cream); }
+.quick-link { padding: 10px 28px; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 50px; font-size: 0.78rem; font-weight: 500; color: var(--text); letter-spacing: 0.04em; transition: 0.25s ease; }
+.quick-link:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--white); }
 
-.site-nav.scrolled .nav-links {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
+/* ANNOUNCEMENT */
+.announcement { text-align: center; padding: 40px 24px; background: var(--cream-warm); }
+.announcement a { font-family: 'Cormorant', serif; font-size: 1.15rem; color: var(--teal-deep); font-weight: 500; font-style: italic; }
+.announcement .date { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-light); margin-top: 8px; font-weight: 500; }
 
-.nav-links a {
-  padding: 8px 18px;
-  font-size: 0.84rem;
-  font-weight: 500;
-  color: var(--text-light);
-  border-radius: 50px;
-  transition: 0.25s ease;
-}
+/* FULL IMAGE */
+.full-image { width: 100%; height: 75vh; object-fit: cover; will-change: transform; }
+.full-image-sm { height: 50vh; }
 
-.nav-links a:hover {
-  background: var(--cream-warm);
-  color: var(--teal-dark);
-}
+/* TEXT SECTION */
+.text-section { max-width: 640px; margin: 0 auto; padding: 96px 32px; }
+.text-section h2 { font-size: 2.4rem; margin-bottom: 24px; color: var(--teal-deep); font-weight: 400; }
+.text-section .label { font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.text-section p { font-size: 0.95rem; color: var(--text); line-height: 1.85; margin-bottom: 1.3em; font-weight: 300; }
 
-/* ===== HERO ===== */
-.hero {
-  height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
+/* SPLIT */
+.split { display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh; }
+.split-img { overflow: hidden; }
+.split-img img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.split-text { display: flex; align-items: center; padding: 72px 64px; }
+.split-text-inner { max-width: 420px; }
+.split-text h2 { font-size: 2rem; margin-bottom: 20px; color: var(--teal-deep); font-weight: 400; }
+.split-text .label { font-family: 'Montserrat', sans-serif; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.split-text p { font-size: 0.92rem; line-height: 1.85; margin-bottom: 1em; font-weight: 300; }
+.split-text a.text-link { display: inline-block; margin-top: 16px; font-weight: 500; font-size: 0.82rem; color: var(--teal-dark); letter-spacing: 0.04em; }
+.split-text a.text-link::after { content: ' \2192'; }
 
-.hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  will-change: transform;
-}
+/* QUOTE */
+.quote-section { text-align: center; padding: 100px 32px; background: var(--cream-warm); }
+.quote-section blockquote { font-family: 'Cormorant', serif; font-size: clamp(1.4rem, 3.2vw, 2rem); font-style: italic; color: var(--teal-deep); max-width: 580px; margin: 0 auto 24px; line-height: 1.5; font-weight: 400; }
+.quote-section cite { font-family: 'Montserrat', sans-serif; font-size: 0.72rem; font-style: normal; color: var(--text-light); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
 
-.hero-text {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0 40px 80px;
-  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%);
-  color: var(--white);
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hero-text.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.hero-text h1 {
-  font-size: clamp(2.8rem, 6vw, 4.5rem);
-  color: var(--white);
-  letter-spacing: -0.03em;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.hero-text p {
-  font-size: 1.1rem;
-  font-weight: 300;
-  opacity: 0.85;
-  max-width: 440px;
-}
-
-/* ===== SCROLL REVEAL ===== */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal.in-view {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-left {
-  opacity: 0;
-  transform: translateX(-50px);
-  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal-right {
-  opacity: 0;
-  transform: translateX(50px);
-  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal-left.in-view, .reveal-right.in-view {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.delay-1 { transition-delay: 0.15s; }
-.delay-2 { transition-delay: 0.3s; }
-.delay-3 { transition-delay: 0.45s; }
-
-/* ===== ANNOUNCEMENT BAR ===== */
-.announcement {
-  text-align: center;
-  padding: 52px 24px;
-  background: var(--cream);
-}
-
-.announcement a {
-  font-family: 'Lora', serif;
-  font-size: 1.1rem;
-  color: var(--teal-deep);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  border-bottom: 1px solid var(--teal);
-  padding-bottom: 2px;
-  transition: 0.25s ease;
-}
-
-.announcement a:hover {
-  color: var(--teal);
-}
-
-.announcement .date {
-  display: block;
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text-light);
-  margin-top: 8px;
-  font-weight: 500;
-}
-
-/* ===== FULL BLEED IMAGE ===== */
-.full-image {
-  width: 100%;
-  height: 70vh;
-  object-fit: cover;
-  will-change: transform;
-}
-
-.full-image-short {
-  height: 50vh;
-}
-
-/* ===== TEXT SECTIONS ===== */
-.text-section {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 96px 32px;
-}
-
-.text-section h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: var(--teal-deep);
-  letter-spacing: -0.01em;
-}
-
-.text-section .label {
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--teal);
-  margin-bottom: 12px;
-  display: block;
-}
-
-.text-section p {
-  font-size: 1.02rem;
-  color: var(--text);
-  line-height: 1.75;
-  margin-bottom: 1.2em;
-}
-
-.text-section p:last-child { margin-bottom: 0; }
-
-/* ===== SPLIT SECTION ===== */
-.split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  min-height: 80vh;
-}
-
-.split-img {
-  overflow: hidden;
-}
-
-.split-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  will-change: transform;
-}
-
-.split-text {
-  display: flex;
-  align-items: center;
-  padding: 72px 64px;
-}
-
-.split-text-inner {
-  max-width: 440px;
-}
-
-.split-text h2 {
-  font-size: 1.85rem;
-  margin-bottom: 20px;
-  color: var(--teal-deep);
-}
-
-.split-text .label {
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--teal);
-  margin-bottom: 12px;
-  display: block;
-}
-
-.split-text p {
-  font-size: 0.95rem;
-  line-height: 1.75;
-  margin-bottom: 1em;
-}
-
-.split-text a.link {
-  display: inline-block;
-  margin-top: 12px;
-  font-weight: 600;
-  font-size: 0.88rem;
-  color: var(--teal-dark);
-  border-bottom: 1.5px solid var(--teal);
-  padding-bottom: 2px;
-}
-
-.split-text a.link:hover { color: var(--teal); }
-
-/* ===== QUOTE ===== */
-.quote-section {
-  text-align: center;
-  padding: 100px 32px;
-  background: var(--cream-warm);
-}
-
-.quote-section blockquote {
-  font-family: 'Lora', serif;
-  font-size: clamp(1.3rem, 3vw, 1.7rem);
-  font-style: italic;
-  color: var(--teal-deep);
-  max-width: 620px;
-  margin: 0 auto 20px;
-  line-height: 1.55;
-}
-
-.quote-section cite {
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.8rem;
-  font-style: normal;
-  color: var(--text-light);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-/* ===== STATS ===== */
-.stats-bar {
-  display: flex;
-  justify-content: center;
-  gap: 64px;
-  padding: 56px 24px;
-  background: var(--teal-deep);
-  color: var(--white);
-}
-
+/* STATS */
+.stats-bar { display: flex; justify-content: center; gap: 72px; padding: 60px 24px; background: var(--teal-deep); color: var(--white); }
 .stat-item { text-align: center; }
+.stat-num { font-family: 'Cormorant', serif; font-size: 3rem; font-weight: 600; color: var(--gold); line-height: 1; }
+.stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.5; margin-top: 6px; }
 
-.stat-num {
-  font-family: 'Lora', serif;
-  font-size: 2.6rem;
-  font-weight: 700;
-  color: var(--gold);
-  line-height: 1;
-}
+/* OFFERINGS */
+.offerings-section { padding: 100px 24px; background: var(--white); }
+.offerings-section h2 { text-align: center; font-size: 2.4rem; color: var(--teal-deep); margin-bottom: 56px; font-weight: 400; }
+.offerings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1080px; margin: 0 auto; }
+.offering-card { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 3/4; cursor: pointer; display: block; color: var(--white); text-decoration: none; }
+.offering-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+.offering-card:hover img { transform: scale(1.06); }
+.offering-card-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 36px 28px; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%); }
+.offering-card-overlay .label { font-family: 'Montserrat', sans-serif; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; margin-bottom: 6px; }
+.offering-card-overlay h3 { font-size: 1.25rem; color: var(--white); font-weight: 500; }
 
-.stat-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  opacity: 0.6;
-  margin-top: 6px;
-}
+/* PHOTO STRIP */
+.photo-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.photo-strip img { width: 100%; aspect-ratio: 1; object-fit: cover; transition: transform 0.5s ease; }
+.photo-strip img:hover { transform: scale(1.03); }
 
-/* ===== OFFERINGS GRID ===== */
-.offerings-section {
-  padding: 96px 24px;
-}
+/* DONATE */
+.donate-section { text-align: center; padding: 100px 24px; background: var(--teal-deep); color: var(--white); position: relative; overflow: hidden; }
+.donate-section h2 { font-size: 2.4rem; color: var(--white); margin-bottom: 16px; font-weight: 400; }
+.donate-section p { max-width: 440px; margin: 0 auto 40px; opacity: 0.75; font-size: 0.95rem; line-height: 1.8; font-weight: 300; }
 
-.offerings-section h2 {
-  text-align: center;
-  font-size: 2rem;
-  color: var(--teal-deep);
-  margin-bottom: 48px;
-}
+/* PARTNERS */
+.partners-section { padding: 64px 24px; text-align: center; background: var(--cream); }
+.partners-section h2 { font-size: 1.8rem; color: var(--teal-deep); margin-bottom: 8px; font-weight: 400; }
+.partners-section .sub { color: var(--text-light); font-size: 0.85rem; margin-bottom: 32px; font-weight: 300; }
+.partners-row { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+.partner-link { font-family: 'Cormorant', serif; font-size: 1.05rem; color: var(--teal-dark); font-style: italic; transition: 0.25s ease; }
+.partner-link:hover { color: var(--teal); }
 
-.offerings-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  max-width: 1080px;
-  margin: 0 auto;
-}
-
-.offering-card {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  aspect-ratio: 3/4;
-  cursor: pointer;
-  text-decoration: none;
-  color: var(--white);
-  display: block;
-}
-
-.offering-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s ease;
-}
-
-.offering-card:hover img {
-  transform: scale(1.05);
-}
-
-.offering-card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 32px 24px;
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
-}
-
-.offering-card-overlay .label {
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  opacity: 0.8;
-  margin-bottom: 6px;
-}
-
-.offering-card-overlay h3 {
-  font-size: 1.2rem;
-  color: var(--white);
-  font-weight: 600;
-}
-
-/* ===== DONATE CTA ===== */
-.donate-section {
-  text-align: center;
-  padding: 100px 24px;
-  background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark));
-  color: var(--white);
-}
-
-.donate-section h2 {
-  font-size: 2rem;
-  color: var(--white);
-  margin-bottom: 16px;
-}
-
-.donate-section p {
-  max-width: 480px;
-  margin: 0 auto 36px;
-  opacity: 0.8;
-  font-size: 1rem;
-  line-height: 1.7;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 14px 34px;
-  border-radius: 50px;
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: 0.25s ease;
-  cursor: pointer;
-  border: none;
-}
-
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; padding: 14px 36px; border-radius: 50px; font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: 0.25s ease; cursor: pointer; border: none; letter-spacing: 0.04em; }
 .btn-primary { background: var(--teal); color: var(--white); }
 .btn-primary:hover { background: var(--teal-dark); color: var(--white); }
-
 .btn-donate { background: var(--terracotta); color: var(--white); }
 .btn-donate:hover { background: #a8632e; color: var(--white); }
+.btn-outline-light { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.4); }
+.btn-outline-light:hover { background: rgba(255,255,255,0.15); color: var(--white); }
 
-.btn-outline { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal); }
-.btn-outline:hover { background: var(--teal); color: var(--white); }
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left { opacity: 0; transform: translateX(-50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-right { opacity: 0; transform: translateX(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
 
-.btn-sm { padding: 10px 24px; font-size: 0.82rem; }
-
-/* ===== PARTNERS ===== */
-.partners-section {
-  padding: 72px 24px;
-  text-align: center;
-  background: var(--white);
-}
-
-.partners-section h2 {
-  font-size: 1.6rem;
-  color: var(--teal-deep);
-  margin-bottom: 8px;
-}
-
-.partners-section .sub {
-  color: var(--text-light);
-  font-size: 0.9rem;
-  margin-bottom: 36px;
-}
-
-.partners-row {
-  display: flex;
-  justify-content: center;
-  gap: 48px;
-  flex-wrap: wrap;
-}
-
-.partner-link {
-  font-family: 'Lora', serif;
-  font-size: 1rem;
-  color: var(--teal-dark);
-  border-bottom: 1px solid transparent;
-  padding-bottom: 2px;
-  transition: 0.25s ease;
-}
-
-.partner-link:hover { border-color: var(--teal); }
-
-/* ===== FOOTER ===== */
-.site-footer {
-  background: var(--teal-deep);
-  color: var(--white);
-  padding: 56px 24px 24px;
-}
-
-.footer-inner {
-  max-width: 1080px;
-  margin: 0 auto;
-}
-
-.footer-top {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 56px;
-  margin-bottom: 40px;
-}
-
-.footer-brand h3 {
-  font-size: 1.1rem;
-  margin-bottom: 12px;
-}
-
-.footer-brand p {
-  font-size: 0.85rem;
-  opacity: 0.6;
-  line-height: 1.65;
-}
-
-.social-links {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.social-links a {
-  color: var(--white);
-  opacity: 0.5;
-  transition: 0.25s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-
-.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.35); }
-
-.footer-newsletter h4 {
-  font-family: 'Lora', serif;
-  font-size: 1rem;
-  margin-bottom: 8px;
-}
-
-.footer-newsletter p {
-  font-size: 0.82rem;
-  opacity: 0.55;
-  margin-bottom: 14px;
-}
-
-.newsletter-form {
-  display: flex;
-  gap: 8px;
-}
-
-.newsletter-form input {
-  flex: 1;
-  padding: 11px 16px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  border-radius: 50px;
-  color: var(--white);
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.85rem;
-}
-
-.newsletter-form input:focus { outline: none; border-color: rgba(255,255,255,0.35); }
-.newsletter-form input::placeholder { color: rgba(255,255,255,0.35); }
-
-.newsletter-form button {
-  padding: 11px 22px;
-  background: var(--teal);
-  color: var(--white);
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: 0.25s ease;
-}
-
-.newsletter-form button:hover { background: var(--teal-dark); }
-
-.footer-nav {
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 24px;
-  margin-bottom: 24px;
-}
-
-.footer-nav-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 20px;
-  justify-content: center;
-}
-
-.footer-nav-links a {
-  color: var(--white);
-  font-size: 0.78rem;
-  opacity: 0.5;
-  transition: 0.25s ease;
-}
-
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Cormorant', serif; font-size: 1.2rem; margin-bottom: 12px; font-weight: 500; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cormorant', serif; font-size: 1.05rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Montserrat', sans-serif; font-size: 0.82rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.75rem; opacity: 0.4; transition: 0.25s; }
 .footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; }
 
-.footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.05);
-  padding-top: 16px;
-  text-align: center;
-}
-
-.footer-bottom p {
-  font-size: 0.68rem;
-  opacity: 0.35;
-  line-height: 1.8;
-}
-
-/* ===== RESPONSIVE ===== */
+/* RESPONSIVE */
 @media (max-width: 900px) {
   .split { grid-template-columns: 1fr; min-height: auto; }
   .split-img { height: 50vh; }
-  .split-text { padding: 56px 32px; }
-  .offerings-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .split-text { padding: 56px 28px; }
+  .offerings-grid { grid-template-columns: 1fr; max-width: 360px; }
   .full-image { height: 50vh; }
-  .stats-bar { gap: 32px; flex-wrap: wrap; padding: 40px 24px; }
+  .stats-bar { gap: 36px; flex-wrap: wrap; padding: 44px 24px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .photo-strip { grid-template-columns: repeat(2, 1fr); }
 }
-
 @media (max-width: 768px) {
   .nav-links { display: none; }
-  .hero-text h1 { font-size: 2.2rem; }
-  .hero-text { padding: 0 24px 60px; }
+  .hero-content h1 { font-size: 2.6rem; }
   .text-section { padding: 64px 24px; }
-  .text-section h2 { font-size: 1.6rem; }
+  .text-section h2, .split-text h2 { font-size: 1.8rem; }
   .split-text-inner { max-width: 100%; }
-  .quote-section { padding: 64px 24px; }
-  .stat-num { font-size: 2rem; }
+  .quote-section { padding: 64px 20px; }
+  .stat-num { font-size: 2.2rem; }
+  .quick-links { gap: 6px; padding: 32px 16px; }
+  .quick-link { padding: 8px 20px; font-size: 0.72rem; }
 }
 </style>
 </head>
@@ -689,9 +194,7 @@ img { max-width: 100%; display: block; }
 
 <!-- NAV -->
 <nav class="site-nav" id="siteNav">
-  <a href="index.html" class="nav-logo">
-    <img src="logo.png" alt="Salt Spring Centre of Yoga">
-  </a>
+  <a href="index.html" class="nav-logo"><img src="logo.png" alt="SSCY"></a>
   <div class="nav-links">
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
@@ -701,100 +204,136 @@ img { max-width: 100%; display: block; }
   </div>
 </nav>
 
-<!-- HERO: Full screen image, text arrives after a beat -->
+<!-- HERO -->
 <section class="hero">
-  <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg" alt="Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
-  <div class="hero-text" id="heroText">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0071.jpg" alt="Salt Spring Centre of Yoga aerial view" class="hero-img" id="heroImg">
+  <div class="hero-overlay"></div>
+  <div class="hero-content" id="heroText">
     <h1>Peace Happens Here</h1>
-    <p>69 acres of sanctuary on Salt Spring Island</p>
+    <p>Salt Spring Island, BC</p>
   </div>
 </section>
 
-<!-- MUSIC FOR PEACE: Simple text line -->
+<!-- QUICK LINKS -->
+<div class="quick-links">
+  <a href="offerings.html" class="quick-link">Retreats</a>
+  <a href="shop.html" class="quick-link">Shop</a>
+  <a href="offerings.html#ytt" class="quick-link">Teacher Training</a>
+  <a href="offerings.html#wellness" class="quick-link">Wellness</a>
+  <a href="rentals.html" class="quick-link">Venue Rentals</a>
+  <a href="offerings.html#karma" class="quick-link">Karma Yoga</a>
+  <a href="shop.html" class="quick-link">Donate</a>
+  <a href="contact.html" class="quick-link">Visit Us</a>
+</div>
+
+<!-- ANNOUNCEMENT -->
 <div class="announcement reveal">
   <a href="shop.html">Music for Peace: Carnatic Violin &amp; Mridangam with Shriram Rajagopalan</a>
   <span class="date">Saturday, April 11 &bull; Satsang Room &bull; Tickets $40</span>
 </div>
 
-<!-- FULL IMAGE: Property -->
-<img src="https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png" alt="Program House with gardens" class="full-image" id="parallax1" loading="lazy">
+<!-- WAVE -->
+<svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="#faf8f4" d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z"/></svg>
+
+<!-- FULL IMAGE: Forest canopy -->
+<img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Forest-Canopy-from-the-ground-1024x683-1.jpg" alt="Forest canopy" class="full-image" loading="lazy">
+
+<!-- WAVE -->
+<svg class="wave wave-flip" viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="#faf8f4" d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z"/></svg>
 
 <!-- ABOUT -->
 <div class="text-section">
   <span class="label reveal">Est. 1981</span>
-  <h2 class="reveal delay-1">A Rare and Sacred Place</h2>
-  <p class="reveal delay-2">The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by venerated master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
-  <p class="reveal delay-3">Whether you're here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
+  <h2 class="reveal d1">A Rare and Sacred Place</h2>
+  <p class="reveal d2">The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
+  <p class="reveal d3">Whether you're here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
 </div>
 
 <!-- QUOTE -->
 <section class="quote-section">
   <blockquote class="reveal">"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
-  <cite class="reveal delay-1">Baba Hari Dass</cite>
+  <cite class="reveal d1">Baba Hari Dass</cite>
 </section>
 
+<!-- WAVE -->
+<svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="#fff" d="M0,40 C480,0 960,80 1440,40 L1440,80 L0,80 Z"/></svg>
+
 <!-- SPLIT: The Land -->
-<section class="split">
+<section class="split" style="background:var(--white);">
   <div class="split-img">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg" alt="The grounds" id="parallax2" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DawnOverTheGarden-small-1.jpg" alt="Dawn over the garden" loading="lazy">
   </div>
   <div class="split-text">
     <div class="split-text-inner">
       <span class="label reveal-right">The Land</span>
-      <h2 class="reveal-right delay-1">69 Acres of Living Sanctuary</h2>
-      <p class="reveal-right delay-2">An organic farm, fruit orchard, permaculture food forest, pristine streams and ponds, and the Dandaka Forest, one of the most untouched cedar-swamp wetlands in North America.</p>
-      <p class="reveal-right delay-3">Over 110 species call this land home. The Centre borders the Salt Spring Island Conservancy's Blackburn Lake nature reserve.</p>
+      <h2 class="reveal-right d1">69 Acres of Living Sanctuary</h2>
+      <p class="reveal-right d2">An organic farm, fruit orchard, permaculture food forest, pristine streams and ponds, and the Dandaka Forest, one of the most untouched cedar-swamp wetlands in North America.</p>
+      <p class="reveal-right d3">Over 110 species call this land home. The Centre borders the Salt Spring Island Conservancy's Blackburn Lake nature reserve.</p>
     </div>
   </div>
 </section>
 
+<!-- PHOTO STRIP -->
+<div class="photo-strip">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Bumble-Bee-Pollinating-1024x683-1.jpg" alt="Bumblebee pollinating" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg" alt="Pond Dome" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Hanuman-Shrine.jpg" alt="Hanuman Shrine" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/05/Farm-truck-with-bounty.jpg" alt="Farm harvest" loading="lazy">
+</div>
+
 <!-- STATS -->
 <div class="stats-bar">
-  <div class="stat-item reveal"><div class="stat-num">69</div><div class="stat-label">Acres</div></div>
-  <div class="stat-item reveal delay-1"><div class="stat-num">45</div><div class="stat-label">Years</div></div>
-  <div class="stat-item reveal delay-2"><div class="stat-num">110+</div><div class="stat-label">Species</div></div>
-  <div class="stat-item reveal delay-3"><div class="stat-num">15+</div><div class="stat-label">Teachers</div></div>
+  <div class="stat-item reveal"><div class="stat-num">69</div><div class="stat-lbl">Acres</div></div>
+  <div class="stat-item reveal d1"><div class="stat-num">45</div><div class="stat-lbl">Years</div></div>
+  <div class="stat-item reveal d2"><div class="stat-num">110+</div><div class="stat-lbl">Species</div></div>
+  <div class="stat-item reveal d3"><div class="stat-num">15+</div><div class="stat-lbl">Teachers</div></div>
 </div>
+
+<!-- WAVE -->
+<svg class="wave wave-flip" viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="#2c2c2c" d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z"/></svg>
 
 <!-- SPLIT: Founder (reversed) -->
 <section class="split" style="direction:rtl;">
   <div class="split-img" style="direction:ltr;">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg" alt="Baba Hari Dass" id="parallax3" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg" alt="Baba Hari Dass" loading="lazy">
   </div>
   <div class="split-text" style="direction:ltr;">
     <div class="split-text-inner">
       <span class="label reveal-left">Our Founder</span>
-      <h2 class="reveal-left delay-1">Baba Hari Dass</h2>
-      <p class="reveal-left delay-2">A master yogi, scholar, and mauni sadhu who undertook a vow of silence in 1952 and never spoke another word. He communicated by means of a small chalkboard, conveying a great deal in the fewest possible words.</p>
-      <p class="reveal-left delay-3">Babaji left his body on September 25, 2018. His wisdom lives on in the institutions he created, his writings, and all those he touched.</p>
-      <a href="https://www.babaharidass.org" target="_blank" rel="noopener" class="link reveal-left delay-3">Learn more</a>
+      <h2 class="reveal-left d1">Baba Hari Dass</h2>
+      <p class="reveal-left d2">A master yogi and scholar who undertook a vow of silence in 1952 and never spoke another word. He communicated by means of a small chalkboard, conveying a great deal in the fewest possible words.</p>
+      <p class="reveal-left d3">Babaji left his body on September 25, 2018. His wisdom lives on in the institutions he created, his writings, and all those he touched.</p>
+      <a href="https://www.babaharidass.org" target="_blank" rel="noopener" class="text-link reveal-left d4">Learn more about Babaji</a>
     </div>
   </div>
 </section>
 
 <!-- FULL IMAGE -->
-<img src="https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg" alt="Annual Community Yoga Retreat" class="full-image full-image-short" id="parallax4" loading="lazy">
+<img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Tree-Pose-in-Boots-scaled-1.jpg" alt="Tree pose in boots" class="full-image full-image-sm" loading="lazy">
+
+<!-- WAVE -->
+<svg class="wave wave-flip" viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="#fff" d="M0,40 C360,0 720,80 1080,40 C1260,20 1380,30 1440,40 L1440,80 L0,80 Z"/></svg>
 
 <!-- OFFERINGS -->
 <section class="offerings-section">
   <h2 class="reveal">What We Offer</h2>
   <div class="offerings-grid">
-    <a href="offerings.html" class="offering-card reveal delay-1">
-      <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg" alt="Retreats" loading="lazy">
+    <a href="offerings.html" class="offering-card reveal d1">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/serene.jpg" alt="Retreats" loading="lazy">
       <div class="offering-card-overlay">
         <div class="label">Programs</div>
         <h3>Retreats &amp; Classes</h3>
       </div>
     </a>
-    <a href="rentals.html" class="offering-card reveal delay-2">
-      <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Program-House-Rock-Wall.jpg" alt="Venues" loading="lazy">
+    <a href="rentals.html" class="offering-card reveal d2">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" alt="Pond Dome" loading="lazy">
       <div class="offering-card-overlay">
         <div class="label">Spaces</div>
         <h3>Rentals &amp; Venues</h3>
       </div>
     </a>
-    <a href="shop.html" class="offering-card reveal delay-3">
-      <img src="https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg" alt="Shop" loading="lazy">
+    <a href="shop.html" class="offering-card reveal d3">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Holy-Mother-below-fountain.jpg" alt="Sacred space" loading="lazy">
       <div class="offering-card-overlay">
         <div class="label">Support</div>
         <h3>Shop &amp; Donate</h3>
@@ -802,6 +341,14 @@ img { max-width: 100%; display: block; }
     </a>
   </div>
 </section>
+
+<!-- PHOTO STRIP 2 -->
+<div class="photo-strip">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Sauna at night" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House yoga space" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Organic-Greens-in-Hoop-House-1024x768-1.jpg" alt="Organic greens" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/people-on-lawn-10.jpg" alt="Community on the lawn" loading="lazy">
+</div>
 
 <!-- PARTNERS -->
 <section class="partners-section reveal">
@@ -814,11 +361,17 @@ img { max-width: 100%; display: block; }
   </div>
 </section>
 
+<!-- WAVE -->
+<svg class="wave" viewBox="0 0 1440 80" preserveAspectRatio="none"><path fill="#1a5c53" d="M0,40 C480,80 960,0 1440,40 L1440,80 L0,80 Z"/></svg>
+
 <!-- DONATE -->
 <section class="donate-section">
   <h2 class="reveal">Support This Sanctuary</h2>
-  <p class="reveal delay-1">Every donation helps preserve 69 acres of peace for future visitors.</p>
-  <a href="shop.html" class="btn btn-donate reveal delay-2">Donate Now</a>
+  <p class="reveal d1">Every donation helps preserve 69 acres of peace for future visitors.</p>
+  <div class="reveal d2" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="shop.html" class="btn btn-donate">Donate Now</a>
+    <a href="shop.html" class="btn btn-outline-light">Visit the Shop</a>
+  </div>
 </section>
 
 <!-- FOOTER -->
@@ -829,15 +382,15 @@ img { max-width: 100%; display: block; }
         <h3>Salt Spring Centre of Yoga</h3>
         <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
         <div class="social-links">
-          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
           <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
         </div>
       </div>
       <div class="footer-newsletter">
         <h4>Join Our Community</h4>
         <p>Stay connected with news, courses, and retreats.</p>
-        <form class="newsletter-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.8;\'>Thank you!</p>';">
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
           <input type="email" placeholder="Your email" required aria-label="Email">
           <button type="submit">Subscribe</button>
         </form>
@@ -867,41 +420,29 @@ img { max-width: 100%; display: block; }
 
 <script>
 // Hero text arrives after a beat
-setTimeout(function() {
-  document.getElementById('heroText').classList.add('visible');
-}, 800);
+setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
 
-// Nav shows on scroll
+// Nav on scroll
 var nav = document.getElementById('siteNav');
-var heroH = window.innerHeight * 0.5;
-window.addEventListener('scroll', function() {
-  nav.classList.toggle('scrolled', window.scrollY > heroH);
-});
+window.addEventListener('scroll', function() { nav.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.6); });
 
-// Scroll reveal with IntersectionObserver
-var reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-var observer = new IntersectionObserver(function(entries) {
+// Scroll reveals (in AND out)
+var obs = new IntersectionObserver(function(entries) {
   entries.forEach(function(e) {
-    if (e.isIntersecting) {
-      e.target.classList.add('in-view');
-    } else {
-      e.target.classList.remove('in-view');
-    }
+    if (e.isIntersecting) e.target.classList.add('in-view');
+    else e.target.classList.remove('in-view');
   });
-}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
 
-reveals.forEach(function(el) { observer.observe(el); });
-
-// Parallax on images (subtle)
+// Parallax on images
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  var parallaxEls = document.querySelectorAll('.full-image, .split-img img, .hero-img');
+  var pEls = document.querySelectorAll('.full-image, .split-img img, .hero-img');
   window.addEventListener('scroll', function() {
-    var scrollY = window.scrollY;
-    parallaxEls.forEach(function(el) {
-      var rect = el.getBoundingClientRect();
-      var center = rect.top + rect.height / 2;
-      var offset = (center - window.innerHeight / 2) * 0.08;
-      el.style.transform = 'translateY(' + offset + 'px) scale(1.05)';
+    pEls.forEach(function(el) {
+      var r = el.getBoundingClientRect();
+      var off = (r.top + r.height / 2 - window.innerHeight / 2) * 0.06;
+      el.style.transform = 'translateY(' + off + 'px) scale(1.04)';
     });
   });
 }
