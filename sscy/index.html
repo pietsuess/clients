@@ -607,8 +607,8 @@ function checkSticky() {
   var currentLeft = centerLeft + (rightLeft - centerLeft) * scrollPast;
   navLinks.style.left = currentLeft + 'px';
 
-  // Fade logo in
-  if (navLogoWrap) navLogoWrap.style.opacity = scrollPast;
+  // Fade logo in (faster, starts earlier)
+  if (navLogoWrap) navLogoWrap.style.opacity = Math.min(1, scrollPast * 3);
 }
 window.addEventListener('scroll', checkSticky);
 checkSticky();
