@@ -220,21 +220,25 @@ p { text-align: justify; text-justify: inter-word; }
   .scroll-strip img { height: 30vh; min-width: 30vh; }
 }
 
-/* ORBIT NAV */
-.orbit-section { position: relative; margin-top: -80px; height: 80px; z-index: 5; pointer-events: none; }
-.orbit-card { pointer-events: auto; }
-.oc-icon { display: none; }
-.orbit-title { display: none; }
-.orbit-track { position: absolute; inset: 0; }
-.orbit-card { position: absolute; width: 240px; height: 44px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1); transition: transform 0.15s ease-out, box-shadow 0.3s ease; will-change: transform; }
-.orbit-card:nth-child(1) { background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
-.orbit-card:nth-child(2) { background: linear-gradient(160deg, #c9a84c, #d4b85c); }
-.orbit-card:nth-child(3) { background: linear-gradient(160deg, #2a8a7d, #3bb8a8); }
-.orbit-card:nth-child(4) { background: linear-gradient(160deg, #d4b85c, #e0ca78); }
-.orbit-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
-.oc-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.5; }
-.oc-label { font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; }
-.oc-sub { display: none; }
+/* HOT ZONES */
+.hz {
+  position: absolute; z-index: 6; width: 140px; height: 140px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; cursor: pointer; opacity: 0;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+.hz.visible { pointer-events: auto; }
+.hz:hover { transform: scale(1.1); background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
+#hz0 { top: 15%; left: 10%; }
+#hz1 { top: 15%; right: 10%; }
+#hz2 { bottom: 18%; left: 10%; }
+#hz3 { bottom: 18%; right: 10%; }
+.hz-icon { font-size: 1.8rem; margin-bottom: 6px; opacity: 0.7; }
+.hz-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -247,35 +251,25 @@ p { text-align: justify; text-justify: inter-word; }
   <div class="hero-content" id="heroText">
     <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
   </div>
+  <!-- HOT ZONES -->
+  <div class="hz" id="hz0" onclick="location.href='offerings.html'" data-x="0" data-y="0">
+    <div class="hz-icon">&#x25CB;</div>
+    <div class="hz-label">Find Peace</div>
+  </div>
+  <div class="hz" id="hz1" onclick="location.href='offerings.html#ytt'" data-x="1" data-y="0">
+    <div class="hz-icon">&#x25B3;</div>
+    <div class="hz-label">Learn</div>
+  </div>
+  <div class="hz" id="hz2" onclick="location.href='shop.html'" data-x="0" data-y="1">
+    <div class="hz-icon">&#x25C7;</div>
+    <div class="hz-label">Give Back</div>
+  </div>
+  <div class="hz" id="hz3" onclick="location.href='rentals.html'" data-x="1" data-y="1">
+    <div class="hz-icon">&#x25A1;</div>
+    <div class="hz-label">Host</div>
+  </div>
 </section>
 
-<!-- ORBIT NAV - overlays bottom of hero via negative margin -->
-<div class="orbit-section" id="orbitSection">
-  <div class="orbit-title"><h2>What brings you here?</h2></div>
-  <canvas id="orbitString" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
-  <div class="orbit-track" id="orbitTrack" style="z-index:2;position:relative;">
-    <div class="orbit-card" onclick="location.href='offerings.html'">
-      <div class="oc-icon">&#x25CB;</div>
-      <div class="oc-label">Find Peace</div>
-      <div class="oc-sub">Retreats, wellness, the land</div>
-    </div>
-    <div class="orbit-card" onclick="location.href='offerings.html#ytt'">
-      <div class="oc-icon">&#x25B3;</div>
-      <div class="oc-label">Learn</div>
-      <div class="oc-sub">Classes, training, philosophy</div>
-    </div>
-    <div class="orbit-card" onclick="location.href='shop.html'">
-      <div class="oc-icon">&#x25C7;</div>
-      <div class="oc-label">Give Back</div>
-      <div class="oc-sub">Karma yoga, donate, shop</div>
-    </div>
-    <div class="orbit-card" onclick="location.href='rentals.html'">
-      <div class="oc-icon">&#x25A1;</div>
-      <div class="oc-label">Host</div>
-      <div class="oc-sub">Venues, rentals, events</div>
-    </div>
-  </div>
-</div>
 
 <!-- STICKY NAV - sits below hero, sticks to top on scroll -->
 <nav class="sticky-nav" id="stickyNav">
@@ -698,106 +692,51 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     card.style.transform = 'perspective(800px) rotateY(0) rotateX(0)';
   });
 });
-// ===== ORBIT NAV =====
+// ===== HOT ZONES =====
 (function() {
-  var section = document.getElementById('orbitSection');
-  if (!section) return;
-  var cards = section.querySelectorAll('.orbit-card');
-  var angle = 0;
-  var autoSpeed = 0.001;
-  var mouseInfluence = 0;
-  var targetInfluence = 0;
-  var hoveredIndex = -1;
-  var targetAngle = null;
+  var hero = document.querySelector('.hero');
+  var zones = document.querySelectorAll('.hz');
+  if (!hero || !zones.length) return;
 
-  function getGeometry() {
-    var rect = section.getBoundingClientRect();
-    return {
-      cx: rect.width / 2,
-      cy: rect.height / 2,
-      rx: rect.width * 0.35,
-      ry: rect.height * 0.08
-    };
-  }
+  // Each zone has a corner: 0=top-left, 1=top-right, 2=bottom-left, 3=bottom-right
+  var corners = [
+    {x: 0, y: 0},  // Find Peace - top left
+    {x: 1, y: 0},  // Learn - top right
+    {x: 0, y: 1},  // Give Back - bottom left
+    {x: 1, y: 1}   // Host - bottom right
+  ];
 
-  var canvas = document.getElementById('orbitString');
-  var ctx = canvas.getContext('2d');
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    // Mouse position 0-1
+    var mx = (e.clientX - rect.left) / rect.width;
+    var my = (e.clientY - rect.top) / rect.height;
 
-  function positionCards() {
-    var g = getGeometry();
-    var points = [];
-    cards.forEach(function(card, i) {
-      var a = angle + (i * Math.PI * 0.5);
-      var x = g.cx + Math.cos(a) * g.rx - 120;
-      var y = g.cy + Math.sin(a) * g.ry - 22;
-      var z = Math.sin(a);
-      var scale = 0.65 + (z + 1) * 0.25;
-      var opacity = 0.35 + (z + 1) * 0.325;
-      if (hoveredIndex === i) { scale = 1.08; opacity = 1; }
-      card.style.left = x + 'px';
-      card.style.top = y + 'px';
-      card.style.transform = 'scale(' + scale + ')';
-      card.style.opacity = opacity;
-      card.style.zIndex = Math.round((z + 1) * 10);
-      points.push({x: x + 120, y: y + 22, z: z});
+    zones.forEach(function(zone, i) {
+      var c = corners[i];
+      // Distance from this corner (0 = at corner, ~1 = at center)
+      var dx = mx - c.x;
+      var dy = my - c.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Closer to corner = more visible. Threshold ~0.45
+      var opacity = Math.max(0, 1 - (dist / 0.45));
+      opacity = opacity * opacity; // ease in
+      var scale = 0.7 + opacity * 0.3;
+
+      zone.style.opacity = opacity;
+      zone.style.transform = 'scale(' + scale + ')';
+      zone.classList.toggle('visible', opacity > 0.1);
     });
-    drawString(g, points);
-  }
-
-  function drawString(g, cardPoints) {
-    var rect = section.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw smooth ellipse path through all positions
-    ctx.beginPath();
-    var steps = 80;
-    for (var s = 0; s <= steps; s++) {
-      var a = angle + (s / steps) * Math.PI * 2;
-      var px = g.cx + Math.cos(a) * g.rx;
-      var py = g.cy + Math.sin(a) * g.ry;
-      var z = Math.sin(a);
-      var alpha = 0.15 + (z + 1) * 0.15;
-      if (s === 0) {
-        ctx.moveTo(px, py);
-      } else {
-        ctx.lineTo(px, py);
-      }
-    }
-    ctx.closePath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-    ctx.lineWidth = 2;
-    ctx.shadowColor = 'rgba(255,255,255,0.3)';
-    ctx.shadowBlur = 6;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-  }
-
-  cards.forEach(function(card, i) {
-    card.addEventListener('mouseenter', function() { hoveredIndex = i; });
-    card.addEventListener('mouseleave', function() { hoveredIndex = -1; });
   });
 
-  document.addEventListener('mousemove', function(e) {
-    targetInfluence = (e.clientX / window.innerWidth - 0.5) * 0.015;
+  hero.addEventListener('mouseleave', function() {
+    zones.forEach(function(zone) {
+      zone.style.opacity = 0;
+      zone.style.transform = 'scale(0.7)';
+      zone.classList.remove('visible');
+    });
   });
-
-  // Dissolve on scroll past
-  function checkDissolve() {
-    var rect = section.getBoundingClientRect();
-    var visible = Math.max(0, Math.min(1, (rect.bottom) / rect.height));
-    section.style.opacity = visible;
-  }
-
-  function animate() {
-    mouseInfluence += (targetInfluence - mouseInfluence) * 0.04;
-    angle += autoSpeed + mouseInfluence;
-    positionCards();
-    checkDissolve();
-    requestAnimationFrame(animate);
-  }
-  animate();
 })();
 </script>
 </body>
