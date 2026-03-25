@@ -25,15 +25,19 @@ img { max-width: 100%; display: block; }
 p { text-align: justify; text-justify: inter-word; }
 
 /* NAV */
-.hero-top-logo { position: absolute; top: 24px; left: 32px; z-index: 10; height: 60px; }
+/* Hero logo - floats over hero, then joins sticky nav */
+.hero-top-logo { position: absolute; top: 24px; left: 32px; z-index: 10; height: 60px; transition: opacity 0.3s ease; }
+.hero-top-logo.hidden { opacity: 0; }
 .nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
 .nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
 /* STICKY NAV BAR - sits below hero, locks to top on scroll */
-.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 14px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
-.sticky-nav-inner { display: flex; justify-content: center; gap: 6px; max-width: 1200px; margin: 0 auto; padding: 0 32px; align-items: center; }
-.sticky-nav a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
-.sticky-nav a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.sticky-nav .sn-logo { height: 48px; }
+.sticky-nav-links { display: flex; gap: 4px; }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
+.sticky-nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
 /* HERO */
 .hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -229,11 +233,14 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- STICKY NAV - sits below hero, sticks to top on scroll -->
 <nav class="sticky-nav" id="stickyNav">
   <div class="sticky-nav-inner">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="offerings.html">Offerings</a>
-    <a href="rentals.html">Rentals</a>
-    <a href="contact.html">Contact</a>
+    <a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a>
+    <div class="sticky-nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="rentals.html">Rentals</a>
+      <a href="contact.html">Contact</a>
+    </div>
   </div>
 </nav>
 
@@ -523,9 +530,12 @@ window.addEventListener('scroll', function() {
 
 // Sticky nav pinned detection
 var stickyNav = document.getElementById('stickyNav');
+var heroTopLogo = document.querySelector('.hero-top-logo');
 var stickyNavTop = stickyNav.offsetTop;
 function checkSticky() {
-  stickyNav.classList.toggle('pinned', window.scrollY >= stickyNavTop);
+  var pinned = window.scrollY >= stickyNavTop;
+  stickyNav.classList.toggle('pinned', pinned);
+  if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
 }
 window.addEventListener('scroll', checkSticky);
 window.addEventListener('resize', function() { stickyNavTop = stickyNav.offsetTop; });
