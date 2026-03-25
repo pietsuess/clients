@@ -737,9 +737,12 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       }
     }
     ctx.closePath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(255,255,255,0.3)';
+    ctx.shadowBlur = 6;
     ctx.stroke();
+    ctx.shadowBlur = 0;
   }
 
   cards.forEach(function(card, i) {
