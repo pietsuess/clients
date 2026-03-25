@@ -536,7 +536,8 @@ function checkSticky() {
   var rect = stickyNav.getBoundingClientRect();
   var pinned = rect.top <= 0;
   stickyNav.classList.toggle('pinned', pinned);
-  if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
+  // Hide hero logo as soon as we start scrolling (nav becomes visible)
+  if (heroTopLogo) heroTopLogo.classList.toggle('hidden', window.scrollY > 10);
 }
 window.addEventListener('scroll', checkSticky);
 
