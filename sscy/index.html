@@ -222,7 +222,7 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* HOT ZONES */
 .hz {
-  position: absolute; z-index: 6; width: 140px; height: 140px; border-radius: 50%;
+  position: absolute; z-index: 6; width: 200px; height: 200px; border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: #fff; cursor: pointer; opacity: 0;
   background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
@@ -708,32 +708,35 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
 
   hero.addEventListener('mousemove', function(e) {
     var rect = hero.getBoundingClientRect();
-    // Mouse position 0-1
     var mx = (e.clientX - rect.left) / rect.width;
     var my = (e.clientY - rect.top) / rect.height;
 
     zones.forEach(function(zone, i) {
       var c = corners[i];
-      // Distance from this corner (0 = at corner, ~1 = at center)
       var dx = mx - c.x;
       var dy = my - c.y;
       var dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Closer to corner = more visible. Threshold ~0.45
-      var opacity = Math.max(0, 1 - (dist / 0.45));
-      opacity = opacity * opacity; // ease in
-      var scale = 0.7 + opacity * 0.3;
+      // Much larger threshold - starts showing almost immediately from center
+      var opacity = Math.max(0, 1 - (dist / 0.75));
+      // Gentle curve, not harsh
+      opacity = Math.pow(opacity, 1.5);
+      var scale = 0.85 + opacity * 0.15;
+
+      // 3D tilt based on mouse position relative to the zone's corner
+      var tiltX = (my - c.y) * -15 * opacity;
+      var tiltY = (mx - c.x) * 15 * opacity;
 
       zone.style.opacity = opacity;
-      zone.style.transform = 'scale(' + scale + ')';
-      zone.classList.toggle('visible', opacity > 0.1);
+      zone.style.transform = 'scale(' + scale + ') perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg)';
+      zone.classList.toggle('visible', opacity > 0.05);
     });
   });
 
   hero.addEventListener('mouseleave', function() {
     zones.forEach(function(zone) {
       zone.style.opacity = 0;
-      zone.style.transform = 'scale(0.7)';
+      zone.style.transform = 'scale(0.85) perspective(400px) rotateX(0deg) rotateY(0deg)';
       zone.classList.remove('visible');
     });
   });
