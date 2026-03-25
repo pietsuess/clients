@@ -27,14 +27,16 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* NAV */
 /* Hero logo - floats over hero, then joins sticky nav */
-.hero-top-logo { position: absolute; top: 16px; left: 32px; z-index: 10; height: 52px; }
+.hero-top-logo { position: fixed; top: 16px; left: 32px; z-index: 100; height: 52px; transition: opacity 0.2s ease; }
+.hero-top-logo.hidden { opacity: 0; pointer-events: none; }
 .nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
 .nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
 /* STICKY NAV BAR - sits below hero, locks to top on scroll */
 .sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .sticky-nav-inner { display: flex; justify-content: space-between; align-items: center; padding: 0 32px; }
-.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav .sn-logo { height: 52px; opacity: 0; transition: opacity 0.2s ease; }
+.sticky-nav.pinned .sn-logo { opacity: 1; }
 .sticky-nav-links { display: flex; gap: 4px; }
 .sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
 .sticky-nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
@@ -530,10 +532,12 @@ window.addEventListener('scroll', function() {
 
 // Sticky nav pinned detection
 var stickyNav = document.getElementById('stickyNav');
+var heroTopLogo = document.querySelector('.hero-top-logo');
 function checkSticky() {
   var rect = stickyNav.getBoundingClientRect();
   var pinned = rect.top <= 0;
   stickyNav.classList.toggle('pinned', pinned);
+  if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
 }
 window.addEventListener('scroll', checkSticky);
 
