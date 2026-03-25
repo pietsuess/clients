@@ -55,13 +55,17 @@ img { max-width: 100%; display: block; }
 .hero-tagline.visible { opacity: 1; transform: translateY(0); }
 
 /* BABAJI Q&A */
-.babaji-qa { background: var(--charcoal); color: var(--white); padding: 56px 32px; text-align: center; cursor: pointer; }
-.babaji-qa:hover .qa-inner { opacity: 0.85; }
-.qa-inner { max-width: 680px; margin: 0 auto; transition: opacity 0.3s ease; }
-.qa-label { font-family: 'Archivo Narrow', sans-serif; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--gold); display: block; margin-bottom: 20px; }
-.qa-question { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 400; opacity: 0.6; margin-bottom: 12px; font-style: italic; }
-.qa-answer { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.4; color: var(--white); }
-.qa-date { font-family: 'Archivo Narrow', sans-serif; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.3; margin-top: 16px; }
+.babaji-qa { background: var(--charcoal); color: var(--white); padding: 48px 32px; }
+.qa-wrap { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 40px; }
+.qa-photo { flex-shrink: 0; width: 100px; height: 100px; border-radius: 50%; object-fit: cover; object-position: center top; border: 2px solid rgba(255,255,255,0.15); }
+.qa-inner { flex: 1; }
+.qa-label { font-family: 'Archivo Narrow', sans-serif; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--gold); display: block; margin-bottom: 14px; }
+.qa-question { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 400; opacity: 0.6; margin-bottom: 10px; font-style: italic; }
+.qa-answer { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 600; line-height: 1.4; color: var(--white); }
+.qa-date { font-family: 'Archivo Narrow', sans-serif; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.3; margin-top: 14px; }
+.qa-refresh { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: 0.25s ease; }
+.qa-refresh:hover { opacity: 1; border-color: rgba(255,255,255,0.4); }
+@media (max-width: 768px) { .qa-wrap { flex-direction: column; text-align: center; gap: 20px; } .qa-photo { width: 80px; height: 80px; } }
 
 /* WAVE DIVIDER */
 .wave { width: 100%; display: block; margin-top: -2px; }
@@ -227,12 +231,18 @@ img { max-width: 100%; display: block; }
 </section>
 
 <!-- BABAJI Q&A -->
-<div class="babaji-qa" id="babajiQA">
-  <div class="qa-inner">
-    <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
-    <div class="qa-question" id="qaQuestion"></div>
-    <div class="qa-answer" id="qaAnswer"></div>
-    <div class="qa-date" id="qaDate"></div>
+<div class="babaji-qa">
+  <div class="qa-wrap">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-w-Chalkboard-1970s.jpg" alt="Baba Hari Dass with chalkboard" class="qa-photo">
+    <div class="qa-inner">
+      <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
+      <div class="qa-question" id="qaQuestion"></div>
+      <div class="qa-answer" id="qaAnswer"></div>
+      <div class="qa-date" id="qaDate"></div>
+    </div>
+    <button class="qa-refresh" onclick="showQA()" aria-label="Next quote">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
   </div>
 </div>
 
@@ -469,7 +479,6 @@ function showQA() {
   }
 }
 showQA();
-document.getElementById('babajiQA').addEventListener('click', showQA);
 
 setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
 
