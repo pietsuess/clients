@@ -24,9 +24,9 @@ body { background: #f5f0e8; font-family: system-ui; overflow: hidden; height: 10
 }
 
 .orbit-item:nth-child(1) { background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
-.orbit-item:nth-child(2) { background: linear-gradient(160deg, #c17838, #d4923e); }
-.orbit-item:nth-child(3) { background: linear-gradient(160deg, #2c2c2c, #444); }
-.orbit-item:nth-child(4) { background: linear-gradient(160deg, #c9a84c, #d4be78); }
+.orbit-item:nth-child(2) { background: linear-gradient(160deg, #c9a84c, #d4b85c); }
+.orbit-item:nth-child(3) { background: linear-gradient(160deg, #2a8a7d, #3bb8a8); }
+.orbit-item:nth-child(4) { background: linear-gradient(160deg, #d4b85c, #e0ca78); }
 
 .orbit-item:hover { box-shadow: 0 20px 56px rgba(0,0,0,0.2); }
 
@@ -260,6 +260,8 @@ var targetInfluence = 0;
 var mouseX = 0.5;
 var radius = Math.min(window.innerWidth, window.innerHeight) * 0.28;
 var hoveredIndex = -1;
+var targetAngleGlobal = 0;
+var isAnimatingToTarget = false;
 
 document.addEventListener('mousemove', function(e) {
   mouseX = e.clientX / window.innerWidth;
@@ -289,18 +291,41 @@ function positionCards() {
   });
 }
 
-// Hover tracking
+// Hover tracking - back cards rotate to front
 items.forEach(function(item, i) {
-  item.addEventListener('mouseenter', function() { hoveredIndex = i; });
-  item.addEventListener('mouseleave', function() { hoveredIndex = -1; });
+  item.addEventListener('mouseenter', function() {
+    hoveredIndex = i;
+    // If card is in the back half, rotate orbit to bring it forward
+    var cardAngle = angle + (i * Math.PI * 0.5);
+    var z = Math.sin(cardAngle);
+    if (z < 0) {
+      // Find the target angle that puts this card at the front (z = 1, which is sin = 1, angle = PI/2)
+      var targetAngle = (Math.PI * 0.5) - (i * Math.PI * 0.5);
+      // Normalize to nearest rotation
+      var diff = targetAngle - angle;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      targetAngleGlobal = angle + diff;
+      isAnimatingToTarget = true;
+    }
+  });
+  item.addEventListener('mouseleave', function() {
+    hoveredIndex = -1;
+    isAnimatingToTarget = false;
+  });
 });
 
 // Animation loop
 var isLanding = true;
 function animateOrbit() {
   if (isLanding) {
-    mouseInfluence += (targetInfluence - mouseInfluence) * 0.08;
-    angle += autoSpeed + mouseInfluence;
+    if (isAnimatingToTarget) {
+      // Smoothly rotate to bring hovered card to front
+      angle += (targetAngleGlobal - angle) * 0.08;
+    } else {
+      mouseInfluence += (targetInfluence - mouseInfluence) * 0.08;
+      angle += autoSpeed + mouseInfluence;
+    }
     positionCards();
   }
   requestAnimationFrame(animateOrbit);
