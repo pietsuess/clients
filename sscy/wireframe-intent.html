@@ -265,7 +265,7 @@ var isAnimatingToTarget = false;
 
 document.addEventListener('mousemove', function(e) {
   mouseX = e.clientX / window.innerWidth;
-  targetInfluence = (mouseX - 0.5) * 0.04;
+  targetInfluence = (mouseX - 0.5) * 0.02;
 });
 
 function positionCards() {
@@ -321,7 +321,7 @@ function animateOrbit() {
   if (isLanding) {
     if (isAnimatingToTarget) {
       // Smoothly rotate to bring hovered card to front
-      angle += (targetAngleGlobal - angle) * 0.08;
+      angle += (targetAngleGlobal - angle) * 0.04;
     } else {
       mouseInfluence += (targetInfluence - mouseInfluence) * 0.08;
       angle += autoSpeed + mouseInfluence;
