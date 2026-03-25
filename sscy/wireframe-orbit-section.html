@@ -18,12 +18,12 @@ body { font-family: system-ui; background: #f5f0e8; color: #333; }
 
 /* ===== ORBIT SECTION ===== */
 .orbit-section {
-  height: 500px; position: relative; overflow: hidden;
+  height: 340px; position: relative; overflow: hidden;
   background: #f5f0e8;
 }
 
 .orbit-title {
-  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
   text-align: center; z-index: 5; pointer-events: none;
 }
 
@@ -114,9 +114,9 @@ body { font-family: system-ui; background: #f5f0e8; color: #333; }
   function getGeometry() {
     var rect = section.getBoundingClientRect();
     var cx = rect.width / 2;
-    var cy = rect.height / 2 + 20;
+    var cy = rect.height / 2;
     var rx = Math.min(rect.width * 0.3, 320);
-    var ry = rect.height * 0.22;
+    var ry = rect.height * 0.06;
     return { cx: cx, cy: cy, rx: rx, ry: ry };
   }
 
@@ -127,8 +127,8 @@ body { font-family: system-ui; background: #f5f0e8; color: #333; }
       var x = g.cx + Math.cos(a) * g.rx - 100;
       var y = g.cy + Math.sin(a) * g.ry - 110;
       var z = Math.sin(a);
-      var scale = 0.8 + (z + 1) * 0.15;
-      var opacity = 0.45 + (z + 1) * 0.275;
+      var scale = 0.65 + (z + 1) * 0.25;
+      var opacity = 0.35 + (z + 1) * 0.325;
 
       if (hoveredIndex === i) {
         scale = 1.08;
