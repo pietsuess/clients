@@ -599,13 +599,17 @@ function checkSticky() {
   // Calculate how far past the pin point we've scrolled (0 to 1 over 200px)
   var scrollPast = Math.max(0, Math.min(1, (window.scrollY - navPinPoint) / 200));
 
-  // Slide links: center (50%) to right edge
+  // Slide links: center to right, and compress gap
   var innerWidth = navInner.offsetWidth;
   var linksWidth = navLinks.offsetWidth;
   var centerLeft = (innerWidth - linksWidth) / 2;
   var rightLeft = innerWidth - linksWidth - 32;
   var currentLeft = centerLeft + (rightLeft - centerLeft) * scrollPast;
   navLinks.style.left = currentLeft + 'px';
+
+  // Gap: starts wide (24px), compresses to tight (4px)
+  var gap = 24 - (20 * scrollPast);
+  navLinks.style.gap = gap + 'px';
 
   // Fade logo in (faster, starts earlier)
   if (navLogoWrap) navLogoWrap.style.opacity = Math.min(1, scrollPast * 3);
