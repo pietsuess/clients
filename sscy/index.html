@@ -220,12 +220,11 @@ p { text-align: justify; text-justify: inter-word; }
 }
 
 /* ORBIT NAV */
-.orbit-section { height: 340px; position: relative; overflow: hidden; background: var(--cream); }
-.orbit-title { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5; pointer-events: none; }
-.orbit-title h2 { font-size: 1.3rem; font-weight: 300; color: #888; letter-spacing: 0.08em; }
-.orbit-title .hint { font-size: 0.65rem; color: #bbb; margin-top: 6px; }
+.orbit-section { position: absolute; bottom: 0; left: 0; right: 0; height: 200px; z-index: 5; pointer-events: none; }
+.orbit-card { pointer-events: auto; }
+.orbit-title { display: none; }
 .orbit-track { position: absolute; inset: 0; }
-.orbit-card { position: absolute; width: 280px; height: 160px; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1); transition: transform 0.15s ease-out, box-shadow 0.3s ease; will-change: transform; }
+.orbit-card { position: absolute; width: 260px; height: 120px; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1); transition: transform 0.15s ease-out, box-shadow 0.3s ease; will-change: transform; }
 .orbit-card:nth-child(1) { background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
 .orbit-card:nth-child(2) { background: linear-gradient(160deg, #c9a84c, #d4b85c); }
 .orbit-card:nth-child(3) { background: linear-gradient(160deg, #2a8a7d, #3bb8a8); }
@@ -246,10 +245,8 @@ p { text-align: justify; text-justify: inter-word; }
   <div class="hero-content" id="heroText">
     <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
   </div>
-</section>
-
-<!-- ORBIT NAV -->
-<section class="orbit-section" id="orbitSection">
+  <!-- ORBIT NAV - overlays bottom of hero -->
+  <div class="orbit-section" id="orbitSection">
   <div class="orbit-title">
     <h2>What brings you here?</h2>
     <div class="hint">hover to explore</div>
@@ -275,6 +272,7 @@ p { text-align: justify; text-justify: inter-word; }
       <div class="oc-label">Host</div>
       <div class="oc-sub">Venues, rentals, events</div>
     </div>
+  </div>
   </div>
 </section>
 
@@ -685,8 +683,8 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     return {
       cx: rect.width / 2,
       cy: rect.height / 2,
-      rx: Math.min(rect.width * 0.2, 220),
-      ry: rect.height * 0.06
+      rx: rect.width * 0.35,
+      ry: rect.height * 0.08
     };
   }
 
@@ -694,8 +692,8 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     var g = getGeometry();
     cards.forEach(function(card, i) {
       var a = angle + (i * Math.PI * 0.5);
-      var x = g.cx + Math.cos(a) * g.rx - 140;
-      var y = g.cy + Math.sin(a) * g.ry - 80;
+      var x = g.cx + Math.cos(a) * g.rx - 130;
+      var y = g.cy + Math.sin(a) * g.ry - 60;
       var z = Math.sin(a);
       var scale = 0.65 + (z + 1) * 0.25;
       var opacity = 0.35 + (z + 1) * 0.325;
