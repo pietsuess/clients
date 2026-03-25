@@ -3,423 +3,368 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wireframe: Intent-Based Spatial</title>
+<title>Wireframe: Intent-Based Spatial v3</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #0a0a0a; font-family: system-ui; overflow: hidden; height: 100vh; color: #fff; }
+body { background: #f5f0e8; font-family: system-ui; overflow: hidden; height: 100vh; color: #333; }
 
-/* 3D Scene container */
-.scene { perspective: 1200px; height: 100vh; width: 100vw; position: relative; }
+/* ===== LANDING: Orbiting intents ===== */
+.landing-scene { perspective: 1000px; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; transition: opacity 0.6s ease; }
+.landing-scene.gone { opacity: 0; pointer-events: none; }
 
-/* Room - rotates based on chosen intent */
-.room {
-  width: 100%; height: 100%; position: relative;
+.orbit-ring {
+  width: 500px; height: 500px; position: relative;
   transform-style: preserve-3d;
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slowSpin 30s linear infinite;
 }
 
-/* Landing state - centered */
-.room.landing { transform: translateZ(-200px); }
+@keyframes slowSpin { to { transform: rotateY(360deg); } }
 
-/* Intent states - camera moves into a direction */
-.room.state-peace { transform: translateZ(100px) translateY(-60px); }
-.room.state-learn { transform: translateZ(100px) translateX(-60px); }
-.room.state-give { transform: translateZ(100px) translateY(60px); }
-.room.state-host { transform: translateZ(100px) translateX(60px); }
-
-/* Floating particles for depth */
-.particle {
-  position: absolute; border-radius: 50%; background: rgba(255,255,255,0.06);
-  pointer-events: none;
-}
-
-/* Landing intents - 4 floating panels in 3D space */
-.intent-panels {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  transform-style: preserve-3d;
-  transition: opacity 0.6s ease, transform 0.8s ease;
-}
-
-.intent-panels.hidden { opacity: 0; pointer-events: none; transform: scale(0.8) translateZ(-200px); }
-
-.intent-panel {
-  position: absolute; width: 260px; height: 320px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+.orbit-item {
+  position: absolute; width: 220px; height: 260px;
+  left: 50%; top: 50%; margin-left: -110px; margin-top: -130px;
   border-radius: 24px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  transform-style: preserve-3d;
+  color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  /* Counter-rotate so text stays readable */
+  backface-visibility: hidden;
 }
 
-.intent-panel:hover {
-  background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2);
-  transform: translateZ(40px) scale(1.05) !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+.orbit-item:nth-child(1) { transform: rotateY(0deg) translateZ(260px) rotateY(0deg); background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
+.orbit-item:nth-child(2) { transform: rotateY(90deg) translateZ(260px) rotateY(-90deg); background: linear-gradient(160deg, #8a6a3a, #aa8a5a); }
+.orbit-item:nth-child(3) { transform: rotateY(180deg) translateZ(260px) rotateY(-180deg); background: linear-gradient(160deg, #3a5a8a, #5a7aaa); }
+.orbit-item:nth-child(4) { transform: rotateY(270deg) translateZ(260px) rotateY(-270deg); background: linear-gradient(160deg, #7a6a3a, #9a8a5a); }
+
+.orbit-item:hover { transform-origin: center; box-shadow: 0 16px 48px rgba(0,0,0,0.25); }
+
+.oi-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.6; }
+.oi-label { font-size: 1.2rem; font-weight: 500; letter-spacing: 0.04em; margin-bottom: 6px; }
+.oi-sub { font-size: 0.72rem; opacity: 0.6; text-align: center; padding: 0 16px; line-height: 1.5; }
+
+/* Center text */
+.orbit-center {
+  position: absolute; text-align: center; z-index: 5; pointer-events: none;
 }
 
-/* Position panels in 3D space */
-.intent-panel:nth-child(1) { transform: translate(-180px, -160px) translateZ(20px) rotateY(5deg); }
-.intent-panel:nth-child(2) { transform: translate(180px, -160px) translateZ(-10px) rotateY(-5deg); }
-.intent-panel:nth-child(3) { transform: translate(-180px, 160px) translateZ(-10px) rotateY(5deg); }
-.intent-panel:nth-child(4) { transform: translate(180px, 160px) translateZ(20px) rotateY(-5deg); }
+.orbit-center h1 { font-size: 1.4rem; font-weight: 300; color: #666; letter-spacing: 0.08em; }
+.orbit-center .hint { font-size: 0.7rem; color: #aaa; margin-top: 8px; }
 
-.intent-icon { font-size: 3rem; margin-bottom: 20px; opacity: 0.5; }
-.intent-label { font-size: 1.3rem; font-weight: 300; letter-spacing: 0.06em; margin-bottom: 8px; }
-.intent-sub { font-size: 0.75rem; opacity: 0.35; text-align: center; padding: 0 20px; line-height: 1.5; }
-
-/* Heading */
-.landing-title {
-  position: absolute; top: 15%; left: 50%; transform: translateX(-50%) translateZ(60px);
-  text-align: center; z-index: 5;
-  transition: opacity 0.6s ease;
+/* Speed control - mouse X position */
+.speed-indicator {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  font-size: 0.65rem; color: #bbb; letter-spacing: 0.1em; text-transform: uppercase;
 }
 
-.landing-title.hidden { opacity: 0; }
-
-.landing-title h1 { font-size: 1.6rem; font-weight: 200; letter-spacing: 0.12em; opacity: 0.6; }
-
-/* Content space - cards floating in 3D */
-.content-space {
-  position: absolute; inset: 0;
-  transform-style: preserve-3d;
+/* ===== CONTENT STATE ===== */
+.content-state {
+  position: fixed; inset: 0; background: #f5f0e8;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.8s ease 0.3s;
+  transition: opacity 0.5s ease 0.2s;
+  overflow-y: auto;
 }
 
-.content-space.active { opacity: 1; pointer-events: auto; }
-
-.float-card {
-  position: absolute; width: 300px; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 20px;
-  overflow: hidden; cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-style: preserve-3d;
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-}
-
-.float-card:hover {
-  background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-  z-index: 10;
-}
-
-.fc-visual {
-  height: 160px; display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; opacity: 0.2;
-}
-
-.fc-body { padding: 24px; }
-.fc-tag { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.4; margin-bottom: 6px; }
-.fc-title { font-size: 1.1rem; font-weight: 500; margin-bottom: 6px; }
-.fc-desc { font-size: 0.78rem; opacity: 0.5; line-height: 1.5; }
-
-/* Color tints per intent */
-.fc-peace .fc-visual { background: linear-gradient(135deg, rgba(26,92,83,0.3), rgba(42,138,125,0.2)); }
-.fc-learn .fc-visual { background: linear-gradient(135deg, rgba(100,70,40,0.3), rgba(140,100,60,0.2)); }
-.fc-give .fc-visual { background: linear-gradient(135deg, rgba(60,80,120,0.3), rgba(80,100,140,0.2)); }
-.fc-host .fc-visual { background: linear-gradient(135deg, rgba(120,100,60,0.3), rgba(140,120,80,0.2)); }
+.content-state.active { opacity: 1; pointer-events: auto; }
 
 /* Top bar */
-.space-bar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-  padding: 20px 32px; display: flex; justify-content: space-between; align-items: center;
-  opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+.top-bar {
+  position: sticky; top: 0; z-index: 50;
+  padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+  background: rgba(245,240,232,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-.space-bar.visible { opacity: 1; pointer-events: auto; }
-
-.space-bar .back-btn {
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 50px; padding: 10px 24px; color: #fff; font-size: 0.8rem;
-  cursor: pointer; transition: 0.25s; display: flex; align-items: center; gap: 8px;
+.top-bar .back {
+  background: none; border: 1.5px solid #ccc; border-radius: 50px; padding: 10px 24px;
+  cursor: pointer; font-size: 0.82rem; color: #888; transition: 0.25s;
+  display: flex; align-items: center; gap: 8px;
 }
 
-.space-bar .back-btn:hover { background: rgba(255,255,255,0.12); }
+.top-bar .back:hover { border-color: #999; color: #444; }
 
-.space-bar .intent-switcher { display: flex; gap: 6px; }
+.top-bar .intent-name { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.14em; color: #1a5c53; font-weight: 600; }
 
-.sw-btn {
-  width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);
-  background: none; color: rgba(255,255,255,0.4); cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-size: 1rem;
-  transition: all 0.4s ease;
+.switcher { display: flex; gap: 6px; }
+
+.sw {
+  width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid #ddd;
+  background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; color: #999; transition: all 0.3s ease;
 }
 
-.sw-btn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
-.sw-btn.active { background: rgba(255,255,255,0.12); color: #fff; border-color: rgba(255,255,255,0.3); }
+.sw:hover { border-color: #1a5c53; color: #1a5c53; }
+.sw.active { background: #1a5c53; color: #fff; border-color: #1a5c53; }
 
-.current-label {
-  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em;
-  opacity: 0.4; position: absolute; left: 50%; transform: translateX(-50%);
+/* Card grid - settles into readable layout with depth on hover */
+.card-area { padding: 32px; max-width: 1100px; margin: 0 auto; }
+
+.card-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  perspective: 800px;
 }
 
-/* Depth lines for spatial feel */
-.depth-grid {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 80px 80px;
-  transform: perspective(800px) rotateX(60deg) translateY(200px);
-  opacity: 0.3;
-  mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+.grid-card {
+  background: #fff; border-radius: 20px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+  opacity: 0; transform: translateY(40px) rotateX(5deg);
+  animation: cardIn 0.6s ease forwards;
+}
+
+.grid-card:nth-child(1) { animation-delay: 0.05s; }
+.grid-card:nth-child(2) { animation-delay: 0.1s; }
+.grid-card:nth-child(3) { animation-delay: 0.15s; }
+.grid-card:nth-child(4) { animation-delay: 0.2s; }
+.grid-card:nth-child(5) { animation-delay: 0.25s; }
+.grid-card:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes cardIn { to { opacity: 1; transform: none; } }
+
+.grid-card:hover {
+  box-shadow: 0 20px 48px rgba(0,0,0,0.12);
+  z-index: 5;
+}
+
+.gc-visual {
+  height: 180px; display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; opacity: 0.15;
+}
+
+.gc-body { padding: 24px; }
+.gc-tag { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; margin-bottom: 6px; }
+.gc-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 8px; }
+.gc-desc { font-size: 0.82rem; color: #999; line-height: 1.5; }
+
+/* Intent colors */
+.gc-peace .gc-visual { background: linear-gradient(135deg, #d4ece8, #b0d8d0); }
+.gc-peace .gc-tag { color: #1a5c53; }
+.gc-learn .gc-visual { background: linear-gradient(135deg, #ece0d4, #d8c8b0); }
+.gc-learn .gc-tag { color: #8a6a3a; }
+.gc-give .gc-visual { background: linear-gradient(135deg, #d4e0ec, #b0c8d8); }
+.gc-give .gc-tag { color: #3a5a8a; }
+.gc-host .gc-visual { background: linear-gradient(135deg, #ece8d4, #d8d0b0); }
+.gc-host .gc-tag { color: #7a6a3a; }
+
+/* Quote break between cards */
+.quote-break {
+  grid-column: 1 / -1; text-align: center; padding: 40px 24px;
+  background: rgba(0,0,0,0.02); border-radius: 20px;
+}
+
+.quote-break q { font-style: italic; font-size: 1.1rem; color: #666; }
+.quote-break cite { display: block; font-size: 0.72rem; color: #bbb; margin-top: 8px; font-style: normal; text-transform: uppercase; letter-spacing: 0.1em; }
+
+@media (max-width: 900px) {
+  .card-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .orbit-ring { width: 300px; height: 300px; }
+  .orbit-item { width: 160px; height: 200px; margin-left: -80px; margin-top: -100px; }
+  .orbit-item:nth-child(1) { transform: rotateY(0deg) translateZ(160px) rotateY(0deg); }
+  .orbit-item:nth-child(2) { transform: rotateY(90deg) translateZ(160px) rotateY(-90deg); }
+  .orbit-item:nth-child(3) { transform: rotateY(180deg) translateZ(160px) rotateY(-180deg); }
+  .orbit-item:nth-child(4) { transform: rotateY(270deg) translateZ(160px) rotateY(-270deg); }
 }
 </style>
 </head>
 <body>
 
-<div class="scene" id="scene">
-  <!-- Depth grid floor -->
-  <div class="depth-grid"></div>
-
-  <div class="room landing" id="room">
-
-    <!-- Floating particles -->
-    <div id="particles"></div>
-
-    <!-- Landing title -->
-    <div class="landing-title" id="landingTitle">
-      <h1>What brings you here?</h1>
+<!-- LANDING: Orbiting intents -->
+<div class="landing-scene" id="landingScene">
+  <div class="orbit-center">
+    <h1>What brings you here?</h1>
+    <div class="hint">click to explore</div>
+  </div>
+  <div class="orbit-ring" id="orbitRing">
+    <div class="orbit-item" onclick="enter('peace')">
+      <div class="oi-icon">&#x25CB;</div>
+      <div class="oi-label">Find Peace</div>
+      <div class="oi-sub">Retreats, wellness, the land</div>
     </div>
-
-    <!-- 4 intent panels floating in 3D -->
-    <div class="intent-panels" id="intentPanels">
-      <div class="intent-panel" onclick="enterIntent('peace')">
-        <div class="intent-icon">&#x25CB;</div>
-        <div class="intent-label">Find Peace</div>
-        <div class="intent-sub">Retreats, wellness, the land, sanctuary</div>
-      </div>
-      <div class="intent-panel" onclick="enterIntent('learn')">
-        <div class="intent-icon">&#x25B3;</div>
-        <div class="intent-label">Learn</div>
-        <div class="intent-sub">Classes, training, philosophy, practice</div>
-      </div>
-      <div class="intent-panel" onclick="enterIntent('give')">
-        <div class="intent-icon">&#x25C7;</div>
-        <div class="intent-label">Give Back</div>
-        <div class="intent-sub">Karma yoga, donate, shop, community</div>
-      </div>
-      <div class="intent-panel" onclick="enterIntent('host')">
-        <div class="intent-icon">&#x25A1;</div>
-        <div class="intent-label">Host</div>
-        <div class="intent-sub">Venues, rentals, events, gatherings</div>
-      </div>
+    <div class="orbit-item" onclick="enter('learn')">
+      <div class="oi-icon">&#x25B3;</div>
+      <div class="oi-label">Learn</div>
+      <div class="oi-sub">Classes, training, philosophy</div>
     </div>
-
-    <!-- Content spaces (one per intent, cards positioned in 3D) -->
-    <div class="content-space" id="space-peace"></div>
-    <div class="content-space" id="space-learn"></div>
-    <div class="content-space" id="space-give"></div>
-    <div class="content-space" id="space-host"></div>
+    <div class="orbit-item" onclick="enter('give')">
+      <div class="oi-icon">&#x25C7;</div>
+      <div class="oi-label">Give Back</div>
+      <div class="oi-sub">Karma yoga, donate, shop</div>
+    </div>
+    <div class="orbit-item" onclick="enter('host')">
+      <div class="oi-icon">&#x25A1;</div>
+      <div class="oi-label">Host</div>
+      <div class="oi-sub">Venues, rentals, events</div>
+    </div>
   </div>
 </div>
 
-<!-- Top bar -->
-<div class="space-bar" id="spaceBar">
-  <button class="back-btn" onclick="goBack()">&#8592; Back</button>
-  <span class="current-label" id="currentLabel"></span>
-  <div class="intent-switcher">
-    <button class="sw-btn" id="sw-peace" onclick="switchIntent('peace')" title="Find Peace">&#x25CB;</button>
-    <button class="sw-btn" id="sw-learn" onclick="switchIntent('learn')" title="Learn">&#x25B3;</button>
-    <button class="sw-btn" id="sw-give" onclick="switchIntent('give')" title="Give Back">&#x25C7;</button>
-    <button class="sw-btn" id="sw-host" onclick="switchIntent('host')" title="Host">&#x25A1;</button>
+<div class="speed-indicator">move mouse to control speed</div>
+
+<!-- CONTENT STATE -->
+<div class="content-state" id="contentState">
+  <div class="top-bar">
+    <button class="back" onclick="goBack()">&#8592; Back</button>
+    <span class="intent-name" id="intentName"></span>
+    <div class="switcher">
+      <button class="sw" id="sw-peace" onclick="switchTo('peace')">&#x25CB;</button>
+      <button class="sw" id="sw-learn" onclick="switchTo('learn')">&#x25B3;</button>
+      <button class="sw" id="sw-give" onclick="switchTo('give')">&#x25C7;</button>
+      <button class="sw" id="sw-host" onclick="switchTo('host')">&#x25A1;</button>
+    </div>
+  </div>
+  <div class="card-area">
+    <div class="card-grid" id="cardGrid"></div>
   </div>
 </div>
 
 <script>
-// Card data
-var data = {
-  peace: [
-    {tag:"Retreat", title:"Weekend Yoga Retreat", desc:"2 nights of practice, rest, and renewal"},
-    {tag:"Retreat", title:"Silent Retreat", desc:"Going deeper through stillness"},
-    {tag:"Wellness", title:"Ayurveda Treatments", desc:"Ancient healing for modern bodies"},
-    {tag:"The Land", title:"69 Acres of Sanctuary", desc:"Forests, gardens, ponds, temples"},
-    {tag:"Personal", title:"Personal Retreat", desc:"Come on your own terms"},
-    {tag:"Wellness", title:"Swedish Massage", desc:"Restore and release"},
-  ],
-  learn: [
-    {tag:"Training", title:"200-Hour Teacher Training", desc:"Become a certified yoga teacher"},
-    {tag:"Classes", title:"Weekly Yoga Classes", desc:"Asana, pranayama, meditation"},
-    {tag:"Study", title:"Yoga Study Groups", desc:"Scriptures, philosophy, practice"},
-    {tag:"Satsang", title:"Sunday Satsang", desc:"Community gathering and teachings"},
-    {tag:"Books", title:"Babaji's Writings", desc:"30+ books on yoga and life"},
-    {tag:"Events", title:"Music for Peace", desc:"Indian classical concert series"},
-  ],
-  give: [
-    {tag:"Karma Yoga", title:"Volunteer Program", desc:"Live and serve at the Centre"},
-    {tag:"Donate", title:"Support the Sanctuary", desc:"Every gift preserves 69 acres"},
-    {tag:"Shop", title:"Books & Merch", desc:"Purchases support the Centre"},
-    {tag:"Membership", title:"Become a Member", desc:"Join the society"},
-    {tag:"Garden", title:"Sponsor a Garden Bed", desc:"Keep the organic farm growing"},
-    {tag:"Community", title:"Feed a Karma Yogi", desc:"Cover meals for a volunteer"},
-  ],
-  host: [
-    {tag:"Venue", title:"Satsang Room", desc:"Ceremony and gathering space"},
-    {tag:"Venue", title:"Pond Dome", desc:"Geodesic dome by the water"},
-    {tag:"Venue", title:"Garden House", desc:"Yoga studio with accommodation"},
-    {tag:"Venue", title:"Sauna", desc:"Wood-burning, night sky views"},
-    {tag:"Event", title:"Host a Retreat", desc:"Multi-day programs on sacred land"},
-    {tag:"Event", title:"Host a Workshop", desc:"Day events and gatherings"},
-  ]
+var intentData = {
+  peace: {
+    label: "Find Peace", color: "peace",
+    cards: [
+      {tag:"Retreat", title:"Weekend Yoga Retreat", desc:"2 nights of practice, rest, and renewal"},
+      {tag:"Retreat", title:"Silent Retreat", desc:"Going deeper through stillness"},
+      {tag:"Wellness", title:"Ayurveda Treatments", desc:"Ancient healing for modern bodies"},
+      {tag:"The Land", title:"69 Acres of Sanctuary", desc:"Forests, gardens, ponds, and temples"},
+      {tag:"Personal", title:"Personal Retreat", desc:"Come on your own terms"},
+      {tag:"Wellness", title:"Swedish Massage", desc:"Restore and release"},
+    ],
+    quote: {text:"Peace. No more than that.", cite:"Baba Hari Dass, 1976"}
+  },
+  learn: {
+    label: "Learn", color: "learn",
+    cards: [
+      {tag:"Training", title:"200-Hour Teacher Training", desc:"Become a certified yoga teacher"},
+      {tag:"Classes", title:"Weekly Yoga Classes", desc:"Asana, pranayama, meditation"},
+      {tag:"Study", title:"Yoga Study Groups", desc:"Scriptures, philosophy, practice"},
+      {tag:"Satsang", title:"Sunday Satsang", desc:"Community gathering and teachings"},
+      {tag:"Books", title:"Babaji's Writings", desc:"30+ books on yoga and life"},
+      {tag:"Events", title:"Music for Peace", desc:"Indian classical concert series"},
+    ],
+    quote: {text:"As soon as a person starts thinking I want to be a better person, that is the start of yoga.", cite:"Baba Hari Dass"}
+  },
+  give: {
+    label: "Give Back", color: "give",
+    cards: [
+      {tag:"Karma Yoga", title:"Volunteer Program", desc:"Live and serve at the Centre"},
+      {tag:"Donate", title:"Support the Sanctuary", desc:"Every gift preserves 69 acres"},
+      {tag:"Shop", title:"Books & Merch", desc:"Purchases support the Centre"},
+      {tag:"Membership", title:"Become a Member", desc:"Join the Dharma Sara Satsang Society"},
+      {tag:"Garden", title:"Sponsor a Garden Bed", desc:"Keep the organic farm growing"},
+      {tag:"Community", title:"Feed a Karma Yogi", desc:"Cover meals for a volunteer"},
+    ],
+    quote: {text:"People can't say we live here and we don't want to help the Centre.", cite:"Baba Hari Dass, 1989"}
+  },
+  host: {
+    label: "Host", color: "host",
+    cards: [
+      {tag:"Venue", title:"Satsang Room", desc:"Ceremony and gathering space"},
+      {tag:"Venue", title:"Pond Dome", desc:"Geodesic dome by the water"},
+      {tag:"Venue", title:"Garden House", desc:"Yoga studio with accommodation"},
+      {tag:"Venue", title:"Sauna", desc:"Wood-burning, night sky views"},
+      {tag:"Event", title:"Host a Retreat", desc:"Multi-day programs on sacred land"},
+      {tag:"Event", title:"Host a Workshop", desc:"Day events and gatherings"},
+    ],
+    quote: {text:"This kind of place is for nad yoga.", cite:"Baba Hari Dass, 1981"}
+  }
 };
 
-var labels = {peace:"Find Peace", learn:"Learn", give:"Give Back", host:"Host"};
-var currentIntent = null;
+var currentKey = null;
+var orbitRing = document.getElementById('orbitRing');
+var baseSpeed = 12; // seconds per rotation (lower = faster)
 
-// Generate floating cards in 3D positions
-Object.keys(data).forEach(function(key) {
-  var space = document.getElementById('space-' + key);
-  var cards = data[key];
-  var cx = window.innerWidth / 2;
-  var cy = window.innerHeight / 2;
-
-  cards.forEach(function(card, i) {
-    var angle = (i / cards.length) * Math.PI * 2;
-    var radius = 280 + (i % 2) * 120;
-    var x = cx + Math.cos(angle) * radius - 150;
-    var y = cy + Math.sin(angle) * radius * 0.6 - 120;
-    var z = -100 + (i % 3) * 80;
-    var rotY = (Math.random() - 0.5) * 10;
-
-    var el = document.createElement('div');
-    el.className = 'float-card fc-' + key;
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    el.style.transform = 'translateZ(' + z + 'px) rotateY(' + rotY + 'deg)';
-    el.dataset.z = z;
-    el.dataset.rotY = rotY;
-    el.innerHTML = '<div class="fc-visual">&#x2727;</div><div class="fc-body"><div class="fc-tag">' + card.tag + '</div><div class="fc-title">' + card.title + '</div><div class="fc-desc">' + card.desc + '</div></div>';
-    space.appendChild(el);
-  });
-});
-
-// Generate particles
-var particlesEl = document.getElementById('particles');
-for (var i = 0; i < 40; i++) {
-  var p = document.createElement('div');
-  p.className = 'particle';
-  var size = 2 + Math.random() * 4;
-  p.style.width = size + 'px';
-  p.style.height = size + 'px';
-  p.style.left = Math.random() * 100 + '%';
-  p.style.top = Math.random() * 100 + '%';
-  p.style.transform = 'translateZ(' + (Math.random() * 400 - 200) + 'px)';
-  p.dataset.speed = (0.3 + Math.random() * 0.7).toFixed(2);
-  particlesEl.appendChild(p);
-}
-
-// Mouse-driven parallax on the room
-var room = document.getElementById('room');
-var mouseX = 0, mouseY = 0;
-var targetRotX = 0, targetRotY = 0;
-var currentRotX = 0, currentRotY = 0;
-
+// Mouse controls orbit speed
 document.addEventListener('mousemove', function(e) {
-  mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-  mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  targetRotY = mouseX * 8;
-  targetRotX = -mouseY * 5;
+  var x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
+  var speed = baseSpeed - (x * 10); // range: 2 to 22 seconds
+  if (speed < 2) speed = 2;
+  if (speed > 40) speed = 40;
+  // Negative = reverse direction
+  if (x < -0.3) {
+    orbitRing.style.animationDirection = 'reverse';
+    orbitRing.style.animationDuration = Math.abs(speed) + 's';
+  } else {
+    orbitRing.style.animationDirection = 'normal';
+    orbitRing.style.animationDuration = speed + 's';
+  }
 });
 
-function animate() {
-  currentRotX += (targetRotX - currentRotX) * 0.06;
-  currentRotY += (targetRotY - currentRotY) * 0.06;
+// Enter an intent
+function enter(key) {
+  currentKey = key;
 
-  var base = '';
-  if (currentIntent) {
-    base = getIntentTransform(currentIntent);
-  } else {
-    base = 'translateZ(-200px)';
-  }
+  // Speed up orbit then disappear
+  orbitRing.style.animationDuration = '0.8s';
+  setTimeout(function() {
+    document.getElementById('landingScene').classList.add('gone');
+    showContent(key);
+  }, 400);
+}
 
-  room.style.transform = base + ' rotateX(' + currentRotX + 'deg) rotateY(' + currentRotY + 'deg)';
+function showContent(key) {
+  var d = intentData[key];
+  document.getElementById('contentState').classList.add('active');
+  document.getElementById('intentName').textContent = d.label;
 
-  // Move particles
-  var particles = document.querySelectorAll('.particle');
-  particles.forEach(function(p) {
-    var speed = parseFloat(p.dataset.speed);
-    var px = mouseX * 20 * speed;
-    var py = mouseY * 15 * speed;
-    p.style.transform = p.style.transform.split(')')[0] + ') translate(' + px + 'px, ' + py + 'px)';
+  document.querySelectorAll('.sw').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('sw-' + key).classList.add('active');
+
+  var grid = document.getElementById('cardGrid');
+  var html = '';
+
+  d.cards.forEach(function(c, i) {
+    html += '<div class="grid-card gc-' + d.color + '" style="animation-delay:' + (i * 0.06) + 's">';
+    html += '<div class="gc-visual">&#x2727;</div>';
+    html += '<div class="gc-body"><div class="gc-tag">' + c.tag + '</div><div class="gc-title">' + c.title + '</div><div class="gc-desc">' + c.desc + '</div></div>';
+    html += '</div>';
+
+    // Insert quote after 3rd card
+    if (i === 2 && d.quote) {
+      html += '<div class="quote-break" style="animation-delay:0.2s"><q>' + d.quote.text + '</q><cite>' + d.quote.cite + '</cite></div>';
+    }
   });
 
-  // Hover effect on cards - slight tilt toward mouse
-  if (currentIntent) {
-    var cards = document.querySelectorAll('#space-' + currentIntent + ' .float-card');
-    cards.forEach(function(c) {
-      var z = parseFloat(c.dataset.z);
-      var rotY = parseFloat(c.dataset.rotY);
-      var depth = (z + 100) / 200;
-      var px = mouseX * 15 * depth;
-      var py = mouseY * 10 * depth;
-      c.style.transform = 'translateZ(' + z + 'px) rotateY(' + (rotY + mouseX * 3) + 'deg) translate(' + px + 'px, ' + py + 'px)';
+  grid.innerHTML = html;
+
+  // 3D tilt on hover
+  grid.querySelectorAll('.grid-card').forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = 'perspective(600px) rotateY(' + (x * 12) + 'deg) rotateX(' + (-y * 8) + 'deg) translateY(-6px)';
     });
-  }
-
-  requestAnimationFrame(animate);
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = '';
+    });
+  });
 }
 
-animate();
+function switchTo(key) {
+  if (key === currentKey) return;
+  currentKey = key;
 
-function getIntentTransform(key) {
-  switch(key) {
-    case 'peace': return 'translateZ(100px) translateY(-40px)';
-    case 'learn': return 'translateZ(100px) translateX(-40px)';
-    case 'give': return 'translateZ(100px) translateY(40px)';
-    case 'host': return 'translateZ(100px) translateX(40px)';
-  }
-  return '';
-}
-
-function enterIntent(key) {
-  currentIntent = key;
-
-  // Hide landing
-  document.getElementById('intentPanels').classList.add('hidden');
-  document.getElementById('landingTitle').classList.add('hidden');
-
-  // Show content space
-  document.querySelectorAll('.content-space').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('space-' + key).classList.add('active');
-
-  // Show bar
-  document.getElementById('spaceBar').classList.add('visible');
-  document.getElementById('currentLabel').textContent = labels[key];
-
-  // Highlight switcher
-  document.querySelectorAll('.sw-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.getElementById('sw-' + key).classList.add('active');
-}
-
-function switchIntent(key) {
-  // Fade current space
-  var oldSpace = document.getElementById('space-' + currentIntent);
-  oldSpace.style.transition = 'opacity 0.4s ease';
-  oldSpace.classList.remove('active');
-
-  currentIntent = key;
+  var grid = document.getElementById('cardGrid');
+  grid.style.opacity = '0';
+  grid.style.transform = 'translateY(20px)';
+  grid.style.transition = 'all 0.3s ease';
 
   setTimeout(function() {
-    document.getElementById('space-' + key).classList.add('active');
-    document.getElementById('currentLabel').textContent = labels[key];
-    document.querySelectorAll('.sw-btn').forEach(function(b) { b.classList.remove('active'); });
-    document.getElementById('sw-' + key).classList.add('active');
+    showContent(key);
+    grid.style.opacity = '1';
+    grid.style.transform = 'none';
   }, 300);
 }
 
 function goBack() {
-  currentIntent = null;
+  currentKey = null;
+  document.getElementById('contentState').classList.remove('active');
 
-  // Hide content
-  document.querySelectorAll('.content-space').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('spaceBar').classList.remove('visible');
-
-  // Show landing
-  document.getElementById('intentPanels').classList.remove('hidden');
-  document.getElementById('landingTitle').classList.remove('hidden');
+  setTimeout(function() {
+    document.getElementById('landingScene').classList.remove('gone');
+    orbitRing.style.animationDuration = baseSpeed + 's';
+    orbitRing.style.animationDirection = 'normal';
+  }, 200);
 }
 </script>
 </body>
