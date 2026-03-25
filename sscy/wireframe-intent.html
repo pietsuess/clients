@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: Intent-Based</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f5f0e8; font-family: system-ui; overflow: hidden; height: 100vh; }
+
+/* Landing state */
+.landing {
+  height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #1a5c53, #2a8a7d);
+  color: #fff; transition: opacity 0.6s ease;
+  position: relative; z-index: 10;
+}
+
+.landing.gone { opacity: 0; pointer-events: none; }
+
+.landing-logo {
+  width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.15);
+  margin-bottom: 32px; display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+}
+
+.landing h1 { font-size: 1.8rem; font-weight: 300; margin-bottom: 48px; letter-spacing: 0.05em; }
+
+.intents {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px; width: 90%;
+}
+
+.intent {
+  padding: 32px 24px; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 20px;
+  text-align: center; cursor: pointer; transition: all 0.4s ease;
+  background: rgba(255,255,255,0.05); backdrop-filter: blur(8px);
+}
+
+.intent:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.5); transform: translateY(-4px); }
+
+.intent-icon { font-size: 2rem; margin-bottom: 12px; opacity: 0.6; }
+.intent-label { font-size: 1rem; font-weight: 500; letter-spacing: 0.03em; }
+.intent-sub { font-size: 0.75rem; opacity: 0.5; margin-top: 6px; }
+
+/* Content state */
+.content-world {
+  position: fixed; inset: 0; background: #f5f0e8;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.6s ease 0.3s;
+}
+
+.content-world.active { opacity: 1; pointer-events: auto; }
+
+/* Top bar in content */
+.content-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+  background: rgba(245,240,232,0.95); backdrop-filter: blur(12px);
+}
+
+.content-bar .back {
+  background: none; border: 1px solid #ccc; border-radius: 50px; padding: 8px 20px;
+  cursor: pointer; font-size: 0.8rem; color: #666; transition: 0.25s;
+}
+
+.content-bar .back:hover { border-color: #999; color: #333; }
+
+.content-bar .current-intent {
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: #1a5c53; font-weight: 600;
+}
+
+.content-bar .switch-btns { display: flex; gap: 8px; }
+.switch-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ddd;
+  background: none; cursor: pointer; font-size: 0.8rem; transition: 0.25s;
+  display: flex; align-items: center; justify-content: center;
+}
+.switch-btn:hover { border-color: #1a5c53; color: #1a5c53; }
+.switch-btn.active { background: #1a5c53; color: #fff; border-color: #1a5c53; }
+
+/* Content cards */
+.content-scroll {
+  padding: 80px 32px 32px;
+  height: 100vh; overflow-y: auto;
+}
+
+.content-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px; max-width: 1100px; margin: 0 auto;
+}
+
+.content-card {
+  background: #fff; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.content-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+
+.card-image {
+  height: 180px; background: #ddd; display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; color: #bbb;
+}
+
+.card-body { padding: 20px; }
+.card-tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #2a8a7d; margin-bottom: 6px; font-weight: 600; }
+.card-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 6px; }
+.card-desc { font-size: 0.82rem; color: #888; line-height: 1.5; }
+
+/* Colors per intent */
+.card-image.peace { background: linear-gradient(135deg, #d4e8e4, #b8d4d0); }
+.card-image.learn { background: linear-gradient(135deg, #e8ddd4, #d4c8b8); }
+.card-image.give { background: linear-gradient(135deg, #d4dfe8, #b8c8d4); }
+.card-image.host { background: linear-gradient(135deg, #e8e4d4, #d4d0b8); }
+</style>
+</head>
+<body>
+
+<div class="landing" id="landing">
+  <div class="landing-logo">&#x2727;</div>
+  <h1>What brings you here?</h1>
+  <div class="intents">
+    <div class="intent" onclick="chooseIntent('peace')">
+      <div class="intent-icon">&#x25CB;</div>
+      <div class="intent-label">Find Peace</div>
+      <div class="intent-sub">retreats, wellness, the land</div>
+    </div>
+    <div class="intent" onclick="chooseIntent('learn')">
+      <div class="intent-icon">&#x25B3;</div>
+      <div class="intent-label">Learn</div>
+      <div class="intent-sub">classes, training, philosophy</div>
+    </div>
+    <div class="intent" onclick="chooseIntent('give')">
+      <div class="intent-icon">&#x25C7;</div>
+      <div class="intent-label">Give Back</div>
+      <div class="intent-sub">karma yoga, donate, shop</div>
+    </div>
+    <div class="intent" onclick="chooseIntent('host')">
+      <div class="intent-icon">&#x25A1;</div>
+      <div class="intent-label">Host</div>
+      <div class="intent-sub">venues, rentals, events</div>
+    </div>
+  </div>
+</div>
+
+<div class="content-world" id="contentWorld">
+  <div class="content-bar">
+    <button class="back" onclick="goBack()">&#8592; Back</button>
+    <div class="current-intent" id="currentIntent">Find Peace</div>
+    <div class="switch-btns">
+      <button class="switch-btn" onclick="switchIntent('peace')" id="sw-peace" title="Peace">&#x25CB;</button>
+      <button class="switch-btn" onclick="switchIntent('learn')" id="sw-learn" title="Learn">&#x25B3;</button>
+      <button class="switch-btn" onclick="switchIntent('give')" id="sw-give" title="Give">&#x25C7;</button>
+      <button class="switch-btn" onclick="switchIntent('host')" id="sw-host" title="Host">&#x25A1;</button>
+    </div>
+  </div>
+  <div class="content-scroll">
+    <div class="content-grid" id="contentGrid"></div>
+  </div>
+</div>
+
+<script>
+var intentData = {
+  peace: {
+    label: "Find Peace",
+    cards: [
+      {tag:"Retreat", title:"Weekend Yoga Retreat", desc:"2 nights of practice, rest, and renewal"},
+      {tag:"Retreat", title:"Silent Retreat", desc:"Going deeper through stillness"},
+      {tag:"Wellness", title:"Ayurveda Treatments", desc:"Ancient healing for modern bodies"},
+      {tag:"The Land", title:"69 Acres of Sanctuary", desc:"Forests, gardens, ponds, temples"},
+      {tag:"Personal", title:"Personal Retreat", desc:"Come on your own terms"},
+      {tag:"Wellness", title:"Swedish Massage", desc:"Restore and release"},
+    ]
+  },
+  learn: {
+    label: "Learn",
+    cards: [
+      {tag:"Training", title:"200-Hour Teacher Training", desc:"Become a certified yoga teacher"},
+      {tag:"Classes", title:"Weekly Yoga Classes", desc:"Asana, pranayama, meditation"},
+      {tag:"Study", title:"Yoga Study Groups", desc:"Scriptures, philosophy, practice"},
+      {tag:"Satsang", title:"Sunday Satsang", desc:"Community gathering and teachings"},
+      {tag:"Books", title:"Babaji's Writings", desc:"30+ books on yoga and life"},
+      {tag:"Events", title:"Music for Peace", desc:"Indian classical concert series"},
+    ]
+  },
+  give: {
+    label: "Give Back",
+    cards: [
+      {tag:"Karma Yoga", title:"Volunteer Program", desc:"Live and serve at the Centre"},
+      {tag:"Donate", title:"Support the Sanctuary", desc:"Every gift preserves 69 acres"},
+      {tag:"Shop", title:"Books & Merch", desc:"Purchases support the Centre"},
+      {tag:"Membership", title:"Become a Member", desc:"Join the Dharma Sara Satsang Society"},
+      {tag:"Garden", title:"Sponsor a Garden Bed", desc:"Keep the organic farm growing"},
+      {tag:"Community", title:"Feed a Karma Yogi", desc:"Cover meals for a volunteer"},
+    ]
+  },
+  host: {
+    label: "Host",
+    cards: [
+      {tag:"Venue", title:"Satsang Room", desc:"Ceremony and gathering space"},
+      {tag:"Venue", title:"Pond Dome", desc:"Geodesic dome by the water"},
+      {tag:"Venue", title:"Garden House", desc:"Yoga studio with accommodation"},
+      {tag:"Venue", title:"Sauna", desc:"Wood-burning, night sky views"},
+      {tag:"Event", title:"Host a Retreat", desc:"Multi-day programs on sacred land"},
+      {tag:"Event", title:"Host a Workshop", desc:"Day events and gatherings"},
+    ]
+  }
+};
+
+var currentIntentKey = null;
+
+function chooseIntent(key) {
+  currentIntentKey = key;
+  document.getElementById('landing').classList.add('gone');
+  document.getElementById('contentWorld').classList.add('active');
+  renderContent(key);
+}
+
+function switchIntent(key) {
+  currentIntentKey = key;
+  renderContent(key);
+}
+
+function renderContent(key) {
+  var data = intentData[key];
+  document.getElementById('currentIntent').textContent = data.label;
+
+  // Highlight active switch
+  document.querySelectorAll('.switch-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('sw-' + key).classList.add('active');
+
+  var grid = document.getElementById('contentGrid');
+  grid.style.opacity = 0;
+  grid.style.transform = 'translateY(20px)';
+
+  setTimeout(function() {
+    grid.innerHTML = data.cards.map(function(c) {
+      return '<div class="content-card"><div class="card-image ' + key + '">Image</div><div class="card-body"><div class="card-tag">' + c.tag + '</div><div class="card-title">' + c.title + '</div><div class="card-desc">' + c.desc + '</div></div></div>';
+    }).join('');
+    grid.style.transition = 'all 0.5s ease';
+    grid.style.opacity = 1;
+    grid.style.transform = 'none';
+  }, 200);
+}
+
+function goBack() {
+  document.getElementById('landing').classList.remove('gone');
+  document.getElementById('contentWorld').classList.remove('active');
+}
+</script>
+</body>
+</html>

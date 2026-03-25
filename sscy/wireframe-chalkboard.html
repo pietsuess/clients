@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: The Chalkboard</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap');
+body { background: #2a2a2a; color: #e8e0d0; font-family: system-ui; overflow: hidden; height: 100vh; }
+
+.chalk-surface {
+  height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #2a2a2a, #1e1e1e);
+  position: relative;
+}
+
+/* Chalk dust texture */
+.chalk-surface::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.prompt { font-family: 'Caveat', cursive; font-size: 2.5rem; text-align: center; opacity: 0.4; margin-bottom: 32px; }
+
+.input-area {
+  position: relative; width: 600px; max-width: 90vw;
+}
+
+.chalk-input {
+  width: 100%; background: none; border: none; border-bottom: 2px solid rgba(255,255,255,0.15);
+  color: #e8e0d0; font-family: 'Caveat', cursive; font-size: 2rem; padding: 16px 8px;
+  text-align: center; outline: none; caret-color: #e8e0d0;
+}
+
+.chalk-input::placeholder { color: rgba(255,255,255,0.2); }
+
+/* Answer area */
+.answer-area {
+  margin-top: 40px; text-align: center; max-width: 600px;
+  opacity: 0; transform: translateY(20px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.answer-area.visible { opacity: 1; transform: none; }
+
+.answer-text {
+  font-family: 'Caveat', cursive; font-size: 2.8rem; color: #fff;
+  line-height: 1.3; margin-bottom: 24px;
+}
+
+/* Doors that open from the answer */
+.doors {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.6s ease 0.5s;
+}
+
+.doors.visible { opacity: 1; transform: none; }
+
+.door {
+  padding: 12px 28px; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 50px;
+  color: rgba(255,255,255,0.6); font-size: 0.85rem; cursor: pointer;
+  transition: all 0.3s ease; text-decoration: none;
+}
+
+.door:hover { border-color: rgba(255,255,255,0.6); color: #fff; background: rgba(255,255,255,0.05); }
+
+/* Content reveal panel */
+.content-panel {
+  position: fixed; bottom: -100%; left: 0; right: 0; height: 70vh;
+  background: #f5f0e8; color: #2a2a2a; border-radius: 24px 24px 0 0;
+  transition: bottom 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 40px; overflow-y: auto;
+}
+
+.content-panel.open { bottom: 0; }
+
+.content-panel .close-btn {
+  position: absolute; top: 16px; right: 24px; background: none; border: none;
+  font-size: 1.5rem; cursor: pointer; color: #999; padding: 8px;
+}
+
+.panel-placeholder {
+  display: flex; gap: 20px; flex-wrap: wrap; margin-top: 24px;
+}
+
+.placeholder-box {
+  width: 200px; height: 150px; background: #ddd; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; color: #999;
+}
+
+.panel-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
+.panel-sub { color: #888; font-size: 0.9rem; }
+
+/* Corner hint */
+.corner-hint {
+  position: fixed; bottom: 20px; right: 24px; font-size: 0.7rem;
+  opacity: 0.2; letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* History of questions */
+.history {
+  position: fixed; left: 24px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.history-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15);
+  cursor: pointer; transition: 0.3s ease;
+}
+
+.history-dot:hover { background: rgba(255,255,255,0.5); transform: scale(1.5); }
+.history-dot.active { background: rgba(255,255,255,0.6); }
+</style>
+</head>
+<body>
+
+<div class="chalk-surface" id="surface">
+  <div class="prompt">ask anything</div>
+  <div class="input-area">
+    <input class="chalk-input" id="questionInput" placeholder="type a question..." autofocus>
+  </div>
+  <div class="answer-area" id="answerArea">
+    <div class="answer-text" id="answerText"></div>
+    <div class="doors" id="doors"></div>
+  </div>
+</div>
+
+<div class="history" id="history"></div>
+
+<div class="content-panel" id="contentPanel">
+  <button class="close-btn" onclick="closePanel()">&times;</button>
+  <div class="panel-title" id="panelTitle">Retreats</div>
+  <div class="panel-sub" id="panelSub">Content would load here based on the door you opened</div>
+  <div class="panel-placeholder" id="panelContent"></div>
+</div>
+
+<div class="corner-hint">the chalkboard</div>
+
+<script>
+var qa = [
+  {q:"peace", a:"Peace. No more than that.", doors:["Retreats","Wellness","Donate"]},
+  {q:"silence", a:"I used to do silence from childhood. Like fasting.", doors:["Our Founder","Retreats","Books"]},
+  {q:"god", a:"God is eternal peace. Is there anything higher than this?", doors:["Satsang","Classes","Books"]},
+  {q:"love", a:"Love everyone, including yourself. This is real Sadhana.", doors:["Community","Karma Yoga","Events"]},
+  {q:"death", a:"Then you don't die. Only this gross body dies. The soul never dies.", doors:["Our Founder","Books"]},
+  {q:"mind", a:"The mind is the ruler of the body.", doors:["Classes","Teacher Training","Wellness"]},
+  {q:"yoga", a:"As soon as a person starts thinking I want to be a better person, that is the start of yoga.", doors:["Classes","Retreats","Teacher Training"]},
+  {q:"food", a:"To support people here, you have to grow food.", doors:["The Farm","Shop","Kitchen"]},
+  {q:"play", a:"Don't think that you are carrying the whole world; make it easy, make it play, make it a prayer.", doors:["Events","Community","The Land"]},
+  {q:"free", a:"Will is a power of the mind. Within the jurisdiction of the mind one is free to act or not act. But the mind itself is not free.", doors:["Books","Classes","Our Founder"]},
+  {q:"guru", a:"Much closer.", doors:["Our Founder","Community","Satsang"]},
+  {q:"prayer", a:"Remember your Self. When you forget your Self, then you drift away.", doors:["Satsang","Retreats","Books"]},
+];
+
+var defaultAnswers = [
+  {a:"Shadow fighting.", doors:["Retreats","Shop","Classes"]},
+  {a:"Sincere longing alone brings the goal near.", doors:["Retreats","Karma Yoga","Our Founder"]},
+  {a:"Some day all questions will stop.", doors:["Retreats","Wellness","The Land"]},
+  {a:"Self control.", doors:["Classes","Teacher Training","Retreats"]},
+  {a:"It's God.", doors:["Satsang","Books","Our Founder"]},
+];
+
+var questionHistory = [];
+
+document.getElementById('questionInput').addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' || !this.value.trim()) return;
+
+  var question = this.value.trim().toLowerCase();
+  this.value = '';
+
+  // Find matching answer
+  var match = qa.find(function(item) { return question.includes(item.q); });
+  if (!match) match = defaultAnswers[Math.floor(Math.random() * defaultAnswers.length)];
+
+  // Show answer
+  var answerArea = document.getElementById('answerArea');
+  var answerText = document.getElementById('answerText');
+  var doorsEl = document.getElementById('doors');
+
+  answerArea.classList.remove('visible');
+  doorsEl.classList.remove('visible');
+
+  setTimeout(function() {
+    answerText.textContent = match.a;
+    doorsEl.innerHTML = match.doors.map(function(d) {
+      return '<a class="door" onclick="openDoor(\'' + d + '\')">' + d + '</a>';
+    }).join('');
+    answerArea.classList.add('visible');
+    setTimeout(function() { doorsEl.classList.add('visible'); }, 300);
+  }, 200);
+
+  // Add to history
+  questionHistory.push({q: question, a: match.a});
+  renderHistory();
+});
+
+function renderHistory() {
+  var el = document.getElementById('history');
+  el.innerHTML = questionHistory.map(function(_, i) {
+    return '<div class="history-dot' + (i === questionHistory.length - 1 ? ' active' : '') + '" title="' + questionHistory[i].q + '"></div>';
+  }).join('');
+}
+
+function openDoor(name) {
+  var panel = document.getElementById('contentPanel');
+  document.getElementById('panelTitle').textContent = name;
+  document.getElementById('panelSub').textContent = 'Content for "' + name + '" would appear here';
+  document.getElementById('panelContent').innerHTML =
+    '<div class="placeholder-box">Image</div>'.repeat(3) +
+    '<div class="placeholder-box" style="width:100%;height:80px;">Text block</div>' +
+    '<div class="placeholder-box">Card</div><div class="placeholder-box">Card</div>';
+  panel.classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('contentPanel').classList.remove('open');
+}
+
+// Auto-type a starter question
+setTimeout(function() {
+  var input = document.getElementById('questionInput');
+  var starter = "what is peace?";
+  var i = 0;
+  var interval = setInterval(function() {
+    input.value = starter.substring(0, ++i);
+    if (i >= starter.length) {
+      clearInterval(interval);
+      setTimeout(function() {
+        input.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter'}));
+      }, 500);
+    }
+  }, 80);
+}, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: The Deck</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #1a1a1a; font-family: system-ui; overflow: hidden; height: 100vh; color: #fff; user-select: none; }
+
+.deck-container {
+  height: 100vh; display: flex; align-items: center; justify-content: center;
+  position: relative; perspective: 1000px;
+}
+
+/* Card stack */
+.card-stack {
+  position: relative; width: 380px; height: 520px;
+}
+
+.card {
+  position: absolute; inset: 0; border-radius: 24px; overflow: hidden;
+  cursor: grab; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center bottom;
+  display: flex; flex-direction: column;
+}
+
+.card:active { cursor: grabbing; }
+
+.card-visual {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; position: relative;
+}
+
+.card-info {
+  padding: 28px; background: rgba(0,0,0,0.3); backdrop-filter: blur(12px);
+}
+
+.card-type { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.6; margin-bottom: 6px; }
+.card-name { font-size: 1.3rem; font-weight: 600; margin-bottom: 4px; }
+.card-detail { font-size: 0.82rem; opacity: 0.7; line-height: 1.4; }
+
+/* Swipe indicators */
+.swipe-hint {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+  font-size: 0.75rem; opacity: 0.3; letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.swipe-hint .arrow { display: inline-block; animation: bounce 1.5s ease infinite; }
+@keyframes bounce { 0%,100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
+
+/* Side labels */
+.like-label, .skip-label {
+  position: fixed; top: 50%; font-size: 1.2rem; font-weight: 700;
+  padding: 12px 28px; border-radius: 12px; border: 3px solid;
+  transform: translateY(-50%) rotate(-12deg); opacity: 0; transition: opacity 0.2s;
+  pointer-events: none; text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+.like-label { right: 60px; color: #4ade80; border-color: #4ade80; }
+.skip-label { left: 60px; color: #f87171; border-color: #f87171; transform: translateY(-50%) rotate(12deg); }
+
+/* Counter */
+.counter {
+  position: fixed; top: 24px; right: 32px; font-size: 0.8rem; opacity: 0.3;
+}
+
+/* Saved tray */
+.saved-tray {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+  display: flex; align-items: center; padding: 0 24px; gap: 8px;
+  background: rgba(255,255,255,0.05); backdrop-filter: blur(8px);
+  overflow-x: auto;
+}
+
+.saved-dot {
+  width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 0.7rem;
+  cursor: pointer; transition: transform 0.2s;
+}
+
+.saved-dot:hover { transform: scale(1.1); }
+
+.saved-label {
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+  opacity: 0.3; margin-right: 12px; flex-shrink: 0;
+}
+
+/* Category pills */
+.cat-pills {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px;
+}
+
+.cat-pill {
+  padding: 6px 16px; border-radius: 50px; font-size: 0.7rem;
+  border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4);
+  cursor: pointer; transition: 0.25s;
+}
+
+.cat-pill:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+.cat-pill.active { background: rgba(255,255,255,0.15); color: #fff; border-color: transparent; }
+</style>
+</head>
+<body>
+
+<div class="cat-pills">
+  <div class="cat-pill active" onclick="filterCat('all')">All</div>
+  <div class="cat-pill" onclick="filterCat('place')">Places</div>
+  <div class="cat-pill" onclick="filterCat('program')">Programs</div>
+  <div class="cat-pill" onclick="filterCat('quote')">Wisdom</div>
+  <div class="cat-pill" onclick="filterCat('product')">Shop</div>
+</div>
+
+<div class="counter" id="counter">1 / 12</div>
+
+<div class="like-label" id="likeLabel">Save</div>
+<div class="skip-label" id="skipLabel">Skip</div>
+
+<div class="deck-container">
+  <div class="card-stack" id="cardStack"></div>
+</div>
+
+<div class="swipe-hint">swipe or drag <span class="arrow">&rarr;</span></div>
+
+<div class="saved-tray" id="savedTray">
+  <span class="saved-label">Saved</span>
+</div>
+
+<script>
+var allCards = [
+  {type:"place", tag:"The Land", name:"69 Acres of Sanctuary", detail:"Forests, gardens, ponds, temples", bg:"linear-gradient(135deg, #2d5a27, #4a8a3e)"},
+  {type:"quote", tag:"Babaji", name:"Peace. No more than that.", detail:"When asked about his only goal in life", bg:"linear-gradient(135deg, #1a1a2e, #2a2a3e)"},
+  {type:"program", tag:"Retreat", name:"Weekend Yoga Retreat", detail:"2 nights of practice, rest, and renewal", bg:"linear-gradient(135deg, #1a5c53, #2a8a7d)"},
+  {type:"place", tag:"Venue", name:"The Pond Dome", detail:"Geodesic dome by the water", bg:"linear-gradient(135deg, #4a6670, #6a8a94)"},
+  {type:"product", tag:"Shop", name:"Salt Spring Island Cooking", detail:"The beloved cookbook, 52,000 copies sold", bg:"linear-gradient(135deg, #8a6a3a, #aa8a5a)"},
+  {type:"quote", tag:"Babaji", name:"Shadow fighting.", detail:"When asked if life is a comedy or a drama", bg:"linear-gradient(135deg, #2a1a2e, #3a2a3e)"},
+  {type:"program", tag:"Training", name:"200-Hour Teacher Training", detail:"Become a certified yoga teacher", bg:"linear-gradient(135deg, #5a3a1a, #7a5a3a)"},
+  {type:"place", tag:"Sacred", name:"Hanuman Shrine", detail:"One of many sacred spaces on the land", bg:"linear-gradient(135deg, #6a4a2a, #8a6a4a)"},
+  {type:"program", tag:"Karma Yoga", name:"Live & Serve", detail:"Volunteer program with room and board", bg:"linear-gradient(135deg, #2a5a2a, #4a7a4a)"},
+  {type:"quote", tag:"Babaji", name:"Self control.", detail:"When asked about birth control", bg:"linear-gradient(135deg, #1a1a1a, #2a2a2a)"},
+  {type:"product", tag:"Event", name:"Music for Peace", detail:"Indian classical concert series", bg:"linear-gradient(135deg, #5a2a4a, #7a4a6a)"},
+  {type:"place", tag:"Nature", name:"Dandaka Forest", detail:"Primordial cedar-swamp wetland", bg:"linear-gradient(135deg, #1a3a1a, #2a4a2a)"},
+];
+
+var cards = [...allCards];
+var currentIndex = 0;
+var savedCards = [];
+var isDragging = false;
+var startX = 0;
+var currentX = 0;
+
+function renderStack() {
+  var stack = document.getElementById('cardStack');
+  stack.innerHTML = '';
+
+  var visible = cards.slice(currentIndex, currentIndex + 3).reverse();
+  visible.forEach(function(card, i) {
+    var realIndex = visible.length - 1 - i;
+    var el = document.createElement('div');
+    el.className = 'card';
+    el.style.background = card.bg;
+    el.style.transform = 'scale(' + (1 - realIndex * 0.04) + ') translateY(' + (realIndex * -12) + 'px)';
+    el.style.zIndex = 10 - realIndex;
+    el.innerHTML = '<div class="card-visual">' + (card.type === 'quote' ? '&#x201C;' : '') + '</div><div class="card-info"><div class="card-type">' + card.tag + '</div><div class="card-name">' + card.name + '</div><div class="card-detail">' + card.detail + '</div></div>';
+
+    if (realIndex === 0) {
+      el.addEventListener('mousedown', dragStart);
+      el.addEventListener('touchstart', dragStart);
+    }
+
+    stack.appendChild(el);
+  });
+
+  document.getElementById('counter').textContent = (currentIndex + 1) + ' / ' + cards.length;
+}
+
+function dragStart(e) {
+  isDragging = true;
+  startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+  currentX = 0;
+  var card = this;
+
+  function dragMove(e2) {
+    if (!isDragging) return;
+    var x = e2.type === 'touchmove' ? e2.touches[0].clientX : e2.clientX;
+    currentX = x - startX;
+    card.style.transition = 'none';
+    card.style.transform = 'translateX(' + currentX + 'px) rotate(' + (currentX * 0.08) + 'deg)';
+
+    // Show labels
+    document.getElementById('likeLabel').style.opacity = currentX > 50 ? Math.min((currentX - 50) / 100, 1) : 0;
+    document.getElementById('skipLabel').style.opacity = currentX < -50 ? Math.min((-currentX - 50) / 100, 1) : 0;
+  }
+
+  function dragEnd() {
+    isDragging = false;
+    document.removeEventListener('mousemove', dragMove);
+    document.removeEventListener('mouseup', dragEnd);
+    document.removeEventListener('touchmove', dragMove);
+    document.removeEventListener('touchend', dragEnd);
+    document.getElementById('likeLabel').style.opacity = 0;
+    document.getElementById('skipLabel').style.opacity = 0;
+
+    if (Math.abs(currentX) > 100) {
+      // Fling away
+      card.style.transition = 'transform 0.4s ease';
+      card.style.transform = 'translateX(' + (currentX > 0 ? 800 : -800) + 'px) rotate(' + (currentX > 0 ? 30 : -30) + 'deg)';
+
+      if (currentX > 0) {
+        // Saved
+        savedCards.push(cards[currentIndex]);
+        renderSaved();
+      }
+
+      setTimeout(function() {
+        currentIndex++;
+        if (currentIndex >= cards.length) currentIndex = 0;
+        renderStack();
+      }, 300);
+    } else {
+      // Snap back
+      card.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+      card.style.transform = 'scale(1)';
+    }
+  }
+
+  document.addEventListener('mousemove', dragMove);
+  document.addEventListener('mouseup', dragEnd);
+  document.addEventListener('touchmove', dragMove);
+  document.addEventListener('touchend', dragEnd);
+}
+
+function renderSaved() {
+  var tray = document.getElementById('savedTray');
+  tray.innerHTML = '<span class="saved-label">Saved</span>';
+  savedCards.forEach(function(card) {
+    var dot = document.createElement('div');
+    dot.className = 'saved-dot';
+    dot.style.background = card.bg;
+    dot.title = card.name;
+    tray.appendChild(dot);
+  });
+}
+
+function filterCat(cat) {
+  document.querySelectorAll('.cat-pill').forEach(function(p) { p.classList.remove('active'); });
+  event.target.classList.add('active');
+  cards = cat === 'all' ? [...allCards] : allCards.filter(function(c) { return c.type === cat; });
+  currentIndex = 0;
+  renderStack();
+}
+
+renderStack();
+</script>
+</body>
+</html>
