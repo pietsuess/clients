@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: The Map</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #2a3a2a; font-family: system-ui; overflow: hidden; height: 100vh; color: #fff; }
+
+/* The map surface - pannable and zoomable */
+.map-world {
+  width: 100vw; height: 100vh; position: relative; overflow: hidden;
+  cursor: grab;
+}
+
+.map-world:active { cursor: grabbing; }
+
+.map-surface {
+  position: absolute; width: 2400px; height: 1600px;
+  transform-origin: 0 0; transition: transform 0.3s ease;
+  /* Start centered */
+  left: 50%; top: 50%;
+  margin-left: -1200px; margin-top: -800px;
+}
+
+/* Ground texture */
+.map-ground {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 40%, #3a5a2a 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, #2a4a2a 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 30%, #4a6a3a 0%, transparent 60%),
+    linear-gradient(160deg, #2a3a1a, #1a2a1a);
+}
+
+/* Paths */
+.path {
+  position: absolute; background: rgba(200,180,140,0.3); border-radius: 100px;
+  transform-origin: left center;
+}
+
+/* Water features */
+.water {
+  position: absolute; background: rgba(80,140,180,0.4); border-radius: 50%;
+}
+
+/* Trees (scattered dots) */
+.tree {
+  position: absolute; width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(30,80,30,0.5);
+}
+
+/* Map points of interest */
+.poi {
+  position: absolute; cursor: pointer; transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+.poi:hover { transform: scale(1.15); z-index: 20; }
+
+.poi-shape {
+  width: 80px; height: 60px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  transition: box-shadow 0.3s;
+}
+
+.poi:hover .poi-shape { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+
+.poi-label {
+  position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 0.65rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  opacity: 0.8;
+}
+
+.poi:hover .poi-label { opacity: 1; }
+
+/* POI colors */
+.poi-building .poi-shape { background: linear-gradient(135deg, #8a7a5a, #6a5a3a); }
+.poi-nature .poi-shape { background: linear-gradient(135deg, #3a7a3a, #2a5a2a); }
+.poi-sacred .poi-shape { background: linear-gradient(135deg, #9a6a3a, #7a4a2a); }
+.poi-water .poi-shape { background: linear-gradient(135deg, #3a6a8a, #2a4a6a); }
+
+/* Detail panel */
+.detail-panel {
+  position: fixed; right: -420px; top: 0; bottom: 0; width: 400px;
+  background: rgba(20,20,20,0.95); backdrop-filter: blur(20px);
+  z-index: 100; transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 40px 32px; overflow-y: auto;
+}
+
+.detail-panel.open { right: 0; }
+
+.detail-close {
+  position: absolute; top: 16px; right: 20px; background: none; border: none;
+  color: #999; font-size: 1.5rem; cursor: pointer; padding: 8px;
+}
+
+.detail-close:hover { color: #fff; }
+
+.detail-tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.14em; color: #6a9a6a; margin-bottom: 8px; }
+.detail-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 16px; }
+.detail-image { width: 100%; height: 200px; background: #333; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; color: #666; }
+.detail-text { font-size: 0.88rem; color: #aaa; line-height: 1.7; margin-bottom: 20px; }
+.detail-btn { display: inline-block; padding: 12px 28px; border-radius: 50px; background: #3a7a5a; color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: 0.25s; }
+.detail-btn:hover { background: #4a9a6a; }
+
+/* Zoom controls */
+.zoom-controls {
+  position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 4px; z-index: 50;
+}
+
+.zoom-btn {
+  width: 40px; height: 40px; border-radius: 8px; background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 1.2rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: 0.25s;
+}
+
+.zoom-btn:hover { background: rgba(0,0,0,0.8); border-color: rgba(255,255,255,0.3); }
+
+/* Compass */
+.compass {
+  position: fixed; top: 24px; right: 24px; width: 50px; height: 50px;
+  border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; z-index: 50;
+}
+
+/* Title */
+.map-title {
+  position: fixed; top: 24px; left: 32px; z-index: 50;
+}
+
+.map-title h1 { font-size: 1.1rem; font-weight: 300; opacity: 0.8; letter-spacing: 0.05em; }
+.map-title .sub { font-size: 0.7rem; opacity: 0.3; margin-top: 4px; }
+
+/* Minimap */
+.minimap {
+  position: fixed; bottom: 24px; left: 24px; width: 150px; height: 100px;
+  background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+  z-index: 50; overflow: hidden;
+}
+
+.minimap-viewport {
+  position: absolute; border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.05); border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.minimap-dot {
+  position: absolute; width: 4px; height: 4px; border-radius: 50%;
+}
+</style>
+</head>
+<body>
+
+<div class="map-title">
+  <h1>Salt Spring Centre of Yoga</h1>
+  <div class="sub">Click a place to explore &bull; Drag to pan</div>
+</div>
+
+<div class="compass">N</div>
+
+<div class="map-world" id="mapWorld">
+  <div class="map-surface" id="mapSurface">
+    <div class="map-ground"></div>
+
+    <!-- Paths -->
+    <div class="path" style="left:400px;top:700px;width:600px;height:12px;transform:rotate(-5deg);"></div>
+    <div class="path" style="left:900px;top:680px;width:400px;height:10px;transform:rotate(15deg);"></div>
+    <div class="path" style="left:700px;top:650px;width:300px;height:8px;transform:rotate(-80deg);"></div>
+
+    <!-- Water -->
+    <div class="water" style="left:1600px;top:200px;width:300px;height:200px;border-radius:40%;"></div>
+    <div class="water" style="left:900px;top:900px;width:150px;height:120px;"></div>
+
+    <!-- Trees (scattered) -->
+    <div class="tree" style="left:200px;top:300px;width:30px;height:30px;"></div>
+    <div class="tree" style="left:150px;top:400px;width:25px;height:25px;"></div>
+    <div class="tree" style="left:300px;top:250px;width:22px;height:22px;"></div>
+    <div class="tree" style="left:1800px;top:400px;width:28px;height:28px;"></div>
+    <div class="tree" style="left:1900px;top:500px;width:24px;height:24px;"></div>
+    <div class="tree" style="left:100px;top:600px;width:26px;height:26px;"></div>
+    <div class="tree" style="left:1700px;top:300px;width:20px;height:20px;"></div>
+    <div class="tree" style="left:400px;top:200px;width:32px;height:32px;"></div>
+    <div class="tree" style="left:1500px;top:800px;width:28px;height:28px;"></div>
+    <div class="tree" style="left:200px;top:900px;width:24px;height:24px;"></div>
+    <div class="tree" style="left:2000px;top:700px;width:26px;height:26px;"></div>
+    <div class="tree" style="left:600px;top:150px;width:22px;height:22px;"></div>
+
+    <!-- Points of Interest -->
+    <div class="poi poi-building" style="left:700px;top:600px;" onclick="openDetail('program-house')">
+      <div class="poi-shape">&#x2302;</div>
+      <div class="poi-label">Program House</div>
+    </div>
+
+    <div class="poi poi-building" style="left:550px;top:500px;" onclick="openDetail('garden-house')">
+      <div class="poi-shape">&#x25A1;</div>
+      <div class="poi-label">Garden House</div>
+    </div>
+
+    <div class="poi poi-water" style="left:900px;top:850px;" onclick="openDetail('pond-dome')">
+      <div class="poi-shape">&#x25CB;</div>
+      <div class="poi-label">Pond Dome</div>
+    </div>
+
+    <div class="poi poi-nature" style="left:1100px;top:400px;" onclick="openDetail('garden')">
+      <div class="poi-shape">&#x2698;</div>
+      <div class="poi-label">Organic Garden</div>
+    </div>
+
+    <div class="poi poi-sacred" style="left:850px;top:450px;" onclick="openDetail('shrine')">
+      <div class="poi-shape">&#x2729;</div>
+      <div class="poi-label">Hanuman Shrine</div>
+    </div>
+
+    <div class="poi poi-building" style="left:500px;top:750px;" onclick="openDetail('sauna')">
+      <div class="poi-shape">&#x2668;</div>
+      <div class="poi-label">Sauna</div>
+    </div>
+
+    <div class="poi poi-nature" style="left:300px;top:500px;" onclick="openDetail('forest')">
+      <div class="poi-shape">&#x2666;</div>
+      <div class="poi-label">Dandaka Forest</div>
+    </div>
+
+    <div class="poi poi-nature" style="left:1300px;top:600px;" onclick="openDetail('orchard')">
+      <div class="poi-shape">&#x273F;</div>
+      <div class="poi-label">Fruit Orchard</div>
+    </div>
+
+    <div class="poi poi-sacred" style="left:650px;top:350px;" onclick="openDetail('temple')">
+      <div class="poi-shape">&#x2605;</div>
+      <div class="poi-label">Temple</div>
+    </div>
+
+    <div class="poi poi-water" style="left:1650px;top:250px;" onclick="openDetail('lake')">
+      <div class="poi-shape">&#x224B;</div>
+      <div class="poi-label">Blackburn Lake</div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-panel" id="detailPanel">
+  <button class="detail-close" onclick="closeDetail()">&times;</button>
+  <div class="detail-tag" id="detailTag">Building</div>
+  <div class="detail-title" id="detailTitle">Program House</div>
+  <div class="detail-image" id="detailImage">Image</div>
+  <div class="detail-text" id="detailText">Content would appear here with photos, description, and links to book or explore further.</div>
+  <button class="detail-btn" id="detailBtn">Explore</button>
+</div>
+
+<!-- Zoom -->
+<div class="zoom-controls">
+  <button class="zoom-btn" onclick="zoomMap(1.2)">+</button>
+  <button class="zoom-btn" onclick="zoomMap(0.8)">&minus;</button>
+</div>
+
+<!-- Minimap -->
+<div class="minimap" id="minimap">
+  <div class="minimap-viewport" id="minimapView" style="width:40%;height:40%;left:30%;top:30%;"></div>
+  <div class="minimap-dot" style="left:44%;top:44%;background:#8a7a5a;"></div>
+  <div class="minimap-dot" style="left:35%;top:38%;background:#8a7a5a;"></div>
+  <div class="minimap-dot" style="left:55%;top:56%;background:#3a6a8a;"></div>
+  <div class="minimap-dot" style="left:65%;top:30%;background:#3a7a3a;"></div>
+  <div class="minimap-dot" style="left:50%;top:33%;background:#9a6a3a;"></div>
+</div>
+
+<script>
+var mapSurface = document.getElementById('mapSurface');
+var mapWorld = document.getElementById('mapWorld');
+var scale = 1;
+var panX = 0, panY = 0;
+var isDragging = false, startX, startY, startPanX, startPanY;
+
+// Pan
+mapWorld.addEventListener('mousedown', function(e) {
+  if (e.target.closest('.poi')) return;
+  isDragging = true;
+  startX = e.clientX; startY = e.clientY;
+  startPanX = panX; startPanY = panY;
+});
+
+document.addEventListener('mousemove', function(e) {
+  if (!isDragging) return;
+  panX = startPanX + (e.clientX - startX);
+  panY = startPanY + (e.clientY - startY);
+  updateMap();
+});
+
+document.addEventListener('mouseup', function() { isDragging = false; });
+
+// Zoom
+function zoomMap(factor) {
+  scale = Math.max(0.4, Math.min(2.5, scale * factor));
+  updateMap();
+}
+
+mapWorld.addEventListener('wheel', function(e) {
+  e.preventDefault();
+  zoomMap(e.deltaY > 0 ? 0.92 : 1.08);
+});
+
+function updateMap() {
+  mapSurface.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + scale + ')';
+
+  // Update minimap viewport
+  var vw = (window.innerWidth / (2400 * scale)) * 100;
+  var vh = (window.innerHeight / (1600 * scale)) * 100;
+  var vx = ((-panX + window.innerWidth / 2 - 1200 * scale) / (2400 * scale) * -100) + 50 - vw / 2;
+  var vy = ((-panY + window.innerHeight / 2 - 800 * scale) / (1600 * scale) * -100) + 50 - vh / 2;
+  var view = document.getElementById('minimapView');
+  view.style.width = Math.min(100, vw) + '%';
+  view.style.height = Math.min(100, vh) + '%';
+  view.style.left = Math.max(0, Math.min(100 - vw, vx)) + '%';
+  view.style.top = Math.max(0, Math.min(100 - vh, vy)) + '%';
+}
+
+// Details
+var details = {
+  'program-house': {tag:'Building', title:'Program House', text:'Heritage farmstead, Satsang Room for ceremonies and gatherings, accommodation rooms. The heart of the Centre since 1981.'},
+  'garden-house': {tag:'Building', title:'Garden House & Yoga Studio', text:'Secondary yoga venue with accommodation rooms. Peaceful setting surrounded by gardens.'},
+  'pond-dome': {tag:'Venue', title:'Pond Dome', text:'Geodesic dome by the pond. Unique space for workshops, retreats, and gatherings.'},
+  'garden': {tag:'Nature', title:'Organic Garden', text:'Large organic farm growing vegetables, herbs, and greens. Feeds the Centre kitchen and community.'},
+  'shrine': {tag:'Sacred', title:'Hanuman Shrine', text:'One of several sacred spaces on the land. A place for devotion and reflection.'},
+  'sauna': {tag:'Building', title:'Sauna', text:'Wood-burning sauna with night sky views. Available for guests and renters.'},
+  'forest': {tag:'Nature', title:'Dandaka Forest', text:'One of the most untouched, primordial cedar-swamp wetlands found in North America.'},
+  'orchard': {tag:'Nature', title:'Fruit Orchard', text:'Abundant fruit trees including apples, pears, and plums. Part of the permaculture food forest.'},
+  'temple': {tag:'Sacred', title:'Temple', text:'Sacred space for ceremony, meditation, and spiritual practice.'},
+  'lake': {tag:'Nature', title:'Blackburn Lake', text:'The Centre borders the Salt Spring Island Conservancy\'s Blackburn Lake nature reserve. Over 110 species recorded.'},
+};
+
+function openDetail(key) {
+  var d = details[key];
+  document.getElementById('detailTag').textContent = d.tag;
+  document.getElementById('detailTitle').textContent = d.title;
+  document.getElementById('detailText').textContent = d.text;
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+updateMap();
+</script>
+</body>
+</html>
