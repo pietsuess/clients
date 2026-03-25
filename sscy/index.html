@@ -532,14 +532,13 @@ window.addEventListener('scroll', function() {
 // Sticky nav pinned detection
 var stickyNav = document.getElementById('stickyNav');
 var heroTopLogo = document.querySelector('.hero-top-logo');
-var stickyNavTop = stickyNav.offsetTop;
 function checkSticky() {
-  var pinned = window.scrollY >= stickyNavTop;
+  var rect = stickyNav.getBoundingClientRect();
+  var pinned = rect.top <= 0;
   stickyNav.classList.toggle('pinned', pinned);
   if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
 }
 window.addEventListener('scroll', checkSticky);
-window.addEventListener('resize', function() { stickyNavTop = stickyNav.offsetTop; });
 
 // Quick links entrance
 var qlObs = new IntersectionObserver(function(entries) {
