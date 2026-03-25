@@ -7,171 +7,325 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, sans-serif; background: #111; color: #fff; padding: 24px; }
-h1 { font-size: 1.4rem; margin-bottom: 32px; font-weight: 400; opacity: 0.6; }
-h2 { font-size: 1.1rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #333; font-weight: 500; color: #3bb8a8; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.item { position: relative; border-radius: 8px; overflow: hidden; background: #222; }
-.item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; cursor: pointer; transition: transform 0.3s; }
-.item img:hover { transform: scale(1.03); }
-.item .caption { padding: 8px 12px; font-size: 0.72rem; color: #999; word-break: break-all; }
-.item .caption a { color: #3bb8a8; text-decoration: none; }
+h1 { font-size: 1.4rem; margin-bottom: 8px; font-weight: 400; opacity: 0.6; }
+.toolbar { margin-bottom: 24px; display: flex; gap: 12px; align-items: center; }
+.toolbar button { padding: 8px 16px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+.toolbar button:hover { background: #444; }
+.save-status { font-size: 0.75rem; opacity: 0.4; }
+h2 { font-size: 1rem; margin: 40px 0 12px; padding: 8px 12px; background: #1a1a1a; border-radius: 8px; font-weight: 500; color: #3bb8a8; display: flex; justify-content: space-between; align-items: center; }
+h2 .count { font-size: 0.7rem; opacity: 0.4; font-weight: 400; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; min-height: 60px; padding: 8px 0; }
+.grid.drag-over { background: rgba(59,184,168,0.1); border-radius: 8px; }
+.item { position: relative; border-radius: 6px; overflow: hidden; background: #222; cursor: grab; transition: opacity 0.2s, transform 0.2s; }
+.item:active { cursor: grabbing; }
+.item.dragging { opacity: 0.3; transform: scale(0.95); }
+.item.drag-target { outline: 2px solid #3bb8a8; outline-offset: 2px; }
+.item img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; pointer-events: none; }
+.item .caption { padding: 6px 10px; font-size: 0.7rem; color: #999; cursor: text; min-height: 24px; outline: none; border: 1px solid transparent; border-radius: 3px; transition: 0.2s; }
+.item .caption:hover { color: #ccc; }
+.item .caption:focus { border-color: #3bb8a8; color: #fff; background: #1a1a1a; }
+.item .url { display: none; }
 </style>
 </head>
 <body>
-<h1>SSCY Photo Reference - All images from saltspringcentre.com</h1>
-
-<h2>Babaji (Baba Hari Dass)</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg" loading="lazy"><div class="caption">Babaji header portrait</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Babaji-photo-overlay.jpg" loading="lazy"><div class="caption">Babaji photo overlay</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2013/02/Babaji-rock-wall-298x300.jpg" loading="lazy"><div class="caption">Babaji building rock wall (2000)</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Honouring-BabaHariDass.jpg" loading="lazy"><div class="caption">Honouring Baba Hari Dass</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/BW-Group-Photo-on-Stairs-1985.jpg" loading="lazy"><div class="caption">B&W group photo on stairs (1985)</div></div>
+<h1>SSCY Photo Reference</h1>
+<div class="toolbar">
+  <button onclick="exportData()">Export JSON</button>
+  <button onclick="resetAll()">Reset to Default</button>
+  <span class="save-status" id="saveStatus">Auto-saves to localStorage</span>
 </div>
 
-<h2>People / Community</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg" loading="lazy"><div class="caption">ACYR Group Peace</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/people-on-lawn-10.jpg" loading="lazy"><div class="caption">People on lawn</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Grounding-with-music.jpg" loading="lazy"><div class="caption">Grounding with music</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Tree-Pose-in-Boots-scaled-1.jpg" loading="lazy"><div class="caption">Tree pose in boots</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/11/Online-yoga.jpg" loading="lazy"><div class="caption">Online yoga</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Kanako-035.jpg" loading="lazy"><div class="caption">Kanako</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/IMG_7499.jpg" loading="lazy"><div class="caption">Community gathering</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Copy-of-IMG_7237.jpg" loading="lazy"><div class="caption">Community photo</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/05/JPEG-image-8.jpeg" loading="lazy"><div class="caption">Activity photo</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/10/231677494_2608469562795673_3300096100624501142_n.jpg" loading="lazy"><div class="caption">Community photo</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/100_4718_6924142843_o-1.jpg" loading="lazy"><div class="caption">Archival community photo</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/image-3.jpeg" loading="lazy"><div class="caption">Community image</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/holiday-giving-e1670557431533.jpg" loading="lazy"><div class="caption">Holiday giving</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2026/02/Peter-and-the-Pipes-rotated-e1770559140566.jpg" loading="lazy"><div class="caption">Peter and the Pipes</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2026/02/Lakshmi-at-Ganga-scaled.jpg" loading="lazy"><div class="caption">Lakshmi at Ganga</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-15.jpeg" loading="lazy"><div class="caption">Bread workshop participants</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2017/02/Kari-cooking.jpg" loading="lazy"><div class="caption">Kari cooking in kitchen</div></div>
-</div>
+<div id="categories"></div>
 
-<h2>House / Buildings</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png" loading="lazy"><div class="caption">Program House with flowers</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Program-House-Rock-Wall.jpg" loading="lazy"><div class="caption">Program House rock wall</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Program-House-Rock-Wall-1.jpg" loading="lazy"><div class="caption">Program House rock wall (alt)</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Staff-Housing-at-Dawn-1024x768-1.jpg" loading="lazy"><div class="caption">Staff housing at dawn</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-1.jpg" loading="lazy"><div class="caption">Garden House exterior 1</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-2.jpg" loading="lazy"><div class="caption">Garden House exterior 2</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-front-with-room-directions-updated.jpeg" loading="lazy"><div class="caption">Garden House front with room map</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" loading="lazy"><div class="caption">Garden House yoga space</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg" loading="lazy"><div class="caption">Pond Dome exterior</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/pond-dome-2.jpg" loading="lazy"><div class="caption">Pond Dome exterior (angle 2)</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" loading="lazy"><div class="caption">Pond Dome interior</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" loading="lazy"><div class="caption">Pond Dome header</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" loading="lazy"><div class="caption">Sauna at night</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2023/03/2-1-e1682363201828.jpg" loading="lazy"><div class="caption">Sauna image</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Yurt-header.jpg" loading="lazy"><div class="caption">Yurt</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Ram-stepps.jpg" loading="lazy"><div class="caption">Ram steps</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Blackburn-road.jpg" loading="lazy"><div class="caption">Blackburn Road entrance</div></div>
-</div>
+<script>
+var DEFAULT_DATA = {
+  "Babaji": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg", cap:"Babaji header portrait"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/Babaji-photo-overlay.jpg", cap:"Babaji photo overlay"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2013/02/Babaji-rock-wall-298x300.jpg", cap:"Babaji building rock wall (2000)"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Honouring-BabaHariDass.jpg", cap:"Honouring Baba Hari Dass"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/BW-Group-Photo-on-Stairs-1985.jpg", cap:"B&W group on stairs (1985)"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/1981-5.jpg", cap:"Babaji at Program House (1981)"}
+  ],
+  "People / Community": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg", cap:"ACYR Group Peace"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/people-on-lawn-10.jpg", cap:"People on lawn"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Grounding-with-music.jpg", cap:"Grounding with music"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Tree-Pose-in-Boots-scaled-1.jpg", cap:"Tree pose in boots"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Kanako-035.jpg", cap:"Kanako"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/IMG_7499.jpg", cap:"Community gathering"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Copy-of-IMG_7237.jpg", cap:"Bridge in the garden"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/05/JPEG-image-8.jpeg", cap:"Activity photo"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/10/231677494_2608469562795673_3300096100624501142_n.jpg", cap:"Forest Trail Hanuman"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/100_4718_6924142843_o-1.jpg", cap:"Main house with flowers"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/holiday-giving-e1670557431533.jpg", cap:"Holiday giving / winter"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/02/Peter-and-the-Pipes-rotated-e1770559140566.jpg", cap:"Peter and the Pipes"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/02/Lakshmi-at-Ganga-scaled.jpg", cap:"Lakshmi at Ganga"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-15.jpeg", cap:"Bread workshop participants"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2017/02/Kari-cooking.jpg", cap:"Kari cooking in kitchen"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Newsletter-pic-Sept-2019-Courtenay-Bhavani-Sharada.jpeg", cap:"Community gathering"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-gratitude-party.jpg", cap:"Gratitude celebration"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-community-members.jpg", cap:"Community members"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-ACYR-attendees.jpg", cap:"ACYR attendees"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-kirtan.jpg", cap:"Kirtan session"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-kitchen-volunteers-and-staff.jpg", cap:"Kitchen volunteers"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-volunteer-yogis.jpg", cap:"Volunteer yogis"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-volunteers-and-staff.jpg", cap:"Volunteers and staff"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/08/ZD.090731.03.013.jpg", cap:"Satsang/kirtan gathering"}
+  ],
+  "Staff / Instructors": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/06/Anuradhas-birthday-October-2022-resized.jpg", cap:"Anuradha Hannah"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/06/Untitled-design.jpg", cap:"Michael LaPlante"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2024/03/Profile-picture-website-1.png", cap:"Christie Roome"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/Profile-picture-website-4.jpg", cap:"Rowan Algoet"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/09/Ranju-headshot-.jpg", cap:"Ranju Raman"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/09/Ramesh.jpg", cap:"Ramesh Rusconi"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/09/IMG_3715-e1773250657875.jpg", cap:"Paz Q Rainville"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2024/03/Untitled-design-45.png", cap:"Ishwarya Chaitanya"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2024/04/Profile-picture-website-4.png", cap:"Mahavir"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2024/05/Profile-picture-website.png", cap:"Mayana"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Yog.jpg", cap:"Yogeshwar Will Humphrey"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/10/Tracy-Chetna-Boyd.jpg", cap:"Chetna Tracy Boyd"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/07/Suchi.png", cap:"Jennifer (Suchi) Pritchard"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2024/02/Gigi-Vincentine-clinic-photo.jpg", cap:"Gigi (Gopa) Vincentine"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Gita-1.jpg", cap:"Gita Tanya Roberts"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Kenzie_small.jpg", cap:"Kenzie Pattillo"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/10/Natasha-Jyoti-Samson-e1657584037156.jpg", cap:"Natasha Jyoti Samson"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/01/2023-Savita-Leah-Young-Wellness-Treatments.jpg", cap:"Savita Leah Young"}
+  ],
+  "House / Buildings": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png", cap:"Program House with flowers"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/Program-House-Rock-Wall.jpg", cap:"Program House rock wall"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Staff-Housing-at-Dawn-1024x768-1.jpg", cap:"Staff housing at dawn"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-1.jpg", cap:"Garden House exterior 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-2.jpg", cap:"Garden House exterior 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg", cap:"Garden House yoga space"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg", cap:"Pond Dome exterior"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/pond-dome-2.jpg", cap:"Pond Dome angle 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg", cap:"Pond Dome interior"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg", cap:"Pond Dome header"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg", cap:"Sauna at night"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/Yurt-header.jpg", cap:"Yurt"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Ram-stepps.jpg", cap:"Ram steps"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Blackburn-road.jpg", cap:"Blackburn Road entrance"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/flowers-and-main-house.jpg", cap:"Flowers and main house"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/IMG_0189-e1672517272528.jpeg", cap:"SSCY entrance sign"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/dsc02974-e1682616124787.jpg", cap:"Program House from orchard"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/1981-6.jpg", cap:"Program House (1948)"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/1981.jpg", cap:"Program House (1981)"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/1981-3.jpg", cap:"Program House in snow (1981)"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/1981-2.jpg", cap:"Painting of Program House"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/Untitled-design-8.jpg", cap:"Program House 1980s"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/05/6.jpg", cap:"Aerial historical view"}
+  ],
+  "Rooms": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/10/Bed-photo-with-overlay-grey-1.jpg", cap:"Bedroom"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/Rm-7-Shared-Room.jpg", cap:"Room 7 shared"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/GH-Lavender-Room-Beds-and-window-resized.jpg", cap:"GH Lavender Room"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/GH-View-Room-Bed-and-desk-resized.jpg", cap:"GH View Room"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-6-Bed-and-Window-Resized.jpg", cap:"PH Room 6"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-7-resized.jpg", cap:"PH Room 7"}
+  ],
+  "Garden / Farm": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/DawnOverTheGarden-small-1.jpg", cap:"Dawn over the garden"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/apple-variety-scaled-1.jpg", cap:"Apple varieties"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Bumble-Bee-Pollinating-1024x683-1.jpg", cap:"Bumblebee pollinating"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Organic-Greens-in-Hoop-House-1024x768-1.jpg", cap:"Organic greens in hoop house"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/pears-1024x824-1.jpg", cap:"Pears"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/05/Farm-truck-with-bounty.jpg", cap:"Farm truck with bounty"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/05/harvesting-salad.jpg", cap:"Harvesting salad greens"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/DSC_3250-bees.jpg", cap:"Bees"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Fountain.jpg", cap:"Fountain"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Centre-garden.jpg", cap:"Centre garden"}
+  ],
+  "Property / Nature": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg", cap:"Main hero (property overview)"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0071.jpg", cap:"Aerial drone 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg", cap:"Aerial drone 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/DSCF0102.jpg", cap:"Outdoor scenic"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/serene.jpg", cap:"Serene grounds"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg", cap:"It's all about love"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Forest-Canopy-from-the-ground-1024x683-1.jpg", cap:"Forest canopy looking up"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/10/Forest-in-winter.jpg", cap:"Forest in winter"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/10/Forest-walk-school-photo.jpg", cap:"Forest walk bridge"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/10/Frosty-flower.jpg", cap:"Frosty flower"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/header-2-1.jpg", cap:"Site header property shot"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/09/Lotus-photo-jpeg.jpg", cap:"Lotus flower"}
+  ],
+  "Temples / Sacred": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Ganesh.jpg", cap:"Ganesh statue"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Hanuman-Shrine.jpg", cap:"Hanuman shrine"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/03/Holy-Mother-below-fountain.jpg", cap:"Holy Mother below fountain"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2024/05/IMG_1143.jpg", cap:"Temple / ceremony"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/04/PHOTO-2025-04-01-10-14-41.jpg", cap:"Recent ceremony"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg", cap:"Buddha background"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-temples.jpg", cap:"Temple spaces"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-ceremony-at-the-Madonna.jpg", cap:"Ceremony at Madonna"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/image-5.jpeg", cap:"Ganesha on property"}
+  ],
+  "Classes / Programs": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg", cap:"Programs & Retreats banner"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-1.jpg", cap:"Retreat 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-2.jpg", cap:"Retreat 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-3.jpg", cap:"Retreat 3"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-4.jpg", cap:"Retreat 4"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/11/Online-yoga.jpg", cap:"Online yoga"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Student-practice-with-CP-697x1024-1.jpg", cap:"Student practicing with instructor"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/YTT-200-Graduating-class-2019-hero.jpg", cap:"YTT graduating class 2019"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/Class-3-1024x610-1.jpg", cap:"Teacher training class"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/image-6.jpeg", cap:"Two yogis in poses"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/12/image-7.jpeg", cap:"YTT in BC setting"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2022/12/DSCF0250.jpg", cap:"Gita and Chetna demo"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg", cap:"Program in Satsang Room"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-YTT-teachers.jpg", cap:"YTT teachers"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/02/46-2.jpg", cap:"Yoga class"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/01/8.jpg", cap:"Spring cleanse"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/Website-front-page-8.jpg", cap:"Website front page"}
+  ],
+  "ACYR / Annual Retreat": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/1.png", cap:"51st Community Yoga Retreat 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/2.png", cap:"Community Yoga Retreat 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/3.png", cap:"Community Yoga Retreat 3"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/6.png", cap:"Community Yoga Retreat 4"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/8.png", cap:"Community Yoga Retreat 5"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/11.png", cap:"Community Yoga Retreat 6"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/07/12.png", cap:"Community Yoga Retreat 7"}
+  ],
+  "Nature & Nurture Series": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/1.jpg", cap:"N&N 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/2.jpg", cap:"N&N 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/3.jpg", cap:"N&N 3"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/4.jpg", cap:"N&N 4"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/5.jpg", cap:"N&N 5"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/6.jpg", cap:"N&N 6"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/7.jpg", cap:"N&N 7"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/8.jpg", cap:"N&N 8"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/9.jpg", cap:"N&N 9"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/10.jpg", cap:"N&N 10"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg", cap:"N&N 11"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/12.jpg", cap:"N&N 12"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-9.jpg", cap:"N&N Webpage 9"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-10.jpg", cap:"N&N Webpage 10"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-12.jpg", cap:"N&N Webpage 12"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-15.jpg", cap:"N&N Webpage 15"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/Personal-Retreat-Instagram-May-2022.jpg", cap:"Personal Retreat Instagram"}
+  ],
+  "Food / Kitchen": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-1.jpeg", cap:"Sourdough loaf"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-4.jpeg", cap:"First loaf"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2021/10/indian-spices-1.jpg", cap:"Indian spices"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2013/10/kicheree.jpg", cap:"Kitchari bowl"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/10/apple-crumble.jpg", cap:"Apple crumble"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/05/kitcheree4.jpg", cap:"Kitcheree"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/02/roasted-roots3.jpg", cap:"Roasted roots"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2017/04/8722829257_51b22d935f_z.jpg", cap:"Dressing for dinner"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2016/10/5414606076_52a3504606_z-copy.jpg", cap:"Ghee / clarified butter"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/06/summer-salad.jpg", cap:"Daya's summer salad"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/06/tofu.jpg", cap:"Sweet & sour tofu"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/04/DSC_4561-1.jpg", cap:"Miso ginger salad"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/03/chocolate-pudding1.jpg", cap:"Silken chocolate pudding"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2011/01/tofu-scramble.jpg", cap:"Sid's tofu scramble"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/02/Blog-Post-picture-horizontal-1200-x-630-6.jpg", cap:"Lemon spring greens"}
+  ],
+  "Music for Peace": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg", cap:"Concert series banner"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/01/Sitar-Concert-March-28-2026-Sharanjeet-Singh-Mand-.jpg", cap:"Sitar Concert poster"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg", cap:"Violin Concert poster"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/11/SoundBath-SaltSpring.png", cap:"Sound Bath"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/02/sitar-and-tabla.jpg", cap:"Sitar and tabla"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/1.jpg", cap:"Concert gallery 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/2.jpg", cap:"Concert gallery 2"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/3.jpg", cap:"Concert gallery 3"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/4.jpg", cap:"Concert gallery 4"}
+  ],
+  "Wellness": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2023/01/Registered-RMT-massage-Canva-Pro-stock-photo-2023.jpg", cap:"Massage therapy"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/10/needles-accupuncture.avif", cap:"Acupuncture"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/02/1.jpg", cap:"Wellness gallery 1"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/02/Where-Nature-2.jpg", cap:"Wellness - Where Nature"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/02/4.jpg", cap:"Wellness gallery 2"}
+  ],
+  "Blog Posts": [
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/Spring-Cleanse-Retreat-2.jpg", cap:"Spring Cleanse Retreat"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/03/3-1.jpg", cap:"Life at the Centre Feb 2026"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/02/IMG_5794.jpeg", cap:"Life at Centre Feb blog"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2026/01/IMG_3125-scaled.jpg", cap:"Life at Centre Jan 2026"},
+    {src:"https://saltspringcentre.com/wp-content/uploads/2025/12/Shine-Like-The-Sun-.jpg", cap:"Shine Like the Sun"}
+  ]
+};
 
-<h2>Rooms / Accommodation</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Bed-photo-with-overlay-grey-1.jpg" loading="lazy"><div class="caption">Bedroom</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Rm-7-Shared-Room.jpg" loading="lazy"><div class="caption">Room 7 shared</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/12/GH-Lavender-Room-Beds-and-window-resized.jpg" loading="lazy"><div class="caption">Garden House Lavender Room</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/12/GH-View-Room-Bed-and-desk-resized.jpg" loading="lazy"><div class="caption">Garden House View Room</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-6-Bed-and-Window-Resized.jpg" loading="lazy"><div class="caption">Program House Room 6</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-7-resized.jpg" loading="lazy"><div class="caption">Program House Room 7</div></div>
-</div>
+var data = JSON.parse(localStorage.getItem('sscy_photos') || 'null') || JSON.parse(JSON.stringify(DEFAULT_DATA));
+var dragItem = null;
+var dragCat = null;
 
-<h2>Garden / Farm</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DawnOverTheGarden-small-1.jpg" loading="lazy"><div class="caption">Dawn over the garden</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/apple-variety-scaled-1.jpg" loading="lazy"><div class="caption">Apple varieties</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Bumble-Bee-Pollinating-1024x683-1.jpg" loading="lazy"><div class="caption">Bumblebee pollinating</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Organic-Greens-in-Hoop-House-1024x768-1.jpg" loading="lazy"><div class="caption">Organic greens in hoop house</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/pears-1024x824-1.jpg" loading="lazy"><div class="caption">Pears</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/05/Farm-truck-with-bounty.jpg" loading="lazy"><div class="caption">Farm truck with bounty</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/05/harvesting-salad.jpg" loading="lazy"><div class="caption">Harvesting salad greens</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DSC_3250-bees.jpg" loading="lazy"><div class="caption">Bees</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Fountain.jpg" loading="lazy"><div class="caption">Fountain</div></div>
-</div>
+function render() {
+  var el = document.getElementById('categories');
+  el.innerHTML = '';
+  Object.keys(data).forEach(function(cat) {
+    var h = document.createElement('h2');
+    h.innerHTML = cat + ' <span class="count">' + data[cat].length + '</span>';
+    el.appendChild(h);
+    var grid = document.createElement('div');
+    grid.className = 'grid';
+    grid.dataset.cat = cat;
+    grid.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('drag-over'); });
+    grid.addEventListener('dragleave', function() { this.classList.remove('drag-over'); });
+    grid.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      if (!dragItem) return;
+      var toCat = this.dataset.cat;
+      if (dragCat !== toCat) {
+        data[dragCat] = data[dragCat].filter(function(x) { return x.src !== dragItem.src; });
+        data[toCat].push(dragItem);
+      }
+      save(); render();
+    });
+    data[cat].forEach(function(img, idx) {
+      var item = document.createElement('div');
+      item.className = 'item';
+      item.draggable = true;
+      item.addEventListener('dragstart', function() { dragItem = img; dragCat = cat; this.classList.add('dragging'); });
+      item.addEventListener('dragend', function() { this.classList.remove('dragging'); dragItem = null; });
+      var im = document.createElement('img');
+      im.src = img.src;
+      im.loading = 'lazy';
+      item.appendChild(im);
+      var cap = document.createElement('div');
+      cap.className = 'caption';
+      cap.contentEditable = true;
+      cap.textContent = img.cap;
+      cap.addEventListener('blur', function() { img.cap = this.textContent; save(); });
+      cap.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); this.blur(); } });
+      item.appendChild(cap);
+      grid.appendChild(item);
+    });
+    el.appendChild(grid);
+  });
+}
 
-<h2>Property / Nature / Aerial</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg" loading="lazy"><div class="caption">Main hero (property overview)</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0071.jpg" loading="lazy"><div class="caption">Aerial drone 1</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg" loading="lazy"><div class="caption">Aerial drone 2</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DSCF0102.jpg" loading="lazy"><div class="caption">Outdoor scenic</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/serene.jpg" loading="lazy"><div class="caption">Serene grounds</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/10/its-all-about-love.jpg" loading="lazy"><div class="caption">It's all about love</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Forest-Canopy-from-the-ground-1024x683-1.jpg" loading="lazy"><div class="caption">Forest canopy looking up</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Forest-in-winter.jpg" loading="lazy"><div class="caption">Forest in winter</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Forest-walk-school-photo.jpg" loading="lazy"><div class="caption">Forest walk</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Frosty-flower.jpg" loading="lazy"><div class="caption">Frosty flower</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/12/header-2-1.jpg" loading="lazy"><div class="caption">Site header property shot</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/09/Lotus-photo-jpeg.jpg" loading="lazy"><div class="caption">Lotus flower</div></div>
-</div>
+function save() {
+  localStorage.setItem('sscy_photos', JSON.stringify(data));
+  document.getElementById('saveStatus').textContent = 'Saved ' + new Date().toLocaleTimeString();
+}
 
-<h2>Temples / Sacred Spaces</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Ganesh.jpg" loading="lazy"><div class="caption">Ganesh statue</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Hanuman-Shrine.jpg" loading="lazy"><div class="caption">Hanuman shrine</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Holy-Mother-below-fountain.jpg" loading="lazy"><div class="caption">Holy Mother below fountain</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2024/05/IMG_1143.jpg" loading="lazy"><div class="caption">Temple/ceremony</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/04/PHOTO-2025-04-01-10-14-41.jpg" loading="lazy"><div class="caption">Recent ceremony</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg" loading="lazy"><div class="caption">Buddha background</div></div>
-</div>
+function exportData() {
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sscy-photos.json';
+  a.click();
+}
 
-<h2>Retreats / Programs</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-1.jpg" loading="lazy"><div class="caption">Retreat 1</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-2.jpg" loading="lazy"><div class="caption">Retreat 2</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-3.jpg" loading="lazy"><div class="caption">Retreat 3</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/retreat-4.jpg" loading="lazy"><div class="caption">Retreat 4</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg" loading="lazy"><div class="caption">Programs & Retreats banner</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/07/Website-front-page-8.jpg" loading="lazy"><div class="caption">Website front page</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2026/03/Spring-Cleanse-Retreat-2.jpg" loading="lazy"><div class="caption">Spring Cleanse Retreat</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/11/SoundBath-SaltSpring.png" loading="lazy"><div class="caption">Sound Bath</div></div>
-</div>
+function resetAll() {
+  if (confirm('Reset all changes? This cannot be undone.')) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    localStorage.removeItem('sscy_photos');
+    render();
+  }
+}
 
-<h2>Food / Kitchen</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-1.jpeg" loading="lazy"><div class="caption">Sourdough loaf</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-4.jpeg" loading="lazy"><div class="caption">First loaf</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2021/10/indian-spices-1.jpg" loading="lazy"><div class="caption">Indian spices</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2013/10/kicheree.jpg" loading="lazy"><div class="caption">Kitchari bowl</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2011/10/apple-crumble.jpg" loading="lazy"><div class="caption">Apple crumble</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2011/05/kitcheree4.jpg" loading="lazy"><div class="caption">Kitcheree</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2011/02/roasted-roots3.jpg" loading="lazy"><div class="caption">Roasted roots</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2011/09/book-cover.jpg" loading="lazy"><div class="caption">Salt Spring Experience book cover</div></div>
-</div>
-
-<h2>Nature & Nurture Series (Personal Retreat)</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/1.jpg" loading="lazy"><div class="caption">N&N 1</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/2.jpg" loading="lazy"><div class="caption">N&N 2</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/3.jpg" loading="lazy"><div class="caption">N&N 3</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/4.jpg" loading="lazy"><div class="caption">N&N 4</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/5.jpg" loading="lazy"><div class="caption">N&N 5</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/6.jpg" loading="lazy"><div class="caption">N&N 6</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/7.jpg" loading="lazy"><div class="caption">N&N 7</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/8.jpg" loading="lazy"><div class="caption">N&N 8</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/9.jpg" loading="lazy"><div class="caption">N&N 9</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/10.jpg" loading="lazy"><div class="caption">N&N 10</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg" loading="lazy"><div class="caption">N&N 11</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/12.jpg" loading="lazy"><div class="caption">N&N 12</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-9.jpg" loading="lazy"><div class="caption">N&N Webpage 9</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-10.jpg" loading="lazy"><div class="caption">N&N Webpage 10</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-12.jpg" loading="lazy"><div class="caption">N&N Webpage 12</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-15.jpg" loading="lazy"><div class="caption">N&N Webpage 15</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Personal-Retreat-Instagram-May-2022.jpg" loading="lazy"><div class="caption">Personal Retreat Instagram</div></div>
-</div>
-
-<h2>Music for Peace</h2>
-<div class="grid">
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg" loading="lazy"><div class="caption">Concert series banner</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2026/01/Sitar-Concert-March-28-2026-Sharanjeet-Singh-Mand-.jpg" loading="lazy"><div class="caption">Sitar Concert poster</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg" loading="lazy"><div class="caption">Violin Concert poster</div></div>
-  <div class="item"><img src="https://saltspringcentre.com/wp-content/uploads/2025/11/SoundBath-SaltSpring.png" loading="lazy"><div class="caption">Sound Bath</div></div>
-</div>
-
+render();
+</script>
 </body>
 </html>
