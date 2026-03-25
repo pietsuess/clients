@@ -27,7 +27,7 @@ html { scroll-behavior: smooth; }
   html { scroll-behavior: auto; }
   .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; }
 }
-body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 22px; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 24px; }
 h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
 h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); text-transform: uppercase; letter-spacing: 0.03em; }
 a { color: var(--teal-dark); text-decoration: none; }
@@ -53,6 +53,14 @@ img { max-width: 100%; display: block; }
 .hero-logo { width: clamp(380px, 60vw, 720px); color: var(--white); filter: drop-shadow(0 2px 16px rgba(0,0,0,0.3)); margin-bottom: 24px; }
 .hero-tagline { position: absolute; bottom: 60px; left: 0; right: 0; z-index: 2; text-align: center; font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 600; color: var(--white); letter-spacing: 0.12em; text-transform: uppercase; text-shadow: 0 2px 16px rgba(0,0,0,0.35); opacity: 0; transform: translateY(20px); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.4s; }
 .hero-tagline.visible { opacity: 1; transform: translateY(0); }
+
+/* BABAJI Q&A */
+.babaji-qa { background: var(--charcoal); color: var(--white); padding: 56px 32px; text-align: center; cursor: pointer; }
+.babaji-qa:hover .qa-inner { opacity: 0.85; }
+.qa-inner { max-width: 680px; margin: 0 auto; transition: opacity 0.3s ease; }
+.qa-label { font-family: 'Archivo Narrow', sans-serif; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--gold); display: block; margin-bottom: 20px; }
+.qa-question { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 400; opacity: 0.6; margin-bottom: 12px; font-style: italic; }
+.qa-answer { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.4; color: var(--white); }
 
 /* WAVE DIVIDER */
 .wave { width: 100%; display: block; margin-top: -2px; }
@@ -216,6 +224,15 @@ img { max-width: 100%; display: block; }
     <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
   </div>
 </section>
+
+<!-- BABAJI Q&A -->
+<div class="babaji-qa" id="babajiQA">
+  <div class="qa-inner">
+    <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
+    <div class="qa-question" id="qaQuestion"></div>
+    <div class="qa-answer" id="qaAnswer"></div>
+  </div>
+</div>
 
 <!-- QUICK LINKS -->
 <div class="quick-links">
@@ -423,6 +440,38 @@ img { max-width: 100%; display: block; }
 
 <script>
 // Hero text arrives after a beat
+// Babaji Q&A
+var qas = [
+  {q:"Do you have any goals that you try to fulfill in your life?", a:"Peace. No more than that."},
+  {q:"What is the definition of God?", a:"God is eternal peace. Is there anything higher than this?"},
+  {q:"How do you feel when no one asks questions?", a:"I feel fine. Some day all questions will stop."},
+  {q:"What do you suggest for birth control?", a:"Self control."},
+  {q:"How long have you been silent?", a:"29 years."},
+  {q:"How did you come about the decision not to speak?", a:"I used to do silence from childhood. Like fasting."},
+  {q:"Is guru a relationship closer than brother or mother?", a:"Much closer."},
+  {q:"Can you have a series of gurus in your life?", a:"I know only one and never wanted more, but I learn from different saints."},
+  {q:"Is the universe friendly?", a:"Universe is friendly but individual ego is the enemy of its own."},
+  {q:"Is it a comedy or a drama?", a:"Shadow fighting."},
+  {q:"What is free will?", a:"Will is a power of the mind. Within the jurisdiction of the mind one is free to act or not act. But the mind itself is not free."},
+  {q:"How can one think about God?", a:"When all thoughts are stopped then one can feel something in that vacant space. That is thinking about God."},
+  {q:"Does peace mean the same thing as love?", a:"How do you define love? It is a state of the mind free from all self interest, which is peace."},
+  {q:"Sincere longing for liberation, does it mean the goal is near?", a:"Sincere longing alone brings the goal near."},
+  {q:"What happens when you really surrender to God?", a:"Then the mind becomes God."},
+  {q:"Is the body a reflection of the mind?", a:"The mind is the ruler of the body."},
+  {q:"What can cause the thread to break?", a:"Dispassion."},
+  {q:"What is our dharma at the Centre?", a:"The priority is yogic life."},
+  {q:"Is it easier to accept death when you accept you are not the mind-body complex?", a:"Then you don't die. Only this gross body dies. The soul never dies."},
+  {q:"The end of what?", a:"The end of what?"}
+];
+var qa = qas[Math.floor(Math.random() * qas.length)];
+document.getElementById('qaQuestion').textContent = '"' + qa.q + '"';
+document.getElementById('qaAnswer').textContent = qa.a;
+document.getElementById('babajiQA').addEventListener('click', function() {
+  qa = qas[Math.floor(Math.random() * qas.length)];
+  document.getElementById('qaQuestion').textContent = '"' + qa.q + '"';
+  document.getElementById('qaAnswer').textContent = qa.a;
+});
+
 setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
 
 // Nav on scroll
