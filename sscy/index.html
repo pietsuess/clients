@@ -72,10 +72,40 @@ img { max-width: 100%; display: block; }
 .wave { width: 100%; display: block; margin-top: -2px; }
 .wave-flip { transform: scaleY(-1); margin-bottom: -2px; margin-top: 0; }
 
-/* QUICK LINKS */
-.quick-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 48px 24px; background: var(--cream); }
-.quick-link { padding: 12px 32px; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 50px; font-size: 0.9rem; font-weight: 500; color: var(--text); letter-spacing: 0.04em; transition: 0.25s ease; }
-.quick-link:hover { border-color: var(--teal); color: var(--teal-dark); background: var(--white); }
+/* QUICK LINKS - KEYS */
+.quick-links { display: grid; grid-template-columns: repeat(8, 1fr); background: var(--cream); overflow: hidden; }
+.quick-link {
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 12px; font-size: 0.88rem; font-weight: 600;
+  font-family: 'Cinzel', serif; color: var(--white);
+  text-decoration: none; letter-spacing: 0.03em;
+  position: relative; overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+  transform-origin: top center;
+}
+.quick-link:nth-child(1) { background: #1a5c53; }
+.quick-link:nth-child(2) { background: #2a8a7d; }
+.quick-link:nth-child(3) { background: #3bb8a8; }
+.quick-link:nth-child(4) { background: #c9a84c; }
+.quick-link:nth-child(5) { background: #c17838; }
+.quick-link:nth-child(6) { background: #8b6f47; }
+.quick-link:nth-child(7) { background: #2d5a27; }
+.quick-link:nth-child(8) { background: #7a9e7e; }
+.quick-link::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0;
+  background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quick-link:hover { transform: scaleY(1.15); z-index: 2; filter: brightness(1.1); color: var(--white); }
+.quick-link:hover::after { height: 100%; }
+.quick-link:active { transform: scaleY(0.92); filter: brightness(0.9); }
+.quick-link.entered {
+  animation: keyPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--i) * 0.07s);
+  opacity: 0; transform: scaleY(0.5);
+}
+@keyframes keyPop { to { opacity: 1; transform: scaleY(1); } }
+@media (max-width: 900px) { .quick-links { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 480px) { .quick-links { grid-template-columns: repeat(2, 1fr); } .quick-link { padding: 24px 8px; font-size: 0.78rem; } }
 
 /* ANNOUNCEMENT */
 .announcement { text-align: center; padding: 40px 24px; background: var(--cream-warm); }
@@ -250,15 +280,15 @@ img { max-width: 100%; display: block; }
 </div>
 
 <!-- QUICK LINKS -->
-<div class="quick-links">
-  <a href="offerings.html" class="quick-link">Retreats</a>
-  <a href="shop.html" class="quick-link">Shop</a>
-  <a href="offerings.html#ytt" class="quick-link">Teacher Training</a>
-  <a href="offerings.html#wellness" class="quick-link">Wellness</a>
-  <a href="rentals.html" class="quick-link">Venue Rentals</a>
-  <a href="offerings.html#karma" class="quick-link">Karma Yoga</a>
-  <a href="shop.html" class="quick-link">Donate</a>
-  <a href="contact.html" class="quick-link">Visit Us</a>
+<div class="quick-links" id="quickLinks">
+  <a href="offerings.html" class="quick-link" style="--i:0">Retreats</a>
+  <a href="shop.html" class="quick-link" style="--i:1">Shop</a>
+  <a href="offerings.html#ytt" class="quick-link" style="--i:2">Teacher Training</a>
+  <a href="offerings.html#wellness" class="quick-link" style="--i:3">Wellness</a>
+  <a href="rentals.html" class="quick-link" style="--i:4">Venue Rentals</a>
+  <a href="offerings.html#karma" class="quick-link" style="--i:5">Karma Yoga</a>
+  <a href="shop.html" class="quick-link" style="--i:6">Donate</a>
+  <a href="contact.html" class="quick-link" style="--i:7">Visit Us</a>
 </div>
 
 <!-- ANNOUNCEMENT -->
@@ -493,6 +523,17 @@ window.addEventListener('scroll', function() {
   nav.classList.toggle('scrolled', scrolled);
   navLogo.src = scrolled ? 'logo-full-teal.svg' : 'logo-full-white.svg';
 });
+
+// Quick links entrance
+var qlObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.quick-link').forEach(function(k) { k.classList.add('entered'); });
+      qlObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+qlObs.observe(document.getElementById('quickLinks'));
 
 // Scroll reveals (in AND out)
 var obs = new IntersectionObserver(function(entries) {
