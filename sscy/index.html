@@ -749,18 +749,34 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
 
     zones.forEach(function(zone, i) {
       var c = corners[i];
-      var dx = mx - c.x;
-      var dy = my - c.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
+      // Pixel distance from center toward this corner's direction
+      var cornerPx = c.x * rect.width;
+      var cornerPy = c.y * rect.height;
+      var centerX = rect.width / 2;
+      var centerY = rect.height / 2;
+      // How far is mouse along the center-to-corner axis (dot product)
+      var toCornerX = cornerPx - centerX;
+      var toCornerY = cornerPy - centerY;
+      var toMouseX = px - centerX;
+      var toMouseY = py - centerY;
+      var cornerDist = Math.sqrt(toCornerX * toCornerX + toCornerY * toCornerY);
+      // Project mouse onto corner direction
+      var dot = (toMouseX * toCornerX + toMouseY * toCornerY) / cornerDist;
+      // Also use radial distance from center
+      var radialDist = Math.sqrt(toMouseX * toMouseX + toMouseY * toMouseY);
 
-      // Always visible at 10%, ramps to 80% as you approach corner
-      var progress = Math.max(0, Math.min(1, 1 - (dist / 0.7)));
+      // Progress: 0 at center, 1 at 500px along the corner's direction
+      var dirProgress = Math.max(0, Math.min(1, dot / 500));
+      // Blend with general radial distance for smoother feel
+      var radProgress = Math.max(0, Math.min(1, radialDist / 500));
+      var progress = dirProgress * 0.7 + radProgress * 0.3;
+
       var opacity = 0.1 + progress * 0.7; // 10% to 80%
       var scale = 0.9 + progress * 0.1;
 
-      // Stronger 3D tilt
-      var tiltX = (my - c.y) * -25 * progress;
-      var tiltY = (mx - c.x) * 25 * progress;
+      // 3D tilt based on mouse offset from center
+      var tiltX = (toMouseY / rect.height) * -25 * progress;
+      var tiltY = (toMouseX / rect.width) * 25 * progress;
 
       zone.style.opacity = opacity;
       zone.style.transform = 'scale(' + scale + ') perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg)';
