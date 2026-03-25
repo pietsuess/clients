@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offerings | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Retreats, yoga teacher training, wellness treatments, karma yoga, classes, and events at the Salt Spring Centre of Yoga.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; } }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 24px; }
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; background: rgba(250,248,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.nav-logo img { height: 60px; }
+.nav-links { display: flex; gap: 2px; }
+.nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
+.nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+.nav-links a.active { background: var(--teal); color: var(--white); }
+
+/* HERO */
+.hero { height: 60vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero-img { position: absolute; top: -15%; left: 0; width: 100%; height: 130%; object-fit: cover; will-change: transform; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.5) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); }
+.hero-content h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+
+/* ANCHOR NAV */
+.anchor-nav { display: flex; justify-content: center; gap: 6px; padding: 20px 24px; background: var(--white); flex-wrap: wrap; }
+.anchor-nav a { padding: 8px 20px; font-size: 0.82rem; font-weight: 600; color: var(--teal-dark); border-radius: 50px; border: 1.5px solid var(--teal); transition: 0.25s ease; letter-spacing: 0.03em; }
+.anchor-nav a:hover { background: var(--teal); color: var(--white); }
+
+/* SPLIT SECTION */
+.split { display: grid; grid-template-columns: 1fr 1fr; min-height: 75vh; }
+.split.reverse .split-img { order: 2; }
+.split.reverse .split-text { order: 1; }
+.split-img { position: relative; overflow: hidden; }
+.split-img img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.split-text { display: flex; align-items: center; padding: 72px 64px; }
+.split-text-inner { max-width: 440px; }
+.split-text h2 { font-size: 2.2rem; margin-bottom: 20px; color: var(--teal-deep); }
+.split-text .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.split-text p { font-size: 1.02rem; line-height: 1.85; margin-bottom: 1em; }
+.split-text a.text-link { display: inline-block; margin-top: 16px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); transition: 0.25s ease; }
+.split-text a.text-link::after { content: ' \2192'; }
+.split-text a.text-link:hover { color: var(--teal); }
+
+/* PRICE TABLE */
+.price-list { list-style: none; margin: 16px 0; }
+.price-list li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.95rem; }
+.price-list li span:last-child { font-weight: 600; color: var(--teal-deep); white-space: nowrap; margin-left: 12px; }
+
+/* CONTACT PILL */
+.contact-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 50px; background: var(--cream-warm); font-size: 0.82rem; color: var(--text); margin-top: 8px; margin-right: 8px; }
+.contact-pill svg { flex-shrink: 0; }
+
+/* FLOATING QUOTE */
+.float-quote { text-align: center; padding: 72px 32px; background: var(--cream-warm); position: relative; overflow: hidden; }
+.float-quote::before { content: '\201C'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; font-size: 12rem; color: var(--teal); opacity: 0.06; line-height: 1; pointer-events: none; }
+.float-quote blockquote { font-family: 'Cinzel', serif; font-size: clamp(1.3rem, 3vw, 1.8rem); color: var(--teal-deep); max-width: 580px; margin: 0 auto 16px; line-height: 1.5; font-weight: 500; position: relative; }
+.float-quote cite { font-size: 0.82rem; color: var(--text-light); font-style: normal; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* WAVE DIVIDER */
+.wave-divider { width: 100%; overflow: hidden; line-height: 0; }
+.wave-divider svg { display: block; width: 100%; height: 60px; }
+.wave-divider.cream svg { fill: var(--cream); }
+.wave-divider.cream-warm svg { fill: var(--cream-warm); }
+.wave-divider.white svg { fill: var(--white); }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; padding: 14px 36px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: 0.25s ease; cursor: pointer; border: none; letter-spacing: 0.04em; }
+.btn-teal { background: var(--teal); color: var(--white); }
+.btn-teal:hover { background: var(--teal-dark); color: var(--white); }
+.btn-outline { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal); }
+.btn-outline:hover { background: var(--teal); color: var(--white); }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left { opacity: 0; transform: translateX(-50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-right { opacity: 0; transform: translateX(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; min-height: auto; }
+  .split.reverse .split-img { order: 0; }
+  .split.reverse .split-text { order: 0; }
+  .split-img { position: relative; height: 50vh; }
+  .split-img img { position: absolute; top: 0; height: 100%; }
+  .split-text { padding: 56px 28px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .anchor-nav { gap: 4px; }
+  .anchor-nav a { padding: 6px 14px; font-size: 0.75rem; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero { height: 50vh; }
+  .hero-content h1 { font-size: 2.6rem; }
+  .split-text h2 { font-size: 1.8rem; }
+  .split-text-inner { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav" id="siteNav">
+  <a href="index.html" class="nav-logo"><img src="logo-full-teal.svg" alt="Salt Spring Centre of Yoga"></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="offerings.html" class="active">Offerings</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg" alt="Offerings at the Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Offerings</h1>
+  </div>
+</section>
+
+<!-- ANCHOR NAV -->
+<div class="anchor-nav">
+  <a href="#retreats">Retreats</a>
+  <a href="#ytt">Teacher Training</a>
+  <a href="#wellness">Wellness Centre</a>
+  <a href="#karma">Karma Yoga</a>
+  <a href="#classes">Yoga Classes</a>
+  <a href="#events">Music for Peace</a>
+</div>
+
+<!-- ============================================ -->
+<!-- RETREATS -->
+<!-- ============================================ -->
+<section class="split" id="retreats">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-9.jpg" alt="Retreat at Salt Spring Centre of Yoga" loading="lazy">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner">
+      <span class="label reveal">Programs &amp; Immersions</span>
+      <h2 class="reveal d1">Retreats</h2>
+      <p class="reveal d2">Step away from the noise and into the stillness. Our retreat programs range from guided weekend immersions and seasonal spring cleanses to extended silent retreats and deeply personal self-directed stays. Each retreat unfolds on 69 acres of forest, gardens, and sacred space, held by decades of practice and community.</p>
+      <p class="reveal d3">Whether you are seeking renewal, clarity, or a first step onto the path, there is a retreat here for you.</p>
+      <a href="https://saltspringcentre.secure.retreat.guru/" target="_blank" rel="noopener" class="btn btn-teal reveal d4">Browse &amp; Book Retreats</a>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider cream-warm">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- QUOTE -->
+<section class="float-quote">
+  <blockquote class="reveal">"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
+  <cite class="reveal d1">Baba Hari Dass</cite>
+</section>
+
+<div class="wave-divider cream">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,40 C360,0 1080,60 1440,20 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- YOGA TEACHER TRAINING -->
+<!-- ============================================ -->
+<section class="split reverse" id="ytt">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/YTT-200-Graduating-class-2019-hero.jpg" alt="Yoga Teacher Training graduating class" loading="lazy">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner">
+      <span class="label reveal">Certification Program</span>
+      <h2 class="reveal d1">Yoga Teacher Training</h2>
+      <p class="reveal d2">Our 200-hour Yoga Teacher Training is a residential immersion grounded in the classical teachings of Ashtanga Yoga as transmitted by Baba Hari Dass. Over three intensive weeks on-site, you will study asana, pranayama, meditation, anatomy, philosophy, and the art of teaching with integrity.</p>
+      <p class="reveal d3">This is not just a certification. It is a deep dive into self-study and community, designed to transform your practice and prepare you to share yoga with authenticity and heart.</p>
+      <a href="https://saltspringcentre.secure.retreat.guru/" target="_blank" rel="noopener" class="btn btn-outline reveal d4">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- WELLNESS CENTRE -->
+<!-- ============================================ -->
+<section class="split" id="wellness">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2025/02/Where-Nature-2.jpg" alt="Wellness Centre at Salt Spring Centre of Yoga" loading="lazy">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner">
+      <span class="label reveal">Healing &amp; Bodywork</span>
+      <h2 class="reveal d1">Wellness Centre</h2>
+      <p class="reveal d2">Our on-site Wellness Centre offers a range of healing treatments rooted in both Eastern and Western traditions. Experienced practitioners provide care in a setting of profound calm, surrounded by forest and birdsong.</p>
+      <ul class="price-list reveal d3">
+        <li><span>Swedish Massage</span><span>$120 &ndash; $180</span></li>
+        <li><span>Ayurveda Treatments</span><span>By consultation</span></li>
+        <li><span>Acupuncture</span><span>$100 &ndash; $140</span></li>
+        <li><span>Fire Cupping</span><span>$75</span></li>
+      </ul>
+      <div class="reveal d4">
+        <a href="mailto:wellness@saltspringcentre.com" class="contact-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          wellness@saltspringcentre.com
+        </a>
+        <a href="tel:2505376200" class="contact-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          250-537-6200
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider cream-warm">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,30 C480,60 960,0 1440,30 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- QUOTE -->
+<section class="float-quote">
+  <blockquote class="reveal">"The mind is like water. When it is turbulent, it is difficult to see. When it is calm, everything becomes clear."</blockquote>
+  <cite class="reveal d1">Baba Hari Dass</cite>
+</section>
+
+<div class="wave-divider cream">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,40 C360,0 1080,60 1440,20 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- KARMA YOGA -->
+<!-- ============================================ -->
+<section class="split reverse" id="karma">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Tree-Pose-in-Boots-scaled-1.jpg" alt="Karma Yoga volunteer in tree pose wearing boots" loading="lazy">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner">
+      <span class="label reveal">Live-In Volunteer Program</span>
+      <h2 class="reveal d1">Karma Yoga</h2>
+      <p class="reveal d2">Karma Yoga is the yoga of selfless service, and it is the heartbeat of this community. Our live-in volunteer program invites you to dedicate 25 to 30 hours per week to the daily work of the Centre: cooking, gardening, cleaning, building, and caring for the land and each other.</p>
+      <p class="reveal d3">In return, you receive accommodation, three vegetarian meals a day, and full access to all yoga classes and community programs. Three seasonal cohorts run throughout the year, each lasting several months. It is a rare opportunity to live simply, practice deeply, and belong to something larger than yourself.</p>
+      <a href="https://saltspringcentre.secure.retreat.guru/" target="_blank" rel="noopener" class="btn btn-outline reveal d4">Apply Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- YOGA CLASSES -->
+<!-- ============================================ -->
+<section class="split" id="classes">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2025/02/46-2.jpg" alt="Yoga class at the Salt Spring Centre" loading="lazy">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner">
+      <span class="label reveal">Weekly Practice</span>
+      <h2 class="reveal d1">Yoga Classes</h2>
+      <p class="reveal d2">The Centre offers a full weekly schedule of asana, pranayama, and meditation classes open to all levels. Whether you are a beginner or a longtime practitioner, our teachers guide with warmth and attention rooted in the classical tradition.</p>
+      <p class="reveal d3">Sunday Satsang brings the community together for chanting, meditation, and teachings. Regular kirtan sessions fill the hall with devotional music and shared voice. These gatherings are free and open to everyone.</p>
+      <a href="https://saltspringcentre.secure.retreat.guru/" target="_blank" rel="noopener" class="btn btn-teal reveal d4">View Schedule</a>
+    </div>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider cream-warm">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- MUSIC FOR PEACE -->
+<!-- ============================================ -->
+<section class="float-quote" id="events" style="padding: 100px 32px;">
+  <span class="label reveal" style="display:block;font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.16em;color:var(--teal);margin-bottom:14px;">Concert Series</span>
+  <h2 class="reveal d1" style="font-size:clamp(2rem,4vw,2.8rem);color:var(--teal-deep);margin-bottom:20px;">Music for Peace</h2>
+  <p class="reveal d2" style="max-width:560px;margin:0 auto 32px;font-size:1.05rem;line-height:1.85;color:var(--text);">Our Music for Peace concert series brings world-class musicians to the Satsang Room for intimate evenings of classical, devotional, and cross-cultural performance. These events support the Centre and nourish the island's cultural life.</p>
+  <a href="shop.html" class="btn btn-teal reveal d3">Get Tickets in the Shop</a>
+</section>
+
+<div class="wave-divider" style="background:var(--cream-warm);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--charcoal);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="contact.html">Contact</a>
+        <a href="index.html#about">History</a>
+        <a href="index.html#partners">Partners</a>
+        <a href="index.html#founder">Baba Hari Dass</a>
+        <a href="https://saltspringcentre.com/blog/" target="_blank">Blog</a>
+        <a href="#karma">Karma Yogis</a>
+        <a href="#ytt">Teacher Training</a>
+        <a href="#wellness">Wellness</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="contact.html">Getting Here</a>
+        <a href="shop.html">Donate</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// Hero parallax
+var heroImg = document.getElementById('heroImg');
+window.addEventListener('scroll', function() {
+  var s = window.scrollY;
+  heroImg.style.transform = 'translateY(' + (s * 0.2) + 'px)';
+});
+
+// Scroll reveals (IntersectionObserver)
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+    else e.target.classList.remove('in-view');
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
+
+// Parallax on split images
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var pEls = document.querySelectorAll('.split-img img');
+  window.addEventListener('scroll', function() {
+    pEls.forEach(function(el) {
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      var progress = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+      el.style.transform = 'translateY(' + (progress * -50) + 'px)';
+    });
+  });
+}
+
+// Smooth scroll for anchor nav
+document.querySelectorAll('.anchor-nav a').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+</body>
+</html>

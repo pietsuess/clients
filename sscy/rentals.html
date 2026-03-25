@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spaces &amp; Rentals | Salt Spring Centre of Yoga</title>
+<meta name="description" content="69 acres of sacred land with established spaces for retreats, workshops, and gatherings since 1981. Satsang Room, Garden House, Pond Dome, and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; } }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 24px; }
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; }
+.site-nav.scrolled { background: rgba(250,248,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 32px; }
+.nav-logo img { height: 60px; }
+.nav-links { display: flex; gap: 2px; }
+.nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: rgba(255,255,255,0.7); border-radius: 50px; transition: 0.25s ease; }
+.nav-links a:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+.site-nav.scrolled .nav-links a { color: var(--text-light); }
+.site-nav.scrolled .nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+.site-nav.scrolled .nav-links a.active { color: var(--teal-dark); background: var(--cream-warm); }
+.nav-links a.active { color: var(--white); background: rgba(255,255,255,0.15); }
+
+/* HERO */
+.hero { height: 85vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero-img { position: absolute; top: -5%; left: 0; width: 100%; height: 110%; object-fit: cover; will-change: transform, filter; transition: filter 0.1s linear; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); opacity: 0; transform: translateY(30px); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-content.visible { opacity: 1; transform: translateY(0); }
+.hero-content h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); color: var(--white); text-shadow: 0 2px 20px rgba(0,0,0,0.3); letter-spacing: 0.02em; }
+.hero-content .hero-sub { font-size: 1rem; margin-top: 16px; opacity: 0.7; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+
+/* INTRO */
+.intro-section { max-width: 680px; margin: 0 auto; padding: 100px 32px; text-align: center; }
+.intro-section p { font-size: 1.3rem; line-height: 1.8; color: var(--teal-deep); font-family: 'Cinzel', serif; font-weight: 400; text-align: center; }
+
+/* SPLIT SECTION */
+.split { display: grid; grid-template-columns: 1fr 1fr; min-height: 75vh; }
+.split.reverse { direction: rtl; }
+.split.reverse > * { direction: ltr; }
+.split-img { position: relative; overflow: hidden; }
+.split-img img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.split-text { display: flex; align-items: center; padding: 72px 64px; }
+.split-text-inner { max-width: 440px; }
+.split-text h2 { font-size: 2.2rem; margin-bottom: 20px; color: var(--teal-deep); }
+.split-text .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.split-text p { font-size: 1.02rem; line-height: 1.85; margin-bottom: 1em; }
+.split-text a.text-link { display: inline-block; margin-top: 16px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); }
+.split-text a.text-link::after { content: ' \2192'; }
+
+/* HORIZONTAL SCROLL STRIP */
+.scroll-strip-section { padding: 0; overflow: hidden; }
+.scroll-strip { overflow-x: auto; overflow-y: hidden; display: flex; gap: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; padding: 4px 0; }
+.scroll-strip:active { cursor: grabbing; }
+.scroll-strip img { height: 40vh; min-width: 40vh; object-fit: cover; scroll-snap-align: start; flex-shrink: 0; border-radius: 0; transition: transform 0.4s ease; }
+.scroll-strip img:hover { transform: scale(1.02); }
+.scroll-strip::-webkit-scrollbar { height: 4px; }
+.scroll-strip::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
+
+/* CTA SECTION */
+.cta-section { text-align: center; padding: 100px 24px; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); color: var(--white); position: relative; overflow: hidden; }
+.cta-section::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; border-radius: 50%; background: rgba(255,255,255,0.03); pointer-events: none; }
+.cta-section h2 { font-size: 2.6rem; color: var(--white); margin-bottom: 16px; }
+.cta-section p { max-width: 520px; margin: 0 auto 40px; opacity: 0.75; font-size: 1.05rem; line-height: 1.8; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; padding: 14px 36px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: 0.25s ease; cursor: pointer; border: none; letter-spacing: 0.04em; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+.btn-primary:hover { background: #a8632e; color: var(--white); }
+.btn-outline-light { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.4); }
+.btn-outline-light:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+
+/* FLOATING QUOTE */
+.float-quote { text-align: center; padding: 72px 32px; background: var(--cream-warm); position: relative; overflow: hidden; }
+.float-quote::before { content: '\201C'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; font-size: 12rem; color: var(--teal); opacity: 0.06; line-height: 1; pointer-events: none; }
+.float-quote blockquote { font-family: 'Cinzel', serif; font-size: clamp(1.3rem, 3vw, 1.8rem); color: var(--teal-deep); max-width: 580px; margin: 0 auto 16px; line-height: 1.5; font-weight: 500; position: relative; }
+.float-quote cite { font-size: 0.82rem; color: var(--text-light); font-style: normal; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* FULL-BLEED IMAGE WITH PARALLAX */
+.parallax-frame { position: relative; overflow: hidden; height: 70vh; }
+.parallax-frame img { position: absolute; top: -15%; left: 0; width: 100%; height: 130%; object-fit: cover; will-change: transform; }
+.parallax-frame.short { height: 50vh; }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left { opacity: 0; transform: translateX(-50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-right { opacity: 0; transform: translateX(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; }
+
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; min-height: auto; }
+  .split.reverse { direction: ltr; }
+  .split-img { position: relative; height: 50vh; }
+  .split-img img { position: absolute; top: 0; height: 100%; }
+  .split-text { padding: 56px 28px; }
+  .parallax-frame { height: 50vh; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero-content h1 { font-size: 2.4rem; }
+  .intro-section { padding: 64px 24px; }
+  .intro-section p { font-size: 1.1rem; }
+  .split-text h2 { font-size: 1.8rem; }
+  .split-text-inner { max-width: 100%; }
+  .scroll-strip img { height: 30vh; min-width: 30vh; }
+  .cta-section h2 { font-size: 2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav" id="siteNav">
+  <a href="index.html" class="nav-logo"><img src="logo-full-teal.svg" alt="Salt Spring Centre of Yoga" id="navLogo"></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="rentals.html" class="active">Rentals</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" alt="Pond Dome at the Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
+  <div class="hero-overlay"></div>
+  <div class="hero-content" id="heroText">
+    <h1>Spaces &amp; Rentals</h1>
+    <div class="hero-sub">Sacred Land &bull; Established Venues &bull; Since 1981</div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<div class="intro-section reveal">
+  <p>69 acres of sacred land, established spaces for retreats, workshops, and gatherings since 1981.</p>
+</div>
+
+<!-- SATSANG ROOM -->
+<section class="split">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg" alt="Satsang Room at the Salt Spring Centre of Yoga">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner reveal-right">
+      <span class="label">Program House</span>
+      <h2>Satsang Room</h2>
+      <p>The main ceremony and gathering space in the Program House. This warm, light-filled room has hosted decades of yoga programs, satsangs, kirtan, workshops, and community celebrations. With seating for up to 80 people, a full sound system, and a stage area, it serves as the heart of programming at the Centre.</p>
+      <p>The adjacent commercial kitchen and dining hall make the Program House ideal for multi-day retreats with catered meals.</p>
+      <a href="contact.html" class="text-link">Inquire about this space</a>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<div class="float-quote">
+  <blockquote>The whole world is a place for practice.</blockquote>
+  <cite>Baba Hari Dass</cite>
+</div>
+
+<!-- GARDEN HOUSE -->
+<section class="split reverse">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House yoga studio at the Salt Spring Centre of Yoga">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner reveal-left">
+      <span class="label">Yoga &amp; Accommodation</span>
+      <h2>Garden House &amp; Yoga Studio</h2>
+      <p>A secondary yoga venue nestled among the gardens, the Garden House offers a tranquil practice space with natural light and views of the surrounding forest. The dedicated yoga studio comfortably holds 20 to 30 practitioners.</p>
+      <p>The building also includes accommodation rooms for retreat participants, making it a self-contained option for smaller groups seeking an intimate experience on the land.</p>
+      <a href="contact.html" class="text-link">Inquire about this space</a>
+    </div>
+  </div>
+</section>
+
+<!-- PARALLAX BREAK -->
+<div class="parallax-frame short">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" alt="Centre grounds">
+</div>
+
+<!-- POND DOME -->
+<section class="split">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" alt="Inside the Pond Dome at the Salt Spring Centre of Yoga">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner reveal-right">
+      <span class="label">Geodesic Venue</span>
+      <h2>Pond Dome</h2>
+      <p>A geodesic dome venue situated by the pond, the Pond Dome offers a unique and inspiring setting for workshops, sound healing, meditation, and small gatherings. The circular architecture creates a natural sense of unity and containment.</p>
+      <p>Surrounded by water, trees, and birdsong, this space brings the outside in. Perfect for groups of up to 30 seeking something beyond a conventional room.</p>
+      <a href="contact.html" class="text-link">Inquire about this space</a>
+    </div>
+  </div>
+</section>
+
+<!-- SAUNA -->
+<section class="split reverse">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Wood-burning sauna at the Salt Spring Centre of Yoga">
+  </div>
+  <div class="split-text">
+    <div class="split-text-inner reveal-left">
+      <span class="label">Wellness</span>
+      <h2>Sauna</h2>
+      <p>A traditional wood-burning sauna available as part of retreat packages or by special arrangement. After a day of practice, teaching, or deep work, the sauna offers a quiet place to release, restore, and reconnect with the body.</p>
+      <p>Set apart from the main buildings and surrounded by forest, the experience is meditative in its simplicity.</p>
+      <a href="contact.html" class="text-link">Inquire about availability</a>
+    </div>
+  </div>
+</section>
+
+<!-- HORIZONTAL SCROLL PHOTO STRIP -->
+<div class="scroll-strip-section">
+  <div class="scroll-strip" id="photoStrip">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg" alt="Satsang Room">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House Yoga Studio">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" alt="Pond Dome Interior">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Sauna at Night">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" alt="Pond Dome Exterior">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg" alt="Satsang Room">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House">
+  </div>
+</div>
+
+<!-- HOST YOUR EVENT CTA -->
+<section class="cta-section">
+  <div class="reveal">
+    <h2>Host Your Event</h2>
+    <p>Whether you are planning a weekend retreat, a teacher training, a day-long workshop, or a private ceremony, our spaces and our community are here to support your vision. We offer flexible venue packages with optional catering, accommodation, and AV support.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+      <a href="offerings.html" class="btn btn-outline-light">View Offerings</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="contact.html">Contact</a>
+        <a href="index.html#about">History</a>
+        <a href="index.html#partners">Partners</a>
+        <a href="index.html#founder">Baba Hari Dass</a>
+        <a href="https://saltspringcentre.com/blog/" target="_blank">Blog</a>
+        <a href="offerings.html">Karma Yogis</a>
+        <a href="offerings.html">Teacher Training</a>
+        <a href="offerings.html">Wellness</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="contact.html">Getting Here</a>
+        <a href="shop.html">Donate</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// Hero entrance
+setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 600);
+
+// Nav scroll behavior
+var nav = document.getElementById('siteNav');
+var navLogo = document.getElementById('navLogo');
+var heroImg = document.getElementById('heroImg');
+window.addEventListener('scroll', function() {
+  var s = window.scrollY;
+  var h = window.innerHeight;
+  var scrolled = s > h * 0.4;
+  nav.classList.toggle('scrolled', scrolled);
+  // Hero blur
+  var blur = Math.min(s / h * 12, 12);
+  heroImg.style.filter = 'blur(' + blur + 'px)';
+  // Hero parallax
+  heroImg.style.transform = 'translateY(' + (s * 0.15) + 'px)';
+  // Hero content fade
+  var heroContent = document.getElementById('heroText');
+  if (heroContent) {
+    heroContent.style.opacity = Math.max(0, 1 - s / (h * 0.5));
+    heroContent.style.transform = 'translateY(' + (s * 0.2) + 'px)';
+  }
+});
+
+// Scroll reveals
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+    else e.target.classList.remove('in-view');
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
+
+// Parallax on split images and frames
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var pEls = document.querySelectorAll('.parallax-frame img, .split-img img');
+  window.addEventListener('scroll', function() {
+    pEls.forEach(function(el) {
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      var progress = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+      el.style.transform = 'translateY(' + (progress * -50) + 'px)';
+    });
+  });
+}
+
+// Drag-to-scroll on photo strip
+document.querySelectorAll('.scroll-strip').forEach(function(strip) {
+  var isDown = false, startX, scrollLeft;
+  strip.addEventListener('mousedown', function(e) { isDown = true; startX = e.pageX - strip.offsetLeft; scrollLeft = strip.scrollLeft; });
+  strip.addEventListener('mouseleave', function() { isDown = false; });
+  strip.addEventListener('mouseup', function() { isDown = false; });
+  strip.addEventListener('mousemove', function(e) {
+    if (!isDown) return;
+    e.preventDefault();
+    strip.scrollLeft = scrollLeft - (e.pageX - strip.offsetLeft - startX) * 1.5;
+  });
+});
+</script>
+</body>
+</html>

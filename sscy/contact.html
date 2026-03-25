@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact &mdash; Salt Spring Centre of Yoga</title>
+<meta name="description" content="Visit the Salt Spring Centre of Yoga on Salt Spring Island, BC. Directions, contact info, and how to get here.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; } }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 24px; }
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; background: rgba(250,248,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.nav-logo img { height: 60px; }
+.nav-links { display: flex; gap: 2px; }
+.nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
+.nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+.nav-links a.active { color: var(--teal-dark); font-weight: 600; }
+
+/* HERO */
+.hero { height: 60vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero-img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.5) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); }
+.hero-content h1 { font-size: clamp(2.4rem, 5vw, 3.8rem); color: var(--white); letter-spacing: 0.04em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+
+/* CONTACT SPLIT */
+.contact-split { display: grid; grid-template-columns: 1fr 1fr; max-width: 1080px; margin: 0 auto; padding: 96px 32px; gap: 64px; }
+.contact-info h2 { font-size: 2rem; color: var(--teal-deep); margin-bottom: 28px; }
+.contact-info .info-item { margin-bottom: 24px; }
+.contact-info .info-label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); margin-bottom: 6px; }
+.contact-info .info-value { font-size: 1.05rem; line-height: 1.7; }
+.contact-info .info-value a { color: var(--teal-dark); transition: 0.25s; }
+.contact-info .info-value a:hover { color: var(--teal); }
+
+/* FORM */
+.contact-form h2 { font-size: 2rem; color: var(--teal-deep); margin-bottom: 28px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 8px; }
+.form-group input,
+.form-group textarea { width: 100%; padding: 14px 18px; border: 1.5px solid rgba(0,0,0,0.08); background: var(--cream-warm); border-radius: 12px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; color: var(--text); transition: border-color 0.25s, box-shadow 0.25s; }
+.form-group input:focus,
+.form-group textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(59,184,168,0.12); }
+.form-group textarea { resize: vertical; min-height: 160px; }
+.form-submit { display: inline-flex; align-items: center; padding: 14px 44px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; color: var(--white); background: var(--teal-dark); border: none; cursor: pointer; letter-spacing: 0.04em; transition: background 0.25s, transform 0.2s; }
+.form-submit:hover { background: var(--teal); transform: translateY(-1px); }
+.form-submit:active { transform: translateY(0); }
+.form-success { display: none; padding: 16px 24px; background: rgba(59,184,168,0.1); border: 1px solid var(--teal); border-radius: 12px; color: var(--teal-deep); font-weight: 500; margin-top: 16px; }
+
+/* GETTING HERE */
+.getting-here { background: var(--white); }
+.getting-here-inner { display: grid; grid-template-columns: 1fr 1fr; min-height: 65vh; }
+.getting-here-img { position: relative; overflow: hidden; }
+.getting-here-img img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.getting-here-text { display: flex; align-items: center; padding: 72px 64px; }
+.getting-here-text-inner { max-width: 460px; }
+.getting-here-text h2 { font-size: 2.2rem; color: var(--teal-deep); margin-bottom: 24px; }
+.getting-here-text .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.getting-here-text p { font-size: 1.02rem; line-height: 1.85; margin-bottom: 1em; }
+.route { margin-bottom: 20px; }
+.route-title { font-weight: 600; color: var(--teal-deep); font-size: 1rem; margin-bottom: 4px; }
+.route p { font-size: 0.95rem; line-height: 1.7; color: var(--text); }
+
+/* MAP */
+.map-section { padding: 0; }
+.map-section iframe { width: 100%; height: 450px; border: none; display: block; filter: saturate(0.85) contrast(1.05); }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; padding: 14px 36px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: 0.25s ease; cursor: pointer; border: none; letter-spacing: 0.04em; }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left { opacity: 0; transform: translateX(-50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-right { opacity: 0; transform: translateX(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .contact-split { grid-template-columns: 1fr; gap: 48px; padding: 64px 24px; }
+  .getting-here-inner { grid-template-columns: 1fr; min-height: auto; }
+  .getting-here-img { position: relative; height: 50vh; }
+  .getting-here-img img { position: absolute; top: 0; height: 100%; }
+  .getting-here-text { padding: 56px 28px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hero { height: 50vh; }
+  .hero-content h1 { font-size: 2.2rem; }
+  .contact-split { padding: 48px 20px; gap: 40px; }
+  .getting-here-text-inner { max-width: 100%; }
+  .getting-here-text h2 { font-size: 1.8rem; }
+  .map-section iframe { height: 320px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav" id="siteNav">
+  <a href="index.html" class="nav-logo"><img src="logo-full-teal.svg" alt="Salt Spring Centre of Yoga" id="navLogo"></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="contact.html" class="active">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Blackburn-road.jpg" alt="Blackburn Road, Salt Spring Island" class="hero-img" id="heroImg">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Visit Us</h1>
+  </div>
+</section>
+
+<!-- CONTACT: INFO + FORM -->
+<section class="contact-split">
+  <div class="contact-info reveal-left">
+    <h2>Get in Touch</h2>
+    <div class="info-item">
+      <div class="info-label">Address</div>
+      <div class="info-value">355 Blackburn Road<br>Salt Spring Island, BC<br>Canada</div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">Phone</div>
+      <div class="info-value"><a href="tel:+12505372326">250-537-2326</a></div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">Email</div>
+      <div class="info-value"><a href="mailto:info@saltspringcentre.com">info@saltspringcentre.com</a></div>
+    </div>
+    <div class="info-item">
+      <div class="info-label">Office Hours</div>
+      <div class="info-value">Monday to Friday, 9 am to 5 pm PST</div>
+    </div>
+  </div>
+  <div class="contact-form reveal-right">
+    <h2>Send a Message</h2>
+    <form id="contactForm" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required placeholder="Your email address">
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" required placeholder="How can we help you?"></textarea>
+      </div>
+      <button type="submit" class="form-submit">Send Message</button>
+      <div class="form-success" id="formSuccess">Thank you for your message. We will be in touch soon.</div>
+    </form>
+  </div>
+</section>
+
+<!-- GETTING HERE -->
+<section class="getting-here">
+  <div class="getting-here-inner">
+    <div class="getting-here-img">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Blackburn-road.jpg" alt="Blackburn Road approach" loading="lazy" id="gettingHereImg">
+    </div>
+    <div class="getting-here-text">
+      <div class="getting-here-text-inner">
+        <span class="label reveal">Directions</span>
+        <h2 class="reveal d1">Getting Here</h2>
+
+        <div class="route reveal d2">
+          <div class="route-title">From Vancouver</div>
+          <p>BC Ferries from Tsawwassen to Long Harbour (direct to Salt Spring) or connect via Swartz Bay on Vancouver Island.</p>
+        </div>
+
+        <div class="route reveal d3">
+          <div class="route-title">From Victoria</div>
+          <p>BC Ferries from Swartz Bay to Fulford Harbour. A scenic 35-minute crossing through the Gulf Islands.</p>
+        </div>
+
+        <div class="route reveal d3">
+          <div class="route-title">By Float Plane</div>
+          <p>Harbour Air and Saltspring Air offer float plane service from Vancouver Harbour directly to Ganges Harbour on Salt Spring Island.</p>
+        </div>
+
+        <div class="route reveal d4">
+          <div class="route-title">From the Ferry</div>
+          <p>The Centre is a 15-minute drive from both Fulford Harbour and Long Harbour ferry terminals. Follow signs toward Fulford-Ganges Road, then turn onto Blackburn Road.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="map-section reveal">
+  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2600!2d-123.5083!3d48.8167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x548f54b4a5e7c8a1%3A0x4e1234567890abcd!2sSalt+Spring+Centre+of+Yoga!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Salt Spring Centre of Yoga location"></iframe>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="contact.html">Contact</a>
+        <a href="index.html#about">History</a>
+        <a href="index.html#partners">Partners</a>
+        <a href="index.html#founder">Baba Hari Dass</a>
+        <a href="https://saltspringcentre.com/blog/" target="_blank">Blog</a>
+        <a href="offerings.html">Karma Yogis</a>
+        <a href="offerings.html">Teacher Training</a>
+        <a href="offerings.html">Wellness</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="contact.html#getting-here">Getting Here</a>
+        <a href="shop.html">Donate</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// Form submission
+function handleSubmit(e) {
+  e.preventDefault();
+  var form = document.getElementById('contactForm');
+  var success = document.getElementById('formSuccess');
+  success.style.display = 'block';
+  form.reset();
+  setTimeout(function() { success.style.display = 'none'; }, 5000);
+}
+
+// Hero parallax
+var heroImg = document.getElementById('heroImg');
+window.addEventListener('scroll', function() {
+  var s = window.scrollY;
+  heroImg.style.transform = 'translateY(' + (s * 0.15) + 'px)';
+});
+
+// Scroll reveals
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+    else e.target.classList.remove('in-view');
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
+
+// Parallax on getting-here image
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var pEls = document.querySelectorAll('.getting-here-img img');
+  window.addEventListener('scroll', function() {
+    pEls.forEach(function(el) {
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      var progress = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+      el.style.transform = 'translateY(' + (progress * -50) + 'px)';
+    });
+  });
+}
+</script>
+</body>
+</html>
