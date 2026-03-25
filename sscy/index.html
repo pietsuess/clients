@@ -582,6 +582,14 @@ var navLinks = document.querySelector('.sticky-nav-links');
 var navLogoWrap = document.querySelector('.sn-logo-wrap');
 var navInner = document.querySelector('.sticky-nav-inner');
 
+// Capture original position before sticky kicks in
+var navPinPoint = stickyNav.offsetTop;
+// Recalc on resize
+window.addEventListener('resize', function() {
+  window.scrollTo(0, 0);
+  navPinPoint = stickyNav.offsetTop;
+});
+
 function checkSticky() {
   var rect = stickyNav.getBoundingClientRect();
   var pinned = rect.top <= 0;
@@ -589,8 +597,7 @@ function checkSticky() {
   if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
 
   // Calculate how far past the pin point we've scrolled (0 to 1 over 200px)
-  var navOriginalTop = stickyNav.offsetTop;
-  var scrollPast = Math.max(0, Math.min(1, (window.scrollY - navOriginalTop) / 200));
+  var scrollPast = Math.max(0, Math.min(1, (window.scrollY - navPinPoint) / 200));
 
   // Slide links: center (50%) to right edge
   var innerWidth = navInner.offsetWidth;
