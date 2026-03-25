@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orbit Section Test</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui; background: #f5f0e8; color: #333; }
+
+/* Spacer to simulate scrolling down to it */
+.spacer {
+  height: 100vh; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: #bbb; font-weight: 300;
+}
+
+.spacer::after { content: 'Scroll down to the orbit'; }
+
+/* ===== ORBIT SECTION ===== */
+.orbit-section {
+  height: 500px; position: relative; overflow: hidden;
+  background: #f5f0e8;
+}
+
+.orbit-title {
+  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+  text-align: center; z-index: 5; pointer-events: none;
+}
+
+.orbit-title h2 { font-size: 1.3rem; font-weight: 300; color: #888; letter-spacing: 0.08em; }
+.orbit-title .hint { font-size: 0.65rem; color: #bbb; margin-top: 6px; }
+
+.orbit-track {
+  position: absolute; inset: 0;
+}
+
+.orbit-card {
+  position: absolute; width: 200px; height: 220px;
+  border-radius: 20px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+  will-change: transform, left, top;
+}
+
+.orbit-card:nth-child(1) { background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
+.orbit-card:nth-child(2) { background: linear-gradient(160deg, #c9a84c, #d4b85c); }
+.orbit-card:nth-child(3) { background: linear-gradient(160deg, #2a8a7d, #3bb8a8); }
+.orbit-card:nth-child(4) { background: linear-gradient(160deg, #d4b85c, #e0ca78); }
+
+.orbit-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
+
+.oc-icon { font-size: 2rem; margin-bottom: 12px; opacity: 0.5; }
+.oc-label { font-size: 1.1rem; font-weight: 500; letter-spacing: 0.03em; margin-bottom: 6px; }
+.oc-sub { font-size: 0.68rem; opacity: 0.55; text-align: center; padding: 0 16px; line-height: 1.4; }
+
+/* Bottom spacer */
+.spacer-bottom {
+  height: 100vh; display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: #bbb; font-weight: 300;
+}
+
+.spacer-bottom::after { content: 'Rest of site below'; }
+</style>
+</head>
+<body>
+
+<div class="spacer"></div>
+
+<!-- ORBIT SECTION - embeddable component -->
+<section class="orbit-section" id="orbitSection">
+  <div class="orbit-title">
+    <h2>What brings you here?</h2>
+    <div class="hint">hover to explore</div>
+  </div>
+  <div class="orbit-track" id="orbitTrack">
+    <div class="orbit-card" data-intent="peace">
+      <div class="oc-icon">&#x25CB;</div>
+      <div class="oc-label">Find Peace</div>
+      <div class="oc-sub">Retreats, wellness, the land</div>
+    </div>
+    <div class="orbit-card" data-intent="learn">
+      <div class="oc-icon">&#x25B3;</div>
+      <div class="oc-label">Learn</div>
+      <div class="oc-sub">Classes, training, philosophy</div>
+    </div>
+    <div class="orbit-card" data-intent="give">
+      <div class="oc-icon">&#x25C7;</div>
+      <div class="oc-label">Give Back</div>
+      <div class="oc-sub">Karma yoga, donate, shop</div>
+    </div>
+    <div class="orbit-card" data-intent="host">
+      <div class="oc-icon">&#x25A1;</div>
+      <div class="oc-label">Host</div>
+      <div class="oc-sub">Venues, rentals, events</div>
+    </div>
+  </div>
+</section>
+
+<div class="spacer-bottom"></div>
+
+<script>
+(function() {
+  var section = document.getElementById('orbitSection');
+  var cards = document.querySelectorAll('.orbit-card');
+  var angle = 0;
+  var autoSpeed = 0.001;
+  var mouseInfluence = 0;
+  var targetInfluence = 0;
+  var hoveredIndex = -1;
+  var targetAngle = null;
+  var isActive = false;
+
+  function getGeometry() {
+    var rect = section.getBoundingClientRect();
+    var cx = rect.width / 2;
+    var cy = rect.height / 2 + 20;
+    var rx = Math.min(rect.width * 0.3, 320);
+    var ry = rect.height * 0.22;
+    return { cx: cx, cy: cy, rx: rx, ry: ry };
+  }
+
+  function positionCards() {
+    var g = getGeometry();
+    cards.forEach(function(card, i) {
+      var a = angle + (i * Math.PI * 0.5);
+      var x = g.cx + Math.cos(a) * g.rx - 100;
+      var y = g.cy + Math.sin(a) * g.ry - 110;
+      var z = Math.sin(a);
+      var scale = 0.8 + (z + 1) * 0.15;
+      var opacity = 0.45 + (z + 1) * 0.275;
+
+      if (hoveredIndex === i) {
+        scale = 1.08;
+        opacity = 1;
+      }
+
+      card.style.left = x + 'px';
+      card.style.top = y + 'px';
+      card.style.transform = 'scale(' + scale + ')';
+      card.style.opacity = opacity;
+      card.style.zIndex = Math.round((z + 1) * 10);
+    });
+  }
+
+  // Hover: bring back cards to front
+  cards.forEach(function(card, i) {
+    card.addEventListener('mouseenter', function() {
+      hoveredIndex = i;
+      var cardAngle = angle + (i * Math.PI * 0.5);
+      var z = Math.sin(cardAngle);
+      if (z < 0) {
+        var ta = (Math.PI * 0.5) - (i * Math.PI * 0.5);
+        var diff = ta - angle;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        targetAngle = angle + diff;
+      } else {
+        targetAngle = null;
+      }
+    });
+    card.addEventListener('mouseleave', function() {
+      hoveredIndex = -1;
+      targetAngle = null;
+    });
+    card.addEventListener('click', function() {
+      alert('Navigate to: ' + card.dataset.intent);
+    });
+  });
+
+  // Mouse influence based on position within section
+  section.addEventListener('mousemove', function(e) {
+    var rect = section.getBoundingClientRect();
+    var mx = (e.clientX - rect.left) / rect.width;
+    targetInfluence = (mx - 0.5) * 0.02;
+    isActive = true;
+  });
+
+  section.addEventListener('mouseleave', function() {
+    targetInfluence = 0;
+    isActive = false;
+  });
+
+  function animate() {
+    if (targetAngle !== null) {
+      angle += (targetAngle - angle) * 0.04;
+    } else {
+      mouseInfluence += (targetInfluence - mouseInfluence) * 0.06;
+      angle += autoSpeed + mouseInfluence;
+    }
+    positionCards();
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+})();
+</script>
+</body>
+</html>
