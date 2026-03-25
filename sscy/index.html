@@ -25,21 +25,13 @@ img { max-width: 100%; display: block; }
 p { text-align: justify; text-justify: inter-word; }
 
 /* NAV */
-.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; }
-.site-nav.scrolled { opacity: 0; pointer-events: none; }
-.nav-logo { color: var(--white); transition: color 0.6s ease; }
-.site-nav.scrolled .nav-logo { color: var(--teal-deep); }
-.nav-logo img { height: 60px; }
-.nav-links { display: none; }
+.hero-top-logo { position: absolute; top: 24px; left: 32px; z-index: 10; height: 60px; }
 .nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
 .nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
 /* STICKY NAV BAR - sits below hero, locks to top on scroll */
 .sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 14px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
-.sticky-nav-inner { display: flex; justify-content: flex-end; gap: 6px; max-width: 1200px; margin: 0 auto; padding: 0 32px; align-items: center; }
-.sticky-nav .sn-logo-link { margin-right: auto; padding: 0; border-radius: 0; }
-.sticky-nav .sn-logo-link:hover { background: none; }
-.sticky-nav .sn-logo { height: 56px; }
+.sticky-nav-inner { display: flex; justify-content: center; gap: 6px; max-width: 1200px; margin: 0 auto; padding: 0 32px; align-items: center; }
 .sticky-nav a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
 .sticky-nav a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
@@ -224,22 +216,11 @@ p { text-align: justify; text-justify: inter-word; }
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="site-nav" id="siteNav">
-  <a href="index.html" class="nav-logo"><img src="logo-full-white.svg" alt="Salt Spring Centre of Yoga" id="navLogo"></a>
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="offerings.html">Offerings</a>
-    <a href="rentals.html">Rentals</a>
-    <a href="contact.html">Contact</a>
-  </div>
-</nav>
-
 <!-- HERO -->
 <section class="hero">
   <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg" alt="Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
   <div class="hero-overlay"></div>
+  <a href="index.html"><img src="logo-full-white.svg" alt="Salt Spring Centre of Yoga" class="hero-top-logo"></a>
   <div class="hero-content" id="heroText">
     <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
   </div>
@@ -248,7 +229,6 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- STICKY NAV - sits below hero, sticks to top on scroll -->
 <nav class="sticky-nav" id="stickyNav">
   <div class="sticky-nav-inner">
-    <a href="index.html" class="sn-logo-link"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a>
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
     <a href="offerings.html">Offerings</a>
@@ -528,9 +508,6 @@ var heroImg = document.getElementById('heroImg');
 window.addEventListener('scroll', function() {
   var s = window.scrollY;
   var h = window.innerHeight;
-  var scrolled = s > h * 0.6;
-  nav.classList.toggle('scrolled', scrolled);
-  navLogo.src = scrolled ? 'logo-full-teal.svg' : 'logo-full-white.svg';
   // Hero blur
   var blur = Math.min(s / h * 12, 12);
   heroImg.style.filter = 'blur(' + blur + 'px)';
