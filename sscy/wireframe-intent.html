@@ -9,52 +9,38 @@
 body { background: #f5f0e8; font-family: system-ui; overflow: hidden; height: 100vh; color: #333; }
 
 /* ===== LANDING: Orbiting intents ===== */
-.landing-scene { perspective: 1000px; height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; transition: opacity 0.6s ease; }
+.landing-scene { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; transition: opacity 0.6s ease; }
 .landing-scene.gone { opacity: 0; pointer-events: none; }
 
-.orbit-ring {
-  width: 500px; height: 500px; position: relative;
-  transform-style: preserve-3d;
-  animation: slowSpin 30s linear infinite;
-}
-
-@keyframes slowSpin { to { transform: rotateY(360deg); } }
+.orbit-ring { position: relative; width: 100vw; height: 100vh; }
 
 .orbit-item {
-  position: absolute; width: 220px; height: 260px;
-  left: 50%; top: 50%; margin-left: -110px; margin-top: -130px;
+  position: absolute; width: 240px; height: 280px;
   border-radius: 24px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-  /* Counter-rotate so text stays readable */
-  backface-visibility: hidden;
+  color: #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease;
+  will-change: transform;
 }
 
-.orbit-item:nth-child(1) { transform: rotateY(0deg) translateZ(260px) rotateY(0deg); background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
-.orbit-item:nth-child(2) { transform: rotateY(90deg) translateZ(260px) rotateY(-90deg); background: linear-gradient(160deg, #8a6a3a, #aa8a5a); }
-.orbit-item:nth-child(3) { transform: rotateY(180deg) translateZ(260px) rotateY(-180deg); background: linear-gradient(160deg, #3a5a8a, #5a7aaa); }
-.orbit-item:nth-child(4) { transform: rotateY(270deg) translateZ(260px) rotateY(-270deg); background: linear-gradient(160deg, #7a6a3a, #9a8a5a); }
+.orbit-item:nth-child(1) { background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
+.orbit-item:nth-child(2) { background: linear-gradient(160deg, #8a6a3a, #aa8a5a); }
+.orbit-item:nth-child(3) { background: linear-gradient(160deg, #3a5a8a, #5a7aaa); }
+.orbit-item:nth-child(4) { background: linear-gradient(160deg, #7a6a3a, #9a8a5a); }
 
-.orbit-item:hover { transform-origin: center; box-shadow: 0 16px 48px rgba(0,0,0,0.25); }
+.orbit-item:hover { box-shadow: 0 20px 56px rgba(0,0,0,0.2); }
 
-.oi-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.6; }
-.oi-label { font-size: 1.2rem; font-weight: 500; letter-spacing: 0.04em; margin-bottom: 6px; }
-.oi-sub { font-size: 0.72rem; opacity: 0.6; text-align: center; padding: 0 16px; line-height: 1.5; }
+.oi-icon { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.5; }
+.oi-label { font-size: 1.3rem; font-weight: 500; letter-spacing: 0.04em; margin-bottom: 8px; }
+.oi-sub { font-size: 0.75rem; opacity: 0.55; text-align: center; padding: 0 20px; line-height: 1.5; }
 
-/* Center text */
 .orbit-center {
-  position: absolute; text-align: center; z-index: 5; pointer-events: none;
+  position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
+  text-align: center; z-index: 5; pointer-events: none;
 }
 
-.orbit-center h1 { font-size: 1.4rem; font-weight: 300; color: #666; letter-spacing: 0.08em; }
-.orbit-center .hint { font-size: 0.7rem; color: #aaa; margin-top: 8px; }
-
-/* Speed control - mouse X position */
-.speed-indicator {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  font-size: 0.65rem; color: #bbb; letter-spacing: 0.1em; text-transform: uppercase;
-}
+.orbit-center h1 { font-size: 1.6rem; font-weight: 300; color: #888; letter-spacing: 0.08em; }
+.orbit-center .hint { font-size: 0.7rem; color: #bbb; margin-top: 8px; }
 
 /* ===== CONTENT STATE ===== */
 .content-state {
@@ -157,12 +143,7 @@ body { background: #f5f0e8; font-family: system-ui; overflow: hidden; height: 10
 
 @media (max-width: 900px) {
   .card-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
-  .orbit-ring { width: 300px; height: 300px; }
-  .orbit-item { width: 160px; height: 200px; margin-left: -80px; margin-top: -100px; }
-  .orbit-item:nth-child(1) { transform: rotateY(0deg) translateZ(160px) rotateY(0deg); }
-  .orbit-item:nth-child(2) { transform: rotateY(90deg) translateZ(160px) rotateY(-90deg); }
-  .orbit-item:nth-child(3) { transform: rotateY(180deg) translateZ(160px) rotateY(-180deg); }
-  .orbit-item:nth-child(4) { transform: rotateY(270deg) translateZ(160px) rotateY(-270deg); }
+  .orbit-item { width: 180px; height: 220px; }
 }
 </style>
 </head>
@@ -198,7 +179,6 @@ body { background: #f5f0e8; font-family: system-ui; overflow: hidden; height: 10
   </div>
 </div>
 
-<div class="speed-indicator">move mouse to control speed</div>
 
 <!-- CONTENT STATE -->
 <div class="content-state" id="contentState">
@@ -270,31 +250,83 @@ var intentData = {
 };
 
 var currentKey = null;
-var orbitRing = document.getElementById('orbitRing');
-var baseSpeed = 12; // seconds per rotation (lower = faster)
+var items = document.querySelectorAll('.orbit-item');
+var cx = window.innerWidth / 2;
+var cy = window.innerHeight / 2;
+var angle = 0;
+var autoSpeed = 0.003;
+var mouseInfluence = 0;
+var mouseX = 0.5;
+var radius = Math.min(window.innerWidth, window.innerHeight) * 0.28;
+var hoveredIndex = -1;
 
-// Mouse controls orbit speed
 document.addEventListener('mousemove', function(e) {
-  var x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
-  var speed = baseSpeed - (x * 10); // range: 2 to 22 seconds
-  if (speed < 2) speed = 2;
-  if (speed > 40) speed = 40;
-  // Negative = reverse direction
-  if (x < -0.3) {
-    orbitRing.style.animationDirection = 'reverse';
-    orbitRing.style.animationDuration = Math.abs(speed) + 's';
-  } else {
-    orbitRing.style.animationDirection = 'normal';
-    orbitRing.style.animationDuration = speed + 's';
-  }
+  mouseX = e.clientX / window.innerWidth;
+  // Mouse left of center slows/reverses, right speeds up
+  mouseInfluence = (mouseX - 0.5) * 0.008;
 });
 
-// Enter an intent
+function positionCards() {
+  items.forEach(function(item, i) {
+    var a = angle + (i * Math.PI * 0.5); // 4 items, 90 degrees apart
+    var x = cx + Math.cos(a) * radius - 120;
+    var y = cy + Math.sin(a) * radius * 0.35 - 140; // elliptical, flatter
+    var z = Math.sin(a); // -1 to 1, for depth
+    var scale = 0.85 + (z + 1) * 0.15; // 0.85 to 1.15
+    var opacity = 0.5 + (z + 1) * 0.25; // 0.5 to 1.0
+
+    // Hovered card pops forward
+    if (hoveredIndex === i) {
+      scale = 1.12;
+      opacity = 1;
+    }
+
+    item.style.left = x + 'px';
+    item.style.top = y + 'px';
+    item.style.transform = 'scale(' + scale + ')';
+    item.style.opacity = opacity;
+    item.style.zIndex = Math.round((z + 1) * 10);
+  });
+}
+
+// Hover tracking
+items.forEach(function(item, i) {
+  item.addEventListener('mouseenter', function() { hoveredIndex = i; });
+  item.addEventListener('mouseleave', function() { hoveredIndex = -1; });
+});
+
+// Animation loop
+var isLanding = true;
+function animateOrbit() {
+  if (isLanding) {
+    angle += autoSpeed + mouseInfluence;
+    positionCards();
+  }
+  requestAnimationFrame(animateOrbit);
+}
+animateOrbit();
+
+// Resize handler
+window.addEventListener('resize', function() {
+  cx = window.innerWidth / 2;
+  cy = window.innerHeight / 2;
+  radius = Math.min(window.innerWidth, window.innerHeight) * 0.28;
+});
+
 function enter(key) {
   currentKey = key;
+  isLanding = false;
 
-  // Speed up orbit then disappear
-  orbitRing.style.animationDuration = '0.8s';
+  // Cards scatter outward
+  items.forEach(function(item, i) {
+    var a = angle + (i * Math.PI * 0.5);
+    var scatterX = Math.cos(a) * window.innerWidth;
+    var scatterY = Math.sin(a) * window.innerHeight;
+    item.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+    item.style.transform = 'translate(' + scatterX * 0.3 + 'px, ' + scatterY * 0.3 + 'px) scale(0.3)';
+    item.style.opacity = '0';
+  });
+
   setTimeout(function() {
     document.getElementById('landingScene').classList.add('gone');
     showContent(key);
@@ -362,8 +394,12 @@ function goBack() {
 
   setTimeout(function() {
     document.getElementById('landingScene').classList.remove('gone');
-    orbitRing.style.animationDuration = baseSpeed + 's';
-    orbitRing.style.animationDirection = 'normal';
+    // Reset card transitions and restart orbit
+    items.forEach(function(item) {
+      item.style.transition = 'transform 0.15s ease-out, box-shadow 0.3s ease';
+      item.style.opacity = '1';
+    });
+    isLanding = true;
   }, 200);
 }
 </script>
