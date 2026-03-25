@@ -37,6 +37,9 @@ p { text-align: justify; text-justify: inter-word; }
 /* STICKY NAV BAR - sits below hero, locks to top on scroll */
 .sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 14px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .sticky-nav-inner { display: flex; justify-content: center; gap: 6px; max-width: 1080px; margin: 0 auto; padding: 0 24px; align-items: center; }
+.sticky-nav .sn-logo-link { margin-right: auto; padding: 0; border-radius: 0; }
+.sticky-nav .sn-logo-link:hover { background: none; }
+.sticky-nav .sn-logo { height: 32px; }
 .sticky-nav a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
 .sticky-nav a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
@@ -76,6 +79,7 @@ p { text-align: justify; text-justify: inter-word; }
 .quick-link:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
 .quick-link:hover::after { height: 100%; }
 .quick-link:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
+.quick-links.sticky { position: sticky; top: 50px; z-index: 80; }
 .quick-link.entered { animation: keyPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(var(--i) * 0.07s); opacity: 0; transform: scaleY(0.5); }
 @keyframes keyPop { to { opacity: 1; transform: scaleY(1); } }
 
@@ -244,6 +248,7 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- STICKY NAV - sits below hero, sticks to top on scroll -->
 <nav class="sticky-nav" id="stickyNav">
   <div class="sticky-nav-inner">
+    <a href="index.html" class="sn-logo-link"><img src="logo-full-teal.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a>
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
     <a href="offerings.html">Offerings</a>
@@ -270,8 +275,10 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
 </div>
 
+<!-- STICKY ZONE: keys stay pinned through this container -->
+<div class="sticky-zone">
 <!-- QUICK LINKS -->
-<div class="quick-links" id="quickLinks">
+<div class="quick-links sticky" id="quickLinks">
   <a href="offerings.html" class="quick-link" style="--i:0">Retreats</a>
   <a href="shop.html" class="quick-link" style="--i:1">Shop</a>
   <a href="offerings.html#ytt" class="quick-link" style="--i:2">Teacher Training</a>
@@ -311,6 +318,7 @@ p { text-align: justify; text-justify: inter-word; }
   <blockquote class="reveal">"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
   <cite class="reveal d1">Baba Hari Dass</cite>
 </section>
+</div><!-- end sticky-zone -->
 
 <!-- SPLIT: The Land -->
 <section class="split">
