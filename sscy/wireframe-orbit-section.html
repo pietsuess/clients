@@ -35,7 +35,7 @@ body { font-family: system-ui; background: #f5f0e8; color: #333; }
 }
 
 .orbit-card {
-  position: absolute; width: 200px; height: 220px;
+  position: absolute; width: 280px; height: 160px;
   border-radius: 20px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1);
@@ -115,7 +115,7 @@ body { font-family: system-ui; background: #f5f0e8; color: #333; }
     var rect = section.getBoundingClientRect();
     var cx = rect.width / 2;
     var cy = rect.height / 2;
-    var rx = Math.min(rect.width * 0.3, 320);
+    var rx = Math.min(rect.width * 0.2, 220);
     var ry = rect.height * 0.06;
     return { cx: cx, cy: cy, rx: rx, ry: ry };
   }
@@ -124,8 +124,8 @@ body { font-family: system-ui; background: #f5f0e8; color: #333; }
     var g = getGeometry();
     cards.forEach(function(card, i) {
       var a = angle + (i * Math.PI * 0.5);
-      var x = g.cx + Math.cos(a) * g.rx - 100;
-      var y = g.cy + Math.sin(a) * g.ry - 110;
+      var x = g.cx + Math.cos(a) * g.rx - 140;
+      var y = g.cy + Math.sin(a) * g.ry - 80;
       var z = Math.sin(a);
       var scale = 0.65 + (z + 1) * 0.25;
       var opacity = 0.35 + (z + 1) * 0.325;
