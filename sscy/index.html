@@ -42,8 +42,8 @@ p { text-align: justify; text-justify: inter-word; }
 .sticky-nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
 /* HERO */
-.hero { height: 100vh; position: relative; overflow: visible; display: flex; align-items: center; justify-content: center; }
-.hero-img, .hero-overlay { clip-path: inset(0); }
+.hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.orbit-section { overflow: visible; }
 .hero-img { position: absolute; top: -5%; left: 0; width: 100%; height: 110%; object-fit: cover; will-change: transform, filter; transition: filter 0.1s linear; }
 .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.18); }
 .hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); opacity: 0; transform: scale(0.96); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -221,7 +221,7 @@ p { text-align: justify; text-justify: inter-word; }
 }
 
 /* ORBIT NAV */
-.orbit-section { position: absolute; bottom: 20px; left: 0; right: 0; height: 80px; z-index: 5; pointer-events: none; }
+.orbit-section { position: relative; margin-top: -80px; height: 80px; z-index: 5; pointer-events: none; }
 .orbit-card { pointer-events: auto; }
 .oc-icon { display: none; }
 .orbit-title { display: none; }
@@ -247,12 +247,11 @@ p { text-align: justify; text-justify: inter-word; }
   <div class="hero-content" id="heroText">
     <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
   </div>
-  <!-- ORBIT NAV - overlays bottom of hero -->
-  <div class="orbit-section" id="orbitSection">
-  <div class="orbit-title">
-    <h2>What brings you here?</h2>
-    <div class="hint">hover to explore</div>
-  </div>
+</section>
+
+<!-- ORBIT NAV - overlays bottom of hero via negative margin -->
+<div class="orbit-section" id="orbitSection">
+  <div class="orbit-title"><h2>What brings you here?</h2></div>
   <canvas id="orbitString" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
   <div class="orbit-track" id="orbitTrack" style="z-index:2;position:relative;">
     <div class="orbit-card" onclick="location.href='offerings.html'">
@@ -276,8 +275,7 @@ p { text-align: justify; text-justify: inter-word; }
       <div class="oc-sub">Venues, rentals, events</div>
     </div>
   </div>
-  </div>
-</section>
+</div>
 
 <!-- STICKY NAV - sits below hero, sticks to top on scroll -->
 <nav class="sticky-nav" id="stickyNav">
