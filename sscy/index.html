@@ -61,6 +61,7 @@ img { max-width: 100%; display: block; }
 .qa-label { font-family: 'Archivo Narrow', sans-serif; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--gold); display: block; margin-bottom: 20px; }
 .qa-question { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 400; opacity: 0.6; margin-bottom: 12px; font-style: italic; }
 .qa-answer { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 600; line-height: 1.4; color: var(--white); }
+.qa-date { font-family: 'Archivo Narrow', sans-serif; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.3; margin-top: 16px; }
 
 /* WAVE DIVIDER */
 .wave { width: 100%; display: block; margin-top: -2px; }
@@ -231,6 +232,7 @@ img { max-width: 100%; display: block; }
     <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
     <div class="qa-question" id="qaQuestion"></div>
     <div class="qa-answer" id="qaAnswer"></div>
+    <div class="qa-date" id="qaDate"></div>
   </div>
 </div>
 
@@ -315,7 +317,7 @@ img { max-width: 100%; display: block; }
 <!-- SPLIT: Founder (reversed) -->
 <section class="split" style="direction:rtl;">
   <div class="split-img" style="direction:ltr;">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg" alt="Baba Hari Dass" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Babaji-photo-overlay.jpg" alt="Baba Hari Dass" loading="lazy">
   </div>
   <div class="split-text" style="direction:ltr;">
     <div class="split-text-inner">
@@ -440,37 +442,34 @@ img { max-width: 100%; display: block; }
 
 <script>
 // Hero text arrives after a beat
-// Babaji Q&A
-var qas = [
-  {q:"Do you have any goals that you try to fulfill in your life?", a:"Peace. No more than that."},
-  {q:"What is the definition of God?", a:"God is eternal peace. Is there anything higher than this?"},
-  {q:"How do you feel when no one asks questions?", a:"I feel fine. Some day all questions will stop."},
-  {q:"What do you suggest for birth control?", a:"Self control."},
-  {q:"How long have you been silent?", a:"29 years."},
-  {q:"How did you come about the decision not to speak?", a:"I used to do silence from childhood. Like fasting."},
-  {q:"Is guru a relationship closer than brother or mother?", a:"Much closer."},
-  {q:"Can you have a series of gurus in your life?", a:"I know only one and never wanted more, but I learn from different saints."},
-  {q:"Is the universe friendly?", a:"Universe is friendly but individual ego is the enemy of its own."},
-  {q:"Is it a comedy or a drama?", a:"Shadow fighting."},
-  {q:"What is free will?", a:"Will is a power of the mind. Within the jurisdiction of the mind one is free to act or not act. But the mind itself is not free."},
-  {q:"How can one think about God?", a:"When all thoughts are stopped then one can feel something in that vacant space. That is thinking about God."},
-  {q:"Does peace mean the same thing as love?", a:"How do you define love? It is a state of the mind free from all self interest, which is peace."},
-  {q:"Sincere longing for liberation, does it mean the goal is near?", a:"Sincere longing alone brings the goal near."},
-  {q:"What happens when you really surrender to God?", a:"Then the mind becomes God."},
-  {q:"Is the body a reflection of the mind?", a:"The mind is the ruler of the body."},
-  {q:"What can cause the thread to break?", a:"Dispassion."},
-  {q:"What is our dharma at the Centre?", a:"The priority is yogic life."},
-  {q:"Is it easier to accept death when you accept you are not the mind-body complex?", a:"Then you don't die. Only this gross body dies. The soul never dies."},
-  {q:"The end of what?", a:"The end of what?"}
-];
-var qa = qas[Math.floor(Math.random() * qas.length)];
-document.getElementById('qaQuestion').textContent = '"' + qa.q + '"';
-document.getElementById('qaAnswer').textContent = qa.a;
-document.getElementById('babajiQA').addEventListener('click', function() {
-  qa = qas[Math.floor(Math.random() * qas.length)];
-  document.getElementById('qaQuestion').textContent = '"' + qa.q + '"';
-  document.getElementById('qaAnswer').textContent = qa.a;
-});
+// Babaji Q&A - 100 exchanges from darshan transcripts 1976-1989
+</script>
+<script src="babaji-qa.js"></script>
+<script>
+function showQA() {
+  var qa = qas[Math.floor(Math.random() * qas.length)];
+  var qEl = document.getElementById('qaQuestion');
+  var aEl = document.getElementById('qaAnswer');
+  if (Array.isArray(qa.q)) {
+    var html = '';
+    for (var i = 0; i < qa.q.length; i++) {
+      html += '<span style="opacity:0.5;font-style:italic;">"' + qa.q[i] + '"</span><br>';
+      html += '<span style="opacity:1;">' + qa.a[i] + '</span>';
+      if (i < qa.q.length - 1) html += '<br><br>';
+    }
+    qEl.innerHTML = '';
+    aEl.innerHTML = html;
+  } else {
+    qEl.textContent = '\u201C' + qa.q + '\u201D';
+    aEl.textContent = qa.a;
+  }
+  if (qa.d) {
+    var dateEl = document.getElementById('qaDate');
+    if (dateEl) dateEl.textContent = 'Darshan, ' + qa.d;
+  }
+}
+showQA();
+document.getElementById('babajiQA').addEventListener('click', showQA);
 
 setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
 
