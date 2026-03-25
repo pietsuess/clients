@@ -253,7 +253,8 @@ p { text-align: justify; text-justify: inter-word; }
     <h2>What brings you here?</h2>
     <div class="hint">hover to explore</div>
   </div>
-  <div class="orbit-track" id="orbitTrack">
+  <canvas id="orbitString" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;"></canvas>
+  <div class="orbit-track" id="orbitTrack" style="z-index:2;position:relative;">
     <div class="orbit-card" onclick="location.href='offerings.html'">
       <div class="oc-icon">&#x25CB;</div>
       <div class="oc-label">Find Peace</div>
@@ -690,8 +691,12 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     };
   }
 
+  var canvas = document.getElementById('orbitString');
+  var ctx = canvas.getContext('2d');
+
   function positionCards() {
     var g = getGeometry();
+    var points = [];
     cards.forEach(function(card, i) {
       var a = angle + (i * Math.PI * 0.5);
       var x = g.cx + Math.cos(a) * g.rx - 120;
@@ -705,7 +710,36 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       card.style.transform = 'scale(' + scale + ')';
       card.style.opacity = opacity;
       card.style.zIndex = Math.round((z + 1) * 10);
+      points.push({x: x + 120, y: y + 22, z: z});
     });
+    drawString(g, points);
+  }
+
+  function drawString(g, cardPoints) {
+    var rect = section.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw smooth ellipse path through all positions
+    ctx.beginPath();
+    var steps = 80;
+    for (var s = 0; s <= steps; s++) {
+      var a = angle + (s / steps) * Math.PI * 2;
+      var px = g.cx + Math.cos(a) * g.rx;
+      var py = g.cy + Math.sin(a) * g.ry;
+      var z = Math.sin(a);
+      var alpha = 0.15 + (z + 1) * 0.15;
+      if (s === 0) {
+        ctx.moveTo(px, py);
+      } else {
+        ctx.lineTo(px, py);
+      }
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
   }
 
   cards.forEach(function(card, i) {
