@@ -26,14 +26,21 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* NAV */
 .site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; }
-.site-nav.scrolled { background: rgba(250,248,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 32px; }
+.site-nav.scrolled { padding: 10px 32px; }
 .nav-logo { color: var(--white); transition: color 0.6s ease; }
 .site-nav.scrolled .nav-logo { color: var(--teal-deep); }
 .nav-logo img { height: 60px; }
-.nav-links { display: flex; gap: 2px; opacity: 0; transform: translateY(-10px); transition: all 0.6s ease; pointer-events: none; }
-.site-nav.scrolled .nav-links { opacity: 1; transform: none; pointer-events: auto; }
+.nav-links { display: none; }
 .nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
 .nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+
+/* STICKY NAV BAR - sits below hero, locks to top on scroll */
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 14px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { display: flex; justify-content: center; gap: 6px; max-width: 1080px; margin: 0 auto; padding: 0 24px; align-items: center; }
+.sticky-nav a { padding: 8px 22px; font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.02em; }
+.sticky-nav a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+.sticky-nav .sn-logo { height: 28px; margin-right: auto; opacity: 0; transition: opacity 0.3s ease; }
+.sticky-nav.pinned .sn-logo { opacity: 1; }
 
 /* HERO */
 .hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -235,6 +242,18 @@ p { text-align: justify; text-justify: inter-word; }
     <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
   </div>
 </section>
+
+<!-- STICKY NAV - sits below hero, sticks to top on scroll -->
+<nav class="sticky-nav" id="stickyNav">
+  <div class="sticky-nav-inner">
+    <img src="logo-lotus.svg" alt="" class="sn-logo" style="color:var(--teal-deep);">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
 
 <!-- BABAJI Q&A -->
 <div class="babaji-qa">
@@ -519,6 +538,15 @@ window.addEventListener('scroll', function() {
     heroContent.style.transform = 'scale(' + Math.max(0.9, 1 - s / (h * 5)) + ') translateY(' + (s * 0.2) + 'px)';
   }
 });
+
+// Sticky nav pinned detection
+var stickyNav = document.getElementById('stickyNav');
+var stickyNavTop = stickyNav.offsetTop;
+function checkSticky() {
+  stickyNav.classList.toggle('pinned', window.scrollY >= stickyNavTop);
+}
+window.addEventListener('scroll', checkSticky);
+window.addEventListener('resize', function() { stickyNavTop = stickyNav.offsetTop; });
 
 // Quick links entrance
 var qlObs = new IntersectionObserver(function(entries) {
