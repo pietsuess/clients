@@ -35,11 +35,9 @@ p { text-align: justify; text-justify: inter-word; }
 /* STICKY NAV BAR - sits below hero, locks to top on scroll */
 .sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
-.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.8s ease; pointer-events: none; }
-.sticky-nav.pinned .sn-logo-wrap { opacity: 1; pointer-events: auto; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); opacity: 0; }
 .sticky-nav .sn-logo { height: 52px; }
-.sticky-nav-links { position: absolute; top: 50%; display: flex; gap: 4px; left: 50%; transform: translate(-50%, -50%); transition: left 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1); }
-.sticky-nav.pinned .sticky-nav-links { left: 100%; transform: translate(calc(-100% - 32px), -50%); }
+.sticky-nav-links { position: absolute; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
 .sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
 .sticky-nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
 
@@ -577,16 +575,36 @@ window.addEventListener('scroll', function() {
   }
 });
 
-// Sticky nav pinned detection
+// Sticky nav - scroll-driven slide
 var stickyNav = document.getElementById('stickyNav');
 var heroTopLogo = document.querySelector('.hero-top-logo');
+var navLinks = document.querySelector('.sticky-nav-links');
+var navLogoWrap = document.querySelector('.sn-logo-wrap');
+var navInner = document.querySelector('.sticky-nav-inner');
+
 function checkSticky() {
   var rect = stickyNav.getBoundingClientRect();
   var pinned = rect.top <= 0;
   stickyNav.classList.toggle('pinned', pinned);
   if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
+
+  // Calculate how far past the pin point we've scrolled (0 to 1 over 200px)
+  var navOriginalTop = stickyNav.offsetTop;
+  var scrollPast = Math.max(0, Math.min(1, (window.scrollY - navOriginalTop) / 200));
+
+  // Slide links: center (50%) to right edge
+  var innerWidth = navInner.offsetWidth;
+  var linksWidth = navLinks.offsetWidth;
+  var centerLeft = (innerWidth - linksWidth) / 2;
+  var rightLeft = innerWidth - linksWidth - 32;
+  var currentLeft = centerLeft + (rightLeft - centerLeft) * scrollPast;
+  navLinks.style.left = currentLeft + 'px';
+
+  // Fade logo in
+  if (navLogoWrap) navLogoWrap.style.opacity = scrollPast;
 }
 window.addEventListener('scroll', checkSticky);
+checkSticky();
 
 // Quick links entrance
 var qlObs = new IntersectionObserver(function(entries) {
