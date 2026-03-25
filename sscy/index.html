@@ -706,10 +706,46 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     {x: 1, y: 1}   // Host - bottom right
   ];
 
+  // Debug canvas for radius circles
+  var dbg = document.createElement('canvas');
+  dbg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:50;';
+  hero.appendChild(dbg);
+
   hero.addEventListener('mousemove', function(e) {
     var rect = hero.getBoundingClientRect();
     var mx = (e.clientX - rect.left) / rect.width;
     var my = (e.clientY - rect.top) / rect.height;
+    var px = e.clientX - rect.left;
+    var py = e.clientY - rect.top;
+
+    // Draw debug radius circles from center
+    dbg.width = rect.width;
+    dbg.height = rect.height;
+    var dc = dbg.getContext('2d');
+    dc.clearRect(0, 0, dbg.width, dbg.height);
+    var cx = rect.width / 2;
+    var cy = rect.height / 2;
+    var radii = [50, 100, 150, 200, 300, 400, 500];
+    radii.forEach(function(r) {
+      dc.beginPath();
+      dc.arc(cx, cy, r, 0, Math.PI * 2);
+      dc.strokeStyle = 'rgba(255,0,0,0.3)';
+      dc.lineWidth = 1;
+      dc.stroke();
+      dc.fillStyle = 'rgba(255,255,255,0.7)';
+      dc.font = '11px system-ui';
+      dc.fillText(r + 'px', cx + r + 4, cy - 4);
+    });
+    // Draw mouse crosshair
+    dc.beginPath();
+    dc.arc(px, py, 4, 0, Math.PI * 2);
+    dc.fillStyle = 'rgba(255,0,0,0.8)';
+    dc.fill();
+    // Draw distance from center
+    var distPx = Math.round(Math.sqrt((px - cx) * (px - cx) + (py - cy) * (py - cy)));
+    dc.fillStyle = 'rgba(255,255,255,0.9)';
+    dc.font = '14px system-ui';
+    dc.fillText(distPx + 'px from center', px + 10, py - 10);
 
     zones.forEach(function(zone, i) {
       var c = corners[i];
@@ -717,28 +753,29 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       var dy = my - c.y;
       var dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Much larger threshold - starts showing almost immediately from center
-      var opacity = Math.max(0, 1 - (dist / 0.75));
-      // Gentle curve, not harsh
-      opacity = Math.pow(opacity, 1.5);
-      var scale = 0.85 + opacity * 0.15;
+      // Always visible at 10%, ramps to 80% as you approach corner
+      var progress = Math.max(0, Math.min(1, 1 - (dist / 0.7)));
+      var opacity = 0.1 + progress * 0.7; // 10% to 80%
+      var scale = 0.9 + progress * 0.1;
 
-      // 3D tilt based on mouse position relative to the zone's corner
-      var tiltX = (my - c.y) * -15 * opacity;
-      var tiltY = (mx - c.x) * 15 * opacity;
+      // Stronger 3D tilt
+      var tiltX = (my - c.y) * -25 * progress;
+      var tiltY = (mx - c.x) * 25 * progress;
 
       zone.style.opacity = opacity;
       zone.style.transform = 'scale(' + scale + ') perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg)';
-      zone.classList.toggle('visible', opacity > 0.05);
+      zone.classList.add('visible');
     });
   });
 
   hero.addEventListener('mouseleave', function() {
     zones.forEach(function(zone) {
-      zone.style.opacity = 0;
-      zone.style.transform = 'scale(0.85) perspective(400px) rotateX(0deg) rotateY(0deg)';
-      zone.classList.remove('visible');
+      zone.style.opacity = 0.1;
+      zone.style.transform = 'scale(0.9) perspective(400px) rotateX(0deg) rotateY(0deg)';
     });
+    // Clear debug
+    var dc = dbg.getContext('2d');
+    dc.clearRect(0, 0, dbg.width, dbg.height);
   });
 })();
 </script>
