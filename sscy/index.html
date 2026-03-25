@@ -221,19 +221,20 @@ p { text-align: justify; text-justify: inter-word; }
 }
 
 /* ORBIT NAV */
-.orbit-section { position: absolute; bottom: 0; left: 0; right: 0; height: 200px; z-index: 5; pointer-events: none; }
+.orbit-section { position: absolute; bottom: 20px; left: 0; right: 0; height: 80px; z-index: 5; pointer-events: none; }
 .orbit-card { pointer-events: auto; }
+.oc-icon { display: none; }
 .orbit-title { display: none; }
 .orbit-track { position: absolute; inset: 0; }
-.orbit-card { position: absolute; width: 260px; height: 120px; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1); transition: transform 0.15s ease-out, box-shadow 0.3s ease; will-change: transform; }
+.orbit-card { position: absolute; width: 240px; height: 44px; border-radius: 20px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.1); transition: transform 0.15s ease-out, box-shadow 0.3s ease; will-change: transform; }
 .orbit-card:nth-child(1) { background: linear-gradient(160deg, #1a5c53, #2a8a7d); }
 .orbit-card:nth-child(2) { background: linear-gradient(160deg, #c9a84c, #d4b85c); }
 .orbit-card:nth-child(3) { background: linear-gradient(160deg, #2a8a7d, #3bb8a8); }
 .orbit-card:nth-child(4) { background: linear-gradient(160deg, #d4b85c, #e0ca78); }
 .orbit-card:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.18); }
 .oc-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.5; }
-.oc-label { font-size: 1.1rem; font-weight: 500; letter-spacing: 0.03em; margin-bottom: 4px; }
-.oc-sub { font-size: 0.68rem; opacity: 0.55; text-align: center; padding: 0 16px; line-height: 1.4; }
+.oc-label { font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; }
+.oc-sub { display: none; }
 </style>
 </head>
 <body>
@@ -693,8 +694,8 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     var g = getGeometry();
     cards.forEach(function(card, i) {
       var a = angle + (i * Math.PI * 0.5);
-      var x = g.cx + Math.cos(a) * g.rx - 130;
-      var y = g.cy + Math.sin(a) * g.ry - 60;
+      var x = g.cx + Math.cos(a) * g.rx - 120;
+      var y = g.cy + Math.sin(a) * g.ry - 22;
       var z = Math.sin(a);
       var scale = 0.65 + (z + 1) * 0.25;
       var opacity = 0.35 + (z + 1) * 0.325;
@@ -708,25 +709,13 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
   }
 
   cards.forEach(function(card, i) {
-    card.addEventListener('mouseenter', function() {
-      hoveredIndex = i;
-      var cardAngle = angle + (i * Math.PI * 0.5);
-      if (Math.sin(cardAngle) < 0) {
-        var ta = (Math.PI * 0.5) - (i * Math.PI * 0.5);
-        var diff = ta - angle;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        targetAngle = angle + diff;
-      } else { targetAngle = null; }
-    });
-    card.addEventListener('mouseleave', function() { hoveredIndex = -1; targetAngle = null; });
+    card.addEventListener('mouseenter', function() { hoveredIndex = i; });
+    card.addEventListener('mouseleave', function() { hoveredIndex = -1; });
   });
 
-  section.addEventListener('mousemove', function(e) {
-    var rect = section.getBoundingClientRect();
-    targetInfluence = ((e.clientX - rect.left) / rect.width - 0.5) * 0.02;
+  document.addEventListener('mousemove', function(e) {
+    targetInfluence = (e.clientX / window.innerWidth - 0.5) * 0.015;
   });
-  section.addEventListener('mouseleave', function() { targetInfluence = 0; });
 
   // Dissolve on scroll past
   function checkDissolve() {
@@ -736,12 +725,8 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
   }
 
   function animate() {
-    if (targetAngle !== null) {
-      angle += (targetAngle - angle) * 0.04;
-    } else {
-      mouseInfluence += (targetInfluence - mouseInfluence) * 0.06;
-      angle += autoSpeed + mouseInfluence;
-    }
+    mouseInfluence += (targetInfluence - mouseInfluence) * 0.04;
+    angle += autoSpeed + mouseInfluence;
     positionCards();
     checkDissolve();
     requestAnimationFrame(animate);
