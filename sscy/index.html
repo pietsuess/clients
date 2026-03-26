@@ -222,7 +222,7 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* HOT ZONES */
 .hz {
-  position: absolute; z-index: 6; width: 500px; height: 500px; border-radius: 50%;
+  position: absolute; z-index: 6; width: 450px; height: 450px; border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: #fff; cursor: pointer; opacity: 0;
   background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
@@ -233,12 +233,13 @@ p { text-align: justify; text-justify: inter-word; }
 }
 .hz.visible { pointer-events: auto; }
 .hz:hover { transform: scale(1.1); background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
-#hz0 { top: 3%; left: calc(20% - 150px); }
-#hz1 { top: 3%; right: calc(20% - 150px); }
-#hz2 { bottom: calc(3% - 50px); left: calc(20% - 150px); }
-#hz3 { bottom: calc(3% - 50px); right: calc(20% - 150px); }
-.hz-icon { font-size: 1.8rem; margin-bottom: 6px; opacity: 0.7; }
-.hz-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+#hz0 { top: 3%; left: calc(20% - 175px); }
+#hz1 { top: 3%; right: calc(20% - 175px); }
+#hz2 { bottom: calc(3% - 50px); left: calc(20% - 175px); }
+#hz3 { bottom: calc(3% - 50px); right: calc(20% - 175px); }
+.hz-icon { font-size: 5.4rem; margin-bottom: 10px; opacity: 0.85; line-height: 1; }
+.hz-icon svg { width: 80px; height: 80px; }
+.hz-label { font-size: 2.16rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -253,19 +254,19 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
   <!-- HOT ZONES -->
   <div class="hz" id="hz0" onclick="location.href='offerings.html'" data-x="0" data-y="0">
-    <div class="hz-icon">&#x25CB;</div>
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#3bb8a8"/></svg></div>
     <div class="hz-label">Find Peace</div>
   </div>
   <div class="hz" id="hz1" onclick="location.href='offerings.html#ytt'" data-x="1" data-y="0">
-    <div class="hz-icon">&#x25B3;</div>
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20" fill="#c9a84c"/></svg></div>
     <div class="hz-label">Learn</div>
   </div>
   <div class="hz" id="hz2" onclick="location.href='shop.html'" data-x="0" data-y="1">
-    <div class="hz-icon">&#x25C7;</div>
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12" fill="#c17838"/></svg></div>
     <div class="hz-label">Give Back</div>
   </div>
   <div class="hz" id="hz3" onclick="location.href='rentals.html'" data-x="1" data-y="1">
-    <div class="hz-icon">&#x25A1;</div>
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2" fill="#2a8a7d"/></svg></div>
     <div class="hz-label">Host</div>
   </div>
 </section>
@@ -718,7 +719,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       // Ramp: full opacity at disc center, fades over 500px distance
       var progress = Math.max(0, Math.min(1, 1 - dist / 500));
 
-      var opacity = 0.15 + progress * 0.75; // 15% to 90%
+      var opacity = 0.05 + progress * 0.9; // 5% to 95%
       var scale = 0.9 + progress * 0.1;
 
       // 3D tilt: face toward mouse
@@ -733,7 +734,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
 
   hero.addEventListener('mouseleave', function() {
     zones.forEach(function(zone) {
-      zone.style.opacity = 0.15;
+      zone.style.opacity = 0.05;
       zone.style.transform = 'scale(0.9) perspective(400px) rotateX(0deg) rotateY(0deg)';
     });
   });
