@@ -623,8 +623,11 @@ var linkEntrances = [
   { y: 50, x: -15, rot: 15,  scale: 0.55 },  // Rentals: tumbles in
   { y: 45, x: 25,  rot: -10, scale: 0.65 }   // Contact: swings from right
 ];
+var navEntranceDone = false;
 
 function animateNavLinks() {
+  if (navEntranceDone) return;
+
   var rect = stickyNav.getBoundingClientRect();
   // Progress: 0 when nav is at bottom of viewport, 1 well before it reaches top
   var viewH = window.innerHeight;
@@ -632,11 +635,14 @@ function animateNavLinks() {
   // Smooth ease-out curve
   var eased = 1 - Math.pow(1 - progress, 3);
 
+  var allDone = true;
   navLinkEls.forEach(function(link, i) {
     var e = linkEntrances[i];
     // Stagger: each link slightly delayed
     var stagger = Math.max(0, Math.min(1, (eased - i * 0.08) / 0.6));
     var linkEase = 1 - Math.pow(1 - stagger, 2.5);
+
+    if (linkEase < 0.99) allDone = false;
 
     var ty = e.y * (1 - linkEase);
     var tx = e.x * (1 - linkEase);
@@ -645,11 +651,17 @@ function animateNavLinks() {
     var op = linkEase;
 
     link.style.opacity = op;
-    // Only apply entrance transform when not being controlled by mouse interaction
-    if (!link.dataset.mouseActive) {
-      link.style.transform = 'perspective(400px) translateX(' + tx + 'px) translateY(' + ty + 'px) rotate(' + rot + 'deg) scale(' + sc + ')';
-    }
+    link.style.transform = 'perspective(400px) translateX(' + tx + 'px) translateY(' + ty + 'px) rotate(' + rot + 'deg) scale(' + sc + ')';
   });
+
+  if (allDone) {
+    navEntranceDone = true;
+    // Clear inline transforms so mouse interactions take over cleanly
+    navLinkEls.forEach(function(link) {
+      link.style.opacity = '';
+      link.style.transform = '';
+    });
+  }
 }
 
 window.addEventListener('scroll', function() {
@@ -800,7 +812,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
   var SCALE_MAX = 1.15;  // max scale on closest link
 
   function resetLink(link) {
-    link.style.transform = 'perspective(400px) rotateX(0deg) rotateY(0deg) translateX(0px) translateY(0px) scale(1)';
+    link.style.transform = '';
     link.style.background = '';
     link.style.boxShadow = '';
   }
@@ -819,7 +831,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       var dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist > PULL_RADIUS * 1.5) {
-        delete link.dataset.mouseActive;
+
         resetLink(link);
         return;
       }
@@ -844,7 +856,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       var shadowAlpha = 0.12 * cubicProgress;
       var shadowBlur = 20 * cubicProgress;
 
-      link.dataset.mouseActive = '1';
+
       link.style.transform = 'perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) translateX(' + pullX + 'px) translateY(' + (pullY + lift) + 'px) scale(' + scale + ')';
       link.style.background = 'rgba(59,184,168,' + bgAlpha + ')';
       link.style.boxShadow = '0 ' + (4 + shadowBlur * 0.5) + 'px ' + shadowBlur + 'px rgba(26,92,83,' + shadowAlpha + ')';
