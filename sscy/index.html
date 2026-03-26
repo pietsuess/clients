@@ -727,6 +727,8 @@ document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(functi
 // Parallax on split images and frames
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   var pEls = document.querySelectorAll('.parallax-frame img, .split-img img, .about-hero-img');
+  // Exclude founder image (has its own layout)
+  pEls = Array.from(pEls).filter(function(el) { return !el.closest('#founder'); });
   window.addEventListener('scroll', function() {
     pEls.forEach(function(el) {
       var r = el.getBoundingClientRect();
