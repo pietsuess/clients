@@ -222,7 +222,7 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* HOT ZONES */
 .hz {
-  position: absolute; z-index: 6; width: 300px; height: 300px; border-radius: 50%;
+  position: absolute; z-index: 6; width: 500px; height: 500px; border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   color: #fff; cursor: pointer; opacity: 0;
   background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
@@ -233,10 +233,10 @@ p { text-align: justify; text-justify: inter-word; }
 }
 .hz.visible { pointer-events: auto; }
 .hz:hover { transform: scale(1.1); background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
-#hz0 { top: calc(3% + 100px); left: 20%; }
-#hz1 { top: calc(3% + 100px); right: 20%; }
-#hz2 { bottom: calc(3% + 50px); left: 20%; }
-#hz3 { bottom: calc(3% + 50px); right: 20%; }
+#hz0 { top: calc(3% + 50px); left: calc(20% - 50px); }
+#hz1 { top: calc(3% + 50px); right: calc(20% - 50px); }
+#hz2 { bottom: 3%; left: calc(20% - 50px); }
+#hz3 { bottom: 3%; right: calc(20% - 50px); }
 .hz-icon { font-size: 1.8rem; margin-bottom: 6px; opacity: 0.7; }
 .hz-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
 </style>
@@ -698,51 +698,32 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
   var zones = document.querySelectorAll('.hz');
   if (!hero || !zones.length) return;
 
-  // Each zone has a corner: 0=top-left, 1=top-right, 2=bottom-left, 3=bottom-right
-  var corners = [
-    {x: 0, y: 0},  // Find Peace - top left
-    {x: 1, y: 0},  // Learn - top right
-    {x: 0, y: 1},  // Give Back - bottom left
-    {x: 1, y: 1}   // Host - bottom right
-  ];
+  function getDiscCenter(zone) {
+    var r = zone.getBoundingClientRect();
+    var hr = hero.getBoundingClientRect();
+    return { x: r.left + r.width / 2 - hr.left, y: r.top + r.height / 2 - hr.top };
+  }
 
   hero.addEventListener('mousemove', function(e) {
     var rect = hero.getBoundingClientRect();
-    var mx = (e.clientX - rect.left) / rect.width;
-    var my = (e.clientY - rect.top) / rect.height;
     var px = e.clientX - rect.left;
     var py = e.clientY - rect.top;
 
-    zones.forEach(function(zone, i) {
-      var c = corners[i];
-      // Pixel distance from center toward this corner's direction
-      var cornerPx = c.x * rect.width;
-      var cornerPy = c.y * rect.height;
-      var centerX = rect.width / 2;
-      var centerY = rect.height / 2;
-      // How far is mouse along the center-to-corner axis (dot product)
-      var toCornerX = cornerPx - centerX;
-      var toCornerY = cornerPy - centerY;
-      var toMouseX = px - centerX;
-      var toMouseY = py - centerY;
-      var cornerDist = Math.sqrt(toCornerX * toCornerX + toCornerY * toCornerY);
-      // Project mouse onto corner direction
-      var dot = (toMouseX * toCornerX + toMouseY * toCornerY) / cornerDist;
-      // Also use radial distance from center
-      var radialDist = Math.sqrt(toMouseX * toMouseX + toMouseY * toMouseY);
+    zones.forEach(function(zone) {
+      var center = getDiscCenter(zone);
+      var dx = px - center.x;
+      var dy = py - center.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
 
-      // Progress: 0 at center, 1 at 500px along the corner's direction
-      var dirProgress = Math.max(0, Math.min(1, dot / 500));
-      // Blend with general radial distance for smoother feel
-      var radProgress = Math.max(0, Math.min(1, radialDist / 500));
-      var progress = dirProgress * 0.7 + radProgress * 0.3;
+      // Ramp: full opacity at disc center, fades over 500px distance
+      var progress = Math.max(0, Math.min(1, 1 - dist / 500));
 
       var opacity = 0.15 + progress * 0.75; // 15% to 90%
       var scale = 0.9 + progress * 0.1;
 
-      // 3D tilt based on mouse offset from center
-      var tiltX = (toMouseY / rect.height) * -75 * progress;
-      var tiltY = (toMouseX / rect.width) * 75 * progress;
+      // 3D tilt: face toward mouse
+      var tiltX = (dy / 300) * -30 * progress;
+      var tiltY = (dx / 300) * 30 * progress;
 
       zone.style.opacity = opacity;
       zone.style.transform = 'scale(' + scale + ') perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg)';
