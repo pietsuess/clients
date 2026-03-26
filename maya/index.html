@@ -287,6 +287,17 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
   padding:100px 0;
   background:linear-gradient(to bottom,var(--plum),#0d0510);
 }
+.media-filters{
+  display:flex;gap:12px;padding:0 4vw;margin:40px 0 30px;flex-wrap:wrap;
+}
+.media-filters button{
+  padding:8px 20px;border:1px solid rgba(245,240,230,0.2);
+  border-radius:20px;background:transparent;color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:0.8rem;
+  letter-spacing:0.08em;cursor:pointer;transition:all 0.3s;
+}
+.media-filters button:hover{border-color:var(--pink);color:var(--pink)}
+.media-filters button.active{background:var(--pink);border-color:var(--pink);color:#fff}
 .media-marquee{
   width:100%;overflow:hidden;margin:50px 0 40px;
   border-top:1px solid rgba(245,240,230,0.08);
@@ -309,6 +320,7 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .gallery-item img{
   width:100%;height:100%;object-fit:cover;display:block;
+  aspect-ratio:1;
   transition:transform 0.6s cubic-bezier(0.075,0.82,0.165,1);
 }
 .gallery-item:hover img{transform:scale(1.05)}
@@ -320,6 +332,20 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .gallery-item:hover .overlay{opacity:1}
 .gallery-item .overlay span{font-size:0.75rem;color:rgba(245,240,230,0.7)}
+.gallery-item .play-icon{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:48px;height:48px;border-radius:50%;
+  background:rgba(0,0,0,0.6);
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;transition:background 0.3s;
+}
+.gallery-item:hover .play-icon{background:rgba(232,74,138,0.8)}
+.gallery-item .play-icon svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+.load-more-wrap{
+  text-align:center;padding:40px 4vw 0;
+}
+.load-more-wrap .btn{background:transparent;border:1px solid rgba(245,240,230,0.3)}
+.load-more-wrap .btn:hover{background:var(--pink);border-color:var(--pink)}
 .press-section{padding:40px 4vw 0}
 .press-link{
   display:inline-flex;align-items:center;gap:10px;
@@ -338,11 +364,25 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .lightbox.active{display:flex}
 .lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:4px}
+.lightbox .lb-caption{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  max-width:600px;text-align:center;
+  font-size:0.8rem;color:rgba(245,240,230,0.6);
+  font-family:'DM Sans',sans-serif;
+}
 .lightbox .close-lb{
   position:absolute;top:20px;right:20px;
   font-size:2rem;color:#fff;cursor:pointer;
   font-family:'DM Sans',sans-serif;
 }
+.lightbox .lb-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  font-size:2.5rem;color:rgba(255,255,255,0.6);cursor:pointer;
+  padding:20px;user-select:none;transition:color 0.3s;
+}
+.lightbox .lb-nav:hover{color:#fff}
+.lightbox .lb-prev{left:10px}
+.lightbox .lb-next{right:10px}
 
 /* SHOP */
 .shop{
@@ -441,7 +481,6 @@ footer a:hover{color:var(--pink)}
 
 /* RESPONSIVE TWEAKS */
 @media(max-width:768px){
-  .hero{padding:80px 6vw 40px}
   .hero{padding:80px 2vw 40px}
   .hero-title{font-size:9.5vw;width:100%}
   .hero-title .line1{color:#ff6baa}
@@ -470,9 +509,12 @@ footer a:hover{color:var(--pink)}
 <div class="noise"></div>
 
 <!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <span class="close-lb">&times;</span>
+<div class="lightbox" id="lightbox">
+  <span class="close-lb" onclick="closeLightbox()">&times;</span>
+  <span class="lb-nav lb-prev" onclick="lbNav(event,-1)">&#8249;</span>
+  <span class="lb-nav lb-next" onclick="lbNav(event,1)">&#8250;</span>
   <img id="lb-img" src="" alt="">
+  <div class="lb-caption" id="lb-caption"></div>
 </div>
 
 <!-- NAV -->
@@ -502,7 +544,7 @@ footer a:hover{color:var(--pink)}
     <span class="line1">Unprofessional</span>
     <span class="line2">Variety Show</span>
   </h1>
-  <p class="hero-tagline a-text">An unprofessional, unimportant, and undisciplined cabaret-style night of performance.</p>
+  <p class="hero-tagline a-text" id="heroTagline"></p>
   <div class="marquee-wrap">
     <div class="marquee-track">
       <span>Quarterly at <em>The Parkside Lounge</em></span>
@@ -522,31 +564,7 @@ footer a:hover{color:var(--pink)}
 </section>
 
 <!-- NEXT SHOW -->
-<section class="next-show" id="nextshow">
-  <div class="next-show-inner">
-    <div class="next-show-poster a-fade">
-      <div class="poster-glow"></div>
-      <img src="img/poster-badadvice-sep25.webp" alt="Bad Advice - September 2025">
-    </div>
-    <div class="next-show-info">
-      <div class="label a-text">Next Show</div>
-      <h2 class="a-text">Bad Advice</h2>
-      <div class="date a-text">Sunday, September 21, 2025</div>
-      <div class="venue a-text">The Parkside Lounge - 317 E Houston St, NYC - Doors 7pm / Show 7:30pm</div>
-      <div class="performers a-text">
-        <span>Bob Voyage</span>
-        <span>Cherie</span>
-        <span>Sebastian Ade</span>
-        <span>Shannon Sennott</span>
-      </div>
-      <div class="a-text" style="margin-bottom:16px">
-        <span style="font-size:0.8rem;color:rgba(245,240,230,0.4)">Emcee: Maya Suess - Accompaniment: Klovis Gaynor</span>
-      </div>
-      <a href="https://events.humanitix.com/unprofessional-show-sept" target="_blank" class="btn a-fade">Get Tickets</a>
-      <div class="access-note a-text">21+ with valid photo ID. Accessible via portable ramp. Reserved seating available.</div>
-    </div>
-  </div>
-</section>
+<section class="next-show" id="nextshow"></section>
 
 <!-- ABOUT -->
 <section class="about" id="about">
@@ -554,10 +572,7 @@ footer a:hover{color:var(--pink)}
   <div class="section-subtitle a-text">There will be song.</div>
   <div class="about-grid" style="margin-top:50px;">
     <div>
-      <div class="about-text a-text">
-        <p>Unprofessional is a quarterly night of cabaret, where you never quite know what you'll get. Launched on Maya Suess's birthday in February 2022, the show lives in the back room of The Parkside Lounge on Houston and Attorney in the Lower East Side.</p>
-        <p>The programming is truly intergenerational, introducing younger performers to the legendary performers from the neighborhood. From Coney Island legends to drag kings, from performance artists to folk musicians, every edition is a different world.</p>
-      </div>
+      <div class="about-text a-text" id="aboutText"></div>
       <div class="about-quote a-text">
         "Allied Productions exemplifies one of the things I love about this neighborhood, which is the diverse legacy of experimental queer and radical art and performance. At the Unprofessional Variety Show, I try to make the programming truly intergenerational."
         <div class="attr">- Maya Suess, EV Grieve, Feb 2024</div>
@@ -566,7 +581,7 @@ footer a:hover{color:var(--pink)}
     <div class="about-details">
       <div class="detail-item a-fade">
         <h4>The Venue</h4>
-        <p>The Parkside Lounge. A dive bar and performance venue catering to the artists, musicians, and freaks of the Lower East Side since 1908. 317 East Houston Street, New York, NY 10002.</p>
+        <p id="venueDetail"></p>
       </div>
       <div class="detail-item a-fade">
         <h4>Maya Suess</h4>
@@ -596,114 +611,40 @@ footer a:hover{color:var(--pink)}
 <section class="shows" id="shows">
   <div class="section-title a-text">Past Shows</div>
   <div class="section-subtitle a-text">Every edition is a different world.</div>
-  <div class="shows-grid">
-    <div class="show-card a-fade">
-      <img src="img/poster-camp-may25.webp" alt="Summer Camp - May 2025">
-      <div class="card-info">
-        <h3>Summer "Camp"</h3>
-        <div class="card-date">May 18, 2025</div>
-        <div class="card-performers">Dusty Childers, Mari Moriarty, River L Ramirez, Yocheved Obliviana</div>
-      </div>
-    </div>
-    <div class="show-card a-fade">
-      <img src="img/poster-afterlife-feb25.webp" alt="The Afterlife - February 2025">
-      <div class="card-info">
-        <h3>The Afterlife</h3>
-        <div class="card-date">Feb 23, 2025</div>
-        <div class="card-performers">Clay Woman, Fantasy Grandma, Joanie Drago, Paula Merchan</div>
-      </div>
-    </div>
-    <div class="show-card a-fade">
-      <img src="img/poster-magic-dec24.webp" alt="A Magic Show - December 2024">
-      <div class="card-info">
-        <h3>A Magic Show</h3>
-        <div class="card-date">Dec 15, 2024</div>
-        <div class="card-performers">With Klovis Gaynor and Mamie Minch</div>
-      </div>
-    </div>
-    <div class="show-card a-fade">
-      <img src="img/poster-onceupon-may24.webp" alt="Once Upon a Time - May 2024">
-      <div class="card-info">
-        <h3>Once Upon a Time</h3>
-        <div class="card-date">May 19, 2024</div>
-        <div class="card-performers">Edition #10</div>
-      </div>
-    </div>
-    <div class="show-card a-fade">
-      <img src="img/poster-clown-feb24.webp" alt="A Clown Show - February 2024">
-      <div class="card-info">
-        <h3>A Clown Show</h3>
-        <div class="card-date">Feb 18, 2024</div>
-        <div class="card-performers">Jess Dobkin, Eak The Geek, Dr. Ksenia M. Soboleva, King Xaddy</div>
-      </div>
-    </div>
-    <div class="show-card a-fade">
-      <img src="img/poster-sept22.webp" alt="Unprofessional - September 2022">
-      <div class="card-info">
-        <h3>Variety Show</h3>
-        <div class="card-date">Sep 18, 2022</div>
-        <div class="card-performers">Rae De Vine, Tiana GlittersaurusRex, Elizabeth Koke, Sleth Larson</div>
-      </div>
-    </div>
-  </div>
+  <div class="shows-grid" id="showsGrid"></div>
 </section>
 
 <!-- MEDIA -->
 <section class="media" id="media">
   <div class="section-title a-text" style="color:var(--yellow)">Media</div>
-  <div class="section-subtitle a-text">Photos by Stacie Joy for EV Grieve. February 2024, "A Clown Show" edition.</div>
+  <div class="section-subtitle a-text">From the Unprofessional archive.</div>
+
+  <div class="media-filters" id="mediaFilters">
+    <button class="active" data-filter="all">All</button>
+    <button data-filter="photo">Photos</button>
+    <button data-filter="video">Videos</button>
+    <button data-filter="reel">Reels</button>
+  </div>
 
   <div class="media-marquee">
     <div class="marquee-track">
-      <span>Photos by Stacie Joy</span>
-      <span>EV Grieve Coverage</span>
+      <span>Via Instagram</span>
+      <span>@unprofessionalvarietyshow</span>
       <span>The Parkside Lounge</span>
       <span>Lower East Side NYC</span>
-      <span>Photos by Stacie Joy</span>
-      <span>EV Grieve Coverage</span>
+      <span>Via Instagram</span>
+      <span>@unprofessionalvarietyshow</span>
       <span>The Parkside Lounge</span>
       <span>Lower East Side NYC</span>
     </div>
   </div>
 
-  <div class="gallery">
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-1.jpg')">
-      <img src="img/press-1.jpg" alt="Full cast on stage at The Clown Show" loading="lazy">
-      <div class="overlay"><span>Full cast - The Clown Show, Feb 2024</span></div>
-    </div>
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-2.jpg')">
-      <img src="img/press-2.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
-      <div class="overlay"><span>Performance - Photo by Stacie Joy</span></div>
-    </div>
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-3.jpg')">
-      <img src="img/press-3.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
-      <div class="overlay"><span>The Parkside Lounge back room</span></div>
-    </div>
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-4.jpg')">
-      <img src="img/press-4.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
-      <div class="overlay"><span>Cabaret vibes - Photo by Stacie Joy</span></div>
-    </div>
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-5.jpg')">
-      <img src="img/press-5.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
-      <div class="overlay"><span>On stage - Feb 2024</span></div>
-    </div>
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-6.jpg')">
-      <img src="img/press-6.jpg" alt="Audience and performers at Unprofessional" loading="lazy">
-      <div class="overlay"><span>Photo by Stacie Joy</span></div>
-    </div>
-    <div class="gallery-item a-fade" onclick="openLightbox('img/press-7.jpg')">
-      <img src="img/press-7.jpg" alt="Scene from the Unprofessional Variety Show" loading="lazy">
-      <div class="overlay"><span>Photo by Stacie Joy</span></div>
-    </div>
+  <div class="gallery" id="gallery"></div>
+  <div class="load-more-wrap" id="loadMoreWrap">
+    <button class="btn" id="loadMoreBtn" onclick="loadMoreMedia()">Load More</button>
   </div>
 
-  <div class="press-section a-text">
-    <h3 style="font-family:'Caveat',cursive;font-size:1.6rem;margin-bottom:16px;">Press</h3>
-    <a href="https://evgrieve.com/2024/02/a-visit-to-unprofessional-variety-show.html" target="_blank" class="press-link">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-      EV Grieve - "A visit to the Unprofessional Variety Show" - Feb 2024
-    </a>
-  </div>
+  <div class="press-section a-text" id="pressSection"></div>
 </section>
 
 <!-- RUNNING TEXT -->
@@ -760,16 +701,9 @@ footer a:hover{color:var(--pink)}
   <p class="contact-cta a-text">
     Want to perform? Have a wild idea? Just want to be part of whatever this is? Reach out. The show is built by its community, and the door is always open.
   </p>
-  <div class="contact-links">
-    <a href="https://www.instagram.com/unprofessionalvarietyshow/" target="_blank" class="contact-link ig a-fade">@unprofessionalvarietyshow</a>
-    <a href="https://www.instagram.com/MayaSuess/" target="_blank" class="contact-link ig a-fade">@MayaSuess</a>
-    <a href="https://events.humanitix.com/unprofessional-variety-show" target="_blank" class="contact-link a-fade">Humanitix Tickets</a>
-    <a href="https://www.parksidelounge.nyc/" target="_blank" class="contact-link a-fade">The Parkside Lounge</a>
-  </div>
+  <div class="contact-links" id="contactLinks"></div>
   <div style="margin-top:40px">
-    <div class="access-note a-text">
-      The Parkside Lounge - 317 E Houston St, NYC 10002 - Ground floor bar, portable ramp to performance space, accessible bathrooms
-    </div>
+    <div class="access-note a-text" id="accessNote"></div>
   </div>
 </section>
 
@@ -780,52 +714,370 @@ footer a:hover{color:var(--pink)}
 </footer>
 
 <script>
-// Mobile menu
-function toggleMenu(){
+/* ========================================
+   DATA LAYER - fetch all JSON on load
+   ======================================== */
+const DATA = { shows: [], media: [], settings: {} };
+let mediaPage = 0;
+const MEDIA_PER_PAGE = 12;
+let currentFilter = 'all';
+let filteredMedia = [];
+let currentLbIndex = -1;
+let currentLbList = [];
+
+async function init() {
+  const [showsRes, mediaRes, settingsRes] = await Promise.all([
+    fetch('content/shows.json').then(r => r.json()),
+    fetch('content/media.json').then(r => r.json()),
+    fetch('content/settings.json').then(r => r.json())
+  ]);
+  DATA.shows = showsRes;
+  DATA.media = mediaRes;
+  DATA.settings = settingsRes;
+
+  renderSettings();
+  renderNextShow();
+  renderShowsArchive();
+  applyMediaFilter('all');
+  renderPress();
+  renderContact();
+  initScrollAnimations();
+}
+
+/* ========================================
+   SETTINGS - tagline, about, venue
+   ======================================== */
+function renderSettings() {
+  const s = DATA.settings;
+  document.getElementById('heroTagline').textContent = s.tagline || '';
+
+  const aboutEl = document.getElementById('aboutText');
+  const aboutParts = (s.aboutText || '').split('. ');
+  // Render as two paragraphs - split roughly in half
+  const mid = Math.ceil(aboutParts.length / 2);
+  const p1 = aboutParts.slice(0, mid).join('. ') + '.';
+  const p2 = aboutParts.slice(mid).join('. ');
+  aboutEl.innerHTML =
+    '<p>' + escHtml(p1) + '</p>' +
+    '<p>The programming is truly intergenerational, introducing younger performers to the legendary performers from the neighborhood. From Coney Island legends to drag kings, from performance artists to folk musicians, every edition is a different world.</p>';
+
+  const venueEl = document.getElementById('venueDetail');
+  venueEl.textContent = (s.venue || 'The Parkside Lounge') +
+    '. A dive bar and performance venue catering to the artists, musicians, and freaks of the Lower East Side since 1908. ' +
+    (s.venueAddress || '');
+}
+
+/* ========================================
+   NEXT SHOW
+   ======================================== */
+function renderNextShow() {
+  const container = document.querySelector('.next-show');
+  // Find first upcoming show, or fall back to most recent
+  let show = DATA.shows.find(s => s.isUpcoming);
+  if (!show) show = DATA.shows[0]; // shows.json is sorted newest first
+  if (!show) { container.style.display = 'none'; return; }
+
+  const dateStr = formatDateLong(show.date);
+  const doorsStr = show.doors ? 'Doors ' + show.doors : '';
+  const timeStr = show.time || '';
+  const venueStr = DATA.settings.venue || 'The Parkside Lounge';
+  const performersHtml = (show.performers || []).map(p => '<span>' + escHtml(p) + '</span>').join('');
+  const ticketHtml = show.ticketUrl
+    ? '<a href="' + escHtml(show.ticketUrl) + '" target="_blank" class="btn a-fade">Get Tickets</a>'
+    : '';
+  const labelText = show.isUpcoming ? 'Next Show' : 'Most Recent Show';
+
+  container.innerHTML =
+    '<div class="next-show-inner">' +
+      '<div class="next-show-poster a-fade">' +
+        '<div class="poster-glow"></div>' +
+        '<img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" loading="lazy">' +
+      '</div>' +
+      '<div class="next-show-info">' +
+        '<div class="label a-text">' + labelText + '</div>' +
+        '<h2 class="a-text">' + escHtml(show.title) + '</h2>' +
+        '<div class="date a-text">' + dateStr + '</div>' +
+        '<div class="venue a-text">' + escHtml(venueStr) + ' - ' + escHtml(doorsStr + (doorsStr && timeStr ? ' / Show ' : '') + timeStr) + '</div>' +
+        (performersHtml ? '<div class="performers a-text">' + performersHtml + '</div>' : '') +
+        '<div class="a-text" style="margin-bottom:16px">' +
+          '<span style="font-size:0.8rem;color:rgba(245,240,230,0.4)">Emcee: ' + escHtml(show.emcee || '') +
+          (show.accompaniment ? ' - Accompaniment: ' + escHtml(show.accompaniment) : '') +
+          '</span>' +
+        '</div>' +
+        ticketHtml +
+        '<div class="access-note a-text">21+ with valid photo ID. Accessible via portable ramp. Reserved seating available.</div>' +
+      '</div>' +
+    '</div>';
+}
+
+/* ========================================
+   SHOWS ARCHIVE
+   ======================================== */
+function renderShowsArchive() {
+  const grid = document.getElementById('showsGrid');
+  // Show all non-upcoming shows (past shows)
+  const pastShows = DATA.shows.filter(s => !s.isUpcoming);
+  grid.innerHTML = pastShows.map(show => {
+    const perfText = (show.performers && show.performers.length)
+      ? show.performers.join(', ')
+      : (show.description || 'With ' + (show.accompaniment || ''));
+    return (
+      '<div class="show-card a-fade">' +
+        '<img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" loading="lazy">' +
+        '<div class="card-info">' +
+          '<h3>' + escHtml(show.title) + '</h3>' +
+          '<div class="card-date">' + formatDateShort(show.date) + '</div>' +
+          '<div class="card-performers">' + escHtml(perfText) + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+}
+
+/* ========================================
+   MEDIA GALLERY - filtered, paginated
+   ======================================== */
+function applyMediaFilter(filter) {
+  currentFilter = filter;
+  mediaPage = 0;
+  filteredMedia = filter === 'all'
+    ? DATA.media
+    : DATA.media.filter(m => m.type === filter);
+
+  // Update active button
+  document.querySelectorAll('#mediaFilters button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+
+  renderMediaPage(true);
+}
+
+function renderMediaPage(reset) {
+  const gallery = document.getElementById('gallery');
+  if (reset) gallery.innerHTML = '';
+
+  const start = mediaPage * MEDIA_PER_PAGE;
+  const end = Math.min(start + MEDIA_PER_PAGE, filteredMedia.length);
+  const items = filteredMedia.slice(start, end);
+
+  const fragment = document.createDocumentFragment();
+  items.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'gallery-item a-fade';
+    div.dataset.idx = start + i;
+
+    const isVideo = item.type === 'video' || item.type === 'reel';
+    // For photos, src is ig-posts/FILE. For video/reel, src is already ig-thumbs/FILE
+    const imgSrc = isVideo ? item.src : item.src;
+    // For lightbox, photos show full image; video/reel show the thumb
+    const lbSrc = item.type === 'photo'
+      ? item.src
+      : item.src.replace('ig-thumbs/', 'ig-posts/');
+
+    const captionClean = cleanCaption(item.caption);
+    const playIcon = isVideo
+      ? '<div class="play-icon"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg></div>'
+      : '';
+
+    div.innerHTML =
+      '<img src="' + escHtml(imgSrc) + '" alt="" loading="lazy">' +
+      playIcon +
+      '<div class="overlay"><span>' + escHtml(captionClean || item.credit || '') + '</span></div>';
+
+    div.onclick = function() { openLightbox(start + i); };
+    fragment.appendChild(div);
+  });
+  gallery.appendChild(fragment);
+
+  // Update load more visibility
+  const hasMore = end < filteredMedia.length;
+  document.getElementById('loadMoreWrap').style.display = hasMore ? 'block' : 'none';
+
+  // Animate new items
+  requestAnimationFrame(() => {
+    gallery.querySelectorAll('.gallery-item.a-fade:not(.visible)').forEach((el, i) => {
+      el.style.transitionDelay = (i * 0.04) + 's';
+      observer.observe(el);
+    });
+  });
+}
+
+function loadMoreMedia() {
+  mediaPage++;
+  renderMediaPage(false);
+}
+
+// Filter button clicks
+document.getElementById('mediaFilters').addEventListener('click', function(e) {
+  if (e.target.tagName === 'BUTTON') {
+    applyMediaFilter(e.target.dataset.filter);
+  }
+});
+
+/* ========================================
+   PRESS
+   ======================================== */
+function renderPress() {
+  const section = document.getElementById('pressSection');
+  const links = DATA.settings.pressLinks || [];
+  if (!links.length) return;
+
+  const svgIcon = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>';
+  section.innerHTML =
+    '<h3 style="font-family:\'Caveat\',cursive;font-size:1.6rem;margin-bottom:16px;">Press</h3>' +
+    links.map(l =>
+      '<a href="' + escHtml(l.url) + '" target="_blank" class="press-link">' +
+        svgIcon + ' ' + escHtml(l.title) + (l.date ? ' - ' + escHtml(l.date) : '') +
+      '</a>'
+    ).join(' ');
+}
+
+/* ========================================
+   CONTACT - pull URLs from settings
+   ======================================== */
+function renderContact() {
+  const s = DATA.settings;
+  const el = document.getElementById('contactLinks');
+  el.innerHTML =
+    '<a href="' + escHtml(s.instagramShow || '#') + '" target="_blank" class="contact-link ig a-fade">@unprofessionalvarietyshow</a>' +
+    '<a href="' + escHtml(s.instagramMaya || '#') + '" target="_blank" class="contact-link ig a-fade">@MayaSuess</a>' +
+    '<a href="' + escHtml(s.ticketPlatform || '#') + '" target="_blank" class="contact-link a-fade">Humanitix Tickets</a>' +
+    '<a href="' + escHtml(s.parksideUrl || '#') + '" target="_blank" class="contact-link a-fade">The Parkside Lounge</a>';
+
+  const accessEl = document.getElementById('accessNote');
+  accessEl.textContent = s.venue + ' - ' + s.venueAddress + ' - ' +
+    (s.accessibilityNote || 'Ground floor bar, portable ramp to performance space, accessible bathrooms');
+}
+
+/* ========================================
+   LIGHTBOX - with prev/next navigation
+   ======================================== */
+function openLightbox(idx) {
+  currentLbList = filteredMedia;
+  currentLbIndex = idx;
+  showLbItem();
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function showLbItem() {
+  const item = currentLbList[currentLbIndex];
+  if (!item) return;
+  // For photos use the direct src, for video/reel try the full-size version
+  const src = item.type === 'photo'
+    ? item.src
+    : item.src.replace('ig-thumbs/', 'ig-posts/');
+  document.getElementById('lb-img').src = src;
+  const captionText = cleanCaption(item.caption);
+  document.getElementById('lb-caption').textContent = captionText || item.credit || '';
+}
+
+function lbNav(e, dir) {
+  e.stopPropagation();
+  let next = currentLbIndex + dir;
+  if (next < 0) next = currentLbList.length - 1;
+  if (next >= currentLbList.length) next = 0;
+  currentLbIndex = next;
+  showLbItem();
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+  document.getElementById('lb-img').src = '';
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this || e.target.id === 'lb-img') closeLightbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft' && document.getElementById('lightbox').classList.contains('active')) {
+    currentLbIndex = (currentLbIndex - 1 + currentLbList.length) % currentLbList.length;
+    showLbItem();
+  }
+  if (e.key === 'ArrowRight' && document.getElementById('lightbox').classList.contains('active')) {
+    currentLbIndex = (currentLbIndex + 1) % currentLbList.length;
+    showLbItem();
+  }
+});
+
+/* ========================================
+   MOBILE MENU
+   ======================================== */
+function toggleMenu() {
   document.getElementById('mobileMenu').classList.toggle('open');
 }
 
-// Lightbox
-function openLightbox(src){
-  document.getElementById('lb-img').src=src;
-  document.getElementById('lightbox').classList.add('active');
-  document.body.style.overflow='hidden';
-}
-function closeLightbox(){
-  document.getElementById('lightbox').classList.remove('active');
-  document.body.style.overflow='';
-}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
-
-// Mark body for JS-ready animations
+/* ========================================
+   SCROLL ANIMATIONS
+   ======================================== */
 document.documentElement.classList.add('js-ready');
 
-// Scroll animations (lightweight IntersectionObserver, no GSAP dependency needed)
-const observer=new IntersectionObserver((entries)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
       entry.target.classList.add('visible');
       observer.unobserve(entry.target);
     }
   });
-},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-document.querySelectorAll('.a-text,.a-fade').forEach(el=>{
-  // Stagger children within same parent
-  const siblings=el.parentElement.querySelectorAll('.a-text,.a-fade');
-  const idx=[...siblings].indexOf(el);
-  el.style.transitionDelay=(idx*0.08)+'s';
-  observer.observe(el);
-});
+function initScrollAnimations() {
+  document.querySelectorAll('.a-text,.a-fade').forEach(function(el) {
+    const siblings = el.parentElement.querySelectorAll('.a-text,.a-fade');
+    const idx = [].indexOf.call(siblings, el);
+    el.style.transitionDelay = (idx * 0.08) + 's';
+    observer.observe(el);
+  });
+}
 
-// Smooth scroll for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
+/* Smooth scroll for anchor links */
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
     e.preventDefault();
-    const t=document.querySelector(a.getAttribute('href'));
-    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+    var t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+/* ========================================
+   UTILS
+   ======================================== */
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function cleanCaption(caption) {
+  if (!caption) return '';
+  // Remove leading ~ and trim, take first meaningful line
+  let c = caption.replace(/^~\s*\n?/, '').trim();
+  // Take first sentence or first 120 chars
+  const firstLine = c.split('\n')[0].trim();
+  if (firstLine.length > 120) return firstLine.substring(0, 117) + '...';
+  return firstLine;
+}
+
+function formatDateLong(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+function formatDateShort(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+/* ========================================
+   BOOT
+   ======================================== */
+init();
 </script>
 </body>
 </html>
