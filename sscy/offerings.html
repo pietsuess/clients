@@ -40,10 +40,19 @@ p { text-align: justify; text-justify: inter-word; }
 .hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); }
 .hero-content h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
 
-/* ANCHOR NAV */
-.anchor-nav { display: flex; justify-content: center; gap: 6px; padding: 20px 24px; background: var(--white); flex-wrap: wrap; }
-.anchor-nav a { padding: 8px 20px; font-size: 0.82rem; font-weight: 600; color: var(--teal-dark); border-radius: 50px; border: 1.5px solid var(--teal); transition: 0.25s ease; letter-spacing: 0.03em; }
-.anchor-nav a:hover { background: var(--teal); color: var(--white); }
+/* FILTER KEYS (matches homepage quick-links) */
+.filter-keys { display: grid; grid-template-columns: repeat(6, 1fr); overflow: hidden; position: sticky; top: 89px; z-index: 80; }
+.filter-key { display: flex; align-items: center; justify-content: center; padding: 32px 12px; font-size: 0.88rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; }
+.filter-key:nth-child(1) { background: #1a5c53; }
+.filter-key:nth-child(2) { background: #2a8a7d; }
+.filter-key:nth-child(3) { background: #c9a84c; }
+.filter-key:nth-child(4) { background: #3bb8a8; }
+.filter-key:nth-child(5) { background: #2a8a7d; }
+.filter-key:nth-child(6) { background: #1a5c53; }
+.filter-key::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.filter-key:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.filter-key:hover::after { height: 100%; }
+.filter-key:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
 
 /* SPLIT SECTION */
 .split { display: grid; grid-template-columns: 1fr 1fr; min-height: 75vh; }
@@ -129,8 +138,8 @@ p { text-align: justify; text-justify: inter-word; }
   .split-img img { position: absolute; top: 0; height: 100%; }
   .split-text { padding: 56px 28px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
-  .anchor-nav { gap: 4px; }
-  .anchor-nav a { padding: 6px 14px; font-size: 0.75rem; }
+  .filter-keys { grid-template-columns: repeat(3, 1fr); }
+  .filter-key { padding: 24px 8px; font-size: 0.78rem; }
 }
 @media (max-width: 768px) {
   .sticky-nav-links { display: none; }
@@ -166,14 +175,14 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
 </section>
 
-<!-- ANCHOR NAV -->
-<div class="anchor-nav">
-  <a href="#retreats">Retreats</a>
-  <a href="#ytt">Teacher Training</a>
-  <a href="#wellness">Wellness Centre</a>
-  <a href="#karma">Karma Yoga</a>
-  <a href="#classes">Yoga Classes</a>
-  <a href="#events">Music for Peace</a>
+<!-- FILTER KEYS -->
+<div class="filter-keys">
+  <a href="#retreats" class="filter-key">Retreats</a>
+  <a href="#ytt" class="filter-key">Teacher Training</a>
+  <a href="#wellness" class="filter-key">Wellness</a>
+  <a href="#karma" class="filter-key">Karma Yoga</a>
+  <a href="#classes" class="filter-key">Classes</a>
+  <a href="#events" class="filter-key">Music for Peace</a>
 </div>
 
 <!-- ============================================ -->
@@ -406,7 +415,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 }
 
 // Smooth scroll for anchor nav
-document.querySelectorAll('.anchor-nav a').forEach(function(a) {
+document.querySelectorAll('.filter-key').forEach(function(a) {
   a.addEventListener('click', function(e) {
     var target = document.querySelector(this.getAttribute('href'));
     if (target) {
