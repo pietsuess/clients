@@ -48,7 +48,7 @@ p { text-align: justify; text-justify: inter-word; }
 .hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.18); }
 .hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); opacity: 0; transform: scale(0.96); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .hero-content.visible { opacity: 1; transform: scale(1); }
-.hero-logo { width: clamp(380px, 60vw, 720px); color: var(--white); filter: drop-shadow(0 2px 16px rgba(0,0,0,0.3)); margin-top: -130px; }
+.hero-logo { width: clamp(380px, 60vw, 720px); color: var(--white); filter: drop-shadow(0 2px 16px rgba(0,0,0,0.3)); margin-top: -130px; transition: transform 0.15s ease, filter 0.15s ease; transform-style: preserve-3d; }
 
 /* BABAJI Q&A */
 .babaji-qa { background: var(--charcoal); color: var(--white); padding: 52px 32px; }
@@ -737,6 +737,38 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       zone.style.opacity = 0.05;
       zone.style.transform = 'scale(0.9) perspective(400px) rotateX(0deg) rotateY(0deg)';
     });
+  });
+})();
+
+// ===== HERO LOGO 3D TILT =====
+(function() {
+  var hero = document.querySelector('.hero');
+  var logo = document.querySelector('.hero-logo');
+  if (!hero || !logo) return;
+
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    var cx = rect.width / 2;
+    var cy = rect.height / 2;
+    var px = e.clientX - rect.left;
+    var py = e.clientY - rect.top;
+    var dx = (px - cx) / cx; // -1 to 1
+    var dy = (py - cy) / cy; // -1 to 1
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var progress = Math.min(1, dist);
+
+    var tiltX = dy * -20;
+    var tiltY = dx * 20;
+    var scale = 1 + progress * 0.06;
+    var shadow = 16 + progress * 24;
+
+    logo.style.transform = 'perspective(600px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) scale(' + scale + ')';
+    logo.style.filter = 'drop-shadow(0 2px ' + shadow + 'px rgba(0,0,0,' + (0.3 + progress * 0.15) + '))';
+  });
+
+  hero.addEventListener('mouseleave', function() {
+    logo.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+    logo.style.filter = 'drop-shadow(0 2px 16px rgba(0,0,0,0.3))';
   });
 })();
 </script>
