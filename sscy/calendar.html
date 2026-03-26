@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt Spring Centre of Yoga - Calendar</title>
+<meta name="description" content="Upcoming retreats, yoga classes, concerts, and community gatherings at the Salt Spring Centre of Yoga on Salt Spring Island, BC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --gold-light: #e8d5a0;
+  --terracotta: #c17838;
+  --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+  --shadow: rgba(0,0,0,0.08);
+  --shadow-md: rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.3s ease;
+}
+
+html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  font-family: 'Archivo Narrow', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  font-size: 24px;
+}
+
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* ===== STICKY NAV (matching homepage) ===== */
+.sticky-nav {
+  background: rgba(250,248,244,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 10px 0;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.sticky-nav-inner {
+  position: relative;
+  padding: 0 32px;
+  height: 68px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sn-logo-wrap { display: flex; align-items: center; }
+.sn-logo { height: 52px; }
+
+.sticky-nav-links {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.sticky-nav-links a {
+  padding: 10px 20px;
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-light);
+  text-decoration: none;
+  border-radius: 50px;
+  letter-spacing: 0.03em;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.sticky-nav-links a:hover { color: var(--teal-dark); background: var(--cream-warm); }
+.sticky-nav-links a.active { color: var(--teal-dark); font-weight: 600; }
+
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(135deg, rgba(26,92,83,0.85) 0%, rgba(42,138,125,0.78) 40%, rgba(45,90,39,0.82) 100%),
+              url('https://saltspringcentre.com/wp-content/uploads/2022/05/ACYR-Group-Peace.jpg') center/cover no-repeat;
+  background-attachment: fixed;
+  color: var(--white);
+  text-align: center;
+  padding: 100px 32px 80px;
+  position: relative;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; max-width: 800px; margin: 0 auto; }
+.hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); margin-bottom: 16px; color: var(--white); }
+.hero p { font-size: 1.1rem; opacity: 0.9; line-height: 1.7; max-width: 640px; margin: 0 auto 32px; text-align: center; }
+.hero-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 8px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; backdrop-filter: blur(8px); }
+
+/* ===== FILTERS ===== */
+.filter-bar {
+  max-width: 100%;
+  padding: 24px 32px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  background: var(--cream-warm);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.filter-btn {
+  padding: 10px 24px;
+  border: 1px solid rgba(0,0,0,0.1);
+  background: var(--white);
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.filter-btn:hover { border-color: var(--teal); color: var(--teal-dark); }
+.filter-btn.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+
+/* ===== RETREATS SECTION ===== */
+.section-header {
+  padding: 56px 32px 24px;
+  text-align: center;
+}
+
+.section-header h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 8px; }
+.section-header p { font-size: 0.95rem; color: var(--text-light); text-align: center; max-width: 600px; margin: 0 auto; }
+
+/* ===== EVENT CARDS ===== */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+  padding: 0 32px 64px;
+}
+
+.event-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 12px var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--shadow-md);
+}
+
+.event-card.featured {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  border: 2px solid var(--gold);
+  box-shadow: 0 4px 20px rgba(201,168,76,0.15);
+}
+
+.event-card.featured .event-img { min-height: 320px; }
+
+.event-img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--cream-warm);
+  position: relative;
+  overflow: hidden;
+}
+
+.event-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.event-card:hover .event-img img { transform: scale(1.04); }
+
+.event-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--terracotta);
+  color: var(--white);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-badge.gold { background: var(--gold); color: var(--charcoal); }
+.event-badge.teal { background: var(--teal-deep); }
+
+.event-body {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-type-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+
+.event-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.event-card.featured .event-title { font-size: 1.4rem; }
+
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.event-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.event-meta-item svg { flex-shrink: 0; opacity: 0.5; }
+
+.event-desc {
+  font-size: 0.88rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  flex: 1;
+  text-align: left;
+}
+
+.event-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.event-price {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--teal-deep);
+}
+
+.event-price .note { font-size: 0.75rem; font-weight: 400; color: var(--text-light); }
+
+.event-cta {
+  display: inline-block;
+  padding: 10px 24px;
+  background: var(--teal);
+  color: var(--white);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.event-cta:hover { background: var(--teal-dark); color: var(--white); }
+
+/* ===== WEEKLY CLASSES TABLE ===== */
+.classes-section {
+  background: var(--white);
+  padding: 64px 32px;
+}
+
+.classes-inner { max-width: 100%; }
+
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.class-card {
+  background: var(--cream);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.class-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.class-day {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+
+.class-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 4px;
+}
+
+.class-teacher {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+.class-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+.class-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.class-detail svg { opacity: 0.4; flex-shrink: 0; }
+
+.class-price {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--teal-dark);
+}
+
+/* ===== NOTE BANNER ===== */
+.note-banner {
+  background: var(--cream-warm);
+  padding: 32px;
+  text-align: center;
+}
+
+.note-banner p {
+  font-size: 0.92rem;
+  color: var(--text-light);
+  font-style: italic;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ===== FOOTER (matching homepage) ===== */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .event-card.featured { grid-template-columns: 1fr; }
+  .event-card.featured .event-img { min-height: 200px; }
+  .events-grid { grid-template-columns: 1fr; padding: 0 16px 48px; }
+  .classes-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .sticky-nav-links { display: none; }
+  .filter-bar { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV (matching homepage) -->
+<nav class="sticky-nav" id="stickyNav">
+  <div class="sticky-nav-inner">
+    <div class="sn-logo-wrap">
+      <a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a>
+    </div>
+    <div class="sticky-nav-links">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="calendar.html" class="active">Calendar</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="rentals.html">Rentals</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">69-acre Sanctuary &bull; Salt Spring Island, BC</div>
+    <h1 style="margin-top:20px">Events &amp; Calendar</h1>
+    <p>Retreats, yoga classes, concerts, and community gatherings throughout the year. No one is turned away for lack of funds.</p>
+  </div>
+</section>
+
+<!-- FILTERS -->
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" data-filter="all">All Events</button>
+  <button class="filter-btn" data-filter="retreat">Retreats</button>
+  <button class="filter-btn" data-filter="concert">Concerts</button>
+  <button class="filter-btn" data-filter="class">Weekly Classes</button>
+  <button class="filter-btn" data-filter="community">Community</button>
+</div>
+
+<!-- UPCOMING RETREATS -->
+<div class="section-header" id="retreats">
+  <h2>Upcoming Retreats</h2>
+  <p>Multi-day immersions in yoga, Ayurveda, meditation, and nature</p>
+</div>
+
+<div class="events-grid" id="eventsGrid">
+  <!-- Populated by JS -->
+</div>
+
+<!-- WEEKLY CLASSES -->
+<section class="classes-section" id="classes">
+  <div class="section-header" style="padding-top:0;">
+    <h2>Weekly Classes &amp; Gatherings</h2>
+    <p>Drop in any time. All levels welcome.</p>
+  </div>
+  <div class="classes-grid" id="classesGrid">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- NOTE -->
+<div class="note-banner">
+  <p>"No one will be turned away for lack of funds." All by-donation classes are Karma Yogi-led. Registration for retreats is via the Centre's website.</p>
+</div>
+
+<!-- FOOTER (matching homepage) -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/@saltspringcentreofyoga" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="contact.html">Contact</a>
+        <a href="index.html#about">History</a>
+        <a href="index.html#partners">Partners</a>
+        <a href="index.html#founder">Baba Hari Dass</a>
+        <a href="https://saltspringcentre.com/blog/" target="_blank">Blog</a>
+        <a href="offerings.html">Karma Yogis</a>
+        <a href="offerings.html">Teacher Training</a>
+        <a href="offerings.html">Wellness</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="contact.html">Getting Here</a>
+        <a href="shop.html">Donate</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Calendar concept by Piet Suess</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== EVENT DATA =====
+const EVENTS = [
+  // MUSIC FOR PEACE CONCERTS
+  {
+    id: 'mfp-violin',
+    type: 'concert',
+    title: 'Music for Peace: Carnatic Violin & Mridangam',
+    desc: 'An evening of South Indian classical music with Shriram Rajagopalan (violin) and Keerthy Raghavan (mridangam). Intricate melodic structures and rhythmic complexity in a contemplative setting.',
+    date: '2026-04-11',
+    dateLabel: 'Saturday, April 11',
+    time: '7:00 - 9:00 PM',
+    venue: 'Satsang Room',
+    price: '$40',
+    badge: 'Apr 11',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg',
+    url: 'https://saltspringcentre.com/events/music-for-peace-carnatic-violin-mridangam/',
+    featured: true
+  },
+  {
+    id: 'spring-cleanse',
+    type: 'retreat',
+    title: 'Spring Cleanse Ayurveda Retreat',
+    desc: 'Five days of cellular detox, mindful dietary choices, and holistic rejuvenation with Savita Leah Young. Ayurvedic cleanse addressing fatigue, hormonal balance, seasonal allergies, and weight.',
+    date: '2026-04-02',
+    dateLabel: 'April 2 - 6',
+    time: '5 days',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Apr 2',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/01/Blog-Post-picture-horizontal-1200-x-630-1.jpg',
+    url: 'https://saltspringcentre.com/events/spring-cleanse-retreat-2026/'
+  },
+  {
+    id: 'april-retreat-3',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 3 Nights',
+    desc: 'Open to all genders, races, and yoga levels. Asana classes, breathwork, meditation, nature time, and lacto-vegetarian meals on 69 acres.',
+    date: '2026-04-16',
+    dateLabel: 'April 16 - 19',
+    time: '3 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Apr 16',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2024/11/Blog-Post-picture-horizontal-1200-x-630-4.png',
+    url: 'https://saltspringcentre.com/events/april-2026-yoga-and-wellness-retreat-3-nights/'
+  },
+  {
+    id: 'agni-protocol',
+    type: 'retreat',
+    title: 'Agni Protocol - Spring Detox Retreat',
+    desc: 'Holistic Ayurvedic detox with Vd. Matheus Macedo (Vida Veda), Ishwarya Chaitanya (yoga), and Maria Marquez (movement). Four Pillars of Health, vegan meals, cleansing practices, silence.',
+    date: '2026-04-23',
+    dateLabel: 'April 23 - 26',
+    time: '4 days',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Apr 23',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/11/Agni-Protocol.jpg',
+    url: 'https://saltspringcentre.com/events/%f0%9f%8c%bf-agni-protocol-spring-detox-retreat/'
+  },
+  {
+    id: 'sound-bath',
+    type: 'concert',
+    title: 'Sound Bath & Meditation with Farhad Khan',
+    desc: 'Crystal bowls, gongs, and chimes for stress release, enhanced concentration, and chakra balancing. Over two decades of healing practice.',
+    date: '2026-05-13',
+    dateLabel: 'Tuesday, May 13',
+    time: '7:30 - 8:30 PM',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'By Donation',
+    badge: 'May 13',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/11/SoundBath-SaltSpring.png',
+    url: 'https://saltspringcentre.com/events/sound-bath-farhad-khan/'
+  },
+  {
+    id: 'may-retreat-2',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 2 Nights',
+    desc: 'A weekend of yoga, meditation, nature walks, and nourishing vegetarian meals at the Centre.',
+    date: '2026-05-08',
+    dateLabel: 'May 8 - 10',
+    time: '2 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'May 8',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/may-2026-yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'nature-nurture-may',
+    type: 'retreat',
+    title: 'Nature & Nurture: Heal Through Yoga',
+    desc: 'Ancient yogic techniques and philosophy for self-healing with Ishwarya Chaitanya. Hatha yoga, Sivananda tradition, yoga therapy. Set in a forested ecosystem.',
+    date: '2026-05-14',
+    dateLabel: 'May 14 - 17',
+    time: '4 days',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'May 14',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/08/519270511_18512460514049610_251173067301957564_n.jpg',
+    url: 'https://saltspringcentre.com/events/2026-nature-and-nurture-retreat-heal-through-yoga/'
+  },
+  {
+    id: 'june-retreat-3',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 3 Nights',
+    desc: 'Three nights of yoga, breathwork, meditation, and community in the heart of summer.',
+    date: '2026-06-18',
+    dateLabel: 'June 18 - 21',
+    time: '3 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Jun 18',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/june-2026-yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'mfp-akhil',
+    type: 'concert',
+    title: 'Music for Peace: Akhil Jobanputra & Tihai Ensemble',
+    desc: 'Hindustani classical concert featuring CBC\'s "30 under 30" vocalist Akhil Jobanputra with Mohan Bhide (harmonium) and Hriday Buddhdev (tabla). Expansive ragas and spontaneous improvisation.',
+    date: '2026-06-27',
+    dateLabel: 'Saturday, June 27',
+    time: 'Doors 6:30 PM, Concert 7:00 - 9:00 PM',
+    venue: 'Pond Dome',
+    price: '$40',
+    badge: 'Jun 27',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg',
+    url: 'https://saltspringcentre.com/events/music-for-peace-akhil-jobanputra/'
+  },
+  {
+    id: 'july-retreat-3',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 3 Nights',
+    desc: 'Mid-summer retreat with daily yoga, meditation, organic meals, and time in nature.',
+    date: '2026-07-16',
+    dateLabel: 'July 16 - 19',
+    time: '3 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Jul 16',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/july-2026yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'mfp-deepak',
+    type: 'concert',
+    title: 'Music for Peace: Deepak Ram - Bansuri Flute',
+    desc: 'Internationally celebrated bansuri master Deepak Ram performs Indian classical music on the bamboo flute. Deeply expressive and meditative sound.',
+    date: '2026-08-01',
+    dateLabel: 'Saturday, August 1',
+    time: 'Doors 6:30 PM, Concert 7:00 - 9:00 PM',
+    venue: 'Satsang Room',
+    price: '$40',
+    badge: 'Aug 1',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg',
+    url: 'https://saltspringcentre.com/events/music-for-peace-deepak-ram/'
+  },
+  {
+    id: 'aug-retreat-2',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 2 Nights',
+    desc: 'Late summer weekend retreat with yoga, meditation, and organic vegetarian meals.',
+    date: '2026-08-28',
+    dateLabel: 'August 28 - 30',
+    time: '2 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Aug 28',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/august-2026-yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'sep-retreat-2',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 2 Nights',
+    desc: 'Autumn weekend at the Centre with daily practice, nature walks, and nourishing meals.',
+    date: '2026-09-18',
+    dateLabel: 'September 18 - 20',
+    time: '2 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Sep 18',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2024/11/FALL-SCHEDULE-5.png',
+    url: 'https://saltspringcentre.com/events/september-2026-yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'nature-nurture-oct',
+    type: 'retreat',
+    title: 'Nature & Nurture: Heal Through Yoga',
+    desc: 'Autumn edition with Ishwarya Chaitanya. Ancient yogic techniques for self-healing, set in the Centre\'s forested ecosystem.',
+    date: '2026-10-02',
+    dateLabel: 'October 2 - 4',
+    time: '3 days',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Oct 2',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/08/519270511_18512460514049610_251173067301957564_n.jpg',
+    url: 'https://saltspringcentre.com/events/nature-and-nurture-retreat-heal-through-yoga-october-2026/'
+  },
+  {
+    id: 'oct-retreat-3',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 3 Nights',
+    desc: 'Three nights of autumn practice, meditation, and organic meals surrounded by fall colours.',
+    date: '2026-10-15',
+    dateLabel: 'October 15 - 18',
+    time: '3 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Oct 15',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/october-2026-yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'soulful-silence',
+    type: 'retreat',
+    title: 'Soulful Silence Meditation Retreat',
+    desc: 'Four-day silent retreat with Farhad Khan. Daily guided meditation, gentle yoga, restorative yoga, somatic stretch, pranayama, sound baths, Yoga Nidra, forest walking meditation, and kirtan. Includes a Khan Wellness Travel Pack (valued at $300 CAD).',
+    date: '2026-10-22',
+    dateLabel: 'October 22 - 25',
+    time: '4 days / 3 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Oct 22',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/11/Soulful-Silence-Meditation-Retreat-Farhad-Khan-.jpg',
+    url: 'https://saltspringcentre.com/events/soulful-silence-meditation-retreat-farhad-khan/',
+    featured: true
+  },
+  {
+    id: 'nov-retreat-2',
+    type: 'retreat',
+    title: 'Yoga & Wellness Retreat - 2 Nights',
+    desc: 'Late autumn weekend retreat with yoga, meditation, and warm vegetarian meals.',
+    date: '2026-11-13',
+    dateLabel: 'November 13 - 15',
+    time: '2 nights',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Nov 13',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/november-2026-yoga-and-wellness-retreat/'
+  },
+  {
+    id: 'nov-retreat-3',
+    type: 'retreat',
+    title: 'Winter Yoga & Wellness Retreat - 3 Days',
+    desc: 'Pre-winter retreat to ground and restore. Yoga, breathwork, meditation, and community.',
+    date: '2026-11-26',
+    dateLabel: 'November 26 - 29',
+    time: '3 days',
+    venue: 'Salt Spring Centre of Yoga',
+    price: 'Inquire',
+    badge: 'Nov 26',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    url: 'https://saltspringcentre.com/events/november-2026-yoga-and-wellness-retreat-copy/'
+  }
+];
+
+const CLASSES = [
+  {
+    day: 'Daily',
+    daySort: 0,
+    name: 'Arati',
+    teacher: 'Centre Community',
+    time: '6:45 - 7:15 AM',
+    price: 'Free (donation welcome)',
+    format: 'In-person',
+    desc: 'Lamp ceremony with mantras, prayers, and songs',
+    type: 'community'
+  },
+  {
+    day: 'Sunday',
+    daySort: 1,
+    name: 'Sadhana for Continuing Practitioners',
+    teacher: '',
+    time: '7:30 - 8:40 AM',
+    price: 'Free (donation)',
+    format: 'Online / Zoom',
+    desc: 'Pranayama and meditation for established practitioners',
+    type: 'class'
+  },
+  {
+    day: 'Sunday',
+    daySort: 1,
+    name: 'Sacred Sunday Eco-Yoga',
+    teacher: 'Cara Graci',
+    time: '11:00 AM - 12:15 PM',
+    price: 'By donation',
+    format: 'Outdoor / Pond Dome',
+    desc: 'Walking meditation and asana flow in nature',
+    type: 'class'
+  },
+  {
+    day: 'Sunday',
+    daySort: 1,
+    name: 'Satsang',
+    teacher: 'Community',
+    time: '2:00 - 3:30 PM',
+    price: 'Free (donation)',
+    format: 'Hybrid (in-person + Zoom)',
+    desc: 'Kirtan, meditation, and readings from Baba Hari Dass',
+    type: 'community'
+  },
+  {
+    day: 'Monday',
+    daySort: 2,
+    name: 'All Levels Hatha Yoga',
+    teacher: 'Dorothy',
+    time: '4:30 - 5:45 PM',
+    price: '$134/8-class pass (1x/wk), drop-in welcome',
+    format: 'In-person',
+    desc: '',
+    type: 'class'
+  },
+  {
+    day: 'Monday',
+    daySort: 2,
+    name: 'Patanjali\'s Yoga Sutra Study',
+    teacher: '',
+    time: '7:00 - 8:00 PM',
+    price: 'By donation',
+    format: 'Online / Zoom',
+    desc: 'Weekly scripture study group',
+    type: 'community'
+  },
+  {
+    day: 'Tuesday',
+    daySort: 3,
+    name: 'Bhagavad Gita Study Group',
+    teacher: '',
+    time: '7:30 - 8:30 PM',
+    price: 'By donation',
+    format: 'Online / Zoom',
+    desc: 'Weekly scripture study group',
+    type: 'community'
+  },
+  {
+    day: 'Wednesday',
+    daySort: 4,
+    name: 'Gentle Hatha Repair',
+    teacher: 'Cara Graci',
+    time: '11:00 AM - 12:15 PM',
+    price: 'By donation',
+    format: 'Online / Zoom',
+    desc: 'Slow flow with healing focus',
+    type: 'class'
+  },
+  {
+    day: 'Wednesday',
+    daySort: 4,
+    name: 'Satsang - Vancouver',
+    teacher: 'Community',
+    time: '6:30 - 8:00 PM',
+    price: 'Free',
+    format: 'Online / Zoom',
+    desc: 'Yoga Sutra study, kirtan, meditation',
+    type: 'community'
+  },
+  {
+    day: 'Thursday',
+    daySort: 5,
+    name: 'All Levels Hatha Yoga',
+    teacher: 'Dorothy',
+    time: '4:30 - 5:45 PM',
+    price: '$118/8-class pass (2+/wk), drop-in welcome',
+    format: 'In-person',
+    desc: '',
+    type: 'class'
+  },
+  {
+    day: 'Thursday',
+    daySort: 5,
+    name: 'Meditation & Mellow Yoga',
+    teacher: 'Cara Graci',
+    time: '4:30 - 5:30 PM',
+    price: 'Free / by donation',
+    format: 'Online / Zoom',
+    desc: '',
+    type: 'class'
+  },
+  {
+    day: 'Thursday',
+    daySort: 5,
+    name: 'Kirtan',
+    teacher: 'Community',
+    time: '7:00 - 8:30 PM',
+    price: 'Pay-what-you-can (suggested $20)',
+    format: 'In-person',
+    desc: 'Devotional chanting with harmonium. Paused for summer.',
+    type: 'community'
+  },
+  {
+    day: 'Friday',
+    daySort: 6,
+    name: 'Mindfulness in Nature Eco-Yoga',
+    teacher: 'Cara Graci',
+    time: '4:30 - 5:45 PM',
+    price: 'By donation',
+    format: 'Outdoor / Pond Dome',
+    desc: '',
+    type: 'class'
+  },
+  {
+    day: 'Saturday',
+    daySort: 7,
+    name: 'Yoga Flow for Everybody',
+    teacher: 'John Howe',
+    time: '9:30 - 10:30 AM',
+    price: '$100/8 classes, $15 drop-in',
+    format: 'In-person',
+    desc: 'All levels pranayama and asana',
+    type: 'class'
+  }
+];
+
+// ===== RENDER =====
+let activeFilter = 'all';
+
+function renderEvents() {
+  const grid = document.getElementById('eventsGrid');
+  const filtered = EVENTS.filter(e => activeFilter === 'all' || e.type === activeFilter).sort((a, b) => a.date.localeCompare(b.date));
+
+  grid.innerHTML = filtered.map(e => `
+    <div class="event-card${e.featured ? ' featured' : ''}" data-type="${e.type}">
+      <div class="event-img">
+        <img src="${e.img}" alt="${e.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div style=&quot;display:flex;align-items:center;justify-content:center;height:100%;font-size:3rem;opacity:0.2;&quot;>&#x1F9D8;</div>'">
+        <div class="event-badge${e.type === 'concert' ? ' teal' : ''}">${e.badge}</div>
+      </div>
+      <div class="event-body">
+        <div class="event-type-label">${e.type === 'concert' ? 'Music for Peace' : e.type === 'retreat' ? 'Retreat' : 'Event'}</div>
+        <div class="event-title">${e.title}</div>
+        <div class="event-meta">
+          <div class="event-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            ${e.dateLabel}
+          </div>
+          <div class="event-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${e.time}
+          </div>
+          <div class="event-meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${e.venue}
+          </div>
+        </div>
+        <div class="event-desc">${e.desc}</div>
+        <div class="event-footer">
+          <div class="event-price">${e.price}${e.price === 'Inquire' ? ' <span class="note">for pricing</span>' : ''}</div>
+          <a href="${e.url}" target="_blank" rel="noopener" class="event-cta">Learn More</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderClasses() {
+  const grid = document.getElementById('classesGrid');
+  const filtered = CLASSES.filter(c => activeFilter === 'all' || activeFilter === 'class' || c.type === activeFilter).sort((a, b) => a.daySort - b.daySort);
+
+  grid.innerHTML = filtered.map(c => `
+    <div class="class-card" data-type="${c.type}">
+      <div class="class-day">${c.day}</div>
+      <div class="class-name">${c.name}</div>
+      ${c.teacher ? `<div class="class-teacher">with ${c.teacher}</div>` : ''}
+      <div class="class-details">
+        <div class="class-detail">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${c.time}
+        </div>
+        <div class="class-detail">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${c.format}
+        </div>
+      </div>
+      ${c.desc ? `<div class="class-teacher" style="margin-top:6px;margin-bottom:0;">${c.desc}</div>` : ''}
+      <div class="class-price">${c.price}</div>
+    </div>
+  `).join('');
+}
+
+// ===== FILTER LOGIC =====
+document.getElementById('filterBar').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.filter;
+
+  const retreatSection = document.getElementById('retreats');
+  const classSection = document.getElementById('classes');
+
+  // Show/hide sections based on filter
+  if (activeFilter === 'class') {
+    retreatSection.style.display = 'none';
+    document.getElementById('eventsGrid').style.display = 'none';
+    classSection.style.display = '';
+  } else if (activeFilter === 'community') {
+    retreatSection.style.display = 'none';
+    document.getElementById('eventsGrid').style.display = 'none';
+    classSection.style.display = '';
+  } else {
+    retreatSection.style.display = '';
+    document.getElementById('eventsGrid').style.display = '';
+    classSection.style.display = (activeFilter === 'retreat' || activeFilter === 'concert') ? 'none' : '';
+  }
+
+  renderEvents();
+  renderClasses();
+});
+
+// Initial render
+renderEvents();
+renderClasses();
+</script>
+</body>
+</html>
