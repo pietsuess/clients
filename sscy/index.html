@@ -65,19 +65,21 @@ p { text-align: justify; text-justify: inter-word; }
 .qa-date { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.4; }
 
 /* MUSIC FOR PEACE BANNER */
-.mfp-banner { display: block; position: relative; overflow: hidden; height: 280px; text-decoration: none; color: var(--white); cursor: pointer; }
-.mfp-bg { position: absolute; inset: 0; }
-.mfp-img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; transition: transform 0.6s ease; }
-.mfp-banner:hover .mfp-img { transform: scale(1.05); }
-.mfp-overlay { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(26,92,83,0.92) 0%, rgba(26,92,83,0.7) 40%, rgba(0,0,0,0.3) 100%); transition: background 0.4s ease; }
-.mfp-banner:hover .mfp-overlay { background: linear-gradient(105deg, rgba(26,92,83,0.85) 0%, rgba(26,92,83,0.6) 40%, rgba(0,0,0,0.2) 100%); }
-.mfp-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 40px 48px; max-width: 600px; }
-.mfp-series { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 8px; }
-.mfp-title { font-family: 'Cinzel', serif; font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 8px; }
-.mfp-artists { font-size: 1.05rem; opacity: 0.8; margin-bottom: 16px; font-weight: 400; }
-.mfp-details { display: flex; gap: 20px; font-size: 0.82rem; font-weight: 500; opacity: 0.7; letter-spacing: 0.04em; margin-bottom: 20px; }
-.mfp-cta { display: inline-block; padding: 10px 28px; border-radius: 50px; background: var(--terracotta); color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.88rem; font-weight: 600; letter-spacing: 0.04em; transition: background 0.25s ease, transform 0.2s ease; align-self: flex-start; }
-.mfp-banner:hover .mfp-cta { background: #a8632e; transform: translateX(4px); }
+.mfp-banner { display: flex; text-decoration: none; color: var(--white); cursor: pointer; background: var(--teal-deep); overflow: hidden; transition: background 0.3s ease; }
+.mfp-banner:hover { background: #174e46; }
+.mfp-img-wrap { flex-shrink: 0; width: 280px; overflow: hidden; }
+.mfp-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+.mfp-banner:hover .mfp-img { transform: scale(1.06); }
+.mfp-content { flex: 1; display: flex; align-items: center; padding: 36px 48px; gap: 32px; }
+.mfp-text { flex: 1; }
+.mfp-series { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 10px; display: block; }
+.mfp-title { font-family: 'Cinzel', serif; font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 10px; }
+.mfp-artists { font-size: 1.05rem; opacity: 0.75; margin-bottom: 16px; font-weight: 400; }
+.mfp-details { display: flex; gap: 24px; font-size: 0.82rem; font-weight: 500; opacity: 0.6; letter-spacing: 0.04em; }
+.mfp-cta-wrap { flex-shrink: 0; display: flex; align-items: center; }
+.mfp-cta { display: inline-block; padding: 14px 36px; border-radius: 50px; background: var(--terracotta); color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.04em; transition: background 0.25s ease, transform 0.2s ease; white-space: nowrap; }
+.mfp-banner:hover .mfp-cta { background: #a8632e; transform: translateY(-2px); }
+@media (max-width: 768px) { .mfp-img-wrap { width: 160px; } .mfp-content { padding: 24px 20px; gap: 20px; flex-direction: column; align-items: flex-start; } .mfp-cta-wrap { align-self: flex-start; } }
 
 /* QUICK LINKS - KEYS */
 .quick-links { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; }
@@ -340,20 +342,23 @@ p { text-align: justify; text-justify: inter-word; }
 
 <!-- MUSIC FOR PEACE BANNER -->
 <a href="shop.html" class="mfp-banner">
-  <div class="mfp-bg">
+  <div class="mfp-img-wrap">
     <img src="https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg" alt="Carnatic Violin Concert" class="mfp-img" loading="lazy">
   </div>
-  <div class="mfp-overlay"></div>
   <div class="mfp-content">
-    <span class="mfp-series">Music for Peace Concert Series</span>
-    <h2 class="mfp-title">Carnatic Violin &amp; Mridangam</h2>
-    <p class="mfp-artists">Shriram Rajagopalan &bull; Keerthy Raghavan</p>
-    <div class="mfp-details">
-      <span>Saturday, April 11</span>
-      <span>7:00 pm</span>
-      <span>Satsang Room</span>
+    <div class="mfp-text">
+      <span class="mfp-series">Music for Peace Concert Series</span>
+      <h2 class="mfp-title">Carnatic Violin &amp; Mridangam</h2>
+      <p class="mfp-artists">Shriram Rajagopalan &bull; Keerthy Raghavan</p>
+      <div class="mfp-details">
+        <span>Saturday, April 11</span>
+        <span>7:00 pm</span>
+        <span>Satsang Room</span>
+      </div>
     </div>
-    <span class="mfp-cta">Get Tickets &bull; $40</span>
+    <div class="mfp-cta-wrap">
+      <span class="mfp-cta">Get Tickets &bull; $40</span>
+    </div>
   </div>
 </a>
 
@@ -867,9 +872,9 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       var progress = Math.max(0, 1 - dist / PULL_RADIUS);
       var cubicProgress = progress * progress * (3 - 2 * progress); // smoothstep
 
-      // Magnetic pull: link slides toward cursor
-      var pullX = (dx / Math.max(dist, 1)) * MAGNETIC_MAX * cubicProgress;
-      var pullY = (dy / Math.max(dist, 1)) * MAGNETIC_MAX * cubicProgress * 0.5;
+      // Magnetic pull: use dx/dy directly scaled, no direction normalization (avoids center jitter)
+      var pullX = (dx / PULL_RADIUS) * MAGNETIC_MAX * cubicProgress;
+      var pullY = (dy / PULL_RADIUS) * MAGNETIC_MAX * cubicProgress * 0.5;
 
       // 3D tilt: face toward cursor
       var tiltY = (dx / PULL_RADIUS) * TILT_MAX * cubicProgress;
