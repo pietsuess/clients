@@ -947,10 +947,8 @@ function openLightbox(idx) {
 function showLbItem() {
   const item = currentLbList[currentLbIndex];
   if (!item) return;
-  // For photos use the direct src, for video/reel try the full-size version
-  const src = item.type === 'photo'
-    ? item.src
-    : item.src.replace('ig-thumbs/', 'ig-posts/');
+  // Always use item.src directly (photos from ig-posts, videos from ig-thumbs)
+  const src = item.src;
   document.getElementById('lb-img').src = src;
   const captionText = cleanCaption(item.caption);
   document.getElementById('lb-caption').textContent = captionText || item.credit || '';
