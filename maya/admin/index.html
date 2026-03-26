@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Unprofessional Variety Show</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="screen">
+    <div class="login-box">
+      <h1>Unprofessional Variety Show</h1>
+      <p>Admin Panel</p>
+      <div id="login-form">
+        <label for="token-input">GitHub Token</label>
+        <input type="password" id="token-input" placeholder="ghp_...">
+        <button id="login-btn" class="btn-primary">Connect</button>
+        <p id="login-error" class="error"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="screen" style="display:none;">
+    <header id="admin-header">
+      <div class="admin-header-inner">
+        <h2>Unprofessional Variety Show</h2>
+        <div class="admin-header-right">
+          <span id="user-name"></span>
+          <button id="logout-btn" class="btn-small">Logout</button>
+        </div>
+      </div>
+      <nav id="admin-nav">
+        <a href="#dashboard" class="nav-item active" data-section="dashboard">Dashboard</a>
+        <a href="#shows" class="nav-item" data-section="shows">Shows</a>
+        <a href="#media" class="nav-item" data-section="media">Media</a>
+        <a href="#shop" class="nav-item" data-section="shop">Shop</a>
+        <a href="#settings" class="nav-item" data-section="settings">Settings</a>
+      </nav>
+    </header>
+
+    <main id="admin-main">
+
+      <!-- DASHBOARD -->
+      <section id="section-dashboard" class="admin-section">
+        <h1>Dashboard</h1>
+        <div class="dashboard-cards">
+          <a href="#shows" class="dash-card" data-section="shows">
+            <span class="dash-count" id="count-shows">-</span>
+            <span class="dash-label">Shows</span>
+          </a>
+          <a href="#media" class="dash-card" data-section="media">
+            <span class="dash-count" id="count-media">-</span>
+            <span class="dash-label">Media</span>
+          </a>
+          <a href="#shop" class="dash-card" data-section="shop">
+            <span class="dash-count" id="count-shop">-</span>
+            <span class="dash-label">Shop Items</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- SHOWS LIST -->
+      <section id="section-shows" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Shows</h1>
+          <button id="new-show-btn" class="btn-primary">+ New Show</button>
+        </div>
+        <div id="shows-list" class="item-list"></div>
+      </section>
+
+      <!-- SHOW EDITOR -->
+      <section id="section-show-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="show-edit-title">New Show</h1>
+          <div>
+            <button id="show-cancel-btn" class="btn-small">Cancel</button>
+            <button id="show-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Title</label>
+          <input type="text" id="show-title" placeholder="Show title">
+          <div class="form-row">
+            <div>
+              <label>Date</label>
+              <input type="date" id="show-date">
+            </div>
+            <div>
+              <label>Time</label>
+              <input type="text" id="show-time" placeholder="7:30 PM - 9:00 PM">
+            </div>
+            <div>
+              <label>Doors</label>
+              <input type="text" id="show-doors" placeholder="7:00 PM">
+            </div>
+          </div>
+          <label>Theme</label>
+          <input type="text" id="show-theme" placeholder="Optional theme">
+          <label>Performers (comma-separated)</label>
+          <input type="text" id="show-performers" placeholder="Bob Voyage, Cherie, Sebastian Ade">
+          <div class="form-row">
+            <div>
+              <label>Accompaniment</label>
+              <input type="text" id="show-accompaniment" placeholder="Klovis Gaynor">
+            </div>
+            <div>
+              <label>Emcee</label>
+              <input type="text" id="show-emcee" placeholder="Maya Suess" value="Maya Suess">
+            </div>
+          </div>
+          <label>Ticket URL</label>
+          <input type="url" id="show-ticket-url" placeholder="https://events.humanitix.com/...">
+          <label>Poster Image</label>
+          <div class="image-upload-row">
+            <input type="text" id="show-poster" placeholder="img/poster.webp" readonly>
+            <button type="button" id="show-poster-upload-btn" class="btn-small">Upload</button>
+          </div>
+          <div id="show-poster-preview" class="image-preview"></div>
+          <label>Description</label>
+          <div id="show-description-editor"></div>
+          <div class="form-row" style="margin-top:16px;">
+            <label class="toggle-label">
+              <input type="checkbox" id="show-upcoming">
+              Upcoming Show
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEDIA LIST -->
+      <section id="section-media" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Media</h1>
+          <button id="new-media-btn" class="btn-primary">+ New Media</button>
+        </div>
+        <div id="media-list" class="item-list"></div>
+      </section>
+
+      <!-- MEDIA EDITOR -->
+      <section id="section-media-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="media-edit-title">New Media</h1>
+          <div>
+            <button id="media-cancel-btn" class="btn-small">Cancel</button>
+            <button id="media-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Image</label>
+          <div class="image-upload-row">
+            <input type="text" id="media-src" placeholder="img/photo.jpg" readonly>
+            <button type="button" id="media-src-upload-btn" class="btn-small">Upload</button>
+          </div>
+          <div id="media-src-preview" class="image-preview"></div>
+          <label>Caption</label>
+          <input type="text" id="media-caption" placeholder="Describe the image">
+          <label>Credit</label>
+          <input type="text" id="media-credit" placeholder="Photographer / Source">
+          <label>Type</label>
+          <select id="media-type">
+            <option value="photo">Photo</option>
+            <option value="video">Video</option>
+            <option value="press">Press</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- SHOP LIST -->
+      <section id="section-shop" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Shop</h1>
+          <button id="new-shop-btn" class="btn-primary">+ New Item</button>
+        </div>
+        <div id="shop-list" class="item-list"></div>
+      </section>
+
+      <!-- SHOP EDITOR -->
+      <section id="section-shop-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="shop-edit-title">New Item</h1>
+          <div>
+            <button id="shop-cancel-btn" class="btn-small">Cancel</button>
+            <button id="shop-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Title</label>
+          <input type="text" id="shop-item-title" placeholder="Item name">
+          <label>Description</label>
+          <input type="text" id="shop-item-description" placeholder="Short description">
+          <label>Price</label>
+          <input type="text" id="shop-item-price" placeholder="$25.00">
+          <label>Image</label>
+          <div class="image-upload-row">
+            <input type="text" id="shop-item-image" placeholder="img/product.jpg" readonly>
+            <button type="button" id="shop-image-upload-btn" class="btn-small">Upload</button>
+          </div>
+          <div id="shop-image-preview" class="image-preview"></div>
+          <label>Buy URL</label>
+          <input type="url" id="shop-item-buy-url" placeholder="https://...">
+          <div class="form-row" style="margin-top:16px;">
+            <label class="toggle-label">
+              <input type="checkbox" id="shop-item-available">
+              Available
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="section-settings" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Site Settings</h1>
+          <button id="settings-save-btn" class="btn-primary">Save Settings</button>
+        </div>
+        <div class="editor-form">
+          <label>Site Name</label>
+          <input type="text" id="setting-siteName">
+          <label>Tagline</label>
+          <textarea id="setting-tagline" rows="2"></textarea>
+          <label>Venue</label>
+          <input type="text" id="setting-venue">
+          <label>Venue Address</label>
+          <input type="text" id="setting-venueAddress">
+          <label>Instagram (Show)</label>
+          <input type="url" id="setting-instagramShow">
+          <label>Instagram (Maya)</label>
+          <input type="url" id="setting-instagramMaya">
+          <label>Ticket Platform URL</label>
+          <input type="url" id="setting-ticketPlatform">
+          <label>Parkside Lounge URL</label>
+          <input type="url" id="setting-parksideUrl">
+          <label>Accessibility Note</label>
+          <textarea id="setting-accessibilityNote" rows="3"></textarea>
+          <label>About Text</label>
+          <textarea id="setting-aboutText" rows="4"></textarea>
+          <label>Press Links (JSON array)</label>
+          <textarea id="setting-pressLinks" rows="4" placeholder='[{"title":"...","url":"...","date":"..."}]'></textarea>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- PUBLISH BAR -->
+    <div id="publish-bar" class="publish-bar" style="display:none;">
+      <span id="pending-count">0 unpublished changes</span>
+      <div>
+        <button id="discard-btn" class="btn-small">Discard</button>
+        <button id="publish-btn" class="btn-primary">Publish</button>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
