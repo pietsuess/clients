@@ -9,6 +9,9 @@
   var BASE_PATH = 'maya/content/';
   var API = 'https://api.github.com';
 
+  // ===== DEMO MODE =====
+  var DEMO = location.search.indexOf('demo') !== -1;
+
   // ===== STATE =====
   var token = '';
   var shas = {}; // { filename: sha }
@@ -76,6 +79,11 @@
   function publishAll() {
     var files = Object.keys(pendingChanges);
     if (!files.length) { toast('Nothing to publish'); return; }
+
+    if (DEMO) {
+      toast('Demo mode - connect a GitHub token to publish live');
+      return;
+    }
 
     $('publish-btn').disabled = true;
     $('publish-btn').textContent = 'Publishing...';
@@ -258,11 +266,40 @@
   }
 
   function initAuth() {
+    if (DEMO) {
+      $('login-screen').style.display = 'none';
+      $('app').style.display = 'block';
+      $('user-name').textContent = 'Demo Mode';
+      loadAllContentLocal();
+      return;
+    }
     var setupToken = checkSetupToken();
     token = setupToken || localStorage.getItem('maya-cms-token') || '';
     if (token) {
       tryLogin(token);
     }
+  }
+
+  function loadAllContentLocal() {
+    Promise.all([
+      fetch('../content/shows.json').then(function(r){return r.json()}).then(function(d){shows=d}),
+      fetch('../content/media.json').then(function(r){return r.json()}).then(function(d){media=d}),
+      fetch('../content/shop.json').then(function(r){return r.json()}).then(function(d){shop=d}),
+      fetch('../content/settings.json').then(function(r){return r.json()}).then(function(d){settings=d})
+    ])
+    .then(function() {
+      loadDrafts();
+      updateDashboard();
+      renderShowsList();
+      renderMediaList();
+      renderShopList();
+      loadSettings();
+      updatePublishBar();
+      toast('Demo mode - edits save locally only');
+    })
+    .catch(function(err) {
+      toast('Error loading content: ' + err.message, true);
+    });
   }
 
   function tryLogin(t) {
