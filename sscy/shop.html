@@ -111,52 +111,23 @@ p { text-align: justify; text-justify: inter-word; }
   backdrop-filter: blur(8px);
 }
 
-/* ===== CATEGORIES ===== */
-.categories-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 48px 24px 16px;
-}
-
-.categories-section h2 {
-  font-size: 1.6rem;
-  text-align: center;
-  color: var(--teal-deep);
-  margin-bottom: 24px;
-}
-
-.category-filters {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  margin-bottom: 32px;
-}
-
-.cat-btn {
-  background: var(--white);
-  border: 1px solid rgba(0,0,0,0.1);
-  margin: -0.5px;
-  padding: 14px 12px;
-  border-radius: 0;
-  cursor: pointer;
-  font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text);
-  transition: background 0.2s, color 0.2s;
-}
-
-.cat-btn:hover {
-  background: var(--cream-warm);
-  color: var(--teal-dark);
-}
-
-.cat-btn.active {
-  background: var(--teal);
-  color: var(--white);
-  border-color: var(--teal);
-  z-index: 1;
-  position: relative;
-}
+/* ===== FILTER KEYS (matches homepage quick-links) ===== */
+.filter-keys { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; position: sticky; top: 89px; z-index: 80; }
+.filter-key { display: flex; align-items: center; justify-content: center; padding: 32px 12px; font-size: 0.88rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); border: none; cursor: pointer; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; }
+.filter-key:nth-child(1) { background: #1a5c53; }
+.filter-key:nth-child(2) { background: #2a8a7d; }
+.filter-key:nth-child(3) { background: #3bb8a8; }
+.filter-key:nth-child(4) { background: #c9a84c; }
+.filter-key:nth-child(5) { background: #d4be78; }
+.filter-key:nth-child(6) { background: #3bb8a8; }
+.filter-key:nth-child(7) { background: #2a8a7d; }
+.filter-key:nth-child(8) { background: #1a5c53; }
+.filter-key::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.filter-key:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.filter-key:hover::after { height: 100%; }
+.filter-key:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
+.filter-key.active { filter: brightness(1.2); }
+.filter-key.active::after { height: 100%; }
 
 /* ===== PRODUCTS GRID ===== */
 .products-section {
@@ -828,8 +799,8 @@ p { text-align: justify; text-justify: inter-word; }
 
 @media (max-width: 480px) {
   .products-grid { grid-template-columns: 1fr; }
-  .category-filters { grid-template-columns: repeat(2, 1fr); }
-  .cat-btn { padding: 12px 8px; font-size: 0.75rem; }
+  .filter-keys { grid-template-columns: repeat(2, 1fr); }
+  .filter-key { padding: 12px 8px; font-size: 0.75rem; }
 }
 </style>
 </head>
@@ -858,20 +829,17 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
 </section>
 
-<!-- CATEGORIES -->
-<section class="categories-section">
-  <h2>Browse by Category</h2>
-  <div class="category-filters" id="categoryFilters">
-    <button class="cat-btn active" data-category="all">All Products</button>
-    <button class="cat-btn" data-category="tickets">Tickets &amp; Events</button>
-    <button class="cat-btn" data-category="books">Books &amp; Media</button>
-    <button class="cat-btn" data-category="apparel">Apparel &amp; Merch</button>
-    <button class="cat-btn" data-category="yoga">Yoga &amp; Meditation</button>
-    <button class="cat-btn" data-category="garden">Garden &amp; Seeds</button>
-    <button class="cat-btn" data-category="gifts">Gift Certificates</button>
-    <button class="cat-btn" data-category="support">Support the Centre</button>
-  </div>
-</section>
+<!-- FILTER KEYS -->
+<div class="filter-keys" id="categoryFilters">
+  <button class="filter-key active" data-category="all">All Products</button>
+  <button class="filter-key" data-category="tickets">Events</button>
+  <button class="filter-key" data-category="books">Books & Media</button>
+  <button class="filter-key" data-category="apparel">Apparel</button>
+  <button class="filter-key" data-category="yoga">Yoga</button>
+  <button class="filter-key" data-category="garden">Garden</button>
+  <button class="filter-key" data-category="gifts">Gifts</button>
+  <button class="filter-key" data-category="support">Support</button>
+</div>
 
 <!-- PRODUCTS -->
 <section class="products-section">
@@ -1380,8 +1348,8 @@ function getCategoryLabel(cat) {
 
 // ===== CATEGORY FILTERS =====
 document.getElementById('categoryFilters').addEventListener('click', e => {
-  if (!e.target.classList.contains('cat-btn')) return;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  if (!e.target.classList.contains('filter-key')) return;
+  document.querySelectorAll('.filter-key').forEach(b => b.classList.remove('active'));
   e.target.classList.add('active');
   renderProducts(e.target.dataset.category);
 });
@@ -1537,7 +1505,7 @@ function showToast(msg) {
 
 // ===== FILTER TO CATEGORY =====
 function filterTo(category) {
-  document.querySelectorAll('.cat-btn').forEach(b => {
+  document.querySelectorAll('.filter-key').forEach(b => {
     b.classList.toggle('active', b.dataset.category === category);
   });
   renderProducts(category);
