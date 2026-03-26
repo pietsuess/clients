@@ -358,10 +358,12 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 .lightbox.active{display:flex}
 .lightbox img{max-width:90vw;max-height:80vh;object-fit:contain;border-radius:4px}
 .lightbox .lb-caption{
-  margin-top:16px;padding:0 20px;
-  max-width:600px;text-align:center;
-  font-size:0.8rem;color:rgba(245,240,230,0.6);
-  font-family:'DM Sans',sans-serif;line-height:1.5;
+  margin-top:16px;padding:0 40px;
+  max-width:700px;width:100%;
+  text-align:justify;text-align-last:left;
+  font-size:0.8rem;color:rgba(245,240,230,0.7);
+  font-family:'DM Sans',sans-serif;line-height:1.6;
+  max-height:25vh;overflow-y:auto;white-space:pre-line;
 }
 .lightbox .close-lb{
   position:absolute;top:20px;right:20px;
@@ -954,6 +956,7 @@ function showLbItem() {
   document.getElementById('lb-img').src = src;
   const captionText = cleanCaption(item.caption);
   document.getElementById('lb-caption').textContent = captionText || item.credit || '';
+
 }
 
 function lbNav(e, dir) {
@@ -1025,12 +1028,11 @@ function escHtml(str) {
 
 function cleanCaption(caption) {
   if (!caption) return '';
-  // Remove leading ~ and trim, take first meaningful line
+  // Remove leading ~ and trim
   let c = caption.replace(/^~\s*\n?/, '').trim();
-  // Take first sentence or first 120 chars
-  const firstLine = c.split('\n')[0].trim();
-  if (firstLine.length > 120) return firstLine.substring(0, 117) + '...';
-  return firstLine;
+  // Remove trailing ~ lines
+  c = c.replace(/\n~[\s\S]*$/, '').trim();
+  return c;
 }
 
 function formatDateLong(dateStr) {
