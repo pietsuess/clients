@@ -54,39 +54,16 @@ p { text-align: justify; text-justify: inter-word; }
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-.sticky-nav-inner {
-  position: relative;
-  padding: 0 32px;
-  height: 68px;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+.sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); opacity: 0; }
+.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav-links { position: absolute; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transform-style: preserve-3d; transition: color 0.2s ease, background 0.2s ease, box-shadow 0.3s ease; will-change: transform; }
+.sticky-nav-links a:hover { color: var(--teal-dark); }
 
-.sn-logo-wrap { display: flex; align-items: center; }
-.sn-logo { height: 52px; }
-
-.sticky-nav-links {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.sticky-nav-links a {
-  padding: 10px 20px;
-  font-family: 'Archivo Narrow', sans-serif;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--text-light);
-  text-decoration: none;
-  border-radius: 50px;
-  letter-spacing: 0.03em;
-  transition: color 0.2s ease, background 0.2s ease;
-}
-
-.sticky-nav-links a:hover { color: var(--teal-dark); background: var(--cream-warm); }
+/* Subpage overrides (no hero scroll animation) */
+.sn-logo-wrap { opacity: 1 !important; }
+.sticky-nav-links { right: 32px; }
 .sticky-nav-links a.active { color: var(--teal-dark); font-weight: 600; }
 
 /* ===== HERO ===== */
@@ -503,7 +480,7 @@ p { text-align: justify; text-justify: inter-word; }
         <div class="social-links">
           <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
           <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-          <a href="https://www.youtube.com/@saltspringcentreofyoga" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
         </div>
       </div>
       <div class="footer-newsletter">
@@ -532,7 +509,7 @@ p { text-align: justify; text-justify: inter-word; }
     </nav>
     <div class="footer-bottom">
       <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
-      <p>Dharma Sara Satsang Society &bull; Calendar concept by Piet Suess</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
     </div>
   </div>
 </footer>
