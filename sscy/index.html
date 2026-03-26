@@ -436,7 +436,7 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- FOUNDER - SPLIT -->
 <section class="split reverse" id="founder">
   <div class="split-img" style="display:flex;align-items:center;justify-content:center;background:var(--cream-warm);">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-Shining-Eyes-Square.jpg" alt="Baba Hari Dass" loading="lazy" style="position:relative;top:auto;left:auto;width:65%;height:auto;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-Shining-Eyes-Square.jpg" alt="Baba Hari Dass" loading="lazy" data-no-parallax style="position:relative;top:auto;left:auto;width:65%;height:auto;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
   </div>
   <div class="split-text" style="background:var(--cream-warm);">
     <div class="split-text-inner">
@@ -726,9 +726,7 @@ document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(functi
 
 // Parallax on split images and frames
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  var pEls = document.querySelectorAll('.parallax-frame img, .split-img img, .about-hero-img');
-  // Exclude founder image (has its own layout)
-  pEls = Array.from(pEls).filter(function(el) { return !el.closest('#founder'); });
+  var pEls = document.querySelectorAll('.parallax-frame img, .split-img img:not([data-no-parallax]), .about-hero-img');
   window.addEventListener('scroll', function() {
     pEls.forEach(function(el) {
       var r = el.getBoundingClientRect();
