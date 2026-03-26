@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unprofessional Variety Show - A Queer Cabaret at The Parkside Lounge, NYC</title>
+<meta name="description" content="An unprofessional, unimportant, and undisciplined cabaret-style night of performance. Quarterly at The Parkside Lounge, Lower East Side, NYC. Programmed by Maya Suess.">
+<meta property="og:title" content="Unprofessional Variety Show">
+<meta property="og:description" content="A queer cabaret at The Parkside Lounge, NYC. You never quite know what you'll get, but it's always gonna be a time.">
+<meta property="og:image" content="img/press-1.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --plum:#1a0a1e;
+  --blue:#2b4fd8;
+  --pink:#e84a8a;
+  --yellow:#e8e234;
+  --red:#d42a4c;
+  --green:#3dcc6a;
+  --cream:#f5f0e6;
+  --gold:#d4a843;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--plum);
+  color:var(--cream);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:20px 4vw;
+  display:flex;justify-content:space-between;align-items:center;
+  mix-blend-mode:difference;
+  transition:opacity 0.3s;
+}
+nav .logo{
+  font-family:'Caveat',cursive;font-size:1.4rem;font-weight:700;
+  color:#fff;letter-spacing:0.02em;
+}
+nav .nav-links{display:flex;gap:28px;font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase}
+nav .nav-links a{color:#fff;position:relative}
+nav .nav-links a::after{
+  content:'';position:absolute;bottom:-2px;left:0;width:100%;height:1px;
+  background:#fff;transform:scaleX(0);transform-origin:right;
+  transition:transform 0.3s ease,transform-origin 0s 0.3s;
+}
+nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:200}
+.hamburger span{width:24px;height:2px;background:#fff;transition:0.3s}
+
+/* MOBILE NAV */
+@media(max-width:768px){
+  nav .nav-links{display:none}
+  .hamburger{display:flex}
+  .mobile-menu{
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:var(--plum);z-index:150;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+    transform:translateY(-100%);transition:transform 0.5s cubic-bezier(0.075,0.82,0.165,1);
+  }
+  .mobile-menu.open{transform:translateY(0)}
+  .mobile-menu a{
+    font-family:'Caveat',cursive;font-size:14vw;color:var(--cream);
+    opacity:0;transform:translateY(40px);transition:opacity 0.4s,transform 0.5s cubic-bezier(0.075,0.82,0.165,1);
+  }
+  .mobile-menu.open a{opacity:1;transform:translateY(0)}
+  .mobile-menu.open a:nth-child(2){transition-delay:0.05s}
+  .mobile-menu.open a:nth-child(3){transition-delay:0.1s}
+  .mobile-menu.open a:nth-child(4){transition-delay:0.15s}
+  .mobile-menu.open a:nth-child(5){transition-delay:0.2s}
+}
+
+/* NOISE OVERLAY */
+.noise{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:9998;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:256px;
+}
+
+/* HERO */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  position:relative;overflow:hidden;
+  padding:100px 4vw 60px;
+}
+.hero-bg{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:radial-gradient(ellipse at 30% 40%,rgba(43,79,216,0.15) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 60%,rgba(232,74,138,0.1) 0%,transparent 50%),
+             var(--plum);
+}
+.hero-title{
+  font-family:'Caveat',cursive;
+  font-size:clamp(3rem,15vw,12rem);
+  line-height:0.85;text-align:center;
+  position:relative;z-index:2;
+  color:var(--cream);
+}
+.hero-title .line1{display:block;color:var(--pink)}
+.hero-title .line2{display:block;font-size:0.6em;color:var(--cream)}
+
+.hero-tagline{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1rem,2.5vw,1.6rem);
+  text-align:center;max-width:700px;
+  margin-top:30px;position:relative;z-index:2;
+  color:rgba(245,240,230,0.7);line-height:1.5;
+}
+
+/* MARQUEE */
+.marquee-wrap{
+  width:100%;overflow:hidden;
+  padding:20px 0;position:relative;z-index:2;
+  margin-top:40px;border-top:1px solid rgba(245,240,230,0.1);
+  border-bottom:1px solid rgba(245,240,230,0.1);
+}
+.marquee-track{
+  display:flex;white-space:nowrap;
+  animation:marquee 25s linear infinite;
+}
+.marquee-track span{
+  font-family:'Caveat',cursive;font-size:clamp(1.2rem,3vw,2rem);
+  padding:0 40px;color:rgba(245,240,230,0.4);
+}
+.marquee-track span em{font-style:normal;color:var(--pink)}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* NEXT SHOW */
+.next-show{
+  padding:80px 4vw;position:relative;
+  background:linear-gradient(to bottom,var(--plum),#0d0510);
+}
+.next-show-inner{
+  display:flex;gap:40px;align-items:center;flex-wrap:wrap;
+  justify-content:center;
+}
+.next-show-poster{
+  width:min(400px,80vw);aspect-ratio:1;border-radius:8px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  position:relative;
+}
+.next-show-poster img{width:100%;height:100%;object-fit:cover}
+.next-show-poster .poster-glow{
+  position:absolute;inset:-2px;border-radius:10px;
+  background:conic-gradient(var(--pink),var(--blue),var(--green),var(--yellow),var(--pink));
+  z-index:-1;filter:blur(20px);opacity:0.4;
+  animation:glowRotate 6s linear infinite;
+}
+@keyframes glowRotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.next-show-info{max-width:500px}
+.next-show-info .label{
+  font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--pink);margin-bottom:12px;
+}
+.next-show-info h2{
+  font-family:'Caveat',cursive;font-size:clamp(2.5rem,6vw,4rem);
+  line-height:1;margin-bottom:16px;
+}
+.next-show-info .date{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:1.2rem;color:var(--gold);margin-bottom:8px;
+}
+.next-show-info .venue{font-size:0.85rem;color:rgba(245,240,230,0.5);margin-bottom:20px}
+.next-show-info .performers{margin-bottom:24px;line-height:1.8}
+.next-show-info .performers span{
+  display:inline-block;padding:4px 14px;margin:3px;
+  border:1px solid rgba(245,240,230,0.2);border-radius:20px;
+  font-size:0.8rem;transition:border-color 0.3s,color 0.3s;
+}
+.next-show-info .performers span:hover{border-color:var(--pink);color:var(--pink)}
+.btn{
+  display:inline-block;padding:14px 32px;
+  background:var(--pink);color:#fff;
+  font-size:0.85rem;letter-spacing:0.12em;text-transform:uppercase;
+  border-radius:4px;position:relative;overflow:hidden;
+  transition:transform 0.3s;
+}
+.btn:hover{transform:scale(1.03)}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,0.15),transparent);
+  transform:translateX(-100%);transition:transform 0.6s;
+}
+.btn:hover::after{transform:translateX(100%)}
+
+/* SECTION TITLES */
+.section-title{
+  font-family:'Caveat',cursive;
+  font-size:clamp(3rem,10vw,8rem);
+  line-height:0.9;padding:0 4vw;
+}
+.section-subtitle{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(0.9rem,2vw,1.2rem);
+  color:rgba(245,240,230,0.5);
+  padding:0 4vw;margin-top:12px;
+}
+
+/* ABOUT */
+.about{
+  padding:100px 4vw;
+  background:linear-gradient(to bottom,#0d0510,var(--plum));
+}
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;
+  margin-top:50px;align-items:start;
+}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+.about-text{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1.1rem,2vw,1.4rem);
+  line-height:1.7;color:rgba(245,240,230,0.8);
+  text-align:justify;text-align-last:left;
+}
+.about-text p{margin-bottom:24px}
+.about-quote{
+  padding:30px;border-left:3px solid var(--blue);
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:1.1rem;line-height:1.7;
+  color:rgba(245,240,230,0.6);
+}
+.about-quote .attr{
+  margin-top:16px;font-size:0.8rem;font-style:normal;
+  font-family:'DM Sans',sans-serif;color:var(--pink);
+  letter-spacing:0.1em;
+}
+.about-details{
+  display:flex;flex-direction:column;gap:20px;
+  font-size:0.85rem;line-height:1.6;
+}
+.about-details .detail-item{
+  padding:20px;border:1px solid rgba(245,240,230,0.08);
+  border-radius:6px;background:rgba(245,240,230,0.02);
+}
+.about-details .detail-item h4{
+  font-family:'Caveat',cursive;font-size:1.3rem;
+  color:var(--gold);margin-bottom:8px;
+}
+
+/* SHOWS ARCHIVE */
+.shows{
+  padding:100px 0;
+  background:var(--blue);
+  position:relative;overflow:hidden;
+}
+.shows .section-title{color:#fff}
+.shows .section-subtitle{color:rgba(255,255,255,0.5)}
+.shows-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:24px;padding:50px 4vw 0;
+}
+.show-card{
+  background:rgba(0,0,0,0.2);border-radius:8px;overflow:hidden;
+  transition:transform 0.4s cubic-bezier(0.075,0.82,0.165,1),box-shadow 0.4s;
+  cursor:pointer;
+}
+.show-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.3)}
+.show-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.show-card .card-info{padding:16px}
+.show-card .card-info h3{
+  font-family:'Caveat',cursive;font-size:1.4rem;margin-bottom:4px;
+}
+.show-card .card-info .card-date{
+  font-size:0.75rem;color:rgba(255,255,255,0.5);letter-spacing:0.08em;
+}
+.show-card .card-info .card-performers{
+  font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:8px;
+  font-style:italic;
+}
+
+/* MEDIA */
+.media{
+  padding:100px 0;
+  background:linear-gradient(to bottom,var(--plum),#0d0510);
+}
+.media-marquee{
+  width:100%;overflow:hidden;margin:50px 0 40px;
+  border-top:1px solid rgba(245,240,230,0.08);
+  border-bottom:1px solid rgba(245,240,230,0.08);
+  padding:12px 0;
+}
+.media-marquee .marquee-track span{
+  font-size:0.7rem;font-family:'DM Sans',sans-serif;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:rgba(245,240,230,0.25);
+}
+.gallery{
+  padding:0 4vw;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:16px;
+}
+.gallery-item{
+  border-radius:6px;overflow:hidden;position:relative;
+  cursor:pointer;
+}
+.gallery-item img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform 0.6s cubic-bezier(0.075,0.82,0.165,1);
+}
+.gallery-item:hover img{transform:scale(1.05)}
+.gallery-item .overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(26,10,30,0.8),transparent 60%);
+  display:flex;align-items:flex-end;padding:16px;
+  opacity:0;transition:opacity 0.3s;
+}
+.gallery-item:hover .overlay{opacity:1}
+.gallery-item .overlay span{font-size:0.75rem;color:rgba(245,240,230,0.7)}
+.press-section{padding:40px 4vw 0}
+.press-link{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:12px 20px;border:1px solid rgba(245,240,230,0.15);
+  border-radius:4px;font-size:0.8rem;
+  transition:border-color 0.3s,background 0.3s;
+}
+.press-link:hover{border-color:var(--pink);background:rgba(232,74,138,0.08)}
+
+/* LIGHTBOX */
+.lightbox{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,0,0.92);
+  display:none;align-items:center;justify-content:center;
+  cursor:pointer;
+}
+.lightbox.active{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:4px}
+.lightbox .close-lb{
+  position:absolute;top:20px;right:20px;
+  font-size:2rem;color:#fff;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+}
+
+/* SHOP */
+.shop{
+  padding:100px 0;
+  background:var(--red);
+  position:relative;
+}
+.shop .section-title{color:#fff}
+.shop .section-subtitle{color:rgba(255,255,255,0.5)}
+.shop-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:24px;padding:50px 4vw 0;
+}
+.shop-item{
+  background:rgba(0,0,0,0.15);border-radius:8px;overflow:hidden;
+  transition:transform 0.3s;
+}
+.shop-item:hover{transform:translateY(-4px)}
+.shop-placeholder{
+  aspect-ratio:1;background:rgba(0,0,0,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Caveat',cursive;font-size:1.8rem;
+  color:rgba(255,255,255,0.3);
+}
+.shop-item .item-info{padding:16px}
+.shop-item .item-info h3{font-family:'Caveat',cursive;font-size:1.3rem;margin-bottom:4px}
+.shop-item .item-info .price{font-size:0.85rem;color:var(--yellow)}
+
+/* CONTACT */
+.contact{
+  padding:100px 4vw;
+  background:linear-gradient(to bottom,#0d0510,var(--plum));
+  text-align:center;
+}
+.contact .section-title{text-align:center}
+.contact-cta{
+  font-family:'Playfair Display',serif;font-style:italic;
+  font-size:clamp(1.1rem,2.5vw,1.5rem);
+  color:rgba(245,240,230,0.6);
+  max-width:600px;margin:30px auto 40px;
+  line-height:1.6;text-align:justify;text-align-last:center;
+}
+.contact-links{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:30px}
+.contact-link{
+  padding:14px 28px;border:1px solid rgba(245,240,230,0.2);
+  border-radius:4px;font-size:0.8rem;letter-spacing:0.1em;
+  text-transform:uppercase;transition:all 0.3s;
+}
+.contact-link:hover{background:var(--pink);border-color:var(--pink)}
+.contact-link.ig:hover{background:#e1306c;border-color:#e1306c}
+
+/* FOOTER */
+footer{
+  padding:30px 4vw;
+  border-top:1px solid rgba(245,240,230,0.06);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  font-size:0.7rem;color:rgba(245,240,230,0.25);
+  letter-spacing:0.08em;
+}
+footer a{color:rgba(245,240,230,0.4);transition:color 0.3s}
+footer a:hover{color:var(--pink)}
+
+/* RUNNING BIG TEXT */
+.big-running{
+  width:100%;overflow:hidden;padding:40px 0;
+}
+.big-running .track{
+  display:flex;white-space:nowrap;
+  animation:marquee 20s linear infinite;
+}
+.big-running .track span{
+  font-family:'Caveat',cursive;
+  font-size:clamp(4rem,12vw,10rem);
+  padding:0 60px;
+  -webkit-text-stroke:1px rgba(245,240,230,0.1);
+  color:transparent;
+}
+
+/* ANIMATE ON SCROLL */
+.a-text,.a-fade{opacity:0;transform:translateY(30px);transition:opacity 0.6s,transform 0.6s cubic-bezier(0.075,0.82,0.165,1)}
+.a-text.visible,.a-fade.visible{opacity:1;transform:translateY(0)}
+
+/* DIVIDER */
+.divider-line{
+  width:60px;height:2px;margin:20px 0;
+  background:linear-gradient(to right,var(--pink),var(--blue));
+}
+
+/* ACCESSIBILITY BADGE */
+.access-note{
+  display:inline-block;padding:8px 14px;
+  background:rgba(245,240,230,0.05);border-radius:4px;
+  font-size:0.75rem;color:rgba(245,240,230,0.4);
+  margin-top:12px;
+}
+
+/* RESPONSIVE TWEAKS */
+@media(max-width:600px){
+  .shows-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .show-card .card-info{padding:10px}
+  .show-card .card-info h3{font-size:1.1rem}
+  .gallery{grid-template-columns:1fr}
+  .shop-grid{grid-template-columns:1fr 1fr}
+  .next-show-inner{flex-direction:column;text-align:center}
+  .next-show-poster{width:min(320px,90vw)}
+}
+</style>
+</head>
+<body>
+
+<!-- NOISE -->
+<div class="noise"></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <span class="close-lb">&times;</span>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">unprofessional</a>
+  <div class="nav-links">
+    <a href="#shows">Shows</a>
+    <a href="#media">Media</a>
+    <a href="#shop">Shop</a>
+    <a href="#contact">Get Involved</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#shows" onclick="toggleMenu()">Shows</a>
+  <a href="#media" onclick="toggleMenu()">Media</a>
+  <a href="#shop" onclick="toggleMenu()">Shop</a>
+  <a href="#contact" onclick="toggleMenu()">Get Involved</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <h1 class="hero-title a-text">
+    <span class="line1">Unprofessional</span>
+    <span class="line2">Variety Show</span>
+  </h1>
+  <p class="hero-tagline a-text">An unprofessional, unimportant, and undisciplined cabaret-style night of performance.</p>
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span>Quarterly at <em>The Parkside Lounge</em></span>
+      <span>Lower East Side, NYC</span>
+      <span>Programmed by <em>Maya Suess</em></span>
+      <span>You never quite know what you'll get</span>
+      <span>But it's always gonna be a time</span>
+      <span>All monies go to the performers</span>
+      <span>Quarterly at <em>The Parkside Lounge</em></span>
+      <span>Lower East Side, NYC</span>
+      <span>Programmed by <em>Maya Suess</em></span>
+      <span>You never quite know what you'll get</span>
+      <span>But it's always gonna be a time</span>
+      <span>All monies go to the performers</span>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT SHOW -->
+<section class="next-show" id="nextshow">
+  <div class="next-show-inner">
+    <div class="next-show-poster a-fade">
+      <div class="poster-glow"></div>
+      <img src="img/poster-badadvice-sep25.webp" alt="Bad Advice - September 2025">
+    </div>
+    <div class="next-show-info">
+      <div class="label a-text">Next Show</div>
+      <h2 class="a-text">Bad Advice</h2>
+      <div class="date a-text">Sunday, September 21, 2025</div>
+      <div class="venue a-text">The Parkside Lounge - 317 E Houston St, NYC - Doors 7pm / Show 7:30pm</div>
+      <div class="performers a-text">
+        <span>Bob Voyage</span>
+        <span>Cherie</span>
+        <span>Sebastian Ade</span>
+        <span>Shannon Sennott</span>
+      </div>
+      <div class="a-text" style="margin-bottom:16px">
+        <span style="font-size:0.8rem;color:rgba(245,240,230,0.4)">Emcee: Maya Suess - Accompaniment: Klovis Gaynor</span>
+      </div>
+      <a href="https://events.humanitix.com/unprofessional-show-sept" target="_blank" class="btn a-fade">Get Tickets</a>
+      <div class="access-note a-text">21+ with valid photo ID. Accessible via portable ramp. Reserved seating available.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="section-title a-text" style="color:var(--pink)">There will be<br>antics.</div>
+  <div class="section-subtitle a-text">There will be song.</div>
+  <div class="about-grid" style="margin-top:50px;">
+    <div>
+      <div class="about-text a-text">
+        <p>Unprofessional is a quarterly night of cabaret, where you never quite know what you'll get. Launched on Maya Suess's birthday in February 2022, the show lives in the back room of The Parkside Lounge on Houston and Attorney in the Lower East Side.</p>
+        <p>The programming is truly intergenerational, introducing younger performers to the legendary performers from the neighborhood. From Coney Island legends to drag kings, from performance artists to folk musicians, every edition is a different world.</p>
+      </div>
+      <div class="about-quote a-text">
+        "Allied Productions exemplifies one of the things I love about this neighborhood, which is the diverse legacy of experimental queer and radical art and performance. At the Unprofessional Variety Show, I try to make the programming truly intergenerational."
+        <div class="attr">- Maya Suess, EV Grieve, Feb 2024</div>
+      </div>
+    </div>
+    <div class="about-details">
+      <div class="detail-item a-fade">
+        <h4>The Venue</h4>
+        <p>The Parkside Lounge. A dive bar and performance venue catering to the artists, musicians, and freaks of the Lower East Side since 1908. 317 East Houston Street, New York, NY 10002.</p>
+      </div>
+      <div class="detail-item a-fade">
+        <h4>Maya Suess</h4>
+        <p>Artist, educator, and arts administrator. Born on a small island off western Canada's coast. BFA from Emily Carr, MFA from Simon Fraser. She makes drawings, installations, videos, performances, and other mischievous entities.</p>
+      </div>
+      <div class="detail-item a-fade">
+        <h4>Klovis Gaynor</h4>
+        <p>Musical accompaniment at nearly every edition. Queer musician and "baroque punk" artist. Queens-based. Sometimes joined by Mamie Minch on guitar.</p>
+      </div>
+      <div class="detail-item a-fade">
+        <h4>The Deal</h4>
+        <p>Sliding scale cover. All monies go directly to the performers. Tickets through Humanitix, where 100% of booking fees go to charity. That's the whole deal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RUNNING TEXT -->
+<div class="big-running" style="background:var(--plum);">
+  <div class="track">
+    <span>Unprofessional</span><span>Unimportant</span><span>Undisciplined</span>
+    <span>Unprofessional</span><span>Unimportant</span><span>Undisciplined</span>
+  </div>
+</div>
+
+<!-- SHOWS ARCHIVE -->
+<section class="shows" id="shows">
+  <div class="section-title a-text">Past Shows</div>
+  <div class="section-subtitle a-text">Every edition is a different world.</div>
+  <div class="shows-grid">
+    <div class="show-card a-fade">
+      <img src="img/poster-camp-may25.webp" alt="Summer Camp - May 2025">
+      <div class="card-info">
+        <h3>Summer "Camp"</h3>
+        <div class="card-date">May 18, 2025</div>
+        <div class="card-performers">Dusty Childers, Mari Moriarty, River L Ramirez, Yocheved Obliviana</div>
+      </div>
+    </div>
+    <div class="show-card a-fade">
+      <img src="img/poster-afterlife-feb25.webp" alt="The Afterlife - February 2025">
+      <div class="card-info">
+        <h3>The Afterlife</h3>
+        <div class="card-date">Feb 23, 2025</div>
+        <div class="card-performers">Clay Woman, Fantasy Grandma, Joanie Drago, Paula Merchan</div>
+      </div>
+    </div>
+    <div class="show-card a-fade">
+      <img src="img/poster-magic-dec24.webp" alt="A Magic Show - December 2024">
+      <div class="card-info">
+        <h3>A Magic Show</h3>
+        <div class="card-date">Dec 15, 2024</div>
+        <div class="card-performers">With Klovis Gaynor and Mamie Minch</div>
+      </div>
+    </div>
+    <div class="show-card a-fade">
+      <img src="img/poster-onceupon-may24.webp" alt="Once Upon a Time - May 2024">
+      <div class="card-info">
+        <h3>Once Upon a Time</h3>
+        <div class="card-date">May 19, 2024</div>
+        <div class="card-performers">Edition #10</div>
+      </div>
+    </div>
+    <div class="show-card a-fade">
+      <img src="img/poster-clown-feb24.webp" alt="A Clown Show - February 2024">
+      <div class="card-info">
+        <h3>A Clown Show</h3>
+        <div class="card-date">Feb 18, 2024</div>
+        <div class="card-performers">Jess Dobkin, Eak The Geek, Dr. Ksenia M. Soboleva, King Xaddy</div>
+      </div>
+    </div>
+    <div class="show-card a-fade">
+      <img src="img/poster-sept22.webp" alt="Unprofessional - September 2022">
+      <div class="card-info">
+        <h3>Variety Show</h3>
+        <div class="card-date">Sep 18, 2022</div>
+        <div class="card-performers">Rae De Vine, Tiana GlittersaurusRex, Elizabeth Koke, Sleth Larson</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEDIA -->
+<section class="media" id="media">
+  <div class="section-title a-text" style="color:var(--yellow)">Media</div>
+  <div class="section-subtitle a-text">Photos by Stacie Joy for EV Grieve. February 2024, "A Clown Show" edition.</div>
+
+  <div class="media-marquee">
+    <div class="marquee-track">
+      <span>Photos by Stacie Joy</span>
+      <span>EV Grieve Coverage</span>
+      <span>The Parkside Lounge</span>
+      <span>Lower East Side NYC</span>
+      <span>Photos by Stacie Joy</span>
+      <span>EV Grieve Coverage</span>
+      <span>The Parkside Lounge</span>
+      <span>Lower East Side NYC</span>
+    </div>
+  </div>
+
+  <div class="gallery">
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-1.jpg')">
+      <img src="img/press-1.jpg" alt="Full cast on stage at The Clown Show" loading="lazy">
+      <div class="overlay"><span>Full cast - The Clown Show, Feb 2024</span></div>
+    </div>
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-2.jpg')">
+      <img src="img/press-2.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
+      <div class="overlay"><span>Performance - Photo by Stacie Joy</span></div>
+    </div>
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-3.jpg')">
+      <img src="img/press-3.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
+      <div class="overlay"><span>The Parkside Lounge back room</span></div>
+    </div>
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-4.jpg')">
+      <img src="img/press-4.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
+      <div class="overlay"><span>Cabaret vibes - Photo by Stacie Joy</span></div>
+    </div>
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-5.jpg')">
+      <img src="img/press-5.jpg" alt="Performance at Unprofessional Variety Show" loading="lazy">
+      <div class="overlay"><span>On stage - Feb 2024</span></div>
+    </div>
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-6.jpg')">
+      <img src="img/press-6.jpg" alt="Audience and performers at Unprofessional" loading="lazy">
+      <div class="overlay"><span>Photo by Stacie Joy</span></div>
+    </div>
+    <div class="gallery-item a-fade" onclick="openLightbox('img/press-7.jpg')">
+      <img src="img/press-7.jpg" alt="Scene from the Unprofessional Variety Show" loading="lazy">
+      <div class="overlay"><span>Photo by Stacie Joy</span></div>
+    </div>
+  </div>
+
+  <div class="press-section a-text">
+    <h3 style="font-family:'Caveat',cursive;font-size:1.6rem;margin-bottom:16px;">Press</h3>
+    <a href="https://evgrieve.com/2024/02/a-visit-to-unprofessional-variety-show.html" target="_blank" class="press-link">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+      EV Grieve - "A visit to the Unprofessional Variety Show" - Feb 2024
+    </a>
+  </div>
+</section>
+
+<!-- RUNNING TEXT -->
+<div class="big-running" style="background:var(--plum);">
+  <div class="track" style="animation-direction:reverse">
+    <span>Queer</span><span>Cabaret</span><span>Lower East Side</span><span>Since 2022</span>
+    <span>Queer</span><span>Cabaret</span><span>Lower East Side</span><span>Since 2022</span>
+  </div>
+</div>
+
+<!-- SHOP -->
+<section class="shop" id="shop">
+  <div class="section-title a-text">Shop</div>
+  <div class="section-subtitle a-text">Merch coming soon. All proceeds support the performers.</div>
+  <div class="shop-grid">
+    <div class="shop-item a-fade">
+      <div class="shop-placeholder">Tee</div>
+      <div class="item-info">
+        <h3>"Unprofessional" Tee</h3>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0">Hand-drawn logo on black cotton</p>
+        <div class="price">Coming Soon</div>
+      </div>
+    </div>
+    <div class="shop-item a-fade">
+      <div class="shop-placeholder">Poster</div>
+      <div class="item-info">
+        <h3>Show Poster Prints</h3>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0">Original artwork by Maya Suess</p>
+        <div class="price">Coming Soon</div>
+      </div>
+    </div>
+    <div class="shop-item a-fade">
+      <div class="shop-placeholder">Sticker</div>
+      <div class="item-info">
+        <h3>Sticker Pack</h3>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0">Assorted show art</p>
+        <div class="price">Coming Soon</div>
+      </div>
+    </div>
+    <div class="shop-item a-fade">
+      <div class="shop-placeholder">Tote</div>
+      <div class="item-info">
+        <h3>"Undisciplined" Tote</h3>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0">Canvas tote bag</p>
+        <div class="price">Coming Soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="section-title a-text" style="color:var(--green)">Get<br>Involved</div>
+  <p class="contact-cta a-text">
+    Want to perform? Have a wild idea? Just want to be part of whatever this is? Reach out. The show is built by its community, and the door is always open.
+  </p>
+  <div class="contact-links">
+    <a href="https://www.instagram.com/unprofessionalvarietyshow/" target="_blank" class="contact-link ig a-fade">@unprofessionalvarietyshow</a>
+    <a href="https://www.instagram.com/MayaSuess/" target="_blank" class="contact-link ig a-fade">@MayaSuess</a>
+    <a href="https://events.humanitix.com/unprofessional-variety-show" target="_blank" class="contact-link a-fade">Humanitix Tickets</a>
+    <a href="https://www.parksidelounge.nyc/" target="_blank" class="contact-link a-fade">The Parkside Lounge</a>
+  </div>
+  <div style="margin-top:40px">
+    <div class="access-note a-text">
+      The Parkside Lounge - 317 E Houston St, NYC 10002 - Ground floor bar, portable ramp to performance space, accessible bathrooms
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>Unprofessional Variety Show - Est. 2022 - The Parkside Lounge, LES NYC</span>
+  <span>Site by <a href="https://pietsuess.com" target="_blank">Salt Spring Collective Media</a></span>
+</footer>
+
+<script>
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// Lightbox
+function openLightbox(src){
+  document.getElementById('lb-img').src=src;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
+
+// Scroll animations (lightweight IntersectionObserver, no GSAP dependency needed)
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+
+document.querySelectorAll('.a-text,.a-fade').forEach(el=>{
+  // Stagger children within same parent
+  const siblings=el.parentElement.querySelectorAll('.a-text,.a-fade');
+  const idx=[...siblings].indexOf(el);
+  el.style.transitionDelay=(idx*0.08)+'s';
+  observer.observe(el);
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+</script>
+</body>
+</html>
