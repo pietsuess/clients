@@ -19,8 +19,13 @@
   var media = [];
   var shop = [];
   var settings = {};
+  var pages = {};
   var editingIndex = -1; // -1 = new, >= 0 = editing existing
+  var editingPageKey = '';
+  var editingSectionIndex = -1;
   var showDescQuill = null;
+  var pageSectionQuill = null;
+  var editingColumn = ''; // '' or 'right' for two-column sections
   var pendingChanges = {}; // { filename: true } tracks which files have unpublished changes
   var DRAFT_KEY = 'maya-cms-drafts';
 
@@ -31,6 +36,7 @@
       media: media,
       shop: shop,
       settings: settings,
+      pages: pages,
       pending: pendingChanges
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(drafts));
@@ -47,6 +53,7 @@
         media = drafts.media || media;
         shop = drafts.shop || shop;
         settings = drafts.settings || settings;
+        pages = drafts.pages || pages;
         pendingChanges = drafts.pending || {};
         return true;
       }
@@ -92,7 +99,8 @@
       'shows.json': shows,
       'media.json': media,
       'shop.json': shop,
-      'settings.json': settings
+      'settings.json': settings,
+      'pages.json': pages
     };
 
     // Commit each changed file sequentially to avoid sha conflicts
@@ -205,6 +213,12 @@
           var filename = Date.now() + '-' + file.name.replace(/[^a-z0-9.]/gi, '-').toLowerCase().replace(/\.[^.]+$/, '') + ext;
           var filePath = UPLOAD_PATH + filename;
 
+          if (DEMO) {
+            // In demo mode, use data URL directly
+            resolve(dataUrl);
+            return;
+          }
+
           // Commit to GitHub
           var body = {
             message: 'Upload image: ' + filename,
@@ -230,6 +244,51 @@
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    });
+  }
+
+  function setupQuillImageHandler(quill) {
+    // Toolbar button handler
+    quill.getModule('toolbar').addHandler('image', function() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function() {
+        if (!input.files.length) return;
+        toast('Uploading image...');
+        uploadImage(input.files[0])
+          .then(function(url) {
+            var range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'image', url);
+            quill.setSelection(range.index + 1);
+            toast('Image uploaded!');
+          })
+          .catch(function(err) { toast('Image upload failed: ' + err.message, true); });
+      };
+      input.click();
+    });
+
+    // Drag and drop handler
+    quill.root.addEventListener('drop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      var file = files[0];
+      if (!file.type.match(/^image\//)) return;
+      toast('Uploading image...');
+      uploadImage(file)
+        .then(function(url) {
+          var range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', url);
+          quill.setSelection(range.index + 1);
+          toast('Image uploaded!');
+        })
+        .catch(function(err) { toast('Image upload failed: ' + err.message, true); });
+    });
+
+    quill.root.addEventListener('dragover', function(e) {
+      e.preventDefault();
     });
   }
 
@@ -285,16 +344,18 @@
       fetch('../content/shows.json').then(function(r){return r.json()}).then(function(d){shows=d}),
       fetch('../content/media.json').then(function(r){return r.json()}).then(function(d){media=d}),
       fetch('../content/shop.json').then(function(r){return r.json()}).then(function(d){shop=d}),
-      fetch('../content/settings.json').then(function(r){return r.json()}).then(function(d){settings=d})
+      fetch('../content/settings.json').then(function(r){return r.json()}).then(function(d){settings=d}),
+      fetch('../content/pages.json').then(function(r){return r.json()}).then(function(d){pages=d})
     ])
     .then(function() {
       loadDrafts();
-      updateDashboard();
       renderShowsList();
       renderMediaList();
       renderShopList();
       loadSettings();
       updatePublishBar();
+      // Populate pages dropdown and render preview
+      if (pagePicker) { populatePagePicker(); renderPagePreview(); }
       toast('Demo mode - edits save locally only');
     })
     .catch(function(err) {
@@ -349,17 +410,19 @@
       getFile('shows.json').then(function(d) { shows = d; }),
       getFile('media.json').then(function(d) { media = d; }),
       getFile('shop.json').then(function(d) { shop = d; }),
-      getFile('settings.json').then(function(d) { settings = d; })
+      getFile('settings.json').then(function(d) { settings = d; }),
+      getFile('pages.json').then(function(d) { pages = d; })
     ])
     .then(function() {
       // Apply any pending drafts over the fetched data
       loadDrafts();
-      updateDashboard();
       renderShowsList();
       renderMediaList();
       renderShopList();
       loadSettings();
       updatePublishBar();
+      // Populate pages dropdown and render preview
+      if (pagePicker) { populatePagePicker(); renderPagePreview(); }
     })
     .catch(function(err) {
       toast('Error loading content: ' + err.message, true);
@@ -374,9 +437,19 @@
     document.querySelectorAll('.nav-item').forEach(function(el) {
       el.classList.toggle('active', el.dataset.section === name);
     });
+    // Expand main for visual editor
+    var main = $('admin-main');
+    if (name === 'pages') {
+      main.style.maxWidth = 'none';
+      main.style.padding = '0';
+      if (typeof initVisualEditor === 'function') initVisualEditor();
+    } else {
+      main.style.maxWidth = '';
+      main.style.padding = '';
+    }
   }
 
-  document.querySelectorAll('.nav-item, .dash-card').forEach(function(el) {
+  document.querySelectorAll('.nav-item').forEach(function(el) {
     el.addEventListener('click', function(e) {
       e.preventDefault();
       var s = this.dataset.section;
@@ -385,18 +458,11 @@
   });
 
   window.addEventListener('hashchange', function() {
-    var h = location.hash.replace('#', '') || 'dashboard';
+    var h = location.hash.replace('#', '') || 'pages';
     // Don't navigate for setup tokens
     if (h.indexOf('setup=') === 0) return;
     showSection(h);
   });
-
-  // ===== DASHBOARD =====
-  function updateDashboard() {
-    $('count-shows').textContent = shows.length;
-    $('count-media').textContent = media.length;
-    $('count-shop').textContent = shop.length;
-  }
 
   // ===== TOAST =====
   function toast(msg, isError) {
@@ -479,11 +545,12 @@
           toolbar: [
             ['bold', 'italic'],
             [{ list: 'ordered' }, { list: 'bullet' }],
-            ['link'],
+            ['link', 'image'],
             ['clean']
           ]
         }
       });
+      setupQuillImageHandler(showDescQuill);
     }
     showDescQuill.root.innerHTML = show ? (show.description || '') : '';
     showSection('show-edit');
@@ -524,7 +591,6 @@
     markDirty('shows.json');
     toast('Draft saved. Click Publish when ready.');
     renderShowsList();
-    updateDashboard();
     showSection('shows');
   }
 
@@ -534,7 +600,6 @@
     markDirty('shows.json');
     toast('Show deleted. Click Publish when ready.');
     renderShowsList();
-    updateDashboard();
   }
 
   $('new-show-btn').addEventListener('click', function() { editShow(-1); });
@@ -614,7 +679,6 @@
     markDirty('media.json');
     toast('Draft saved. Click Publish when ready.');
     renderMediaList();
-    updateDashboard();
     showSection('media');
   }
 
@@ -624,7 +688,6 @@
     markDirty('media.json');
     toast('Media deleted. Click Publish when ready.');
     renderMediaList();
-    updateDashboard();
   }
 
   $('new-media-btn').addEventListener('click', function() { editMedia(-1); });
@@ -709,7 +772,6 @@
     markDirty('shop.json');
     toast('Draft saved. Click Publish when ready.');
     renderShopList();
-    updateDashboard();
     showSection('shop');
   }
 
@@ -719,7 +781,6 @@
     markDirty('shop.json');
     toast('Item deleted. Click Publish when ready.');
     renderShopList();
-    updateDashboard();
   }
 
   $('new-shop-btn').addEventListener('click', function() { editShop(-1); });
@@ -770,6 +831,466 @@
 
   $('settings-save-btn').addEventListener('click', saveSettings);
 
+  // ===== PAGE NAV TOGGLE + URL IN PREVIEW =====
+  var pageNavToggle = $('page-nav-toggle');
+  var pageUrlInput = $('page-url');
+
+  pageNavToggle.addEventListener('change', function() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    pages[key].showInNav = pageNavToggle.checked;
+    markDirty('pages.json');
+  });
+
+  pageUrlInput.addEventListener('change', function() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    pages[key].url = pageUrlInput.value.trim();
+    markDirty('pages.json');
+  });
+
+  // ===== VISUAL PAGE EDITOR (direct render, no iframe) =====
+  var modalQuill = null;
+  var pagePicker = $('page-picker');
+  var pagePreview = $('page-preview');
+
+  function getSection(pageKey, sectionId) {
+    var page = pages[pageKey];
+    if (!page) return { heading: '', body: '' };
+    var s = page.sections.find(function(sec) { return sec.id === sectionId; });
+    return s || { heading: '', body: '' };
+  }
+
+  function pvSection(pageKey, sectionId, extraClass) {
+    var s = getSection(pageKey, sectionId);
+    var type = s.type || 'text';
+    var delBtn = '<button class="pv-section-delete" onclick="event.stopPropagation();CMS.deletePageSection(\'' + pageKey + '\',\'' + sectionId + '\')">Delete</button>';
+    var typeLabel = '<span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px;">' + type + '</span>';
+
+    var imgLabel = s.image ? 'Change Image' : 'Add Image';
+    var imgBtnAny = '<button class="pv-section-img-btn" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">' + imgLabel + '</button>';
+
+    if (type === 'banner') {
+      return '<div class="pv-section pv-section-quote" style="' + (s.image ? 'background-image:url(\'../' + s.image + '\');' : '') + '">' +
+        delBtn +
+        '<button class="pv-section-img-btn" style="opacity:1;" onclick="event.stopPropagation();CMS.changeSectionImage(\'' + pageKey + '\',\'' + sectionId + '\')">' + imgLabel + '</button>' +
+        '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')" style="cursor:pointer;">' +
+          '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Text</div>' +
+          '<p>' + (s.heading || '') + '</p>' +
+          (s.body ? '<p style="font-size:0.9rem;margin-top:10px;font-style:normal;">' + s.body.replace(/<[^>]+>/g, '') + '</p>' : '') +
+        '</div>' +
+      '</div>';
+    }
+
+    if (type === 'text-image' || (type !== 'two-column' && s.image)) {
+      return '<div class="pv-section pv-img-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
+        delBtn +
+        '<div style="position:relative;"><img src="../' + (s.image || '') + '" alt="">' + imgBtnAny + '</div>' +
+        '<div><div class="pv-section-label">Edit Text</div>' +
+          typeLabel +
+          '<h2>' + s.heading + '</h2>' +
+          s.body +
+        '</div>' +
+      '</div>';
+    }
+
+    if (type === 'images') {
+      var imgs = s.images || [];
+      var imgHtml = '';
+      imgs.forEach(function(src, i) {
+        imgHtml += '<div style="position:relative;flex:1;min-width:0;">' +
+          '<img src="../' + src + '" alt="" style="width:100%;border-radius:8px;display:block;">' +
+          '<button class="pv-section-img-btn" style="opacity:1;font-size:10px;padding:3px 8px;" onclick="event.stopPropagation();CMS.changeGalleryImage(\'' + pageKey + '\',\'' + sectionId + '\',' + i + ')">Change</button>' +
+          '<button class="pv-section-delete" style="opacity:1;top:4px;left:4px;font-size:10px;padding:2px 6px;" onclick="event.stopPropagation();CMS.removeGalleryImage(\'' + pageKey + '\',\'' + sectionId + '\',' + i + ')">X</button>' +
+        '</div>';
+      });
+      if (imgs.length < 3) {
+        imgHtml += '<div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;min-height:120px;border:2px dashed #e0e0e0;border-radius:8px;cursor:pointer;" onclick="event.stopPropagation();CMS.addGalleryImage(\'' + pageKey + '\',\'' + sectionId + '\')">' +
+          '<span style="color:#999;font-size:13px;">+ Add Image</span>' +
+        '</div>';
+      }
+      return '<div class="pv-section ' + (extraClass || '') + '">' +
+        delBtn +
+        typeLabel +
+        '<h2>' + s.heading + '</h2>' +
+        '<div style="display:flex;gap:12px;margin-top:12px;">' + imgHtml + '</div>' +
+      '</div>';
+    }
+
+    if (type === 'two-column') {
+      return '<div class="pv-section ' + (extraClass || '') + '" style="cursor:default;">' +
+        delBtn +
+        typeLabel +
+        '<div class="pv-two-col">' +
+          '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')" style="cursor:pointer;">' +
+            '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Left</div>' +
+            '<h2>' + (s.heading || '') + '</h2>' +
+            (s.body || '') +
+          '</div>' +
+          '<div onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\',\'right\')" style="cursor:pointer;">' +
+            '<div class="pv-section-label" style="position:static;display:inline-block;margin-bottom:8px;">Edit Right</div>' +
+            '<h2>' + (s.heading2 || '') + '</h2>' +
+            (s.body2 || '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    if (type === 'accent') {
+      extraClass = (extraClass || '') + ' pv-section-accent';
+    }
+
+    // Default: text / accent - always show image button
+    return '<div class="pv-section ' + (extraClass || '') + '" onclick="CMS.openSectionModal(\'' + pageKey + '\',\'' + sectionId + '\')">' +
+      delBtn +
+      imgBtnAny +
+      '<div class="pv-section-label">Edit Text</div>' +
+      typeLabel +
+      '<h2>' + s.heading + '</h2>' +
+      s.body +
+    '</div>';
+  }
+
+  function pvAddSection(pageKey) {
+    return '<div style="position:relative;">' +
+      '<button class="pv-add-section" onclick="CMS.toggleAddMenu(\'' + pageKey + '\',this)">+ Add Section</button>' +
+    '</div>';
+  }
+
+  // Hero card with text edit (bottom-left) and image edit (top-right)
+  function pvHero(pageKey, heroTitle, heroSubtitle) {
+    var page = pages[pageKey] || {};
+    var img = page.heroImage ? '../' + page.heroImage : '';
+    return '<div class="pv-hero" style="background-image:url(\'' + img + '\');">' +
+      '<div class="pv-hero-actions">' +
+        '<button class="pv-hero-btn" onclick="event.stopPropagation();CMS.changeHeroImage(\'' + pageKey + '\')">Change Image</button>' +
+      '</div>' +
+      '<div>' +
+        (heroTitle ? '<h1>' + heroTitle + '</h1>' : '') +
+        (heroSubtitle ? '<p>' + heroSubtitle + '</p>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  function changeSectionImage(pageKey, sectionId) {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          var relPath = url.replace('https://clients.pietsuess.com/maya/', '');
+          var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+          if (section) section.image = relPath;
+          markDirty('pages.json');
+          toast('Image updated. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
+  function addGalleryImage(pageKey, sectionId) {
+    var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+    if (!section) return;
+    if (!section.images) section.images = [];
+    if (section.images.length >= 3) { toast('Maximum 3 images', true); return; }
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          var relPath = url.replace('https://clients.pietsuess.com/maya/', '');
+          section.images.push(relPath);
+          markDirty('pages.json');
+          toast('Image added. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
+  function changeGalleryImage(pageKey, sectionId, index) {
+    var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+    if (!section || !section.images) return;
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          var relPath = url.replace('https://clients.pietsuess.com/maya/', '');
+          section.images[index] = relPath;
+          markDirty('pages.json');
+          toast('Image updated. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
+  function removeGalleryImage(pageKey, sectionId, index) {
+    var section = pages[pageKey].sections.find(function(s) { return s.id === sectionId; });
+    if (!section || !section.images) return;
+    section.images.splice(index, 1);
+    markDirty('pages.json');
+    renderPagePreview();
+    toast('Image removed. Click Publish when ready.');
+  }
+
+  function changeHeroImage(pageKey) {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = function() {
+      if (!input.files.length) return;
+      toast('Uploading hero image...');
+      uploadImage(input.files[0])
+        .then(function(url) {
+          // Store relative path from site root
+          var relPath = url.replace('https://clients.pietsuess.com/maya/', '');
+          pages[pageKey].heroImage = relPath;
+          markDirty('pages.json');
+          toast('Hero image updated. Click Publish when ready.');
+          renderPagePreview();
+        })
+        .catch(function(err) { toast('Upload failed: ' + err.message, true); });
+    };
+    input.click();
+  }
+
+  function buildGenericPage(key) {
+    var page = pages[key];
+    if (!page) return '<div class="pv-note">Page not found</div>';
+    var html = pvHero(key, page.title);
+    if (page.sections.length === 0) {
+      html += '<div class="pv-note">No sections yet. Click "+ Add Section" below.</div>';
+    }
+    page.sections.forEach(function(s) {
+      html += pvSection(key, s.id);
+    });
+    html += pvAddSection(key);
+    return html;
+  }
+
+  function renderPagePreview() {
+    var key = pagePicker.value;
+    if (!key || !pages[key]) return;
+    pagePreview.innerHTML = buildGenericPage(key);
+    // Update page settings bar
+    pageNavToggle.checked = pages[key].showInNav || false;
+    pageUrlInput.value = pages[key].url || '';
+  }
+
+  pagePicker.addEventListener('change', renderPagePreview);
+
+  // ===== ADD/DELETE SECTIONS =====
+  var SECTION_TYPES = [
+    { id: 'text', label: 'Text', desc: 'Heading + body text, white background' },
+    { id: 'accent', label: 'Accent', desc: 'Heading + body text, tan background' },
+    { id: 'text-image', label: 'Text + Image', desc: 'Side-by-side image and text' },
+    { id: 'banner', label: 'Banner', desc: 'Full-width background image with text overlay' },
+    { id: 'two-column', label: 'Two Column', desc: 'Two text blocks side by side' },
+    { id: 'images', label: 'Images', desc: '1 to 3 images across in a row' }
+  ];
+
+  function toggleAddMenu(pageKey, btn) {
+    var existing = btn.parentElement.querySelector('.pv-type-picker');
+    if (existing) { existing.remove(); return; }
+    var menu = document.createElement('div');
+    menu.className = 'pv-type-picker';
+    SECTION_TYPES.forEach(function(t) {
+      var opt = document.createElement('button');
+      opt.className = 'pv-type-option';
+      opt.innerHTML = t.label + '<span>' + t.desc + '</span>';
+      opt.addEventListener('click', function() {
+        addSection(pageKey, t.id);
+        menu.remove();
+      });
+      menu.appendChild(opt);
+    });
+    btn.parentElement.appendChild(menu);
+    // Close on outside click
+    setTimeout(function() {
+      document.addEventListener('click', function close(e) {
+        if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', close); }
+      });
+    }, 10);
+  }
+
+  function addSection(pageKey, type) {
+    var title = prompt('Section heading:');
+    if (!title || !title.trim()) return;
+    var id = title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    var section = { id: id, type: type, heading: title.trim(), body: '' };
+    if (type === 'text-image' || type === 'banner') section.image = '';
+    if (type === 'two-column') { section.heading2 = ''; section.body2 = ''; }
+    if (type === 'images') { section.images = []; section.body = ''; }
+    pages[pageKey].sections.push(section);
+    markDirty('pages.json');
+    renderPagePreview();
+    toast('Section added. Click it to edit.');
+  }
+
+  function deletePageSection(pageKey, sectionId) {
+    var page = pages[pageKey];
+    if (!page) return;
+    var idx = page.sections.findIndex(function(s) { return s.id === sectionId; });
+    if (idx < 0) return;
+    if (!confirm('Delete section "' + page.sections[idx].heading + '"?')) return;
+    page.sections.splice(idx, 1);
+    markDirty('pages.json');
+    renderPagePreview();
+    toast('Section deleted. Click Publish when ready.');
+  }
+
+  function openSectionModal(pageKey, sectionId, column) {
+    editingPageKey = pageKey;
+    var page = pages[pageKey];
+    if (!page) { toast('Page not found: ' + pageKey, true); return; }
+    var idx = page.sections.findIndex(function(s) { return s.id === sectionId; });
+    if (idx < 0) { toast('Section not found: ' + sectionId, true); return; }
+    editingSectionIndex = idx;
+    var section = page.sections[idx];
+
+    editingColumn = column || '';
+    var heading = editingColumn === 'right' ? (section.heading2 || '') : section.heading;
+    var body = editingColumn === 'right' ? (section.body2 || '') : section.body;
+
+    $('edit-modal-title').textContent = heading || 'Edit Section';
+    $('modal-heading').value = heading;
+    $('modal-heading').parentElement.querySelector('label').textContent = 'Heading';
+
+    // Show Quill
+    var editorWrap = $('modal-editor').parentElement;
+    editorWrap.querySelectorAll('label').forEach(function(l) { l.style.display = ''; });
+    $('modal-editor').style.display = '';
+    var toolbar = editorWrap.querySelector('.ql-toolbar');
+    if (toolbar) toolbar.style.display = '';
+
+    if (!modalQuill) {
+      modalQuill = new Quill('#modal-editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            [{ header: [2, 3, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['link', 'image'],
+            ['clean']
+          ]
+        }
+      });
+      setupQuillImageHandler(modalQuill);
+    }
+    modalQuill.root.innerHTML = body;
+    $('edit-modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    $('edit-modal').style.display = 'none';
+    var editorWrap = $('modal-editor').parentElement;
+    editorWrap.querySelectorAll('label').forEach(function(l) { l.style.display = ''; });
+    $('modal-editor').style.display = '';
+    var toolbar = editorWrap.querySelector('.ql-toolbar');
+    if (toolbar) toolbar.style.display = '';
+  }
+
+  function saveModal() {
+    var heading = $('modal-heading').value.trim();
+    var section = pages[editingPageKey].sections[editingSectionIndex];
+    if (editingColumn === 'right') {
+      section.heading2 = heading;
+      section.body2 = modalQuill.root.innerHTML;
+    } else {
+      section.heading = heading;
+      section.body = modalQuill.root.innerHTML;
+    }
+    markDirty('pages.json');
+
+    toast('Draft saved. Click Publish when ready.');
+    closeModal();
+    renderPagePreview();
+  }
+
+  $('modal-save-btn').addEventListener('click', saveModal);
+  $('modal-cancel-btn').addEventListener('click', closeModal);
+
+  function populatePagePicker() {
+    var current = pagePicker.value;
+    pagePicker.innerHTML = '';
+    Object.keys(pages).forEach(function(key) {
+      var opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = pages[key].title;
+      pagePicker.appendChild(opt);
+    });
+    if (current && pages[current]) pagePicker.value = current;
+  }
+
+  function addPage() {
+    var title = prompt('Page name:');
+    if (!title || !title.trim()) return;
+    var key = title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    if (pages[key]) { toast('A page with that key already exists', true); return; }
+    pages[key] = {
+      title: title.trim(),
+      heroImage: '',
+      showInNav: true,
+      url: key + '.html',
+      navOrder: Object.keys(pages).length + 1,
+      sections: []
+    };
+    markDirty('pages.json');
+    populatePagePicker();
+    pagePicker.value = key;
+    renderPagePreview();
+    toast('Page added. Add sections and a hero image, then Publish.');
+  }
+
+  function renamePage() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    var newTitle = prompt('New page name:', pages[key].title);
+    if (!newTitle || !newTitle.trim()) return;
+    pages[key].title = newTitle.trim();
+    markDirty('pages.json');
+    populatePagePicker();
+    pagePicker.value = key;
+    renderPagePreview();
+    toast('Page renamed. Click Publish when ready.');
+  }
+
+  function deletePage() {
+    var key = pagePicker.value;
+    if (!pages[key]) return;
+    if (!confirm('Delete page "' + pages[key].title + '" and all its sections? This cannot be undone.')) return;
+    delete pages[key];
+    markDirty('pages.json');
+    populatePagePicker();
+    renderPagePreview();
+    toast('Page deleted. Click Publish when ready.');
+  }
+
+  $('add-page-btn').addEventListener('click', addPage);
+  $('rename-page-btn').addEventListener('click', renamePage);
+  $('delete-page-btn').addEventListener('click', deletePage);
+
+  function initVisualEditor() {
+    populatePagePicker();
+    if (Object.keys(pages).length > 0) renderPagePreview();
+  }
+
   // ===== PUBLISH / DISCARD =====
   $('publish-btn').addEventListener('click', publishAll);
   $('discard-btn').addEventListener('click', discardDrafts);
@@ -784,7 +1305,15 @@
     moveMedia: moveMedia,
     editShop: editShop,
     deleteShop: deleteShop,
-    moveShop: moveShop
+    moveShop: moveShop,
+    openSectionModal: openSectionModal,
+    changeHeroImage: changeHeroImage,
+    changeSectionImage: changeSectionImage,
+    toggleAddMenu: toggleAddMenu,
+    deletePageSection: deletePageSection,
+    addGalleryImage: addGalleryImage,
+    changeGalleryImage: changeGalleryImage,
+    removeGalleryImage: removeGalleryImage
   };
 
   // ===== INIT =====

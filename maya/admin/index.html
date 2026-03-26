@@ -41,7 +41,7 @@
         </div>
       </div>
       <nav id="admin-nav">
-        <a href="#dashboard" class="nav-item active" data-section="dashboard">Dashboard</a>
+        <a href="#pages" class="nav-item active" data-section="pages">Pages</a>
         <a href="#shows" class="nav-item" data-section="shows">Shows</a>
         <a href="#media" class="nav-item" data-section="media">Media</a>
         <a href="#shop" class="nav-item" data-section="shop">Shop</a>
@@ -51,24 +51,44 @@
 
     <main id="admin-main">
 
-      <!-- DASHBOARD -->
-      <section id="section-dashboard" class="admin-section">
-        <h1>Dashboard</h1>
-        <div class="dashboard-cards">
-          <a href="#shows" class="dash-card" data-section="shows">
-            <span class="dash-count" id="count-shows">-</span>
-            <span class="dash-label">Shows</span>
-          </a>
-          <a href="#media" class="dash-card" data-section="media">
-            <span class="dash-count" id="count-media">-</span>
-            <span class="dash-label">Media</span>
-          </a>
-          <a href="#shop" class="dash-card" data-section="shop">
-            <span class="dash-count" id="count-shop">-</span>
-            <span class="dash-label">Shop Items</span>
-          </a>
+      <!-- PAGES: VISUAL EDITOR -->
+      <section id="section-pages" class="admin-section admin-section--visual">
+        <div class="visual-toolbar">
+          <select id="page-picker">
+            <!-- populated dynamically from pages.json -->
+          </select>
+          <button id="add-page-btn" class="btn-small" style="margin-left:4px;">+ Add Page</button>
+          <button id="rename-page-btn" class="btn-small">Rename</button>
+          <button id="delete-page-btn" class="btn-danger" style="margin-left:4px;">Delete Page</button>
+          <span class="visual-hint">Click any highlighted section to edit</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:#666;">
+              <input type="checkbox" id="page-nav-toggle"> Show in Nav
+            </label>
+            <input type="text" id="page-url" placeholder="page-url.html" style="width:160px;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px;">
+          </div>
         </div>
+        <div id="page-preview" class="page-preview"></div>
       </section>
+
+      <!-- EDIT MODAL -->
+      <div id="edit-modal" class="edit-modal" style="display:none;">
+        <div class="edit-modal-inner">
+          <div class="edit-modal-header">
+            <h2 id="edit-modal-title">Edit Section</h2>
+            <div>
+              <button id="modal-cancel-btn" class="btn-small">Cancel</button>
+              <button id="modal-save-btn" class="btn-primary">Save</button>
+            </div>
+          </div>
+          <div class="edit-modal-body">
+            <label>Heading</label>
+            <input type="text" id="modal-heading">
+            <label>Content</label>
+            <div id="modal-editor"></div>
+          </div>
+        </div>
+      </div>
 
       <!-- SHOWS LIST -->
       <section id="section-shows" class="admin-section" style="display:none;">
