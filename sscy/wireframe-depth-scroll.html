@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe: Depth Scroll</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Spacer to create scroll distance */
+        .scroll-space {
+            height: calc(var(--num-cards) * 100vh);
+        }
+
+        /* 3D stage */
+        .stage {
+            position: fixed;
+            inset: 0;
+            perspective: 1200px;
+            perspective-origin: 50% 50%;
+            overflow: hidden;
+        }
+
+        /* Each card is full viewport */
+        .card {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0;
+            will-change: transform, opacity;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+        }
+
+        .card-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .card-tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.5;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: clamp(2rem, 6vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+
+        .card-desc {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            opacity: 0.6;
+            max-width: 500px;
+            line-height: 1.5;
+        }
+
+        .card-visual-icon {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            opacity: 0.3;
+        }
+
+        /* Progress dots */
+        .progress {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .progress-dot.active {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.4);
+        }
+
+        .progress-dot:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Scroll cue */
+        .scroll-cue {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.25;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        .scroll-cue .chevron {
+            display: block;
+            text-align: center;
+            animation: pulse-down 2s ease infinite;
+            font-size: 1rem;
+            margin-top: 6px;
+        }
+
+        @keyframes pulse-down {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(6px); opacity: 1; }
+        }
+
+        .scroll-cue.hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stage" id="stage"></div>
+    <div class="scroll-space" id="scrollSpace"></div>
+
+    <div class="progress" id="progress"></div>
+
+    <div class="scroll-cue" id="scrollCue">
+        Scroll to explore
+        <span class="chevron">&#x2304;</span>
+    </div>
+
+    <script>
+        var cards = [
+            {
+                tag: "The Land",
+                title: "69 Acres of Sanctuary",
+                desc: "Forests, gardens, ponds, temples",
+                bg: "linear-gradient(135deg, #1a3d17, #2d5a27, #4a8a3e)",
+                icon: ""
+            },
+            {
+                tag: "Babaji",
+                title: "Peace. No more than that.",
+                desc: "When asked about his only goal in life",
+                bg: "linear-gradient(135deg, #0d0d1a, #1a1a2e, #2a2a4e)",
+                icon: "\u201C"
+            },
+            {
+                tag: "Retreat",
+                title: "Weekend Yoga Retreat",
+                desc: "2 nights of practice, rest, and renewal",
+                bg: "linear-gradient(135deg, #0f3a33, #1a5c53, #2a8a7d)",
+                icon: ""
+            },
+            {
+                tag: "Venue",
+                title: "The Pond Dome",
+                desc: "Geodesic dome by the water",
+                bg: "linear-gradient(135deg, #2a3a40, #4a6670, #6a8a94)",
+                icon: ""
+            },
+            {
+                tag: "Shop",
+                title: "Salt Spring Island Cooking",
+                desc: "The beloved cookbook, 52,000 copies sold",
+                bg: "linear-gradient(135deg, #5a3a1a, #8a6a3a, #aa8a5a)",
+                icon: ""
+            },
+            {
+                tag: "Babaji",
+                title: "Shadow fighting.",
+                desc: "When asked if life is a comedy or a drama",
+                bg: "linear-gradient(135deg, #1a0d1a, #2a1a2e, #3a2a4e)",
+                icon: "\u201C"
+            },
+            {
+                tag: "Training",
+                title: "200-Hour Teacher Training",
+                desc: "Become a certified yoga teacher",
+                bg: "linear-gradient(135deg, #3a2010, #5a3a1a, #7a5a3a)",
+                icon: ""
+            },
+            {
+                tag: "Sacred",
+                title: "Hanuman Shrine",
+                desc: "One of many sacred spaces on the land",
+                bg: "linear-gradient(135deg, #3a2a14, #6a4a2a, #8a6a4a)",
+                icon: ""
+            },
+            {
+                tag: "Karma Yoga",
+                title: "Live & Serve",
+                desc: "Volunteer program with room and board",
+                bg: "linear-gradient(135deg, #143a14, #2a5a2a, #4a7a4a)",
+                icon: ""
+            },
+            {
+                tag: "Babaji",
+                title: "Self control.",
+                desc: "When asked about birth control",
+                bg: "linear-gradient(135deg, #0a0a0a, #1a1a1a, #2a2a2a)",
+                icon: "\u201C"
+            },
+            {
+                tag: "Event",
+                title: "Music for Peace",
+                desc: "Indian classical concert series",
+                bg: "linear-gradient(135deg, #3a1428, #5a2a4a, #7a4a6a)",
+                icon: ""
+            },
+            {
+                tag: "Nature",
+                title: "Dandaka Forest",
+                desc: "Primordial cedar-swamp wetland",
+                bg: "linear-gradient(135deg, #0d1a0d, #1a3a1a, #2a5a2a)",
+                icon: ""
+            }
+        ];
+
+        var numCards = cards.length;
+        document.documentElement.style.setProperty('--num-cards', numCards);
+
+        var stage = document.getElementById('stage');
+        var progress = document.getElementById('progress');
+        var scrollCue = document.getElementById('scrollCue');
+
+        // Build card elements
+        cards.forEach(function(card, i) {
+            var el = document.createElement('div');
+            el.className = 'card';
+            el.innerHTML =
+                '<div class="card-bg" style="background:' + card.bg + '"></div>' +
+                '<div class="card-content">' +
+                    (card.icon ? '<div class="card-visual-icon">' + card.icon + '</div>' : '') +
+                    '<div class="card-tag">' + card.tag + '</div>' +
+                    '<div class="card-title">' + card.title + '</div>' +
+                    '<div class="card-desc">' + card.desc + '</div>' +
+                '</div>';
+            stage.appendChild(el);
+
+            // Progress dot
+            var dot = document.createElement('div');
+            dot.className = 'progress-dot';
+            dot.addEventListener('click', function() {
+                window.scrollTo({
+                    top: i * window.innerHeight,
+                    behavior: 'smooth'
+                });
+            });
+            progress.appendChild(dot);
+        });
+
+        var cardEls = stage.querySelectorAll('.card');
+        var dotEls = progress.querySelectorAll('.progress-dot');
+
+        function update() {
+            var scrollY = window.scrollY;
+            var vh = window.innerHeight;
+            var activeIndex = Math.round(scrollY / vh);
+
+            // Hide scroll cue after first scroll
+            if (scrollY > 50) {
+                scrollCue.classList.add('hidden');
+            } else {
+                scrollCue.classList.remove('hidden');
+            }
+
+            cards.forEach(function(card, i) {
+                var el = cardEls[i];
+                // Progress through this card: 0 = card is centered, -1 = one screen before, +1 = one screen after
+                var t = (scrollY / vh) - i;
+
+                if (t < -1.2 || t > 1.2) {
+                    // Off screen - hide for performance
+                    el.style.display = 'none';
+                    return;
+                }
+
+                el.style.display = '';
+
+                var translateZ, translateY, scale, opacity;
+
+                if (t <= 0) {
+                    // Card is current or approaching from behind
+                    // t = -1: far back, small. t = 0: full screen, right here
+                    translateZ = t * 800;           // -800 (far) to 0 (here)
+                    translateY = 0;
+                    scale = 1 + t * 0.3;            // 0.7 (far) to 1.0 (here)
+                    opacity = 1 + t * 0.6;          // 0.4 (far) to 1.0 (here)
+                } else {
+                    // Card has been scrolled past - moves down and forward past us
+                    translateZ = t * 600;            // 0 to 600 (past us, huge)
+                    translateY = t * 40;             // slides down percent
+                    scale = 1 + t * 0.5;            // grows as it comes past
+                    opacity = 1 - t * 1.2;          // fades out quickly
+                }
+
+                opacity = Math.max(0, Math.min(1, opacity));
+
+                el.style.transform =
+                    'translate3d(0, ' + translateY + 'vh, ' + translateZ + 'px) ' +
+                    'scale(' + Math.max(0.01, scale) + ')';
+                el.style.opacity = opacity;
+                el.style.zIndex = numCards - Math.abs(Math.round(t));
+
+                // Active dot
+                dotEls[i].classList.toggle('active', i === activeIndex);
+            });
+
+            requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
+    </script>
+</body>
+</html>
