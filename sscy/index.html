@@ -38,8 +38,8 @@ p { text-align: justify; text-justify: inter-word; }
 .sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); opacity: 0; }
 .sticky-nav .sn-logo { height: 52px; }
 .sticky-nav-links { position: absolute; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
-.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; transition: 0.25s ease; letter-spacing: 0.03em; }
-.sticky-nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transform-style: preserve-3d; transition: color 0.2s ease, background 0.2s ease, box-shadow 0.3s ease; will-change: transform; }
+.sticky-nav-links a:hover { color: var(--teal-dark); }
 
 /* HERO */
 .hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -740,6 +740,73 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
   });
 })();
 
+// ===== NAV LINK INTERACTIONS =====
+(function() {
+  var navBar = document.querySelector('.sticky-nav');
+  var links = document.querySelectorAll('.sticky-nav-links a');
+  if (!navBar || !links.length) return;
+
+  var PULL_RADIUS = 120; // magnetic pull range in px
+  var TILT_MAX = 25;     // max 3D tilt degrees
+  var LIFT_MAX = 12;     // max Y lift in px
+  var MAGNETIC_MAX = 8;  // max magnetic pull in px
+  var SCALE_MAX = 1.15;  // max scale on closest link
+
+  function resetLink(link) {
+    link.style.transform = 'perspective(400px) rotateX(0deg) rotateY(0deg) translateX(0px) translateY(0px) scale(1)';
+    link.style.background = '';
+    link.style.boxShadow = '';
+  }
+
+  navBar.addEventListener('mousemove', function(e) {
+    var barRect = navBar.getBoundingClientRect();
+    var mx = e.clientX;
+    var my = e.clientY;
+
+    links.forEach(function(link) {
+      var r = link.getBoundingClientRect();
+      var cx = r.left + r.width / 2;
+      var cy = r.top + r.height / 2;
+      var dx = mx - cx;
+      var dy = my - cy;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > PULL_RADIUS * 1.5) {
+        resetLink(link);
+        return;
+      }
+
+      var progress = Math.max(0, 1 - dist / PULL_RADIUS);
+      var cubicProgress = progress * progress * (3 - 2 * progress); // smoothstep
+
+      // Magnetic pull: link slides toward cursor
+      var pullX = (dx / Math.max(dist, 1)) * MAGNETIC_MAX * cubicProgress;
+      var pullY = (dy / Math.max(dist, 1)) * MAGNETIC_MAX * cubicProgress * 0.5;
+
+      // 3D tilt: face toward cursor
+      var tiltY = (dx / PULL_RADIUS) * TILT_MAX * cubicProgress;
+      var tiltX = -(dy / PULL_RADIUS) * TILT_MAX * cubicProgress * 0.6;
+
+      // Lift and scale
+      var lift = -LIFT_MAX * cubicProgress;
+      var scale = 1 + (SCALE_MAX - 1) * cubicProgress;
+
+      // Glassmorphic glow
+      var bgAlpha = 0.08 * cubicProgress;
+      var shadowAlpha = 0.12 * cubicProgress;
+      var shadowBlur = 20 * cubicProgress;
+
+      link.style.transform = 'perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) translateX(' + pullX + 'px) translateY(' + (pullY + lift) + 'px) scale(' + scale + ')';
+      link.style.background = 'rgba(59,184,168,' + bgAlpha + ')';
+      link.style.boxShadow = '0 ' + (4 + shadowBlur * 0.5) + 'px ' + shadowBlur + 'px rgba(26,92,83,' + shadowAlpha + ')';
+    });
+  });
+
+  navBar.addEventListener('mouseleave', function() {
+    links.forEach(resetLink);
+  });
+})();
+
 // ===== HERO LOGO 3D TILT =====
 (function() {
   var hero = document.querySelector('.hero');
@@ -757,8 +824,8 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
     var dist = Math.sqrt(dx * dx + dy * dy);
     var progress = Math.min(1, dist);
 
-    var tiltX = dy * -20;
-    var tiltY = dx * 20;
+    var tiltX = dy * -15;
+    var tiltY = dx * 15;
     var scale = 1 + progress * 0.06;
     var shadow = 16 + progress * 24;
 
