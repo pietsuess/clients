@@ -52,16 +52,17 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* BABAJI Q&A */
 .babaji-qa { background: var(--charcoal); color: var(--white); padding: 52px 32px; }
-.qa-wrap { max-width: 800px; margin: 0 auto; display: flex; align-items: center; gap: 24px; position: relative; }
+.qa-wrap { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 24px; position: relative; min-height: 240px; }
+.qa-refresh { flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: 0.3s ease; order: -1; }
+.qa-refresh:hover { opacity: 1; border-color: var(--gold); background: rgba(255,255,255,0.08); transform: rotate(180deg); }
+.qa-refresh svg { width: 28px; height: 28px; }
 .qa-photo { flex-shrink: 0; width: 180px; height: 220px; border-radius: 16px; object-fit: cover; object-position: center top; border: 3px solid rgba(255,255,255,0.1); }
-.qa-inner { flex: 1; }
-.qa-label { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--gold); display: block; margin-bottom: 12px; }
-.qa-question { font-size: 1.3rem; font-weight: 400; opacity: 0.6; margin-bottom: 10px; font-style: italic; text-align: justify; text-justify: inter-word; }
-.qa-answer { font-size: 1.5rem; font-weight: 500; line-height: 1.5; color: var(--white); text-align: justify; text-justify: inter-word; }
-.qa-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+.qa-inner { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 200px; }
+.qa-label { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--gold); display: block; margin-bottom: 10px; }
+.qa-question { font-size: 1.15rem; font-weight: 400; opacity: 0.6; margin-bottom: 8px; font-style: italic; text-align: justify; text-justify: inter-word; line-height: 1.4; }
+.qa-answer { font-size: 1.35rem; font-weight: 500; line-height: 1.35; color: var(--white); text-align: justify; text-justify: inter-word; }
+.qa-bottom { display: flex; align-items: center; margin-top: 10px; }
 .qa-date { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.4; }
-.qa-refresh { flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: none; color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: 0.25s ease; }
-.qa-refresh:hover { opacity: 1; border-color: rgba(255,255,255,0.4); }
 
 /* QUICK LINKS - KEYS */
 .quick-links { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; }
@@ -289,6 +290,9 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- BABAJI Q&A -->
 <div class="babaji-qa">
   <div class="qa-wrap">
+    <button class="qa-refresh" onclick="showQA()" aria-label="Next quote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
     <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-w-Chalkboard-1970s.jpg" alt="Baba Hari Dass with chalkboard" class="qa-photo">
     <div class="qa-inner">
       <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
@@ -296,9 +300,6 @@ p { text-align: justify; text-justify: inter-word; }
       <div class="qa-answer" id="qaAnswer"></div>
       <div class="qa-bottom">
         <div class="qa-date" id="qaDate"></div>
-        <button class="qa-refresh" onclick="showQA()" aria-label="Next quote">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        </button>
       </div>
     </div>
   </div>
@@ -520,23 +521,16 @@ p { text-align: justify; text-justify: inter-word; }
 <script src="babaji-qa.js"></script>
 <script>
 // Q&A
+// Filter: single Q&A only, combined length under 280 chars for consistent height
+var shortQas = qas.filter(function(q) {
+  return !Array.isArray(q.q) && (q.q.length + q.a.length) < 280;
+});
 function showQA() {
-  var qa = qas[Math.floor(Math.random() * qas.length)];
+  var qa = shortQas[Math.floor(Math.random() * shortQas.length)];
   var qEl = document.getElementById('qaQuestion');
   var aEl = document.getElementById('qaAnswer');
-  if (Array.isArray(qa.q)) {
-    var html = '';
-    for (var i = 0; i < qa.q.length; i++) {
-      html += '<span style="opacity:0.5;font-style:italic;">\u201C' + qa.q[i] + '\u201D</span><br>';
-      html += '<span>' + qa.a[i] + '</span>';
-      if (i < qa.q.length - 1) html += '<br><br>';
-    }
-    qEl.innerHTML = '';
-    aEl.innerHTML = html;
-  } else {
-    qEl.textContent = '\u201C' + qa.q + '\u201D';
-    aEl.textContent = qa.a;
-  }
+  qEl.textContent = '\u201C' + qa.q + '\u201D';
+  aEl.textContent = qa.a;
   var dateEl = document.getElementById('qaDate');
   if (dateEl && qa.d) dateEl.textContent = 'Darshan, ' + qa.d;
 }
