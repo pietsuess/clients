@@ -70,6 +70,19 @@ p { text-align: justify; text-justify: inter-word; }
 .scroll-strip::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
 
 /* CTA SECTION */
+/* ROOMS GRID */
+.rooms-section { padding: 80px 32px; }
+.rooms-section h2 { text-align: center; font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 8px; }
+.rooms-section .section-sub { text-align: center; font-size: 0.95rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px; }
+.rooms-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.room-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.room-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.room-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; transition: transform 0.6s ease; }
+.room-card:hover img { transform: scale(1.04); }
+.room-card-body { padding: 20px; }
+.room-card-title { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+.room-card-desc { font-size: 0.82rem; color: var(--text-light); line-height: 1.5; text-align: left; }
+
 .cta-section { text-align: center; padding: 100px 24px; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); color: var(--white); position: relative; overflow: hidden; }
 .cta-section::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; border-radius: 50%; background: rgba(255,255,255,0.03); pointer-events: none; }
 .cta-section h2 { font-size: 2.6rem; color: var(--white); margin-bottom: 16px; }
@@ -142,6 +155,7 @@ p { text-align: justify; text-justify: inter-word; }
   .split-text h2 { font-size: 1.8rem; }
   .split-text-inner { max-width: 100%; }
   .scroll-strip img { height: 30vh; min-width: 30vh; }
+  .rooms-grid { grid-template-columns: 1fr; }
   .cta-section h2 { font-size: 2rem; }
 }
 </style>
@@ -264,6 +278,56 @@ p { text-align: justify; text-justify: inter-word; }
     <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House">
   </div>
 </div>
+
+<!-- ACCOMMODATION -->
+<section class="rooms-section">
+  <h2 class="reveal">Accommodation</h2>
+  <p class="section-sub reveal d1">Private and shared rooms in the Program House and Garden House. Simple, clean, and peaceful.</p>
+  <div class="rooms-grid">
+    <div class="room-card reveal d1">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Bed-photo-with-overlay-grey-1.jpg" alt="Private bedroom" loading="lazy">
+      <div class="room-card-body">
+        <div class="room-card-title">Private Room</div>
+        <div class="room-card-desc">Quiet, simply furnished rooms with natural light. Linens provided.</div>
+      </div>
+    </div>
+    <div class="room-card reveal d2">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/GH-Lavender-Room-Beds-and-window-resized.jpg" alt="Garden House Lavender Room" loading="lazy">
+      <div class="room-card-body">
+        <div class="room-card-title">Garden House - Lavender Room</div>
+        <div class="room-card-desc">Bright and welcoming space in the Garden House with garden views.</div>
+      </div>
+    </div>
+    <div class="room-card reveal d3">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/GH-View-Room-Bed-and-desk-resized.jpg" alt="Garden House View Room" loading="lazy">
+      <div class="room-card-body">
+        <div class="room-card-title">Garden House - View Room</div>
+        <div class="room-card-desc">A quiet corner with a desk and views over the grounds.</div>
+      </div>
+    </div>
+    <div class="room-card reveal d1">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-6-Bed-and-Window-Resized.jpg" alt="Program House Room 6" loading="lazy">
+      <div class="room-card-body">
+        <div class="room-card-title">Program House - Room 6</div>
+        <div class="room-card-desc">Comfortable private room in the heritage Program House.</div>
+      </div>
+    </div>
+    <div class="room-card reveal d2">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-7-resized.jpg" alt="Program House Room 7" loading="lazy">
+      <div class="room-card-body">
+        <div class="room-card-title">Program House - Room 7</div>
+        <div class="room-card-desc">Cozy room with natural wood and warm light.</div>
+      </div>
+    </div>
+    <div class="room-card reveal d3">
+      <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Rm-7-Shared-Room.jpg" alt="Shared room" loading="lazy">
+      <div class="room-card-body">
+        <div class="room-card-title">Shared Room</div>
+        <div class="room-card-desc">Affordable shared accommodation for retreat and program guests.</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- HOST YOUR EVENT CTA -->
 <section class="cta-section">
