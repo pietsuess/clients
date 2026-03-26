@@ -67,9 +67,9 @@ p { text-align: justify; text-justify: inter-word; }
 /* MUSIC FOR PEACE BANNER */
 .mfp-banner { display: flex; text-decoration: none; color: var(--white); cursor: pointer; background: var(--teal-deep); overflow: hidden; transition: background 0.3s ease; }
 .mfp-banner:hover { background: #174e46; }
-.mfp-img-wrap { flex-shrink: 0; width: 200px; overflow: hidden; }
-.mfp-img { width: 155%; height: 155%; object-fit: cover; object-position: center center; transition: transform 0.6s ease; }
-.mfp-banner:hover .mfp-img { transform: scale(1.06); }
+.mfp-img-wrap { flex-shrink: 0; width: 200px; overflow: hidden; position: relative; }
+.mfp-img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160%; height: auto; min-height: 160%; object-fit: cover; transition: transform 0.6s ease; }
+.mfp-banner:hover .mfp-img { transform: translate(-50%, -50%) scale(1.06); }
 .mfp-content { flex: 1; display: flex; align-items: center; padding: 36px 48px; gap: 32px; }
 .mfp-text { flex: 1; }
 .mfp-series { font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 12px; display: block; }
