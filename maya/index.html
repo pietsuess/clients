@@ -507,6 +507,7 @@ footer a:hover{color:var(--pink)}
   <span class="lb-nav lb-prev" onclick="lbNav(event,-1)">&#8249;</span>
   <span class="lb-nav lb-next" onclick="lbNav(event,1)">&#8250;</span>
   <img id="lb-img" src="" alt="">
+  <video id="lb-video" src="" controls playsinline style="display:none;max-width:90vw;max-height:80vh;border-radius:4px;"></video>
   <div class="lb-caption" id="lb-caption"></div>
 </div>
 
@@ -947,12 +948,22 @@ function openLightbox(idx) {
 function showLbItem() {
   const item = currentLbList[currentLbIndex];
   if (!item) return;
-  // Always use item.src directly (photos from ig-posts, videos from ig-thumbs)
-  const src = item.src;
-  document.getElementById('lb-img').src = src;
+  const img = document.getElementById('lb-img');
+  const vid = document.getElementById('lb-video');
+  vid.pause();
+  if (item.videoSrc) {
+    img.style.display = 'none';
+    vid.style.display = 'block';
+    vid.src = item.videoSrc;
+    vid.play();
+  } else {
+    vid.style.display = 'none';
+    vid.src = '';
+    img.style.display = 'block';
+    img.src = item.src;
+  }
   const captionText = cleanCaption(item.caption);
   document.getElementById('lb-caption').textContent = captionText || item.credit || '';
-
 }
 
 function lbNav(e, dir) {
@@ -968,6 +979,8 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('active');
   document.body.style.overflow = '';
   document.getElementById('lb-img').src = '';
+  const vid = document.getElementById('lb-video');
+  vid.pause(); vid.src = ''; vid.style.display = 'none';
 }
 
 document.getElementById('lightbox').addEventListener('click', function(e) {
