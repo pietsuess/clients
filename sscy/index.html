@@ -83,6 +83,15 @@ p { text-align: justify; text-justify: inter-word; }
 .mfp-banner:hover .mfp-cta { background: #a8632e; transform: translateY(-2px); }
 @media (max-width: 768px) { .mfp-img-wrap { width: 160px; } .mfp-content { padding: 24px 20px; gap: 20px; flex-direction: column; align-items: flex-start; } .mfp-cta-wrap { align-self: flex-start; } }
 
+/* ABOUT HERO - FULL BLEED */
+.about-hero { position: relative; min-height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: flex-start; }
+.about-hero-img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.about-hero-overlay { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%); }
+.about-hero-content { position: relative; z-index: 2; color: var(--white); max-width: 600px; padding: 80px 64px; }
+.about-hero-content h2 { font-size: clamp(2.2rem, 5vw, 3.4rem); color: var(--white); margin-bottom: 24px; }
+.about-hero-content p { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.2em; opacity: 0.9; color: var(--white); }
+@media (max-width: 768px) { .about-hero-content { padding: 48px 24px; max-width: 100%; } .about-hero { min-height: 80vh; } }
+
 /* QUICK LINKS - KEYS */
 .quick-links { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; }
 .quick-link { display: flex; align-items: center; justify-content: center; padding: 32px 12px; font-size: 0.88rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; }
@@ -365,19 +374,17 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
 </a>
 
-<!-- PARALLAX IMAGE: Program House -->
-<div class="parallax-frame">
-  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/flowers-and-main-house.jpg" alt="Flowers and main house" loading="lazy">
-</div>
-
-<!-- ABOUT -->
-<div class="text-section" id="about">
-  <img src="logo-lotus.svg" class="lotus-mark" alt="" style="color:var(--teal);">
-  <span class="label reveal">Est. 1981</span>
-  <h2 class="reveal d1">A Rare and Sacred Place</h2>
-  <p class="reveal d2">The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
-  <p class="reveal d3">Whether you're here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
-</div>
+<!-- ABOUT - FULL BLEED IMAGE WITH TEXT OVERLAY -->
+<section class="about-hero" id="about">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-9.jpg" alt="Salt Spring Centre of Yoga" class="about-hero-img" id="aboutImg" loading="lazy">
+  <div class="about-hero-overlay"></div>
+  <div class="about-hero-content">
+    <span class="label reveal" style="color:var(--gold);">Est. 1981</span>
+    <h2 class="reveal d1">A Rare and Sacred Place</h2>
+    <p class="reveal d2">The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
+    <p class="reveal d3">Whether you are here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
+  </div>
+</section>
 
 <!-- FLOATING QUOTE 1 -->
 <section class="float-quote">
@@ -729,7 +736,7 @@ document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(functi
 
 // Parallax on split images and frames
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  var pEls = document.querySelectorAll('.parallax-frame img, .split-img img');
+  var pEls = document.querySelectorAll('.parallax-frame img, .split-img img, .about-hero-img');
   window.addEventListener('scroll', function() {
     pEls.forEach(function(el) {
       var r = el.getBoundingClientRect();
