@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wireframe: Depth Scroll</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
             background: #0a0a0a;
@@ -18,8 +14,9 @@
             overflow-x: hidden;
         }
 
+        /* 2vh per card: 1st half = dwell, 2nd half = transition */
         .scroll-space {
-            height: calc(var(--num-cards) * 100vh);
+            height: calc(var(--num-cards) * 200vh);
             pointer-events: none;
         }
 
@@ -38,62 +35,197 @@
             transform-style: preserve-3d;
         }
 
+        /* Recipe card header */
         .card-header {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            border-radius: 20px 20px 0 0;
+            top: 0; left: 0; right: 0;
+            height: 72px;
+            border-radius: 18px 18px 0 0;
             display: flex;
             align-items: center;
-            padding: 0 40px;
+            justify-content: space-between;
+            padding: 0 36px;
             z-index: 2;
         }
 
         .card-header-tag {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 0.18em;
-            opacity: 0.6;
+            letter-spacing: 0.2em;
+            opacity: 0.5;
         }
 
+        /* Card body */
         .card-body {
             position: absolute;
-            top: 80px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            text-align: center;
+            top: 72px; left: 0; right: 0; bottom: 0;
+            overflow-y: auto;
             z-index: 1;
         }
 
-        .card-icon {
-            font-size: 5rem;
-            opacity: 0.2;
-            margin-bottom: 20px;
+        .card-inner {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 50px 36px 80px;
         }
 
+        /* Typography */
         .card-title {
-            font-size: clamp(2rem, 6vw, 4.5rem);
+            font-size: clamp(1.8rem, 5vw, 3.2rem);
             font-weight: 700;
             line-height: 1.1;
-            margin-bottom: 20px;
-            max-width: 800px;
+            margin-bottom: 12px;
         }
 
-        .card-desc {
-            font-size: clamp(0.9rem, 2vw, 1.15rem);
-            opacity: 0.55;
-            max-width: 500px;
-            line-height: 1.5;
+        .card-subtitle {
+            font-size: 0.95rem;
+            opacity: 0.5;
+            margin-bottom: 32px;
+            line-height: 1.4;
         }
 
+        /* Placeholder image boxes */
+        .ph-hero {
+            width: 100%;
+            height: 220px;
+            border-radius: 14px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.35;
+        }
+
+        .ph-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .ph-box {
+            flex: 1;
+            height: 130px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.3;
+        }
+
+        .ph-box.tall { height: 180px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            border: 1.5px solid rgba(255,255,255,0.2);
+        }
+
+        /* Detail list */
+        .detail-list {
+            list-style: none;
+            margin-bottom: 28px;
+        }
+
+        .detail-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.85rem;
+            opacity: 0.7;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-list li span { opacity: 0.5; }
+
+        /* Quote card */
+        .quote-mark {
+            font-size: 6rem;
+            line-height: 1;
+            opacity: 0.15;
+            margin-bottom: -20px;
+        }
+
+        .quote-text {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            font-style: italic;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .quote-context {
+            font-size: 0.85rem;
+            opacity: 0.4;
+            font-style: italic;
+        }
+
+        /* Price tag */
+        .price {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .price-note {
+            font-size: 0.75rem;
+            opacity: 0.4;
+            margin-bottom: 24px;
+        }
+
+        /* Tags row */
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .tag-pill {
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            opacity: 0.5;
+        }
+
+        /* Section divider */
+        .section-gap { height: 28px; }
+
+        /* Body text */
+        .body-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            opacity: 0.6;
+            margin-bottom: 24px;
+        }
+
+        /* HUD */
         .hud {
             position: fixed;
             right: 20px;
@@ -116,21 +248,19 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.12);
-            border: 2px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255,255,255,0.12);
+            border: 2px solid rgba(255,255,255,0.08);
             cursor: pointer;
             transition: background 0.3s, border-color 0.3s;
             flex-shrink: 0;
         }
 
         .hud-dot.active {
-            background: rgba(255, 255, 255, 0.6);
-            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255,255,255,0.6);
+            border-color: rgba(255,255,255,0.25);
         }
 
-        .hud-dot:hover {
-            background: rgba(255, 255, 255, 0.35);
-        }
+        .hud-dot:hover { background: rgba(255,255,255,0.35); }
 
         .hud-label {
             position: absolute;
@@ -138,7 +268,7 @@
             white-space: nowrap;
             font-size: 0.7rem;
             letter-spacing: 0.04em;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0,0,0,0.75);
             backdrop-filter: blur(8px);
             padding: 6px 12px;
             border-radius: 6px;
@@ -165,9 +295,7 @@
             z-index: 9999;
             transition: opacity 0.6s;
         }
-
         .scroll-cue.hidden { opacity: 0; }
-
         .scroll-cue .ch {
             display: block;
             text-align: center;
@@ -175,7 +303,6 @@
             font-size: 1rem;
             margin-top: 6px;
         }
-
         @keyframes bob {
             0%, 100% { transform: translateY(0); opacity: 0.4; }
             50% { transform: translateY(5px); opacity: 1; }
@@ -191,18 +318,189 @@
 
 <script>
 var cards = [
-    { tag: "The Land",    title: "69 Acres of Sanctuary",      desc: "Forests, gardens, ponds, temples",             bg: "#2d5a27", headerBg: "#3a6e33", icon: "" },
-    { tag: "Babaji",      title: "Peace. No more than that.",   desc: "When asked about his only goal in life",       bg: "#1a1a2e", headerBg: "#24243e", icon: "\u201C" },
-    { tag: "Retreat",     title: "Weekend Yoga Retreat",        desc: "2 nights of practice, rest, and renewal",      bg: "#1a5c53", headerBg: "#237a6e", icon: "" },
-    { tag: "Venue",       title: "The Pond Dome",               desc: "Geodesic dome by the water",                   bg: "#4a6670", headerBg: "#5a7a84", icon: "" },
-    { tag: "Shop",        title: "Salt Spring Island Cooking",  desc: "The beloved cookbook, 52,000 copies sold",      bg: "#8a6a3a", headerBg: "#9a7a4a", icon: "" },
-    { tag: "Babaji",      title: "Shadow fighting.",            desc: "When asked if life is a comedy or a drama",    bg: "#2a1a2e", headerBg: "#3a2a40", icon: "\u201C" },
-    { tag: "Training",    title: "200-Hour Teacher Training",   desc: "Become a certified yoga teacher",              bg: "#5a3a1a", headerBg: "#6a4a2a", icon: "" },
-    { tag: "Sacred",      title: "Hanuman Shrine",              desc: "One of many sacred spaces on the land",        bg: "#6a4a2a", headerBg: "#7a5a3a", icon: "" },
-    { tag: "Karma Yoga",  title: "Live & Serve",                desc: "Volunteer program with room and board",        bg: "#2a5a2a", headerBg: "#3a6a3a", icon: "" },
-    { tag: "Babaji",      title: "Self control.",               desc: "When asked about birth control",               bg: "#1a1a1a", headerBg: "#2a2a2a", icon: "\u201C" },
-    { tag: "Event",       title: "Music for Peace",             desc: "Indian classical concert series",              bg: "#5a2a4a", headerBg: "#6a3a5a", icon: "" },
-    { tag: "Nature",      title: "Dandaka Forest",              desc: "Primordial cedar-swamp wetland",               bg: "#1a3a1a", headerBg: "#2a4a2a", icon: "" }
+    {
+        tag: "The Land", title: "69 Acres of Sanctuary",
+        bg: "#2d5a27", headerBg: "#3a6e33", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Aerial Photo</div>' +
+              '<div class="card-title">69 Acres of Sanctuary</div>' +
+              '<div class="body-text">Sacred land on Salt Spring Island, home to forests, organic gardens, meditation ponds, and temples nestled among ancient cedars.</div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Gardens</div>' +
+                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Temples</div>' +
+                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Ponds</div>' +
+              '</div>' +
+              '<button class="btn btn-primary">Explore the Land</button>' +
+              '<button class="btn btn-outline">Plan a Visit</button>'
+    },
+    {
+        tag: "Babaji", title: "Peace. No more than that.",
+        bg: "#1a1a2e", headerBg: "#24243e", phColor: "rgba(255,255,255,0.06)",
+        body: '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center">' +
+              '<div class="quote-mark">\u201C</div>' +
+              '<div class="quote-text">Peace. No more than that.</div>' +
+              '<div class="quote-context">When asked about his only goal in life</div>' +
+              '<div class="section-gap"></div>' +
+              '<button class="btn btn-outline">More from Babaji</button>' +
+              '</div>'
+    },
+    {
+        tag: "Retreat", title: "Weekend Yoga Retreat",
+        bg: "#1a5c53", headerBg: "#237a6e", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Retreat Photo</div>' +
+              '<div class="card-title">Weekend Yoga Retreat</div>' +
+              '<div class="card-subtitle">2 nights of practice, rest, and renewal</div>' +
+              '<div class="tags"><span class="tag-pill">Yoga</span><span class="tag-pill">Meditation</span><span class="tag-pill">Meals Included</span><span class="tag-pill">2 Nights</span></div>' +
+              '<ul class="detail-list">' +
+                '<li>Dates <span>June 13 \u2013 15, 2025</span></li>' +
+                '<li>Accommodation <span>Shared cabin</span></li>' +
+                '<li>Meals <span>3 vegetarian daily</span></li>' +
+                '<li>Sessions <span>4 yoga + 2 meditation</span></li>' +
+              '</ul>' +
+              '<div class="price">$395</div>' +
+              '<div class="price-note">Per person, shared accommodation</div>' +
+              '<button class="btn btn-primary">Book This Retreat</button>' +
+              '<button class="btn btn-outline">View Schedule</button>'
+    },
+    {
+        tag: "Venue", title: "The Pond Dome",
+        bg: "#4a6670", headerBg: "#5a7a84", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Dome Exterior</div>' +
+              '<div class="card-title">The Pond Dome</div>' +
+              '<div class="card-subtitle">Geodesic dome by the water</div>' +
+              '<div class="body-text">A stunning geodesic dome set beside a tranquil pond. Available for workshops, weddings, concerts, and private events.</div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Interior</div>' +
+                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Pond View</div>' +
+              '</div>' +
+              '<ul class="detail-list">' +
+                '<li>Capacity <span>80 seated</span></li>' +
+                '<li>Features <span>Natural light, wood floor</span></li>' +
+                '<li>Season <span>May \u2013 October</span></li>' +
+              '</ul>' +
+              '<button class="btn btn-primary">Inquire About Rental</button>'
+    },
+    {
+        tag: "Shop", title: "Salt Spring Island Cooking",
+        bg: "#8a6a3a", headerBg: "#9a7a4a", phColor: "rgba(255,255,255,0.08)",
+        body: '<div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">' +
+                '<div class="ph-box tall" style="background:rgba(255,255,255,0.08);width:200px;flex-shrink:0;height:260px">Book Cover</div>' +
+                '<div style="flex:1;min-width:240px">' +
+                  '<div class="card-title" style="font-size:1.8rem">Salt Spring Island Cooking</div>' +
+                  '<div class="body-text">The beloved cookbook that has sold over 52,000 copies. Recipes rooted in the land, the seasons, and the community.</div>' +
+                  '<div class="price">$34.95</div>' +
+                  '<div class="price-note">Hardcover, 224 pages</div>' +
+                  '<button class="btn btn-primary">Add to Cart</button>' +
+                  '<button class="btn btn-outline">Preview Recipes</button>' +
+                '</div>' +
+              '</div>'
+    },
+    {
+        tag: "Babaji", title: "Shadow fighting.",
+        bg: "#2a1a2e", headerBg: "#3a2a40", phColor: "rgba(255,255,255,0.06)",
+        body: '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center">' +
+              '<div class="quote-mark">\u201C</div>' +
+              '<div class="quote-text">Shadow fighting.</div>' +
+              '<div class="quote-context">When asked if life is a comedy or a drama</div>' +
+              '<div class="section-gap"></div>' +
+              '<button class="btn btn-outline">More from Babaji</button>' +
+              '</div>'
+    },
+    {
+        tag: "Training", title: "200-Hour Teacher Training",
+        bg: "#5a3a1a", headerBg: "#6a4a2a", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Training Photo</div>' +
+              '<div class="card-title">200-Hour Teacher Training</div>' +
+              '<div class="card-subtitle">Become a certified yoga teacher</div>' +
+              '<div class="tags"><span class="tag-pill">Yoga Alliance</span><span class="tag-pill">200 Hours</span><span class="tag-pill">Residential</span></div>' +
+              '<div class="body-text">An immersive residential program rooted in classical yoga tradition. Study asana, pranayama, meditation, anatomy, and the philosophy of yoga.</div>' +
+              '<ul class="detail-list">' +
+                '<li>Duration <span>4 weeks intensive</span></li>' +
+                '<li>Certification <span>Yoga Alliance RYT-200</span></li>' +
+                '<li>Includes <span>Room, board, materials</span></li>' +
+                '<li>Next intake <span>September 2025</span></li>' +
+              '</ul>' +
+              '<div class="price">$4,200</div>' +
+              '<div class="price-note">Full program, shared accommodation</div>' +
+              '<button class="btn btn-primary">Apply Now</button>' +
+              '<button class="btn btn-outline">Download Syllabus</button>'
+    },
+    {
+        tag: "Sacred", title: "Hanuman Shrine",
+        bg: "#6a4a2a", headerBg: "#7a5a3a", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Shrine Photo</div>' +
+              '<div class="card-title">Hanuman Shrine</div>' +
+              '<div class="card-subtitle">One of many sacred spaces on the land</div>' +
+              '<div class="body-text">Dedicated to the devoted servant of Rama, this open-air shrine sits among the cedars. Visitors are welcome to sit, meditate, and offer prayers.</div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Detail</div>' +
+                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Path</div>' +
+                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Forest</div>' +
+              '</div>' +
+              '<button class="btn btn-outline">View All Sacred Spaces</button>'
+    },
+    {
+        tag: "Karma Yoga", title: "Live & Serve",
+        bg: "#2a5a2a", headerBg: "#3a6a3a", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Volunteers Photo</div>' +
+              '<div class="card-title">Live & Serve</div>' +
+              '<div class="card-subtitle">Karma yoga volunteer program</div>' +
+              '<div class="body-text">Live on the land and contribute through service. Room and board provided in exchange for 4 hours of daily work in the gardens, kitchen, or maintenance.</div>' +
+              '<ul class="detail-list">' +
+                '<li>Commitment <span>Minimum 2 weeks</span></li>' +
+                '<li>Work <span>4 hours / day</span></li>' +
+                '<li>Includes <span>Room + 3 meals daily</span></li>' +
+                '<li>Yoga classes <span>Included</span></li>' +
+              '</ul>' +
+              '<button class="btn btn-primary">Apply to Volunteer</button>' +
+              '<button class="btn btn-outline">Read FAQs</button>'
+    },
+    {
+        tag: "Babaji", title: "Self control.",
+        bg: "#1a1a1a", headerBg: "#2a2a2a", phColor: "rgba(255,255,255,0.06)",
+        body: '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center">' +
+              '<div class="quote-mark">\u201C</div>' +
+              '<div class="quote-text">Self control.</div>' +
+              '<div class="quote-context">When asked about birth control</div>' +
+              '<div class="section-gap"></div>' +
+              '<button class="btn btn-outline">More from Babaji</button>' +
+              '</div>'
+    },
+    {
+        tag: "Event", title: "Music for Peace",
+        bg: "#5a2a4a", headerBg: "#6a3a5a", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Concert Photo</div>' +
+              '<div class="card-title">Music for Peace</div>' +
+              '<div class="card-subtitle">Indian classical concert series</div>' +
+              '<div class="body-text">An evening of classical Indian music performed in the Pond Dome. Ragas selected to invoke peace, devotion, and stillness.</div>' +
+              '<ul class="detail-list">' +
+                '<li>Date <span>July 19, 2025</span></li>' +
+                '<li>Venue <span>The Pond Dome</span></li>' +
+                '<li>Doors <span>6:30 PM</span></li>' +
+                '<li>Duration <span>~2 hours</span></li>' +
+              '</ul>' +
+              '<div class="price">$25</div>' +
+              '<div class="price-note">General admission, seating on floor cushions</div>' +
+              '<button class="btn btn-primary">Get Tickets</button>' +
+              '<button class="btn btn-outline">Past Concerts</button>'
+    },
+    {
+        tag: "Nature", title: "Dandaka Forest",
+        bg: "#1a3a1a", headerBg: "#2a4a2a", phColor: "rgba(255,255,255,0.08)",
+        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Forest Canopy</div>' +
+              '<div class="card-title">Dandaka Forest</div>' +
+              '<div class="card-subtitle">Primordial cedar-swamp wetland</div>' +
+              '<div class="body-text">One of the last undisturbed cedar-swamp ecosystems on Salt Spring Island. Walk the boardwalk trail through ancient trees draped in moss.</div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Trail</div>' +
+                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Canopy</div>' +
+              '</div>' +
+              '<ul class="detail-list">' +
+                '<li>Trail length <span>1.2 km loop</span></li>' +
+                '<li>Difficulty <span>Easy, boardwalk</span></li>' +
+                '<li>Access <span>Dawn to dusk</span></li>' +
+              '</ul>' +
+              '<button class="btn btn-outline">Trail Map</button>'
+    }
 ];
 
 var numCards = cards.length;
@@ -214,7 +512,9 @@ var scrollCue = document.getElementById('scrollCue');
 var cardEls = [];
 var dotEls = [];
 
-// Card 0 = front of stack (highest z-index), drops first
+// DWELL: each card gets 2vh of scroll. First 40% = card sits still. Last 60% = transition.
+var DWELL = 0.4; // fraction of each card's scroll that is pause
+
 cards.forEach(function(c, i) {
     var el = document.createElement('div');
     el.className = 'card';
@@ -224,9 +524,7 @@ cards.forEach(function(c, i) {
             '<span class="card-header-tag">' + c.tag + '</span>' +
         '</div>' +
         '<div class="card-body" style="background:' + c.bg + '">' +
-            (c.icon ? '<div class="card-icon">' + c.icon + '</div>' : '') +
-            '<div class="card-title">' + c.title + '</div>' +
-            '<div class="card-desc">' + c.desc + '</div>' +
+            '<div class="card-inner">' + c.body + '</div>' +
         '</div>';
     stage.appendChild(el);
     cardEls.push(el);
@@ -238,9 +536,11 @@ cards.forEach(function(c, i) {
     label.textContent = c.title;
     var dot = document.createElement('div');
     dot.className = 'hud-dot';
-    dot.addEventListener('click', function() {
-        window.scrollTo({ top: i * window.innerHeight, behavior: 'smooth' });
-    });
+    (function(idx) {
+        dot.addEventListener('click', function() {
+            window.scrollTo({ top: idx * 2 * window.innerHeight, behavior: 'smooth' });
+        });
+    })(i);
     item.appendChild(label);
     item.appendChild(dot);
     hud.appendChild(item);
@@ -260,31 +560,53 @@ function render() {
     ticking = false;
     var scrollY = window.scrollY;
     var vh = window.innerHeight;
-    var progress = scrollY / vh;
-    var activeIndex = Math.min(Math.round(progress), numCards - 1);
+    // Each card owns 2vh of scroll distance
+    var cardScroll = 2 * vh;
+    var activeIndex = Math.min(Math.floor(scrollY / cardScroll + 0.5), numCards - 1);
 
     scrollCue.classList.toggle('hidden', scrollY > 50);
 
     for (var i = 0; i < numCards; i++) {
         var el = cardEls[i];
-        var t = progress - i;
+        // Raw progress through this card: 0 = card just arrived, 1 = fully scrolled past
+        var raw = (scrollY / cardScroll) - i;
 
-        if (t < -1.5 || t > 2) {
+        if (raw < -1.5 || raw > 2) {
             el.style.visibility = 'hidden';
-        } else {
-            el.style.visibility = 'visible';
+            continue;
+        }
 
-            if (t <= 0) {
-                var behindZ = t * 600;
-                var behindScale = 0.65 + 0.35 * (1 + t);
-                el.style.transform =
-                    'translate3d(0, 0, ' + behindZ + 'px) scale(' + behindScale + ')';
+        el.style.visibility = 'visible';
+
+        // Apply dwell: remap so first DWELL fraction = no movement
+        var t;
+        if (raw <= 0) {
+            // Card is behind, approaching
+            // Remap: card arrives when raw hits -(1 - DWELL) and is fully here at raw=0
+            var arriveStart = -(1 - DWELL);
+            if (raw <= arriveStart) {
+                t = -1; // fully behind
             } else {
-                var dropY = t * 110;
-                var dropZ = t * 150;
-                el.style.transform =
-                    'translate3d(0, ' + dropY + 'vh, ' + dropZ + 'px)';
+                t = -1 + (raw - arriveStart) / (1 - DWELL); // -1 to 0
             }
+        } else if (raw <= DWELL) {
+            // In the dwell zone: card sits still
+            t = 0;
+        } else {
+            // Transitioning out: drops down
+            t = (raw - DWELL) / (1 - DWELL); // 0 to 1
+        }
+
+        if (t <= 0) {
+            // Behind: scale down and push back in Z
+            var behindZ = t * 500;
+            var behindScale = 0.7 + 0.3 * (1 + t);
+            el.style.transform = 'translate3d(0, 0, ' + behindZ + 'px) scale(' + behindScale + ')';
+        } else {
+            // Dropping: straight down, slight forward
+            var dropY = t * 120;
+            var dropZ = t * 100;
+            el.style.transform = 'translate3d(0, ' + dropY + 'vh, ' + dropZ + 'px)';
         }
 
         dotEls[i].classList.toggle('active', i === activeIndex);
