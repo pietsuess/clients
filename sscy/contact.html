@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact &mdash; Salt Spring Centre of Yoga</title>
+<title>Contact - Salt Spring Centre of Yoga</title>
 <meta name="description" content="Visit the Salt Spring Centre of Yoga on Salt Spring Island, BC. Directions, contact info, and how to get here.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -24,13 +24,14 @@ a { color: var(--teal-dark); text-decoration: none; }
 img { max-width: 100%; display: block; }
 p { text-align: justify; text-justify: inter-word; }
 
-/* NAV */
-.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; transition: all 0.6s ease; background: rgba(250,248,244,0.96); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-.nav-logo img { height: 60px; }
-.nav-links { display: flex; gap: 2px; }
-.nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
-.nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
-.nav-links a.active { color: var(--teal-dark); font-weight: 600; }
+/* STICKY NAV (matching homepage) */
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); }
+.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav-links { position: absolute; right: 32px; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transition: color 0.2s ease, background 0.2s ease; }
+.sticky-nav-links a:hover { color: var(--teal-dark); background: var(--cream-warm); }
 
 /* HERO */
 .hero { height: 60vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
@@ -124,7 +125,7 @@ p { text-align: justify; text-justify: inter-word; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
 }
 @media (max-width: 768px) {
-  .nav-links { display: none; }
+  .sticky-nav-links { display: none; }
   .hero { height: 50vh; }
   .hero-content h1 { font-size: 2.2rem; }
   .contact-split { padding: 48px 20px; gap: 40px; }
@@ -137,14 +138,16 @@ p { text-align: justify; text-justify: inter-word; }
 <body>
 
 <!-- NAV -->
-<nav class="site-nav" id="siteNav">
-  <a href="index.html" class="nav-logo"><img src="logo-full-teal.svg" alt="Salt Spring Centre of Yoga" id="navLogo"></a>
-  <div class="nav-links">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="offerings.html">Offerings</a>
-    <a href="rentals.html">Rentals</a>
-    <a href="contact.html" class="active">Contact</a>
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <div class="sn-logo-wrap"><a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a></div>
+    <div class="sticky-nav-links">
+      <a href="index.html">Home</a>
+      <a href="calendar.html">Calendar</a>
+      <a href="shop.html">Shop</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="rentals.html">Rentals</a>
+    </div>
   </div>
 </nav>
 
@@ -263,6 +266,7 @@ p { text-align: justify; text-justify: inter-word; }
     </div>
     <nav class="footer-nav">
       <div class="footer-nav-links">
+        <a href="calendar.html">Calendar</a>
         <a href="contact.html">Contact</a>
         <a href="index.html#about">History</a>
         <a href="index.html#partners">Partners</a>
