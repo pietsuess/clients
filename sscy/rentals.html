@@ -70,6 +70,18 @@ p { text-align: justify; text-justify: inter-word; }
 .scroll-strip::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
 
 /* CTA SECTION */
+/* POND DOME FEATURE */
+.pond-dome-section { padding: 80px 32px; background: var(--white); }
+.pond-dome-header { text-align: center; margin-bottom: 40px; }
+.pond-dome-header .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.pond-dome-header h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 16px; }
+.pond-dome-header p { font-size: 1.02rem; line-height: 1.85; color: var(--text); max-width: 700px; margin: 0 auto 1em; }
+.pond-dome-header a.text-link { display: inline-block; margin-top: 8px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); }
+.pond-dome-header a.text-link::after { content: ' \2192'; }
+.pond-dome-gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.pond-dome-gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--radius-sm); transition: transform 0.4s ease; }
+.pond-dome-gallery img:hover { transform: scale(1.03); }
+
 /* ROOMS GRID */
 .rooms-section { padding: 80px 32px; }
 .rooms-section h2 { text-align: center; font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 8px; }
@@ -156,6 +168,7 @@ p { text-align: justify; text-justify: inter-word; }
   .split-text-inner { max-width: 100%; }
   .scroll-strip img { height: 30vh; min-width: 30vh; }
   .rooms-grid { grid-template-columns: 1fr; }
+  .pond-dome-gallery { grid-template-columns: repeat(2, 1fr); }
   .cta-section h2 { font-size: 2rem; }
 }
 </style>
@@ -235,18 +248,19 @@ p { text-align: justify; text-justify: inter-word; }
 </div>
 
 <!-- POND DOME -->
-<section class="split">
-  <div class="split-img">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" alt="Inside the Pond Dome at the Salt Spring Centre of Yoga">
+<section class="pond-dome-section">
+  <div class="pond-dome-header reveal">
+    <span class="label">Geodesic Venue</span>
+    <h2>Pond Dome</h2>
+    <p>A geodesic dome venue situated by the pond, offering a unique and inspiring setting for workshops, sound healing, meditation, and small gatherings. The circular architecture creates a natural sense of unity and containment.</p>
+    <p>Surrounded by water, trees, and birdsong, this space brings the outside in. Perfect for groups of up to 30 seeking something beyond a conventional room.</p>
+    <a href="contact.html" class="text-link">Inquire about this space</a>
   </div>
-  <div class="split-text">
-    <div class="split-text-inner reveal-right">
-      <span class="label">Geodesic Venue</span>
-      <h2>Pond Dome</h2>
-      <p>A geodesic dome venue situated by the pond, the Pond Dome offers a unique and inspiring setting for workshops, sound healing, meditation, and small gatherings. The circular architecture creates a natural sense of unity and containment.</p>
-      <p>Surrounded by water, trees, and birdsong, this space brings the outside in. Perfect for groups of up to 30 seeking something beyond a conventional room.</p>
-      <a href="contact.html" class="text-link">Inquire about this space</a>
-    </div>
+  <div class="pond-dome-gallery">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg" alt="Pond Dome exterior" loading="lazy" class="reveal d1">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" alt="Pond Dome interior" loading="lazy" class="reveal d2">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/pond-dome-2.jpg" alt="Pond Dome angle" loading="lazy" class="reveal d3">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" alt="Pond Dome from above" loading="lazy" class="reveal d4">
   </div>
 </section>
 
