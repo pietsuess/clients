@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Van Solo Business Card Mockups</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    color: #fff;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    padding: 40px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.4rem;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #888;
+    letter-spacing: 0.15em;
+    margin-bottom: 60px;
+  }
+  .size-section {
+    max-width: 1400px;
+    margin: 0 auto 80px;
+  }
+  .size-section h2 {
+    font-size: 1.4rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #333;
+    padding-bottom: 12px;
+    margin-bottom: 40px;
+  }
+  .size-section h2 span {
+    color: #666;
+    font-size: 0.8rem;
+    margin-left: 10px;
+  }
+  .card-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: center;
+    margin-bottom: 50px;
+  }
+  .card-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-pair .label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #666;
+  }
+  .card-pair .variant-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: #aaa;
+    margin-bottom: 4px;
+  }
+  .card-sides {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .card {
+    background: #fff;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .card.dark {
+    background: #0a0a0a;
+    color: #fff;
+  }
+  .card.cream {
+    background: #f5f0e8;
+    color: #1a1a1a;
+  }
+  .card.charcoal {
+    background: #2a2a2a;
+    color: #e0e0e0;
+  }
+
+  /* Classic: 3.5" x 2" = 350px x 200px */
+  .card.classic { width: 350px; height: 200px; }
+  /* Square: 2.5" x 2.5" = 250px x 250px */
+  .card.square { width: 250px; height: 250px; }
+  /* Tall: 2" x 3.5" = 200px x 350px */
+  .card.tall { width: 200px; height: 350px; }
+
+  .card img.logo-full { height: 60%; width: auto; object-fit: contain; }
+  .card img.logo-icon { height: 45%; width: auto; object-fit: contain; }
+  .card img.logo-text { height: 25%; width: auto; object-fit: contain; }
+  .card img.logo-feathers { height: 40%; width: auto; object-fit: contain; }
+
+  /* Invert images on dark backgrounds */
+  .card.dark img { filter: invert(1); }
+  .card.charcoal img { filter: invert(1); }
+
+  /* Card inner layouts */
+  .card-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  .contact-info {
+    text-align: center;
+    line-height: 1.6;
+  }
+  .contact-info .name {
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .contact-info .detail {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: #555;
+  }
+  .card.dark .contact-info .detail,
+  .card.charcoal .contact-info .detail { color: #999; }
+
+  /* Design 1: Minimal */
+  .d1-front .card-inner { justify-content: center; }
+  .d1-front img { max-height: 50%; }
+  .d1-back .card-inner { justify-content: center; gap: 0; }
+  .d1-back .name { font-size: 0.85rem; }
+  .d1-back .detail { font-size: 0.65rem; }
+
+  /* Design 2: Clean */
+  .d2-front .card-inner { justify-content: center; gap: 12px; }
+  .d2-back .card-inner { justify-content: center; }
+
+  /* Design 3: Bold */
+  .d3-front .card-inner { justify-content: space-between; padding: 24px; }
+  .d3-back .card-inner { justify-content: center; }
+
+  /* Design 4: Complex */
+  .d4-front .card-inner { justify-content: center; }
+  .d4-back .card-inner { justify-content: center; }
+
+  /* Border accents */
+  .border-top { border-top: 3px solid #000; }
+  .card.dark .border-top { border-top-color: #fff; }
+  .border-left { border-left: 3px solid #000; }
+  .card.dark .border-left { border-left-color: #fff; }
+
+  /* Divider line */
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: #000;
+    margin: 8px 0;
+  }
+  .card.dark .divider,
+  .card.charcoal .divider { background: #fff; }
+  .card.cream .divider { background: #1a1a1a; }
+
+  /* Corner marks for complex design */
+  .corner-marks::before,
+  .corner-marks::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+  .corner-marks::before { top: 12px; left: 12px; border-right: none; border-bottom: none; }
+  .corner-marks::after { bottom: 12px; right: 12px; border-left: none; border-top: none; }
+  .card.dark .corner-marks::before,
+  .card.dark .corner-marks::after,
+  .card.charcoal .corner-marks::before,
+  .card.charcoal .corner-marks::after { border-color: rgba(255,255,255,0.2); }
+
+  /* Geometric accent for complex */
+  .geo-line {
+    position: absolute;
+    background: rgba(0,0,0,0.08);
+  }
+  .card.dark .geo-line,
+  .card.charcoal .geo-line { background: rgba(255,255,255,0.08); }
+  .geo-line.diagonal {
+    width: 150%;
+    height: 1px;
+    transform: rotate(-30deg);
+    transform-origin: center;
+  }
+  .geo-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .card.dark .geo-circle,
+  .card.charcoal .geo-circle { border-color: rgba(255,255,255,0.08); }
+
+  /* Half-tone pattern overlay */
+  .halftone {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 8px 8px;
+    pointer-events: none;
+  }
+  .card.dark .halftone {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+  }
+
+  /* Feather watermark */
+  .watermark {
+    position: absolute;
+    opacity: 0.04;
+    z-index: 0;
+  }
+  .watermark img { width: 100%; height: 100%; }
+
+  /* Stripe accent */
+  .stripe {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: #000;
+  }
+  .card.dark .stripe { background: #fff; }
+  .card.cream .stripe { background: #1a1a1a; }
+  .card.charcoal .stripe { background: #e0e0e0; }
+
+  .side-label {
+    font-size: 0.55rem;
+    color: #555;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Responsive */
+  @media (max-width: 800px) {
+    .card-sides { flex-direction: column; }
+    .card.classic { width: 280px; height: 160px; }
+    .card.square { width: 200px; height: 200px; }
+    .card.tall { width: 160px; height: 280px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Van Solo</h1>
+<p class="subtitle">Business Card Mockups</p>
+
+<!-- ============================================ -->
+<!-- CLASSIC 3.5" x 2"                            -->
+<!-- ============================================ -->
+<div class="size-section">
+  <h2>Classic <span>3.5" x 2"</span></h2>
+
+  <!-- Design 1: Minimal -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">1. Minimal</div>
+      <div class="card-sides">
+        <div>
+          <div class="card classic d1-front">
+            <div class="card-inner">
+              <img src="VanSolo_LOGOS-01.svg" style="max-height:65%; max-width:60%;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card classic d1-back">
+            <div class="card-inner contact-info">
+              <div class="name" style="font-size:0.8rem;">Tommy Van Solo</div>
+              <div class="divider" style="margin:6px auto;"></div>
+              <div class="detail">+1 (555) 867-5309</div>
+              <div class="detail">tommy@vansolo.com</div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 2: Clean -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">2. Clean</div>
+      <div class="card-sides">
+        <div>
+          <div class="card classic cream d2-front">
+            <div class="card-inner" style="flex-direction:row; justify-content:space-between; padding:24px 30px;">
+              <div style="display:flex; flex-direction:column; justify-content:center;">
+                <img src="VanSolo_LOGOS-03.svg" style="height:70px; width:auto;">
+              </div>
+              <div style="display:flex; flex-direction:column; justify-content:center; align-items:flex-end;">
+                <img src="VanSolo_LOGOS-04.svg" style="height:35px; width:auto;">
+              </div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card classic cream d2-back">
+            <div class="card-inner contact-info" style="align-items:flex-start; padding:30px;">
+              <div class="name" style="font-size:0.8rem;">Tommy Van Solo</div>
+              <div class="divider"></div>
+              <div class="detail">+1 (555) 867-5309</div>
+              <div class="detail">tommy@vansolo.com</div>
+              <img src="VanSolo_LOGOS-02.svg" style="position:absolute; bottom:20px; right:20px; height:40px; opacity:0.12;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 3: Bold -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">3. Bold</div>
+      <div class="card-sides">
+        <div>
+          <div class="card classic dark d3-front">
+            <div class="card-inner" style="padding:24px 28px;">
+              <img src="VanSolo_LOGOS-01.svg" style="max-height:75%; max-width:55%;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card classic dark d3-back">
+            <div class="stripe"></div>
+            <div class="card-inner contact-info" style="padding-left:30px; align-items:flex-start;">
+              <div class="name" style="font-size:0.85rem; letter-spacing:0.2em;">Tommy Van Solo</div>
+              <div class="divider" style="background:#fff;"></div>
+              <div class="detail" style="color:#777;">+1 (555) 867-5309</div>
+              <div class="detail" style="color:#777;">tommy@vansolo.com</div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 4: Complex -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">4. Complex</div>
+      <div class="card-sides">
+        <div>
+          <div class="card classic dark d4-front">
+            <div class="halftone"></div>
+            <div class="card-inner corner-marks">
+              <img src="VanSolo_LOGOS-03.svg" style="max-height:50%; max-width:35%; position:relative; z-index:1;">
+              <div style="position:absolute; bottom:20px; left:0; right:0; text-align:center;">
+                <img src="VanSolo_LOGOS-04.svg" style="height:18px; filter:invert(1); opacity:0.7;">
+              </div>
+              <div class="geo-circle" style="width:300px; height:300px; top:-80px; right:-100px;"></div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card classic dark d4-back">
+            <div class="halftone"></div>
+            <div class="stripe" style="width:4px;"></div>
+            <div class="card-inner corner-marks contact-info" style="padding-left:28px; align-items:flex-start;">
+              <div class="name" style="font-size:0.85rem; letter-spacing:0.2em;">Tommy Van Solo</div>
+              <div class="divider" style="background:rgba(255,255,255,0.3); width:50px;"></div>
+              <div class="detail" style="color:#666;">+1 (555) 867-5309</div>
+              <div class="detail" style="color:#666;">tommy@vansolo.com</div>
+              <img src="VanSolo_LOGOS-02.svg" style="position:absolute; bottom:-10px; right:-10px; height:100px; filter:invert(1); opacity:0.06;">
+              <div class="geo-circle" style="width:200px; height:200px; bottom:-60px; left:-60px;"></div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- SQUARE 2.5" x 2.5"                           -->
+<!-- ============================================ -->
+<div class="size-section">
+  <h2>Square <span>2.5" x 2.5"</span></h2>
+
+  <!-- Design 1: Minimal -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">1. Minimal</div>
+      <div class="card-sides">
+        <div>
+          <div class="card square d1-front">
+            <div class="card-inner">
+              <img src="VanSolo_LOGOS-01.svg" style="max-height:70%; max-width:70%;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card square d1-back">
+            <div class="card-inner contact-info">
+              <div class="name" style="font-size:0.8rem;">Tommy Van Solo</div>
+              <div class="divider" style="margin:8px auto;"></div>
+              <div class="detail">+1 (555) 867-5309</div>
+              <div class="detail">tommy@vansolo.com</div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 2: Clean -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">2. Clean</div>
+      <div class="card-sides">
+        <div>
+          <div class="card square cream d2-front">
+            <div class="card-inner" style="gap:12px;">
+              <img src="VanSolo_LOGOS-03.svg" style="max-height:45%; max-width:50%;">
+              <img src="VanSolo_LOGOS-04.svg" style="max-height:15%; max-width:60%;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card square cream d2-back">
+            <div class="card-inner contact-info">
+              <div class="name" style="font-size:0.8rem;">Tommy Van Solo</div>
+              <div class="divider" style="margin:8px auto;"></div>
+              <div class="detail">+1 (555) 867-5309</div>
+              <div class="detail">tommy@vansolo.com</div>
+              <img src="VanSolo_LOGOS-02.svg" style="position:absolute; bottom:15px; right:15px; height:35px; opacity:0.1;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 3: Bold -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">3. Bold</div>
+      <div class="card-sides">
+        <div>
+          <div class="card square dark d3-front">
+            <div class="card-inner">
+              <img src="VanSolo_LOGOS-03.svg" style="max-height:55%; max-width:60%;">
+              <div style="margin-top:10px;">
+                <img src="VanSolo_LOGOS-04.svg" style="height:22px; filter:invert(1);">
+              </div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card square dark d3-back">
+            <div class="stripe"></div>
+            <div class="card-inner contact-info" style="padding-left:26px; align-items:flex-start;">
+              <div class="name" style="font-size:0.8rem; letter-spacing:0.2em;">Tommy<br>Van Solo</div>
+              <div class="divider" style="background:#fff; margin:10px 0;"></div>
+              <div class="detail" style="color:#777;">+1 (555) 867-5309</div>
+              <div class="detail" style="color:#777;">tommy@vansolo.com</div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 4: Complex -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">4. Complex</div>
+      <div class="card-sides">
+        <div>
+          <div class="card square dark d4-front">
+            <div class="halftone"></div>
+            <div class="card-inner corner-marks" style="gap:8px;">
+              <img src="VanSolo_LOGOS-02.svg" style="max-height:35%; max-width:45%; filter:invert(1); position:relative; z-index:1;">
+              <div class="divider" style="background:rgba(255,255,255,0.3); width:30px;"></div>
+              <img src="VanSolo_LOGOS-04.svg" style="height:18px; filter:invert(1); opacity:0.8; position:relative; z-index:1;">
+              <div class="geo-circle" style="width:250px; height:250px; top:-60px; left:-80px;"></div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card square dark d4-back">
+            <div class="halftone"></div>
+            <div class="card-inner corner-marks contact-info">
+              <div class="name" style="font-size:0.85rem; letter-spacing:0.2em;">Tommy<br>Van Solo</div>
+              <div class="divider" style="background:rgba(255,255,255,0.3); width:40px; margin:10px auto;"></div>
+              <div class="detail" style="color:#666;">+1 (555) 867-5309</div>
+              <div class="detail" style="color:#666;">tommy@vansolo.com</div>
+              <div class="geo-circle" style="width:180px; height:180px; bottom:-50px; right:-50px;"></div>
+              <img src="VanSolo_LOGOS-03.svg" style="position:absolute; top:10px; right:10px; height:30px; filter:invert(1); opacity:0.08;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- TALL 2" x 3.5"                               -->
+<!-- ============================================ -->
+<div class="size-section">
+  <h2>Tall <span>2" x 3.5"</span></h2>
+
+  <!-- Design 1: Minimal -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">1. Minimal</div>
+      <div class="card-sides">
+        <div>
+          <div class="card tall d1-front">
+            <div class="card-inner">
+              <img src="VanSolo_LOGOS-01.svg" style="max-height:55%; max-width:80%;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card tall d1-back">
+            <div class="card-inner contact-info">
+              <div class="name" style="font-size:0.8rem;">Tommy<br>Van Solo</div>
+              <div class="divider" style="margin:10px auto;"></div>
+              <div class="detail">+1 (555) 867-5309</div>
+              <div class="detail">tommy@vansolo.com</div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 2: Clean -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">2. Clean</div>
+      <div class="card-sides">
+        <div>
+          <div class="card tall cream d2-front">
+            <div class="card-inner" style="justify-content:space-between; padding:35px 20px;">
+              <img src="VanSolo_LOGOS-03.svg" style="max-height:40%; max-width:70%;">
+              <img src="VanSolo_LOGOS-04.svg" style="max-height:12%; max-width:75%;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card tall cream d2-back">
+            <div class="card-inner contact-info" style="justify-content:flex-end; padding-bottom:35px;">
+              <div class="name" style="font-size:0.8rem;">Tommy<br>Van Solo</div>
+              <div class="divider" style="margin:10px auto;"></div>
+              <div class="detail">+1 (555) 867-5309</div>
+              <div class="detail">tommy@vansolo.com</div>
+              <img src="VanSolo_LOGOS-02.svg" style="position:absolute; top:25px; left:50%; transform:translateX(-50%); height:60px; opacity:0.08;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 3: Bold -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">3. Bold</div>
+      <div class="card-sides">
+        <div>
+          <div class="card tall dark d3-front">
+            <div class="card-inner" style="justify-content:space-between; padding:30px 20px;">
+              <img src="VanSolo_LOGOS-03.svg" style="max-height:40%; max-width:70%;">
+              <div style="text-align:center;">
+                <img src="VanSolo_LOGOS-04.svg" style="height:22px; filter:invert(1);">
+              </div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card tall dark d3-back">
+            <div class="stripe" style="top:0; bottom:0; left:0; width:5px;"></div>
+            <div class="card-inner contact-info" style="justify-content:flex-end; padding:30px 20px 40px 28px; align-items:flex-start;">
+              <div class="name" style="font-size:0.85rem; letter-spacing:0.2em;">Tommy<br>Van Solo</div>
+              <div class="divider" style="background:#fff; margin:10px 0;"></div>
+              <div class="detail" style="color:#777;">+1 (555) 867-5309</div>
+              <div class="detail" style="color:#777;">tommy@vansolo.com</div>
+              <img src="VanSolo_LOGOS-02.svg" style="position:absolute; top:25px; right:15px; height:45px; filter:invert(1); opacity:0.1;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design 4: Complex -->
+  <div class="card-row">
+    <div class="card-pair">
+      <div class="variant-label">4. Complex</div>
+      <div class="card-sides">
+        <div>
+          <div class="card tall dark d4-front">
+            <div class="halftone"></div>
+            <div class="card-inner corner-marks" style="justify-content:space-between; padding:30px 20px;">
+              <img src="VanSolo_LOGOS-02.svg" style="max-height:25%; max-width:50%; filter:invert(1); position:relative; z-index:1;">
+              <img src="VanSolo_LOGOS-03.svg" style="max-height:35%; max-width:65%; position:relative; z-index:1;">
+              <img src="VanSolo_LOGOS-04.svg" style="height:18px; filter:invert(1); opacity:0.7; position:relative; z-index:1;">
+              <div class="geo-circle" style="width:200px; height:200px; top:40%; left:-60px;"></div>
+              <div class="geo-circle" style="width:120px; height:120px; bottom:20px; right:-30px;"></div>
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">front</div>
+        </div>
+        <div>
+          <div class="card tall dark d4-back">
+            <div class="halftone"></div>
+            <div class="stripe" style="width:4px;"></div>
+            <div class="card-inner corner-marks contact-info" style="justify-content:center; padding-left:26px; align-items:flex-start;">
+              <div style="position:relative; z-index:1;">
+                <div class="name" style="font-size:0.9rem; letter-spacing:0.2em;">Tommy<br>Van Solo</div>
+                <div class="divider" style="background:rgba(255,255,255,0.3); width:40px; margin:12px 0;"></div>
+                <div class="detail" style="color:#666;">+1 (555) 867-5309</div>
+                <div class="detail" style="color:#666;">tommy@vansolo.com</div>
+              </div>
+              <div class="geo-circle" style="width:250px; height:250px; bottom:-80px; right:-80px;"></div>
+              <div class="geo-circle" style="width:100px; height:100px; top:20px; right:20px;"></div>
+              <img src="VanSolo_LOGOS-02.svg" style="position:absolute; bottom:15px; left:50%; transform:translateX(-50%); height:50px; filter:invert(1); opacity:0.05;">
+            </div>
+          </div>
+          <div class="side-label" style="text-align:center; margin-top:4px;">back</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding:40px 0; color:#444; font-size:0.7rem; letter-spacing:0.1em;">
+  Tommy Van Solo &mdash; Business Card Concepts &mdash; Salt Spring Collective Media
+</div>
+
+</body>
+</html>
