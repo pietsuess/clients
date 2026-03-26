@@ -862,10 +862,8 @@ function renderMediaPage(reset) {
     const isVideo = item.type === 'video' || item.type === 'reel';
     // For photos, src is ig-posts/FILE. For video/reel, src is already ig-thumbs/FILE
     const imgSrc = isVideo ? item.src : item.src;
-    // For lightbox, photos show full image; video/reel show the thumb
-    const lbSrc = item.type === 'photo'
-      ? item.src
-      : item.src.replace('ig-thumbs/', 'ig-posts/');
+    // For lightbox, always use src (photos from ig-posts, videos from ig-thumbs)
+    const lbSrc = item.src;
 
     const captionClean = cleanCaption(item.caption);
     const playIcon = isVideo
