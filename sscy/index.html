@@ -602,15 +602,57 @@ function checkSticky() {
   var currentLeft = centerLeft + (rightLeft - centerLeft) * scrollPast;
   navLinks.style.left = currentLeft + 'px';
 
-  // Gap: starts wide (24px), compresses to tight (4px)
-  var gap = 24 - (20 * scrollPast);
+  // Gap: starts wide (48px), compresses to tight (4px)
+  var gap = 48 - (44 * scrollPast);
   navLinks.style.gap = gap + 'px';
 
   // Fade logo in (faster, starts earlier)
   if (navLogoWrap) navLogoWrap.style.opacity = Math.min(1, scrollPast * 3);
 }
-window.addEventListener('scroll', checkSticky);
+// Per-link scroll-driven entrance
+var navLinkEls = document.querySelectorAll('.sticky-nav-links a');
+var linkEntrances = [
+  { y: 40, x: -30, rot: -12, scale: 0.6 },  // Home: drops in from upper-left, spins
+  { y: 60, x: 0,   rot: 8,   scale: 0.5 },  // Shop: rises from below, tilts
+  { y: 30, x: 20,  rot: -6,  scale: 0.7 },  // Offerings: slides from right
+  { y: 50, x: -15, rot: 15,  scale: 0.55 },  // Rentals: tumbles in
+  { y: 45, x: 25,  rot: -10, scale: 0.65 }   // Contact: swings from right
+];
+
+function animateNavLinks() {
+  var rect = stickyNav.getBoundingClientRect();
+  // Progress: 0 when nav is at bottom of viewport, 1 when it reaches top
+  var viewH = window.innerHeight;
+  var progress = Math.max(0, Math.min(1, 1 - (rect.top / (viewH * 0.6))));
+  // Smooth ease-out curve
+  var eased = 1 - Math.pow(1 - progress, 3);
+
+  navLinkEls.forEach(function(link, i) {
+    var e = linkEntrances[i];
+    // Stagger: each link slightly delayed
+    var stagger = Math.max(0, Math.min(1, (eased - i * 0.08) / 0.6));
+    var linkEase = 1 - Math.pow(1 - stagger, 2.5);
+
+    var ty = e.y * (1 - linkEase);
+    var tx = e.x * (1 - linkEase);
+    var rot = e.rot * (1 - linkEase);
+    var sc = e.scale + (1 - e.scale) * linkEase;
+    var op = linkEase;
+
+    link.style.opacity = op;
+    // Only apply entrance transform when not being controlled by mouse interaction
+    if (!link.dataset.mouseActive) {
+      link.style.transform = 'perspective(400px) translateX(' + tx + 'px) translateY(' + ty + 'px) rotate(' + rot + 'deg) scale(' + sc + ')';
+    }
+  });
+}
+
+window.addEventListener('scroll', function() {
+  checkSticky();
+  animateNavLinks();
+});
 checkSticky();
+animateNavLinks();
 
 // Quick links entrance
 var qlObs = new IntersectionObserver(function(entries) {
@@ -772,6 +814,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       var dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist > PULL_RADIUS * 1.5) {
+        delete link.dataset.mouseActive;
         resetLink(link);
         return;
       }
@@ -796,6 +839,7 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
       var shadowAlpha = 0.12 * cubicProgress;
       var shadowBlur = 20 * cubicProgress;
 
+      link.dataset.mouseActive = '1';
       link.style.transform = 'perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) translateX(' + pullX + 'px) translateY(' + (pullY + lift) + 'px) scale(' + scale + ')';
       link.style.background = 'rgba(59,184,168,' + bgAlpha + ')';
       link.style.boxShadow = '0 ' + (4 + shadowBlur * 0.5) + 'px ' + shadowBlur + 'px rgba(26,92,83,' + shadowAlpha + ')';
@@ -803,7 +847,10 @@ document.querySelectorAll('.offering-card').forEach(function(card) {
   });
 
   navBar.addEventListener('mouseleave', function() {
-    links.forEach(resetLink);
+    links.forEach(function(link) {
+      delete link.dataset.mouseActive;
+      resetLink(link);
+    });
   });
 })();
 
