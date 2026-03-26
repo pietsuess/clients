@@ -70,17 +70,22 @@ p { text-align: justify; text-justify: inter-word; }
 .scroll-strip::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
 
 /* CTA SECTION */
-/* POND DOME FEATURE */
-.pond-dome-section { padding: 80px 32px; background: var(--white); }
-.pond-dome-header { text-align: center; margin-bottom: 40px; }
-.pond-dome-header .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
-.pond-dome-header h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 16px; }
-.pond-dome-header p { font-size: 1.02rem; line-height: 1.85; color: var(--text); max-width: 700px; margin: 0 auto 1em; }
-.pond-dome-header a.text-link { display: inline-block; margin-top: 8px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); }
-.pond-dome-header a.text-link::after { content: ' \2192'; }
-.pond-dome-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.pond-dome-gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--radius-sm); transition: transform 0.4s ease; }
-.pond-dome-gallery img:hover { transform: scale(1.03); }
+/* VENUE FEATURE SECTIONS */
+.venue-section { padding: 80px 32px; }
+.venue-section:nth-child(odd) { background: var(--white); }
+.venue-header { text-align: center; margin-bottom: 40px; }
+.venue-header .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.venue-header h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 16px; }
+.venue-header p { font-size: 1.02rem; line-height: 1.85; color: var(--text); max-width: 700px; margin: 0 auto 1em; }
+.venue-header a.text-link { display: inline-block; margin-top: 8px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); }
+.venue-header a.text-link::after { content: ' \2192'; }
+.venue-gallery { display: grid; gap: 8px; }
+.venue-gallery.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.venue-gallery.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.venue-gallery img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: var(--radius-sm); transition: transform 0.4s ease; }
+.venue-gallery img:hover { transform: scale(1.03); }
+.venue-gallery.cols-1 { grid-template-columns: 1fr; max-width: 600px; margin: 0 auto; }
+.venue-gallery.cols-1 img { aspect-ratio: 16/9; }
 
 /* ROOMS GRID */
 .rooms-section { padding: 80px 32px; }
@@ -168,7 +173,7 @@ p { text-align: justify; text-justify: inter-word; }
   .split-text-inner { max-width: 100%; }
   .scroll-strip img { height: 30vh; min-width: 30vh; }
   .rooms-grid { grid-template-columns: 1fr; }
-  .pond-dome-gallery { grid-template-columns: repeat(2, 1fr); }
+  .venue-gallery.cols-3 { grid-template-columns: repeat(2, 1fr); }
   .cta-section h2 { font-size: 2rem; }
 }
 </style>
@@ -205,18 +210,17 @@ p { text-align: justify; text-justify: inter-word; }
 </div>
 
 <!-- SATSANG ROOM -->
-<section class="split">
-  <div class="split-img">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg" alt="Satsang Room at the Salt Spring Centre of Yoga">
+<section class="venue-section">
+  <div class="venue-header reveal">
+    <span class="label">Program House</span>
+    <h2>Satsang Room</h2>
+    <p>The main ceremony and gathering space in the Program House. This warm, light-filled room has hosted decades of yoga programs, satsangs, kirtan, workshops, and community celebrations. With seating for up to 80 people, a full sound system, and a stage area, it serves as the heart of programming at the Centre.</p>
+    <p>The adjacent commercial kitchen and dining hall make the Program House ideal for multi-day retreats with catered meals.</p>
+    <a href="contact.html" class="text-link">Inquire about this space</a>
   </div>
-  <div class="split-text">
-    <div class="split-text-inner reveal-right">
-      <span class="label">Program House</span>
-      <h2>Satsang Room</h2>
-      <p>The main ceremony and gathering space in the Program House. This warm, light-filled room has hosted decades of yoga programs, satsangs, kirtan, workshops, and community celebrations. With seating for up to 80 people, a full sound system, and a stage area, it serves as the heart of programming at the Centre.</p>
-      <p>The adjacent commercial kitchen and dining hall make the Program House ideal for multi-day retreats with catered meals.</p>
-      <a href="contact.html" class="text-link">Inquire about this space</a>
-    </div>
+  <div class="venue-gallery cols-2">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg" alt="Program in the Satsang Room" loading="lazy" class="reveal d1">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2011/08/ZD.090731.03.013.jpg" alt="Satsang and kirtan gathering" loading="lazy" class="reveal d2">
   </div>
 </section>
 
@@ -227,31 +231,31 @@ p { text-align: justify; text-justify: inter-word; }
 </div>
 
 <!-- GARDEN HOUSE -->
-<section class="split reverse">
-  <div class="split-img">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House yoga studio at the Salt Spring Centre of Yoga">
+<section class="venue-section">
+  <div class="venue-header reveal">
+    <span class="label">Yoga &amp; Accommodation</span>
+    <h2>Garden House &amp; Yoga Studio</h2>
+    <p>A secondary yoga venue nestled among the gardens, the Garden House offers a tranquil practice space with natural light and views of the surrounding forest. The dedicated yoga studio comfortably holds 20 to 30 practitioners.</p>
+    <p>The building also includes accommodation rooms for retreat participants, making it a self-contained option for smaller groups seeking an intimate experience on the land.</p>
+    <a href="contact.html" class="text-link">Inquire about this space</a>
   </div>
-  <div class="split-text">
-    <div class="split-text-inner reveal-left">
-      <span class="label">Yoga &amp; Accommodation</span>
-      <h2>Garden House &amp; Yoga Studio</h2>
-      <p>A secondary yoga venue nestled among the gardens, the Garden House offers a tranquil practice space with natural light and views of the surrounding forest. The dedicated yoga studio comfortably holds 20 to 30 practitioners.</p>
-      <p>The building also includes accommodation rooms for retreat participants, making it a self-contained option for smaller groups seeking an intimate experience on the land.</p>
-      <a href="contact.html" class="text-link">Inquire about this space</a>
-    </div>
+  <div class="venue-gallery cols-3">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-1.jpg" alt="Garden House exterior" loading="lazy" class="reveal d1">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House yoga studio" loading="lazy" class="reveal d2">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-2.jpg" alt="Garden House from the garden" loading="lazy" class="reveal d3">
   </div>
 </section>
 
 <!-- POND DOME -->
-<section class="pond-dome-section">
-  <div class="pond-dome-header reveal">
+<section class="venue-section">
+  <div class="venue-header reveal">
     <span class="label">Geodesic Venue</span>
     <h2>Pond Dome</h2>
     <p>A geodesic dome venue situated by the pond, offering a unique and inspiring setting for workshops, sound healing, meditation, and small gatherings. The circular architecture creates a natural sense of unity and containment.</p>
     <p>Surrounded by water, trees, and birdsong, this space brings the outside in. Perfect for groups of up to 30 seeking something beyond a conventional room.</p>
     <a href="contact.html" class="text-link">Inquire about this space</a>
   </div>
-  <div class="pond-dome-gallery">
+  <div class="venue-gallery cols-3">
     <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg" alt="Pond Dome exterior" loading="lazy" class="reveal d1">
     <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" alt="Pond Dome interior" loading="lazy" class="reveal d2">
     <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/pond-dome-2.jpg" alt="Pond Dome angle" loading="lazy" class="reveal d3">
@@ -259,18 +263,16 @@ p { text-align: justify; text-justify: inter-word; }
 </section>
 
 <!-- SAUNA -->
-<section class="split reverse">
-  <div class="split-img">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Wood-burning sauna at the Salt Spring Centre of Yoga">
+<section class="venue-section">
+  <div class="venue-header reveal">
+    <span class="label">Wellness</span>
+    <h2>Sauna</h2>
+    <p>A traditional wood-burning sauna available as part of retreat packages or by special arrangement. After a day of practice, teaching, or deep work, the sauna offers a quiet place to release, restore, and reconnect with the body.</p>
+    <p>Set apart from the main buildings and surrounded by forest, the experience is meditative in its simplicity.</p>
+    <a href="contact.html" class="text-link">Inquire about availability</a>
   </div>
-  <div class="split-text">
-    <div class="split-text-inner reveal-left">
-      <span class="label">Wellness</span>
-      <h2>Sauna</h2>
-      <p>A traditional wood-burning sauna available as part of retreat packages or by special arrangement. After a day of practice, teaching, or deep work, the sauna offers a quiet place to release, restore, and reconnect with the body.</p>
-      <p>Set apart from the main buildings and surrounded by forest, the experience is meditative in its simplicity.</p>
-      <a href="contact.html" class="text-link">Inquire about availability</a>
-    </div>
+  <div class="venue-gallery cols-1">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Wood-burning sauna at night" loading="lazy" class="reveal d1">
   </div>
 </section>
 
