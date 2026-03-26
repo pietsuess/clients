@@ -152,45 +152,6 @@ p { text-align: justify; text-justify: inter-word; }
   flex-direction: column;
 }
 
-.product-card.featured {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  border: 2px solid var(--gold);
-  box-shadow: 0 4px 20px rgba(201,168,76,0.2);
-}
-
-.product-card.featured .product-image {
-  aspect-ratio: auto;
-  min-height: 0;
-  max-height: none;
-  overflow: hidden;
-}
-
-.product-card.featured .product-image img {
-  object-position: center 58%;
-  height: 280px;
-}
-
-.product-card.featured .product-body {
-  padding: 32px;
-  justify-content: center;
-}
-
-.product-card.featured .product-title {
-  font-size: 1.25rem;
-}
-
-.product-card.featured .product-desc {
-  font-size: 0.9rem;
-}
-
-.product-card.featured .event-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 12px 0;
-}
 
 .event-detail {
   display: flex;
@@ -204,15 +165,6 @@ p { text-align: justify; text-justify: inter-word; }
 .event-detail svg {
   flex-shrink: 0;
   opacity: 0.6;
-}
-
-@media (max-width: 768px) {
-  .product-card.featured {
-    grid-template-columns: 1fr;
-  }
-  .product-card.featured .product-image {
-    min-height: 200px;
-  }
 }
 
 .product-card:hover {
@@ -1309,7 +1261,7 @@ function renderProducts(category = 'all') {
   const filtered = category === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === category);
 
   grid.innerHTML = filtered.map(p => `
-    <div class="product-card${p.featured ? ' featured' : ''}" data-category="${p.category}">
+    <div class="product-card" data-category="${p.category}">
       <div class="product-image">
         ${p.img ? `<img src="${p.img}" alt="${p.title}" loading="lazy">` : `<span class="placeholder-icon">${p.icon || '\u2728'}</span>`}
         ${p.badge ? `<span class="product-badge ${p.badgeClass || ''}">${p.badge}</span>` : ''}
