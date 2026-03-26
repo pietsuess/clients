@@ -490,9 +490,11 @@
     var html = '';
     shows.forEach(function(show, i) {
       html += '<div class="item-row">';
-      html += '<div class="item-info"><h3>' + escHtml(show.title);
+      html += '<div class="item-info" style="display:flex;align-items:center;gap:12px;">';
+      if (show.posterImage) html += '<img src="../' + escHtml(show.posterImage) + '" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:4px;">';
+      html += '<div><h3>' + escHtml(show.title);
       if (show.isUpcoming) html += '<span class="upcoming-badge">Upcoming</span>';
-      html += '</h3><p>' + formatDate(show.date) + ' &bull; ' + escHtml(show.time) + '</p></div>';
+      html += '</h3><p>' + formatDate(show.date) + ' &bull; ' + escHtml(show.time) + '</p></div></div>';
       html += '<div class="item-actions">';
       if (i > 0) html += '<button class="btn-small" onclick="CMS.moveShow(' + i + ',-1)" title="Move up">&uarr;</button>';
       if (i < shows.length - 1) html += '<button class="btn-small" onclick="CMS.moveShow(' + i + ',1)" title="Move down">&darr;</button>';
