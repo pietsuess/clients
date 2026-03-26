@@ -334,6 +334,14 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .gallery-item:hover .play-icon{background:rgba(232,74,138,0.8)}
 .gallery-item .play-icon svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+.gallery-item .vimeo-label{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:8px 10px;
+  background:linear-gradient(transparent,rgba(0,0,0,0.8));
+  font-size:0.7rem;color:rgba(255,255,255,0.85);
+  font-family:'DM Sans',sans-serif;
+  pointer-events:none;
+}
 .load-more-wrap{
   text-align:center;padding:40px 4vw 0;
 }
@@ -618,6 +626,7 @@ footer a:hover{color:var(--pink)}
     <button data-filter="photo">Photos</button>
     <button data-filter="video">Videos</button>
     <button data-filter="reel">Reels</button>
+    <button data-filter="vimeo">Full Performances</button>
   </div>
 
   <div class="media-marquee">
@@ -861,20 +870,18 @@ function renderMediaPage(reset) {
     div.dataset.idx = start + i;
 
     const isVideo = item.type === 'video' || item.type === 'reel';
-    // For photos, src is ig-posts/FILE. For video/reel, src is already ig-thumbs/FILE
-    const imgSrc = isVideo ? item.src : item.src;
-    // For lightbox, always use src (photos from ig-posts, videos from ig-thumbs)
-    const lbSrc = item.src;
+    const isVimeo = item.type === 'vimeo';
+    const imgSrc = isVimeo ? (item.thumbSrc || '') : item.src;
 
-    const captionClean = cleanCaption(item.caption);
-    const playIcon = isVideo
+    const playIcon = (isVideo || isVimeo)
       ? '<div class="play-icon"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg></div>'
       : '';
 
+    const label = isVimeo ? '<div class="vimeo-label">' + escHtml(item.title || '') + (item.duration ? ' (' + item.duration + ')' : '') + '</div>' : '';
+
     div.innerHTML =
       '<img src="' + escHtml(imgSrc) + '" alt="" loading="lazy">' +
-      playIcon +
-      '<div class="overlay"><span>' + escHtml(captionClean || item.credit || '') + '</span></div>';
+      playIcon + label;
 
     div.onclick = function() { openLightbox(start + i); };
     fragment.appendChild(div);
@@ -950,15 +957,28 @@ function showLbItem() {
   if (!item) return;
   const img = document.getElementById('lb-img');
   const vid = document.getElementById('lb-video');
+  let vimeoFrame = document.getElementById('lb-vimeo');
   vid.pause();
-  if (item.videoSrc) {
+  // Remove any existing vimeo iframe
+  if (vimeoFrame) { vimeoFrame.remove(); vimeoFrame = null; }
+
+  if (item.vimeoId) {
+    img.style.display = 'none';
+    vid.style.display = 'none'; vid.src = '';
+    const iframe = document.createElement('iframe');
+    iframe.id = 'lb-vimeo';
+    iframe.src = 'https://player.vimeo.com/video/' + item.vimeoId + '?autoplay=1&title=0&byline=0&portrait=0';
+    iframe.style.cssText = 'width:min(90vw,1000px);height:min(80vh,562px);border:none;border-radius:4px;';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.allowFullscreen = true;
+    img.parentElement.insertBefore(iframe, img);
+  } else if (item.videoSrc) {
     img.style.display = 'none';
     vid.style.display = 'block';
     vid.src = item.videoSrc;
     vid.play();
   } else {
-    vid.style.display = 'none';
-    vid.src = '';
+    vid.style.display = 'none'; vid.src = '';
     img.style.display = 'block';
     img.src = item.src;
   }
@@ -981,6 +1001,8 @@ function closeLightbox() {
   document.getElementById('lb-img').src = '';
   const vid = document.getElementById('lb-video');
   vid.pause(); vid.src = ''; vid.style.display = 'none';
+  const vf = document.getElementById('lb-vimeo');
+  if (vf) vf.remove();
 }
 
 document.getElementById('lightbox').addEventListener('click', function(e) {
