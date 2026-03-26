@@ -779,7 +779,7 @@ function renderNextShow() {
   const doorsStr = show.doors ? 'Doors ' + show.doors : '';
   const timeStr = show.time || '';
   const venueStr = DATA.settings.venue || 'The Parkside Lounge';
-  const performersHtml = (show.performers || []).map(p => '<span>' + escHtml(p) + '</span>').join('');
+  const performersHtml = (show.performers || []).map(p => '<span>' + escHtml(typeof p === 'string' ? p : p.name) + '</span>').join('');
   const ticketHtml = show.ticketUrl
     ? '<a href="' + escHtml(show.ticketUrl) + '" target="_blank" class="btn">Get Tickets</a>'
     : '';
@@ -817,7 +817,7 @@ function renderShowsArchive() {
   const pastShows = DATA.shows.filter(s => !s.isUpcoming);
   grid.innerHTML = pastShows.map(show => {
     const perfText = (show.performers && show.performers.length)
-      ? show.performers.join(', ')
+      ? show.performers.map(p => typeof p === 'string' ? p : p.name).join(', ')
       : (show.description || 'With ' + (show.accompaniment || ''));
     return (
       '<div class="show-card">' +
