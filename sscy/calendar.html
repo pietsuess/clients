@@ -355,6 +355,34 @@ p { text-align: justify; text-justify: inter-word; }
   color: var(--teal-dark);
 }
 
+/* ===== MONTH CALENDAR ===== */
+.cal-wrap { padding: 32px; }
+.cal-header { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 24px; }
+.cal-header h2 { font-size: clamp(1.4rem, 2.5vw, 2rem); color: var(--teal-deep); min-width: 280px; text-align: center; }
+.cal-nav { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); flex-shrink: 0; }
+.cal-nav:hover { border-color: var(--teal); background: var(--cream-warm); }
+.cal-nav svg { width: 18px; height: 18px; stroke: var(--text); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-day-header { font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); text-align: center; padding: 8px 0; }
+.cal-cell { min-height: 100px; background: var(--white); border-radius: var(--radius-sm); padding: 8px; position: relative; border: 1px solid rgba(0,0,0,0.04); transition: var(--transition); }
+.cal-cell.empty { background: transparent; border-color: transparent; }
+.cal-cell.today { border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal); }
+.cal-cell-num { font-size: 0.78rem; font-weight: 600; color: var(--text-light); margin-bottom: 4px; }
+.cal-cell.today .cal-cell-num { color: var(--teal-dark); }
+.cal-event { display: block; font-size: 0.62rem; font-weight: 500; padding: 3px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; text-decoration: none; transition: var(--transition); line-height: 1.3; }
+.cal-event:hover { filter: brightness(0.9); }
+.cal-event.retreat { background: var(--teal); color: var(--white); }
+.cal-event.concert { background: var(--gold); color: var(--charcoal); }
+.cal-event.class { background: var(--cream-warm); color: var(--text); }
+.cal-event.community { background: rgba(26,92,83,0.12); color: var(--teal-deep); }
+.cal-legend { display: flex; gap: 20px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-light); }
+.cal-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.cal-legend-dot.retreat { background: var(--teal); }
+.cal-legend-dot.concert { background: var(--gold); }
+.cal-legend-dot.class { background: var(--cream-warm); border: 1px solid rgba(0,0,0,0.1); }
+.cal-legend-dot.community { background: rgba(26,92,83,0.12); }
+
 /* ===== NOTE BANNER ===== */
 .note-banner {
   background: var(--cream-warm);
@@ -404,6 +432,9 @@ p { text-align: justify; text-justify: inter-word; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
   .sticky-nav-links { display: none; }
   .filter-bar { padding: 16px; }
+  .cal-cell { min-height: 60px; padding: 4px; }
+  .cal-event { font-size: 0.55rem; padding: 2px 4px; }
+  .cal-cell-num { font-size: 0.7rem; }
 }
 </style>
 </head>
@@ -432,6 +463,22 @@ p { text-align: justify; text-justify: inter-word; }
     <div class="hero-badge">69-acre Sanctuary &bull; Salt Spring Island, BC</div>
     <h1 style="margin-top:20px">Events &amp; Calendar</h1>
     <p>Retreats, yoga classes, concerts, and community gatherings throughout the year. No one is turned away for lack of funds.</p>
+  </div>
+</section>
+
+<!-- MONTH CALENDAR -->
+<section class="cal-wrap" id="calWrap">
+  <div class="cal-header">
+    <button class="cal-nav" id="calPrev" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <h2 id="calTitle"></h2>
+    <button class="cal-nav" id="calNext" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-legend">
+    <div class="cal-legend-item"><div class="cal-legend-dot retreat"></div>Retreat</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot concert"></div>Concert</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot class"></div>Weekly Class</div>
+    <div class="cal-legend-item"><div class="cal-legend-dot community"></div>Community</div>
   </div>
 </section>
 
@@ -1026,9 +1073,97 @@ document.getElementById('filterBar').addEventListener('click', e => {
   renderClasses();
 });
 
+// ===== MONTH CALENDAR =====
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+let calMonth = 3; // April (0-indexed)
+let calYear = 2026;
+
+// Map recurring classes to day-of-week indices for calendar dots
+const CLASS_DAY_MAP = {};
+CLASSES.forEach(c => {
+  if (c.day === 'Daily') { for (let i = 0; i < 7; i++) { if (!CLASS_DAY_MAP[i]) CLASS_DAY_MAP[i] = []; CLASS_DAY_MAP[i].push(c); } }
+  else { const idx = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].indexOf(c.day); if (idx >= 0) { if (!CLASS_DAY_MAP[idx]) CLASS_DAY_MAP[idx] = []; CLASS_DAY_MAP[idx].push(c); } }
+});
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  document.getElementById('calTitle').textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+  // Events indexed by date
+  const eventsByDate = {};
+  EVENTS.forEach(e => {
+    // Handle multi-day events by parsing dateLabel for ranges
+    const startDate = e.date;
+    const startD = new Date(startDate + 'T12:00:00');
+    // Check if dateLabel contains a range like "April 2 - 6"
+    const rangeMatch = e.dateLabel.match(/(\w+)\s+(\d+)\s*-\s*(\d+)/);
+    if (rangeMatch) {
+      const endDay = parseInt(rangeMatch[3]);
+      const startDay = parseInt(rangeMatch[2]);
+      for (let d = startDay; d <= endDay; d++) {
+        const key = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        if (!eventsByDate[key]) eventsByDate[key] = [];
+        eventsByDate[key].push(e);
+      }
+    } else {
+      if (!eventsByDate[startDate]) eventsByDate[startDate] = [];
+      eventsByDate[startDate].push(e);
+    }
+  });
+
+  let html = DAY_NAMES.map(d => '<div class="cal-day-header">' + d + '</div>').join('');
+
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const dow = new Date(calYear, calMonth, d).getDay();
+    const isToday = dateStr === todayStr;
+    const dayEvents = eventsByDate[dateStr] || [];
+    const dayClasses = CLASS_DAY_MAP[dow] || [];
+
+    html += '<div class="cal-cell' + (isToday ? ' today' : '') + '">';
+    html += '<div class="cal-cell-num">' + d + '</div>';
+
+    // Show up to 3 event pills, then "+N more"
+    const allItems = [];
+    // Deduplicate multi-day events (show title only once per day)
+    const seenIds = new Set();
+    dayEvents.forEach(e => { if (!seenIds.has(e.id)) { seenIds.add(e.id); allItems.push({ name: e.title, type: e.type, url: e.url }); } });
+    dayClasses.forEach(c => allItems.push({ name: c.name, type: c.type, url: null }));
+
+    const maxShow = 3;
+    allItems.slice(0, maxShow).forEach(item => {
+      if (item.url) {
+        html += '<a href="' + item.url + '" target="_blank" rel="noopener" class="cal-event ' + item.type + '" title="' + item.name + '">' + item.name + '</a>';
+      } else {
+        html += '<div class="cal-event ' + item.type + '" title="' + item.name + '">' + item.name + '</div>';
+      }
+    });
+    if (allItems.length > maxShow) {
+      html += '<div class="cal-event community" style="text-align:center;cursor:default;">+' + (allItems.length - maxShow) + ' more</div>';
+    }
+
+    html += '</div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+document.getElementById('calPrev').addEventListener('click', () => { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); });
+document.getElementById('calNext').addEventListener('click', () => { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); });
+
 // Initial render
 renderEvents();
 renderClasses();
+renderCalendar();
 </script>
 </body>
 </html>
