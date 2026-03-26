@@ -97,31 +97,63 @@
         /* Progress dots */
         .progress {
             position: fixed;
-            right: 24px;
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             z-index: 100;
         }
 
+        .progress-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
         .progress-dot {
-            width: 8px;
-            height: 8px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.1);
             cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
+            transition: transform 0.3s, background 0.3s, border-color 0.3s;
+            flex-shrink: 0;
         }
 
         .progress-dot.active {
-            background: rgba(255, 255, 255, 0.8);
-            transform: scale(1.4);
+            background: rgba(255, 255, 255, 0.7);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.15);
         }
 
         .progress-dot:hover {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-label {
+            position: absolute;
+            right: 36px;
+            white-space: nowrap;
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 6px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(6px);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .progress-item:hover .progress-label {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* Scroll cue */
@@ -277,7 +309,14 @@
                 '</div>';
             stage.appendChild(el);
 
-            // Progress dot
+            // Progress dot with label
+            var item = document.createElement('div');
+            item.className = 'progress-item';
+
+            var label = document.createElement('div');
+            label.className = 'progress-label';
+            label.textContent = card.title;
+
             var dot = document.createElement('div');
             dot.className = 'progress-dot';
             dot.addEventListener('click', function() {
@@ -286,11 +325,14 @@
                     behavior: 'smooth'
                 });
             });
-            progress.appendChild(dot);
+
+            item.appendChild(label);
+            item.appendChild(dot);
+            progress.appendChild(item);
         });
 
         var cardEls = stage.querySelectorAll('.card');
-        var dotEls = progress.querySelectorAll('.progress-dot');
+        var dotEls = progress.querySelectorAll('.progress-item .progress-dot');
 
         function update() {
             var scrollY = window.scrollY;
@@ -309,7 +351,7 @@
                 // Progress through this card: 0 = card is centered, -1 = one screen before, +1 = one screen after
                 var t = (scrollY / vh) - i;
 
-                if (t < -1.2 || t > 1.2) {
+                if (t < -1.5 || t > 1.5) {
                     // Off screen - hide for performance
                     el.style.display = 'none';
                     return;
@@ -317,30 +359,28 @@
 
                 el.style.display = '';
 
-                var translateZ, translateY, scale, opacity;
+                var translateZ, translateY, scale;
 
                 if (t <= 0) {
-                    // Card is current or approaching from behind
+                    // Card is approaching from behind (next up)
                     // t = -1: far back, small. t = 0: full screen, right here
                     translateZ = t * 800;           // -800 (far) to 0 (here)
                     translateY = 0;
                     scale = 1 + t * 0.3;            // 0.7 (far) to 1.0 (here)
-                    opacity = 1 + t * 0.6;          // 0.4 (far) to 1.0 (here)
                 } else {
-                    // Card has been scrolled past - moves down and forward past us
-                    translateZ = t * 600;            // 0 to 600 (past us, huge)
-                    translateY = t * 40;             // slides down percent
-                    scale = 1 + t * 0.5;            // grows as it comes past
-                    opacity = 1 - t * 1.2;          // fades out quickly
+                    // Card has been scrolled past - drops forward and down past us
+                    translateZ = t * 900;            // 0 to 900 (rushes past)
+                    translateY = t * 60;             // drops down
+                    scale = 1 + t * 0.6;            // grows as it comes past
                 }
 
-                opacity = Math.max(0, Math.min(1, opacity));
-
+                // No opacity change - card stays fully opaque, drops away to reveal the one behind
                 el.style.transform =
                     'translate3d(0, ' + translateY + 'vh, ' + translateZ + 'px) ' +
                     'scale(' + Math.max(0.01, scale) + ')';
-                el.style.opacity = opacity;
-                el.style.zIndex = numCards - Math.abs(Math.round(t));
+                el.style.opacity = 1;
+                // Cards further back render behind cards closer to us
+                el.style.zIndex = i;
 
                 // Active dot
                 dotEls[i].classList.toggle('active', i === activeIndex);
