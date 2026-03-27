@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe: Scatter</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            background: #1a1a1a;
+            overflow: hidden;
+            height: 100%;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #fff;
+            user-select: none;
+        }
+
+        .table {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, #222 0%, #111 100%);
+        }
+
+        .card {
+            position: absolute;
+            width: 320px;
+            height: 420px;
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: grab;
+            transition: box-shadow 0.3s, transform 0.15s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        .card.held {
+            cursor: grabbing;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            transition: box-shadow 0.15s;
+        }
+
+        .card-visual {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .card-info {
+            padding: 24px 28px;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-type {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            opacity: 0.5;
+            margin-bottom: 5px;
+        }
+
+        .card-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .card-detail {
+            font-size: 0.78rem;
+            opacity: 0.6;
+            line-height: 1.4;
+            text-align: justify;
+            text-align-last: left;
+        }
+
+        .hint {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.2;
+            pointer-events: none;
+            transition: opacity 0.6s;
+        }
+
+        .hint.hidden { opacity: 0; }
+    </style>
+</head>
+<body>
+
+<div class="table" id="table"></div>
+<div class="hint" id="hint">Pick up a card</div>
+
+<script>
+var cards = [
+    { type:"place", tag:"The Land", name:"69 Acres of Sanctuary", detail:"Forests, gardens, ponds, temples", bg:"linear-gradient(135deg, #2d5a27, #4a8a3e)" },
+    { type:"quote", tag:"Babaji", name:"Peace. No more than that.", detail:"When asked about his only goal in life", bg:"linear-gradient(135deg, #1a1a2e, #2a2a3e)" },
+    { type:"program", tag:"Retreat", name:"Weekend Yoga Retreat", detail:"2 nights of practice, rest, and renewal", bg:"linear-gradient(135deg, #1a5c53, #2a8a7d)" },
+    { type:"place", tag:"Venue", name:"The Pond Dome", detail:"Geodesic dome by the water", bg:"linear-gradient(135deg, #4a6670, #6a8a94)" },
+    { type:"product", tag:"Shop", name:"Salt Spring Island Cooking", detail:"The beloved cookbook, 52,000 copies sold", bg:"linear-gradient(135deg, #8a6a3a, #aa8a5a)" },
+    { type:"quote", tag:"Babaji", name:"Shadow fighting.", detail:"When asked if life is a comedy or a drama", bg:"linear-gradient(135deg, #2a1a2e, #3a2a3e)" },
+    { type:"program", tag:"Training", name:"200-Hour Teacher Training", detail:"Become a certified yoga teacher", bg:"linear-gradient(135deg, #5a3a1a, #7a5a3a)" }
+];
+
+var table = document.getElementById('table');
+var hint = document.getElementById('hint');
+var topZ = cards.length + 1;
+var cardEls = [];
+var heldCard = null;
+var holdOffsetX = 0;
+var holdOffsetY = 0;
+var lastMouseX = 0;
+var lastMouseY = 0;
+var throwVX = 0;
+var throwVY = 0;
+
+// Scatter cards randomly across the viewport
+function scatterCard(el) {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var pad = 60;
+    var x = pad + Math.random() * (vw - 320 - pad * 2);
+    var y = pad + Math.random() * (vh - 420 - pad * 2);
+    var rot = (Math.random() - 0.5) * 30; // -15 to +15 degrees
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.transform = 'rotate(' + rot + 'deg)';
+    el._scatterRot = rot;
+}
+
+// Build card elements
+cards.forEach(function(c, i) {
+    var el = document.createElement('div');
+    el.className = 'card';
+    el.style.background = c.bg;
+    el.style.zIndex = i + 1;
+    el.innerHTML =
+        '<div class="card-visual">' + (c.type === 'quote' ? '\u201C' : '') + '</div>' +
+        '<div class="card-info">' +
+            '<div class="card-type">' + c.tag + '</div>' +
+            '<div class="card-name">' + c.name + '</div>' +
+            '<div class="card-detail">' + c.detail + '</div>' +
+        '</div>';
+
+    scatterCard(el);
+    table.appendChild(el);
+    cardEls.push(el);
+
+    // Mouse down: pick up
+    el.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        pickUp(el, e.clientX, e.clientY);
+    });
+
+    // Touch start: pick up
+    el.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        var t = e.touches[0];
+        pickUp(el, t.clientX, t.clientY);
+    });
+});
+
+function pickUp(el, mx, my) {
+    heldCard = el;
+    var rect = el.getBoundingClientRect();
+    holdOffsetX = mx - rect.left;
+    holdOffsetY = my - rect.top;
+    lastMouseX = mx;
+    lastMouseY = my;
+    throwVX = 0;
+    throwVY = 0;
+
+    // Bring to front
+    topZ++;
+    el.style.zIndex = topZ;
+    el.classList.add('held');
+
+    // Straighten up when held
+    el.style.transform = 'rotate(0deg) scale(1.04)';
+    el.style.transition = 'box-shadow 0.15s, transform 0.15s';
+
+    hint.classList.add('hidden');
+}
+
+function moveCard(mx, my) {
+    if (!heldCard) return;
+    // Track velocity for throw
+    throwVX = mx - lastMouseX;
+    throwVY = my - lastMouseY;
+    lastMouseX = mx;
+    lastMouseY = my;
+
+    var x = mx - holdOffsetX;
+    var y = my - holdOffsetY;
+    heldCard.style.left = x + 'px';
+    heldCard.style.top = y + 'px';
+
+    // Slight tilt based on horizontal velocity
+    var tilt = Math.max(-12, Math.min(12, throwVX * 0.8));
+    heldCard.style.transform = 'rotate(' + tilt + 'deg) scale(1.04)';
+    heldCard.style.transition = 'box-shadow 0.15s';
+}
+
+function release() {
+    if (!heldCard) return;
+    var el = heldCard;
+    heldCard = null;
+    el.classList.remove('held');
+
+    var speed = Math.sqrt(throwVX * throwVX + throwVY * throwVY);
+
+    if (speed > 6) {
+        // Thrown: animate in the throw direction, then scatter to a random spot
+        var throwDist = Math.min(speed * 8, 400);
+        var angle = Math.atan2(throwVY, throwVX);
+        var landX = parseFloat(el.style.left) + Math.cos(angle) * throwDist;
+        var landY = parseFloat(el.style.top) + Math.sin(angle) * throwDist;
+
+        // Keep in bounds
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        landX = Math.max(20, Math.min(vw - 340, landX));
+        landY = Math.max(20, Math.min(vh - 440, landY));
+
+        var landRot = (Math.random() - 0.5) * 40;
+
+        el.style.transition = 'left 0.5s cubic-bezier(0.16, 1, 0.3, 1), top 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s';
+        el.style.left = landX + 'px';
+        el.style.top = landY + 'px';
+        el.style.transform = 'rotate(' + landRot + 'deg) scale(1)';
+
+        setTimeout(function() {
+            el.style.transition = 'box-shadow 0.3s, transform 0.15s';
+        }, 550);
+    } else {
+        // Gentle set-down: slight random rotation
+        var setRot = (Math.random() - 0.5) * 10;
+        el.style.transition = 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s';
+        el.style.transform = 'rotate(' + setRot + 'deg) scale(1)';
+
+        setTimeout(function() {
+            el.style.transition = 'box-shadow 0.3s, transform 0.15s';
+        }, 350);
+    }
+}
+
+// Mouse move / up
+document.addEventListener('mousemove', function(e) {
+    moveCard(e.clientX, e.clientY);
+});
+
+document.addEventListener('mouseup', function() {
+    release();
+});
+
+// Touch move / end
+document.addEventListener('touchmove', function(e) {
+    if (heldCard) {
+        e.preventDefault();
+        var t = e.touches[0];
+        moveCard(t.clientX, t.clientY);
+    }
+}, { passive: false });
+
+document.addEventListener('touchend', function() {
+    release();
+});
+
+// Re-scatter on resize
+window.addEventListener('resize', function() {
+    cardEls.forEach(function(el) {
+        if (el !== heldCard) scatterCard(el);
+    });
+});
+</script>
+</body>
+</html>
