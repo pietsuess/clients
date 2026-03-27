@@ -1484,6 +1484,10 @@ window.addEventListener('scroll', function() {
 // ===== INIT =====
 renderProducts();
 updateCartUI();
+
+// Auto-open donate if #donate in URL
+if (window.location.hash === '#donate') openDonateGeneral();
+window.addEventListener('hashchange', function() { if (window.location.hash === '#donate') openDonateGeneral(); });
 </script>
 </body>
 </html>
