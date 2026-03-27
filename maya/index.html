@@ -1155,7 +1155,7 @@ function openShowDetail(idx) {
   if (show.notes) html += '<div class="sd-notes">' + escHtml(show.notes) + '</div>';
   if (show.ticketUrl) html += '<div style="margin:20px 0"><a href="' + escHtml(show.ticketUrl) + '" target="_blank" class="btn">Get Tickets</a></div>';
   if (show.performers && show.performers.length) {
-    html += '<div class="sd-section-title">Performers</div>';
+    html += '<div style="clear:both"></div><div class="sd-section-title">Performers</div>';
     show.performers.forEach(function(p) {
       if (typeof p === 'string') { html += '<div class="sd-performer"><div class="sd-perf-name">' + escHtml(p) + '</div></div>'; return; }
       html += '<div class="sd-performer">';
