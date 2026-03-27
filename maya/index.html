@@ -977,15 +977,24 @@ function renderPress() {
   const section = document.getElementById('pressSection');
   const links = DATA.settings.pressLinks || [];
   if (!links.length) return;
-
-  const svgIcon = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>';
-  section.innerHTML =
-    '<h3 style="font-family:\'Space Grotesk\',sans-serif;font-size:1.6rem;margin-bottom:16px;">Press</h3>' +
-    links.map(l =>
-      '<a href="' + escHtml(l.url) + '" target="_blank" class="press-link">' +
-        svgIcon + ' ' + escHtml(l.title) + (l.date ? ' - ' + escHtml(l.date) : '') +
-      '</a>'
-    ).join(' ');
+  const svgIcon = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>';
+  var press = links.filter(l => l.type === 'press');
+  var features = links.filter(l => l.type === 'feature');
+  var listings = links.filter(l => l.type === 'listing');
+  var html = '';
+  if (press.length) {
+    html += '<h3 style="font-family:\'Space Grotesk\',sans-serif;font-size:1.4rem;margin-bottom:12px;">Press</h3>';
+    html += press.map(l => '<a href="' + escHtml(l.url) + '" target="_blank" class="press-link">' + svgIcon + ' ' + escHtml(l.title) + (l.date ? ' - ' + escHtml(l.date) : '') + '</a>').join(' ');
+  }
+  if (features.length) {
+    html += '<h3 style="font-family:\'Space Grotesk\',sans-serif;font-size:1.4rem;margin:24px 0 12px;">Features</h3>';
+    html += features.map(l => '<a href="' + escHtml(l.url) + '" target="_blank" class="press-link">' + svgIcon + ' ' + escHtml(l.title) + '</a>').join(' ');
+  }
+  if (listings.length) {
+    html += '<h3 style="font-family:\'Space Grotesk\',sans-serif;font-size:1.4rem;margin:24px 0 12px;">Listings</h3>';
+    html += listings.map(l => '<a href="' + escHtml(l.url) + '" target="_blank" class="press-link">' + svgIcon + ' ' + escHtml(l.title) + '</a>').join(' ');
+  }
+  section.innerHTML = html;
 }
 
 /* ========================================
