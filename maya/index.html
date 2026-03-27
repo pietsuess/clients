@@ -505,10 +505,12 @@ footer a:hover{color:var(--pink)}
 .show-detail{position:fixed;inset:0;z-index:9999;background:var(--plum);display:none;overflow-y:auto}
 .show-detail.active{display:block}
 .show-detail-back{position:fixed;top:20px;left:24px;z-index:10001;padding:10px 20px;border-radius:0;background:rgba(26,10,30,0.7);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:0.85rem;letter-spacing:0.08em;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.2s;font-family:'DM Sans',sans-serif}
-.show-nav-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:10001;width:44px;height:44px;border-radius:0;background:rgba(26,10,30,0.5);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.1);color:rgba(245,240,230,0.5);font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s,color 0.2s}
-.show-nav-arrow:hover{background:rgba(232,74,138,0.4);color:#fff}
-.show-nav-prev{left:20px}
-.show-nav-next{right:20px}
+.show-nav-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:10001;width:60px;height:300px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s;opacity:0.25}
+.show-nav-arrow:hover{opacity:0.7}
+.show-nav-arrow svg{width:40px;height:300px;fill:rgba(245,240,230,0.6)}
+.show-nav-arrow:hover svg{fill:var(--pink)}
+.show-nav-prev{left:4vw}
+.show-nav-next{right:4vw}
 .show-detail-back:hover{background:rgba(232,74,138,0.4)}
 .show-detail-close{position:fixed;top:20px;right:24px;z-index:10001;width:44px;height:44px;border-radius:0;background:rgba(26,10,30,0.7);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
 .show-detail-close:hover{background:rgba(232,74,138,0.4)}
@@ -542,8 +544,8 @@ footer a:hover{color:var(--pink)}
 <div class="show-detail" id="showDetail">
   <button class="show-detail-back" onclick="closeShowDetail()">&#8592; Back</button>
   <button class="show-detail-close" onclick="closeShowDetail()">&times;</button>
-  <button class="show-nav-arrow show-nav-prev" id="showNavPrev" onclick="navShow(-1)">&#8249;</button>
-  <button class="show-nav-arrow show-nav-next" id="showNavNext" onclick="navShow(1)">&#8250;</button>
+  <button class="show-nav-arrow show-nav-prev" id="showNavPrev" onclick="navShow(-1)"><svg viewBox="0 0 20 100"><polygon points="20,0 0,50 20,100"/></svg></button>
+  <button class="show-nav-arrow show-nav-next" id="showNavNext" onclick="navShow(1)"><svg viewBox="0 0 20 100"><polygon points="0,0 20,50 0,100"/></svg></button>
   <div id="showDetailContent"></div>
 </div>
 
