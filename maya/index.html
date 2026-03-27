@@ -503,8 +503,8 @@ footer a:hover{color:var(--pink)}
 .show-detail-back:hover{background:rgba(232,74,138,0.4)}
 .show-detail-close{position:fixed;top:20px;right:24px;z-index:10001;width:44px;height:44px;border-radius:50%;background:rgba(26,10,30,0.7);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
 .show-detail-close:hover{background:rgba(232,74,138,0.4)}
-.show-detail-hero{width:45%;max-width:450px;float:left;margin:10px 40px 30px 0;cursor:pointer}
-.show-detail-hero img{width:100%;height:auto;display:block;border-radius:8px}
+.show-detail-hero{display:none}
+.show-detail-hero img{display:none}
 .show-detail-content{width:85%;max-width:1400px;margin:0 auto;padding:80px 0 80px}
 .show-detail-content h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.5rem,8vw,4.5rem);font-weight:700;line-height:1;margin:-30px 0 8px;position:relative;z-index:2}
 .show-detail-content .sd-meta{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:6px}
@@ -1128,23 +1128,25 @@ function openShowDetail(idx) {
   const venue = DATA.settings.venue || 'The Parkside Lounge';
   const addr = DATA.settings.venueAddress || '';
   let html = '';
+  // Narrow header column: poster + title + meta
+  html += '<div style="max-width:900px;margin:0 auto;text-align:center">';
   if (show.posterImage) {
-    html += '<div class="show-detail-hero" onclick="event.stopPropagation();openLbDirect(\'' + escHtml(show.posterImage).replace(/'/g,"\\'") + '\')"><img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '"></div>';
+    html += '<div style="cursor:pointer;margin-bottom:24px" onclick="event.stopPropagation();openLbDirect(\'' + escHtml(show.posterImage).replace(/'/g,"\\'") + '\')"><img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" style="max-width:100%;height:auto;border-radius:8px"></div>';
   }
-  html += '<div class="show-detail-content">';
   html += '<h1>' + escHtml(show.title) + '</h1>';
   html += '<div class="sd-meta">' + dateStr + (show.time ? ' - ' + escHtml(show.time) : '') + '</div>';
   html += '<div class="sd-venue">' + escHtml(venue) + ' - ' + escHtml(addr) + (show.doors ? ' - Doors ' + escHtml(show.doors) : '') + '</div>';
   if (show.edition) html += '<div class="sd-notes">Edition #' + show.edition + '</div>';
-  html += '<div class="sd-crew">';
+  html += '<div class="sd-crew" style="justify-content:center">';
   if (show.emcee) html += '<span>Emcee: ' + escHtml(show.emcee) + '</span>';
   if (show.accompaniment) html += '<span>Accompaniment: ' + escHtml(show.accompaniment) + '</span>';
   html += '<span>Sets: <a href="https://www.instagram.com/libbys_arty_party/" target="_blank" style="color:inherit;border-bottom:1px solid var(--pink)">Libby Paloma</a></span>';
   html += '</div>';
   if (show.notes) html += '<div class="sd-notes">' + escHtml(show.notes) + '</div>';
   if (show.ticketUrl) html += '<div style="margin:20px 0"><a href="' + escHtml(show.ticketUrl) + '" target="_blank" class="btn">Get Tickets</a></div>';
-  // Clear the float so everything below is full width
-  html += '<div style="clear:both"></div>';
+  html += '</div>';
+  // Full width content below
+  html += '<div class="show-detail-content">';
   if (show.performers && show.performers.length) {
     html += '<div class="sd-section-title">Performers</div>';
     show.performers.forEach(function(p) {
