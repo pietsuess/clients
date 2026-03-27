@@ -263,11 +263,14 @@ p { text-align: justify; text-justify: inter-word; }
   .sn-logo { height: 40px !important; }
   .hamburger { right: 16px !important; }
   .mobile-menu { top: 77px; }
-  .hero-top-logo { height: 36px; top: 12px; left: 16px; }
-  .hero { height: 70vh; }
-  .hero-content h1 { font-size: 2rem; }
-  .hero-logo { width: clamp(240px, 70vw, 380px) !important; margin-top: -60px !important; }
+  .hero-top-logo { display: none; }
+  .hero { height: 50vh; }
+  .hero-content h1 { font-size: 1.6rem; }
+  .hero-logo { width: clamp(200px, 60vw, 320px) !important; margin-top: -40px !important; }
+  .hero-content { opacity: 1 !important; transform: none !important; }
   .hz { display: none; }
+  .sticky-nav { position: sticky; top: 0; }
+  .sn-logo-wrap { opacity: 1 !important; }
   .babaji-qa { padding: 32px 16px; }
   .qa-wrap { flex-direction: column; text-align: center; gap: 16px; }
   .qa-photo { width: 120px; height: 150px; }
@@ -281,8 +284,9 @@ p { text-align: justify; text-justify: inter-word; }
   .about-hero { min-height: 60vh; }
   .about-hero-content { padding: 32px 16px; }
   .about-hero-content h2 { font-size: 1.6rem; }
-  .quick-links { grid-template-columns: repeat(2, 1fr); }
-  .quick-link { padding: 20px 8px; font-size: 0.72rem; }
+  .quick-links { grid-template-columns: repeat(4, 1fr); }
+  .quick-link { padding: 10px 6px; font-size: 0.6rem; }
+  .quick-links.sticky { top: 77px; }
   .text-section { padding: 48px 16px; }
   .text-section h2, .split-text h2 { font-size: 1.5rem; }
   .split-text { padding: 40px 16px; }
@@ -660,25 +664,25 @@ document.getElementById('floatQuote2').textContent = '\u201C' + rq.a + '\u201D';
 // Hero entrance
 setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
 
-// Nav + hero blur on scroll
+// Nav + hero blur on scroll (desktop only)
+var isMobile = window.innerWidth <= 768;
 var nav = document.getElementById('siteNav');
 var navLogo = document.getElementById('navLogo');
 var heroImg = document.getElementById('heroImg');
-window.addEventListener('scroll', function() {
-  var s = window.scrollY;
-  var h = window.innerHeight;
-  // Hero blur
-  var blur = Math.min(s / h * 12, 12);
-  heroImg.style.filter = 'blur(' + blur + 'px)';
-  // Hero parallax
-  heroImg.style.transform = 'translateY(' + (s * 0.15) + 'px)';
-  // Hero content fade
-  var heroContent = document.getElementById('heroText');
-  if (heroContent) {
-    heroContent.style.opacity = Math.max(0, 1 - s / (h * 0.5));
-    heroContent.style.transform = 'scale(' + Math.max(0.9, 1 - s / (h * 5)) + ') translateY(' + (s * 0.2) + 'px)';
-  }
-});
+if (!isMobile) {
+  window.addEventListener('scroll', function() {
+    var s = window.scrollY;
+    var h = window.innerHeight;
+    var blur = Math.min(s / h * 12, 12);
+    heroImg.style.filter = 'blur(' + blur + 'px)';
+    heroImg.style.transform = 'translateY(' + (s * 0.15) + 'px)';
+    var heroContent = document.getElementById('heroText');
+    if (heroContent) {
+      heroContent.style.opacity = Math.max(0, 1 - s / (h * 0.5));
+      heroContent.style.transform = 'scale(' + Math.max(0.9, 1 - s / (h * 5)) + ') translateY(' + (s * 0.2) + 'px)';
+    }
+  });
+}
 
 // Sticky nav - scroll-driven slide
 var stickyNav = document.getElementById('stickyNav');
@@ -780,12 +784,17 @@ function animateNavLinks() {
   }
 }
 
-window.addEventListener('scroll', function() {
+if (!isMobile) {
+  window.addEventListener('scroll', function() {
+    checkSticky();
+    animateNavLinks();
+  });
   checkSticky();
   animateNavLinks();
-});
-checkSticky();
-animateNavLinks();
+} else {
+  // On mobile: show logo immediately, no scroll animations
+  if (navLogoWrap) navLogoWrap.style.opacity = '1';
+}
 
 // Quick links entrance
 var qlObs = new IntersectionObserver(function(entries) {
