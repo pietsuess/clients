@@ -854,15 +854,17 @@ cards.forEach(function(c, i) {
 // ---- WHEEL / SCROLL GESTURE = CHANGE CARDS (responsive, not snapping) ----
 // Wheel directly drives vScroll with momentum
 var vVelocity = 0;
-var WHEEL_SENSITIVITY = 0.0008; // how much each pixel of wheel delta moves between cards
-var FRICTION = 0.92; // momentum decay per frame
-var SNAP_STRENGTH = 0.04; // how hard it snaps to nearest card when nearly stopped
+var WHEEL_SENSITIVITY = 0.00015; // very gentle: a normal scroll barely nudges
+var FRICTION = 0.88; // decays faster so momentum dies quickly
+var SNAP_STRENGTH = 0.03; // soft snap to nearest card
+var MAX_VELOCITY = 0.035; // cap so you can never fly through more than ~1 card
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
-    // Feed wheel delta directly into velocity
     vVelocity += e.deltaY * WHEEL_SENSITIVITY;
-    // Cancel any HUD jump animation
+    // Clamp velocity so rapid scrolling can't skip cards
+    if (vVelocity > MAX_VELOCITY) vVelocity = MAX_VELOCITY;
+    if (vVelocity < -MAX_VELOCITY) vVelocity = -MAX_VELOCITY;
     targetCard = null;
 }, { passive: false });
 
