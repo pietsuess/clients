@@ -346,13 +346,14 @@
         /* Lure orb - a floating shape that drifts down, inviting the mouse to chase it */
         .lure-orb {
             position: fixed;
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,255,255,0.35), rgba(255,255,255,0.08));
-            box-shadow: 0 0 16px rgba(255,255,255,0.12);
+            background: radial-gradient(circle, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+            box-shadow: 0 0 20px rgba(255,255,255,0.15), 0 0 40px rgba(255,255,255,0.05);
             z-index: 9999;
-            pointer-events: none;
+            pointer-events: auto;
+            cursor: pointer;
             opacity: 0;
             transition: opacity 0.6s;
         }
@@ -850,35 +851,19 @@ cards.forEach(function(c, i) {
     dotEls.push(dot);
 });
 
-// ---- WHEEL / SCROLL GESTURE = CHANGE CARDS ----
-// Accumulate wheel delta, snap to next/prev card
-var wheelAccum = 0;
-var WHEEL_THRESHOLD = 120; // pixels of wheel delta to trigger card change
-var transitioning = false;
+// ---- WHEEL / SCROLL GESTURE = CHANGE CARDS (responsive, not snapping) ----
+// Wheel directly drives vScroll with momentum
+var vVelocity = 0;
+var WHEEL_SENSITIVITY = 0.0008; // how much each pixel of wheel delta moves between cards
+var FRICTION = 0.92; // momentum decay per frame
+var SNAP_STRENGTH = 0.04; // how hard it snaps to nearest card when nearly stopped
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
-
-    // Don't accept new wheel input while animating between cards
-    if (transitioning) return;
-
-    wheelAccum += e.deltaY;
-
-    if (wheelAccum > WHEEL_THRESHOLD) {
-        // Next card
-        wheelAccum = 0;
-        if (vScroll < maxScroll) {
-            transitioning = true;
-            targetCard = Math.min(Math.round(vScroll) + 1, maxScroll);
-        }
-    } else if (wheelAccum < -WHEEL_THRESHOLD) {
-        // Prev card
-        wheelAccum = 0;
-        if (vScroll > 0) {
-            transitioning = true;
-            targetCard = Math.max(Math.round(vScroll) - 1, 0);
-        }
-    }
+    // Feed wheel delta directly into velocity
+    vVelocity += e.deltaY * WHEEL_SENSITIVITY;
+    // Cancel any HUD jump animation
+    targetCard = null;
 }, { passive: false });
 
 // Block native touch scroll
@@ -897,54 +882,74 @@ document.addEventListener('mouseleave', function() {
 function tick() {
     requestAnimationFrame(tick);
 
-    // Animate vScroll toward target card
+    // HUD click: animate to target card
     if (targetCard !== null) {
         var diff = targetCard - vScroll;
         if (Math.abs(diff) < 0.005) {
             vScroll = targetCard;
             targetCard = null;
-            transitioning = false;
+            vVelocity = 0;
         } else {
-            vScroll += diff * 0.1;
+            vVelocity = diff * 0.08;
         }
     }
 
-    vScroll = Math.max(0, Math.min(maxScroll, vScroll));
+    // Apply velocity with friction
+    vScroll += vVelocity;
+    vVelocity *= FRICTION;
+
+    // Soft snap to nearest card when nearly stopped
+    if (Math.abs(vVelocity) < 0.003 && targetCard === null) {
+        var nearest = Math.round(vScroll);
+        var snapDiff = nearest - vScroll;
+        if (Math.abs(snapDiff) > 0.001) {
+            vScroll += snapDiff * SNAP_STRENGTH;
+        }
+    }
+
+    // Clamp
+    if (vScroll < 0) { vScroll = 0; vVelocity = 0; }
+    if (vScroll > maxScroll) { vScroll = maxScroll; vVelocity = 0; }
 
     var activeIndex = Math.min(Math.round(vScroll), numCards - 1);
 
     // Check if active card has scrollable content
     var activeBody = cardBodies[activeIndex];
     var hasMore = activeBody && (activeBody.scrollTop < (activeBody.scrollHeight - activeBody.clientHeight - 2));
+    var hasScrolledDown = activeBody && activeBody.scrollTop > 5;
     var isScrollable = activeBody && (activeBody.scrollHeight > activeBody.clientHeight + 10);
 
-    // Mouse in bottom 30%: auto-scroll the active card's content
-    var inScrollZone = mouseY > 0.70;
+    // Mouse in bottom 30%: auto-scroll the active card's content DOWN
+    var inScrollDown = mouseY > 0.75;
+    // Mouse in top 15%: auto-scroll the active card's content UP
+    var inScrollUp = mouseY < 0.15 && hasScrolledDown;
 
-    if (inScrollZone && activeBody && hasMore) {
-        var intensity = (mouseY - 0.70) / 0.30;
-        activeBody.scrollTop += intensity * 4;
+    if (inScrollDown && activeBody && hasMore) {
+        var intensity = (mouseY - 0.75) / 0.25;
+        activeBody.scrollTop += intensity * 5;
+    } else if (inScrollUp && activeBody) {
+        var intensity = (0.15 - mouseY) / 0.15;
+        activeBody.scrollTop -= intensity * 5;
     }
 
-    // Show indicator when card has scrollable content and hasn't been scrolled to bottom
-    scrollIndicator.classList.toggle('visible', isScrollable && hasMore && !inScrollZone);
+    // Show indicator when card has scrollable content not yet at bottom, and mouse is in neutral zone
+    scrollIndicator.classList.toggle('visible', isScrollable && hasMore && !inScrollDown);
 
-    // Lure orb: floats down the screen when there's more content, inviting chase
-    if (isScrollable && hasMore && !inScrollZone) {
+    // Lure orb: drifts in bottom 80-92% of screen, inviting mouse to chase it down
+    if (isScrollable && hasMore && !inScrollDown) {
         lureOrb.classList.add('visible');
         lureOrb.classList.remove('caught');
-        // Drift the orb in a gentle arc toward the bottom
         var time = Date.now() * 0.001;
-        var orbX = 50 + Math.sin(time * 0.7) * 15; // % from left
-        var orbBaseY = 65 + Math.sin(time * 0.4) * 8; // % from top, hovers in lower area
+        var orbX = 50 + Math.sin(time * 0.6) * 20;
+        var orbBaseY = 82 + Math.sin(time * 0.35) * 6; // 76-88% range
         lureOrb.style.left = orbX + '%';
         lureOrb.style.top = orbBaseY + '%';
-    } else if (inScrollZone && lureOrb.classList.contains('visible')) {
-        // Mouse caught the orb zone
+    } else if (inScrollDown && lureOrb.classList.contains('visible')) {
         lureOrb.classList.add('caught');
         setTimeout(function() { lureOrb.classList.remove('visible'); }, 300);
     } else if (!isScrollable || !hasMore) {
         lureOrb.classList.remove('visible');
+        lureOrb.classList.remove('caught');
     }
 
     // Render card transforms
