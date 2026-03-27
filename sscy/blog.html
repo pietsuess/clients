@@ -217,6 +217,16 @@ p { text-align: justify; text-justify: inter-word; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
 .footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
 
+/* SEARCH BAR */
+.search-bar { padding: 24px 32px 0; }
+.search-inner { max-width: 500px; margin: 0 auto; position: relative; display: flex; align-items: center; }
+.search-icon { position: absolute; left: 16px; color: var(--text-light); pointer-events: none; }
+.search-inner input { width: 100%; padding: 14px 44px 14px 48px; border: 1.5px solid rgba(0,0,0,0.1); background: var(--white); border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; color: var(--text); transition: border-color 0.25s, box-shadow 0.25s; }
+.search-inner input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(59,184,168,0.12); }
+.search-inner input::placeholder { color: var(--text-light); opacity: 0.6; }
+.search-clear { position: absolute; right: 14px; background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; padding: 4px; line-height: 1; }
+.search-clear:hover { color: var(--text); }
+
 /* HAMBURGER */
 .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; z-index: 100; position: absolute; right: 32px; top: 50%; transform: translateY(-50%); }
 .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s ease; border-radius: 2px; }
@@ -319,6 +329,15 @@ p { text-align: justify; text-justify: inter-word; }
   <button class="filter-key" data-cat="60">Retreats</button>
 </div>
 
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <div class="search-inner">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search 679 posts..." oninput="handleSearch()" autcomplete="off">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">&times;</button>
+  </div>
+</div>
+
 <!-- BLOG GRID -->
 <section class="blog-section">
   <div class="loading" id="loading">
@@ -387,6 +406,8 @@ var currentPage = 1;
 var totalPages = 1;
 var totalPosts = 0;
 var activeCategory = '';
+var searchQuery = '';
+var searchTimer = null;
 var mediaCache = {};
 
 // Category name map for display
@@ -410,6 +431,7 @@ function fetchPosts() {
 
   var url = API + '/posts?per_page=' + PER_PAGE + '&page=' + currentPage + '&_fields=id,title,date,excerpt,link,featured_media,categories';
   if (activeCategory) url += '&categories=' + activeCategory;
+  if (searchQuery) url += '&search=' + encodeURIComponent(searchQuery);
 
   fetch(url)
     .then(function(r) {
@@ -488,6 +510,37 @@ document.getElementById('filterKeys').addEventListener('click', function(e) {
   currentPage = 1;
   fetchPosts();
 });
+
+// Search
+function handleSearch() {
+  var input = document.getElementById('searchInput');
+  var clear = document.getElementById('searchClear');
+  clear.style.display = input.value ? '' : 'none';
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function() {
+    searchQuery = input.value.trim();
+    currentPage = 1;
+    fetchPosts();
+  }, 400);
+}
+
+function clearSearch() {
+  var input = document.getElementById('searchInput');
+  input.value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  searchQuery = '';
+  currentPage = 1;
+  fetchPosts();
+  input.focus();
+}
+
+// Check for ?search= URL param
+var urlSearch = new URLSearchParams(window.location.search).get('search');
+if (urlSearch) {
+  searchQuery = urlSearch;
+  document.getElementById('searchInput').value = urlSearch;
+  document.getElementById('searchClear').style.display = '';
+}
 
 // Initial load
 fetchPosts();
