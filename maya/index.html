@@ -810,7 +810,11 @@ function renderNextShow() {
   const doorsStr = show.doors ? 'Doors ' + show.doors : '';
   const timeStr = show.time || '';
   const venueStr = DATA.settings.venue || 'The Parkside Lounge';
-  const performersHtml = (show.performers || []).map(p => '<span>' + escHtml(typeof p === 'string' ? p : p.name) + '</span>').join('');
+  const performersHtml = (show.performers || []).map(p => {
+    var name = typeof p === 'string' ? p : p.name;
+    var ig = (typeof p === 'object' && p.instagram) ? p.instagram.replace('@','') : '';
+    return ig ? '<a href="https://www.instagram.com/' + escHtml(ig) + '/" target="_blank" style="color:inherit;text-decoration:none"><span>' + escHtml(name) + '</span></a>' : '<span>' + escHtml(name) + '</span>';
+  }).join('');
   const ticketHtml = show.ticketUrl
     ? '<a href="' + escHtml(show.ticketUrl) + '" target="_blank" class="btn">Get Tickets</a>'
     : '';
@@ -1139,8 +1143,13 @@ function openShowDetail(idx) {
     show.performers.forEach(function(p) {
       if (typeof p === 'string') { html += '<div class="sd-performer"><div class="sd-perf-name">' + escHtml(p) + '</div></div>'; return; }
       html += '<div class="sd-performer">';
-      html += '<div class="sd-perf-name">' + escHtml(p.name) + '</div>';
-      if (p.instagram) html += '<div class="sd-perf-ig">' + escHtml(p.instagram) + '</div>';
+      var igHandle = (p.instagram || '').replace('@','');
+      if (igHandle) {
+        html += '<div class="sd-perf-name"><a href="https://www.instagram.com/' + escHtml(igHandle) + '/" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid var(--pink)">' + escHtml(p.name) + '</a></div>';
+        html += '<div class="sd-perf-ig"><a href="https://www.instagram.com/' + escHtml(igHandle) + '/" target="_blank" style="color:var(--pink)">' + escHtml(p.instagram) + '</a></div>';
+      } else {
+        html += '<div class="sd-perf-name">' + escHtml(p.name) + '</div>';
+      }
       if (p.bio) html += '<div class="sd-perf-bio">' + escHtml(p.bio) + '</div>';
       if (p.image) html += '<img src="' + escHtml(p.image) + '" style="width:100%;max-width:300px;border-radius:8px;margin-top:10px" loading="lazy">';
       html += '</div>';
