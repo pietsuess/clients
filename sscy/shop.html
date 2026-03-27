@@ -140,22 +140,22 @@ p { text-align: justify; text-justify: inter-word; }
 .products-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 20px;
 }
 
 .product-card {
   background: var(--white);
   border-radius: var(--radius);
-  overflow: hidden;
   box-shadow: 0 2px 8px var(--shadow);
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: box-shadow 0.35s ease, z-index 0s;
   position: relative;
+  z-index: 1;
 }
 
 .product-card:hover {
-  box-shadow: 0 8px 24px var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--shadow-md);
+  z-index: 10;
 }
 
 /* Slim row layout */
@@ -188,9 +188,7 @@ p { text-align: justify; text-justify: inter-word; }
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--charcoal);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .product-slim-cat {
@@ -209,11 +207,18 @@ p { text-align: justify; text-justify: inter-word; }
   white-space: nowrap;
 }
 
-/* Hover preview image */
+/* Hover preview image - overlaps row below */
 .product-preview {
-  height: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 0;
   overflow: hidden;
-  transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 8px 24px var(--shadow-md);
+  background: var(--white);
 }
 
 .product-preview img {
@@ -224,7 +229,7 @@ p { text-align: justify; text-justify: inter-word; }
 }
 
 .product-card:hover .product-preview {
-  height: 140px;
+  max-height: 140px;
 }
 
 /* Badge on slim card */
