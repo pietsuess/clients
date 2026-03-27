@@ -605,7 +605,7 @@ footer a:hover{color:var(--pink)}
 
 <!-- NEXT SHOW DATE -->
 <div style="text-align:center;padding:0 4vw 30px;margin-top:-30px;background:linear-gradient(to bottom,var(--plum),#0d0510);position:relative;z-index:2">
-  <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.4rem,3.5vw,2.4rem);font-weight:700;white-space:nowrap"><span style="color:var(--pink)">Next Show:</span> <span style="color:var(--cream)">Physique</span> <span style="color:rgba(245,240,230,0.5)">May 10</span></div>
+  <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.4rem,3.5vw,2.4rem);font-weight:700;white-space:nowrap"><span style="color:var(--pink)">Next Show: &nbsp;</span><span style="color:var(--cream)">"Physique"</span> <span style="color:rgba(245,240,230,0.5)">- May 10</span></div>
 </div>
 
 <!-- NEXT SHOW -->
@@ -783,13 +783,14 @@ async function init() {
   DATA.media = mediaRes;
   DATA.settings = settingsRes;
 
-  renderSettings();
-  renderNextShow();
-  renderShowsArchive();
-  applyMediaFilter('all');
-  renderPress();
-  renderContact();
-  initScrollAnimations();
+  try {
+    renderSettings();
+    renderNextShow();
+    renderShowsArchive();
+    applyMediaFilter('all');
+    renderPress();
+    renderContact();
+  } catch(e) { console.error('Init error:', e); }
 }
 
 /* ========================================
@@ -1092,14 +1093,7 @@ function toggleMenu() {
    SCROLL ANIMATIONS
    ======================================== */
 
-function initScrollAnimations() {
-  document.querySelectorAll('.REMOVED').forEach(function(el) {
-    const siblings = el.parentElement.querySelectorAll('.REMOVED');
-    const idx = [].indexOf.call(siblings, el);
-    el.style.transitionDelay = (idx * 0.08) + 's';
-    observer.observe(el);
-  });
-}
+function initScrollAnimations() {}
 
 /* Smooth scroll for anchor links */
 document.querySelectorAll('a[href^="#"]').forEach(function(a) {
