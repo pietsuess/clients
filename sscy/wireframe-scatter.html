@@ -97,6 +97,83 @@
         }
 
         .hint.hidden { opacity: 0; }
+
+        /* Fullscreen card state */
+        .card.fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            left: 0 !important;
+            top: 0 !important;
+            border-radius: 0;
+            cursor: default;
+            transform: rotate(0deg) scale(1) !important;
+            transition: left 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        top 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-radius 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.3s;
+            box-shadow: none;
+        }
+
+        .card.fullscreen .card-visual {
+            font-size: 5rem;
+        }
+
+        .card.fullscreen .card-info {
+            padding: 40px 60px;
+        }
+
+        .card.fullscreen .card-name {
+            font-size: 2rem;
+        }
+
+        .card.fullscreen .card-detail {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .card.fullscreen .card-type {
+            font-size: 0.7rem;
+        }
+
+        /* Close button */
+        .card-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.6);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .card-close:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+
+        .card.fullscreen .card-close {
+            display: flex;
+        }
+
+        /* Dim other cards when one is fullscreen */
+        .table.has-fullscreen .card:not(.fullscreen) {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -120,6 +197,7 @@ var hint = document.getElementById('hint');
 var topZ = cards.length + 1;
 var cardEls = [];
 var heldCard = null;
+var fullscreenCard = null;
 var holdOffsetX = 0;
 var holdOffsetY = 0;
 var lastMouseX = 0;
@@ -148,6 +226,7 @@ cards.forEach(function(c, i) {
     el.style.background = c.bg;
     el.style.zIndex = i + 1;
     el.innerHTML =
+        '<div class="card-close">\u2715</div>' +
         '<div class="card-visual">' + (c.type === 'quote' ? '\u201C' : '') + '</div>' +
         '<div class="card-info">' +
             '<div class="card-type">' + c.tag + '</div>' +
@@ -159,19 +238,77 @@ cards.forEach(function(c, i) {
     table.appendChild(el);
     cardEls.push(el);
 
-    // Mouse down: pick up
+    // Mouse down: pick up (but not if fullscreen)
     el.addEventListener('mousedown', function(e) {
+        if (fullscreenCard) return;
         e.preventDefault();
         pickUp(el, e.clientX, e.clientY);
     });
 
-    // Touch start: pick up
+    // Double click: go fullscreen
+    el.addEventListener('dblclick', function(e) {
+        e.preventDefault();
+        if (fullscreenCard === el) return;
+        goFullscreen(el);
+    });
+
+    // Close button
+    el.querySelector('.card-close').addEventListener('mousedown', function(e) {
+        e.stopPropagation(); // don't trigger drag
+    });
+    el.querySelector('.card-close').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeFullscreen(el);
+    });
+
+    // Touch start: pick up (but not if fullscreen)
     el.addEventListener('touchstart', function(e) {
+        if (fullscreenCard) return;
         e.preventDefault();
         var t = e.touches[0];
         pickUp(el, t.clientX, t.clientY);
     });
 });
+
+function goFullscreen(el) {
+    if (fullscreenCard) return;
+    if (heldCard) { release(); }
+    fullscreenCard = el;
+
+    // Save current position so we can return to it
+    el._savedLeft = el.style.left;
+    el._savedTop = el.style.top;
+    el._savedTransform = el.style.transform;
+    el._savedWidth = el.style.width;
+    el._savedHeight = el.style.height;
+
+    // Bring to top
+    topZ++;
+    el.style.zIndex = topZ;
+
+    // Go fullscreen
+    el.classList.add('fullscreen');
+    table.classList.add('has-fullscreen');
+    hint.classList.add('hidden');
+}
+
+function closeFullscreen(el) {
+    if (!fullscreenCard || fullscreenCard !== el) return;
+    fullscreenCard = null;
+
+    el.classList.remove('fullscreen');
+    table.classList.remove('has-fullscreen');
+
+    // Animate back to saved position
+    el.style.transition = 'left 0.4s cubic-bezier(0.16, 1, 0.3, 1), top 0.4s cubic-bezier(0.16, 1, 0.3, 1), width 0.4s cubic-bezier(0.16, 1, 0.3, 1), height 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s';
+    el.style.left = el._savedLeft;
+    el.style.top = el._savedTop;
+    el.style.transform = el._savedTransform;
+
+    setTimeout(function() {
+        el.style.transition = 'box-shadow 0.3s, transform 0.15s';
+    }, 450);
+}
 
 function pickUp(el, mx, my) {
     heldCard = el;
