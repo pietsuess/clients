@@ -356,6 +356,31 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .press-link:hover{border-color:var(--pink);background:rgba(232,74,138,0.08)}
 
+/* SHOW DETAIL */
+.show-detail{position:fixed;inset:0;z-index:9999;background:var(--plum);display:none;overflow-y:auto}
+.show-detail.active{display:block}
+.show-detail-close{position:fixed;top:20px;right:24px;z-index:10001;width:44px;height:44px;border-radius:50%;background:rgba(26,10,30,0.7);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+.show-detail-close:hover{background:rgba(232,74,138,0.4)}
+.show-detail-hero{width:100%;height:40vh;overflow:hidden;position:relative}
+.show-detail-hero img{width:100%;height:100%;object-fit:contain;display:block;background:#0d0510}
+.show-detail-hero .hero-grad{position:absolute;inset:0;background:linear-gradient(transparent 50%,var(--plum))}
+.show-detail-content{max-width:900px;margin:0 auto;padding:0 4vw 80px}
+.show-detail-content h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(2.5rem,8vw,4.5rem);font-weight:700;line-height:1;margin:-30px 0 8px;position:relative;z-index:2}
+.show-detail-content .sd-meta{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;color:var(--gold);margin-bottom:6px}
+.show-detail-content .sd-venue{font-size:0.85rem;color:rgba(245,240,230,0.5);margin-bottom:24px}
+.show-detail-content .sd-section-title{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;color:var(--pink);margin:32px 0 16px}
+.show-detail-content .sd-performer{padding:16px 0;border-bottom:1px solid rgba(245,240,230,0.06)}
+.show-detail-content .sd-performer:last-child{border-bottom:none}
+.show-detail-content .sd-perf-name{font-size:1rem;font-weight:600;margin-bottom:4px}
+.show-detail-content .sd-perf-ig{font-size:0.75rem;color:var(--pink);margin-bottom:6px}
+.show-detail-content .sd-perf-bio{font-size:0.85rem;color:rgba(245,240,230,0.65);line-height:1.6;text-align:justify;text-align-last:left}
+.show-detail-content .sd-recap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:16px}
+.show-detail-content .sd-recap-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer}
+.show-detail-content .sd-recap-caption{font-family:'Playfair Display',serif;font-style:italic;font-size:0.9rem;color:rgba(245,240,230,0.5);line-height:1.6;margin-top:16px;white-space:pre-line;text-align:justify;text-align-last:left}
+.show-detail-content .sd-notes{font-size:0.85rem;color:rgba(245,240,230,0.4);margin-top:12px}
+.show-detail-content .sd-crew{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.show-detail-content .sd-crew span{padding:6px 14px;border:1px solid rgba(245,240,230,0.12);border-radius:20px;font-size:0.8rem;color:rgba(245,240,230,0.6)}
+
 /* LIGHTBOX */
 .lightbox{
   position:fixed;inset:0;z-index:10000;
@@ -830,8 +855,9 @@ function renderShowsArchive() {
     const perfText = (show.performers && show.performers.length)
       ? show.performers.map(p => typeof p === 'string' ? p : p.name).join(', ')
       : (show.description || 'With ' + (show.accompaniment || ''));
+    var showIdx = DATA.shows.indexOf(show);
     return (
-      '<div class="show-card">' +
+      '<div class="show-card" onclick="openShowDetail(' + showIdx + ')" style="cursor:pointer">' +
         '<img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" loading="lazy">' +
         '<div class="card-info">' +
           '<h3>' + escHtml(show.title) + '</h3>' +
