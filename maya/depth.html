@@ -767,8 +767,16 @@ function buildSite(shows, media, settings) {
         bg: '#1a0a1e',
         headerBg: '#2a1a2e',
         body:
-            '<div class="card-title" style="font-size:clamp(2.4rem,6vw,4.2rem)">Unprofessional Variety Show</div>' +
+            '<div class="ph-hero" style="margin:-50px -60px 40px;padding:0;position:relative;height:300px;overflow:hidden;border-radius:0">' +
+                '<img src="img/profile.jpg" style="width:100%;height:100%;object-fit:cover;opacity:0.6">' +
+                '<div style="position:absolute;inset:0;background:linear-gradient(transparent 40%,#1a0a1e);display:flex;align-items:flex-end;padding:30px 60px">' +
+                    '<div class="card-title" style="font-size:clamp(2.4rem,6vw,4.2rem);margin:0">Unprofessional Variety Show</div>' +
+                '</div>' +
+            '</div>' +
             '<div class="card-subtitle">' + escHtml(settings.tagline) + '</div>' +
+            '<div style="display:flex;gap:12px;margin:24px 0 32px;overflow-x:auto">' +
+                shows.slice(0,6).map(function(s){return s.posterImage ? '<img src="' + escHtml(s.posterImage) + '" style="width:100px;height:100px;object-fit:cover;border-radius:8px;flex-shrink:0">' : ''}).join('') +
+            '</div>' +
             '<div class="feature-grid">' +
                 '<div class="feature-card"><div class="feature-card-title">Venue</div><div class="feature-card-desc">' + escHtml(settings.venue) + '<br>' + escHtml(settings.venueAddress) + '</div></div>' +
                 '<div class="feature-card"><div class="feature-card-title">Emcee</div><div class="feature-card-desc">Maya Suess</div></div>' +
