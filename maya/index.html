@@ -822,14 +822,18 @@ function renderNextShow() {
     : '';
   const labelText = show.isUpcoming ? 'Next Show' : 'Most Recent Show';
 
-  container.innerHTML =
+  var showIdx = DATA.shows.indexOf(show);
+  var headerHtml = show.isUpcoming
+    ? '<div class="section-title" style="color:var(--pink);padding:0 4vw;margin-bottom:30px">Next Show</div>'
+    : '<div class="section-title" style="color:var(--cream);padding:0 4vw;margin-bottom:30px">Most Recent</div>';
+
+  container.innerHTML = headerHtml +
     '<div class="next-show-inner">' +
-      '<div class="next-show-poster" onclick="openShowDetail(0)" style="cursor:pointer">' +
+      '<div class="next-show-poster" onclick="openShowDetail(' + showIdx + ')" style="cursor:pointer">' +
         '<div class="poster-glow"></div>' +
         '<img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" loading="lazy">' +
       '</div>' +
       '<div class="next-show-info">' +
-        '<div class="label">' + labelText + '</div>' +
         '<h2 class="">' + escHtml(show.title) + '</h2>' +
         '<div class="date">' + dateStr + '</div>' +
         '<div class="venue">' + escHtml(venueStr) + ' - ' + escHtml(doorsStr + (doorsStr && timeStr ? ' / Show ' : '') + timeStr) + '</div>' +
