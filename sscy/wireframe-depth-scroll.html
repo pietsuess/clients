@@ -857,15 +857,15 @@ cards.forEach(function(c, i) {
 // ---- WHEEL / SCROLL GESTURE = CHANGE CARDS (responsive, not snapping) ----
 // Wheel directly drives vScroll with momentum
 var vVelocity = 0;
-var WHEEL_SENSITIVITY = 0.00015; // very gentle: a normal scroll barely nudges
-var FRICTION = 0.88; // decays faster so momentum dies quickly
-var SNAP_STRENGTH = 0.03; // soft snap to nearest card
-var MAX_VELOCITY = 0.035; // cap so you can never fly through more than ~1 card
+var WHEEL_SENSITIVITY = 0.00006; // very slow: takes real intention to move
+var FRICTION = 0.94; // gentle friction, long glide but not far
+var SNAP_STRENGTH = 0.008; // barely noticeable drift into place
+var SNAP_DEAD_ZONE = 0.0008; // velocity must be nearly zero before snap engages
+var MAX_VELOCITY = 0.02; // hard cap: can never rush past a card
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
     vVelocity += e.deltaY * WHEEL_SENSITIVITY;
-    // Clamp velocity so rapid scrolling can't skip cards
     if (vVelocity > MAX_VELOCITY) vVelocity = MAX_VELOCITY;
     if (vVelocity < -MAX_VELOCITY) vVelocity = -MAX_VELOCITY;
     targetCard = null;
@@ -903,11 +903,11 @@ function tick() {
     vScroll += vVelocity;
     vVelocity *= FRICTION;
 
-    // Soft snap to nearest card when nearly stopped
-    if (Math.abs(vVelocity) < 0.003 && targetCard === null) {
+    // Very lazy snap: only when truly stopped, and drifts gently
+    if (Math.abs(vVelocity) < SNAP_DEAD_ZONE && targetCard === null) {
         var nearest = Math.round(vScroll);
         var snapDiff = nearest - vScroll;
-        if (Math.abs(snapDiff) > 0.001) {
+        if (Math.abs(snapDiff) > 0.002) {
             vScroll += snapDiff * SNAP_STRENGTH;
         }
     }
