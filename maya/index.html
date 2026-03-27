@@ -91,10 +91,10 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 
 /* HERO */
 .hero{
-  min-height:100vh;display:flex;flex-direction:column;
+  min-height:85vh;display:flex;flex-direction:column;
   justify-content:center;align-items:center;
   position:relative;overflow:clip;
-  padding:100px 4vw 60px;
+  padding:80px 4vw 30px;
 }
 .hero-bg{
   position:absolute;top:0;left:0;right:0;bottom:0;
@@ -505,6 +505,10 @@ footer a:hover{color:var(--pink)}
 .show-detail{position:fixed;inset:0;z-index:9999;background:var(--plum);display:none;overflow-y:auto}
 .show-detail.active{display:block}
 .show-detail-back{position:fixed;top:20px;left:24px;z-index:10001;padding:10px 20px;border-radius:8px;background:rgba(26,10,30,0.7);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:0.85rem;letter-spacing:0.08em;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.2s;font-family:'DM Sans',sans-serif}
+.show-nav-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:10001;width:44px;height:44px;border-radius:50%;background:rgba(26,10,30,0.5);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.1);color:rgba(245,240,230,0.5);font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s,color 0.2s}
+.show-nav-arrow:hover{background:rgba(232,74,138,0.4);color:#fff}
+.show-nav-prev{left:20px}
+.show-nav-next{right:20px}
 .show-detail-back:hover{background:rgba(232,74,138,0.4)}
 .show-detail-close{position:fixed;top:20px;right:24px;z-index:10001;width:44px;height:44px;border-radius:50%;background:rgba(26,10,30,0.7);backdrop-filter:blur(8px);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
 .show-detail-close:hover{background:rgba(232,74,138,0.4)}
@@ -538,6 +542,8 @@ footer a:hover{color:var(--pink)}
 <div class="show-detail" id="showDetail">
   <button class="show-detail-back" onclick="closeShowDetail()">&#8592; Back</button>
   <button class="show-detail-close" onclick="closeShowDetail()">&times;</button>
+  <button class="show-nav-arrow show-nav-prev" id="showNavPrev" onclick="navShow(-1)">&#8249;</button>
+  <button class="show-nav-arrow show-nav-next" id="showNavNext" onclick="navShow(1)">&#8250;</button>
   <div id="showDetailContent"></div>
 </div>
 
@@ -598,7 +604,7 @@ footer a:hover{color:var(--pink)}
 </section>
 
 <!-- NEXT SHOW DATE -->
-<div style="text-align:center;padding:40px 4vw;background:linear-gradient(to bottom,var(--plum),#0d0510)">
+<div style="text-align:center;padding:20px 4vw 40px;background:linear-gradient(to bottom,var(--plum),#0d0510)">
   <div style="font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);margin-bottom:8px">Next Show</div>
   <div style="font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:var(--cream)">May 10 - Physique</div>
 </div>
@@ -653,7 +659,6 @@ footer a:hover{color:var(--pink)}
 <!-- SHOWS ARCHIVE -->
 <section class="shows" id="shows">
   <div class="section-title">Past Shows</div>
-  <div class="section-subtitle">Every edition is a different world.</div>
   <div class="shows-grid" id="showsGrid"></div>
 </section>
 
@@ -865,24 +870,33 @@ function renderNextShow() {
    ======================================== */
 function renderShowsArchive() {
   const grid = document.getElementById('showsGrid');
-  // Show all non-upcoming shows (past shows)
   const pastShows = DATA.shows.filter(s => !s.isUpcoming);
-  grid.innerHTML = pastShows.map(show => {
-    const perfText = (show.performers && show.performers.length)
-      ? show.performers.map(p => typeof p === 'string' ? p : p.name).join(', ')
-      : (show.description || 'With ' + (show.accompaniment || ''));
-    var showIdx = DATA.shows.indexOf(show);
-    return (
-      '<div class="show-card" onclick="openShowDetail(' + showIdx + ')" style="cursor:pointer">' +
+  // Group by year
+  const years = {};
+  pastShows.forEach(show => {
+    const yr = show.date.substring(0, 4);
+    if (!years[yr]) years[yr] = [];
+    years[yr].push(show);
+  });
+  let html = '';
+  Object.keys(years).sort().reverse().forEach(yr => {
+    html += '<div style="grid-column:1/-1;font-family:\'Space Grotesk\',sans-serif;font-size:1.4rem;font-weight:700;color:rgba(255,255,255,0.3);padding:20px 0 8px">' + yr + '</div>';
+    years[yr].forEach(show => {
+      const perfText = (show.performers && show.performers.length)
+        ? show.performers.map(p => typeof p === 'string' ? p : p.name).join(', ')
+        : (show.description || 'With ' + (show.accompaniment || ''));
+      var showIdx = DATA.shows.indexOf(show);
+      html += '<div class="show-card" onclick="openShowDetail(' + showIdx + ')" style="cursor:pointer">' +
         '<img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" loading="lazy">' +
         '<div class="card-info">' +
           '<h3>' + escHtml(show.title) + '</h3>' +
           '<div class="card-date">' + formatDateShort(show.date) + '</div>' +
           '<div class="card-performers">' + escHtml(perfText) + '</div>' +
         '</div>' +
-      '</div>'
-    );
-  }).join('');
+      '</div>';
+    });
+  });
+  grid.innerHTML = html;
 }
 
 /* ========================================
@@ -1132,7 +1146,16 @@ function formatDateShort(dateStr) {
 /* ========================================
    SHOW DETAIL
    ======================================== */
+var currentShowIdx = 0;
+function navShow(dir) {
+  var next = currentShowIdx + dir;
+  if (next < 0) next = DATA.shows.length - 1;
+  if (next >= DATA.shows.length) next = 0;
+  document.getElementById('showDetail').scrollTop = 0;
+  openShowDetail(next);
+}
 function openShowDetail(idx) {
+  currentShowIdx = idx;
   const show = DATA.shows[idx];
   if (!show) return;
   const dateStr = formatDateLong(show.date);
