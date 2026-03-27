@@ -11,13 +11,8 @@
             background: #0a0a0a;
             color: #fff;
             font-family: system-ui, -apple-system, sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* 2vh per card: 1st half = dwell, 2nd half = transition */
-        .scroll-space {
-            height: calc(var(--num-cards) * 200vh);
-            pointer-events: none;
+            overflow: hidden;
+            height: 100%;
         }
 
         .stage {
@@ -283,26 +278,68 @@
             transform: translateX(0);
         }
 
-        .scroll-cue {
+        /* Advance zone: bottom 25% of screen */
+        .advance-zone {
             position: fixed;
-            bottom: 32px;
+            bottom: 0;
+            left: 0;
+            right: 60px; /* don't overlap HUD */
+            height: 25%;
+            z-index: 9998;
+            pointer-events: none;
+            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.03));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .advance-zone.active {
+            opacity: 1;
+        }
+
+        .advance-arrow {
+            position: fixed;
+            bottom: 28px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 0.15em;
-            opacity: 0.25;
+            opacity: 0;
             z-index: 9999;
-            transition: opacity 0.6s;
-        }
-        .scroll-cue.hidden { opacity: 0; }
-        .scroll-cue .ch {
-            display: block;
+            transition: opacity 0.3s;
+            pointer-events: none;
             text-align: center;
-            animation: bob 2s ease infinite;
-            font-size: 1rem;
-            margin-top: 6px;
         }
+
+        .advance-arrow.visible {
+            opacity: 0.35;
+        }
+
+        .advance-arrow .arr {
+            display: block;
+            font-size: 1.2rem;
+            margin-top: 4px;
+            animation: bob 1.5s ease infinite;
+        }
+
+        /* Reverse zone: top 20% */
+        .reverse-zone-hint {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 60px;
+            height: 20%;
+            z-index: 9998;
+            pointer-events: none;
+            background: linear-gradient(to top, transparent, rgba(255,255,255,0.02));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .reverse-zone-hint.active {
+            opacity: 1;
+        }
+
         @keyframes bob {
             0%, 100% { transform: translateY(0); opacity: 0.4; }
             50% { transform: translateY(5px); opacity: 1; }
@@ -312,9 +349,10 @@
 <body>
 
 <div class="stage" id="stage"></div>
-<div class="scroll-space" id="scrollSpace"></div>
 <div class="hud" id="hud"></div>
-<div class="scroll-cue" id="scrollCue">Scroll to explore<span class="ch">&#x2304;</span></div>
+<div class="advance-zone" id="advanceZone"></div>
+<div class="reverse-zone-hint" id="reverseZone"></div>
+<div class="advance-arrow" id="advanceArrow">Next<span class="arr">&#x2304;</span></div>
 
 <script>
 var cards = [
@@ -504,17 +542,24 @@ var cards = [
 ];
 
 var numCards = cards.length;
-document.documentElement.style.setProperty('--num-cards', numCards);
 
 var stage = document.getElementById('stage');
 var hud = document.getElementById('hud');
-var scrollCue = document.getElementById('scrollCue');
+var advanceZone = document.getElementById('advanceZone');
+var reverseZone = document.getElementById('reverseZone');
+var advanceArrow = document.getElementById('advanceArrow');
 var cardEls = [];
 var dotEls = [];
 
-// DWELL: each card gets 2vh of scroll. First 40% = card sits still. Last 60% = transition.
-var DWELL = 0.4; // fraction of each card's scroll that is pause
+var DWELL = 0.4;
 
+// Virtual scroll position (0 to numCards-1)
+var vScroll = 0;
+var maxScroll = numCards - 1;
+var mouseY = 0.5; // normalized 0-1 (top to bottom)
+var advancing = 0; // -1, 0, or +speed
+
+// Build cards
 cards.forEach(function(c, i) {
     var el = document.createElement('div');
     el.className = 'card';
@@ -538,7 +583,8 @@ cards.forEach(function(c, i) {
     dot.className = 'hud-dot';
     (function(idx) {
         dot.addEventListener('click', function() {
-            window.scrollTo({ top: idx * 2 * window.innerHeight, behavior: 'smooth' });
+            // Animate to target card
+            targetScroll = idx;
         });
     })(i);
     item.appendChild(label);
@@ -547,29 +593,67 @@ cards.forEach(function(c, i) {
     dotEls.push(dot);
 });
 
-var ticking = false;
+// Block all native scroll
+document.addEventListener('wheel', function(e) { e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
 
-function onScroll() {
-    if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(render);
+// Track mouse position
+var targetScroll = null;
+
+document.addEventListener('mousemove', function(e) {
+    mouseY = e.clientY / window.innerHeight;
+});
+
+// Also stop advancing if mouse leaves the window
+document.addEventListener('mouseleave', function() {
+    mouseY = 0.5;
+});
+
+function tick() {
+    requestAnimationFrame(tick);
+
+    var speed = 0;
+
+    // HUD click: animate to target
+    if (targetScroll !== null) {
+        var diff = targetScroll - vScroll;
+        if (Math.abs(diff) < 0.01) {
+            vScroll = targetScroll;
+            targetScroll = null;
+        } else {
+            vScroll += diff * 0.08;
+        }
+    } else {
+        // Mouse in bottom 25%: advance forward
+        if (mouseY > 0.75) {
+            var intensity = (mouseY - 0.75) / 0.25; // 0 to 1
+            speed = intensity * 0.018;
+        }
+        // Mouse in top 20%: go back
+        else if (mouseY < 0.20) {
+            var intensity = (0.20 - mouseY) / 0.20; // 0 to 1
+            speed = -intensity * 0.018;
+        }
+
+        vScroll += speed;
     }
-}
 
-function render() {
-    ticking = false;
-    var scrollY = window.scrollY;
-    var vh = window.innerHeight;
-    // Each card owns 2vh of scroll distance
-    var cardScroll = 2 * vh;
-    var activeIndex = Math.min(Math.floor(scrollY / cardScroll + 0.5), numCards - 1);
+    // Clamp
+    vScroll = Math.max(0, Math.min(maxScroll, vScroll));
 
-    scrollCue.classList.toggle('hidden', scrollY > 50);
+    // Show/hide zone hints
+    var inAdvance = mouseY > 0.75 && vScroll < maxScroll;
+    var inReverse = mouseY < 0.20 && vScroll > 0;
+    advanceZone.classList.toggle('active', inAdvance);
+    reverseZone.classList.toggle('active', inReverse);
+    advanceArrow.classList.toggle('visible', inAdvance);
+
+    // Render cards
+    var activeIndex = Math.min(Math.round(vScroll), numCards - 1);
 
     for (var i = 0; i < numCards; i++) {
         var el = cardEls[i];
-        // Raw progress through this card: 0 = card just arrived, 1 = fully scrolled past
-        var raw = (scrollY / cardScroll) - i;
+        var raw = vScroll - i;
 
         if (raw < -1.5 || raw > 2) {
             el.style.visibility = 'hidden';
@@ -578,32 +662,25 @@ function render() {
 
         el.style.visibility = 'visible';
 
-        // Apply dwell: remap so first DWELL fraction = no movement
         var t;
         if (raw <= 0) {
-            // Card is behind, approaching
-            // Remap: card arrives when raw hits -(1 - DWELL) and is fully here at raw=0
             var arriveStart = -(1 - DWELL);
             if (raw <= arriveStart) {
-                t = -1; // fully behind
+                t = -1;
             } else {
-                t = -1 + (raw - arriveStart) / (1 - DWELL); // -1 to 0
+                t = -1 + (raw - arriveStart) / (1 - DWELL);
             }
         } else if (raw <= DWELL) {
-            // In the dwell zone: card sits still
             t = 0;
         } else {
-            // Transitioning out: drops down
-            t = (raw - DWELL) / (1 - DWELL); // 0 to 1
+            t = (raw - DWELL) / (1 - DWELL);
         }
 
         if (t <= 0) {
-            // Behind: scale down and push back in Z
             var behindZ = t * 500;
             var behindScale = 0.7 + 0.3 * (1 + t);
             el.style.transform = 'translate3d(0, 0, ' + behindZ + 'px) scale(' + behindScale + ')';
         } else {
-            // Dropping: straight down, slight forward
             var dropY = t * 120;
             var dropZ = t * 100;
             el.style.transform = 'translate3d(0, ' + dropY + 'vh, ' + dropZ + 'px)';
@@ -613,8 +690,7 @@ function render() {
     }
 }
 
-window.addEventListener('scroll', onScroll, { passive: true });
-render();
+tick();
 </script>
 </body>
 </html>
