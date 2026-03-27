@@ -1203,15 +1203,15 @@ function openShowDetail(idx) {
     show.videos.forEach(function(v) {
       if (v.vimeoId) {
         html += '<div style="position:relative;cursor:pointer" onclick="event.stopPropagation();openVimeoInLb(\'' + v.vimeoId + '\')">';
-        html += '<img src="https://vumbnail.com/' + v.vimeoId + '.jpg" alt="" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:0;
-        html += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff;margin-left:3px"><polygon points="8,5 19,12 8,19"/></svg></div>';
+        html += '<img src="https://vumbnail.com/' + v.vimeoId + '.jpg" alt="" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover">';
+        html += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff;margin-left:3px"><polygon points="8,5 19,12 8,19"/></svg></div>';
         html += '<div style="padding:8px 0;font-size:0.8rem;color:rgba(245,240,230,0.7)">' + escHtml(v.title || '') + (v.duration ? ' (' + v.duration + ')' : '') + '</div>';
         html += '</div>';
       } else if (v.src) {
         html += '<div style="position:relative;cursor:pointer" onclick="event.stopPropagation();openVideoInLb(\'' + escHtml(v.src).replace(/'/g,"\\'") + '\')">';
         var thumbSrc = v.thumb || v.src;
-        html += '<img src="' + escHtml(thumbSrc) + '" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:0;
-        html += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff;margin-left:3px"><polygon points="8,5 19,12 8,19"/></svg></div>';
+        html += '<img src="' + escHtml(thumbSrc) + '" alt="" loading="lazy" style="width:100%;aspect-ratio:1;object-fit:cover">';
+        html += '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff;margin-left:3px"><polygon points="8,5 19,12 8,19"/></svg></div>';
         html += '</div>';
       }
     });
