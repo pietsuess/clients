@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Clearing</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            background: #0a0a08;
+            overflow: hidden;
+            height: 100%;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #fff;
+            user-select: none;
+            cursor: none;
+        }
+
+        .ground {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* Lantern glow follows cursor */
+        .lantern {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(
+                circle,
+                rgba(201, 168, 76, 0.08) 0%,
+                rgba(201, 168, 76, 0.04) 30%,
+                rgba(201, 168, 76, 0.01) 60%,
+                transparent 100%
+            );
+            mix-blend-mode: screen;
+        }
+
+        /* Tiny lantern dot at cursor center */
+        .lantern-dot {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 240, 200, 0.7);
+            box-shadow: 0 0 12px rgba(201, 168, 76, 0.5), 0 0 30px rgba(201, 168, 76, 0.2);
+            transform: translate(-50%, -50%);
+        }
+
+        /* Ambient ground texture */
+        .ground-texture {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.015;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(59, 184, 168, 0.3), transparent 50%),
+                radial-gradient(ellipse at 80% 30%, rgba(201, 168, 76, 0.2), transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(59, 120, 100, 0.2), transparent 40%);
+        }
+
+        /* Cards */
+        .card {
+            position: absolute;
+            width: 340px;
+            border-radius: 16px;
+            overflow: hidden;
+            opacity: 0.04;
+            transform: scale(0.96);
+            transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.6s ease;
+            cursor: none;
+        }
+
+        .card.near {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+
+        .card.close {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 40px rgba(201, 168, 76, 0.08), 0 8px 30px rgba(0,0,0,0.5);
+        }
+
+        .card-visual {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-visual-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.25;
+        }
+
+        .card-glow {
+            position: absolute;
+            inset: -20px;
+            border-radius: 16px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .card.close .card-glow {
+            opacity: 1;
+        }
+
+        .card-info {
+            padding: 22px 26px 26px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .card-tag {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            opacity: 0.4;
+            margin-bottom: 6px;
+        }
+
+        .card-name {
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .card-detail {
+            font-size: 0.78rem;
+            opacity: 0.5;
+            line-height: 1.5;
+            text-align: justify;
+            text-align-last: left;
+        }
+
+        .card-cta {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 8px 18px;
+            border-radius: 8px;
+            background: rgba(201, 168, 76, 0.12);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.4s, transform 0.4s;
+            cursor: pointer;
+        }
+
+        .card.close .card-cta {
+            opacity: 0.7;
+            transform: translateY(0);
+        }
+
+        .card-cta:hover {
+            background: rgba(201, 168, 76, 0.25);
+        }
+
+        /* Fullscreen card */
+        .card.fullscreen {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
+            opacity: 1;
+            transform: scale(1) translate(0,0) !important;
+            z-index: 10001 !important;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: default;
+            overflow-y: auto;
+        }
+
+        .card.fullscreen .card-visual {
+            height: 40vh;
+        }
+
+        .card.fullscreen .card-info {
+            padding: 40px 60px 80px;
+        }
+
+        .card.fullscreen .card-name {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+        }
+
+        .card.fullscreen .card-detail {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .card.fullscreen .card-cta {
+            opacity: 1;
+            font-size: 0.75rem;
+            padding: 12px 24px;
+        }
+
+        .card-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+            font-size: 1.1rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .card-close:hover {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+        }
+
+        .card.fullscreen .card-close {
+            display: flex;
+            cursor: pointer;
+        }
+
+        /* Dim ground when fullscreen */
+        .ground.dimmed .card:not(.fullscreen) {
+            opacity: 0 !important;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .ground.dimmed .ground-texture {
+            opacity: 0;
+        }
+
+        /* Ambient text at bottom */
+        .ambient-hint {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.6s;
+        }
+
+        .ambient-hint.hidden { opacity: 0; }
+    </style>
+</head>
+<body>
+
+<div class="ground" id="ground">
+    <div class="ground-texture"></div>
+</div>
+<div class="lantern" id="lantern"></div>
+<div class="lantern-dot" id="lanternDot"></div>
+<div class="ambient-hint" id="hint">Explore the clearing</div>
+
+<script>
+var cards = [
+    { tag:"The Land", name:"69 Acres of Sanctuary", detail:"Forests, organic gardens, meditation ponds, and temples nestled among ancient cedars on Salt Spring Island.", cta:"Explore the Land", bg:"linear-gradient(160deg, #1a3d17, #2d5a27)", glow:"rgba(74,138,62,0.06)" },
+    { tag:"Babaji", name:"Peace. No more than that.", detail:"When asked about his only goal in life.", cta:"More from Babaji", bg:"linear-gradient(160deg, #12122a, #1a1a2e)", glow:"rgba(100,100,160,0.05)", quote:true },
+    { tag:"Retreat", name:"Weekend Yoga Retreat", detail:"Two nights of practice, rest, and renewal. Vegetarian meals from the garden. All levels welcome.", cta:"Book This Retreat", bg:"linear-gradient(160deg, #0f3a33, #1a5c53)", glow:"rgba(59,184,168,0.06)" },
+    { tag:"Venue", name:"The Pond Dome", detail:"Geodesic dome beside a tranquil pond. Available for workshops, weddings, concerts, and private events.", cta:"Inquire", bg:"linear-gradient(160deg, #3a4a50, #4a6670)", glow:"rgba(90,140,160,0.06)" },
+    { tag:"Shop", name:"Salt Spring Island Cooking", detail:"The beloved cookbook that has sold over 52,000 copies. Recipes rooted in the land, the seasons, and the community.", cta:"Add to Cart", bg:"linear-gradient(160deg, #6a5020, #8a6a3a)", glow:"rgba(201,168,76,0.06)" },
+    { tag:"Training", name:"200-Hour Teacher Training", detail:"An immersive residential program rooted in classical yoga tradition. Yoga Alliance certified.", cta:"Apply Now", bg:"linear-gradient(160deg, #3a2510, #5a3a1a)", glow:"rgba(180,120,60,0.06)" },
+    { tag:"Karma Yoga", name:"Live & Serve", detail:"Volunteer program with room and board. Four hours of daily service in gardens, kitchen, or maintenance.", cta:"Apply to Volunteer", bg:"linear-gradient(160deg, #1a3a1a, #2a5a2a)", glow:"rgba(80,140,80,0.05)" },
+    { tag:"Event", name:"Music for Peace", detail:"Indian classical concert series in the Pond Dome. Ragas selected to invoke peace, devotion, and stillness.", cta:"Get Tickets", bg:"linear-gradient(160deg, #3a142a, #5a2a4a)", glow:"rgba(140,60,100,0.06)" },
+    { tag:"Sacred", name:"Hanuman Shrine", detail:"Open-air shrine among the cedars. Consecrated in 1984. Visitors are welcome to sit, meditate, and offer prayers.", cta:"View Sacred Spaces", bg:"linear-gradient(160deg, #4a3418, #6a4a2a)", glow:"rgba(160,120,60,0.05)" },
+    { tag:"Nature", name:"Dandaka Forest", detail:"Primordial cedar-swamp wetland. One of the last undisturbed ecosystems on the island. Boardwalk trail, dawn to dusk.", cta:"Trail Map", bg:"linear-gradient(160deg, #0d1a0d, #1a3a1a)", glow:"rgba(40,80,40,0.06)" }
+];
+
+var ground = document.getElementById('ground');
+var lantern = document.getElementById('lantern');
+var lanternDot = document.getElementById('lanternDot');
+var hintEl = document.getElementById('hint');
+
+var mouseX = window.innerWidth / 2;
+var mouseY = window.innerHeight / 2;
+var smoothX = mouseX;
+var smoothY = mouseY;
+
+var fullscreenCard = null;
+var cardEls = [];
+var cardData = [];
+
+// Place cards in a scattered spatial layout
+function layoutCards() {
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var cols = 4;
+    var rows = Math.ceil(cards.length / cols);
+    var cellW = vw / cols;
+    var cellH = vh / rows;
+
+    cards.forEach(function(c, i) {
+        var col = i % cols;
+        var row = Math.floor(i / cols);
+        // Position in grid cell with random offset
+        var baseX = col * cellW + cellW * 0.15;
+        var baseY = row * cellH + cellH * 0.1;
+        var randX = (Math.random() - 0.5) * cellW * 0.35;
+        var randY = (Math.random() - 0.5) * cellH * 0.2;
+
+        var x = Math.max(20, Math.min(vw - 360, baseX + randX));
+        var y = Math.max(20, Math.min(vh - 320, baseY + randY));
+
+        cardData[i] = {
+            homeX: x,
+            homeY: y,
+            currentX: x,
+            currentY: y
+        };
+
+        if (cardEls[i]) {
+            cardEls[i].style.left = x + 'px';
+            cardEls[i].style.top = y + 'px';
+        }
+    });
+}
+
+// Build cards
+cards.forEach(function(c, i) {
+    var el = document.createElement('div');
+    el.className = 'card';
+    el.style.background = c.bg;
+    el.style.zIndex = i + 1;
+
+    var visualContent = '';
+    if (c.quote) {
+        visualContent = '<div style="font-size:4rem;opacity:0.15">\u201C</div>';
+    } else {
+        visualContent = '<div class="card-visual-label">Photo</div>';
+    }
+
+    el.innerHTML =
+        '<div class="card-close">\u2715</div>' +
+        '<div class="card-glow" style="background:radial-gradient(ellipse,' + c.glow + ',' + 'transparent 70%)"></div>' +
+        '<div class="card-visual">' + visualContent + '</div>' +
+        '<div class="card-info">' +
+            '<div class="card-tag">' + c.tag + '</div>' +
+            '<div class="card-name">' + c.name + '</div>' +
+            '<div class="card-detail">' + c.detail + '</div>' +
+            '<div class="card-cta">' + c.cta + '</div>' +
+        '</div>';
+
+    ground.appendChild(el);
+    cardEls.push(el);
+
+    // Double click to fullscreen
+    el.addEventListener('dblclick', function(e) {
+        e.preventDefault();
+        if (fullscreenCard) return;
+        goFullscreen(el, i);
+    });
+
+    // Close button
+    el.querySelector('.card-close').addEventListener('mousedown', function(e) { e.stopPropagation(); });
+    el.querySelector('.card-close').addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeFullscreen(el, i);
+    });
+});
+
+layoutCards();
+
+function goFullscreen(el, idx) {
+    fullscreenCard = el;
+    cardData[idx]._savedLeft = el.style.left;
+    cardData[idx]._savedTop = el.style.top;
+
+    el.classList.add('fullscreen');
+    ground.classList.add('dimmed');
+    hintEl.classList.add('hidden');
+
+    // Show default cursor in fullscreen
+    document.body.style.cursor = 'default';
+}
+
+function closeFullscreen(el, idx) {
+    if (!fullscreenCard) return;
+    fullscreenCard = null;
+    el.classList.remove('fullscreen');
+    ground.classList.remove('dimmed');
+
+    el.style.left = cardData[idx]._savedLeft;
+    el.style.top = cardData[idx]._savedTop;
+
+    document.body.style.cursor = 'none';
+
+    setTimeout(function() {
+        el.style.transition = '';
+    }, 500);
+}
+
+// Track mouse
+document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+// Hide hint after first move
+var hintShown = true;
+document.addEventListener('mousemove', function() {
+    if (hintShown) {
+        setTimeout(function() { hintEl.classList.add('hidden'); }, 2000);
+        hintShown = false;
+    }
+}, { once: false });
+
+// Main loop
+function tick() {
+    requestAnimationFrame(tick);
+
+    // Smooth lantern follow
+    smoothX += (mouseX - smoothX) * 0.12;
+    smoothY += (mouseY - smoothY) * 0.12;
+
+    lantern.style.left = smoothX + 'px';
+    lantern.style.top = smoothY + 'px';
+    lanternDot.style.left = smoothX + 'px';
+    lanternDot.style.top = smoothY + 'px';
+
+    if (fullscreenCard) return;
+
+    // Update card proximity + magnetic pull
+    var NEAR_DIST = 350;
+    var CLOSE_DIST = 180;
+    var PULL_STRENGTH = 0.02;
+    var RETURN_STRENGTH = 0.04;
+
+    for (var i = 0; i < cardEls.length; i++) {
+        var el = cardEls[i];
+        var d = cardData[i];
+        var cx = d.currentX + 170; // center of card
+        var cy = d.currentY + 150;
+        var dx = smoothX - cx;
+        var dy = smoothY - cy;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Proximity classes
+        if (dist < CLOSE_DIST) {
+            el.classList.add('close');
+            el.classList.remove('near');
+        } else if (dist < NEAR_DIST) {
+            el.classList.add('near');
+            el.classList.remove('close');
+        } else {
+            el.classList.remove('near', 'close');
+        }
+
+        // Magnetic pull toward cursor when close
+        if (dist < NEAR_DIST && dist > 10) {
+            var pullFactor = (1 - dist / NEAR_DIST) * PULL_STRENGTH;
+            d.currentX += dx * pullFactor;
+            d.currentY += dy * pullFactor;
+        }
+
+        // Spring back toward home
+        var homeDistX = d.homeX - d.currentX;
+        var homeDistY = d.homeY - d.currentY;
+        d.currentX += homeDistX * RETURN_STRENGTH;
+        d.currentY += homeDistY * RETURN_STRENGTH;
+
+        el.style.left = d.currentX + 'px';
+        el.style.top = d.currentY + 'px';
+    }
+}
+
+tick();
+
+// Relayout on resize
+window.addEventListener('resize', layoutCards);
+</script>
+</body>
+</html>
