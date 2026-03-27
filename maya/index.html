@@ -1130,7 +1130,7 @@ function openShowDetail(idx) {
   let html = '';
   html += '<div class="show-detail-content" style="max-width:900px;margin:0 auto">';
   if (show.posterImage) {
-    html += '<div class="show-detail-hero" onclick="event.stopPropagation();openLbDirect(\'' + escHtml(show.posterImage).replace(/'/g,"\\'") + '\')"><img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '"></div>';
+    html += '<div class="show-detail-hero" style="float:left;width:40%;margin:0 30px 20px 0" onclick="event.stopPropagation();openLbDirect(\'' + escHtml(show.posterImage).replace(/'/g,"\\'") + '\')"><img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '"></div>';
   }
   html += '<h1>' + escHtml(show.title) + '</h1>';
   html += '<div class="sd-meta">' + dateStr + (show.time ? ' - ' + escHtml(show.time) : '') + '</div>';
