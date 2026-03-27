@@ -278,53 +278,176 @@
             transform: translateX(0);
         }
 
-        /* Content scroll zone: bottom 30% of screen */
-        .scroll-zone {
+        /* Scroll indicator - fixed bottom center, shows when card has more content */
+        .scroll-indicator {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 60px;
-            height: 30%;
-            z-index: 9998;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
             pointer-events: none;
-            background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.03));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
             opacity: 0;
             transition: opacity 0.4s;
         }
 
-        .scroll-zone.active {
+        .scroll-indicator.visible {
             opacity: 1;
         }
 
-        .scroll-zone-label {
-            position: fixed;
-            bottom: 20px;
+        .scroll-indicator-text {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            opacity: 0.35;
+        }
+
+        .scroll-indicator-mouse {
+            width: 22px;
+            height: 36px;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            border-radius: 11px;
+            position: relative;
+            opacity: 0.4;
+        }
+
+        .scroll-indicator-mouse::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            opacity: 0;
-            z-index: 9999;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            text-align: center;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            animation: mouse-hint 2s ease infinite;
         }
 
-        .scroll-zone-label.visible {
+        @keyframes mouse-hint {
+            0%, 100% { bottom: 6px; opacity: 0.6; }
+            50% { bottom: 18px; opacity: 1; }
+        }
+
+        .scroll-indicator-arrow {
             opacity: 0.25;
-        }
-
-        .scroll-zone-label .arr {
-            display: block;
-            font-size: 1rem;
-            margin-top: 4px;
-            animation: bob 1.5s ease infinite;
+            font-size: 0.8rem;
+            animation: bob 1.8s ease infinite;
         }
 
         @keyframes bob {
-            0%, 100% { transform: translateY(0); opacity: 0.4; }
-            50% { transform: translateY(4px); opacity: 1; }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+        }
+
+        /* Lure orb - a floating shape that drifts down, inviting the mouse to chase it */
+        .lure-orb {
+            position: fixed;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.35), rgba(255,255,255,0.08));
+            box-shadow: 0 0 16px rgba(255,255,255,0.12);
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.6s;
+        }
+
+        .lure-orb.visible {
+            opacity: 1;
+        }
+
+        .lure-orb.caught {
+            opacity: 0;
+            transform: scale(2.5) !important;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        /* Section heading inside cards */
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+
+        /* Testimonial block */
+        .testimonial {
+            border-left: 2px solid rgba(255,255,255,0.15);
+            padding: 14px 0 14px 20px;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-text {
+            font-size: 0.85rem;
+            font-style: italic;
+            opacity: 0.55;
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .testimonial-author {
+            font-size: 0.7rem;
+            opacity: 0.35;
+        }
+
+        /* Divider line */
+        .divider {
+            height: 1px;
+            background: rgba(255,255,255,0.08);
+            margin: 32px 0;
+        }
+
+        /* Grid for features/items */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .feature-card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+
+        .feature-card-desc {
+            font-size: 0.7rem;
+            opacity: 0.4;
+            line-height: 1.4;
+        }
+
+        /* Schedule block */
+        .schedule-block {
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .schedule-time {
+            font-size: 0.7rem;
+            opacity: 0.4;
+            margin-bottom: 4px;
+        }
+
+        .schedule-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -332,28 +455,53 @@
 
 <div class="stage" id="stage"></div>
 <div class="hud" id="hud"></div>
-<div class="scroll-zone" id="scrollZone"></div>
-<div class="scroll-zone-label" id="scrollLabel">Scroll content<span class="arr">&#x2304;</span></div>
+<div class="scroll-indicator" id="scrollIndicator">
+    <div class="scroll-indicator-text">Move mouse down to scroll</div>
+    <div class="scroll-indicator-mouse"></div>
+    <div class="scroll-indicator-arrow">&#x2304;</div>
+</div>
+<div class="lure-orb" id="lureOrb"></div>
 
 <script>
+var PH = 'rgba(255,255,255,0.08)';
+var PH2 = 'rgba(255,255,255,0.06)';
+
 var cards = [
     {
         tag: "The Land", title: "69 Acres of Sanctuary",
-        bg: "#2d5a27", headerBg: "#3a6e33", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Aerial Photo</div>' +
+        bg: "#2d5a27", headerBg: "#3a6e33",
+        body: '<div class="ph-hero" style="background:'+PH+'">Aerial Photo</div>' +
               '<div class="card-title">69 Acres of Sanctuary</div>' +
-              '<div class="body-text">Sacred land on Salt Spring Island, home to forests, organic gardens, meditation ponds, and temples nestled among ancient cedars.</div>' +
+              '<div class="body-text">Sacred land on Salt Spring Island, home to forests, organic gardens, meditation ponds, and temples nestled among ancient cedars. For over four decades, this land has been a refuge for seekers, artists, and those looking for peace.</div>' +
               '<div class="ph-row">' +
-                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Gardens</div>' +
-                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Temples</div>' +
-                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Ponds</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Gardens</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Temples</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Ponds</div>' +
               '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">What You\'ll Find</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Organic Gardens</div><div class="feature-card-desc">Over 2 acres of food gardens supplying the kitchen year-round</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Meditation Ponds</div><div class="feature-card-desc">Quiet water features surrounded by native plants and sitting stones</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Temple Spaces</div><div class="feature-card-desc">Multiple shrines and sacred spaces for prayer and contemplation</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Forest Trails</div><div class="feature-card-desc">Winding paths through old-growth cedar and fir forest</div></div>' +
+              '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Visitor Information</div>' +
+              '<ul class="detail-list">' +
+                '<li>Location <span>Salt Spring Island, BC</span></li>' +
+                '<li>Access <span>By ferry from Vancouver or Victoria</span></li>' +
+                '<li>Day visits <span>By appointment only</span></li>' +
+                '<li>Overnight <span>Available through retreat bookings</span></li>' +
+              '</ul>' +
+              '<div class="testimonial"><div class="testimonial-text">Walking through the gardens at dawn, with mist rising off the pond, I understood why people never want to leave this place.</div><div class="testimonial-author">Retreat participant, 2024</div></div>' +
+              '<div class="ph-hero" style="background:'+PH+'">Panoramic Landscape</div>' +
               '<button class="btn btn-primary">Explore the Land</button>' +
               '<button class="btn btn-outline">Plan a Visit</button>'
     },
     {
         tag: "Babaji", title: "Peace. No more than that.",
-        bg: "#1a1a2e", headerBg: "#24243e", phColor: "rgba(255,255,255,0.06)",
+        bg: "#1a1a2e", headerBg: "#24243e",
         body: '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center">' +
               '<div class="quote-mark">\u201C</div>' +
               '<div class="quote-text">Peace. No more than that.</div>' +
@@ -364,58 +512,114 @@ var cards = [
     },
     {
         tag: "Retreat", title: "Weekend Yoga Retreat",
-        bg: "#1a5c53", headerBg: "#237a6e", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Retreat Photo</div>' +
+        bg: "#1a5c53", headerBg: "#237a6e",
+        body: '<div class="ph-hero" style="background:'+PH+'">Retreat Photo</div>' +
               '<div class="card-title">Weekend Yoga Retreat</div>' +
               '<div class="card-subtitle">2 nights of practice, rest, and renewal</div>' +
               '<div class="tags"><span class="tag-pill">Yoga</span><span class="tag-pill">Meditation</span><span class="tag-pill">Meals Included</span><span class="tag-pill">2 Nights</span></div>' +
+              '<div class="body-text">Step away from the noise and into stillness. This weekend retreat offers a gentle but structured immersion in classical yoga, surrounded by the forests and gardens of the centre.</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Sample Schedule</div>' +
+              '<div class="schedule-block"><div class="schedule-time">6:00 AM</div><div class="schedule-title">Morning Meditation</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">7:00 AM</div><div class="schedule-title">Asana Practice</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">8:30 AM</div><div class="schedule-title">Breakfast</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">10:00 AM</div><div class="schedule-title">Workshop: Breath & Bandhas</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">12:30 PM</div><div class="schedule-title">Lunch + Free Time</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">4:00 PM</div><div class="schedule-title">Afternoon Asana</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">6:00 PM</div><div class="schedule-title">Dinner</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">7:30 PM</div><div class="schedule-title">Kirtan / Evening Satsang</div></div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Details</div>' +
               '<ul class="detail-list">' +
                 '<li>Dates <span>June 13 \u2013 15, 2025</span></li>' +
                 '<li>Accommodation <span>Shared cabin</span></li>' +
                 '<li>Meals <span>3 vegetarian daily</span></li>' +
                 '<li>Sessions <span>4 yoga + 2 meditation</span></li>' +
+                '<li>Level <span>All levels welcome</span></li>' +
               '</ul>' +
+              '<div class="testimonial"><div class="testimonial-text">I came exhausted and left transformed. The food alone is worth the trip. Everything is grown right there on the land.</div><div class="testimonial-author">Sarah M., Vancouver</div></div>' +
+              '<div class="testimonial"><div class="testimonial-text">The teachers hold space in a way I have never experienced. Gentle but deep. I cried on the second day and it was exactly what I needed.</div><div class="testimonial-author">James K., Victoria</div></div>' +
+              '<div class="divider"></div>' +
               '<div class="price">$395</div>' +
               '<div class="price-note">Per person, shared accommodation</div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box" style="background:'+PH2+'">Cabin</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Yoga Hall</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Meals</div>' +
+              '</div>' +
               '<button class="btn btn-primary">Book This Retreat</button>' +
-              '<button class="btn btn-outline">View Schedule</button>'
+              '<button class="btn btn-outline">View All Retreats</button>'
     },
     {
         tag: "Venue", title: "The Pond Dome",
-        bg: "#4a6670", headerBg: "#5a7a84", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Dome Exterior</div>' +
+        bg: "#4a6670", headerBg: "#5a7a84",
+        body: '<div class="ph-hero" style="background:'+PH+'">Dome Exterior</div>' +
               '<div class="card-title">The Pond Dome</div>' +
               '<div class="card-subtitle">Geodesic dome by the water</div>' +
-              '<div class="body-text">A stunning geodesic dome set beside a tranquil pond. Available for workshops, weddings, concerts, and private events.</div>' +
+              '<div class="body-text">A stunning geodesic dome set beside a tranquil pond. The space fills with natural light through its triangulated panels and opens directly onto a wooden deck overlooking the water. Available for workshops, weddings, concerts, and private events.</div>' +
               '<div class="ph-row">' +
-                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Interior</div>' +
-                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Pond View</div>' +
+                '<div class="ph-box tall" style="background:'+PH2+'">Interior</div>' +
+                '<div class="ph-box tall" style="background:'+PH2+'">Pond View</div>' +
               '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Venue Features</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Natural Acoustics</div><div class="feature-card-desc">The dome shape creates warm, resonant sound ideal for music and voice</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Waterfront Deck</div><div class="feature-card-desc">Extend your event outdoors with the adjacent pond-side deck</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Wood Floor</div><div class="feature-card-desc">Heated hardwood suitable for dance, yoga, or seated events</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Kitchen Access</div><div class="feature-card-desc">Full commercial kitchen available for catered events</div></div>' +
+              '</div>' +
+              '<div class="divider"></div>' +
               '<ul class="detail-list">' +
-                '<li>Capacity <span>80 seated</span></li>' +
-                '<li>Features <span>Natural light, wood floor</span></li>' +
+                '<li>Capacity <span>80 seated / 40 with tables</span></li>' +
                 '<li>Season <span>May \u2013 October</span></li>' +
+                '<li>Half day rental <span>$600</span></li>' +
+                '<li>Full day rental <span>$1,000</span></li>' +
+                '<li>Catering <span>Available on request</span></li>' +
               '</ul>' +
-              '<button class="btn btn-primary">Inquire About Rental</button>'
+              '<div class="ph-hero" style="background:'+PH+'">Evening Event Setup</div>' +
+              '<div class="testimonial"><div class="testimonial-text">We held our wedding here and it was pure magic. The sunset over the pond, the candlelight through the dome panels. Our guests still talk about it.</div><div class="testimonial-author">Leah & David, 2023</div></div>' +
+              '<button class="btn btn-primary">Inquire About Rental</button>' +
+              '<button class="btn btn-outline">View Gallery</button>'
     },
     {
         tag: "Shop", title: "Salt Spring Island Cooking",
-        bg: "#8a6a3a", headerBg: "#9a7a4a", phColor: "rgba(255,255,255,0.08)",
+        bg: "#8a6a3a", headerBg: "#9a7a4a",
         body: '<div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">' +
-                '<div class="ph-box tall" style="background:rgba(255,255,255,0.08);width:200px;flex-shrink:0;height:260px">Book Cover</div>' +
+                '<div class="ph-box tall" style="background:'+PH+';width:200px;flex-shrink:0;height:260px">Book Cover</div>' +
                 '<div style="flex:1;min-width:240px">' +
                   '<div class="card-title" style="font-size:1.8rem">Salt Spring Island Cooking</div>' +
-                  '<div class="body-text">The beloved cookbook that has sold over 52,000 copies. Recipes rooted in the land, the seasons, and the community.</div>' +
+                  '<div class="body-text">The beloved cookbook that has sold over 52,000 copies. Recipes rooted in the land, the seasons, and the community of Salt Spring Island.</div>' +
                   '<div class="price">$34.95</div>' +
                   '<div class="price-note">Hardcover, 224 pages</div>' +
                   '<button class="btn btn-primary">Add to Cart</button>' +
                   '<button class="btn btn-outline">Preview Recipes</button>' +
                 '</div>' +
-              '</div>'
+              '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Sample Recipes</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Spring Nettle Soup</div><div class="feature-card-desc">Foraged nettles from the forest edge, with potato and cream</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Garden Dal</div><div class="feature-card-desc">Red lentils with fresh chard and turmeric from the garden</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Cedar-Plank Salmon</div><div class="feature-card-desc">Wild Pacific salmon on local cedar with herb butter</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Lavender Shortbread</div><div class="feature-card-desc">Buttery cookies with culinary lavender from the herb spiral</div></div>' +
+              '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">What People Are Saying</div>' +
+              '<div class="testimonial"><div class="testimonial-text">This is not just a cookbook. It is a window into a way of living that most of us have forgotten. Every recipe tastes like home.</div><div class="testimonial-author">Globe and Mail Review</div></div>' +
+              '<div class="testimonial"><div class="testimonial-text">I have given this book as a gift more than any other. It converts people.</div><div class="testimonial-author">Reader review</div></div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">More from the Shop</div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box" style="background:'+PH2+'">Honey</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Tea Blend</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Incense</div>' +
+              '</div>' +
+              '<button class="btn btn-outline">View Full Shop</button>'
     },
     {
         tag: "Babaji", title: "Shadow fighting.",
-        bg: "#2a1a2e", headerBg: "#3a2a40", phColor: "rgba(255,255,255,0.06)",
+        bg: "#2a1a2e", headerBg: "#3a2a40",
         body: '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center">' +
               '<div class="quote-mark">\u201C</div>' +
               '<div class="quote-text">Shadow fighting.</div>' +
@@ -426,56 +630,100 @@ var cards = [
     },
     {
         tag: "Training", title: "200-Hour Teacher Training",
-        bg: "#5a3a1a", headerBg: "#6a4a2a", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Training Photo</div>' +
+        bg: "#5a3a1a", headerBg: "#6a4a2a",
+        body: '<div class="ph-hero" style="background:'+PH+'">Training Photo</div>' +
               '<div class="card-title">200-Hour Teacher Training</div>' +
               '<div class="card-subtitle">Become a certified yoga teacher</div>' +
               '<div class="tags"><span class="tag-pill">Yoga Alliance</span><span class="tag-pill">200 Hours</span><span class="tag-pill">Residential</span></div>' +
-              '<div class="body-text">An immersive residential program rooted in classical yoga tradition. Study asana, pranayama, meditation, anatomy, and the philosophy of yoga.</div>' +
+              '<div class="body-text">An immersive residential program rooted in classical yoga tradition. Study asana, pranayama, meditation, anatomy, and the philosophy of yoga in the environment where these practices have been lived daily for over forty years.</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Curriculum</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Asana</div><div class="feature-card-desc">Classical postures, alignment principles, sequencing, and modifications</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Pranayama</div><div class="feature-card-desc">Breath control techniques and their physiological effects</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Meditation</div><div class="feature-card-desc">Seated practices, mantra, and contemplative traditions</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Anatomy</div><div class="feature-card-desc">Musculoskeletal system, injury prevention, and therapeutic applications</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Philosophy</div><div class="feature-card-desc">Yoga Sutras, Bhagavad Gita, and ethical foundations of teaching</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Teaching Practice</div><div class="feature-card-desc">Practicum hours, peer teaching, feedback, and voice development</div></div>' +
+              '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Program Details</div>' +
               '<ul class="detail-list">' +
                 '<li>Duration <span>4 weeks intensive</span></li>' +
                 '<li>Certification <span>Yoga Alliance RYT-200</span></li>' +
                 '<li>Includes <span>Room, board, materials</span></li>' +
                 '<li>Next intake <span>September 2025</span></li>' +
+                '<li>Class size <span>Maximum 16 students</span></li>' +
+                '<li>Prerequisites <span>1+ year regular practice</span></li>' +
               '</ul>' +
+              '<div class="testimonial"><div class="testimonial-text">This training changed my life in ways I am still discovering. The depth of knowledge and the sincerity of the teachers set it apart from anything else I have encountered.</div><div class="testimonial-author">Graduate, 2024 cohort</div></div>' +
+              '<div class="divider"></div>' +
               '<div class="price">$4,200</div>' +
               '<div class="price-note">Full program, shared accommodation</div>' +
               '<button class="btn btn-primary">Apply Now</button>' +
-              '<button class="btn btn-outline">Download Syllabus</button>'
+              '<button class="btn btn-outline">Download Syllabus</button>' +
+              '<button class="btn btn-outline">Talk to a Graduate</button>'
     },
     {
         tag: "Sacred", title: "Hanuman Shrine",
-        bg: "#6a4a2a", headerBg: "#7a5a3a", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Shrine Photo</div>' +
+        bg: "#6a4a2a", headerBg: "#7a5a3a",
+        body: '<div class="ph-hero" style="background:'+PH+'">Shrine Photo</div>' +
               '<div class="card-title">Hanuman Shrine</div>' +
               '<div class="card-subtitle">One of many sacred spaces on the land</div>' +
-              '<div class="body-text">Dedicated to the devoted servant of Rama, this open-air shrine sits among the cedars. Visitors are welcome to sit, meditate, and offer prayers.</div>' +
+              '<div class="body-text">Dedicated to the devoted servant of Rama, this open-air shrine sits among the cedars. Visitors are welcome to sit, meditate, and offer prayers. The shrine was consecrated in 1984 and has been maintained by the community ever since.</div>' +
               '<div class="ph-row">' +
-                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Detail</div>' +
-                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Path</div>' +
-                '<div class="ph-box" style="background:rgba(255,255,255,0.06)">Forest</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Detail</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Path</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Forest</div>' +
               '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">All Sacred Spaces</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Hanuman Shrine</div><div class="feature-card-desc">Open-air shrine among cedars</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Lakshmi Pavilion</div><div class="feature-card-desc">Covered meditation space overlooking the garden</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Shiva Lingam</div><div class="feature-card-desc">Stone shrine at the forest edge</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Prayer Flags Path</div><div class="feature-card-desc">Walking path strung with Tibetan prayer flags</div></div>' +
+              '</div>' +
+              '<div class="body-text">These spaces are open to all visitors during daylight hours. We ask only that you approach them with respect and awareness. Shoes are removed at each site.</div>' +
+              '<div class="ph-hero" style="background:'+PH+'">Forest Path to Shrines</div>' +
               '<button class="btn btn-outline">View All Sacred Spaces</button>'
     },
     {
         tag: "Karma Yoga", title: "Live & Serve",
-        bg: "#2a5a2a", headerBg: "#3a6a3a", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Volunteers Photo</div>' +
+        bg: "#2a5a2a", headerBg: "#3a6a3a",
+        body: '<div class="ph-hero" style="background:'+PH+'">Volunteers Photo</div>' +
               '<div class="card-title">Live & Serve</div>' +
               '<div class="card-subtitle">Karma yoga volunteer program</div>' +
-              '<div class="body-text">Live on the land and contribute through service. Room and board provided in exchange for 4 hours of daily work in the gardens, kitchen, or maintenance.</div>' +
+              '<div class="body-text">Live on the land and contribute through service. Room and board provided in exchange for 4 hours of daily work in the gardens, kitchen, or maintenance. The rest of your time is yours for practice, study, and stillness.</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Work Areas</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Gardens</div><div class="feature-card-desc">Planting, weeding, harvesting, and composting in the organic food gardens</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Kitchen</div><div class="feature-card-desc">Meal preparation, baking bread, preserving seasonal harvests</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Maintenance</div><div class="feature-card-desc">Trail upkeep, building repair, and general groundskeeping</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Housekeeping</div><div class="feature-card-desc">Preparing guest rooms, cleaning shared spaces, laundry</div></div>' +
+              '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Program Details</div>' +
               '<ul class="detail-list">' +
                 '<li>Commitment <span>Minimum 2 weeks</span></li>' +
-                '<li>Work <span>4 hours / day</span></li>' +
+                '<li>Work <span>4 hours / day, 6 days / week</span></li>' +
                 '<li>Includes <span>Room + 3 meals daily</span></li>' +
                 '<li>Yoga classes <span>Included</span></li>' +
+                '<li>Day off <span>Saturdays (explore the island)</span></li>' +
+                '<li>Ages <span>19+</span></li>' +
               '</ul>' +
+              '<div class="testimonial"><div class="testimonial-text">I came for two weeks and stayed for two months. Working in the garden at sunrise, eating food we grew together, practising yoga in the evening. It reset something deep inside me.</div><div class="testimonial-author">Karma yogi, 2024</div></div>' +
+              '<div class="ph-row">' +
+                '<div class="ph-box" style="background:'+PH2+'">Garden Work</div>' +
+                '<div class="ph-box" style="background:'+PH2+'">Community Meal</div>' +
+              '</div>' +
               '<button class="btn btn-primary">Apply to Volunteer</button>' +
               '<button class="btn btn-outline">Read FAQs</button>'
     },
     {
         tag: "Babaji", title: "Self control.",
-        bg: "#1a1a1a", headerBg: "#2a2a2a", phColor: "rgba(255,255,255,0.06)",
+        bg: "#1a1a1a", headerBg: "#2a2a2a",
         body: '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center">' +
               '<div class="quote-mark">\u201C</div>' +
               '<div class="quote-text">Self control.</div>' +
@@ -486,39 +734,65 @@ var cards = [
     },
     {
         tag: "Event", title: "Music for Peace",
-        bg: "#5a2a4a", headerBg: "#6a3a5a", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Concert Photo</div>' +
+        bg: "#5a2a4a", headerBg: "#6a3a5a",
+        body: '<div class="ph-hero" style="background:'+PH+'">Concert Photo</div>' +
               '<div class="card-title">Music for Peace</div>' +
               '<div class="card-subtitle">Indian classical concert series</div>' +
-              '<div class="body-text">An evening of classical Indian music performed in the Pond Dome. Ragas selected to invoke peace, devotion, and stillness.</div>' +
+              '<div class="body-text">An evening of classical Indian music performed in the Pond Dome. Ragas selected to invoke peace, devotion, and stillness. Performed by visiting musicians from across North America and India.</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Upcoming Concerts</div>' +
+              '<div class="schedule-block"><div class="schedule-time">July 19, 2025 \u2014 7:00 PM</div><div class="schedule-title">Raga Yaman \u2014 Evening of Devotion</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">August 9, 2025 \u2014 7:00 PM</div><div class="schedule-title">Raga Malkauns \u2014 Music of Midnight</div></div>' +
+              '<div class="schedule-block"><div class="schedule-time">September 6, 2025 \u2014 4:00 PM</div><div class="schedule-title">Afternoon Ragas \u2014 Seasonal Closing</div></div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Event Details</div>' +
               '<ul class="detail-list">' +
-                '<li>Date <span>July 19, 2025</span></li>' +
                 '<li>Venue <span>The Pond Dome</span></li>' +
-                '<li>Doors <span>6:30 PM</span></li>' +
-                '<li>Duration <span>~2 hours</span></li>' +
+                '<li>Doors <span>30 min before showtime</span></li>' +
+                '<li>Seating <span>Floor cushions provided</span></li>' +
+                '<li>Duration <span>~2 hours with intermission</span></li>' +
+                '<li>Refreshments <span>Chai and sweets at intermission</span></li>' +
               '</ul>' +
+              '<div class="testimonial"><div class="testimonial-text">Hearing sitar music in the dome, with the pond reflecting moonlight through the panels. There is nothing like it anywhere else on this island.</div><div class="testimonial-author">Regular attendee</div></div>' +
+              '<div class="ph-hero" style="background:'+PH+'">Performance in the Dome</div>' +
               '<div class="price">$25</div>' +
-              '<div class="price-note">General admission, seating on floor cushions</div>' +
+              '<div class="price-note">General admission</div>' +
               '<button class="btn btn-primary">Get Tickets</button>' +
               '<button class="btn btn-outline">Past Concerts</button>'
     },
     {
         tag: "Nature", title: "Dandaka Forest",
-        bg: "#1a3a1a", headerBg: "#2a4a2a", phColor: "rgba(255,255,255,0.08)",
-        body: '<div class="ph-hero" style="background:rgba(255,255,255,0.08)">Forest Canopy</div>' +
+        bg: "#1a3a1a", headerBg: "#2a4a2a",
+        body: '<div class="ph-hero" style="background:'+PH+'">Forest Canopy</div>' +
               '<div class="card-title">Dandaka Forest</div>' +
               '<div class="card-subtitle">Primordial cedar-swamp wetland</div>' +
-              '<div class="body-text">One of the last undisturbed cedar-swamp ecosystems on Salt Spring Island. Walk the boardwalk trail through ancient trees draped in moss.</div>' +
+              '<div class="body-text">One of the last undisturbed cedar-swamp ecosystems on Salt Spring Island. Walk the boardwalk trail through ancient trees draped in moss. Named after the mythological forest from the Ramayana, this wetland is home to great blue herons, salamanders, and rare ferns.</div>' +
               '<div class="ph-row">' +
-                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Trail</div>' +
-                '<div class="ph-box tall" style="background:rgba(255,255,255,0.06)">Canopy</div>' +
+                '<div class="ph-box tall" style="background:'+PH2+'">Trail</div>' +
+                '<div class="ph-box tall" style="background:'+PH2+'">Canopy</div>' +
               '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">What You\'ll See</div>' +
+              '<div class="feature-grid">' +
+                '<div class="feature-card"><div class="feature-card-title">Western Red Cedar</div><div class="feature-card-desc">Ancient specimens up to 800 years old</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Skunk Cabbage</div><div class="feature-card-desc">Bright yellow blooms in early spring</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Great Blue Heron</div><div class="feature-card-desc">Nesting colony visible from the boardwalk</div></div>' +
+                '<div class="feature-card"><div class="feature-card-title">Rough-skinned Newt</div><div class="feature-card-desc">Found along the trail edges in autumn</div></div>' +
+              '</div>' +
+              '<div class="divider"></div>' +
+              '<div class="section-title">Trail Information</div>' +
               '<ul class="detail-list">' +
                 '<li>Trail length <span>1.2 km loop</span></li>' +
-                '<li>Difficulty <span>Easy, boardwalk</span></li>' +
+                '<li>Surface <span>Boardwalk + gravel</span></li>' +
+                '<li>Difficulty <span>Easy, mostly flat</span></li>' +
+                '<li>Accessibility <span>Wheelchair passable (dry season)</span></li>' +
                 '<li>Access <span>Dawn to dusk</span></li>' +
+                '<li>Dogs <span>Not permitted</span></li>' +
               '</ul>' +
-              '<button class="btn btn-outline">Trail Map</button>'
+              '<div class="testimonial"><div class="testimonial-text">The silence in there is alive. You can hear the trees breathing. My children still talk about the day we found the heron nest.</div><div class="testimonial-author">Local family</div></div>' +
+              '<div class="ph-hero" style="background:'+PH+'">Boardwalk Through Wetland</div>' +
+              '<button class="btn btn-outline">Trail Map</button>' +
+              '<button class="btn btn-outline">Seasonal Guide</button>'
     }
 ];
 
@@ -526,8 +800,8 @@ var numCards = cards.length;
 
 var stage = document.getElementById('stage');
 var hud = document.getElementById('hud');
-var scrollZone = document.getElementById('scrollZone');
-var scrollLabel = document.getElementById('scrollLabel');
+var scrollIndicator = document.getElementById('scrollIndicator');
+var lureOrb = document.getElementById('lureOrb');
 var cardEls = [];
 var cardBodies = [];
 var dotEls = [];
@@ -639,19 +913,38 @@ function tick() {
 
     var activeIndex = Math.min(Math.round(vScroll), numCards - 1);
 
+    // Check if active card has scrollable content
+    var activeBody = cardBodies[activeIndex];
+    var hasMore = activeBody && (activeBody.scrollTop < (activeBody.scrollHeight - activeBody.clientHeight - 2));
+    var isScrollable = activeBody && (activeBody.scrollHeight > activeBody.clientHeight + 10);
+
     // Mouse in bottom 30%: auto-scroll the active card's content
     var inScrollZone = mouseY > 0.70;
-    scrollZone.classList.toggle('active', inScrollZone);
 
-    var activeBody = cardBodies[activeIndex];
-    if (inScrollZone && activeBody) {
-        var intensity = (mouseY - 0.70) / 0.30; // 0 to 1
-        var scrollSpeed = intensity * 4; // px per frame
-        var hasMore = activeBody.scrollTop < (activeBody.scrollHeight - activeBody.clientHeight - 2);
-        activeBody.scrollTop += scrollSpeed;
-        scrollLabel.classList.toggle('visible', hasMore);
-    } else {
-        scrollLabel.classList.remove('visible');
+    if (inScrollZone && activeBody && hasMore) {
+        var intensity = (mouseY - 0.70) / 0.30;
+        activeBody.scrollTop += intensity * 4;
+    }
+
+    // Show indicator when card has scrollable content and hasn't been scrolled to bottom
+    scrollIndicator.classList.toggle('visible', isScrollable && hasMore && !inScrollZone);
+
+    // Lure orb: floats down the screen when there's more content, inviting chase
+    if (isScrollable && hasMore && !inScrollZone) {
+        lureOrb.classList.add('visible');
+        lureOrb.classList.remove('caught');
+        // Drift the orb in a gentle arc toward the bottom
+        var time = Date.now() * 0.001;
+        var orbX = 50 + Math.sin(time * 0.7) * 15; // % from left
+        var orbBaseY = 65 + Math.sin(time * 0.4) * 8; // % from top, hovers in lower area
+        lureOrb.style.left = orbX + '%';
+        lureOrb.style.top = orbBaseY + '%';
+    } else if (inScrollZone && lureOrb.classList.contains('visible')) {
+        // Mouse caught the orb zone
+        lureOrb.classList.add('caught');
+        setTimeout(function() { lureOrb.classList.remove('visible'); }, 300);
+    } else if (!isScrollable || !hasMore) {
+        lureOrb.classList.remove('visible');
     }
 
     // Render card transforms
