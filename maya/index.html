@@ -792,7 +792,7 @@ function renderNextShow() {
 
   container.innerHTML =
     '<div class="next-show-inner">' +
-      '<div class="next-show-poster">' +
+      '<div class="next-show-poster" onclick="openShowDetail(0)" style="cursor:pointer">' +
         '<div class="poster-glow"></div>' +
         '<img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '" loading="lazy">' +
       '</div>' +
@@ -1080,6 +1080,72 @@ function formatDateShort(dateStr) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
+
+/* ========================================
+   SHOW DETAIL
+   ======================================== */
+function openShowDetail(idx) {
+  const show = DATA.shows[idx];
+  if (!show) return;
+  const dateStr = formatDateLong(show.date);
+  const venue = DATA.settings.venue || 'The Parkside Lounge';
+  const addr = DATA.settings.venueAddress || '';
+  let html = '';
+  if (show.posterImage) {
+    html += '<div class="show-detail-hero"><img src="' + escHtml(show.posterImage) + '" alt="' + escHtml(show.title) + '"><div class="hero-grad"></div></div>';
+  }
+  html += '<div class="show-detail-content">';
+  html += '<h1>' + escHtml(show.title) + '</h1>';
+  html += '<div class="sd-meta">' + dateStr + (show.time ? ' - ' + escHtml(show.time) : '') + '</div>';
+  html += '<div class="sd-venue">' + escHtml(venue) + ' - ' + escHtml(addr) + (show.doors ? ' - Doors ' + escHtml(show.doors) : '') + '</div>';
+  if (show.edition) html += '<div class="sd-notes">Edition #' + show.edition + '</div>';
+  html += '<div class="sd-crew">';
+  if (show.emcee) html += '<span>Emcee: ' + escHtml(show.emcee) + '</span>';
+  if (show.accompaniment) html += '<span>Accompaniment: ' + escHtml(show.accompaniment) + '</span>';
+  html += '</div>';
+  if (show.notes) html += '<div class="sd-notes">' + escHtml(show.notes) + '</div>';
+  if (show.ticketUrl) html += '<div style="margin:20px 0"><a href="' + escHtml(show.ticketUrl) + '" target="_blank" class="btn">Get Tickets</a></div>';
+  if (show.performers && show.performers.length) {
+    html += '<div class="sd-section-title">Performers</div>';
+    show.performers.forEach(function(p) {
+      if (typeof p === 'string') { html += '<div class="sd-performer"><div class="sd-perf-name">' + escHtml(p) + '</div></div>'; return; }
+      html += '<div class="sd-performer">';
+      html += '<div class="sd-perf-name">' + escHtml(p.name) + '</div>';
+      if (p.instagram) html += '<div class="sd-perf-ig">' + escHtml(p.instagram) + '</div>';
+      if (p.bio) html += '<div class="sd-perf-bio">' + escHtml(p.bio) + '</div>';
+      if (p.image) html += '<img src="' + escHtml(p.image) + '" style="width:100%;max-width:300px;border-radius:8px;margin-top:10px" loading="lazy">';
+      html += '</div>';
+    });
+  }
+  if (show.recapImages && show.recapImages.length) {
+    html += '<div class="sd-section-title">From the Show</div>';
+    if (show.recapCaption) html += '<div class="sd-recap-caption">' + escHtml(show.recapCaption) + '</div>';
+    html += '<div class="sd-recap-grid">';
+    show.recapImages.forEach(function(img) {
+      html += '<img src="' + escHtml(img) + '" alt="" loading="lazy" onclick="event.stopPropagation();openLbDirect(\'' + escHtml(img).replace(/'/g,"\\'") + '\')">';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  document.getElementById('showDetailContent').innerHTML = html;
+  document.getElementById('showDetail').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeShowDetail() {
+  document.getElementById('showDetail').classList.remove('active');
+  document.body.style.overflow = '';
+  document.getElementById('showDetail').scrollTop = 0;
+}
+function openLbDirect(src) {
+  document.getElementById('lb-img').src = src;
+  document.getElementById('lb-img').style.display = 'block';
+  document.getElementById('lb-video').style.display = 'none';
+  document.getElementById('lb-caption').textContent = '';
+  document.getElementById('lightbox').classList.add('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('showDetail').classList.contains('active')) closeShowDetail();
+});
 
 /* ========================================
    BOOT
