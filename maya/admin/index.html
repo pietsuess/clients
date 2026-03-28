@@ -600,6 +600,17 @@ body.admin-mode{padding-top:48px}
 }
 .show-card-edit button:hover{border-color:var(--pink);color:var(--pink)}
 
+/* Item delete button - reusable */
+.item-delete{
+  position:absolute;top:6px;right:6px;z-index:2;
+  width:22px;height:22px;background:rgba(0,0,0,0.7);
+  border:1px solid rgba(245,240,230,0.15);color:var(--cream);
+  font-size:0.75rem;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;opacity:0;transition:all 0.2s;border-radius:0;
+}
+*:hover > .item-delete{opacity:0.6}
+.item-delete:hover{opacity:1 !important;border-color:var(--red);color:var(--red)}
+
 /* Discard draft button */
 .discard-btn{color:rgba(245,240,230,0.3) !important;font-size:0.65rem !important}
 .discard-btn:hover{color:var(--red) !important;border-color:var(--red) !important}
@@ -1050,17 +1061,30 @@ function renderNextShowInner(show) {
     '</div></div>';
 }
 
+function initAboutDetails() {
+  if (!DATA.settings.aboutDetails) {
+    DATA.settings.aboutDetails = [
+      { title: 'The Venue', text: (DATA.settings.venue || 'The Parkside Lounge') + '. A dive bar and performance venue catering to the artists, musicians, and freaks of the Lower East Side since 1908.' },
+      { title: 'Maya Suess', text: 'Artist, educator, and arts administrator. Born on a small island off western Canada\'s coast. BFA from Emily Carr, MFA from Simon Fraser. She makes drawings, installations, videos, performances, and other mischievous entities.' },
+      { title: 'Klovis Gaynor', text: 'Musical accompaniment at nearly every edition. Queer musician and "baroque punk" artist. Queens-based.' },
+      { title: 'Libby Paloma', text: 'Set designer and production support. Queercrip, Mexican-American interdisciplinary artist working in sculpture, installation, and performance.' },
+      { title: 'The Deal', text: 'Sliding scale cover. All monies go directly to the performers. Tickets through Humanitix, where 100% of booking fees go to charity.' }
+    ];
+  }
+}
 function renderAboutDetails() {
-  var items = [
-    { t: 'The Venue', p: (DATA.settings.venue || 'The Parkside Lounge') + '. A dive bar and performance venue catering to the artists, musicians, and freaks of the Lower East Side since 1908.' },
-    { t: 'Maya Suess', p: 'Artist, educator, and arts administrator. Born on a small island off western Canada\'s coast. BFA from Emily Carr, MFA from Simon Fraser. She makes drawings, installations, videos, performances, and other mischievous entities.' },
-    { t: 'Klovis Gaynor', p: 'Musical accompaniment at nearly every edition. Queer musician and "baroque punk" artist. Queens-based.' },
-    { t: 'Libby Paloma', p: 'Set designer and production support. Queercrip, Mexican-American interdisciplinary artist working in sculpture, installation, and performance.' },
-    { t: 'The Deal', p: 'Sliding scale cover. All monies go directly to the performers. Tickets through Humanitix, where 100% of booking fees go to charity.' }
-  ];
-  return items.map(function(i) {
-    return '<div class="detail-item"><h4 contenteditable="true">' + esc(i.t) + '</h4><p contenteditable="true">' + esc(i.p) + '</p></div>';
-  }).join('');
+  initAboutDetails();
+  var items = DATA.settings.aboutDetails;
+  return items.map(function(item, i) {
+    return '<div class="detail-item" style="position:relative">' +
+      '<button class="item-delete" onclick="deleteAboutDetail(' + i + ')">&times;</button>' +
+      '<h4 contenteditable="true" data-about="' + i + '" data-aboutfield="title">' + esc(item.title) + '</h4>' +
+      '<p contenteditable="true" data-about="' + i + '" data-aboutfield="text">' + esc(item.text) + '</p>' +
+    '</div>';
+  }).join('') +
+  '<div class="detail-item" onclick="addAboutDetail()" style="cursor:pointer;border:1px dashed rgba(245,240,230,0.15);padding:16px;text-align:center;color:rgba(245,240,230,0.3)">' +
+    '<div style="font-size:1.2rem">+</div><div style="font-size:0.75rem">Add Detail</div>' +
+  '</div>';
 }
 
 function renderShowsGrid() {
@@ -1100,18 +1124,21 @@ function renderShowsGrid() {
 
 function renderMediaGrid() {
   var items = DATA.media.slice(0, 24);
-  return items.map(function(item) {
+  return items.map(function(item, i) {
     var isVideo = item.type === 'video' || item.type === 'reel';
     var src = item.src || item.thumbSrc || '';
     var play = isVideo ? '<div class="play-icon"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg></div>' : '';
-    return '<div class="gallery-item"><img src="' + imgSrc(src) + '" alt="" loading="lazy">' + play + '</div>';
+    return '<div class="gallery-item" style="position:relative">' +
+      '<button class="item-delete" onclick="event.stopPropagation();deleteMediaItem(' + i + ')">&times;</button>' +
+      '<img src="' + imgSrc(src) + '" alt="" loading="lazy">' + play +
+    '</div>';
   }).join('');
 }
 
 function renderShopGrid() {
   return DATA.shop.map(function(item, i) {
     return '<div class="shop-item" style="position:relative">' +
-      '<button onclick="deleteShopItem(' + i + ')" style="position:absolute;top:8px;right:8px;z-index:2;width:24px;height:24px;background:rgba(0,0,0,0.7);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s" onmouseover="this.style.opacity=1;this.style.borderColor=\'var(--red)\';this.style.color=\'var(--red)\'" onmouseout="this.style.opacity=0;this.style.borderColor=\'\';this.style.color=\'\'">&times;</button>' +
+      '<button class="item-delete" onclick="deleteShopItem(' + i + ')">&times;</button>' +
       '<div class="img-editable" onclick="replaceShopImage(' + i + ')">' +
         '<img src="' + imgSrc(item.image || '') + '" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">' +
         '<div class="img-edit-badge">Replace</div>' +
@@ -1385,6 +1412,25 @@ function deleteShopItem(idx) {
     toast('Shop item deleted');
   });
 }
+function deleteMediaItem(idx) {
+  showConfirm('Remove this media item?', function() {
+    DATA.media.splice(idx, 1);
+    markDirty(); saveDraft(); renderSite(); setupDropZones();
+    toast('Media item removed');
+  });
+}
+function deleteAboutDetail(idx) {
+  showConfirm('Delete "' + (DATA.settings.aboutDetails[idx].title || 'this detail') + '"?', function() {
+    DATA.settings.aboutDetails.splice(idx, 1);
+    markDirty(); saveDraft(); renderSite(); setupDropZones();
+    toast('Detail removed');
+  });
+}
+function addAboutDetail() {
+  initAboutDetails();
+  DATA.settings.aboutDetails.push({ title: 'New Detail', text: 'Description here.' });
+  markDirty(); saveDraft(); renderSite(); setupDropZones();
+}
 function replaceShopImage(idx) {
   var input = document.createElement('input');
   input.type = 'file'; input.accept = 'image/*';
@@ -1415,6 +1461,14 @@ function collectInlineEdits() {
     var idx = parseInt(el.dataset.shop);
     var field = el.dataset.shopfield;
     if (DATA.shop[idx]) DATA.shop[idx][field] = el.textContent.trim();
+  });
+
+  document.querySelectorAll('[data-about]').forEach(function(el) {
+    var idx = parseInt(el.dataset.about);
+    var field = el.dataset.aboutfield;
+    if (DATA.settings.aboutDetails && DATA.settings.aboutDetails[idx]) {
+      DATA.settings.aboutDetails[idx][field] = el.textContent.trim();
+    }
   });
 }
 
