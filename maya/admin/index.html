@@ -989,6 +989,15 @@ function renderSite() {
   html += '<div class="section-ctrl">' + sectionArrows('shop') + '</div>';
   html += '<div class="section-title">Shop</div>';
   html += '<div class="section-subtitle">Merch coming soon. All proceeds support the performers.</div>';
+  html += '<div style="max-width:700px;margin:24px auto 0;padding:16px 20px;border:1px solid rgba(245,240,230,0.08);background:rgba(245,240,230,0.02)">';
+  html += '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:0.75rem;color:var(--pink);letter-spacing:0.1em;margin-bottom:8px">* SELLING ITEMS</div>';
+  html += '<div style="font-size:0.8rem;color:rgba(245,240,230,0.55);line-height:1.7">';
+  html += 'To accept payments, create a free <a href="https://stripe.com" target="_blank" style="color:var(--pink);border-bottom:1px solid var(--pink)">Stripe</a> account. ';
+  html += 'For each item, go to Stripe &gt; Payment Links &gt; create a product with a price &gt; copy the link. ';
+  html += 'Paste the link into the Buy URL field on the item below. ';
+  html += 'When a customer clicks Buy, they go straight to Stripe checkout. No code needed. ';
+  html += 'Stripe takes ~2.9% + 30c per transaction. Everything else goes to you.';
+  html += '</div></div>';
   html += '<div class="shop-grid">' + renderShopGrid() + '</div>';
   html += '</section>';
 
@@ -1147,6 +1156,7 @@ function renderShopGrid() {
         '<h3 contenteditable="true" data-shop="' + i + '" data-shopfield="title">' + esc(item.title) + '</h3>' +
         '<p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0" contenteditable="true" data-shop="' + i + '" data-shopfield="description">' + esc(item.description) + '</p>' +
         '<div class="price" contenteditable="true" data-shop="' + i + '" data-shopfield="price">' + esc(item.price || 'Coming Soon') + '</div>' +
+        '<input value="' + esc(item.buyUrl || '') + '" placeholder="Buy URL (Stripe Payment Link)" data-shop-url="' + i + '" onchange="DATA.shop[' + i + '].buyUrl=this.value;markDirty()" style="width:100%;padding:6px 8px;margin-top:8px;background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);color:var(--cream);font-size:0.7rem;font-family:\'DM Sans\',sans-serif;border-radius:0">' +
       '</div></div>';
   }).join('') +
   '<div class="shop-item" onclick="addShopItem()" style="display:flex;align-items:center;justify-content:center;min-height:200px;border:2px dashed rgba(255,255,255,0.15);background:none;cursor:pointer">' +
