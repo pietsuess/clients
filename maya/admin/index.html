@@ -653,6 +653,13 @@ body.admin-mode{padding-top:48px}
   <label>Tagline</label>
   <textarea id="setTagline" oninput="markDirty()"></textarea>
 
+  <label>Site Logo</label>
+  <div id="logoPreview" style="margin-bottom:8px"></div>
+  <div class="media-dropzone" style="padding:20px;min-height:auto;margin-top:0;margin-bottom:16px" onclick="document.getElementById('logoInput').click()">
+    <div>Drop logo here or click to replace</div>
+    <input type="file" id="logoInput" accept="image/*" style="display:none">
+  </div>
+
   <h3>Venue</h3>
   <label>Venue Name</label>
   <input id="setVenue" oninput="markDirty()">
@@ -913,7 +920,8 @@ function renderSite() {
 
   // NAV
   html += '<nav class="site-nav">';
-  html += '<a href="#" class="logo"><img src="../img/upvs-logo-purple.png" alt="UPVS"></a>';
+  var logoPath = DATA.settings.logoImage || 'img/upvs-logo-purple.png';
+  html += '<a href="#" class="logo"><img src="' + imgSrc(logoPath) + '" alt="UPVS"></a>';
   html += '<div class="nav-links">';
   html += '<a href="#shows">Shows</a><a href="#media">Media</a>';
   html += '<a href="#shop">Shop</a><a href="#contact">Get Involved</a>';
@@ -1209,7 +1217,34 @@ function populateSettings() {
   document.getElementById('setTicketUrl').value = s.ticketPlatform || '';
   document.getElementById('setParksideUrl').value = s.parksideUrl || '';
   document.getElementById('setAboutText').value = s.aboutText || '';
+  renderLogoPreview();
   renderPressLinksEditor();
+  setupLogoInput();
+}
+
+function renderLogoPreview() {
+  var logoPath = DATA.settings.logoImage || 'img/upvs-logo-purple.png';
+  document.getElementById('logoPreview').innerHTML =
+    '<img src="' + imgSrc(logoPath) + '" style="height:60px;width:auto;background:rgba(245,240,230,0.05);padding:8px">';
+}
+function setupLogoInput() {
+  var logoInput = document.getElementById('logoInput');
+  var logoDrop = logoInput.parentElement;
+  logoDrop.ondragover = function(e) { e.preventDefault(); logoDrop.classList.add('dragover'); };
+  logoDrop.ondragleave = function() { logoDrop.classList.remove('dragover'); };
+  logoDrop.ondrop = function(e) { e.preventDefault(); logoDrop.classList.remove('dragover'); if (e.dataTransfer.files.length) handleLogoFile(e.dataTransfer.files[0]); };
+  logoInput.onchange = function() { if (this.files.length) handleLogoFile(this.files[0]); };
+}
+function handleLogoFile(file) {
+  var path = 'img/' + file.name;
+  DATA.settings.logoImage = path;
+  pendingFiles['maya/' + path] = file;
+  localPreviews[path] = URL.createObjectURL(file);
+  renderLogoPreview();
+  markDirty();
+  renderSite();
+  setupDropZones();
+  toast('Logo updated');
 }
 
 function renderPressLinksEditor() {
