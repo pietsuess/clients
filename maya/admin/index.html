@@ -1110,7 +1110,8 @@ function renderMediaGrid() {
 
 function renderShopGrid() {
   return DATA.shop.map(function(item, i) {
-    return '<div class="shop-item">' +
+    return '<div class="shop-item" style="position:relative">' +
+      '<button onclick="deleteShopItem(' + i + ')" style="position:absolute;top:8px;right:8px;z-index:2;width:24px;height:24px;background:rgba(0,0,0,0.7);border:1px solid rgba(245,240,230,0.15);color:var(--cream);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s" onmouseover="this.style.opacity=1;this.style.borderColor=\'var(--red)\';this.style.color=\'var(--red)\'" onmouseout="this.style.opacity=0;this.style.borderColor=\'\';this.style.color=\'\'">&times;</button>' +
       '<div class="img-editable" onclick="replaceShopImage(' + i + ')">' +
         '<img src="' + imgSrc(item.image || '') + '" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">' +
         '<div class="img-edit-badge">Replace</div>' +
@@ -1376,6 +1377,13 @@ function removeRecap(i) { editorRecapSrcs.splice(i, 1); editorRecapFiles.splice(
 function addShopItem() {
   DATA.shop.push({ title: 'New Item', description: '', price: '', image: '', buyUrl: '', available: false });
   markDirty(); saveDraft(); renderSite(); setupDropZones();
+}
+function deleteShopItem(idx) {
+  showConfirm('Delete "' + (DATA.shop[idx].title || 'this item') + '"?', function() {
+    DATA.shop.splice(idx, 1);
+    markDirty(); saveDraft(); renderSite(); setupDropZones();
+    toast('Shop item deleted');
+  });
 }
 function replaceShopImage(idx) {
   var input = document.createElement('input');
