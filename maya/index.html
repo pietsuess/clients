@@ -375,9 +375,13 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .lightbox .lb-nav{
   position:absolute;top:50%;transform:translateY(-50%);
-  font-size:2.5rem;color:rgba(255,255,255,0.6);cursor:pointer;
-  padding:20px;user-select:none;transition:color 0.3s;z-index:1;
+  cursor:pointer;user-select:none;z-index:1;
+  width:50px;height:200px;background:none;border:none;padding:0;
+  opacity:0.3;transition:opacity 0.2s;
 }
+.lightbox .lb-nav:hover{opacity:0.7}
+.lightbox .lb-nav svg{width:30px;height:200px;fill:rgba(255,255,255,0.6)}
+.lightbox .lb-nav:hover svg{fill:var(--pink)}
 .lightbox .lb-nav:hover{color:#fff}
 .lightbox .lb-prev{left:10px}
 .lightbox .lb-next{right:10px}
@@ -552,8 +556,8 @@ footer a:hover{color:var(--pink)}
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <span class="close-lb" onclick="closeLightbox()">&times;</span>
-  <span class="lb-nav lb-prev" onclick="lbNav(event,-1)">&#8249;</span>
-  <span class="lb-nav lb-next" onclick="lbNav(event,1)">&#8250;</span>
+  <span class="lb-nav lb-prev" onclick="lbNav(event,-1)"><svg viewBox="0 0 20 100"><polygon points="20,0 0,50 20,100"/></svg></span>
+  <span class="lb-nav lb-next" onclick="lbNav(event,1)"><svg viewBox="0 0 20 100"><polygon points="0,0 20,50 0,100"/></svg></span>
   <img id="lb-img" src="" alt="">
   <video id="lb-video" src="" controls playsinline style="display:none;max-width:90vw;max-height:80vh;border-radius:0;"></video>
   <div class="lb-caption" id="lb-caption"></div>
@@ -725,7 +729,7 @@ footer a:hover{color:var(--pink)}
   <div class="section-subtitle">Merch coming soon. All proceeds support the performers.</div>
   <div class="shop-grid">
     <div class="shop-item">
-      <img src="img/shop-tshirt.jpg" alt="Tee" style="width:100%;aspect-ratio:1;object-fit:cover">
+      <img src="img/ig-thumbs/18060162065276968.jpg" alt="Tee" style="width:100%;aspect-ratio:1;object-fit:cover">
       <div class="item-info">
         <h3>"Unprofessional" Tee</h3>
         <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0">Hand-drawn logo on black cotton</p>
@@ -774,7 +778,7 @@ footer a:hover{color:var(--pink)}
 <!-- FOOTER -->
 <footer>
   <span>Unprofessional Variety Show - Est. 2022 - The Parkside Lounge, LES NYC</span>
-  <span>Site by <a href="https://pietsuess.com" target="_blank">Salt Spring Collective Media</a></span>
+  <span>Site by <a href="https://pietsuess.com" target="_blank">Piet Suess</a></span>
 </footer>
 
 <script>
@@ -1250,7 +1254,9 @@ function openShowDetail(idx) {
   html += '</div>';
   document.getElementById('showDetailContent').innerHTML = html;
   document.getElementById('showDetail').classList.add('active');
+  document.getElementById('showDetail').scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  requestAnimationFrame(function() { document.getElementById('showDetail').scrollTop = 0; });
 }
 function closeShowDetail() {
   document.getElementById('showDetail').classList.remove('active');
