@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Support the Salt Spring Centre of Yoga. Books, music, apparel, yoga supplies, gift certificates, and more from our 69-acre sanctuary on Salt Spring Island.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../shop.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+.menu .donate-link { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* HERO */
+.hero { height: 30vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; background: linear-gradient(135deg, rgba(26,92,83,0.82) 0%, rgba(42,138,125,0.75) 40%, rgba(45,90,39,0.8) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-content h1 { font-size: 1.6rem; color: var(--white); margin-bottom: 8px; }
+.hero-content p { font-size: 0.85rem; opacity: 0.9; text-align: center; }
+
+/* COLORED KEYS */
+.keys { display: grid; grid-template-columns: repeat(4, 1fr); position: sticky; top: 52px; z-index: 80; }
+.key { display: flex; align-items: center; justify-content: center; padding: 10px 4px; font-size: 0.60rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; text-align: center; letter-spacing: 0.02em; border: none; cursor: pointer; }
+.key:nth-child(1) { background: #1a5c53; }
+.key:nth-child(2) { background: #2a8a7d; }
+.key:nth-child(3) { background: #3bb8a8; }
+.key:nth-child(4) { background: #c9a84c; }
+.key:nth-child(5) { background: #d4be78; }
+.key:nth-child(6) { background: #3bb8a8; }
+.key:nth-child(7) { background: #2a8a7d; }
+.key:nth-child(8) { background: #1a5c53; }
+.key.active { filter: brightness(1.2); }
+
+/* SECTION */
+.sec { padding: 32px 20px; }
+.sec h2 { font-size: 1.3rem; text-align: center; margin-bottom: 8px; color: var(--teal-deep); }
+.sec .sub { font-size: 0.85rem; color: var(--text-light); text-align: center; margin-bottom: 20px; }
+
+/* PRODUCT CARDS */
+.product-card { background: var(--white); border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+.product-slim { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+.product-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--cream-warm); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.product-info { flex: 1; min-width: 0; }
+.product-cat { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal); }
+.product-title { font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; color: var(--charcoal); line-height: 1.3; }
+.product-price { font-size: 0.88rem; font-weight: 600; color: var(--teal-deep); flex-shrink: 0; white-space: nowrap; }
+.product-badge { display: inline-block; background: var(--terracotta); color: var(--white); font-size: 0.55rem; font-weight: 600; padding: 2px 8px; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.05em; margin-left: 6px; vertical-align: middle; }
+.product-badge.new { background: var(--gold); color: var(--charcoal); }
+
+/* PRODUCT DETAIL (inline expand) */
+.product-detail { display: none; padding: 0 16px 16px; border-top: 1px solid rgba(0,0,0,0.06); }
+.product-detail.open { display: block; }
+.product-detail p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; margin-bottom: 10px; text-align: left; }
+.product-detail .event-info { font-size: 0.78rem; color: var(--text); margin-bottom: 8px; }
+.product-detail .event-info svg { opacity: 0.4; vertical-align: middle; margin-right: 3px; }
+.add-btn { display: inline-block; padding: 10px 28px; background: var(--teal); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+
+/* CART BAR */
+.cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--charcoal); color: var(--white); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 90; transform: translateY(100%); transition: transform 0.3s ease; }
+.cart-bar.visible { transform: translateY(0); }
+.cart-bar-info { font-size: 0.85rem; }
+.cart-bar-total { font-family: 'Cinzel', serif; font-weight: 600; color: var(--gold); }
+.cart-bar-btn { padding: 10px 24px; background: var(--teal); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--charcoal); color: var(--white); padding: 10px 20px; border-radius: 50px; font-size: 0.82rem; font-weight: 500; z-index: 300; transition: transform 0.3s ease; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* BUTTONS */
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 80px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; }
+.donate-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 24px; position: relative; }
+.donate-header h3 { font-size: 1.2rem; }
+.donate-header p { font-size: 0.82rem; opacity: 0.8; }
+.donate-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+.donate-body { padding: 24px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.tier { padding: 10px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; cursor: pointer; background: var(--white); }
+.tier.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-field { margin-bottom: 12px; }
+.donate-field label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 4px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; }
+.donate-submit { width: 100%; padding: 14px; background: var(--terracotta); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.donate-alt { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.donate-alt strong { color: var(--text); }
+.donate-foot { text-align: center; font-size: 0.68rem; color: var(--text-light); padding: 0 24px 20px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU (no Shop link) -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+  <a href="#" class="donate-link" onclick="event.preventDefault();closeMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Support Our Sanctuary</h1>
+    <p>Every purchase supports a 69-acre sanctuary for peace, practice, and community on Salt Spring Island.</p>
+  </div>
+</section>
+
+<!-- FILTER KEYS -->
+<div class="keys" id="categoryFilters">
+  <button class="key active" data-category="all">All</button>
+  <button class="key" data-category="tickets">Events</button>
+  <button class="key" data-category="books">Books</button>
+  <button class="key" data-category="apparel">Apparel</button>
+  <button class="key" data-category="yoga">Yoga</button>
+  <button class="key" data-category="garden">Garden</button>
+  <button class="key" data-category="gifts">Gifts</button>
+  <button class="key" data-category="support">Support</button>
+</div>
+
+<!-- INTRO -->
+<section class="sec">
+  <h2>Books, Music, Yoga &amp; More</h2>
+  <p class="sub">Revenue from the shop directly supports the Centre's programs, gardens, and facilities.</p>
+  <div id="productsGrid"></div>
+</section>
+
+<!-- DONATE CTA -->
+<div style="text-align:center;padding:24px 20px 32px;">
+  <a href="#" class="btn btn-primary" onclick="event.preventDefault();openDonate();">Donate Now</a>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<!-- CART BAR -->
+<div class="cart-bar" id="cartBar">
+  <div class="cart-bar-info"><span id="cartCount">0</span> items - <span class="cart-bar-total" id="cartTotal">$0.00</span></div>
+  <button class="cart-bar-btn" onclick="handleCheckout()">Checkout</button>
+</div>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-body">
+      <div class="donate-tiers">
+        <button class="tier" onclick="pickTier(25,this)">$25</button>
+        <button class="tier" onclick="pickTier(50,this)">$50</button>
+        <button class="tier active" onclick="pickTier(108,this)">$108</button>
+        <button class="tier" onclick="pickTier(200,this)">$200</button>
+      </div>
+      <div class="donate-field"><label>Name</label><input type="text" placeholder="Your full name"></div>
+      <div class="donate-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="donate-field"><label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs &amp; Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="closeDonate();alert('Thank you! In production this connects to Stripe.');">Complete Donation</button>
+      <div class="donate-alt">Or Interac E-Transfer to <strong>payment@saltspringcentre.com</strong></div>
+    </div>
+    <div class="donate-foot">This is a prototype. In production, this connects to Stripe for secure payment.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== PRODUCT DATA =====
+var PRODUCTS = [
+  { id:100, category:'tickets', title:'Music for Peace: Carnatic Violin & Mridangam', desc:'An evening of South Indian classical music with Shriram Rajagopalan (violin) and Keerthy Raghavan (mridangam). Limited seating.', price:40.00, badge:'Apr 11', badgeClass:'new', event:{ date:'Saturday, April 11, 2026', time:'7:00 pm - 9:00 pm', venue:'Satsang Room' }, icon:'\uD83C\uDFBB' },
+  { id:101, category:'tickets', title:'Sound Bath + Meditation with Farhad Khan', desc:'Crystal bowls, gongs, and chimes for stress release, enhanced concentration, and chakra balancing.', price:0, priceLabel:'By Donation', badge:'May 13', badgeClass:'new', event:{ date:'Tuesday, May 13, 2026', time:'7:30 pm - 8:30 pm', venue:'Salt Spring Centre of Yoga' }, icon:'\uD83D\uDD14' },
+  { id:102, category:'tickets', title:'Music for Peace: Akhil Jobanputra & Tihai Ensemble', desc:'Hindustani classical concert featuring CBC "30 under 30" vocalist with harmonium and tabla.', price:40.00, badge:'Jun 27', badgeClass:'new', event:{ date:'Saturday, June 27, 2026', time:'Doors 6:30 pm, Concert 7:00 - 9:00 pm', venue:'Pond Dome' }, icon:'\uD83C\uDFB6' },
+  { id:103, category:'tickets', title:'Music for Peace: Deepak Ram - Bansuri Flute', desc:'Internationally celebrated bansuri master performs Indian classical music on the bamboo flute.', price:40.00, badge:'Aug 1', badgeClass:'new', event:{ date:'Saturday, August 1, 2026', time:'Doors 6:30 pm, Concert 7:00 - 9:00 pm', venue:'Satsang Room' }, icon:'\uD83C\uDFB5' },
+  { id:1, category:'books', title:'Salt Spring Island Cooking', desc:'The beloved vegetarian cookbook that sold 52,000 copies. Classic sattvic recipes from the Centre\'s kitchen.', price:19.95, icon:'\uD83D\uDCD7' },
+  { id:2, category:'books', title:'The Salt Spring Experience', desc:'Yoga philosophy, Ayurvedic principles, asana practice, and vegetarian recipes combined in one guide.', price:22.95, icon:'\uD83D\uDCD6' },
+  { id:3, category:'books', title:'Ashtanga Yoga Primer', desc:'Baba Hari Dass\'s foundational guide to the eight limbs of yoga.', price:24.95, icon:'\uD83D\uDCDA' },
+  { id:4, category:'books', title:'Silence Speaks', desc:'Collected wisdom from Baba Hari Dass\'s chalkboard. Aphorisms on yoga, life, and spiritual practice.', price:18.95, icon:'\uD83D\uDCDA' },
+  { id:5, category:'books', title:'The Yellow Book', desc:'Baba Hari Dass\'s first publication (1974). A collection of aphorisms.', price:16.95, icon:'\uD83D\uDCDA' },
+  { id:6, category:'books', title:'41st Annual Retreat Kirtan', desc:'Live devotional chanting recorded at the annual community yoga retreat.', price:12.00, icon:'\uD83C\uDFB6' },
+  { id:7, category:'books', title:'Surya Namaskar Mantras', desc:'Sun salutation mantras for your daily practice.', price:8.00, icon:'\uD83C\uDFB5' },
+  { id:10, category:'apparel', title:'Centre Logo T-Shirt', desc:'Soft organic cotton tee with the classic lotus calligraphy logo. Available in natural, sage, and ocean.', price:34.95, badge:'New', badgeClass:'new', icon:'\uD83D\uDC55' },
+  { id:11, category:'apparel', title:'Karma Yoga Hoodie', desc:'Cozy pullover hoodie with "Karma Yoga" print. Ethically produced.', price:54.95, icon:'\uD83E\uDDE5' },
+  { id:12, category:'apparel', title:'SSCY Toque', desc:'Warm knit beanie with embroidered lotus.', price:28.00, icon:'\uD83E\uDDE2' },
+  { id:13, category:'apparel', title:'Centre Tote Bag', desc:'Heavy-duty organic canvas tote with lotus logo.', price:24.95, icon:'\uD83D\uDC5C' },
+  { id:20, category:'yoga', title:'Meditation Cushion (Zafu)', desc:'Buckwheat-filled round cushion in Centre teal. Supports proper meditation posture.', price:59.95, icon:'\uD83E\uDDD8' },
+  { id:21, category:'yoga', title:'Mala Beads (108)', desc:'Handcrafted rudraksha seed mala for japa meditation. Traditional 108 beads.', price:38.00, icon:'\uD83D\uDCFF' },
+  { id:22, category:'yoga', title:'Cork Yoga Block', desc:'Sustainable cork block for support in asana practice.', price:22.00, icon:'\uD83E\uDDF1' },
+  { id:23, category:'yoga', title:'Neti Pot (Ceramic)', desc:'Traditional ceramic neti pot for nasal cleansing.', price:18.95, icon:'\uD83C\uDFFA' },
+  { id:30, category:'garden', title:'Kitchen Garden Seed Collection', desc:'Curated set of 8 seed varieties from the Centre\'s organic gardens. Includes planting guide.', price:24.95, badge:'New', badgeClass:'new', icon:'\uD83C\uDF31' },
+  { id:31, category:'garden', title:'Herb Garden Starter Kit', desc:'Basil, cilantro, dill, and parsley seeds. Organic and open-pollinated.', price:14.95, icon:'\uD83C\uDF3F' },
+  { id:32, category:'garden', title:'Recipe Card Set', desc:'12 recipe cards featuring classic vegetarian dishes from the Centre\'s kitchen.', price:16.95, icon:'\uD83C\uDF72' },
+  { id:40, category:'gifts', title:'Retreat Gift Certificate', desc:'Give the gift of a retreat. Redeemable for any program or personal retreat.', price:150.00, priceLabel:'From $150', icon:'\uD83C\uDF81' },
+  { id:41, category:'gifts', title:'Wellness Gift Certificate', desc:'Redeemable for massage, Ayurveda, or acupuncture at the Centre.', price:75.00, priceLabel:'From $75', icon:'\uD83D\uDC86' },
+  { id:42, category:'gifts', title:'Shop Gift Card', desc:'Gift card for any item in the online store. Delivered by email.', price:50.00, priceLabel:'From $50', icon:'\uD83C\uDF1F' },
+  { id:50, category:'support', title:'Sponsor a Garden Bed', desc:'Your sponsorship keeps the organic gardens growing. Includes a thank-you card.', price:50.00, icon:'\uD83C\uDF3B' },
+  { id:51, category:'support', title:'Feed a Karma Yogi', desc:'Cover meals for a karma yoga volunteer for one week.', price:75.00, icon:'\uD83C\uDF5B' },
+  { id:52, category:'support', title:'Annual Membership', desc:'Become a member of the Dharma Sara Satsang Society.', price:26.25, icon:'\uD83E\uDD1D' },
+  { id:53, category:'support', title:'Temple Maintenance Fund', desc:'Help preserve the Centre\'s sacred spaces.', price:100.00, priceLabel:'From $100', icon:'\uD83C\uDFDB\uFE0F' }
+];
+
+var catLabels = { tickets:'Music for Peace', books:'Books & Media', apparel:'Apparel & Merch', yoga:'Yoga & Meditation', garden:'Garden & Seeds', gifts:'Gift Certificates', support:'Support the Centre' };
+function getCatLabel(c) { return catLabels[c] || c; }
+
+// ===== CART =====
+var cart = JSON.parse(localStorage.getItem('sscy_cart') || '[]');
+
+function updateCartBar() {
+  var count = 0, total = 0;
+  cart.forEach(function(item) { count += item.qty; total += item.qty * item.price; });
+  document.getElementById('cartCount').textContent = count;
+  document.getElementById('cartTotal').textContent = '$' + total.toFixed(2);
+  document.getElementById('cartBar').classList.toggle('visible', count > 0);
+}
+
+function addToCart(id) {
+  var p = PRODUCTS.find(function(x) { return x.id === id; });
+  if (!p || p.price === 0) return;
+  var existing = cart.find(function(x) { return x.id === id; });
+  if (existing) existing.qty++;
+  else cart.push({ id: p.id, title: p.title, price: p.price, qty: 1 });
+  localStorage.setItem('sscy_cart', JSON.stringify(cart));
+  updateCartBar();
+  showToast('Added to cart');
+}
+
+function handleCheckout() {
+  alert('Thank you! In production, this would process via Stripe. Total: ' + document.getElementById('cartTotal').textContent);
+  cart = [];
+  localStorage.setItem('sscy_cart', JSON.stringify(cart));
+  updateCartBar();
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2000);
+}
+
+// ===== RENDER =====
+var openCardId = null;
+
+function renderProducts(category) {
+  category = category || 'all';
+  var grid = document.getElementById('productsGrid');
+  var filtered = category === 'all' ? PRODUCTS : PRODUCTS.filter(function(p) { return p.category === category; });
+  grid.innerHTML = filtered.map(function(p) {
+    var priceText = p.priceLabel ? p.priceLabel : p.price > 0 ? '$' + p.price.toFixed(2) : 'By Donation';
+    var badgeHtml = p.badge ? '<span class="product-badge ' + (p.badgeClass || '') + '">' + p.badge + '</span>' : '';
+    var isOpen = openCardId === p.id;
+    var eventHtml = '';
+    if (p.event) {
+      eventHtml = '<div class="event-info"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' + p.event.date + '</div>' +
+        '<div class="event-info"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + p.event.time + '</div>' +
+        '<div class="event-info"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + p.event.venue + '</div>';
+    }
+    var btnLabel = p.category === 'tickets' ? 'Get Tickets' : p.category === 'support' ? 'Donate' : 'Add to Cart';
+    return '<div class="product-card">' +
+      '<div class="product-slim" onclick="toggleProduct(' + p.id + ')">' +
+        '<div class="product-icon">' + (p.icon || '\u2728') + '</div>' +
+        '<div class="product-info">' +
+          '<div class="product-cat">' + getCatLabel(p.category) + '</div>' +
+          '<div class="product-title">' + p.title + badgeHtml + '</div>' +
+        '</div>' +
+        '<div class="product-price">' + priceText + '</div>' +
+      '</div>' +
+      '<div class="product-detail' + (isOpen ? ' open' : '') + '" id="detail-' + p.id + '">' +
+        eventHtml +
+        '<p>' + p.desc + '</p>' +
+        (p.price > 0 ? '<button class="add-btn" onclick="event.stopPropagation();addToCart(' + p.id + ')">' + btnLabel + '</button>' : '<p style="font-size:0.78rem;color:var(--teal-dark);font-weight:500;">Contact the Centre for details</p>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleProduct(id) {
+  if (openCardId === id) {
+    openCardId = null;
+  } else {
+    openCardId = id;
+  }
+  // Just toggle the detail panel without full re-render
+  var allDetails = document.querySelectorAll('.product-detail');
+  allDetails.forEach(function(d) { d.classList.remove('open'); });
+  if (openCardId !== null) {
+    var el = document.getElementById('detail-' + id);
+    if (el) el.classList.add('open');
+  }
+}
+
+// Filter keys
+document.getElementById('categoryFilters').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('key')) return;
+  var cat = e.target.getAttribute('data-category');
+  document.querySelectorAll('.key').forEach(function(k) { k.classList.remove('active'); });
+  e.target.classList.add('active');
+  openCardId = null;
+  renderProducts(cat);
+});
+
+renderProducts('all');
+updateCartBar();
+
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+function openDonate() { document.getElementById('donateOverlay').classList.add('open'); }
+function closeDonate() { document.getElementById('donateOverlay').classList.remove('open'); }
+function pickTier(amt, el) {
+  document.querySelectorAll('.tier').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
