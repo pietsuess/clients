@@ -1,291 +1,1593 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Unprofessional Variety Show</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPVS Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ========================================
+   SITE CSS - matches live site exactly
+   ======================================== */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --plum:#1a0a1e;
+  --blue:#2b4fd8;
+  --pink:#e84a8a;
+  --yellow:#e8e234;
+  --red:#d42a4c;
+  --green:#3dcc6a;
+  --cream:#f5f0e6;
+  --gold:#d4a843;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--plum);
+  color:var(--cream);
+  font-family:'DM Sans',sans-serif;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+.site-nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 4vw;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(26,10,30,0.95),rgba(26,10,30,0));
+  pointer-events:none;
+}
+.site-nav *{pointer-events:auto}
+.site-nav .logo img{height:80px;width:auto}
+.site-nav .nav-links{display:flex;gap:24px}
+.site-nav .nav-links a{
+  font-family:'Space Grotesk',sans-serif;font-size:0.85rem;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(245,240,230,0.5);transition:color 0.2s;
+}
+.site-nav .nav-links a:hover{color:var(--cream)}
+
+/* HERO */
+.hero{
+  min-height:85vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:120px 4vw 60px;position:relative;
+  background:linear-gradient(180deg,var(--plum) 0%,#0d0510 100%);
+}
+.hero-title{
+  font-family:'Space Grotesk',sans-serif;font-weight:700;
+  line-height:0.9;position:relative;z-index:2;
+}
+.hero-title .line1{
+  display:block;font-size:clamp(3rem,12vw,9rem);
+  -webkit-text-stroke:2px var(--cream);color:transparent;
+}
+.hero-title .line2{
+  display:block;font-size:clamp(2.2rem,8vw,6rem);
+  color:var(--cream);
+}
+.hero-tagline{
+  font-family:'DM Sans',sans-serif;font-size:clamp(0.85rem,2vw,1.1rem);
+  color:rgba(245,240,230,0.5);margin-top:20px;
+  max-width:500px;line-height:1.6;
+}
+.noise{
+  position:fixed;inset:0;z-index:9999;pointer-events:none;
+  opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* MARQUEE */
+.marquee-wrap{
+  width:100%;overflow:hidden;
+  padding:20px 0;position:relative;z-index:2;
+  margin-top:40px;border-top:1px solid rgba(245,240,230,0.1);
+  border-bottom:1px solid rgba(245,240,230,0.1);
+}
+.marquee-track{
+  display:flex;white-space:nowrap;
+  animation:marquee 14s linear infinite;
+  will-change:transform;
+}
+.marquee-track span{
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(1.2rem,3vw,2rem);
+  padding:0 40px;color:rgba(245,240,230,0.6);
+}
+.marquee-track span em{font-style:normal;color:var(--pink)}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* NEXT SHOW */
+.next-show{
+  padding:80px 4vw;position:relative;
+  background:linear-gradient(to bottom,#0d0510,var(--plum));
+}
+.next-show-inner{
+  display:flex;gap:60px;align-items:flex-start;
+  max-width:1200px;margin:0 auto;
+}
+.next-show-poster{
+  width:min(400px,80vw);aspect-ratio:1;border-radius:0;overflow:hidden;
+  position:relative;flex-shrink:0;
+}
+.next-show-poster img{width:100%;height:100%;object-fit:cover}
+.poster-glow{
+  position:absolute;inset:-20%;
+  background:radial-gradient(circle,rgba(232,74,138,0.15),transparent 70%);
+  z-index:-1;
+}
+.next-show-info{max-width:500px}
+.next-show-info .label{
+  font-family:'Space Grotesk',sans-serif;font-size:0.7rem;
+  letter-spacing:0.2em;text-transform:uppercase;color:var(--pink);margin-bottom:8px;
+}
+.next-show-info h2{
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,5vw,3.5rem);
+  font-weight:700;line-height:1;margin-bottom:12px;
+}
+.next-show-info .date{
+  font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:4px;
+}
+.next-show-info .venue{font-size:0.85rem;color:rgba(245,240,230,0.5);margin-bottom:20px}
+.next-show-info .performers{margin-bottom:24px;line-height:1.8}
+.next-show-info .performers span{
+  display:inline-block;padding:4px 12px;margin:3px 4px;
+  border:1px solid rgba(245,240,230,0.12);font-size:0.8rem;
+  transition:all 0.2s;
+}
+
+/* ABOUT */
+.about{padding:100px 4vw;position:relative;overflow:hidden}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;max-width:1200px;margin:0 auto}
+.about-text p{font-size:1rem;line-height:1.8;margin-bottom:16px;text-align:justify;text-align-last:left}
+.about-quote{
+  font-family:'Playfair Display',serif;font-size:1.15rem;
+  line-height:1.7;color:rgba(245,240,230,0.7);
+  border-left:2px solid var(--pink);padding-left:20px;margin-top:24px;
+}
+.about-quote .attr{font-size:0.75rem;margin-top:8px;color:var(--pink);font-family:'DM Sans',sans-serif}
+.about-details{display:flex;flex-direction:column;gap:16px}
+.detail-item h4{font-family:'Space Grotesk',sans-serif;font-size:0.9rem;color:var(--pink);margin-bottom:6px}
+.detail-item p{font-size:0.85rem;color:rgba(245,240,230,0.6);line-height:1.6}
+
+/* SECTION TITLES */
+.section-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(3rem,10vw,8rem);font-weight:700;
+  text-align:center;padding:0 4vw;
+  color:var(--cream);line-height:0.9;
+}
+.section-subtitle{
+  text-align:center;font-size:0.9rem;
+  color:rgba(245,240,230,0.4);margin-top:12px;
+}
+
+/* SHOWS */
+.shows{padding:80px 4vw;position:relative;background:var(--blue);overflow:hidden}
+.shows-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:20px;max-width:1400px;margin:40px auto 0;
+}
+.show-card{
+  background:rgba(0,0,0,0.2);border-radius:0;overflow:hidden;
+  transition:transform 0.3s;cursor:pointer;
+}
+.show-card:hover{transform:translateY(-4px)}
+.show-card img{width:100%;aspect-ratio:1;object-fit:cover}
+.card-info{padding:16px}
+.card-info h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;margin-bottom:4px}
+.card-date{font-size:0.75rem;color:rgba(245,240,230,0.5);margin-bottom:6px}
+.card-performers{font-size:0.75rem;color:rgba(245,240,230,0.4);line-height:1.4}
+
+/* MEDIA */
+.media{padding:80px 4vw;position:relative;background:var(--plum)}
+.media-filters{display:flex;gap:8px;justify-content:center;padding:30px 0}
+.media-filters button{
+  padding:8px 20px;border:1px solid rgba(245,240,230,0.15);
+  background:transparent;color:rgba(245,240,230,0.5);
+  font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;
+  transition:all 0.2s;border-radius:0;
+}
+.media-filters button:hover{border-color:var(--pink);color:var(--pink)}
+.media-filters button.active{background:var(--pink);border-color:var(--pink);color:#fff}
+.gallery{
+  padding:0;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:16px;
+}
+.gallery-item{
+  background:rgba(0,0,0,0.15);border-radius:0;overflow:hidden;
+  position:relative;cursor:pointer;
+}
+.gallery-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.gallery-item:hover{opacity:0.85}
+.play-icon{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:48px;height:48px;background:rgba(0,0,0,0.6);
+  display:flex;align-items:center;justify-content:center;border-radius:0;
+}
+.play-icon svg{width:20px;height:20px;fill:#fff;margin-left:3px}
+
+/* PRESS */
+.press-section{padding:60px 0 0}
+.press-link{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;margin:4px;
+  border:1px solid rgba(245,240,230,0.1);
+  font-size:0.8rem;color:rgba(245,240,230,0.6);
+  transition:all 0.2s;
+}
+.press-link:hover{border-color:var(--pink);color:var(--pink)}
+
+/* SHOP */
+.shop{
+  padding:100px 4vw;
+  background:var(--red);
+  position:relative;
+}
+.shop .section-title{color:#fff}
+.shop .section-subtitle{color:rgba(255,255,255,0.5)}
+.shop-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:24px;padding:50px 0 0;max-width:1200px;margin:0 auto;
+}
+.shop-item{
+  background:rgba(0,0,0,0.15);border-radius:0;overflow:hidden;
+  transition:transform 0.3s;
+}
+.shop-item:hover{transform:translateY(-4px)}
+.shop-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.item-info{padding:16px}
+.item-info h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;margin-bottom:4px}
+.price{font-size:0.85rem;color:var(--gold);margin-top:8px}
+
+/* CONTACT */
+.contact{
+  padding:100px 4vw;text-align:center;
+  background:var(--plum);position:relative;
+}
+.contact .section-title{color:var(--green)}
+.contact-cta{
+  max-width:600px;margin:24px auto 40px;
+  font-size:1rem;color:rgba(245,240,230,0.6);line-height:1.8;
+  text-align:justify;text-align-last:center;
+}
+.contact-links{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.contact-link{
+  padding:12px 24px;border:1px solid rgba(245,240,230,0.15);
+  font-size:0.85rem;transition:all 0.2s;
+}
+.contact-link:hover{border-color:var(--pink);color:var(--pink)}
+.access-note{font-size:0.75rem;color:rgba(245,240,230,0.3);margin-top:16px}
+
+/* FOOTER */
+footer{
+  padding:30px 4vw;display:flex;justify-content:space-between;
+  font-size:0.7rem;color:rgba(245,240,230,0.25);
+  border-top:1px solid rgba(245,240,230,0.05);
+}
+footer a{color:rgba(245,240,230,0.4);transition:color 0.2s}
+footer a:hover{color:var(--pink)}
+
+/* RUNNING TEXT */
+.big-running{width:100%;overflow:hidden;padding:20px 0}
+.big-running .track{
+  display:flex;white-space:nowrap;
+  animation:marquee 11s linear infinite;
+  will-change:transform;
+}
+.big-running .track span{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(4rem,12vw,10rem);
+  padding:0 60px;
+  -webkit-text-stroke:1px rgba(245,240,230,0.35);
+  color:transparent;
+}
+
+/* BTN */
+.btn{
+  display:inline-block;padding:14px 36px;
+  background:var(--pink);color:#fff;
+  font-family:'Space Grotesk',sans-serif;font-size:0.85rem;
+  font-weight:600;letter-spacing:0.08em;text-transform:uppercase;
+  border:none;cursor:pointer;position:relative;overflow:hidden;
+  border-radius:0;transition:background 0.2s;
+}
+.btn:hover{background:#d63d7a}
+
+/* ========================================
+   ADMIN CHROME
+   ======================================== */
+
+/* Top bar */
+.admin-bar{
+  position:fixed;top:0;left:0;right:0;z-index:10000;
+  height:48px;background:rgba(26,10,30,0.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(232,74,138,0.3);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;font-family:'Space Grotesk',sans-serif;
+}
+.admin-bar .left{display:flex;align-items:center;gap:16px}
+.admin-bar .editing-badge{
+  font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--pink);padding:4px 12px;
+  border:1px solid rgba(232,74,138,0.3);
+}
+.admin-bar .right{display:flex;align-items:center;gap:12px}
+.admin-bar button{
+  padding:8px 16px;border:1px solid rgba(245,240,230,0.15);
+  background:transparent;color:var(--cream);font-family:'Space Grotesk',sans-serif;
+  font-size:0.75rem;cursor:pointer;border-radius:0;transition:all 0.2s;
+  letter-spacing:0.05em;
+}
+.admin-bar button:hover{border-color:var(--pink);color:var(--pink)}
+.admin-bar .publish-btn{
+  background:var(--pink);border-color:var(--pink);color:#fff;font-weight:600;
+}
+.admin-bar .publish-btn:hover{background:#d63d7a}
+
+/* Push body down for admin bar */
+body.admin-mode{padding-top:48px}
+
+/* Section controls - left rail */
+.section-ctrl{
+  position:absolute;left:-44px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:4px;z-index:50;
+  opacity:0;transition:opacity 0.2s;
+}
+.admin-section:hover .section-ctrl{opacity:1}
+.admin-section{position:relative}
+.section-ctrl button{
+  width:32px;height:32px;border:1px solid rgba(245,240,230,0.15);
+  background:rgba(26,10,30,0.85);backdrop-filter:blur(8px);
+  color:var(--cream);font-size:0.8rem;cursor:pointer;border-radius:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.2s;
+}
+.section-ctrl button:hover{border-color:var(--pink);color:var(--pink)}
+.section-ctrl button svg{width:14px;height:14px;fill:currentColor}
+
+/* Editable highlights */
+[contenteditable]{
+  outline:none;position:relative;
+  transition:box-shadow 0.2s;
+  cursor:text;
+}
+[contenteditable]:hover{
+  box-shadow:inset 0 0 0 1px rgba(232,74,138,0.25);
+}
+[contenteditable]:focus{
+  box-shadow:inset 0 0 0 2px rgba(232,74,138,0.5);
+}
+
+/* Image editable overlay */
+.img-editable{position:relative;cursor:pointer}
+.img-editable::after{
+  content:'';position:absolute;inset:0;
+  background:transparent;transition:background 0.2s;
+}
+.img-editable:hover::after{
+  background:rgba(232,74,138,0.15);
+}
+.img-edit-badge{
+  position:absolute;top:8px;right:8px;z-index:2;
+  padding:4px 8px;background:rgba(26,10,30,0.8);
+  border:1px solid rgba(232,74,138,0.4);
+  font-family:'Space Grotesk',sans-serif;font-size:0.6rem;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--pink);opacity:0;transition:opacity 0.2s;
+  pointer-events:none;
+}
+.img-editable:hover .img-edit-badge{opacity:1}
+
+/* Settings panel */
+.settings-panel{
+  position:fixed;top:48px;right:0;bottom:0;width:360px;
+  background:rgba(26,10,30,0.97);backdrop-filter:blur(16px);
+  border-left:1px solid rgba(232,74,138,0.2);
+  z-index:9998;transform:translateX(100%);transition:transform 0.3s;
+  overflow-y:auto;padding:24px;
+  font-family:'DM Sans',sans-serif;
+}
+.settings-panel.open{transform:translateX(0)}
+.settings-panel h3{
+  font-family:'Space Grotesk',sans-serif;font-size:1rem;
+  color:var(--pink);margin:24px 0 12px;letter-spacing:0.05em;
+}
+.settings-panel h3:first-child{margin-top:0}
+.settings-panel label{
+  display:block;font-size:0.75rem;color:rgba(245,240,230,0.5);
+  margin-bottom:4px;letter-spacing:0.05em;text-transform:uppercase;
+}
+.settings-panel input,
+.settings-panel textarea,
+.settings-panel select{
+  width:100%;padding:10px 12px;
+  background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.1);
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  border-radius:0;margin-bottom:16px;
+}
+.settings-panel input:focus,
+.settings-panel textarea:focus,
+.settings-panel select:focus{
+  outline:none;border-color:var(--pink);
+}
+.settings-panel textarea{min-height:80px;resize:vertical}
+.settings-panel .color-row{
+  display:flex;gap:12px;align-items:center;margin-bottom:12px;
+}
+.settings-panel .color-row input[type="color"]{
+  width:40px;height:32px;padding:2px;cursor:pointer;
+  border:1px solid rgba(245,240,230,0.15);
+}
+.settings-panel .color-row span{font-size:0.8rem;color:var(--cream);flex:1}
+
+/* Show editor overlay */
+.show-editor{
+  position:fixed;inset:0;z-index:9997;
+  background:var(--plum);overflow-y:auto;
+  display:none;
+}
+.show-editor.active{display:block}
+.show-editor-bar{
+  position:sticky;top:0;z-index:10;
+  height:48px;background:rgba(26,10,30,0.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(232,74,138,0.3);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+}
+.show-editor-bar button{
+  padding:8px 16px;border:1px solid rgba(245,240,230,0.15);
+  background:transparent;color:var(--cream);font-family:'Space Grotesk',sans-serif;
+  font-size:0.75rem;cursor:pointer;border-radius:0;transition:all 0.2s;
+}
+.show-editor-bar button:hover{border-color:var(--pink);color:var(--pink)}
+.show-editor-bar .save-show-btn{
+  background:var(--pink);border-color:var(--pink);color:#fff;font-weight:600;
+}
+.show-editor-content{
+  max-width:900px;margin:0 auto;padding:40px 4vw 80px;
+}
+.se-field{margin-bottom:20px}
+.se-field label{
+  display:block;font-family:'Space Grotesk',sans-serif;
+  font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--pink);margin-bottom:6px;
+}
+.se-field input,
+.se-field textarea,
+.se-field select{
+  width:100%;padding:12px;
+  background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.1);
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.95rem;
+  border-radius:0;
+}
+.se-field input:focus,
+.se-field textarea:focus{outline:none;border-color:var(--pink)}
+.se-field textarea{min-height:80px;resize:vertical}
+.se-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
+/* Performer editor */
+.perf-list{margin-top:12px}
+.perf-item{
+  padding:16px;margin-bottom:8px;
+  border:1px solid rgba(245,240,230,0.08);
+  background:rgba(245,240,230,0.02);position:relative;
+}
+.perf-item .perf-remove{
+  position:absolute;top:8px;right:8px;
+  width:24px;height:24px;background:none;border:1px solid rgba(245,240,230,0.15);
+  color:var(--cream);font-size:0.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.perf-item .perf-remove:hover{border-color:var(--red);color:var(--red)}
+.perf-item input{
+  width:100%;padding:8px;margin-bottom:8px;
+  background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  border-radius:0;
+}
+.perf-item textarea{
+  width:100%;padding:8px;min-height:60px;
+  background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);
+  color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  border-radius:0;resize:vertical;
+}
+.add-perf-btn{
+  padding:10px 20px;border:1px dashed rgba(245,240,230,0.2);
+  background:transparent;color:rgba(245,240,230,0.4);
+  font-family:'Space Grotesk',sans-serif;font-size:0.8rem;
+  cursor:pointer;width:100%;margin-top:8px;
+}
+.add-perf-btn:hover{border-color:var(--pink);color:var(--pink)}
+
+/* Media drop zone */
+.media-dropzone{
+  border:2px dashed rgba(245,240,230,0.15);
+  padding:40px;text-align:center;margin-top:16px;
+  color:rgba(245,240,230,0.4);font-size:0.85rem;
+  cursor:pointer;transition:all 0.2s;min-height:120px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.media-dropzone:hover,
+.media-dropzone.dragover{
+  border-color:var(--pink);color:var(--pink);
+  background:rgba(232,74,138,0.05);
+}
+.media-dropzone input{display:none}
+.media-thumbs{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:8px;margin-top:12px;
+}
+.media-thumbs .thumb{
+  position:relative;aspect-ratio:1;overflow:hidden;
+}
+.media-thumbs .thumb img{width:100%;height:100%;object-fit:cover}
+.media-thumbs .thumb .thumb-remove{
+  position:absolute;top:2px;right:2px;
+  width:20px;height:20px;background:rgba(0,0,0,0.7);
+  color:#fff;font-size:0.7rem;cursor:pointer;border:none;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  padding:12px 24px;background:rgba(61,204,106,0.9);
+  color:#fff;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;
+  z-index:99999;opacity:0;transition:opacity 0.3s;pointer-events:none;
+}
+.toast.show{opacity:1}
+.toast.error{background:rgba(212,42,76,0.9)}
+
+/* Confirm dialog */
+.confirm-overlay{
+  position:fixed;inset:0;z-index:99998;
+  background:rgba(0,0,0,0.7);display:none;
+  align-items:center;justify-content:center;
+}
+.confirm-overlay.active{display:flex}
+.confirm-box{
+  background:var(--plum);border:1px solid rgba(232,74,138,0.3);
+  padding:32px;max-width:400px;width:90%;text-align:center;
+}
+.confirm-box p{margin-bottom:20px;font-size:0.95rem;line-height:1.6}
+.confirm-box .btns{display:flex;gap:12px;justify-content:center}
+.confirm-box button{
+  padding:10px 24px;border:1px solid rgba(245,240,230,0.15);
+  background:transparent;color:var(--cream);font-family:'Space Grotesk',sans-serif;
+  font-size:0.8rem;cursor:pointer;border-radius:0;
+}
+.confirm-box .confirm-yes{background:var(--pink);border-color:var(--pink);color:#fff}
+
+/* Token setup */
+.token-setup{
+  position:fixed;inset:0;z-index:99999;
+  background:rgba(0,0,0,0.85);
+  display:none;align-items:center;justify-content:center;
+}
+.token-setup.active{display:flex}
+.token-box{
+  background:var(--plum);border:1px solid rgba(232,74,138,0.3);
+  padding:40px;max-width:500px;width:90%;
+}
+.token-box h2{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;margin-bottom:8px}
+.token-box p{font-size:0.85rem;color:rgba(245,240,230,0.6);line-height:1.6;margin-bottom:20px}
+.token-box input{
+  width:100%;padding:12px;
+  background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.15);
+  color:var(--cream);font-family:monospace;font-size:0.85rem;
+  border-radius:0;margin-bottom:16px;
+}
+.token-box .btns{display:flex;gap:12px}
+
+/* Show card hover edit */
+.show-card-edit{
+  position:absolute;inset:0;
+  background:rgba(26,10,30,0.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;opacity:0;transition:opacity 0.2s;
+}
+.show-card{position:relative}
+.show-card:hover .show-card-edit{opacity:1}
+.show-card-edit button{
+  padding:6px 16px;border:1px solid rgba(245,240,230,0.3);
+  background:rgba(26,10,30,0.7);color:var(--cream);
+  font-family:'Space Grotesk',sans-serif;font-size:0.7rem;
+  cursor:pointer;letter-spacing:0.05em;
+}
+.show-card-edit button:hover{border-color:var(--pink);color:var(--pink)}
+
+/* Discard draft button */
+.discard-btn{color:rgba(245,240,230,0.3) !important;font-size:0.65rem !important}
+.discard-btn:hover{color:var(--red) !important;border-color:var(--red) !important}
+
+@media(max-width:768px){
+  .about-grid{grid-template-columns:1fr}
+  .shows-grid{grid-template-columns:repeat(2,1fr)}
+  .next-show-inner{flex-direction:column;text-align:center}
+  .next-show-poster{width:min(320px,90vw)}
+  .settings-panel{width:100%}
+  .section-ctrl{left:4px;top:8px;transform:none;flex-direction:row}
+  .se-row{grid-template-columns:1fr}
+}
+</style>
 </head>
-<body>
+<body class="admin-mode">
 
-  <!-- LOGIN -->
-  <div id="login-screen" class="screen">
-    <div class="login-box">
-      <h1>Unprofessional Variety Show</h1>
-      <p>Admin Panel</p>
-      <div id="login-form">
-        <label for="token-input">GitHub Token</label>
-        <input type="password" id="token-input" placeholder="ghp_...">
-        <button id="login-btn" class="btn-primary">Connect</button>
-        <p id="login-error" class="error"></p>
-        <div style="margin-top:30px;padding-top:20px;border-top:1px solid #e0e0e0;">
-          <a href="?demo" class="btn-small" style="text-decoration:none;">Try Demo Mode</a>
-          <p style="color:#999;font-size:12px;margin-top:8px;">Preview the admin panel - edits save locally only</p>
-        </div>
-      </div>
-    </div>
+<div class="noise"></div>
+
+<!-- ADMIN TOP BAR -->
+<div class="admin-bar">
+  <div class="left">
+    <a href="../" style="color:var(--cream);font-size:0.8rem;opacity:0.5">View Site</a>
+    <div class="editing-badge">Editing</div>
+    <span style="font-size:0.8rem;color:rgba(245,240,230,0.4)" id="saveStatus">Loading...</span>
+  </div>
+  <div class="right">
+    <button class="discard-btn" onclick="discardDraft()">Discard Draft</button>
+    <button onclick="toggleSettings()">Settings</button>
+    <button onclick="openShowEditor(-1)">+ New Show</button>
+    <button class="publish-btn" onclick="publish()">Publish</button>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+  <h3>Site Settings</h3>
+  <label>Site Name</label>
+  <input id="setSiteName" oninput="markDirty()">
+  <label>Tagline</label>
+  <textarea id="setTagline" oninput="markDirty()"></textarea>
+
+  <h3>Venue</h3>
+  <label>Venue Name</label>
+  <input id="setVenue" oninput="markDirty()">
+  <label>Address</label>
+  <input id="setVenueAddr" oninput="markDirty()">
+  <label>Accessibility Note</label>
+  <textarea id="setAccess" oninput="markDirty()"></textarea>
+
+  <h3>Links</h3>
+  <label>Instagram (Show)</label>
+  <input id="setIgShow" oninput="markDirty()">
+  <label>Instagram (Maya)</label>
+  <input id="setIgMaya" oninput="markDirty()">
+  <label>Ticket Platform URL</label>
+  <input id="setTicketUrl" oninput="markDirty()">
+  <label>Parkside URL</label>
+  <input id="setParksideUrl" oninput="markDirty()">
+
+  <h3>Font</h3>
+  <label>Heading Font</label>
+  <select id="setHeadingFont" onchange="applyFont();markDirty()">
+    <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+    <option value="'DM Sans',sans-serif">DM Sans</option>
+    <option value="'Playfair Display',serif">Playfair Display</option>
+    <option value="system-ui,sans-serif">System UI</option>
+  </select>
+  <label>Body Font</label>
+  <select id="setBodyFont" onchange="applyFont();markDirty()">
+    <option value="'DM Sans',sans-serif">DM Sans</option>
+    <option value="'Space Grotesk',sans-serif">Space Grotesk</option>
+    <option value="'Playfair Display',serif">Playfair Display</option>
+    <option value="system-ui,sans-serif">System UI</option>
+  </select>
+
+  <h3>Colors</h3>
+  <div class="color-row">
+    <input type="color" id="colPlum" value="#1a0a1e" onchange="applyColor('plum',this.value);markDirty()">
+    <span>Background (Plum)</span>
+  </div>
+  <div class="color-row">
+    <input type="color" id="colPink" value="#e84a8a" onchange="applyColor('pink',this.value);markDirty()">
+    <span>Accent (Pink)</span>
+  </div>
+  <div class="color-row">
+    <input type="color" id="colBlue" value="#2b4fd8" onchange="applyColor('blue',this.value);markDirty()">
+    <span>Shows (Blue)</span>
+  </div>
+  <div class="color-row">
+    <input type="color" id="colRed" value="#d42a4c" onchange="applyColor('red',this.value);markDirty()">
+    <span>Shop (Red)</span>
+  </div>
+  <div class="color-row">
+    <input type="color" id="colGreen" value="#3dcc6a" onchange="applyColor('green',this.value);markDirty()">
+    <span>Contact (Green)</span>
+  </div>
+  <div class="color-row">
+    <input type="color" id="colGold" value="#d4a843" onchange="applyColor('gold',this.value);markDirty()">
+    <span>Gold</span>
+  </div>
+  <div class="color-row">
+    <input type="color" id="colCream" value="#f5f0e6" onchange="applyColor('cream',this.value);markDirty()">
+    <span>Text (Cream)</span>
   </div>
 
-  <!-- APP -->
-  <div id="app" class="screen" style="display:none;">
-    <header id="admin-header">
-      <div class="admin-header-inner">
-        <h2>Unprofessional Variety Show</h2>
-        <div class="admin-header-right">
-          <span id="user-name"></span>
-          <button id="logout-btn" class="btn-small">Logout</button>
-        </div>
+  <h3>About Text</h3>
+  <textarea id="setAboutText" rows="6" oninput="markDirty()"></textarea>
+
+  <h3>Press Links</h3>
+  <div id="pressLinksEditor"></div>
+  <button class="add-perf-btn" onclick="addPressLink()" style="margin-top:8px">+ Add Press Link</button>
+</div>
+
+<!-- SHOW EDITOR -->
+<div class="show-editor" id="showEditor">
+  <div class="show-editor-bar">
+    <button onclick="closeShowEditor()">Cancel</button>
+    <span style="font-family:'Space Grotesk',sans-serif;font-size:0.85rem" id="showEditorTitle">New Show</span>
+    <button class="save-show-btn" onclick="saveShow()">Save Show</button>
+  </div>
+  <div class="show-editor-content">
+    <div class="se-row">
+      <div class="se-field">
+        <label>Show Title</label>
+        <input id="seTitle" placeholder="e.g. Physique">
       </div>
-      <nav id="admin-nav">
-        <a href="#pages" class="nav-item active" data-section="pages">Pages</a>
-        <a href="#shows" class="nav-item" data-section="shows">Shows</a>
-        <a href="#media" class="nav-item" data-section="media">Media</a>
-        <a href="#shop" class="nav-item" data-section="shop">Shop</a>
-        <a href="#settings" class="nav-item" data-section="settings">Settings</a>
-      </nav>
-    </header>
-
-    <main id="admin-main">
-
-      <!-- PAGES: VISUAL EDITOR -->
-      <section id="section-pages" class="admin-section admin-section--visual">
-        <div class="visual-toolbar">
-          <select id="page-picker">
-            <!-- populated dynamically from pages.json -->
-          </select>
-          <button id="add-page-btn" class="btn-small" style="margin-left:4px;">+ Add Page</button>
-          <button id="rename-page-btn" class="btn-small">Rename</button>
-          <button id="delete-page-btn" class="btn-danger" style="margin-left:4px;">Delete Page</button>
-          <span class="visual-hint">Click any highlighted section to edit</span>
-          <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:#666;">
-              <input type="checkbox" id="page-nav-toggle"> Show in Nav
-            </label>
-            <input type="text" id="page-url" placeholder="page-url.html" style="width:160px;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px;">
-          </div>
-        </div>
-        <div id="page-preview" class="page-preview"></div>
-      </section>
-
-      <!-- EDIT MODAL -->
-      <div id="edit-modal" class="edit-modal" style="display:none;">
-        <div class="edit-modal-inner">
-          <div class="edit-modal-header">
-            <h2 id="edit-modal-title">Edit Section</h2>
-            <div>
-              <button id="modal-cancel-btn" class="btn-small">Cancel</button>
-              <button id="modal-save-btn" class="btn-primary">Save</button>
-            </div>
-          </div>
-          <div class="edit-modal-body">
-            <label>Heading</label>
-            <input type="text" id="modal-heading">
-            <label>Content</label>
-            <div id="modal-editor"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SHOWS LIST -->
-      <section id="section-shows" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1>Shows</h1>
-          <button id="new-show-btn" class="btn-primary">+ New Show</button>
-        </div>
-        <div id="shows-list" class="item-list"></div>
-      </section>
-
-      <!-- SHOW EDITOR -->
-      <section id="section-show-edit" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1 id="show-edit-title">New Show</h1>
-          <div>
-            <button id="show-cancel-btn" class="btn-small">Cancel</button>
-            <button id="show-save-btn" class="btn-primary">Save</button>
-          </div>
-        </div>
-        <div class="editor-form">
-          <label>Title</label>
-          <input type="text" id="show-title" placeholder="Show title">
-          <div class="form-row">
-            <div>
-              <label>Date</label>
-              <input type="date" id="show-date">
-            </div>
-            <div>
-              <label>Time</label>
-              <input type="text" id="show-time" placeholder="7:30 PM - 9:00 PM">
-            </div>
-            <div>
-              <label>Doors</label>
-              <input type="text" id="show-doors" placeholder="7:00 PM">
-            </div>
-          </div>
-          <label>Theme</label>
-          <input type="text" id="show-theme" placeholder="Optional theme">
-          <label>Performers (comma-separated)</label>
-          <input type="text" id="show-performers" placeholder="Bob Voyage, Cherie, Sebastian Ade">
-          <div class="form-row">
-            <div>
-              <label>Accompaniment</label>
-              <input type="text" id="show-accompaniment" placeholder="Klovis Gaynor">
-            </div>
-            <div>
-              <label>Emcee</label>
-              <input type="text" id="show-emcee" placeholder="Maya Suess" value="Maya Suess">
-            </div>
-          </div>
-          <label>Ticket URL</label>
-          <input type="url" id="show-ticket-url" placeholder="https://events.humanitix.com/...">
-          <label>Poster Image</label>
-          <div class="image-upload-row">
-            <input type="text" id="show-poster" placeholder="img/poster.webp" readonly>
-            <button type="button" id="show-poster-upload-btn" class="btn-small">Upload</button>
-          </div>
-          <div id="show-poster-preview" class="image-preview"></div>
-          <label>Description</label>
-          <div id="show-description-editor"></div>
-          <div class="form-row" style="margin-top:16px;">
-            <label class="toggle-label">
-              <input type="checkbox" id="show-upcoming">
-              Upcoming Show
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- MEDIA LIST -->
-      <section id="section-media" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1>Media</h1>
-          <button id="new-media-btn" class="btn-primary">+ New Media</button>
-        </div>
-        <div id="media-list" class="item-list"></div>
-      </section>
-
-      <!-- MEDIA EDITOR -->
-      <section id="section-media-edit" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1 id="media-edit-title">New Media</h1>
-          <div>
-            <button id="media-cancel-btn" class="btn-small">Cancel</button>
-            <button id="media-save-btn" class="btn-primary">Save</button>
-          </div>
-        </div>
-        <div class="editor-form">
-          <label>Image</label>
-          <div class="image-upload-row">
-            <input type="text" id="media-src" placeholder="img/photo.jpg" readonly>
-            <button type="button" id="media-src-upload-btn" class="btn-small">Upload</button>
-          </div>
-          <div id="media-src-preview" class="image-preview"></div>
-          <label>Caption</label>
-          <input type="text" id="media-caption" placeholder="Describe the image">
-          <label>Credit</label>
-          <input type="text" id="media-credit" placeholder="Photographer / Source">
-          <label>Type</label>
-          <select id="media-type">
-            <option value="photo">Photo</option>
-            <option value="video">Video</option>
-            <option value="press">Press</option>
-          </select>
-        </div>
-      </section>
-
-      <!-- SHOP LIST -->
-      <section id="section-shop" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1>Shop</h1>
-          <button id="new-shop-btn" class="btn-primary">+ New Item</button>
-        </div>
-        <div id="shop-list" class="item-list"></div>
-      </section>
-
-      <!-- SHOP EDITOR -->
-      <section id="section-shop-edit" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1 id="shop-edit-title">New Item</h1>
-          <div>
-            <button id="shop-cancel-btn" class="btn-small">Cancel</button>
-            <button id="shop-save-btn" class="btn-primary">Save</button>
-          </div>
-        </div>
-        <div class="editor-form">
-          <label>Title</label>
-          <input type="text" id="shop-item-title" placeholder="Item name">
-          <label>Description</label>
-          <input type="text" id="shop-item-description" placeholder="Short description">
-          <label>Price</label>
-          <input type="text" id="shop-item-price" placeholder="$25.00">
-          <label>Image</label>
-          <div class="image-upload-row">
-            <input type="text" id="shop-item-image" placeholder="img/product.jpg" readonly>
-            <button type="button" id="shop-image-upload-btn" class="btn-small">Upload</button>
-          </div>
-          <div id="shop-image-preview" class="image-preview"></div>
-          <label>Buy URL</label>
-          <input type="url" id="shop-item-buy-url" placeholder="https://...">
-          <div class="form-row" style="margin-top:16px;">
-            <label class="toggle-label">
-              <input type="checkbox" id="shop-item-available">
-              Available
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- SETTINGS -->
-      <section id="section-settings" class="admin-section" style="display:none;">
-        <div class="section-header">
-          <h1>Site Settings</h1>
-          <button id="settings-save-btn" class="btn-primary">Save Settings</button>
-        </div>
-        <div class="editor-form">
-          <label>Site Name</label>
-          <input type="text" id="setting-siteName">
-          <label>Tagline</label>
-          <textarea id="setting-tagline" rows="2"></textarea>
-          <label>Venue</label>
-          <input type="text" id="setting-venue">
-          <label>Venue Address</label>
-          <input type="text" id="setting-venueAddress">
-          <label>Instagram (Show)</label>
-          <input type="url" id="setting-instagramShow">
-          <label>Instagram (Maya)</label>
-          <input type="url" id="setting-instagramMaya">
-          <label>Ticket Platform URL</label>
-          <input type="url" id="setting-ticketPlatform">
-          <label>Parkside Lounge URL</label>
-          <input type="url" id="setting-parksideUrl">
-          <label>Accessibility Note</label>
-          <textarea id="setting-accessibilityNote" rows="3"></textarea>
-          <label>About Text</label>
-          <textarea id="setting-aboutText" rows="4"></textarea>
-          <label>Press Links (JSON array)</label>
-          <textarea id="setting-pressLinks" rows="4" placeholder='[{"title":"...","url":"...","date":"..."}]'></textarea>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- PUBLISH BAR -->
-    <div id="publish-bar" class="publish-bar" style="display:none;">
-      <span id="pending-count">0 unpublished changes</span>
-      <div>
-        <button id="discard-btn" class="btn-small">Discard</button>
-        <button id="publish-btn" class="btn-primary">Publish</button>
+      <div class="se-field">
+        <label>Edition #</label>
+        <input id="seEdition" type="number" placeholder="18">
       </div>
     </div>
+    <div class="se-row">
+      <div class="se-field">
+        <label>Date</label>
+        <input id="seDate" type="date">
+      </div>
+      <div class="se-field">
+        <label>Time</label>
+        <input id="seTime" placeholder="7:30 PM">
+      </div>
+    </div>
+    <div class="se-row">
+      <div class="se-field">
+        <label>Doors</label>
+        <input id="seDoors" placeholder="7:00 PM">
+      </div>
+      <div class="se-field">
+        <label>Ticket URL</label>
+        <input id="seTicketUrl" placeholder="https://...">
+      </div>
+    </div>
+    <div class="se-field">
+      <label>Theme / Description</label>
+      <input id="seTheme" placeholder="What's this show about?">
+    </div>
+    <div class="se-row">
+      <div class="se-field">
+        <label>Emcee</label>
+        <input id="seEmcee" value="Maya Suess">
+      </div>
+      <div class="se-field">
+        <label>Accompaniment</label>
+        <input id="seAccompaniment" placeholder="Klovis Gaynor">
+      </div>
+    </div>
+    <div class="se-field">
+      <label>Notes (crew credits, etc)</label>
+      <textarea id="seNotes" placeholder="Costumes by... Tech by..."></textarea>
+    </div>
+    <div class="se-field">
+      <label style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="seUpcoming" style="width:auto;margin:0"> Mark as Upcoming Show
+      </label>
+    </div>
 
-    <!-- TOAST -->
-    <div id="toast" class="toast"></div>
+    <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--pink);margin:32px 0 12px">Poster Image</h3>
+    <div class="media-dropzone" id="posterDrop" onclick="document.getElementById('posterInput').click()">
+      <div>Drop poster image here or click to browse</div>
+      <input type="file" id="posterInput" accept="image/*">
+    </div>
+    <div id="posterPreview" style="margin-top:12px"></div>
+
+    <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--pink);margin:32px 0 12px">Performers</h3>
+    <div class="perf-list" id="perfList"></div>
+    <button class="add-perf-btn" onclick="addPerformer()">+ Add Performer</button>
+
+    <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--pink);margin:32px 0 12px">Recap Caption</h3>
+    <div class="se-field">
+      <textarea id="seRecapCaption" placeholder="Thank you to everyone who came..." rows="4"></textarea>
+    </div>
+
+    <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--pink);margin:32px 0 12px">Recap Photos</h3>
+    <div class="media-dropzone" id="recapDrop" onclick="document.getElementById('recapInput').click()">
+      <div>Drop recap photos here or click to browse</div>
+      <input type="file" id="recapInput" accept="image/*" multiple>
+    </div>
+    <div class="media-thumbs" id="recapThumbs"></div>
+
+    <h3 style="font-family:'Space Grotesk',sans-serif;color:var(--pink);margin:32px 0 12px">Videos</h3>
+    <div id="videoList"></div>
+    <button class="add-perf-btn" onclick="addVideo()">+ Add Video</button>
   </div>
+</div>
 
-  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-  <script src="admin.js"></script>
+<!-- TOKEN SETUP -->
+<div class="token-setup" id="tokenSetup">
+  <div class="token-box">
+    <h2>Connect to GitHub</h2>
+    <p>To publish changes, enter a GitHub Personal Access Token with repo access to pietsuess/clients.</p>
+    <input id="ghToken" type="password" placeholder="ghp_xxxxxxxxxxxx">
+    <div class="btns">
+      <button onclick="closeTokenSetup()" style="padding:10px 24px;border:1px solid rgba(245,240,230,0.15);background:transparent;color:var(--cream);font-family:'Space Grotesk',sans-serif;cursor:pointer;border-radius:0">Cancel</button>
+      <button onclick="saveToken()" style="padding:10px 24px;background:var(--pink);border:1px solid var(--pink);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;cursor:pointer;border-radius:0">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-overlay" id="confirmDialog">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="btns">
+      <button onclick="confirmNo()">Cancel</button>
+      <button class="confirm-yes" onclick="confirmYes()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SITE CONTENT -->
+<div id="siteContent"></div>
+
+<script>
+/* ========================================
+   DATA
+   ======================================== */
+var DATA = { shows: [], media: [], settings: {}, shop: [], pages: {} };
+var dirty = false;
+var editingShowIdx = -1;
+var editorPerformers = [];
+var editorVideos = [];
+var editorPosterFile = null;
+var editorPosterSrc = '';
+var editorRecapFiles = [];
+var editorRecapSrcs = [];
+var confirmCallback = null;
+
+/* ========================================
+   INIT
+   ======================================== */
+async function init() {
+  var draft = localStorage.getItem('upvs-admin-draft');
+  if (draft) {
+    try {
+      var d = JSON.parse(draft);
+      DATA.shows = d.shows || [];
+      DATA.media = d.media || [];
+      DATA.settings = d.settings || {};
+      DATA.shop = d.shop || [];
+      DATA.pages = d.pages || {};
+      document.getElementById('saveStatus').textContent = 'Loaded from local draft';
+    } catch(e) { await loadFromJSON(); }
+  } else {
+    await loadFromJSON();
+  }
+  renderSite();
+  populateSettings();
+  setupDropZones();
+}
+
+async function loadFromJSON() {
+  var base = '../content/';
+  var results = await Promise.all([
+    fetch(base + 'shows.json').then(function(r){return r.json()}).catch(function(){return []}),
+    fetch(base + 'media.json').then(function(r){return r.json()}).catch(function(){return []}),
+    fetch(base + 'settings.json').then(function(r){return r.json()}).catch(function(){return {}}),
+    fetch(base + 'shop.json').then(function(r){return r.json()}).catch(function(){return []}),
+    fetch(base + 'pages.json').then(function(r){return r.json()}).catch(function(){return {}})
+  ]);
+  DATA.shows = results[0];
+  DATA.media = results[1];
+  DATA.settings = results[2];
+  DATA.shop = results[3];
+  DATA.pages = results[4];
+  document.getElementById('saveStatus').textContent = 'Loaded from site data';
+}
+
+/* ========================================
+   RENDER SITE
+   ======================================== */
+function renderSite() {
+  var s = DATA.settings;
+  var container = document.getElementById('siteContent');
+  var html = '';
+
+  // NAV
+  html += '<nav class="site-nav">';
+  html += '<a href="#" class="logo"><img src="../img/upvs-logo-purple.png" alt="UPVS"></a>';
+  html += '<div class="nav-links">';
+  html += '<a href="#shows">Shows</a><a href="#media">Media</a>';
+  html += '<a href="#shop">Shop</a><a href="#contact">Get Involved</a>';
+  html += '</div></nav>';
+
+  // HERO
+  html += '<section class="hero admin-section" data-section="hero">';
+  html += '<div class="section-ctrl">' + sectionArrows('hero') + '</div>';
+  html += '<h1 class="hero-title">';
+  html += '<span class="line1">Unprofessional</span>';
+  html += '<span class="line2">Variety Show</span>';
+  html += '</h1>';
+  html += '<p class="hero-tagline" contenteditable="true" data-field="tagline">' + esc(s.tagline || '') + '</p>';
+  html += renderMarquee();
+  html += '</section>';
+
+  // NEXT SHOW
+  var nextShow = DATA.shows.find(function(x){return x.isUpcoming}) || DATA.shows[0];
+  if (nextShow) {
+    html += '<div class="admin-section" data-section="nextShowBanner" style="text-align:center;padding:0 4vw 30px;margin-top:-30px;background:linear-gradient(to bottom,var(--plum),#0d0510);position:relative;z-index:2">';
+    html += '<div style="font-family:\'Space Grotesk\',sans-serif;font-size:clamp(1.4rem,3.5vw,2.4rem);font-weight:700">';
+    html += '<span style="color:var(--pink)">Next Show: &nbsp;</span>';
+    html += '<span style="color:var(--cream)">"' + esc(nextShow.title) + '"</span> ';
+    html += '<span style="color:rgba(245,240,230,0.5)">- ' + formatDateShort(nextShow.date) + '</span>';
+    html += '</div></div>';
+    html += '<section class="next-show admin-section" data-section="nextShow">';
+    html += '<div class="section-ctrl">' + sectionArrows('nextShow') + '</div>';
+    html += renderNextShowInner(nextShow);
+    html += '</section>';
+  }
+
+  // ABOUT
+  html += '<section class="about admin-section" data-section="about">';
+  html += '<div class="section-ctrl">' + sectionArrows('about') + '</div>';
+  html += '<div class="section-title" style="color:var(--pink);white-space:nowrap;font-size:clamp(2rem,7vw,6rem);padding:0" contenteditable="true" data-field="aboutHeadline">There will be antics.</div>';
+  html += '<div class="about-grid" style="margin-top:50px">';
+  html += '<div style="margin-top:4.5em">';
+  html += '<div class="about-text" contenteditable="true" data-field="aboutText">';
+  html += '<p>' + esc(s.aboutText || '') + '</p>';
+  html += '<p>The programming is truly intergenerational, introducing younger performers to the legendary performers from the neighborhood. From Coney Island legends to drag kings, from performance artists to folk musicians, every edition is a different world.</p>';
+  html += '</div>';
+  html += '<div class="about-quote">';
+  html += '<div contenteditable="true" data-field="aboutQuote">"Allied Productions exemplifies one of the things I love about this neighborhood, which is the diverse legacy of experimental queer and radical art and performance. At the Unprofessional Variety Show, I try to make the programming truly intergenerational."</div>';
+  html += '<div class="attr" contenteditable="true" data-field="aboutQuoteAttr">- Maya Suess, EV Grieve, Feb 2024</div>';
+  html += '</div></div>';
+  html += '<div class="about-details">' + renderAboutDetails() + '</div>';
+  html += '</div></section>';
+
+  // RUNNING TEXT
+  html += renderRunningText('Unprofessional', 'Unimportant', 'Undisciplined');
+
+  // SHOWS
+  html += '<section class="shows admin-section" id="shows" data-section="shows">';
+  html += '<div class="section-ctrl">' + sectionArrows('shows') + '</div>';
+  html += '<div class="section-title">Past Shows</div>';
+  html += '<div class="shows-grid">' + renderShowsGrid() + '</div>';
+  html += '</section>';
+
+  // MEDIA
+  html += '<section class="media admin-section" id="media" data-section="media">';
+  html += '<div class="section-ctrl">' + sectionArrows('media') + '</div>';
+  html += '<div class="section-title" style="color:var(--yellow)">Media</div>';
+  html += '<div class="section-subtitle">From the Unprofessional archive.</div>';
+  html += '<div class="gallery" style="margin-top:40px">' + renderMediaGrid() + '</div>';
+  html += renderPress();
+  html += '</section>';
+
+  // RUNNING TEXT 2
+  html += renderRunningText('Queer', 'Cabaret', 'Lower East Side', 'Since 2022');
+
+  // SHOP
+  html += '<section class="shop admin-section" id="shop" data-section="shop">';
+  html += '<div class="section-ctrl">' + sectionArrows('shop') + '</div>';
+  html += '<div class="section-title">Shop</div>';
+  html += '<div class="section-subtitle">Merch coming soon. All proceeds support the performers.</div>';
+  html += '<div class="shop-grid">' + renderShopGrid() + '</div>';
+  html += '</section>';
+
+  // CONTACT
+  html += '<section class="contact admin-section" id="contact" data-section="contact">';
+  html += '<div class="section-ctrl">' + sectionArrows('contact') + '</div>';
+  html += '<div class="section-title" style="color:var(--green)">Get<br>Involved</div>';
+  html += '<p class="contact-cta" contenteditable="true" data-field="contactCta">Want to perform? Have a wild idea? Just want to be part of whatever this is? Reach out. The show is built by its community, and the door is always open.</p>';
+  html += '<div class="contact-links">';
+  html += '<span class="contact-link">@unprofessionalvarietyshow</span>';
+  html += '<span class="contact-link">@MayaSuess</span>';
+  html += '<span class="contact-link">Humanitix Tickets</span>';
+  html += '<span class="contact-link">The Parkside Lounge</span>';
+  html += '</div>';
+  html += '<div class="access-note" style="margin-top:40px" contenteditable="true" data-field="accessNote">' + esc(s.venue || '') + ' - ' + esc(s.venueAddress || '') + ' - ' + esc(s.accessibilityNote || '') + '</div>';
+  html += '</section>';
+
+  // FOOTER
+  html += '<footer>';
+  html += '<span>Unprofessional Variety Show - Est. 2022 - The Parkside Lounge, LES NYC</span>';
+  html += '<span>Site by <a href="https://pietsuess.com" target="_blank">Piet Suess</a></span>';
+  html += '</footer>';
+
+  container.innerHTML = html;
+
+  // Wire contenteditable listeners
+  container.querySelectorAll('[contenteditable]').forEach(function(el) {
+    el.addEventListener('input', function() { markDirty(); });
+  });
+}
+
+/* ========================================
+   RENDER HELPERS
+   ======================================== */
+function renderMarquee() {
+  var items = [
+    'Quarterly at <em>The Parkside Lounge</em>',
+    'Lower East Side, NYC',
+    'Programmed by <em>Maya Suess</em>',
+    'You never quite know what you\'ll get',
+    'But it\'s always gonna be a time',
+    'All monies go to the performers'
+  ];
+  var spans = '';
+  for (var r = 0; r < 4; r++) items.forEach(function(t) { spans += '<span>' + t + '</span>'; });
+  return '<div class="marquee-wrap"><div class="marquee-track">' + spans + '</div></div>';
+}
+
+function renderNextShowInner(show) {
+  if (!show) return '';
+  var idx = DATA.shows.indexOf(show);
+  var label = show.isUpcoming ? 'Next Show' : 'Most Recent Show';
+  var perfs = (show.performers || []).map(function(p) {
+    return '<span>' + esc(typeof p === 'string' ? p : p.name) + '</span>';
+  }).join('');
+  return '<div class="next-show-inner">' +
+    '<div class="next-show-poster img-editable" onclick="openShowEditor(' + idx + ')">' +
+      '<div class="img-edit-badge">Edit Show</div>' +
+      '<div class="poster-glow"></div>' +
+      '<img src="../' + esc(show.posterImage || '') + '" alt="' + esc(show.title) + '">' +
+    '</div>' +
+    '<div class="next-show-info">' +
+      '<div class="label">' + label + '</div>' +
+      '<h2>' + esc(show.title) + '</h2>' +
+      '<div class="date">' + formatDateLong(show.date) + '</div>' +
+      '<div class="venue">' + esc(DATA.settings.venue || '') + '</div>' +
+      (perfs ? '<div class="performers">' + perfs + '</div>' : '') +
+      '<div style="margin-bottom:16px"><span style="font-size:0.8rem;color:rgba(245,240,230,0.4)">Emcee: ' + esc(show.emcee || '') + (show.accompaniment ? ' - Accompaniment: ' + esc(show.accompaniment) : '') + '</span></div>' +
+      (show.ticketUrl ? '<span class="btn" style="pointer-events:none">Get Tickets</span>' : '') +
+    '</div></div>';
+}
+
+function renderAboutDetails() {
+  var items = [
+    { t: 'The Venue', p: (DATA.settings.venue || 'The Parkside Lounge') + '. A dive bar and performance venue catering to the artists, musicians, and freaks of the Lower East Side since 1908.' },
+    { t: 'Maya Suess', p: 'Artist, educator, and arts administrator. Born on a small island off western Canada\'s coast. BFA from Emily Carr, MFA from Simon Fraser. She makes drawings, installations, videos, performances, and other mischievous entities.' },
+    { t: 'Klovis Gaynor', p: 'Musical accompaniment at nearly every edition. Queer musician and "baroque punk" artist. Queens-based.' },
+    { t: 'Libby Paloma', p: 'Set designer and production support. Queercrip, Mexican-American interdisciplinary artist working in sculpture, installation, and performance.' },
+    { t: 'The Deal', p: 'Sliding scale cover. All monies go directly to the performers. Tickets through Humanitix, where 100% of booking fees go to charity.' }
+  ];
+  return items.map(function(i) {
+    return '<div class="detail-item"><h4 contenteditable="true">' + esc(i.t) + '</h4><p contenteditable="true">' + esc(i.p) + '</p></div>';
+  }).join('');
+}
+
+function renderShowsGrid() {
+  var shows = DATA.shows.filter(function(s) { return !s.isUpcoming; });
+  var years = {};
+  shows.forEach(function(show) {
+    var yr = show.date ? show.date.substring(0, 4) : '????';
+    if (!years[yr]) years[yr] = [];
+    years[yr].push(show);
+  });
+  var html = '';
+  Object.keys(years).sort().reverse().forEach(function(yr) {
+    html += '<div style="grid-column:1/-1;font-family:\'Space Grotesk\',sans-serif;font-size:1.4rem;font-weight:700;color:rgba(255,255,255,0.3);padding:20px 0 8px">' + yr + '</div>';
+    years[yr].forEach(function(show) {
+      var idx = DATA.shows.indexOf(show);
+      var perfText = (show.performers && show.performers.length)
+        ? show.performers.map(function(p) { return typeof p === 'string' ? p : p.name; }).join(', ')
+        : (show.description || '');
+      html += '<div class="show-card" onclick="openShowEditor(' + idx + ')">' +
+        '<img src="../' + esc(show.posterImage || '') + '" alt="' + esc(show.title) + '" loading="lazy">' +
+        '<div class="card-info">' +
+          '<h3>' + esc(show.title) + '</h3>' +
+          '<div class="card-date">' + formatDateShort(show.date) + '</div>' +
+          '<div class="card-performers">' + esc(perfText) + '</div>' +
+        '</div>' +
+        '<div class="show-card-edit">' +
+          '<button onclick="event.stopPropagation();openShowEditor(' + idx + ')">Edit</button>' +
+          '<button onclick="event.stopPropagation();deleteShow(' + idx + ')">Delete</button>' +
+        '</div>' +
+      '</div>';
+    });
+  });
+  html += '<div class="show-card" onclick="openShowEditor(-1)" style="display:flex;align-items:center;justify-content:center;min-height:200px;border:2px dashed rgba(245,240,230,0.15);background:none;cursor:pointer">';
+  html += '<div style="text-align:center;color:rgba(245,240,230,0.3)"><div style="font-size:2rem">+</div><div style="font-family:\'Space Grotesk\',sans-serif;font-size:0.8rem;letter-spacing:0.1em">ADD SHOW</div></div></div>';
+  return html;
+}
+
+function renderMediaGrid() {
+  var items = DATA.media.slice(0, 24);
+  return items.map(function(item) {
+    var isVideo = item.type === 'video' || item.type === 'reel';
+    var src = item.src || item.thumbSrc || '';
+    var play = isVideo ? '<div class="play-icon"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg></div>' : '';
+    return '<div class="gallery-item"><img src="../' + esc(src) + '" alt="" loading="lazy">' + play + '</div>';
+  }).join('');
+}
+
+function renderShopGrid() {
+  return DATA.shop.map(function(item, i) {
+    return '<div class="shop-item">' +
+      '<div class="img-editable" onclick="replaceShopImage(' + i + ')">' +
+        '<img src="../' + esc(item.image || '') + '" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">' +
+        '<div class="img-edit-badge">Replace</div>' +
+      '</div>' +
+      '<div class="item-info">' +
+        '<h3 contenteditable="true" data-shop="' + i + '" data-shopfield="title">' + esc(item.title) + '</h3>' +
+        '<p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0" contenteditable="true" data-shop="' + i + '" data-shopfield="description">' + esc(item.description) + '</p>' +
+        '<div class="price" contenteditable="true" data-shop="' + i + '" data-shopfield="price">' + esc(item.price || 'Coming Soon') + '</div>' +
+      '</div></div>';
+  }).join('') +
+  '<div class="shop-item" onclick="addShopItem()" style="display:flex;align-items:center;justify-content:center;min-height:200px;border:2px dashed rgba(255,255,255,0.15);background:none;cursor:pointer">' +
+    '<div style="text-align:center;color:rgba(255,255,255,0.3)"><div style="font-size:2rem">+</div><div style="font-size:0.8rem">ADD ITEM</div></div></div>';
+}
+
+function renderPress() {
+  var links = DATA.settings.pressLinks || [];
+  if (!links.length) return '';
+  var icon = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>';
+  var html = '<div class="press-section">';
+  ['press','feature','listing'].forEach(function(type) {
+    var filtered = links.filter(function(l){return l.type===type});
+    if (!filtered.length) return;
+    var label = type.charAt(0).toUpperCase() + type.slice(1) + (type==='listing'?'s':type==='feature'?'s':'');
+    html += '<h3 style="font-family:\'Space Grotesk\',sans-serif;font-size:1.4rem;margin:24px 0 12px">' + label + '</h3>';
+    html += filtered.map(function(l){return '<span class="press-link">' + icon + ' ' + esc(l.title) + (l.date ? ' - ' + esc(l.date) : '') + '</span>'}).join(' ');
+  });
+  return html + '</div>';
+}
+
+function renderRunningText() {
+  var words = Array.prototype.slice.call(arguments);
+  var spans = '';
+  for (var r = 0; r < 4; r++) words.forEach(function(w) { spans += '<span>' + esc(w) + '</span>'; });
+  return '<div class="big-running" style="background:var(--plum)"><div class="track">' + spans + '</div></div>';
+}
+
+function sectionArrows(id) {
+  return '<button title="Move up" onclick="event.stopPropagation();moveSection(\'' + id + '\',-1)"><svg viewBox="0 0 24 24"><path d="M12 4l-8 8h16z"/></svg></button>' +
+    '<button title="Move down" onclick="event.stopPropagation();moveSection(\'' + id + '\',1)"><svg viewBox="0 0 24 24"><path d="M12 20l8-8H4z"/></svg></button>';
+}
+
+/* ========================================
+   SETTINGS PANEL
+   ======================================== */
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+}
+
+function populateSettings() {
+  var s = DATA.settings;
+  document.getElementById('setSiteName').value = s.siteName || '';
+  document.getElementById('setTagline').value = s.tagline || '';
+  document.getElementById('setVenue').value = s.venue || '';
+  document.getElementById('setVenueAddr').value = s.venueAddress || '';
+  document.getElementById('setAccess').value = s.accessibilityNote || '';
+  document.getElementById('setIgShow').value = s.instagramShow || '';
+  document.getElementById('setIgMaya').value = s.instagramMaya || '';
+  document.getElementById('setTicketUrl').value = s.ticketPlatform || '';
+  document.getElementById('setParksideUrl').value = s.parksideUrl || '';
+  document.getElementById('setAboutText').value = s.aboutText || '';
+  renderPressLinksEditor();
+}
+
+function renderPressLinksEditor() {
+  var links = DATA.settings.pressLinks || [];
+  var html = '';
+  links.forEach(function(l, i) {
+    html += '<div style="padding:12px;margin-bottom:8px;border:1px solid rgba(245,240,230,0.08);position:relative">';
+    html += '<button onclick="removePressLink(' + i + ')" style="position:absolute;top:4px;right:4px;width:20px;height:20px;background:none;border:1px solid rgba(245,240,230,0.15);color:var(--cream);cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center">&times;</button>';
+    html += '<input value="' + esc(l.title) + '" placeholder="Title" onchange="updatePressLink(' + i + ',\'title\',this.value)" style="width:100%;padding:6px;margin-bottom:6px;background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);color:var(--cream);font-size:0.8rem;border-radius:0">';
+    html += '<input value="' + esc(l.url) + '" placeholder="URL" onchange="updatePressLink(' + i + ',\'url\',this.value)" style="width:100%;padding:6px;margin-bottom:6px;background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);color:var(--cream);font-size:0.8rem;border-radius:0">';
+    html += '<select onchange="updatePressLink(' + i + ',\'type\',this.value)" style="padding:6px;background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);color:var(--cream);font-size:0.8rem;border-radius:0">';
+    html += '<option value="press"' + (l.type==='press'?' selected':'') + '>Press</option>';
+    html += '<option value="feature"' + (l.type==='feature'?' selected':'') + '>Feature</option>';
+    html += '<option value="listing"' + (l.type==='listing'?' selected':'') + '>Listing</option>';
+    html += '</select></div>';
+  });
+  document.getElementById('pressLinksEditor').innerHTML = html;
+}
+
+function addPressLink() {
+  if (!DATA.settings.pressLinks) DATA.settings.pressLinks = [];
+  DATA.settings.pressLinks.push({ title: '', url: '', date: '', type: 'press' });
+  renderPressLinksEditor(); markDirty();
+}
+function removePressLink(i) { DATA.settings.pressLinks.splice(i, 1); renderPressLinksEditor(); markDirty(); }
+function updatePressLink(i, field, val) { DATA.settings.pressLinks[i][field] = val; markDirty(); }
+
+/* ========================================
+   SHOW EDITOR
+   ======================================== */
+function openShowEditor(idx) {
+  editingShowIdx = idx;
+  var show = idx >= 0 ? DATA.shows[idx] : {};
+  document.getElementById('showEditorTitle').textContent = idx >= 0 ? 'Edit: ' + (show.title || 'Show') : 'New Show';
+  document.getElementById('seTitle').value = show.title || '';
+  document.getElementById('seEdition').value = show.edition || '';
+  document.getElementById('seDate').value = show.date || '';
+  document.getElementById('seTime').value = show.time || '';
+  document.getElementById('seDoors').value = show.doors || '';
+  document.getElementById('seTicketUrl').value = show.ticketUrl || '';
+  document.getElementById('seTheme').value = show.theme || show.description || '';
+  document.getElementById('seEmcee').value = show.emcee || 'Maya Suess';
+  document.getElementById('seAccompaniment').value = show.accompaniment || '';
+  document.getElementById('seNotes').value = show.notes || '';
+  document.getElementById('seUpcoming').checked = !!show.isUpcoming;
+  document.getElementById('seRecapCaption').value = show.recapCaption || '';
+
+  editorPosterFile = null;
+  editorPosterSrc = show.posterImage || '';
+  document.getElementById('posterPreview').innerHTML = editorPosterSrc
+    ? '<img src="../' + esc(editorPosterSrc) + '" style="max-width:200px;max-height:200px">' : '';
+
+  editorPerformers = (show.performers || []).map(function(p) {
+    if (typeof p === 'string') return { name: p, instagram: '', bio: '' };
+    return { name: p.name || '', instagram: p.instagram || '', bio: p.bio || '' };
+  });
+  renderPerformerList();
+
+  editorRecapFiles = [];
+  editorRecapSrcs = (show.recapImages || []).slice();
+  renderRecapThumbs();
+
+  editorVideos = (show.videos || []).map(function(v) {
+    return { src: v.src || '', vimeoId: v.vimeoId || '', title: v.title || '', thumb: v.thumb || '' };
+  });
+  renderVideoList();
+
+  document.getElementById('showEditor').classList.add('active');
+}
+
+function closeShowEditor() {
+  document.getElementById('showEditor').classList.remove('active');
+  editingShowIdx = -1;
+}
+
+function saveShow() {
+  var show = editingShowIdx >= 0 ? DATA.shows[editingShowIdx] : {};
+  show.title = document.getElementById('seTitle').value.trim();
+  show.edition = parseInt(document.getElementById('seEdition').value) || '';
+  show.date = document.getElementById('seDate').value;
+  show.time = document.getElementById('seTime').value.trim();
+  show.doors = document.getElementById('seDoors').value.trim();
+  show.ticketUrl = document.getElementById('seTicketUrl').value.trim();
+  show.theme = document.getElementById('seTheme').value.trim();
+  show.description = show.theme;
+  show.emcee = document.getElementById('seEmcee').value.trim();
+  show.accompaniment = document.getElementById('seAccompaniment').value.trim();
+  show.notes = document.getElementById('seNotes').value.trim();
+  show.isUpcoming = document.getElementById('seUpcoming').checked;
+  show.recapCaption = document.getElementById('seRecapCaption').value.trim();
+  show.performers = editorPerformers.filter(function(p) { return p.name.trim(); });
+  show.recapImages = editorRecapSrcs;
+  show.videos = editorVideos.filter(function(v) { return v.src || v.vimeoId; });
+  if (editorPosterSrc) show.posterImage = editorPosterSrc;
+
+  if (show.isUpcoming) {
+    DATA.shows.forEach(function(s) { if (s !== show) s.isUpcoming = false; });
+  }
+  if (editingShowIdx < 0) {
+    show.mediaItems = show.mediaItems || [];
+    show.specialGuests = show.specialGuests || [];
+    show.dj = show.dj || '';
+    DATA.shows.unshift(show);
+  }
+  closeShowEditor(); markDirty(); saveDraft(); renderSite(); setupDropZones();
+  toast('Show saved');
+}
+
+function deleteShow(idx) {
+  showConfirm('Delete "' + DATA.shows[idx].title + '"?', function() {
+    DATA.shows.splice(idx, 1);
+    markDirty(); saveDraft(); renderSite(); setupDropZones();
+    toast('Show deleted');
+  });
+}
+
+function renderPerformerList() {
+  var html = '';
+  editorPerformers.forEach(function(p, i) {
+    html += '<div class="perf-item">';
+    html += '<button class="perf-remove" onclick="removePerformer(' + i + ')">&times;</button>';
+    html += '<input value="' + esc(p.name) + '" placeholder="Name" onchange="editorPerformers[' + i + '].name=this.value">';
+    html += '<input value="' + esc(p.instagram) + '" placeholder="@instagram" onchange="editorPerformers[' + i + '].instagram=this.value">';
+    html += '<textarea placeholder="Bio (optional)" onchange="editorPerformers[' + i + '].bio=this.value">' + esc(p.bio) + '</textarea>';
+    html += '</div>';
+  });
+  document.getElementById('perfList').innerHTML = html;
+}
+function addPerformer() {
+  editorPerformers.push({ name: '', instagram: '', bio: '' });
+  renderPerformerList();
+  var inputs = document.querySelectorAll('#perfList .perf-item:last-child input');
+  if (inputs[0]) inputs[0].focus();
+}
+function removePerformer(i) { editorPerformers.splice(i, 1); renderPerformerList(); }
+
+function renderVideoList() {
+  var html = '';
+  editorVideos.forEach(function(v, i) {
+    html += '<div class="perf-item">';
+    html += '<button class="perf-remove" onclick="removeVideo(' + i + ')">&times;</button>';
+    html += '<input value="' + esc(v.title || '') + '" placeholder="Title (optional)" onchange="editorVideos[' + i + '].title=this.value">';
+    html += '<input value="' + esc(v.vimeoId || '') + '" placeholder="Vimeo ID (e.g. 123456789)" onchange="editorVideos[' + i + '].vimeoId=this.value">';
+    html += '<input value="' + esc(v.src || '') + '" placeholder="Video file path (e.g. img/ig-videos/file.mp4)" onchange="editorVideos[' + i + '].src=this.value">';
+    html += '</div>';
+  });
+  document.getElementById('videoList').innerHTML = html;
+}
+function addVideo() { editorVideos.push({ src: '', vimeoId: '', title: '', thumb: '' }); renderVideoList(); }
+function removeVideo(i) { editorVideos.splice(i, 1); renderVideoList(); }
+
+/* Drop zone setup */
+function setupDropZones() {
+  var posterDrop = document.getElementById('posterDrop');
+  var posterInput = document.getElementById('posterInput');
+  var recapDrop = document.getElementById('recapDrop');
+  var recapInput = document.getElementById('recapInput');
+
+  posterDrop.ondragover = function(e) { e.preventDefault(); posterDrop.classList.add('dragover'); };
+  posterDrop.ondragleave = function() { posterDrop.classList.remove('dragover'); };
+  posterDrop.ondrop = function(e) { e.preventDefault(); posterDrop.classList.remove('dragover'); if (e.dataTransfer.files.length) handlePosterFile(e.dataTransfer.files[0]); };
+  posterInput.onchange = function() { if (this.files.length) handlePosterFile(this.files[0]); };
+
+  recapDrop.ondragover = function(e) { e.preventDefault(); recapDrop.classList.add('dragover'); };
+  recapDrop.ondragleave = function() { recapDrop.classList.remove('dragover'); };
+  recapDrop.ondrop = function(e) { e.preventDefault(); recapDrop.classList.remove('dragover'); Array.from(e.dataTransfer.files).forEach(handleRecapFile); };
+  recapInput.onchange = function() { Array.from(this.files).forEach(handleRecapFile); };
+}
+
+function handlePosterFile(file) {
+  editorPosterFile = file;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    editorPosterSrc = 'img/ig-posts/' + file.name;
+    document.getElementById('posterPreview').innerHTML =
+      '<img src="' + e.target.result + '" style="max-width:200px;max-height:200px">' +
+      '<div style="font-size:0.75rem;color:rgba(245,240,230,0.4);margin-top:4px">Will save as: ' + editorPosterSrc + '</div>';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleRecapFile(file) {
+  editorRecapFiles.push(file);
+  editorRecapSrcs.push('img/ig-posts/' + file.name);
+  renderRecapThumbs();
+}
+
+function renderRecapThumbs() {
+  var html = '';
+  editorRecapSrcs.forEach(function(src, i) {
+    var imgSrc = editorRecapFiles[i] ? URL.createObjectURL(editorRecapFiles[i]) : '../' + src;
+    html += '<div class="thumb"><img src="' + imgSrc + '"><button class="thumb-remove" onclick="removeRecap(' + i + ')">&times;</button></div>';
+  });
+  document.getElementById('recapThumbs').innerHTML = html;
+}
+function removeRecap(i) { editorRecapSrcs.splice(i, 1); editorRecapFiles.splice(i, 1); renderRecapThumbs(); }
+
+/* ========================================
+   SHOP
+   ======================================== */
+function addShopItem() {
+  DATA.shop.push({ title: 'New Item', description: '', price: '', image: '', buyUrl: '', available: false });
+  markDirty(); saveDraft(); renderSite(); setupDropZones();
+}
+function replaceShopImage(idx) {
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = function() {
+    if (!this.files.length) return;
+    DATA.shop[idx].image = 'img/ig-posts/' + this.files[0].name;
+    markDirty(); saveDraft(); renderSite(); setupDropZones();
+    toast('Shop image updated');
+  };
+  input.click();
+}
+
+/* ========================================
+   INLINE EDIT COLLECTION
+   ======================================== */
+function collectInlineEdits() {
+  var el;
+  el = document.querySelector('[data-field="tagline"]');
+  if (el) DATA.settings.tagline = el.textContent.trim();
+  el = document.querySelector('[data-field="aboutText"]');
+  if (el) DATA.settings.aboutText = el.textContent.trim();
+
+  document.querySelectorAll('[data-shop]').forEach(function(el) {
+    var idx = parseInt(el.dataset.shop);
+    var field = el.dataset.shopfield;
+    if (DATA.shop[idx]) DATA.shop[idx][field] = el.textContent.trim();
+  });
+}
+
+/* ========================================
+   SECTION REORDER
+   ======================================== */
+function moveSection(id, dir) {
+  var sections = Array.from(document.querySelectorAll('.admin-section'));
+  var idx = sections.findIndex(function(s) { return s.dataset.section === id; });
+  if (idx < 0) return;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= sections.length) return;
+  var el = sections[idx];
+  var sibling = sections[newIdx];
+  if (dir < 0) el.parentNode.insertBefore(el, sibling);
+  else el.parentNode.insertBefore(sibling, el);
+  toast('Section moved');
+}
+
+/* ========================================
+   SETTINGS COLLECTION
+   ======================================== */
+function collectSettings() {
+  DATA.settings.siteName = document.getElementById('setSiteName').value.trim();
+  DATA.settings.tagline = document.getElementById('setTagline').value.trim();
+  DATA.settings.venue = document.getElementById('setVenue').value.trim();
+  DATA.settings.venueAddress = document.getElementById('setVenueAddr').value.trim();
+  DATA.settings.accessibilityNote = document.getElementById('setAccess').value.trim();
+  DATA.settings.instagramShow = document.getElementById('setIgShow').value.trim();
+  DATA.settings.instagramMaya = document.getElementById('setIgMaya').value.trim();
+  DATA.settings.ticketPlatform = document.getElementById('setTicketUrl').value.trim();
+  DATA.settings.parksideUrl = document.getElementById('setParksideUrl').value.trim();
+  DATA.settings.aboutText = document.getElementById('setAboutText').value.trim();
+}
+
+/* ========================================
+   COLORS & FONTS
+   ======================================== */
+function applyColor(name, val) { document.documentElement.style.setProperty('--' + name, val); }
+function applyFont() {
+  var h = document.getElementById('setHeadingFont').value;
+  var b = document.getElementById('setBodyFont').value;
+  document.querySelectorAll('.section-title,.hero-title,h1,h2,h3,h4').forEach(function(el) { el.style.fontFamily = h; });
+  document.body.style.fontFamily = b;
+}
+
+/* ========================================
+   DRAFT / PUBLISH
+   ======================================== */
+function saveDraft() {
+  collectSettings();
+  collectInlineEdits();
+  localStorage.setItem('upvs-admin-draft', JSON.stringify(DATA));
+  document.getElementById('saveStatus').textContent = 'Draft saved';
+}
+
+function markDirty() {
+  dirty = true;
+  document.getElementById('saveStatus').textContent = 'Unsaved changes';
+  clearTimeout(window._draftTimer);
+  window._draftTimer = setTimeout(saveDraft, 1500);
+}
+
+function discardDraft() {
+  showConfirm('Discard all local changes and reload from site data?', function() {
+    localStorage.removeItem('upvs-admin-draft');
+    dirty = false;
+    location.reload();
+  });
+}
+
+async function publish() {
+  collectSettings();
+  collectInlineEdits();
+  var token = localStorage.getItem('upvs-gh-token');
+  if (!token) { document.getElementById('tokenSetup').classList.add('active'); return; }
+
+  toast('Publishing...');
+  try {
+    var files = {
+      'maya/content/shows.json': JSON.stringify(DATA.shows, null, 2),
+      'maya/content/media.json': JSON.stringify(DATA.media, null, 2),
+      'maya/content/settings.json': JSON.stringify(DATA.settings, null, 2),
+      'maya/content/shop.json': JSON.stringify(DATA.shop, null, 2),
+      'maya/content/pages.json': JSON.stringify(DATA.pages, null, 2)
+    };
+
+    var refRes = await ghApi('GET', '/repos/pietsuess/clients/git/ref/heads/main', null, token);
+    var commitSha = refRes.object.sha;
+    var commitRes = await ghApi('GET', '/repos/pietsuess/clients/git/commits/' + commitSha, null, token);
+    var treeSha = commitRes.tree.sha;
+
+    var treeItems = [];
+    for (var path in files) {
+      var blobRes = await ghApi('POST', '/repos/pietsuess/clients/git/blobs', { content: files[path], encoding: 'utf-8' }, token);
+      treeItems.push({ path: path, mode: '100644', type: 'blob', sha: blobRes.sha });
+    }
+
+    var newTreeRes = await ghApi('POST', '/repos/pietsuess/clients/git/trees', { base_tree: treeSha, tree: treeItems }, token);
+    var newCommitRes = await ghApi('POST', '/repos/pietsuess/clients/git/commits', { message: 'Update UPVS content via admin', tree: newTreeRes.sha, parents: [commitSha] }, token);
+    await ghApi('PATCH', '/repos/pietsuess/clients/git/refs/heads/main', { sha: newCommitRes.sha }, token);
+
+    dirty = false;
+    localStorage.removeItem('upvs-admin-draft');
+    document.getElementById('saveStatus').textContent = 'Published!';
+    toast('Published! Live in a few minutes.');
+  } catch(e) {
+    console.error('Publish error:', e);
+    toast('Publish failed: ' + e.message, true);
+  }
+}
+
+async function ghApi(method, path, body, token) {
+  var res = await fetch('https://api.github.com' + path, {
+    method: method,
+    headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+    body: body ? JSON.stringify(body) : null
+  });
+  if (!res.ok) {
+    var err = await res.json().catch(function(){return {}});
+    throw new Error((err.message || res.statusText) + ' (' + res.status + ')');
+  }
+  return res.json();
+}
+
+/* ========================================
+   TOKEN
+   ======================================== */
+function saveToken() {
+  var token = document.getElementById('ghToken').value.trim();
+  if (!token) return;
+  localStorage.setItem('upvs-gh-token', token);
+  document.getElementById('tokenSetup').classList.remove('active');
+  toast('GitHub connected');
+  publish();
+}
+function closeTokenSetup() { document.getElementById('tokenSetup').classList.remove('active'); }
+
+/* ========================================
+   CONFIRM
+   ======================================== */
+function showConfirm(msg, cb) {
+  document.getElementById('confirmMsg').textContent = msg;
+  confirmCallback = cb;
+  document.getElementById('confirmDialog').classList.add('active');
+}
+function confirmYes() { document.getElementById('confirmDialog').classList.remove('active'); if (confirmCallback) confirmCallback(); confirmCallback = null; }
+function confirmNo() { document.getElementById('confirmDialog').classList.remove('active'); confirmCallback = null; }
+
+/* ========================================
+   UTILS
+   ======================================== */
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function formatDateLong(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr + 'T12:00:00');
+  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function formatDateShort(dateStr) {
+  if (!dateStr) return '';
+  var d = new Date(dateStr + 'T12:00:00');
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function toast(msg, isError) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function() { el.className = 'toast'; }, 3000);
+}
+
+/* KEYBOARD */
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); saveDraft(); toast('Draft saved'); }
+  if (e.key === 'Escape') {
+    document.getElementById('settingsPanel').classList.remove('open');
+    if (document.getElementById('showEditor').classList.contains('active')) closeShowEditor();
+  }
+});
+window.addEventListener('beforeunload', function(e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+init();
+</script>
 </body>
 </html>
