@@ -601,6 +601,18 @@ footer a:hover{color:var(--pink)}
       <span>You never quite know what you'll get</span>
       <span>But it's always gonna be a time</span>
       <span>All monies go to the performers</span>
+      <span>Quarterly at <em>The Parkside Lounge</em></span>
+      <span>Lower East Side, NYC</span>
+      <span>Programmed by <em>Maya Suess</em></span>
+      <span>You never quite know what you'll get</span>
+      <span>But it's always gonna be a time</span>
+      <span>All monies go to the performers</span>
+      <span>Quarterly at <em>The Parkside Lounge</em></span>
+      <span>Lower East Side, NYC</span>
+      <span>Programmed by <em>Maya Suess</em></span>
+      <span>You never quite know what you'll get</span>
+      <span>But it's always gonna be a time</span>
+      <span>All monies go to the performers</span>
     </div>
   </div>
 </section>
@@ -652,6 +664,8 @@ footer a:hover{color:var(--pink)}
 <!-- RUNNING TEXT -->
 <div class="big-running" style="background:var(--plum);">
   <div class="track">
+    <span>Unprofessional</span><span>Unimportant</span><span>Undisciplined</span>
+    <span>Unprofessional</span><span>Unimportant</span><span>Undisciplined</span>
     <span>Unprofessional</span><span>Unimportant</span><span>Undisciplined</span>
     <span>Unprofessional</span><span>Unimportant</span><span>Undisciplined</span>
   </div>
@@ -711,7 +725,7 @@ footer a:hover{color:var(--pink)}
   <div class="section-subtitle">Merch coming soon. All proceeds support the performers.</div>
   <div class="shop-grid">
     <div class="shop-item">
-      <img src="img/ig-posts/17910301938035642.jpg" alt="Tee" style="width:100%;aspect-ratio:1;object-fit:cover">
+      <img src="img/shop-tshirt.jpg" alt="Tee" style="width:100%;aspect-ratio:1;object-fit:cover">
       <div class="item-info">
         <h3>"Unprofessional" Tee</h3>
         <p style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin:4px 0">Hand-drawn logo on black cotton</p>
@@ -1151,6 +1165,7 @@ function formatDateShort(dateStr) {
    SHOW DETAIL
    ======================================== */
 var currentShowIdx = 0;
+var currentRecapImages = [];
 function navShow(dir) {
   var next = currentShowIdx + dir;
   if (next < 0) next = DATA.shows.length - 1;
@@ -1160,6 +1175,7 @@ function navShow(dir) {
 }
 function openShowDetail(idx) {
   currentShowIdx = idx;
+  document.getElementById('showDetail').scrollTop = 0;
   const show = DATA.shows[idx];
   if (!show) return;
   const dateStr = formatDateLong(show.date);
@@ -1199,14 +1215,17 @@ function openShowDetail(idx) {
     });
   }
   if (show.recapImages && show.recapImages.length) {
+    currentRecapImages = show.recapImages;
+    var ri = 0;
     html += '<div class="sd-section-title">From the Show</div>';
     if (show.recapCaption) html += '<div class="sd-recap-caption">' + escHtml(show.recapCaption) + '</div>';
     html += '<div class="sd-recap-grid">';
     show.recapImages.forEach(function(img) {
-      html += '<img src="' + escHtml(img) + '" alt="" loading="lazy" onclick="event.stopPropagation();openLbDirect(\'' + escHtml(img).replace(/'/g,"\\'") + '\')">';
+      html += '<img src="' + escHtml(img) + '" alt="" loading="lazy" onclick="event.stopPropagation();openRecapLb(' + ri + ')">';
+      ri++;
     });
     html += '</div>';
-  }
+  } else { currentRecapImages = []; }
   // Videos
   if (show.videos && show.videos.length) {
     html += '<div class="sd-section-title">Videos</div>';
@@ -1237,6 +1256,12 @@ function closeShowDetail() {
   document.getElementById('showDetail').classList.remove('active');
   document.body.style.overflow = '';
   document.getElementById('showDetail').scrollTop = 0;
+}
+function openRecapLb(idx) {
+  currentLbList = currentRecapImages.map(function(src) { return {src: src, type: 'photo', caption: ''}; });
+  currentLbIndex = idx;
+  showLbItem();
+  document.getElementById('lightbox').classList.add('active');
 }
 function openLbDirect(src) {
   document.getElementById('lb-img').src = src;
