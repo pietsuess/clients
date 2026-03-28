@@ -1218,23 +1218,39 @@ function openShowDetail(idx) {
       html += '</div>';
     });
   }
+  // All media for this show
+  var showMedia = (show.mediaItems || []);
+  var showPhotos = showMedia.filter(function(m) { return m.type === 'photo'; });
+  var showVids = showMedia.filter(function(m) { return m.type === 'video' || m.type === 'reel'; });
+  // Also include recapImages for backwards compat
   if (show.recapImages && show.recapImages.length) {
-    currentRecapImages = show.recapImages;
-    var ri = 0;
-    html += '<div class="sd-section-title">From the Show</div>';
+    show.recapImages.forEach(function(img) {
+      if (!showPhotos.some(function(p) { return p.src === img; })) {
+        showPhotos.push({src: img, type: 'photo', date: show.date});
+      }
+    });
+  }
+  currentRecapImages = showPhotos.map(function(p) { return p.src; });
+  if (showPhotos.length) {
+    html += '<div class="sd-section-title">Photos (' + showPhotos.length + ')</div>';
     if (show.recapCaption) html += '<div class="sd-recap-caption">' + escHtml(show.recapCaption) + '</div>';
     html += '<div class="sd-recap-grid">';
-    show.recapImages.forEach(function(img) {
-      html += '<img src="' + escHtml(img) + '" alt="" loading="lazy" onclick="event.stopPropagation();openRecapLb(' + ri + ')">';
-      ri++;
+    showPhotos.forEach(function(p, ri) {
+      html += '<img src="' + escHtml(p.src) + '" alt="" loading="lazy" onclick="event.stopPropagation();openRecapLb(' + ri + ')">';
     });
     html += '</div>';
   } else { currentRecapImages = []; }
-  // Videos
-  if (show.videos && show.videos.length) {
-    html += '<div class="sd-section-title">Videos</div>';
+  // Videos - combine show.videos + mediaItems videos
+  var allVids = (show.videos || []).slice();
+  showVids.forEach(function(sv) {
+    if (sv.src && !allVids.some(function(v) { return v.src === sv.src; })) {
+      allVids.push(sv);
+    }
+  });
+  if (allVids.length) {
+    html += '<div class="sd-section-title">Videos (' + allVids.length + ')</div>';
     html += '<div class="sd-recap-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">';
-    show.videos.forEach(function(v) {
+    allVids.forEach(function(v) {
       if (v.vimeoId) {
         html += '<div style="position:relative;cursor:pointer" onclick="event.stopPropagation();openVimeoInLb(\'' + v.vimeoId + '\')">';
         html += '<img src="https://vumbnail.com/' + v.vimeoId + '.jpg" alt="" loading="lazy" style="width:100%;aspect-ratio:16/9;object-fit:cover">';
