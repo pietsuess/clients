@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salt Spring Centre of Yoga</title>
+<meta name="description" content="A 69-acre sanctuary for peace, yoga practice, and community on Salt Spring Island, BC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>
+// Send desktop users to main site
+if (window.innerWidth > 768) { window.location.href = '../index.html'; }
+</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.nav-hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MOBILE MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+.menu .donate-link { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* HERO */
+.hero { height: calc(100vh - 52px); height: calc(100dvh - 52px); margin-top: 52px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.2); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-logo { width: 70vw; max-width: 300px; margin: 0 auto; filter: drop-shadow(0 2px 12px rgba(0,0,0,0.3)); }
+
+/* SECTION */
+.section { padding: 48px 20px; }
+.section-alt { background: var(--white); }
+.section-dark { background: var(--charcoal); color: var(--white); }
+.section h2 { font-size: 1.5rem; text-align: center; margin-bottom: 16px; color: var(--teal-deep); }
+.section-dark h2 { color: var(--white); }
+.section p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 12px; }
+
+/* QUICK NAV GRID */
+.quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 20px; }
+.quick-card { background: var(--white); border-radius: 12px; padding: 20px 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-decoration: none; color: var(--text); transition: 0.2s; }
+.quick-card:active { transform: scale(0.97); }
+.quick-card .icon { font-size: 1.6rem; margin-bottom: 8px; }
+.quick-card h3 { font-size: 0.82rem; color: var(--teal-deep); margin-bottom: 4px; }
+.quick-card p { font-size: 0.72rem; color: var(--text-light); text-align: center; line-height: 1.4; }
+
+/* BABAJI Q&A */
+.qa { background: var(--charcoal); color: var(--white); padding: 40px 20px; text-align: center; }
+.qa-photo { width: 100px; height: 130px; border-radius: 12px; object-fit: cover; object-position: center top; margin: 0 auto 16px; border: 2px solid rgba(255,255,255,0.1); }
+.qa-label { font-family: 'Cinzel', serif; font-size: 0.82rem; color: var(--gold); margin-bottom: 10px; display: block; }
+.qa-question { font-size: 0.92rem; opacity: 0.6; font-style: italic; margin-bottom: 8px; line-height: 1.4; }
+.qa-answer { font-size: 1.05rem; font-weight: 500; line-height: 1.4; margin-bottom: 10px; }
+.qa-date { font-size: 0.72rem; opacity: 0.4; text-transform: uppercase; letter-spacing: 0.1em; }
+.qa-refresh { background: none; border: 2px solid rgba(255,255,255,0.15); color: var(--white); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 16px auto 0; cursor: pointer; opacity: 0.5; }
+.qa-refresh:active { opacity: 1; }
+
+/* EVENT BANNER */
+.event-banner { display: block; background: var(--teal-deep); color: var(--white); padding: 24px 20px; text-decoration: none; }
+.event-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--gold); margin-bottom: 8px; display: block; }
+.event-title { font-family: 'Cinzel', serif; font-size: 1.2rem; margin-bottom: 6px; color: var(--white); }
+.event-sub { font-size: 0.85rem; opacity: 0.7; }
+.event-cta { display: inline-block; margin-top: 12px; padding: 10px 28px; background: var(--terracotta); color: var(--white); border-radius: 50px; font-size: 0.85rem; font-weight: 600; }
+
+/* IMAGE STRIP */
+.strip { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; }
+.strip img { height: 30vh; min-width: 30vh; object-fit: cover; scroll-snap-align: start; flex-shrink: 0; }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 32px 20px; background: var(--teal-deep); }
+.stat { text-align: center; color: var(--white); }
+.stat-num { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; color: var(--gold); }
+.stat-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; }
+
+/* CTA */
+.cta { text-align: center; padding: 48px 20px; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); color: var(--white); }
+.cta h2 { color: var(--white); margin-bottom: 12px; font-size: 1.4rem; }
+.cta p { text-align: center; opacity: 0.7; font-size: 0.92rem; margin-bottom: 24px; }
+.cta-btn { display: inline-block; padding: 14px 36px; background: var(--terracotta); color: var(--white); border-radius: 50px; font-weight: 600; font-size: 0.95rem; margin: 0 6px 10px; }
+.cta-btn.outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; }
+.donate-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 24px; position: relative; }
+.donate-header h3 { font-size: 1.2rem; }
+.donate-header p { font-size: 0.82rem; opacity: 0.8; }
+.donate-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+.donate-body { padding: 24px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.tier { padding: 10px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; cursor: pointer; background: var(--white); }
+.tier.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-field { margin-bottom: 12px; }
+.donate-field label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 4px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; }
+.donate-submit { width: 100%; padding: 14px; background: var(--terracotta); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.donate-alt { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.donate-alt strong { color: var(--text); }
+.donate-foot { text-align: center; font-size: 0.68rem; color: var(--text-light); padding: 0 24px 20px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="nav-hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+  <a href="#" class="donate-link" onclick="event.preventDefault();closeMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg" alt="Salt Spring Centre of Yoga">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <img src="../logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
+  </div>
+</section>
+
+<!-- QUICK NAV -->
+<div class="quick-grid">
+  <a href="offerings.html" class="quick-card"><div class="icon">🧘</div><h3>Retreats</h3><p>Weekend getaways and immersions</p></a>
+  <a href="calendar.html" class="quick-card"><div class="icon">📅</div><h3>Calendar</h3><p>Events and classes</p></a>
+  <a href="offerings.html#wellness" class="quick-card"><div class="icon">🌿</div><h3>Wellness</h3><p>Ayurveda and massage</p></a>
+  <a href="shop.html" class="quick-card"><div class="icon">🛍</div><h3>Shop</h3><p>Books, music, gifts</p></a>
+  <a href="offerings.html#karma" class="quick-card"><div class="icon">💛</div><h3>Karma Yoga</h3><p>Live-in service program</p></a>
+  <a href="contact.html" class="quick-card"><div class="icon">📍</div><h3>Visit Us</h3><p>Directions and contact</p></a>
+</div>
+
+<!-- BABAJI Q&A -->
+<section class="qa">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-w-Chalkboard-1970s.jpg" alt="Baba Hari Dass" class="qa-photo">
+  <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
+  <div class="qa-question" id="qaQ"></div>
+  <div class="qa-answer" id="qaA"></div>
+  <div class="qa-date" id="qaD"></div>
+  <button class="qa-refresh" onclick="showQA()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  </button>
+</section>
+
+<!-- MUSIC FOR PEACE -->
+<a href="shop.html" class="event-banner">
+  <span class="event-label">Music for Peace 2026</span>
+  <div class="event-title">Indian Classical Concert Series</div>
+  <div class="event-sub">Evenings of peace, listening, and shared humanity</div>
+  <span class="event-cta">Get Tickets</span>
+</a>
+
+<!-- PHOTO STRIP -->
+<div class="strip">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0071.jpg" alt="Aerial" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/05/JPEG-image-8.jpeg" alt="Activity" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg" alt="Pond Dome" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Sauna" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png" alt="Program House" loading="lazy">
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">69</div><div class="stat-lbl">Acres</div></div>
+  <div class="stat"><div class="stat-num">45</div><div class="stat-lbl">Years</div></div>
+  <div class="stat"><div class="stat-num">52</div><div class="stat-lbl">Annual Retreats</div></div>
+  <div class="stat"><div class="stat-num">20+</div><div class="stat-lbl">Programs</div></div>
+</div>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Support This Sanctuary</h2>
+  <p>Every donation preserves 69 acres of peace for future visitors.</p>
+  <a href="#" class="cta-btn" onclick="event.preventDefault();openDonate();">Donate Now</a>
+  <a href="shop.html" class="cta-btn outline">Visit Shop</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="offerings.html">Offerings</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-body">
+      <div class="donate-tiers">
+        <button class="tier" onclick="pickTier(25,this)">$25</button>
+        <button class="tier" onclick="pickTier(50,this)">$50</button>
+        <button class="tier active" onclick="pickTier(108,this)">$108</button>
+        <button class="tier" onclick="pickTier(200,this)">$200</button>
+      </div>
+      <div class="donate-field"><label>Name</label><input type="text" placeholder="Your full name"></div>
+      <div class="donate-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="donate-field"><label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs & Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="closeDonate();alert('Thank you! In production this connects to Stripe.');">Complete Donation</button>
+      <div class="donate-alt">Or Interac E-Transfer to <strong>payment@saltspringcentre.com</strong></div>
+    </div>
+    <div class="donate-foot">This is a prototype. In production, this connects to Stripe for secure payment.</div>
+  </div>
+</div>
+
+<script src="../babaji-qa.js"></script>
+<script>
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+
+function openDonate() { document.getElementById('donateOverlay').classList.add('open'); }
+function closeDonate() { document.getElementById('donateOverlay').classList.remove('open'); }
+var donateAmt = 108;
+function pickTier(amt, el) {
+  donateAmt = amt;
+  document.querySelectorAll('.tier').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+// Babaji Q&A
+function showQA() {
+  if (!window.BABAJI_QA) return;
+  var qa = BABAJI_QA[Math.floor(Math.random() * BABAJI_QA.length)];
+  document.getElementById('qaQ').textContent = qa.q;
+  document.getElementById('qaA').textContent = qa.a;
+  document.getElementById('qaD').textContent = qa.date || '';
+}
+if (window.BABAJI_QA) showQA();
+else window.addEventListener('load', function() { if (window.BABAJI_QA) showQA(); });
+</script>
+</body>
+</html>
