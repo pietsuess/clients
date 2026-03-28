@@ -649,9 +649,9 @@ body.admin-mode{padding-top:48px}
 <div class="settings-panel" id="settingsPanel">
   <h3>Site Settings</h3>
   <label>Site Name</label>
-  <input id="setSiteName" oninput="markDirty()">
+  <input id="setSiteName" oninput="settingsChanged()">
   <label>Tagline</label>
-  <textarea id="setTagline" oninput="markDirty()"></textarea>
+  <textarea id="setTagline" oninput="settingsChanged()"></textarea>
 
   <label>Site Logo</label>
   <div id="logoPreview" style="margin-bottom:8px"></div>
@@ -662,21 +662,21 @@ body.admin-mode{padding-top:48px}
 
   <h3>Venue</h3>
   <label>Venue Name</label>
-  <input id="setVenue" oninput="markDirty()">
+  <input id="setVenue" oninput="settingsChanged()">
   <label>Address</label>
-  <input id="setVenueAddr" oninput="markDirty()">
+  <input id="setVenueAddr" oninput="settingsChanged()">
   <label>Accessibility Note</label>
-  <textarea id="setAccess" oninput="markDirty()"></textarea>
+  <textarea id="setAccess" oninput="settingsChanged()"></textarea>
 
   <h3>Links</h3>
   <label>Instagram (Show)</label>
-  <input id="setIgShow" oninput="markDirty()">
+  <input id="setIgShow" oninput="settingsChanged()">
   <label>Instagram (Maya)</label>
-  <input id="setIgMaya" oninput="markDirty()">
+  <input id="setIgMaya" oninput="settingsChanged()">
   <label>Ticket Platform URL</label>
-  <input id="setTicketUrl" oninput="markDirty()">
+  <input id="setTicketUrl" oninput="settingsChanged()">
   <label>Parkside URL</label>
-  <input id="setParksideUrl" oninput="markDirty()">
+  <input id="setParksideUrl" oninput="settingsChanged()">
 
   <h3>Font</h3>
   <label>Heading Font</label>
@@ -725,11 +725,16 @@ body.admin-mode{padding-top:48px}
   </div>
 
   <h3>About Text</h3>
-  <textarea id="setAboutText" rows="6" oninput="markDirty()"></textarea>
+  <textarea id="setAboutText" rows="6" oninput="settingsChanged()"></textarea>
 
   <h3>Press Links</h3>
   <div id="pressLinksEditor"></div>
   <button class="add-perf-btn" onclick="addPressLink()" style="margin-top:8px">+ Add Press Link</button>
+
+  <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(245,240,230,0.08)">
+    <button onclick="saveSettings()" style="width:100%;padding:12px;background:var(--pink);border:1px solid var(--pink);color:#fff;font-family:'Space Grotesk',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;border-radius:0;letter-spacing:0.05em">Save Draft</button>
+    <div style="text-align:center;font-size:0.7rem;color:rgba(245,240,230,0.3);margin-top:8px">Saves locally. Hit Publish to go live.</div>
+  </div>
 </div>
 
 <!-- SHOW EDITOR -->
@@ -1547,6 +1552,25 @@ function collectSettings() {
   DATA.settings.ticketPlatform = document.getElementById('setTicketUrl').value.trim();
   DATA.settings.parksideUrl = document.getElementById('setParksideUrl').value.trim();
   DATA.settings.aboutText = document.getElementById('setAboutText').value.trim();
+}
+
+function settingsChanged() {
+  collectSettings();
+  markDirty();
+  // Debounced live re-render
+  clearTimeout(window._settingsRenderTimer);
+  window._settingsRenderTimer = setTimeout(function() {
+    renderSite();
+    setupDropZones();
+  }, 400);
+}
+
+function saveSettings() {
+  collectSettings();
+  saveDraft();
+  renderSite();
+  setupDropZones();
+  toast('Settings saved to draft');
 }
 
 /* ========================================
