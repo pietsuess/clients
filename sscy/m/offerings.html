@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offerings | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Retreats, yoga teacher training, wellness treatments, karma yoga, classes, satsang, kirtan, concerts, and daily life at the Salt Spring Centre of Yoga.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../offerings.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+.menu .donate-link { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* HERO */
+.hero { height: 40vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; }
+.hero img.bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.35); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-content h1 { font-size: 1.6rem; color: var(--white); margin-bottom: 8px; }
+.hero-content p { font-size: 0.88rem; opacity: 0.9; text-align: center; }
+
+/* COLORED KEYS */
+.keys { display: grid; grid-template-columns: repeat(4, 1fr); }
+.key { display: flex; align-items: center; justify-content: center; padding: 10px 4px; font-size: 0.62rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; text-align: center; letter-spacing: 0.02em; }
+.key:nth-child(1) { background: #1a5c53; }
+.key:nth-child(2) { background: #2a8a7d; }
+.key:nth-child(3) { background: #3bb8a8; }
+.key:nth-child(4) { background: #c9a84c; }
+.key:nth-child(5) { background: #d4be78; }
+.key:nth-child(6) { background: #3bb8a8; }
+.key:nth-child(7) { background: #2a8a7d; }
+.key:nth-child(8) { background: #1a5c53; }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec-warm { background: var(--cream-warm); }
+.sec h2 { font-size: 1.4rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+.sec .link { display: inline-block; margin-top: 8px; font-weight: 500; font-size: 0.85rem; color: var(--teal-dark); }
+.sec .link::after { content: ' \2192'; }
+
+/* SECTION IMAGE */
+.sec-img { width: 100%; border-radius: 12px; margin-bottom: 20px; object-fit: cover; object-position: center top; max-height: 30vh; }
+
+/* OFFERING CARDS */
+.card { background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.card h3 { font-size: 0.95rem; margin-bottom: 6px; }
+.card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; margin-bottom: 6px; text-align: left; }
+.card .meta { font-size: 0.78rem; color: var(--teal-dark); font-weight: 500; }
+.card .price { font-size: 0.85rem; font-weight: 600; color: var(--teal-deep); margin-top: 6px; }
+
+/* CONTENT BLOCK */
+.content-block p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+.content-block ul { list-style: none; margin: 0 0 12px; }
+.content-block ul li { padding: 6px 0 6px 20px; font-size: 0.88rem; line-height: 1.6; position: relative; }
+.content-block ul li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+
+/* QUOTE */
+.quote { text-align: center; padding: 40px 20px; background: var(--cream-warm); }
+.quote blockquote { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--teal-deep); line-height: 1.5; max-width: 90%; margin: 0 auto 8px; }
+.quote cite { font-size: 0.75rem; color: var(--text-light); font-style: normal; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* BUTTONS */
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; margin: 0 4px 10px; text-decoration: none; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+.btn-teal { background: var(--teal); color: var(--white); }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; }
+.donate-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 24px; position: relative; }
+.donate-header h3 { font-size: 1.2rem; }
+.donate-header p { font-size: 0.82rem; opacity: 0.8; }
+.donate-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+.donate-body { padding: 24px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.tier { padding: 10px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; cursor: pointer; background: var(--white); }
+.tier.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-field { margin-bottom: 12px; }
+.donate-field label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 4px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; }
+.donate-submit { width: 100%; padding: 14px; background: var(--terracotta); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.donate-alt { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.donate-alt strong { color: var(--text); }
+.donate-foot { text-align: center; font-size: 0.68rem; color: var(--text-light); padding: 0 24px 20px; }
+
+/* HOW-TO BOX */
+.how-box { background: var(--cream-warm); border-radius: 12px; padding: 24px; margin-top: 20px; }
+.how-box h3 { font-size: 1rem; color: var(--teal-deep); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU (no Offerings link) -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+  <a href="#" class="donate-link" onclick="event.preventDefault();closeMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="bg" src="https://saltspringcentre.com/wp-content/uploads/2023/05/Program-House-at-dusk-dahlias-Keikos-photo-website-header.jpg" alt="Program House at dusk with dahlias">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Offerings</h1>
+    <p>Retreats, training, classes, wellness, service, and devotion on 69 acres of sacred land.</p>
+  </div>
+</section>
+
+<!-- KEYS -->
+<div class="keys">
+  <a href="#retreats" class="key">Retreats</a>
+  <a href="#ytt" class="key">Teacher Training</a>
+  <a href="#wellness" class="key">Wellness</a>
+  <a href="#karma" class="key">Karma Yoga</a>
+  <a href="#classes" class="key">Classes</a>
+  <a href="#satsang" class="key">Satsang &amp; Kirtan</a>
+  <a href="#events" class="key">Music for Peace</a>
+  <a href="#daily" class="key">Daily Life</a>
+</div>
+
+<!-- 1. RETREATS -->
+<section class="sec" id="retreats">
+  <span class="label">Programs &amp; Immersions</span>
+  <h2>Retreats</h2>
+  <p>Multi-day immersions in yoga, Ayurveda, meditation, and nature on 69 acres of sacred land. Whether you are seeking renewal, clarity, or a first step onto the path, there is a retreat here for you.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg" alt="Aerial view" loading="lazy">
+  <div class="card"><h3>Yoga &amp; Wellness Weekends</h3><p>Two or three night retreats open to all levels. A full immersion in asana, breathwork, meditation, nature walks, and freshly prepared vegetarian meals.</p><div class="meta">Monthly, April through November</div></div>
+  <div class="card"><h3>Spring Cleanse Retreat</h3><p>Five-day Ayurvedic detox with Savita Leah Young. Khichadi cleanse, Shat Karma purification, sound bath, forest bathing, and wood-fired sauna.</p><div class="meta">April 2 - 6</div></div>
+  <div class="card"><h3>Nature &amp; Nurture: Heal Through Yoga</h3><p>Four-day retreat with Ishwarya Chaitanya. Classical Hatha yoga, Vedanta philosophy, Hindu rituals, forest walks, and periods of silence.</p><div class="meta">May 14 - 17 &amp; October 2 - 4</div></div>
+  <div class="card"><h3>Breath as a Gateway to Raja Yoga</h3><p>Seven-day Akhanda Yoga immersion with Dr. Yogrishi Vishvketu. Rooted in Himalayan traditions, focusing on pranayama mastery, meditation, and the subtler limbs of classical yoga.</p><div class="meta">June 10 - 16</div></div>
+  <div class="card"><h3>Agni Protocol Spring Detox</h3><p>An Ayurvedic cleanse built around the digestive fire. Guided dietary protocols, herbal support, yoga, and rest.</p><div class="meta">Spring 2026</div></div>
+  <div class="card"><h3>Ayurveda &amp; Yoga: I Want More From Life</h3><p>Five-day intensive integrating Ayurveda, psychology, somatic medicine, and nonviolent communication.</p><div class="meta">September 2026</div></div>
+  <div class="card"><h3>Yoga Intensive Program</h3><p>Five days of concentrated practice and study. Approved for Yoga Alliance continuing education hours.</p><div class="meta">July 2026</div></div>
+  <div class="card"><h3>Going Deeper Silent Retreat</h3><p>A profound silent retreat created by Baba Hari Dass. Covered windows, minimal light, and a cave-like atmosphere for deep inner exploration.</p><div class="meta">November 18 - 22</div></div>
+  <div class="card"><h3>Annual Community Yoga Retreat</h3><p>A 50-year tradition. Family-friendly, multi-day gathering featuring diverse yoga styles, workshops, kirtan, meals, and community.</p><div class="meta">Registration opens later in 2026</div></div>
+  <div class="card"><h3>Personal Retreats</h3><p>Self-directed schedule on 69 acres of sacred land. Light self-serve breakfast, two cooked vegetarian meals per day, and a 24/7 tea bar.</p><div class="meta">Available year-round</div><a href="https://saltspringcentre.secure.retreat.guru" target="_blank" rel="noopener" class="link" style="margin-top:8px;">Book a Personal Retreat</a></div>
+  <div style="text-align:center;margin-top:16px;"><a href="calendar.html" class="link">View upcoming dates on the Calendar</a></div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote">
+  <blockquote>"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
+  <cite>Baba Hari Dass</cite>
+</div>
+
+<!-- 2. YOGA TEACHER TRAINING -->
+<section class="sec sec-alt" id="ytt">
+  <span class="label">YTT-200</span>
+  <h2>Yoga Teacher Training</h2>
+  <p>An immersive residential 200-hour program rooted in the teachings of Baba Hari Dass. Held over two intensive sessions spanning approximately 22 nights on-site, this training is led by 15+ multi-generational faculty members and carries a 4.91 out of 5 rating with Yoga Alliance.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2023/11/YTT-teacher-demo-in-asana-class-crop-3-scaled.jpg" alt="Teacher demonstrating asana" loading="lazy">
+  <div class="content-block">
+    <p>The curriculum is grounded in classical eight-limbed Ashtanga and Hatha yoga. Studies include the Yoga Sutras of Patanjali, an introduction to Ayurveda, functional anatomy, pranayama, meditation, Shat Karma purification, kirtan, and mantra.</p>
+    <p>Faculty includes Chetna Tracy Boyd (Program Director, E-RYT 500, C-IAYT), Gita Tanya Roberts (E-RYT 500, C-IAYT), Yogeshwar Will Humphrey, and 12+ additional instructors.</p>
+    <p>Tuition is $2,800 CAD. Accommodation and meals range from $1,870 to $5,390 depending on room type. Applications are currently closed.</p>
+  </div>
+</section>
+
+<!-- 3. WELLNESS & AYURVEDA -->
+<section class="sec" id="wellness">
+  <span class="label">Centre Wellness</span>
+  <h2>Wellness &amp; Ayurveda</h2>
+  <p>At Centre Wellness, we take yoga beyond the mat. Our on-site practitioners offer Ayurvedic treatments, therapeutic massage, acupuncture, and wood-fired sauna in a setting of profound calm.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2023/01/Treatments-header-photo-Canva-Pro-stock-photo-2023.jpg" alt="Wellness treatment" loading="lazy">
+  <div class="card"><h3>Swedish Massage (Deep Flow)</h3><p>Classic therapeutic bodywork tailored to your needs. Releases tension, improves circulation, and restores ease.</p><div class="price">60 min $120 / 90 min $180</div></div>
+  <div class="card"><h3>The MAHA Therapy</h3><p>The Centre's signature treatment. A 150-minute journey combining Abhyanga oil massage, Swedana herbal steam, Udtana herbal paste exfoliation, and Shirodhara warm oil therapy.</p><div class="price">150 min $270</div></div>
+  <div class="card"><h3>Abhyanga (Ayurvedic Oil Massage)</h3><p>Warm herbal oils applied in long, flowing strokes to nourish the skin, calm the nervous system, and balance the doshas.</p><div class="price">75 min $160</div></div>
+  <div class="card"><h3>Swedana (Herbal Steam)</h3><p>A medicated steam treatment that opens the channels, draws toxins to the surface, and deeply relaxes the musculature.</p><div class="price">60 min $128 / 90 min $180</div></div>
+  <div class="card"><h3>Shirodhara (Oil Therapy)</h3><p>A continuous stream of warm oil flows over the forehead, settling the mind into meditative stillness.</p><div class="price">60 min $120 / 90 min $180</div></div>
+  <div class="card"><h3>Acupuncture (Initial Visit)</h3><p>Comprehensive intake and treatment with Ehlana Helen. Traditional Chinese medicine diagnostics combined with a yoga-informed understanding of the body.</p><div class="price">90 min $140</div></div>
+  <div class="card"><h3>Bodywork / Needle-Free</h3><p>Therapeutic bodywork using acupressure, craniosacral, and other non-invasive modalities.</p><div class="price">60 min $100</div></div>
+  <div class="card"><h3>Fire Cupping</h3><p>Traditional cupping therapy to release deep-seated tension, improve circulation, and support healing.</p><div class="price">45 min $75</div></div>
+  <div class="card"><h3>Wood-Fired Sauna</h3><p>Private sauna sessions for 2 to 8 people. Nestled in the forest, heated by wood fire.</p><div class="price">$100 / 2 hrs (2-8 people)</div></div>
+  <div class="card"><h3>Reset &amp; Rejuvenate with Ayurveda</h3><p>A specialized Ayurvedic program designed for individuals in cancer remission.</p><div class="meta">By consultation</div></div>
+  <p style="text-align:center;color:var(--text-light);font-size:0.85rem;margin-top:12px;"><strong>Practitioners:</strong> Savita Leah Young (Ayurveda, 40+ years) and Ehlana Helen (Acupuncture, Yoga Therapy).</p>
+</section>
+
+<!-- QUOTE -->
+<div class="quote">
+  <blockquote>"The mind is like water. When it is turbulent, it is difficult to see. When it is calm, everything becomes clear."</blockquote>
+  <cite>Baba Hari Dass</cite>
+</div>
+
+<!-- 4. KARMA YOGA -->
+<section class="sec sec-alt" id="karma">
+  <span class="label">Selfless Service</span>
+  <h2>Karma Yoga Program</h2>
+  <p>A live-in immersive experience blending service, spiritual practice, and community life. Karma Yogis dedicate 25 to 30 hours per week to the daily work of the Centre in exchange for accommodation, three vegetarian meals a day, and full access to all yoga classes, ceremonies, and community programs.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-kitchen-volunteers-and-staff.jpg" alt="Kitchen volunteers" loading="lazy">
+  <div class="content-block">
+    <p>Three seasonal cohorts run each year: March through May, June through August, and September through December. Service areas include the kitchen, farm and gardens, grounds maintenance, housekeeping, building projects, and administration.</p>
+    <p>The philosophy is simple and profound: selfless service as taught by Baba Hari Dass. Actions performed without attachment to personal gain.</p>
+  </div>
+  <div class="card"><h3>Yoga Study &amp; Service Immersion</h3><p>A four-week residential program that combines the Karma Yoga experience with structured study.</p><div class="meta">Multiple sessions throughout the year</div></div>
+  <div class="how-box">
+    <h3>How to Apply</h3>
+    <div class="content-block">
+      <ul>
+        <li><strong>Cohort 1:</strong> March 1 to May 31</li>
+        <li><strong>Cohort 2:</strong> June 1 to August 31</li>
+        <li><strong>Cohort 3:</strong> September 1 to December 5</li>
+      </ul>
+      <p>A three-month commitment is preferred, though shorter stays may be considered.</p>
+      <p style="margin-bottom:0;"><a href="https://saltspringcentre.com/get-involved/karma-yoga-volunteer/" target="_blank" rel="noopener" class="link">Apply for Karma Yoga</a></p>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:20px;">
+    <a href="#" class="btn btn-primary" onclick="event.preventDefault();openDonate();">Support the Centre</a>
+  </div>
+</section>
+
+<!-- 5. CLASSES & STUDY GROUPS -->
+<section class="sec" id="classes">
+  <span class="label">Weekly Practice</span>
+  <h2>Classes &amp; Study Groups</h2>
+  <p>Drop-in yoga classes, meditation, philosophy study, and more. All levels are welcome. No one is ever turned away for lack of funds.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2022/08/Kirtan.jpg" alt="Yoga class" loading="lazy">
+  <div class="card"><h3>Hatha Yoga with Dorothy</h3><p>Classical Hatha yoga suitable for all levels.</p><div class="meta">Monday &amp; Thursday, 4:30 - 5:45 PM</div><div class="price">$118 - $134 / 8-class pass</div></div>
+  <div class="card"><h3>Yoga Flow with John Howe</h3><p>A flowing, breath-led Saturday morning practice.</p><div class="meta">Saturday, 9:30 - 10:30 AM</div><div class="price">$100 / 8 classes. $15 drop-in.</div></div>
+  <div class="card"><h3>Sacred Sunday Eco-Yoga with Cara Graci</h3><p>Practice outdoors at the Pond Dome, surrounded by the sounds of the natural world.</p><div class="meta">Sunday, 11:00 AM - 12:15 PM</div><div class="price">By donation</div></div>
+  <div class="card"><h3>Gentle Hatha Repair with Cara Graci</h3><p>A slow, therapeutic practice designed to restore and repair. Available in-person and on Zoom.</p><div class="meta">Wednesday, 11:00 AM - 12:15 PM</div><div class="price">By donation (online / Zoom)</div></div>
+  <div class="card"><h3>Meditation &amp; Mellow Yoga with Cara Graci</h3><p>A quiet Thursday practice combining gentle movement with seated meditation.</p><div class="meta">Thursday, 4:30 - 5:30 PM</div><div class="price">Free / donation (online)</div></div>
+  <div class="card"><h3>Mindfulness in Nature Eco-Yoga with Cara Graci</h3><p>Outdoor yoga practice cultivating presence through nature.</p><div class="meta">Friday, 4:30 - 5:45 PM</div><div class="price">By donation (outdoor)</div></div>
+  <div class="card"><h3>Yoga Sutras Study Group</h3><p>Weekly study of Patanjali's Yoga Sutras with Yogeshwar (Will Humphrey).</p><div class="meta">Monday, 7:00 - 8:00 PM (online)</div><div class="price">By donation</div></div>
+  <div class="card"><h3>Bhagavad Gita Study Group</h3><p>Weekly reading and discussion led by Mahavir, using the translations of Baba Hari Dass.</p><div class="meta">Tuesday, 7:30 - 8:30 PM (online)</div><div class="price">By donation</div></div>
+  <div class="card"><h3>Sadhana for Continuing Practitioners</h3><p>Early Sunday morning practice for experienced students.</p><div class="meta">Sunday, 7:30 - 8:40 AM (online)</div><div class="price">Free</div></div>
+</section>
+
+<!-- 6. SATSANG & KIRTAN -->
+<section class="sec sec-warm" id="satsang">
+  <span class="label">Devotional Practice</span>
+  <h2>Satsang &amp; Kirtan</h2>
+  <p>Satsang means "union of truth." It is a gathering of seekers who come together to sing, chant, meditate, and hear spiritual readings. Kirtan is the practice of call-and-response devotional chanting, central to the Centre's strong bhakti tradition.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2011/08/ZD.090731.03.013.jpg" alt="Satsang gathering" loading="lazy">
+  <div class="card"><h3>Sunday Satsang</h3><p>The heart of the weekly community gathering. Kirtan, meditation, spiritual readings, and shared silence.</p><div class="meta">Sunday, 2:00 - 3:30 PM (hybrid: in-person + Zoom)</div><div class="price">Free</div></div>
+  <div class="card"><h3>Vancouver Satsang</h3><p>A mid-week online gathering for the extended community.</p><div class="meta">Wednesday, 6:30 - 8:00 PM (Zoom)</div><div class="price">Free</div></div>
+  <div class="card"><h3>Kirtan Class</h3><p>Learn to chant, lead kirtan, and play harmonium.</p><div class="meta">Thursday, 7:00 - 8:30 PM (currently paused)</div><div class="price">Pay-what-you-can ($20 suggested)</div></div>
+  <div class="card"><h3>Daily Arati</h3><p>The day begins with Arati, a lamp ceremony accompanied by mantras, prayers, and songs.</p><div class="meta">Daily, 6:45 - 7:15 AM</div><div class="price">Free</div></div>
+</section>
+
+<!-- 7. MUSIC FOR PEACE -->
+<section class="sec sec-alt" id="events">
+  <span class="label">Concert Series</span>
+  <h2>Music for Peace 2026</h2>
+  <p>Evenings of Indian classical music offered as a reflection of peace, listening, and shared humanity. Performed in the intimate setting of the Satsang Room, each concert is a fundraiser supporting the Centre's programs. Tickets are $40 unless otherwise noted.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2024/06/Classical-Indian-Concert.jpg" alt="Classical Indian concert" loading="lazy">
+  <div class="card"><h3>Sitar with Sharanjeet Singh Mand</h3><p>Juno-recognized sitarist and CBC "30 Under 30" artist.</p><div class="meta">March 28</div><div class="price">$40</div></div>
+  <div class="card"><h3>Carnatic Violin &amp; Mridangam</h3><p>South Indian classical music with Shriram Rajagopalan and Keerthy Raghavan.</p><div class="meta">April 11</div><div class="price">$40</div></div>
+  <div class="card"><h3>Sound Bath with Farhad Khan</h3><p>An immersive, meditative sound experience.</p><div class="meta">May 13</div><div class="price">By donation</div></div>
+  <div class="card"><h3>Akhil Jobanputra &amp; Tihai Ensemble</h3><p>Hindustani vocal music from another CBC "30 Under 30" artist.</p><div class="meta">June 27</div><div class="price">$40</div></div>
+  <div class="card"><h3>Deepak Ram, Bansuri Flute</h3><p>International bansuri master performs North Indian classical music.</p><div class="meta">August 1</div><div class="price">$40</div></div>
+  <div style="text-align:center;margin-top:16px;">
+    <a href="shop.html" class="btn btn-teal">Get Tickets in the Shop</a>
+  </div>
+</section>
+
+<!-- 8. DAILY LIFE -->
+<section class="sec" id="daily">
+  <span class="label">Life at the Centre</span>
+  <h2>Daily Rhythms</h2>
+  <p>Life at the Salt Spring Centre of Yoga follows a rhythm shaped by decades of practice. Whether you are here for a weekend retreat or a season of Karma Yoga, each day unfolds with intention, community, and care.</p>
+  <img class="sec-img" src="https://saltspringcentre.com/wp-content/uploads/2021/12/serene.jpg" alt="Serene grounds" loading="lazy">
+  <div class="content-block">
+    <p>Mornings begin with sadhana at 6:30 AM, followed by Arati at the temple. Breakfast is served communally, and the rest of the morning is given to classes, workshops, or service. A freshly prepared lunch gathers the community at midday. Afternoons bring asana practice, free time on the land, or continued study.</p>
+    <p>All meals are lacto-vegetarian, freshly prepared on-site using produce from the Centre's own gardens wherever possible. Cooking follows sattvic principles, emphasizing purity, balance, and nourishment.</p>
+    <p>The Centre is home to three temples: the Hanuman Temple, the Ganesh Temple, and the Holy Mother/Garden Temple. Ceremonies, pujas, and yajnas are held regularly and are open to all visitors.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-body">
+      <div class="donate-tiers">
+        <button class="tier" onclick="pickTier(25,this)">$25</button>
+        <button class="tier" onclick="pickTier(50,this)">$50</button>
+        <button class="tier active" onclick="pickTier(108,this)">$108</button>
+        <button class="tier" onclick="pickTier(200,this)">$200</button>
+      </div>
+      <div class="donate-field"><label>Name</label><input type="text" placeholder="Your full name"></div>
+      <div class="donate-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="donate-field"><label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs &amp; Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="closeDonate();alert('Thank you! In production this connects to Stripe.');">Complete Donation</button>
+      <div class="donate-alt">Or Interac E-Transfer to <strong>payment@saltspringcentre.com</strong></div>
+    </div>
+    <div class="donate-foot">This is a prototype. In production, this connects to Stripe for secure payment.</div>
+  </div>
+</div>
+
+<script>
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+function openDonate() { document.getElementById('donateOverlay').classList.add('open'); }
+function closeDonate() { document.getElementById('donateOverlay').classList.remove('open'); }
+function pickTier(amt, el) {
+  document.querySelectorAll('.tier').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+// Smooth scroll for keys
+document.querySelectorAll('.key').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var href = this.getAttribute('href');
+    if (href.charAt(0) === '#') {
+      var target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        var offset = 52 + 44;
+        var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

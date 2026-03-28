@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Upcoming retreats, yoga classes, concerts, and community gatherings at the Salt Spring Centre of Yoga on Salt Spring Island, BC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../calendar.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+.menu .donate-link { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* HERO */
+.hero { height: 30vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; background: linear-gradient(135deg, rgba(26,92,83,0.85) 0%, rgba(42,138,125,0.78) 40%, rgba(45,90,39,0.82) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-content h1 { font-size: 1.6rem; color: var(--white); margin-bottom: 8px; }
+.hero-content p { font-size: 0.85rem; opacity: 0.9; text-align: center; }
+
+/* COLORED KEYS */
+.keys { display: grid; grid-template-columns: repeat(5, 1fr); position: sticky; top: 52px; z-index: 80; }
+.key { display: flex; align-items: center; justify-content: center; padding: 10px 4px; font-size: 0.60rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; text-align: center; letter-spacing: 0.02em; border: none; cursor: pointer; }
+.key:nth-child(1) { background: #1a5c53; }
+.key:nth-child(2) { background: #2a8a7d; }
+.key:nth-child(3) { background: #c9a84c; }
+.key:nth-child(4) { background: #3bb8a8; }
+.key:nth-child(5) { background: #2a8a7d; }
+.key.active { filter: brightness(1.2); }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec h2 { font-size: 1.4rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .sub { font-size: 0.85rem; color: var(--text-light); text-align: center; margin-bottom: 20px; }
+
+/* EVENT CARDS */
+.event-card { background: var(--white); border-radius: 12px; padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.event-badge { display: inline-block; background: var(--terracotta); color: var(--white); font-size: 0.65rem; font-weight: 600; padding: 4px 10px; border-radius: 50px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.event-badge.concert { background: var(--teal-deep); }
+.event-badge.community { background: var(--gold); color: var(--charcoal); }
+.event-type { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal); margin-bottom: 4px; }
+.event-card h3 { font-size: 1rem; margin-bottom: 6px; }
+.event-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; font-size: 0.78rem; color: var(--text); font-weight: 500; }
+.event-meta svg { opacity: 0.4; vertical-align: middle; margin-right: 3px; }
+.event-card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; margin-bottom: 10px; text-align: left; }
+.event-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.06); }
+.event-price { font-size: 0.92rem; font-weight: 600; color: var(--teal-deep); }
+.event-cta { display: inline-block; padding: 8px 20px; background: var(--teal); color: var(--white); border-radius: 50px; font-size: 0.78rem; font-weight: 600; }
+
+/* CLASS CARDS */
+.class-card { background: var(--cream); border-radius: 12px; padding: 16px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.04); }
+.class-day { font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal); margin-bottom: 4px; }
+.class-name { font-size: 0.95rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+.class-teacher { font-size: 0.78rem; color: var(--text-light); margin-bottom: 6px; }
+.class-details { display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem; color: var(--text); margin-bottom: 4px; }
+.class-details svg { opacity: 0.4; vertical-align: middle; margin-right: 2px; }
+.class-price { font-size: 0.75rem; font-weight: 500; color: var(--teal-dark); margin-top: 6px; }
+
+/* NOTE */
+.note-banner { background: var(--cream-warm); padding: 24px 20px; text-align: center; }
+.note-banner p { font-size: 0.85rem; color: var(--text-light); font-style: italic; text-align: center; }
+
+/* BUTTONS */
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; text-decoration: none; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; }
+.donate-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 24px; position: relative; }
+.donate-header h3 { font-size: 1.2rem; }
+.donate-header p { font-size: 0.82rem; opacity: 0.8; }
+.donate-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+.donate-body { padding: 24px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.tier { padding: 10px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; cursor: pointer; background: var(--white); }
+.tier.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-field { margin-bottom: 12px; }
+.donate-field label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 4px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; }
+.donate-submit { width: 100%; padding: 14px; background: var(--terracotta); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.donate-alt { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.donate-alt strong { color: var(--text); }
+.donate-foot { text-align: center; font-size: 0.68rem; color: var(--text-light); padding: 0 24px 20px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU (no Calendar link) -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+  <a href="#" class="donate-link" onclick="event.preventDefault();closeMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Events &amp; Calendar</h1>
+    <p>Retreats, yoga classes, concerts, and community gatherings throughout the year.</p>
+  </div>
+</section>
+
+<!-- FILTER KEYS -->
+<div class="keys" id="filterBar">
+  <button class="key active" data-filter="all">All Events</button>
+  <button class="key" data-filter="retreat">Retreats</button>
+  <button class="key" data-filter="concert">Concerts</button>
+  <button class="key" data-filter="class">Weekly Classes</button>
+  <button class="key" data-filter="community">Community</button>
+</div>
+
+<!-- EVENTS -->
+<section class="sec" id="eventsSection">
+  <h2>Upcoming Events</h2>
+  <p class="sub">Multi-day immersions, concerts, and community gatherings</p>
+  <div id="eventsGrid"></div>
+</section>
+
+<!-- WEEKLY CLASSES -->
+<section class="sec sec-alt" id="classesSection">
+  <h2>Weekly Classes &amp; Gatherings</h2>
+  <p class="sub">Drop in any time. All levels welcome.</p>
+  <div id="classesGrid"></div>
+</section>
+
+<!-- NOTE -->
+<div class="note-banner">
+  <p>"No one will be turned away for lack of funds." All by-donation classes are Karma Yogi-led.</p>
+</div>
+
+<div style="text-align:center;padding:32px 20px;">
+  <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:12px;text-align:center;">Your generosity helps keep our programs accessible to all.</p>
+  <a href="#" class="btn btn-primary" onclick="event.preventDefault();openDonate();">Donate Now</a>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-body">
+      <div class="donate-tiers">
+        <button class="tier" onclick="pickTier(25,this)">$25</button>
+        <button class="tier" onclick="pickTier(50,this)">$50</button>
+        <button class="tier active" onclick="pickTier(108,this)">$108</button>
+        <button class="tier" onclick="pickTier(200,this)">$200</button>
+      </div>
+      <div class="donate-field"><label>Name</label><input type="text" placeholder="Your full name"></div>
+      <div class="donate-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="donate-field"><label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs &amp; Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="closeDonate();alert('Thank you! In production this connects to Stripe.');">Complete Donation</button>
+      <div class="donate-alt">Or Interac E-Transfer to <strong>payment@saltspringcentre.com</strong></div>
+    </div>
+    <div class="donate-foot">This is a prototype. In production, this connects to Stripe for secure payment.</div>
+  </div>
+</div>
+
+<script>
+// ===== EVENT DATA =====
+var EVENTS = [
+  { id:'mfp-violin', type:'concert', title:'Music for Peace: Carnatic Violin & Mridangam', desc:'South Indian classical music with Shriram Rajagopalan (violin) and Keerthy Raghavan (mridangam).', date:'2026-04-11', dateLabel:'Saturday, April 11', time:'7:00 - 9:00 PM', venue:'Satsang Room', price:'$40', url:'https://saltspringcentre.com/events/music-for-peace-carnatic-violin-mridangam/' },
+  { id:'spring-cleanse', type:'retreat', title:'Spring Cleanse Ayurveda Retreat', desc:'Five days of cellular detox and holistic rejuvenation with Savita Leah Young.', date:'2026-04-02', dateLabel:'April 2 - 6', time:'5 days', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/spring-cleanse-retreat-2026/' },
+  { id:'april-retreat-3', type:'retreat', title:'Yoga & Wellness Retreat - 3 Nights', desc:'Asana classes, breathwork, meditation, nature time, and lacto-vegetarian meals on 69 acres.', date:'2026-04-16', dateLabel:'April 16 - 19', time:'3 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/april-2026-yoga-and-wellness-retreat-3-nights/' },
+  { id:'agni-protocol', type:'retreat', title:'Agni Protocol - Spring Detox Retreat', desc:'Holistic Ayurvedic detox with Vd. Matheus Macedo, Ishwarya Chaitanya, and Maria Marquez.', date:'2026-04-23', dateLabel:'April 23 - 26', time:'4 days', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/%f0%9f%8c%bf-agni-protocol-spring-detox-retreat/' },
+  { id:'sound-bath', type:'concert', title:'Sound Bath & Meditation with Farhad Khan', desc:'Crystal bowls, gongs, and chimes for stress release and chakra balancing.', date:'2026-05-13', dateLabel:'Tuesday, May 13', time:'7:30 - 8:30 PM', venue:'Salt Spring Centre of Yoga', price:'By Donation', url:'https://saltspringcentre.com/events/sound-bath-farhad-khan/' },
+  { id:'may-retreat-2', type:'retreat', title:'Yoga & Wellness Retreat - 2 Nights', desc:'A weekend of yoga, meditation, nature walks, and nourishing vegetarian meals.', date:'2026-05-08', dateLabel:'May 8 - 10', time:'2 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/may-2026-yoga-and-wellness-retreat/' },
+  { id:'nature-nurture-may', type:'retreat', title:'Nature & Nurture: Heal Through Yoga', desc:'Ancient yogic techniques for self-healing with Ishwarya Chaitanya.', date:'2026-05-14', dateLabel:'May 14 - 17', time:'4 days', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/2026-nature-and-nurture-retreat-heal-through-yoga/' },
+  { id:'june-retreat-3', type:'retreat', title:'Yoga & Wellness Retreat - 3 Nights', desc:'Three nights of yoga, breathwork, meditation, and community.', date:'2026-06-18', dateLabel:'June 18 - 21', time:'3 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/june-2026-yoga-and-wellness-retreat/' },
+  { id:'mfp-akhil', type:'concert', title:'Music for Peace: Akhil Jobanputra & Tihai Ensemble', desc:'Hindustani classical concert featuring CBC "30 under 30" vocalist.', date:'2026-06-27', dateLabel:'Saturday, June 27', time:'Doors 6:30 PM, Concert 7:00 - 9:00 PM', venue:'Pond Dome', price:'$40', url:'https://saltspringcentre.com/events/music-for-peace-akhil-jobanputra/' },
+  { id:'july-retreat-3', type:'retreat', title:'Yoga & Wellness Retreat - 3 Nights', desc:'Mid-summer retreat with daily yoga, meditation, and organic meals.', date:'2026-07-16', dateLabel:'July 16 - 19', time:'3 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/july-2026yoga-and-wellness-retreat/' },
+  { id:'mfp-deepak', type:'concert', title:'Music for Peace: Deepak Ram - Bansuri Flute', desc:'Internationally celebrated bansuri master performs Indian classical music.', date:'2026-08-01', dateLabel:'Saturday, August 1', time:'Doors 6:30 PM, Concert 7:00 - 9:00 PM', venue:'Satsang Room', price:'$40', url:'https://saltspringcentre.com/events/music-for-peace-deepak-ram/' },
+  { id:'aug-retreat-2', type:'retreat', title:'Yoga & Wellness Retreat - 2 Nights', desc:'Late summer weekend retreat with yoga, meditation, and organic vegetarian meals.', date:'2026-08-28', dateLabel:'August 28 - 30', time:'2 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/august-2026-yoga-and-wellness-retreat/' },
+  { id:'sep-retreat-2', type:'retreat', title:'Yoga & Wellness Retreat - 2 Nights', desc:'Autumn weekend at the Centre with daily practice, nature walks, and nourishing meals.', date:'2026-09-18', dateLabel:'September 18 - 20', time:'2 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/september-2026-yoga-and-wellness-retreat/' },
+  { id:'nature-nurture-oct', type:'retreat', title:'Nature & Nurture: Heal Through Yoga', desc:'Autumn edition with Ishwarya Chaitanya.', date:'2026-10-02', dateLabel:'October 2 - 4', time:'3 days', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/nature-and-nurture-retreat-heal-through-yoga-october-2026/' },
+  { id:'oct-retreat-3', type:'retreat', title:'Yoga & Wellness Retreat - 3 Nights', desc:'Three nights of autumn practice surrounded by fall colours.', date:'2026-10-15', dateLabel:'October 15 - 18', time:'3 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/october-2026-yoga-and-wellness-retreat/' },
+  { id:'soulful-silence', type:'retreat', title:'Soulful Silence Meditation Retreat', desc:'Four-day silent retreat with Farhad Khan. Guided meditation, gentle yoga, sound baths, forest walking, and kirtan.', date:'2026-10-22', dateLabel:'October 22 - 25', time:'4 days / 3 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/soulful-silence-meditation-retreat-farhad-khan/' },
+  { id:'nov-retreat-2', type:'retreat', title:'Yoga & Wellness Retreat - 2 Nights', desc:'Late autumn weekend retreat with yoga, meditation, and warm vegetarian meals.', date:'2026-11-13', dateLabel:'November 13 - 15', time:'2 nights', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/november-2026-yoga-and-wellness-retreat/' },
+  { id:'nov-retreat-3', type:'retreat', title:'Winter Yoga & Wellness Retreat - 3 Days', desc:'Pre-winter retreat to ground and restore.', date:'2026-11-26', dateLabel:'November 26 - 29', time:'3 days', venue:'Salt Spring Centre of Yoga', price:'Inquire', url:'https://saltspringcentre.com/events/november-2026-yoga-and-wellness-retreat-copy/' }
+];
+
+var CLASSES = [
+  { day:'Daily', daySort:0, name:'Arati', teacher:'Centre Community', time:'6:45 - 7:15 AM', price:'Free (donation welcome)', format:'In-person', desc:'Lamp ceremony with mantras, prayers, and songs', type:'community' },
+  { day:'Sunday', daySort:1, name:'Sadhana for Continuing Practitioners', teacher:'', time:'7:30 - 8:40 AM', price:'Free (donation)', format:'Online / Zoom', desc:'Pranayama and meditation for established practitioners', type:'class' },
+  { day:'Sunday', daySort:1, name:'Sacred Sunday Eco-Yoga', teacher:'Cara Graci', time:'11:00 AM - 12:15 PM', price:'By donation', format:'Outdoor / Pond Dome', desc:'Walking meditation and asana flow in nature', type:'class' },
+  { day:'Sunday', daySort:1, name:'Satsang', teacher:'Community', time:'2:00 - 3:30 PM', price:'Free (donation)', format:'Hybrid (in-person + Zoom)', desc:'Kirtan, meditation, and readings from Baba Hari Dass', type:'community' },
+  { day:'Monday', daySort:2, name:'All Levels Hatha Yoga', teacher:'Dorothy', time:'4:30 - 5:45 PM', price:'$134/8-class pass (1x/wk), drop-in welcome', format:'In-person', desc:'', type:'class' },
+  { day:'Monday', daySort:2, name:"Patanjali's Yoga Sutra Study", teacher:'', time:'7:00 - 8:00 PM', price:'By donation', format:'Online / Zoom', desc:'Weekly scripture study group', type:'community' },
+  { day:'Tuesday', daySort:3, name:'Bhagavad Gita Study Group', teacher:'', time:'7:30 - 8:30 PM', price:'By donation', format:'Online / Zoom', desc:'Weekly scripture study group', type:'community' },
+  { day:'Wednesday', daySort:4, name:'Gentle Hatha Repair', teacher:'Cara Graci', time:'11:00 AM - 12:15 PM', price:'By donation', format:'Online / Zoom', desc:'Slow flow with healing focus', type:'class' },
+  { day:'Wednesday', daySort:4, name:'Satsang - Vancouver', teacher:'Community', time:'6:30 - 8:00 PM', price:'Free', format:'Online / Zoom', desc:'Yoga Sutra study, kirtan, meditation', type:'community' },
+  { day:'Thursday', daySort:5, name:'All Levels Hatha Yoga', teacher:'Dorothy', time:'4:30 - 5:45 PM', price:'$118/8-class pass (2+/wk), drop-in welcome', format:'In-person', desc:'', type:'class' },
+  { day:'Thursday', daySort:5, name:'Meditation & Mellow Yoga', teacher:'Cara Graci', time:'4:30 - 5:30 PM', price:'Free / by donation', format:'Online / Zoom', desc:'', type:'class' },
+  { day:'Thursday', daySort:5, name:'Kirtan', teacher:'Community', time:'7:00 - 8:30 PM', price:'Pay-what-you-can (suggested $20)', format:'In-person', desc:'Devotional chanting with harmonium. Paused for summer.', type:'community' },
+  { day:'Friday', daySort:6, name:'Mindfulness in Nature Eco-Yoga', teacher:'Cara Graci', time:'4:30 - 5:45 PM', price:'By donation', format:'Outdoor / Pond Dome', desc:'', type:'class' },
+  { day:'Saturday', daySort:7, name:'Yoga Flow for Everybody', teacher:'John Howe', time:'9:30 - 10:30 AM', price:'$100/8 classes, $15 drop-in', format:'In-person', desc:'All levels pranayama and asana', type:'class' }
+];
+
+var activeFilter = 'all';
+
+function renderEvents() {
+  var grid = document.getElementById('eventsGrid');
+  var filtered = EVENTS.filter(function(e) { return activeFilter === 'all' || e.type === activeFilter; }).sort(function(a, b) { return a.date.localeCompare(b.date); });
+  grid.innerHTML = filtered.map(function(e) {
+    var badgeClass = e.type === 'concert' ? ' concert' : '';
+    var typeLabel = e.type === 'concert' ? 'Music for Peace' : e.type === 'retreat' ? 'Retreat' : 'Event';
+    var priceNote = e.price === 'Inquire' ? ' for pricing' : '';
+    return '<div class="event-card">' +
+      '<span class="event-badge' + badgeClass + '">' + e.dateLabel.split(',')[0].split(' ').slice(0,2).join(' ') + '</span>' +
+      '<div class="event-type">' + typeLabel + '</div>' +
+      '<h3>' + e.title + '</h3>' +
+      '<div class="event-meta">' +
+        '<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> ' + e.dateLabel + '</span>' +
+        '<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + e.time + '</span>' +
+      '</div>' +
+      '<p>' + e.desc + '</p>' +
+      '<div class="event-footer">' +
+        '<span class="event-price">' + e.price + priceNote + '</span>' +
+        '<a href="' + e.url + '" target="_blank" rel="noopener" class="event-cta">Learn More</a>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('eventsSection').style.display = (activeFilter === 'class') ? 'none' : '';
+}
+
+function renderClasses() {
+  var grid = document.getElementById('classesGrid');
+  var filtered = CLASSES.filter(function(c) { return activeFilter === 'all' || activeFilter === 'class' || c.type === activeFilter; }).sort(function(a, b) { return a.daySort - b.daySort; });
+  grid.innerHTML = filtered.map(function(c) {
+    return '<div class="class-card">' +
+      '<div class="class-day">' + c.day + '</div>' +
+      '<div class="class-name">' + c.name + '</div>' +
+      (c.teacher ? '<div class="class-teacher">with ' + c.teacher + '</div>' : '') +
+      '<div class="class-details">' +
+        '<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + c.time + '</span>' +
+        '<span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> ' + c.format + '</span>' +
+      '</div>' +
+      (c.desc ? '<div class="class-teacher" style="margin-top:4px;">' + c.desc + '</div>' : '') +
+      '<div class="class-price">' + c.price + '</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('classesSection').style.display = (activeFilter === 'retreat' || activeFilter === 'concert') ? 'none' : '';
+}
+
+function render() { renderEvents(); renderClasses(); }
+
+// Filter keys
+document.getElementById('filterBar').addEventListener('click', function(e) {
+  if (!e.target.classList.contains('key')) return;
+  activeFilter = e.target.getAttribute('data-filter');
+  document.querySelectorAll('.key').forEach(function(k) { k.classList.remove('active'); });
+  e.target.classList.add('active');
+  render();
+});
+
+render();
+
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+function openDonate() { document.getElementById('donateOverlay').classList.add('open'); }
+function closeDonate() { document.getElementById('donateOverlay').classList.remove('open'); }
+function pickTier(amt, el) {
+  document.querySelectorAll('.tier').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

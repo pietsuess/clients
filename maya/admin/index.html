@@ -849,6 +849,8 @@ var editorPosterSrc = '';
 var editorRecapFiles = [];
 var editorRecapSrcs = [];
 var confirmCallback = null;
+var pendingFiles = {}; /* 'maya/path' -> File, uploaded on publish */
+var localPreviews = {}; /* 'img/path' -> blob URL for local preview */
 
 /* ========================================
    INIT
@@ -1035,7 +1037,7 @@ function renderNextShowInner(show) {
     '<div class="next-show-poster img-editable" onclick="openShowEditor(' + idx + ')">' +
       '<div class="img-edit-badge">Edit Show</div>' +
       '<div class="poster-glow"></div>' +
-      '<img src="../' + esc(show.posterImage || '') + '" alt="' + esc(show.title) + '">' +
+      '<img src="' + imgSrc(show.posterImage || '') + '" alt="' + esc(show.title) + '">' +
     '</div>' +
     '<div class="next-show-info">' +
       '<div class="label">' + label + '</div>' +
@@ -1078,7 +1080,7 @@ function renderShowsGrid() {
         ? show.performers.map(function(p) { return typeof p === 'string' ? p : p.name; }).join(', ')
         : (show.description || '');
       html += '<div class="show-card" onclick="openShowEditor(' + idx + ')">' +
-        '<img src="../' + esc(show.posterImage || '') + '" alt="' + esc(show.title) + '" loading="lazy">' +
+        '<img src="' + imgSrc(show.posterImage || '') + '" alt="' + esc(show.title) + '" loading="lazy">' +
         '<div class="card-info">' +
           '<h3>' + esc(show.title) + '</h3>' +
           '<div class="card-date">' + formatDateShort(show.date) + '</div>' +
@@ -1102,7 +1104,7 @@ function renderMediaGrid() {
     var isVideo = item.type === 'video' || item.type === 'reel';
     var src = item.src || item.thumbSrc || '';
     var play = isVideo ? '<div class="play-icon"><svg viewBox="0 0 24 24"><polygon points="8,5 19,12 8,19"/></svg></div>' : '';
-    return '<div class="gallery-item"><img src="../' + esc(src) + '" alt="" loading="lazy">' + play + '</div>';
+    return '<div class="gallery-item"><img src="' + imgSrc(src) + '" alt="" loading="lazy">' + play + '</div>';
   }).join('');
 }
 
@@ -1110,7 +1112,7 @@ function renderShopGrid() {
   return DATA.shop.map(function(item, i) {
     return '<div class="shop-item">' +
       '<div class="img-editable" onclick="replaceShopImage(' + i + ')">' +
-        '<img src="../' + esc(item.image || '') + '" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">' +
+        '<img src="' + imgSrc(item.image || '') + '" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">' +
         '<div class="img-edit-badge">Replace</div>' +
       '</div>' +
       '<div class="item-info">' +
@@ -1220,7 +1222,7 @@ function openShowEditor(idx) {
   editorPosterFile = null;
   editorPosterSrc = show.posterImage || '';
   document.getElementById('posterPreview').innerHTML = editorPosterSrc
-    ? '<img src="../' + esc(editorPosterSrc) + '" style="max-width:200px;max-height:200px">' : '';
+    ? '<img src="' + imgSrc(editorPosterSrc) + '" style="max-width:200px;max-height:200px">' : '';
 
   editorPerformers = (show.performers || []).map(function(p) {
     if (typeof p === 'string') return { name: p, instagram: '', bio: '' };
@@ -1341,27 +1343,28 @@ function setupDropZones() {
 
 function handlePosterFile(file) {
   editorPosterFile = file;
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    editorPosterSrc = 'img/ig-posts/' + file.name;
-    document.getElementById('posterPreview').innerHTML =
-      '<img src="' + e.target.result + '" style="max-width:200px;max-height:200px">' +
-      '<div style="font-size:0.75rem;color:rgba(245,240,230,0.4);margin-top:4px">Will save as: ' + editorPosterSrc + '</div>';
-  };
-  reader.readAsDataURL(file);
+  editorPosterSrc = 'img/ig-posts/' + file.name;
+  pendingFiles['maya/' + editorPosterSrc] = file;
+  localPreviews[editorPosterSrc] = URL.createObjectURL(file);
+  document.getElementById('posterPreview').innerHTML =
+    '<img src="' + localPreviews[editorPosterSrc] + '" style="max-width:200px;max-height:200px">' +
+    '<div style="font-size:0.75rem;color:rgba(245,240,230,0.4);margin-top:4px">Will upload: ' + editorPosterSrc + '</div>';
 }
 
 function handleRecapFile(file) {
+  var path = 'img/ig-posts/' + file.name;
   editorRecapFiles.push(file);
-  editorRecapSrcs.push('img/ig-posts/' + file.name);
+  editorRecapSrcs.push(path);
+  pendingFiles['maya/' + path] = file;
+  localPreviews[path] = URL.createObjectURL(file);
   renderRecapThumbs();
 }
 
 function renderRecapThumbs() {
   var html = '';
   editorRecapSrcs.forEach(function(src, i) {
-    var imgSrc = editorRecapFiles[i] ? URL.createObjectURL(editorRecapFiles[i]) : '../' + src;
-    html += '<div class="thumb"><img src="' + imgSrc + '"><button class="thumb-remove" onclick="removeRecap(' + i + ')">&times;</button></div>';
+    var thumbUrl = imgSrc(src);
+    html += '<div class="thumb"><img src="' + thumbUrl + '"><button class="thumb-remove" onclick="removeRecap(' + i + ')">&times;</button></div>';
   });
   document.getElementById('recapThumbs').innerHTML = html;
 }
@@ -1379,9 +1382,13 @@ function replaceShopImage(idx) {
   input.type = 'file'; input.accept = 'image/*';
   input.onchange = function() {
     if (!this.files.length) return;
-    DATA.shop[idx].image = 'img/ig-posts/' + this.files[0].name;
+    var file = this.files[0];
+    var path = 'img/ig-posts/' + file.name;
+    DATA.shop[idx].image = path;
+    pendingFiles['maya/' + path] = file;
+    localPreviews[path] = URL.createObjectURL(file);
     markDirty(); saveDraft(); renderSite(); setupDropZones();
-    toast('Shop image updated');
+    toast('Shop image queued for upload');
   };
   input.click();
 }
@@ -1477,7 +1484,8 @@ async function publish() {
   var token = localStorage.getItem('upvs-gh-token');
   if (!token) { document.getElementById('tokenSetup').classList.add('active'); return; }
 
-  toast('Publishing...');
+  var imgCount = Object.keys(pendingFiles).length;
+  toast('Publishing' + (imgCount ? ' (' + imgCount + ' image' + (imgCount>1?'s':'') + ')...' : '...'));
   try {
     var files = {
       'maya/content/shows.json': JSON.stringify(DATA.shows, null, 2),
@@ -1493,9 +1501,22 @@ async function publish() {
     var treeSha = commitRes.tree.sha;
 
     var treeItems = [];
+
+    // Upload JSON files
     for (var path in files) {
       var blobRes = await ghApi('POST', '/repos/pietsuess/clients/git/blobs', { content: files[path], encoding: 'utf-8' }, token);
       treeItems.push({ path: path, mode: '100644', type: 'blob', sha: blobRes.sha });
+    }
+
+    // Upload pending image files as base64
+    var pendingPaths = Object.keys(pendingFiles);
+    for (var pi = 0; pi < pendingPaths.length; pi++) {
+      var imgPath = pendingPaths[pi];
+      var file = pendingFiles[imgPath];
+      toast('Uploading ' + (pi+1) + '/' + pendingPaths.length + ': ' + file.name);
+      var b64 = await fileToBase64(file);
+      var imgBlobRes = await ghApi('POST', '/repos/pietsuess/clients/git/blobs', { content: b64, encoding: 'base64' }, token);
+      treeItems.push({ path: imgPath, mode: '100644', type: 'blob', sha: imgBlobRes.sha });
     }
 
     var newTreeRes = await ghApi('POST', '/repos/pietsuess/clients/git/trees', { base_tree: treeSha, tree: treeItems }, token);
@@ -1503,6 +1524,8 @@ async function publish() {
     await ghApi('PATCH', '/repos/pietsuess/clients/git/refs/heads/main', { sha: newCommitRes.sha }, token);
 
     dirty = false;
+    pendingFiles = {};
+    localPreviews = {};
     localStorage.removeItem('upvs-admin-draft');
     document.getElementById('saveStatus').textContent = 'Published!';
     toast('Published! Live in a few minutes.');
@@ -1510,6 +1533,18 @@ async function publish() {
     console.error('Publish error:', e);
     toast('Publish failed: ' + e.message, true);
   }
+}
+
+function fileToBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function() {
+      var b64 = reader.result.split(',')[1];
+      resolve(b64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 async function ghApi(method, path, body, token) {
@@ -1552,6 +1587,11 @@ function confirmNo() { document.getElementById('confirmDialog').classList.remove
 /* ========================================
    UTILS
    ======================================== */
+function imgSrc(path) {
+  if (!path) return '';
+  if (localPreviews[path]) return localPreviews[path];
+  return '../' + path;
+}
 function esc(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

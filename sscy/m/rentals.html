@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spaces & Rentals | Salt Spring Centre of Yoga</title>
+<meta name="description" content="69 acres of sacred land with established spaces for retreats, workshops, and gatherings since 1981. Satsang Room, Garden House, Pond Dome, and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../rentals.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+.menu .donate-link { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* HERO */
+.hero { min-height: 50vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; }
+.hero img.bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.45) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 40px 24px; }
+.hero h1 { font-size: 1.6rem; color: var(--white); margin-bottom: 8px; text-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+.hero .hero-sub { font-size: 0.75rem; opacity: 0.7; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec-warm { background: var(--cream-warm); }
+.sec h2 { font-size: 1.4rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+.sec .link { display: inline-block; margin-top: 8px; font-weight: 500; font-size: 0.85rem; color: var(--teal-dark); }
+.sec .link::after { content: ' \2192'; }
+
+/* INTRO */
+.intro { padding: 40px 20px; text-align: center; }
+.intro p { font-size: 1rem; line-height: 1.7; color: var(--teal-deep); font-family: 'Cinzel', serif; font-weight: 400; text-align: center; }
+
+/* VENUE SECTION */
+.venue { padding: 48px 20px; }
+.venue:nth-child(odd) { background: var(--white); }
+.venue .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.venue h2 { font-size: 1.3rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.venue p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+.venue .link { display: inline-block; margin-top: 8px; font-weight: 500; font-size: 0.85rem; color: var(--teal-dark); }
+.venue .link::after { content: ' \2192'; }
+.venue-text { margin-bottom: 16px; }
+
+/* STRIP */
+.strip { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; }
+.strip img { height: 28vh; min-width: 28vh; object-fit: cover; scroll-snap-align: start; flex-shrink: 0; }
+
+/* ROOM CARDS */
+.rooms { padding: 48px 20px; }
+.rooms h2 { font-size: 1.3rem; text-align: center; margin-bottom: 8px; color: var(--teal-deep); }
+.rooms .sub { font-size: 0.85rem; color: var(--text-light); text-align: center; margin-bottom: 12px; }
+.rooms .pricing { font-size: 0.82rem; color: var(--text-light); text-align: center; margin-bottom: 16px; line-height: 1.6; }
+.rooms .book-btn { display: block; text-align: center; margin: 0 auto 24px; padding: 12px 32px; background: var(--teal); color: var(--white); border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; font-weight: 600; width: fit-content; }
+.room-card { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
+.room-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.room-card-body { padding: 16px 20px; }
+.room-card-title { font-family: 'Cinzel', serif; font-size: 0.92rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+.room-card-desc { font-size: 0.8rem; color: var(--text-light); line-height: 1.5; text-align: left; }
+
+/* CTA */
+.cta-section { text-align: center; padding: 48px 20px; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); color: var(--white); }
+.cta-section h2 { color: var(--white); margin-bottom: 12px; font-size: 1.4rem; }
+.cta-section p { text-align: center; opacity: 0.75; font-size: 0.88rem; margin-bottom: 20px; line-height: 1.7; }
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; margin: 0 4px 10px; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+.btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); color: var(--white); }
+
+/* QUOTE */
+.quote { text-align: center; padding: 40px 20px; background: var(--cream-warm); }
+.quote blockquote { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--teal-deep); line-height: 1.5; max-width: 90%; margin: 0 auto 8px; }
+.quote cite { font-size: 0.75rem; color: var(--text-light); font-style: normal; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; }
+.donate-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 24px; position: relative; }
+.donate-header h3 { font-size: 1.2rem; }
+.donate-header p { font-size: 0.82rem; opacity: 0.8; }
+.donate-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+.donate-body { padding: 24px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.tier { padding: 10px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; cursor: pointer; background: var(--white); }
+.tier.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-field { margin-bottom: 12px; }
+.donate-field label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 4px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; }
+.donate-submit { width: 100%; padding: 14px; background: var(--terracotta); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.donate-alt { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.donate-alt strong { color: var(--text); }
+.donate-foot { text-align: center; font-size: 0.68rem; color: var(--text-light); padding: 0 24px 20px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+  <a href="#" class="donate-link" onclick="event.preventDefault();closeMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="bg" src="https://saltspringcentre.com/wp-content/uploads/2022/05/JPEG-image-8.jpeg" alt="Activity at the Salt Spring Centre of Yoga">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Spaces &amp; Rentals</h1>
+    <div class="hero-sub">Sacred Land &bull; Established Venues &bull; Since 1981</div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<div class="intro">
+  <p>69 acres of sacred land, established spaces for retreats, workshops, and gatherings since 1981.</p>
+</div>
+
+<!-- SATSANG ROOM -->
+<section class="venue sec-alt">
+  <span class="label">Program House</span>
+  <h2>Satsang Room</h2>
+  <div class="venue-text">
+    <p>The main ceremony and gathering space in the Program House. This warm, light-filled room has hosted decades of yoga programs, satsangs, kirtan, workshops, and community celebrations. With seating for up to 80 people, a full sound system, and a stage area, it serves as the heart of programming at the Centre.</p>
+    <p>The adjacent commercial kitchen and dining hall make the Program House ideal for multi-day retreats with catered meals.</p>
+    <a href="contact.html" class="link">Inquire about this space</a>
+  </div>
+  <div class="strip">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg" alt="Program in the Satsang Room" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2011/08/ZD.090731.03.013.jpg" alt="Satsang and kirtan gathering" loading="lazy">
+  </div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote">
+  <blockquote>The whole world is a place for practice.</blockquote>
+  <cite>Baba Hari Dass</cite>
+</div>
+
+<!-- GARDEN HOUSE -->
+<section class="venue">
+  <span class="label">Yoga &amp; Accommodation</span>
+  <h2>Garden House &amp; Yoga Studio</h2>
+  <div class="venue-text">
+    <p>A secondary yoga venue nestled among the gardens, the Garden House offers a tranquil practice space with natural light and views of the surrounding forest. The dedicated yoga studio comfortably holds 20 to 30 practitioners.</p>
+    <p>The building also includes accommodation rooms for retreat participants, making it a self-contained option for smaller groups seeking an intimate experience on the land.</p>
+    <a href="contact.html" class="link">Inquire about this space</a>
+  </div>
+  <div class="strip">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-1.jpg" alt="Garden House exterior" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House yoga studio" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Garden-House-2.jpg" alt="Garden House from the garden" loading="lazy">
+  </div>
+</section>
+
+<!-- POND DOME -->
+<section class="venue sec-alt">
+  <span class="label">Geodesic Venue</span>
+  <h2>Pond Dome</h2>
+  <div class="venue-text">
+    <p>A geodesic dome venue situated by the pond, offering a unique and inspiring setting for workshops, sound healing, meditation, and small gatherings. The circular architecture creates a natural sense of unity and containment.</p>
+    <p>Surrounded by water, trees, and birdsong, this space brings the outside in. Perfect for groups of up to 30 seeking something beyond a conventional room.</p>
+    <a href="contact.html" class="link">Inquire about this space</a>
+  </div>
+  <div class="strip">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome.jpg" alt="Pond Dome exterior" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-indoors.jpg" alt="Pond Dome interior" loading="lazy">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/pond-dome-2.jpg" alt="Pond Dome angle" loading="lazy">
+  </div>
+</section>
+
+<!-- SAUNA -->
+<section class="venue">
+  <span class="label">Wellness</span>
+  <h2>Sauna</h2>
+  <div class="venue-text">
+    <p>A traditional wood-burning sauna available as part of retreat packages or by special arrangement. After a day of practice, teaching, or deep work, the sauna offers a quiet place to release, restore, and reconnect with the body.</p>
+    <p>Set apart from the main buildings and surrounded by forest, the experience is meditative in its simplicity.</p>
+    <a href="contact.html" class="link">Inquire about availability</a>
+  </div>
+  <div class="strip">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Wood-burning sauna at night" loading="lazy">
+  </div>
+</section>
+
+<!-- ACCOMMODATION -->
+<section class="rooms sec-alt">
+  <h2>Accommodation</h2>
+  <p class="sub">Private and shared rooms in the Program House and Garden House. Simple, clean, and peaceful.</p>
+  <p class="pricing">Accommodation ranges from $1,870 (camping) to $5,390 (private en suite) for multi-week programs. Weekend retreats include accommodation in the package price.</p>
+  <a href="https://saltspringcentre.secure.retreat.guru" target="_blank" rel="noopener" class="book-btn">Book Accommodation</a>
+
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Bed-photo-with-overlay-grey-1.jpg" alt="Private bedroom" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Private Room</div>
+      <div class="room-card-desc">Quiet, simply furnished rooms with natural light. Linens provided.</div>
+    </div>
+  </div>
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/GH-Lavender-Room-Beds-and-window-resized.jpg" alt="Garden House Lavender Room" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Garden House - Lavender Room</div>
+      <div class="room-card-desc">Bright and welcoming space in the Garden House with garden views.</div>
+    </div>
+  </div>
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/GH-View-Room-Bed-and-desk-resized.jpg" alt="Garden House View Room" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Garden House - View Room</div>
+      <div class="room-card-desc">A quiet corner with a desk and views over the grounds.</div>
+    </div>
+  </div>
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-6-Bed-and-Window-Resized.jpg" alt="Program House Room 6" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Program House - Room 6</div>
+      <div class="room-card-desc">Comfortable private room in the heritage Program House.</div>
+    </div>
+  </div>
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/PH-Room-7-resized.jpg" alt="Program House Room 7" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Program House - Room 7</div>
+      <div class="room-card-desc">Cozy room with natural wood and warm light.</div>
+    </div>
+  </div>
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Rm-7-Shared-Room.jpg" alt="Shared room" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Shared Room</div>
+      <div class="room-card-desc">Affordable shared accommodation for retreat and program guests.</div>
+    </div>
+  </div>
+  <div class="room-card">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/Yurt-header.jpg" alt="Camping at the Centre" loading="lazy">
+    <div class="room-card-body">
+      <div class="room-card-title">Seasonal Camping</div>
+      <div class="room-card-desc">Tent and yurt camping available during warmer months. A simple, grounded way to stay close to the land.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOST YOUR EVENT CTA -->
+<section class="cta-section">
+  <h2>Host Your Event</h2>
+  <p>Whether you are planning a weekend retreat, a teacher training, a day-long workshop, or a private ceremony, our spaces and our community are here to support your vision.</p>
+  <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+  <a href="offerings.html" class="btn btn-outline">View Offerings</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="offerings.html">Offerings</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="blog.html">Blog</a>
+    <a href="index.html">Home</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-body">
+      <div class="donate-tiers">
+        <button class="tier" onclick="pickTier(25,this)">$25</button>
+        <button class="tier" onclick="pickTier(50,this)">$50</button>
+        <button class="tier active" onclick="pickTier(108,this)">$108</button>
+        <button class="tier" onclick="pickTier(200,this)">$200</button>
+      </div>
+      <div class="donate-field"><label>Name</label><input type="text" placeholder="Your full name"></div>
+      <div class="donate-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="donate-field"><label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs & Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="closeDonate();alert('Thank you! In production this connects to Stripe.');">Complete Donation</button>
+      <div class="donate-alt">Or Interac E-Transfer to <strong>payment@saltspringcentre.com</strong></div>
+    </div>
+    <div class="donate-foot">This is a prototype. In production, this connects to Stripe for secure payment.</div>
+  </div>
+</div>
+
+<script>
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+function openDonate() { document.getElementById('donateOverlay').classList.add('open'); }
+function closeDonate() { document.getElementById('donateOverlay').classList.remove('open'); }
+function pickTier(amt, el) {
+  document.querySelectorAll('.tier').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

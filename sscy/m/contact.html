@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact - Salt Spring Centre of Yoga</title>
+<meta name="description" content="Visit the Salt Spring Centre of Yoga on Salt Spring Island, BC. Directions, contact info, and how to get here.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../contact.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+.menu .donate-link { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* HERO */
+.hero { min-height: 40vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; }
+.hero img.bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.5) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 40px 24px; }
+.hero h1 { font-size: 1.6rem; color: var(--white); text-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec-warm { background: var(--cream-warm); }
+.sec h2 { font-size: 1.3rem; margin-bottom: 16px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+
+/* CONTACT INFO */
+.info-item { margin-bottom: 20px; }
+.info-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); margin-bottom: 4px; }
+.info-value { font-size: 0.95rem; line-height: 1.7; }
+.info-value a { color: var(--teal-dark); }
+
+/* FORM */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 6px; }
+.form-group input,
+.form-group textarea { width: 100%; padding: 12px 16px; border: 1.5px solid rgba(0,0,0,0.08); background: var(--cream-warm); border-radius: 12px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; color: var(--text); }
+.form-group input:focus,
+.form-group textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(59,184,168,0.12); }
+.form-group textarea { resize: vertical; min-height: 140px; }
+.form-submit { display: inline-block; padding: 12px 36px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--white); background: var(--teal-dark); border: none; cursor: pointer; }
+.form-success { display: none; padding: 14px 20px; background: rgba(59,184,168,0.1); border: 1px solid var(--teal); border-radius: 12px; color: var(--teal-deep); font-weight: 500; margin-top: 14px; font-size: 0.88rem; }
+
+/* ROUTES */
+.route { margin-bottom: 16px; }
+.route-title { font-weight: 600; color: var(--teal-deep); font-size: 0.95rem; margin-bottom: 2px; }
+.route p { font-size: 0.88rem; line-height: 1.6; color: var(--text); }
+
+/* MAP */
+.map-section iframe { width: 100%; height: 300px; border: none; display: block; filter: saturate(0.85) contrast(1.05); }
+
+/* CTA */
+.cta-section { text-align: center; padding: 48px 20px; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); color: var(--white); }
+.cta-section h2 { color: var(--white); margin-bottom: 12px; font-size: 1.4rem; }
+.cta-section p { text-align: center; opacity: 0.7; font-size: 0.88rem; margin-bottom: 20px; }
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; margin: 0 4px 10px; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; overflow: hidden; }
+.donate-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 24px; position: relative; }
+.donate-header h3 { font-size: 1.2rem; }
+.donate-header p { font-size: 0.82rem; opacity: 0.8; }
+.donate-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; }
+.donate-body { padding: 24px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+.tier { padding: 10px 16px; border: 2px solid rgba(0,0,0,0.1); border-radius: 8px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; cursor: pointer; background: var(--white); }
+.tier.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-field { margin-bottom: 12px; }
+.donate-field label { display: block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 4px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; }
+.donate-submit { width: 100%; padding: 14px; background: var(--terracotta); color: var(--white); border: none; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.donate-alt { text-align: center; font-size: 0.78rem; color: var(--text-light); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06); }
+.donate-alt strong { color: var(--text); }
+.donate-foot { text-align: center; font-size: 0.68rem; color: var(--text-light); padding: 0 24px 20px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="#" class="donate-link" onclick="event.preventDefault();closeMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="bg" src="https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png" alt="Salt Spring Centre of Yoga main house">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Visit Us</h1>
+  </div>
+</section>
+
+<!-- CONTACT INFO -->
+<section class="sec">
+  <h2>Get in Touch</h2>
+  <div class="info-item">
+    <div class="info-label">Address</div>
+    <div class="info-value">355 Blackburn Road<br>Salt Spring Island, BC<br>Canada</div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">Phone</div>
+    <div class="info-value"><a href="tel:+12505372326">250-537-2326</a></div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">Email</div>
+    <div class="info-value"><a href="mailto:info@saltspringcentre.com">info@saltspringcentre.com</a></div>
+  </div>
+  <div class="info-item">
+    <div class="info-label">Office Hours</div>
+    <div class="info-value">Monday to Friday, 9 am to 5 pm PST</div>
+  </div>
+</section>
+
+<!-- CONTACT FORM -->
+<section class="sec sec-alt">
+  <h2>Send a Message</h2>
+  <form id="contactForm" onsubmit="handleSubmit(event)">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required placeholder="Your name">
+    </div>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required placeholder="Your email address">
+    </div>
+    <div class="form-group">
+      <label for="message">Message</label>
+      <textarea id="message" name="message" required placeholder="How can we help you?"></textarea>
+    </div>
+    <button type="submit" class="form-submit">Send Message</button>
+    <div class="form-success" id="formSuccess">Thank you for your message. We will be in touch soon.</div>
+  </form>
+</section>
+
+<!-- GETTING HERE -->
+<section class="sec sec-warm">
+  <span class="label" style="display:block;text-align:center;margin-bottom:8px;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--teal);">Directions</span>
+  <h2 style="text-align:center;">Getting Here</h2>
+
+  <div class="route">
+    <div class="route-title">From Vancouver</div>
+    <p>BC Ferries from Tsawwassen to Long Harbour (direct to Salt Spring) or connect via Swartz Bay on Vancouver Island.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-title">From Victoria</div>
+    <p>BC Ferries from Swartz Bay to Fulford Harbour. A scenic 35-minute crossing through the Gulf Islands.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-title">By Float Plane</div>
+    <p>Harbour Air and Saltspring Air offer float plane service from Vancouver Harbour directly to Ganges Harbour on Salt Spring Island.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-title">From the Ferry</div>
+    <p>The Centre is a 15-minute drive from both Fulford Harbour and Long Harbour ferry terminals. Follow signs toward Fulford-Ganges Road, then turn onto Blackburn Road.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-title">From Nanaimo</div>
+    <p>BC Ferries from Crofton to Vesuvius Bay. A quick 20-minute crossing from the Cowichan Valley.</p>
+  </div>
+
+  <div class="route">
+    <div class="route-title">Getting Around</div>
+    <p>Silver Shadow Taxi: 250-537-3030 (cash only, book in advance). Salt Spring Car and Scooter Rentals: 250-537-3122. BC Transit buses serve the island with a stop at Blackburn Road.</p>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="map-section">
+  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2600!2d-123.5083!3d48.8167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x548f54b4a5e7c8a1%3A0x4e1234567890abcd!2sSalt+Spring+Centre+of+Yoga!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Salt Spring Centre of Yoga location"></iframe>
+</section>
+
+<!-- DONATE CTA -->
+<section class="cta-section">
+  <h2>Support This Sanctuary</h2>
+  <p>Every donation preserves 69 acres of peace for future visitors.</p>
+  <a href="#" class="btn btn-primary" onclick="event.preventDefault();openDonate();">Donate Now</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="offerings.html">Offerings</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="index.html">Home</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-body">
+      <div class="donate-tiers">
+        <button class="tier" onclick="pickTier(25,this)">$25</button>
+        <button class="tier" onclick="pickTier(50,this)">$50</button>
+        <button class="tier active" onclick="pickTier(108,this)">$108</button>
+        <button class="tier" onclick="pickTier(200,this)">$200</button>
+      </div>
+      <div class="donate-field"><label>Name</label><input type="text" placeholder="Your full name"></div>
+      <div class="donate-field"><label>Email</label><input type="email" placeholder="you@example.com"></div>
+      <div class="donate-field"><label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs & Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="closeDonate();alert('Thank you! In production this connects to Stripe.');">Complete Donation</button>
+      <div class="donate-alt">Or Interac E-Transfer to <strong>payment@saltspringcentre.com</strong></div>
+    </div>
+    <div class="donate-foot">This is a prototype. In production, this connects to Stripe for secure payment.</div>
+  </div>
+</div>
+
+<script>
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+function openDonate() { document.getElementById('donateOverlay').classList.add('open'); }
+function closeDonate() { document.getElementById('donateOverlay').classList.remove('open'); }
+function pickTier(amt, el) {
+  document.querySelectorAll('.tier').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+function handleSubmit(e) {
+  e.preventDefault();
+  var form = document.getElementById('contactForm');
+  var success = document.getElementById('formSuccess');
+  success.style.display = 'block';
+  form.reset();
+  setTimeout(function() { success.style.display = 'none'; }, 5000);
+}
+</script>
+</body>
+</html>
