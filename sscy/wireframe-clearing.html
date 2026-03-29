@@ -367,6 +367,18 @@ discs.forEach(function(c, i) {
         '<div class="disc-detail">' + c.detail + '</div>' +
         '<div class="disc-cta">' + c.cta + '</div>';
 
+    // Hover to bring to front
+    el.addEventListener('mouseenter', function() {
+        if (!fullscreenDisc) {
+            el.style.zIndex = 200;
+        }
+    });
+    el.addEventListener('mouseleave', function() {
+        if (!fullscreenDisc && !el.classList.contains('fullscreen')) {
+            el.style.zIndex = i + 1;
+        }
+    });
+
     ground.appendChild(el);
     discEls.push(el);
 
