@@ -441,23 +441,21 @@ var lineSettled = false;
 var settleTimer = 0;
 var SETTLE_DELAY = 60;
 
-// Phase 2 ends when last disc reaches top - then phase 3 (horizontal) begins
+// Phase 2 ends when last disc reaches top - phase 3 starts immediately
 var PHASE2_END = 1 + (discs.length - 1) * 0.35;
-var PHASE3_END = PHASE2_END + 1; // 1 unit to transition to horizontal
-var rowSettled = false;
-var rowSettleTimer = 0;
+// Phase 3: 1 unit to go horizontal, then scroll across discs
+var PHASE3_TRANSITION = 1;
+var PHASE3_SCROLL = (discs.length - 1) * 0.4;
+var MAX_SCROLL = PHASE2_END + PHASE3_TRANSITION + PHASE3_SCROLL;
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
     if (!lineSettled) {
         scrollTarget += e.deltaY * 0.0015;
         scrollTarget = Math.max(0, Math.min(1, scrollTarget));
-    } else if (!rowSettled) {
-        scrollTarget += e.deltaY * 0.001;
-        scrollTarget = Math.max(0, Math.min(PHASE2_END, scrollTarget));
     } else {
         scrollTarget += e.deltaY * 0.001;
-        scrollTarget = Math.max(0, Math.min(PHASE3_END, scrollTarget));
+        scrollTarget = Math.max(0, Math.min(MAX_SCROLL, scrollTarget));
     }
 }, { passive: false });
 
@@ -496,23 +494,15 @@ function tick() {
     if (scrollTarget < 0.5) {
         lineSettled = false;
         settleTimer = 0;
-        rowSettled = false;
-        rowSettleTimer = 0;
-    }
-
-    // Unlock phase 3 once column is fully scrolled
-    if (scrollPos > PHASE2_END - 0.05 && scrollTarget >= PHASE2_END - 0.05 && lineSettled) {
-        rowSettleTimer++;
-        if (rowSettleTimer >= SETTLE_DELAY) rowSettled = true;
-    } else if (scrollTarget < PHASE2_END - 0.5) {
-        rowSettled = false;
-        rowSettleTimer = 0;
     }
 
     // Phase breakdown
     var lineBlend = Math.min(1, Math.max(0, scrollPos));
     var columnScroll = Math.max(0, Math.min(PHASE2_END - 1, scrollPos - 1));
-    var rowBlend = Math.max(0, Math.min(1, scrollPos - PHASE2_END));
+    // Phase 3: transition to horizontal (0-1), then scroll across (beyond 1)
+    var phase3Raw = Math.max(0, scrollPos - PHASE2_END);
+    var rowBlend = Math.min(1, phase3Raw / PHASE3_TRANSITION);
+    var rowScroll = Math.max(0, phase3Raw - PHASE3_TRANSITION);
 
     var NEAR_DIST = 260;
     var CLOSE_DIST = 140;
@@ -530,10 +520,11 @@ function tick() {
     var scrollOffset = columnScroll * vh * 0.8;
 
     // Horizontal row layout (phase 3)
+    // Disc 1 starts fully visible on left, spaced out to the right
     var rowY = (vh - DISC_SIZE) / 2;
-    var rowTotalW = count * (DISC_SIZE * 0.75);
-    var rowStartX = (vw - rowTotalW) / 2;
-    var rowSpacing = DISC_SIZE * 0.75;
+    var rowPad = 30;
+    var rowSpacing = DISC_SIZE * 0.85;
+    var rowScrollOffset = rowScroll * vw * 0.6; // scroll pans right
 
     var isLining = lineBlend > 0.05;
     var driftMul = 1 - lineBlend;
@@ -552,8 +543,8 @@ function tick() {
         var colTgtX = lineX;
         var colTgtY = lineStartY + i * lineSpacing - scrollOffset;
 
-        // Horizontal row target
-        var rowTgtX = rowStartX + i * rowSpacing;
+        // Horizontal row target - starts from left, scrolls right
+        var rowTgtX = rowPad + i * rowSpacing - rowScrollOffset;
         var rowTgtY = rowY;
 
         // Blend: scatter -> column -> row
