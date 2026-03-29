@@ -27,21 +27,20 @@
             position: fixed;
             pointer-events: none;
             z-index: 9999;
-            width: 500px;
-            height: 500px;
+            width: 600px;
+            height: 600px;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             background: radial-gradient(
                 circle,
-                rgba(201, 168, 76, 0.08) 0%,
-                rgba(201, 168, 76, 0.04) 30%,
-                rgba(201, 168, 76, 0.01) 60%,
+                rgba(201, 168, 76, 0.07) 0%,
+                rgba(201, 168, 76, 0.03) 35%,
+                rgba(201, 168, 76, 0.008) 60%,
                 transparent 100%
             );
             mix-blend-mode: screen;
         }
 
-        /* Tiny lantern dot at cursor center */
         .lantern-dot {
             position: fixed;
             pointer-events: none;
@@ -49,179 +48,193 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: rgba(255, 240, 200, 0.7);
-            box-shadow: 0 0 12px rgba(201, 168, 76, 0.5), 0 0 30px rgba(201, 168, 76, 0.2);
+            background: rgba(255, 240, 200, 0.6);
+            box-shadow: 0 0 12px rgba(201, 168, 76, 0.4), 0 0 30px rgba(201, 168, 76, 0.15);
             transform: translate(-50%, -50%);
         }
 
-        /* Ambient ground texture */
         .ground-texture {
             position: fixed;
             inset: 0;
             pointer-events: none;
-            opacity: 0.015;
+            opacity: 0.012;
             background-image:
                 radial-gradient(ellipse at 20% 50%, rgba(59, 184, 168, 0.3), transparent 50%),
                 radial-gradient(ellipse at 80% 30%, rgba(201, 168, 76, 0.2), transparent 50%),
                 radial-gradient(ellipse at 50% 80%, rgba(59, 120, 100, 0.2), transparent 40%);
         }
 
-        /* Cards */
-        .card {
+        /* Discs - glassmorphic circles matching SSCY hot zones */
+        .disc {
             position: absolute;
-            width: 340px;
-            border-radius: 16px;
-            overflow: hidden;
-            opacity: 0.04;
-            transform: scale(0.96);
-            transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.6s ease;
-            cursor: none;
-        }
-
-        .card.near {
-            opacity: 0.5;
-            transform: scale(0.98);
-        }
-
-        .card.close {
-            opacity: 1;
-            transform: scale(1);
-            box-shadow: 0 0 40px rgba(201, 168, 76, 0.08), 0 8px 30px rgba(0,0,0,0.5);
-        }
-
-        .card-visual {
-            height: 160px;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
+            text-align: center;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            opacity: 0.03;
+            transform: scale(0.92);
+            transition: opacity 0.8s ease, transform 0.8s ease, background 0.8s ease, border-color 0.6s ease, box-shadow 0.8s ease;
+            cursor: none;
             overflow: hidden;
         }
 
-        .card-visual-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            opacity: 0.25;
+        .disc.near {
+            opacity: 0.4;
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-        .card-glow {
+        .disc.close {
+            opacity: 1;
+            transform: scale(1);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 60px rgba(201, 168, 76, 0.04);
+        }
+
+        .disc.close:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Inner glow per disc */
+        .disc-glow {
             position: absolute;
-            inset: -20px;
-            border-radius: 16px;
+            inset: -30px;
+            border-radius: 50%;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.6s ease;
+            transition: opacity 0.8s ease;
         }
 
-        .card.close .card-glow {
+        .disc.close .disc-glow {
             opacity: 1;
         }
 
-        .card-info {
-            padding: 22px 26px 26px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px);
-        }
-
-        .card-tag {
-            font-size: 0.55rem;
+        .disc-tag {
+            font-size: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 0.18em;
-            opacity: 0.4;
-            margin-bottom: 6px;
+            letter-spacing: 0.22em;
+            opacity: 0.35;
+            margin-bottom: 8px;
         }
 
-        .card-name {
-            font-size: 1.15rem;
+        .disc-icon {
+            font-size: 2.2rem;
+            opacity: 0.2;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .disc-name {
+            font-size: 1rem;
             font-weight: 600;
             line-height: 1.2;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
-        .card-detail {
-            font-size: 0.78rem;
-            opacity: 0.5;
-            line-height: 1.5;
-            text-align: justify;
-            text-align-last: left;
+        .disc-detail {
+            font-size: 0.68rem;
+            opacity: 0.45;
+            line-height: 1.45;
         }
 
-        .card-cta {
-            display: inline-block;
-            margin-top: 14px;
-            padding: 8px 18px;
-            border-radius: 8px;
-            background: rgba(201, 168, 76, 0.12);
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            font-size: 0.65rem;
+        .disc-cta {
+            margin-top: 12px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            background: rgba(201, 168, 76, 0.1);
+            border: 1px solid rgba(201, 168, 76, 0.18);
+            font-size: 0.55rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             opacity: 0;
-            transform: translateY(6px);
-            transition: opacity 0.4s, transform 0.4s;
+            transform: translateY(4px);
+            transition: opacity 0.5s, transform 0.5s, background 0.2s;
             cursor: pointer;
         }
 
-        .card.close .card-cta {
-            opacity: 0.7;
+        .disc.close .disc-cta {
+            opacity: 0.65;
             transform: translateY(0);
         }
 
-        .card-cta:hover {
+        .disc-cta:hover {
             background: rgba(201, 168, 76, 0.25);
         }
 
-        /* Fullscreen card */
-        .card.fullscreen {
+        /* Fullscreen disc */
+        .disc.fullscreen {
             position: fixed !important;
             inset: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
             border-radius: 0;
+            padding: 0;
             opacity: 1;
-            transform: scale(1) translate(0,0) !important;
+            transform: scale(1) translate(0, 0) !important;
             z-index: 10001 !important;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: default;
             overflow-y: auto;
+            background: rgba(20, 20, 18, 0.97);
+            border-color: transparent;
+            backdrop-filter: blur(20px);
+            justify-content: center;
         }
 
-        .card.fullscreen .card-visual {
-            height: 40vh;
+        .disc.fullscreen .disc-tag {
+            font-size: 0.65rem;
+            margin-bottom: 14px;
         }
 
-        .card.fullscreen .card-info {
-            padding: 40px 60px 80px;
+        .disc.fullscreen .disc-icon {
+            font-size: 3.5rem;
+            margin-bottom: 14px;
         }
 
-        .card.fullscreen .card-name {
-            font-size: 2.2rem;
-            margin-bottom: 12px;
+        .disc.fullscreen .disc-name {
+            font-size: 2.4rem;
+            margin-bottom: 16px;
         }
 
-        .card.fullscreen .card-detail {
-            font-size: 1rem;
+        .disc.fullscreen .disc-detail {
+            font-size: 1.05rem;
             line-height: 1.6;
+            max-width: 600px;
+            opacity: 0.55;
         }
 
-        .card.fullscreen .card-cta {
+        .disc.fullscreen .disc-cta {
             opacity: 1;
-            font-size: 0.75rem;
-            padding: 12px 24px;
+            font-size: 0.7rem;
+            padding: 12px 28px;
+            margin-top: 24px;
         }
 
-        .card-close {
+        .disc-close {
             position: absolute;
-            top: 20px;
-            right: 24px;
+            top: 24px;
+            right: 28px;
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(0,0,0,0.4);
+            background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.4);
             font-size: 1.1rem;
             display: none;
             align-items: center;
@@ -231,18 +244,18 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        .card-close:hover {
-            background: rgba(255,255,255,0.12);
+        .disc-close:hover {
+            background: rgba(255, 255, 255, 0.12);
             color: #fff;
         }
 
-        .card.fullscreen .card-close {
+        .disc.fullscreen .disc-close {
             display: flex;
             cursor: pointer;
         }
 
         /* Dim ground when fullscreen */
-        .ground.dimmed .card:not(.fullscreen) {
+        .ground.dimmed .disc:not(.fullscreen) {
             opacity: 0 !important;
             pointer-events: none;
             transition: opacity 0.3s;
@@ -252,7 +265,6 @@
             opacity: 0;
         }
 
-        /* Ambient text at bottom */
         .ambient-hint {
             position: fixed;
             bottom: 32px;
@@ -280,17 +292,17 @@
 <div class="ambient-hint" id="hint">Explore the clearing</div>
 
 <script>
-var cards = [
-    { tag:"The Land", name:"69 Acres of Sanctuary", detail:"Forests, organic gardens, meditation ponds, and temples nestled among ancient cedars on Salt Spring Island.", cta:"Explore the Land", bg:"linear-gradient(160deg, #1a3d17, #2d5a27)", glow:"rgba(74,138,62,0.06)" },
-    { tag:"Babaji", name:"Peace. No more than that.", detail:"When asked about his only goal in life.", cta:"More from Babaji", bg:"linear-gradient(160deg, #12122a, #1a1a2e)", glow:"rgba(100,100,160,0.05)", quote:true },
-    { tag:"Retreat", name:"Weekend Yoga Retreat", detail:"Two nights of practice, rest, and renewal. Vegetarian meals from the garden. All levels welcome.", cta:"Book This Retreat", bg:"linear-gradient(160deg, #0f3a33, #1a5c53)", glow:"rgba(59,184,168,0.06)" },
-    { tag:"Venue", name:"The Pond Dome", detail:"Geodesic dome beside a tranquil pond. Available for workshops, weddings, concerts, and private events.", cta:"Inquire", bg:"linear-gradient(160deg, #3a4a50, #4a6670)", glow:"rgba(90,140,160,0.06)" },
-    { tag:"Shop", name:"Salt Spring Island Cooking", detail:"The beloved cookbook that has sold over 52,000 copies. Recipes rooted in the land, the seasons, and the community.", cta:"Add to Cart", bg:"linear-gradient(160deg, #6a5020, #8a6a3a)", glow:"rgba(201,168,76,0.06)" },
-    { tag:"Training", name:"200-Hour Teacher Training", detail:"An immersive residential program rooted in classical yoga tradition. Yoga Alliance certified.", cta:"Apply Now", bg:"linear-gradient(160deg, #3a2510, #5a3a1a)", glow:"rgba(180,120,60,0.06)" },
-    { tag:"Karma Yoga", name:"Live & Serve", detail:"Volunteer program with room and board. Four hours of daily service in gardens, kitchen, or maintenance.", cta:"Apply to Volunteer", bg:"linear-gradient(160deg, #1a3a1a, #2a5a2a)", glow:"rgba(80,140,80,0.05)" },
-    { tag:"Event", name:"Music for Peace", detail:"Indian classical concert series in the Pond Dome. Ragas selected to invoke peace, devotion, and stillness.", cta:"Get Tickets", bg:"linear-gradient(160deg, #3a142a, #5a2a4a)", glow:"rgba(140,60,100,0.06)" },
-    { tag:"Sacred", name:"Hanuman Shrine", detail:"Open-air shrine among the cedars. Consecrated in 1984. Visitors are welcome to sit, meditate, and offer prayers.", cta:"View Sacred Spaces", bg:"linear-gradient(160deg, #4a3418, #6a4a2a)", glow:"rgba(160,120,60,0.05)" },
-    { tag:"Nature", name:"Dandaka Forest", detail:"Primordial cedar-swamp wetland. One of the last undisturbed ecosystems on the island. Boardwalk trail, dawn to dusk.", cta:"Trail Map", bg:"linear-gradient(160deg, #0d1a0d, #1a3a1a)", glow:"rgba(40,80,40,0.06)" }
+var discs = [
+    { tag:"The Land", name:"69 Acres of Sanctuary", detail:"Forests, gardens, ponds, and temples among ancient cedars.", cta:"Explore", glow:"rgba(74,138,62,0.05)", icon:"\u2618" },
+    { tag:"Babaji", name:"Peace. No more than that.", detail:"When asked about his only goal in life.", cta:"More from Babaji", glow:"rgba(100,100,160,0.04)", icon:"\u201C" },
+    { tag:"Retreat", name:"Weekend Yoga Retreat", detail:"Two nights of practice, rest, and renewal from the garden.", cta:"Book", glow:"rgba(59,184,168,0.05)", icon:"\u2726" },
+    { tag:"Venue", name:"The Pond Dome", detail:"Geodesic dome by the water for workshops and events.", cta:"Inquire", glow:"rgba(90,140,160,0.05)", icon:"\u2B21" },
+    { tag:"Shop", name:"Salt Spring Cooking", detail:"The beloved cookbook. 52,000 copies sold.", cta:"Shop", glow:"rgba(201,168,76,0.05)", icon:"\u2661" },
+    { tag:"Training", name:"200-Hour YTT", detail:"Immersive residential teacher training. Yoga Alliance certified.", cta:"Apply", glow:"rgba(180,120,60,0.05)", icon:"\u2600" },
+    { tag:"Karma Yoga", name:"Live & Serve", detail:"Volunteer with room and board. Four hours daily.", cta:"Volunteer", glow:"rgba(80,140,80,0.04)", icon:"\u2698" },
+    { tag:"Event", name:"Music for Peace", detail:"Indian classical concerts in the Pond Dome.", cta:"Tickets", glow:"rgba(140,60,100,0.05)", icon:"\u266B" },
+    { tag:"Sacred", name:"Hanuman Shrine", detail:"Open-air shrine among cedars. Consecrated 1984.", cta:"Sacred Spaces", glow:"rgba(160,120,60,0.04)", icon:"\u2727" },
+    { tag:"Nature", name:"Dandaka Forest", detail:"Primordial cedar-swamp wetland. Boardwalk trail.", cta:"Trail Map", glow:"rgba(40,80,40,0.05)", icon:"\u2E19" }
 ];
 
 var ground = document.getElementById('ground');
@@ -303,117 +315,106 @@ var mouseY = window.innerHeight / 2;
 var smoothX = mouseX;
 var smoothY = mouseY;
 
-var fullscreenCard = null;
-var cardEls = [];
-var cardData = [];
+var fullscreenDisc = null;
+var discEls = [];
+var discData = [];
 
-// Place cards in a scattered spatial layout
-function layoutCards() {
+var DISC_SIZE = 320;
+var DISC_HALF = DISC_SIZE / 2;
+
+function layoutDiscs() {
     var vw = window.innerWidth;
     var vh = window.innerHeight;
-    var cols = 4;
-    var rows = Math.ceil(cards.length / cols);
-    var cellW = vw / cols;
-    var cellH = vh / rows;
 
-    cards.forEach(function(c, i) {
-        var col = i % cols;
-        var row = Math.floor(i / cols);
-        // Position in grid cell with random offset
-        var baseX = col * cellW + cellW * 0.15;
-        var baseY = row * cellH + cellH * 0.1;
-        var randX = (Math.random() - 0.5) * cellW * 0.35;
-        var randY = (Math.random() - 0.5) * cellH * 0.2;
+    // Organic scattered layout using golden angle
+    var cx = vw / 2;
+    var cy = vh / 2;
+    var goldenAngle = 137.508 * (Math.PI / 180);
+    var maxRadius = Math.min(vw, vh) * 0.38;
 
-        var x = Math.max(20, Math.min(vw - 360, baseX + randX));
-        var y = Math.max(20, Math.min(vh - 320, baseY + randY));
+    discs.forEach(function(c, i) {
+        var angle = i * goldenAngle;
+        var r = maxRadius * Math.sqrt((i + 0.5) / discs.length);
+        var x = cx + Math.cos(angle) * r - DISC_HALF;
+        var y = cy + Math.sin(angle) * r - DISC_HALF;
 
-        cardData[i] = {
+        // Keep in bounds
+        x = Math.max(10, Math.min(vw - DISC_SIZE - 10, x));
+        y = Math.max(10, Math.min(vh - DISC_SIZE - 10, y));
+
+        discData[i] = {
             homeX: x,
             homeY: y,
             currentX: x,
             currentY: y
         };
 
-        if (cardEls[i]) {
-            cardEls[i].style.left = x + 'px';
-            cardEls[i].style.top = y + 'px';
+        if (discEls[i]) {
+            discEls[i].style.left = x + 'px';
+            discEls[i].style.top = y + 'px';
         }
     });
 }
 
-// Build cards
-cards.forEach(function(c, i) {
+// Build discs
+discs.forEach(function(c, i) {
     var el = document.createElement('div');
-    el.className = 'card';
-    el.style.background = c.bg;
+    el.className = 'disc';
     el.style.zIndex = i + 1;
 
-    var visualContent = '';
-    if (c.quote) {
-        visualContent = '<div style="font-size:4rem;opacity:0.15">\u201C</div>';
-    } else {
-        visualContent = '<div class="card-visual-label">Photo</div>';
-    }
-
     el.innerHTML =
-        '<div class="card-close">\u2715</div>' +
-        '<div class="card-glow" style="background:radial-gradient(ellipse,' + c.glow + ',' + 'transparent 70%)"></div>' +
-        '<div class="card-visual">' + visualContent + '</div>' +
-        '<div class="card-info">' +
-            '<div class="card-tag">' + c.tag + '</div>' +
-            '<div class="card-name">' + c.name + '</div>' +
-            '<div class="card-detail">' + c.detail + '</div>' +
-            '<div class="card-cta">' + c.cta + '</div>' +
-        '</div>';
+        '<div class="disc-close">\u2715</div>' +
+        '<div class="disc-glow" style="background:radial-gradient(circle,' + c.glow + ',transparent 70%)"></div>' +
+        '<div class="disc-tag">' + c.tag + '</div>' +
+        '<div class="disc-icon">' + c.icon + '</div>' +
+        '<div class="disc-name">' + c.name + '</div>' +
+        '<div class="disc-detail">' + c.detail + '</div>' +
+        '<div class="disc-cta">' + c.cta + '</div>';
 
     ground.appendChild(el);
-    cardEls.push(el);
+    discEls.push(el);
 
-    // Double click to fullscreen
     el.addEventListener('dblclick', function(e) {
         e.preventDefault();
-        if (fullscreenCard) return;
+        if (fullscreenDisc) return;
         goFullscreen(el, i);
     });
 
-    // Close button
-    el.querySelector('.card-close').addEventListener('mousedown', function(e) { e.stopPropagation(); });
-    el.querySelector('.card-close').addEventListener('click', function(e) {
+    el.querySelector('.disc-close').addEventListener('mousedown', function(e) { e.stopPropagation(); });
+    el.querySelector('.disc-close').addEventListener('click', function(e) {
         e.stopPropagation();
         closeFullscreen(el, i);
     });
 });
 
-layoutCards();
+layoutDiscs();
 
 function goFullscreen(el, idx) {
-    fullscreenCard = el;
-    cardData[idx]._savedLeft = el.style.left;
-    cardData[idx]._savedTop = el.style.top;
+    fullscreenDisc = el;
+    discData[idx]._savedLeft = el.style.left;
+    discData[idx]._savedTop = el.style.top;
 
+    el.style.zIndex = 10001;
     el.classList.add('fullscreen');
     ground.classList.add('dimmed');
     hintEl.classList.add('hidden');
-
-    // Show default cursor in fullscreen
     document.body.style.cursor = 'default';
 }
 
 function closeFullscreen(el, idx) {
-    if (!fullscreenCard) return;
-    fullscreenCard = null;
+    if (!fullscreenDisc) return;
+    fullscreenDisc = null;
     el.classList.remove('fullscreen');
     ground.classList.remove('dimmed');
 
-    el.style.left = cardData[idx]._savedLeft;
-    el.style.top = cardData[idx]._savedTop;
-
+    el.style.left = discData[idx]._savedLeft;
+    el.style.top = discData[idx]._savedTop;
     document.body.style.cursor = 'none';
 
     setTimeout(function() {
         el.style.transition = '';
-    }, 500);
+        el.style.zIndex = idx + 1;
+    }, 550);
 }
 
 // Track mouse
@@ -422,11 +423,10 @@ document.addEventListener('mousemove', function(e) {
     mouseY = e.clientY;
 });
 
-// Hide hint after first move
 var hintShown = true;
 document.addEventListener('mousemove', function() {
     if (hintShown) {
-        setTimeout(function() { hintEl.classList.add('hidden'); }, 2000);
+        setTimeout(function() { hintEl.classList.add('hidden'); }, 2500);
         hintShown = false;
     }
 }, { once: false });
@@ -435,51 +435,49 @@ document.addEventListener('mousemove', function() {
 function tick() {
     requestAnimationFrame(tick);
 
-    // Smooth lantern follow
-    smoothX += (mouseX - smoothX) * 0.12;
-    smoothY += (mouseY - smoothY) * 0.12;
+    smoothX += (mouseX - smoothX) * 0.1;
+    smoothY += (mouseY - smoothY) * 0.1;
 
     lantern.style.left = smoothX + 'px';
     lantern.style.top = smoothY + 'px';
     lanternDot.style.left = smoothX + 'px';
     lanternDot.style.top = smoothY + 'px';
 
-    if (fullscreenCard) return;
+    if (fullscreenDisc) return;
 
-    // Update card proximity + magnetic pull
-    var NEAR_DIST = 350;
-    var CLOSE_DIST = 180;
-    var PULL_STRENGTH = 0.02;
-    var RETURN_STRENGTH = 0.04;
+    var NEAR_DIST = 380;
+    var CLOSE_DIST = 200;
+    var PULL_STRENGTH = 0.015;
+    var RETURN_STRENGTH = 0.035;
 
-    for (var i = 0; i < cardEls.length; i++) {
-        var el = cardEls[i];
-        var d = cardData[i];
-        var cx = d.currentX + 170; // center of card
-        var cy = d.currentY + 150;
+    for (var i = 0; i < discEls.length; i++) {
+        var el = discEls[i];
+        var d = discData[i];
+        var cx = d.currentX + DISC_HALF;
+        var cy = d.currentY + DISC_HALF;
         var dx = smoothX - cx;
         var dy = smoothY - cy;
         var dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Proximity classes
         if (dist < CLOSE_DIST) {
             el.classList.add('close');
             el.classList.remove('near');
+            el.style.zIndex = 100;
         } else if (dist < NEAR_DIST) {
             el.classList.add('near');
             el.classList.remove('close');
+            el.style.zIndex = i + 1;
         } else {
             el.classList.remove('near', 'close');
+            el.style.zIndex = i + 1;
         }
 
-        // Magnetic pull toward cursor when close
         if (dist < NEAR_DIST && dist > 10) {
             var pullFactor = (1 - dist / NEAR_DIST) * PULL_STRENGTH;
             d.currentX += dx * pullFactor;
             d.currentY += dy * pullFactor;
         }
 
-        // Spring back toward home
         var homeDistX = d.homeX - d.currentX;
         var homeDistY = d.homeY - d.currentY;
         d.currentX += homeDistX * RETURN_STRENGTH;
@@ -492,8 +490,7 @@ function tick() {
 
 tick();
 
-// Relayout on resize
-window.addEventListener('resize', layoutCards);
+window.addEventListener('resize', layoutDiscs);
 </script>
 </body>
 </html>
