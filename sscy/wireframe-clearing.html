@@ -67,15 +67,15 @@
         /* Discs - glassmorphic circles matching SSCY hot zones */
         .disc {
             position: absolute;
-            width: 320px;
-            height: 320px;
+            width: 272px;
+            height: 272px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 50px;
+            padding: 40px;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(8px);
@@ -319,7 +319,7 @@ var fullscreenDisc = null;
 var discEls = [];
 var discData = [];
 
-var DISC_SIZE = 320;
+var DISC_SIZE = 272;
 var DISC_HALF = DISC_SIZE / 2;
 
 function layoutDiscs() {
@@ -330,7 +330,7 @@ function layoutDiscs() {
     var cx = vw / 2;
     var cy = vh / 2;
     var goldenAngle = 137.508 * (Math.PI / 180);
-    var maxRadius = Math.min(vw, vh) * 0.38;
+    var maxRadius = Math.min(vw, vh) * 0.46;
 
     discs.forEach(function(c, i) {
         var angle = i * goldenAngle;
@@ -342,11 +342,19 @@ function layoutDiscs() {
         x = Math.max(10, Math.min(vw - DISC_SIZE - 10, x));
         y = Math.max(10, Math.min(vh - DISC_SIZE - 10, y));
 
+        // Each disc gets unique drift parameters (speed, phase, radius)
         discData[i] = {
             homeX: x,
             homeY: y,
+            baseX: x,
+            baseY: y,
             currentX: x,
-            currentY: y
+            currentY: y,
+            driftSpeedX: 0.15 + Math.random() * 0.25,
+            driftSpeedY: 0.12 + Math.random() * 0.2,
+            driftPhaseX: Math.random() * Math.PI * 2,
+            driftPhaseY: Math.random() * Math.PI * 2,
+            driftRadius: 30 + Math.random() * 50
         };
 
         if (discEls[i]) {
@@ -449,10 +457,21 @@ function tick() {
     var CLOSE_DIST = 200;
     var PULL_STRENGTH = 0.015;
     var RETURN_STRENGTH = 0.035;
+    var time = Date.now() * 0.001;
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
 
     for (var i = 0; i < discEls.length; i++) {
         var el = discEls[i];
         var d = discData[i];
+
+        // Slowly drift home position around its base
+        d.homeX = d.baseX + Math.sin(time * d.driftSpeedX + d.driftPhaseX) * d.driftRadius;
+        d.homeY = d.baseY + Math.cos(time * d.driftSpeedY + d.driftPhaseY) * d.driftRadius * 0.7;
+        // Keep drifted home in bounds
+        d.homeX = Math.max(10, Math.min(vw - DISC_SIZE - 10, d.homeX));
+        d.homeY = Math.max(10, Math.min(vh - DISC_SIZE - 10, d.homeY));
+
         var cx = d.currentX + DISC_HALF;
         var cy = d.currentY + DISC_HALF;
         var dx = smoothX - cx;
