@@ -435,15 +435,19 @@ document.addEventListener('mousemove', function(e) {
 // Scroll drives everything: 0-1 = scatter to line, 1+ = scroll through column
 // Phase 2 is locked until the line has fully settled
 var lineSettled = false;
+var settleTimer = 0;
+var SETTLE_DELAY = 60; // frames (~1 second at 60fps) the line must hold before phase 2 unlocks
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
-    scrollTarget += e.deltaY * 0.0015;
     var maxScroll = 1 + (discs.length - 1) * 0.35;
-    // If line hasn't settled yet, clamp to 1.0 so we can't scroll past assembly
     if (!lineSettled) {
+        // Phase 1: only allow scrolling up to 1.0
+        scrollTarget += e.deltaY * 0.0015;
         scrollTarget = Math.max(0, Math.min(1, scrollTarget));
     } else {
+        // Phase 2: scroll through column, but slower
+        scrollTarget += e.deltaY * 0.001;
         scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
     }
 }, { passive: false });
@@ -473,13 +477,19 @@ function tick() {
     // Smooth scroll position
     scrollPos += (scrollTarget - scrollPos) * 0.06;
 
-    // Unlock phase 2 once line has fully settled
-    if (scrollPos > 0.95 && scrollTarget >= 1) {
-        lineSettled = true;
+    // Unlock phase 2 only after the line has been fully settled for SETTLE_DELAY frames
+    if (scrollPos > 0.98 && scrollTarget >= 0.99) {
+        settleTimer++;
+        if (settleTimer >= SETTLE_DELAY) {
+            lineSettled = true;
+        }
+    } else {
+        settleTimer = 0;
     }
-    // Re-lock if we scroll back to scatter
+    // Re-lock if we scroll back toward scatter
     if (scrollTarget < 0.5) {
         lineSettled = false;
+        settleTimer = 0;
     }
 
     // Phase 1: scatter to line (scrollPos 0 to 1)
