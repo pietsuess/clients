@@ -433,12 +433,19 @@ document.addEventListener('mousemove', function(e) {
 });
 
 // Scroll drives everything: 0-1 = scatter to line, 1+ = scroll through column
+// Phase 2 is locked until the line has fully settled
+var lineSettled = false;
+
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
     scrollTarget += e.deltaY * 0.0015;
-    // Max scroll = enough to see all discs
     var maxScroll = 1 + (discs.length - 1) * 0.35;
-    scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
+    // If line hasn't settled yet, clamp to 1.0 so we can't scroll past assembly
+    if (!lineSettled) {
+        scrollTarget = Math.max(0, Math.min(1, scrollTarget));
+    } else {
+        scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
+    }
 }, { passive: false });
 
 var hintShown = true;
@@ -465,6 +472,15 @@ function tick() {
 
     // Smooth scroll position
     scrollPos += (scrollTarget - scrollPos) * 0.06;
+
+    // Unlock phase 2 once line has fully settled
+    if (scrollPos > 0.95 && scrollTarget >= 1) {
+        lineSettled = true;
+    }
+    // Re-lock if we scroll back to scatter
+    if (scrollTarget < 0.5) {
+        lineSettled = false;
+    }
 
     // Phase 1: scatter to line (scrollPos 0 to 1)
     // Phase 2: scroll through column (scrollPos > 1)
