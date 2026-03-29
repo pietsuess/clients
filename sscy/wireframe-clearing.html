@@ -576,7 +576,9 @@ function tick() {
 
         el.style.left = d.currentX + 'px';
         el.style.top = d.currentY + 'px';
-        el.style.transform = 'translateZ(' + d.currentZ + 'px)';
+        // Hovered disc jumps forward in Z so it renders in front of everything
+        var renderZ = isHovered ? 300 : d.currentZ;
+        el.style.transform = 'translateZ(' + renderZ + 'px)';
     }
 }
 
