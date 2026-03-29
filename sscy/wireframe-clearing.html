@@ -287,9 +287,9 @@ var discData = [];
 var DISC_SIZE = 245;
 var DISC_HALF = DISC_SIZE / 2;
 
-// Line-up blend: 0 = scattered, 1 = vertical column
-var lineBlend = 0;
-var lineTarget = 0;
+// Scroll state: 0 = scattered, 1 = fully lined up, >1 = scrolling down through column
+var scrollPos = 0;
+var scrollTarget = 0;
 
 function layoutDiscs() {
     var vw = window.innerWidth;
@@ -420,11 +420,13 @@ document.addEventListener('mousemove', function(e) {
     mouseY = e.clientY;
 });
 
-// Scroll drives scatter-to-line blend
+// Scroll drives everything: 0-1 = scatter to line, 1+ = scroll through column
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
-    lineTarget += e.deltaY * 0.002;
-    lineTarget = Math.max(0, Math.min(1, lineTarget));
+    scrollTarget += e.deltaY * 0.0015;
+    // Max scroll = enough to see all discs
+    var maxScroll = 1 + (discs.length - 1) * 0.35;
+    scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
 }, { passive: false });
 
 var hintShown = true;
@@ -449,8 +451,13 @@ function tick() {
 
     if (fullscreenDisc) return;
 
-    // Smooth the blend
-    lineBlend += (lineTarget - lineBlend) * 0.06;
+    // Smooth scroll position
+    scrollPos += (scrollTarget - scrollPos) * 0.06;
+
+    // Phase 1: scatter to line (scrollPos 0 to 1)
+    // Phase 2: scroll through column (scrollPos > 1)
+    var lineBlend = Math.min(1, Math.max(0, scrollPos));
+    var columnScroll = Math.max(0, scrollPos - 1); // only active after fully lined up
 
     var NEAR_DIST = 260;
     var CLOSE_DIST = 140;
@@ -461,37 +468,36 @@ function tick() {
     var vh = window.innerHeight;
     var count = discEls.length;
 
-    // Vertical line target positions
+    // Column layout: first disc starts at 10% from top, spaced generously
     var lineX = (vw - DISC_SIZE) / 2;
-    var totalLineH = count * (DISC_SIZE * 0.55);
-    var lineStartY = (vh - totalLineH) / 2;
-    var lineSpacing = DISC_SIZE * 0.55;
+    var lineStartY = vh * 0.08; // top 10% area, disc fully visible
+    var lineSpacing = DISC_SIZE * 0.7; // generous spacing between disc centers
+    var scrollOffset = columnScroll * vh * 0.8; // how far the column has scrolled up
 
-    // When lined up, discs should all be visible
     var isLining = lineBlend > 0.05;
+    var driftMul = 1 - lineBlend;
 
     for (var i = 0; i < count; i++) {
         var el = discEls[i];
         var d = discData[i];
 
-        // Scatter home (with drift dampened by blend)
-        var driftMul = 1 - lineBlend;
+        // Scatter position (with drift)
         var scatterX = d.baseX + Math.sin(time * d.driftSpeedX + d.driftPhaseX) * d.driftRadius * driftMul;
         var scatterY = d.baseY + Math.cos(time * d.driftSpeedY + d.driftPhaseY) * d.driftRadius * 0.7 * driftMul;
         scatterX = Math.max(0, Math.min(vw - DISC_SIZE, scatterX));
         scatterY = Math.max(0, Math.min(vh - DISC_SIZE, scatterY));
 
-        // Line target
+        // Line target (scrolled by columnScroll)
         var lineTgtX = lineX;
-        var lineTgtY = lineStartY + i * lineSpacing;
+        var lineTgtY = lineStartY + i * lineSpacing - scrollOffset;
 
-        // Blend between scatter and line
+        // Blend
         d.homeX = scatterX + (lineTgtX - scatterX) * lineBlend;
         d.homeY = scatterY + (lineTgtY - scatterY) * lineBlend;
 
-        // Z drift dampened as we line up
+        // Z: flatten when lined up
         var targetZ = d.zBase + Math.sin(time * d.driftSpeedZ + d.driftPhaseZ) * d.driftRadiusZ * driftMul;
-        var zGoal = targetZ * (1 - lineBlend); // flatten Z when lined up
+        var zGoal = targetZ * (1 - lineBlend);
         d.currentZ += (zGoal - d.currentZ) * 0.05;
 
         var cx = d.currentX + DISC_HALF;
@@ -500,9 +506,8 @@ function tick() {
         var dy = smoothY - cy;
         var dist = Math.sqrt(dx * dx + dy * dy);
 
-        // Proximity (only in scatter mode)
+        // Proximity
         if (isLining) {
-            // When lining up, all discs become visible
             el.classList.add('close');
             el.classList.remove('near');
             el.style.zIndex = count - i;
@@ -518,7 +523,7 @@ function tick() {
             }
         }
 
-        // Magnetic pull (dampened when lining up)
+        // Magnetic pull (scatter mode only)
         if (dist < NEAR_DIST && dist > 10) {
             var pullFactor = (1 - dist / NEAR_DIST) * PULL_STRENGTH * driftMul;
             d.currentX += dx * pullFactor;
