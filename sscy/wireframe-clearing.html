@@ -439,7 +439,7 @@ document.addEventListener('mousemove', function(e) {
 // Phase 2 is locked until the line has fully settled
 var lineSettled = false;
 var settleTimer = 0;
-var SETTLE_DELAY = 60;
+var SETTLE_DELAY = 100; // ~1.7 seconds at 60fps
 
 var PHASE2_END = 1 + (discs.length - 1) * 0.35;
 var PHASE3_TRANSITION = 1;
@@ -454,16 +454,18 @@ var rowSettleTimer = 0;
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
     if (!lineSettled) {
-        // Phase 1: clamp to 1
+        // Phase 1: vertical scroll assembles line
         scrollTarget += e.deltaY * 0.0015;
         scrollTarget = Math.max(0, Math.min(1, scrollTarget));
     } else if (!rowSettled) {
-        // Phases 2+3 transition: allow up to where row is formed, but no panning yet
+        // Phases 2+3 transition: vertical scroll through column and into row formation
         scrollTarget += e.deltaY * 0.001;
         scrollTarget = Math.max(0, Math.min(PHASE3_START, scrollTarget));
     } else {
-        // Phase 3 pan: scroll across the row
-        scrollTarget += e.deltaY * 0.001;
+        // Phase 3 pan: horizontal scroll (deltaX) pans across the row
+        // Also accept deltaY for mice without horizontal scroll
+        var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        scrollTarget += delta * 0.001;
         scrollTarget = Math.max(0, Math.min(MAX_SCROLL, scrollTarget));
     }
 }, { passive: false });
