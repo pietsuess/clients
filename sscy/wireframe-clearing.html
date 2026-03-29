@@ -258,16 +258,16 @@
 
 <script>
 var discs = [
-    { tag:"Category", name:"Feature One", detail:"A short description of what this section contains.", cta:"Explore", glow:"rgba(74,138,62,0.05)", icon:"\u2726" },
-    { tag:"Category", name:"Feature Two", detail:"Another area of content worth discovering.", cta:"Learn More", glow:"rgba(100,100,160,0.04)", icon:"\u2736" },
-    { tag:"Category", name:"Feature Three", detail:"Supporting detail for this content area.", cta:"View", glow:"rgba(59,184,168,0.05)", icon:"\u2605" },
-    { tag:"Category", name:"Feature Four", detail:"Something interesting lives behind this disc.", cta:"Open", glow:"rgba(90,140,160,0.05)", icon:"\u2B21" },
-    { tag:"Category", name:"Feature Five", detail:"A placeholder for real content to come.", cta:"Details", glow:"rgba(201,168,76,0.05)", icon:"\u2661" },
-    { tag:"Category", name:"Feature Six", detail:"Discover what this area has to offer.", cta:"Enter", glow:"rgba(180,120,60,0.05)", icon:"\u2600" },
-    { tag:"Category", name:"Feature Seven", detail:"Content that reveals itself on approach.", cta:"See More", glow:"rgba(80,140,80,0.04)", icon:"\u2698" },
-    { tag:"Category", name:"Feature Eight", detail:"One more thing to find in the clearing.", cta:"Go", glow:"rgba(140,60,100,0.05)", icon:"\u266B" },
-    { tag:"Category", name:"Feature Nine", detail:"A quiet corner with something to share.", cta:"Discover", glow:"rgba(160,120,60,0.04)", icon:"\u2727" },
-    { tag:"Category", name:"Feature Ten", detail:"The last disc, but not the least.", cta:"Visit", glow:"rgba(40,80,40,0.05)", icon:"\u2E19" }
+    { tag:"Category", name:"Feature One", detail:"A short description of what this section contains.", cta:"Explore", glow:"rgba(74,138,62,0.05)", icon:"\u2726", tint:"rgba(74,138,62,0.06)" },
+    { tag:"Category", name:"Feature Two", detail:"Another area of content worth discovering.", cta:"Learn More", glow:"rgba(100,100,160,0.04)", icon:"\u2736", tint:"rgba(100,100,180,0.06)" },
+    { tag:"Category", name:"Feature Three", detail:"Supporting detail for this content area.", cta:"View", glow:"rgba(59,184,168,0.05)", icon:"\u2605", tint:"rgba(59,184,168,0.06)" },
+    { tag:"Category", name:"Feature Four", detail:"Something interesting lives behind this disc.", cta:"Open", glow:"rgba(90,140,160,0.05)", icon:"\u2B21", tint:"rgba(90,140,180,0.06)" },
+    { tag:"Category", name:"Feature Five", detail:"A placeholder for real content to come.", cta:"Details", glow:"rgba(201,168,76,0.05)", icon:"\u2661", tint:"rgba(201,168,76,0.06)" },
+    { tag:"Category", name:"Feature Six", detail:"Discover what this area has to offer.", cta:"Enter", glow:"rgba(180,120,60,0.05)", icon:"\u2600", tint:"rgba(180,120,60,0.06)" },
+    { tag:"Category", name:"Feature Seven", detail:"Content that reveals itself on approach.", cta:"See More", glow:"rgba(80,140,80,0.04)", icon:"\u2698", tint:"rgba(80,150,80,0.06)" },
+    { tag:"Category", name:"Feature Eight", detail:"One more thing to find in the clearing.", cta:"Go", glow:"rgba(140,60,100,0.05)", icon:"\u266B", tint:"rgba(150,60,110,0.06)" },
+    { tag:"Category", name:"Feature Nine", detail:"A quiet corner with something to share.", cta:"Discover", glow:"rgba(160,120,60,0.04)", icon:"\u2727", tint:"rgba(170,130,60,0.06)" },
+    { tag:"Category", name:"Feature Ten", detail:"The last disc, but not the least.", cta:"Visit", glow:"rgba(40,80,40,0.05)", icon:"\u2E19", tint:"rgba(50,100,50,0.06)" }
 ];
 
 var ground = document.getElementById('ground');
@@ -359,6 +359,9 @@ discs.forEach(function(c, i) {
     el.className = 'disc';
     el.style.zIndex = i + 1;
 
+    // Faint color tint via inset box-shadow
+    el.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2), inset 0 0 60px ' + c.tint;
+
     el.innerHTML =
         '<div class="disc-close">\u2715</div>' +
         '<div class="disc-glow" style="background:radial-gradient(circle,' + c.glow + ',transparent 70%)"></div>' +
@@ -436,19 +439,25 @@ document.addEventListener('mousemove', function(e) {
 // Phase 2 is locked until the line has fully settled
 var lineSettled = false;
 var settleTimer = 0;
-var SETTLE_DELAY = 60; // frames (~1 second at 60fps) the line must hold before phase 2 unlocks
+var SETTLE_DELAY = 60;
+
+// Phase 2 ends when last disc reaches top - then phase 3 (horizontal) begins
+var PHASE2_END = 1 + (discs.length - 1) * 0.35;
+var PHASE3_END = PHASE2_END + 1; // 1 unit to transition to horizontal
+var rowSettled = false;
+var rowSettleTimer = 0;
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
-    var maxScroll = 1 + (discs.length - 1) * 0.35;
     if (!lineSettled) {
-        // Phase 1: only allow scrolling up to 1.0
         scrollTarget += e.deltaY * 0.0015;
         scrollTarget = Math.max(0, Math.min(1, scrollTarget));
-    } else {
-        // Phase 2: scroll through column, but slower
+    } else if (!rowSettled) {
         scrollTarget += e.deltaY * 0.001;
-        scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget));
+        scrollTarget = Math.max(0, Math.min(PHASE2_END, scrollTarget));
+    } else {
+        scrollTarget += e.deltaY * 0.001;
+        scrollTarget = Math.max(0, Math.min(PHASE3_END, scrollTarget));
     }
 }, { passive: false });
 
@@ -477,25 +486,33 @@ function tick() {
     // Smooth scroll position
     scrollPos += (scrollTarget - scrollPos) * 0.06;
 
-    // Unlock phase 2 only after the line has been fully settled for SETTLE_DELAY frames
+    // Unlock phase 2 once line has settled
     if (scrollPos > 0.98 && scrollTarget >= 0.99) {
         settleTimer++;
-        if (settleTimer >= SETTLE_DELAY) {
-            lineSettled = true;
-        }
+        if (settleTimer >= SETTLE_DELAY) lineSettled = true;
     } else {
         settleTimer = 0;
     }
-    // Re-lock if we scroll back toward scatter
     if (scrollTarget < 0.5) {
         lineSettled = false;
         settleTimer = 0;
+        rowSettled = false;
+        rowSettleTimer = 0;
     }
 
-    // Phase 1: scatter to line (scrollPos 0 to 1)
-    // Phase 2: scroll through column (scrollPos > 1)
+    // Unlock phase 3 once column is fully scrolled
+    if (scrollPos > PHASE2_END - 0.05 && scrollTarget >= PHASE2_END - 0.05 && lineSettled) {
+        rowSettleTimer++;
+        if (rowSettleTimer >= SETTLE_DELAY) rowSettled = true;
+    } else if (scrollTarget < PHASE2_END - 0.5) {
+        rowSettled = false;
+        rowSettleTimer = 0;
+    }
+
+    // Phase breakdown
     var lineBlend = Math.min(1, Math.max(0, scrollPos));
-    var columnScroll = Math.max(0, scrollPos - 1); // only active after fully lined up
+    var columnScroll = Math.max(0, Math.min(PHASE2_END - 1, scrollPos - 1));
+    var rowBlend = Math.max(0, Math.min(1, scrollPos - PHASE2_END));
 
     var NEAR_DIST = 260;
     var CLOSE_DIST = 140;
@@ -506,11 +523,17 @@ function tick() {
     var vh = window.innerHeight;
     var count = discEls.length;
 
-    // Column layout: first disc starts at 10% from top, spaced generously
+    // Column layout
     var lineX = (vw - DISC_SIZE) / 2;
-    var lineStartY = vh * 0.08; // top 10% area, disc fully visible
-    var lineSpacing = DISC_SIZE * 0.7; // generous spacing between disc centers
-    var scrollOffset = columnScroll * vh * 0.8; // how far the column has scrolled up
+    var lineStartY = vh * 0.08;
+    var lineSpacing = DISC_SIZE * 0.7;
+    var scrollOffset = columnScroll * vh * 0.8;
+
+    // Horizontal row layout (phase 3)
+    var rowY = (vh - DISC_SIZE) / 2;
+    var rowTotalW = count * (DISC_SIZE * 0.75);
+    var rowStartX = (vw - rowTotalW) / 2;
+    var rowSpacing = DISC_SIZE * 0.75;
 
     var isLining = lineBlend > 0.05;
     var driftMul = 1 - lineBlend;
@@ -525,13 +548,27 @@ function tick() {
         scatterX = Math.max(0, Math.min(vw - DISC_SIZE, scatterX));
         scatterY = Math.max(0, Math.min(vh - DISC_SIZE, scatterY));
 
-        // Line target (scrolled by columnScroll)
-        var lineTgtX = lineX;
-        var lineTgtY = lineStartY + i * lineSpacing - scrollOffset;
+        // Column target (scrolled)
+        var colTgtX = lineX;
+        var colTgtY = lineStartY + i * lineSpacing - scrollOffset;
 
-        // Blend
-        d.homeX = scatterX + (lineTgtX - scatterX) * lineBlend;
-        d.homeY = scatterY + (lineTgtY - scatterY) * lineBlend;
+        // Horizontal row target
+        var rowTgtX = rowStartX + i * rowSpacing;
+        var rowTgtY = rowY;
+
+        // Blend: scatter -> column -> row
+        // First blend scatter to column
+        var tgtX = scatterX + (colTgtX - scatterX) * lineBlend;
+        var tgtY = scatterY + (colTgtY - scatterY) * lineBlend;
+
+        // Then blend column to row (phase 3)
+        if (rowBlend > 0) {
+            tgtX = tgtX + (rowTgtX - tgtX) * rowBlend;
+            tgtY = tgtY + (rowTgtY - tgtY) * rowBlend;
+        }
+
+        d.homeX = tgtX;
+        d.homeY = tgtY;
 
         // Z: flatten when lined up
         var targetZ = d.zBase + Math.sin(time * d.driftSpeedZ + d.driftPhaseZ) * d.driftRadiusZ * driftMul;
