@@ -287,6 +287,10 @@ var discData = [];
 var DISC_SIZE = 245;
 var DISC_HALF = DISC_SIZE / 2;
 
+// Line-up blend: 0 = scattered, 1 = vertical column
+var lineBlend = 0;
+var lineTarget = 0;
+
 function layoutDiscs() {
     var vw = window.innerWidth;
     var vh = window.innerHeight;
@@ -416,6 +420,13 @@ document.addEventListener('mousemove', function(e) {
     mouseY = e.clientY;
 });
 
+// Scroll drives scatter-to-line blend
+document.addEventListener('wheel', function(e) {
+    e.preventDefault();
+    lineTarget += e.deltaY * 0.002;
+    lineTarget = Math.max(0, Math.min(1, lineTarget));
+}, { passive: false });
+
 var hintShown = true;
 document.addEventListener('mousemove', function() {
     if (hintShown) {
@@ -438,6 +449,9 @@ function tick() {
 
     if (fullscreenDisc) return;
 
+    // Smooth the blend
+    lineBlend += (lineTarget - lineBlend) * 0.06;
+
     var NEAR_DIST = 260;
     var CLOSE_DIST = 140;
     var PULL_STRENGTH = 0.015;
@@ -445,20 +459,40 @@ function tick() {
     var time = Date.now() * 0.001;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
+    var count = discEls.length;
 
-    for (var i = 0; i < discEls.length; i++) {
+    // Vertical line target positions
+    var lineX = (vw - DISC_SIZE) / 2;
+    var totalLineH = count * (DISC_SIZE * 0.55);
+    var lineStartY = (vh - totalLineH) / 2;
+    var lineSpacing = DISC_SIZE * 0.55;
+
+    // When lined up, discs should all be visible
+    var isLining = lineBlend > 0.05;
+
+    for (var i = 0; i < count; i++) {
         var el = discEls[i];
         var d = discData[i];
 
-        // Drift XY
-        d.homeX = d.baseX + Math.sin(time * d.driftSpeedX + d.driftPhaseX) * d.driftRadius;
-        d.homeY = d.baseY + Math.cos(time * d.driftSpeedY + d.driftPhaseY) * d.driftRadius * 0.7;
-        d.homeX = Math.max(0, Math.min(vw - DISC_SIZE, d.homeX));
-        d.homeY = Math.max(0, Math.min(vh - DISC_SIZE, d.homeY));
+        // Scatter home (with drift dampened by blend)
+        var driftMul = 1 - lineBlend;
+        var scatterX = d.baseX + Math.sin(time * d.driftSpeedX + d.driftPhaseX) * d.driftRadius * driftMul;
+        var scatterY = d.baseY + Math.cos(time * d.driftSpeedY + d.driftPhaseY) * d.driftRadius * 0.7 * driftMul;
+        scatterX = Math.max(0, Math.min(vw - DISC_SIZE, scatterX));
+        scatterY = Math.max(0, Math.min(vh - DISC_SIZE, scatterY));
 
-        // Drift Z
-        var targetZ = d.zBase + Math.sin(time * d.driftSpeedZ + d.driftPhaseZ) * d.driftRadiusZ;
-        d.currentZ += (targetZ - d.currentZ) * 0.03;
+        // Line target
+        var lineTgtX = lineX;
+        var lineTgtY = lineStartY + i * lineSpacing;
+
+        // Blend between scatter and line
+        d.homeX = scatterX + (lineTgtX - scatterX) * lineBlend;
+        d.homeY = scatterY + (lineTgtY - scatterY) * lineBlend;
+
+        // Z drift dampened as we line up
+        var targetZ = d.zBase + Math.sin(time * d.driftSpeedZ + d.driftPhaseZ) * d.driftRadiusZ * driftMul;
+        var zGoal = targetZ * (1 - lineBlend); // flatten Z when lined up
+        d.currentZ += (zGoal - d.currentZ) * 0.05;
 
         var cx = d.currentX + DISC_HALF;
         var cy = d.currentY + DISC_HALF;
@@ -466,19 +500,27 @@ function tick() {
         var dy = smoothY - cy;
         var dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < CLOSE_DIST) {
+        // Proximity (only in scatter mode)
+        if (isLining) {
+            // When lining up, all discs become visible
             el.classList.add('close');
             el.classList.remove('near');
-        } else if (dist < NEAR_DIST) {
-            el.classList.add('near');
-            el.classList.remove('close');
+            el.style.zIndex = count - i;
         } else {
-            el.classList.remove('near', 'close');
+            if (dist < CLOSE_DIST) {
+                el.classList.add('close');
+                el.classList.remove('near');
+            } else if (dist < NEAR_DIST) {
+                el.classList.add('near');
+                el.classList.remove('close');
+            } else {
+                el.classList.remove('near', 'close');
+            }
         }
 
-        // Magnetic pull
+        // Magnetic pull (dampened when lining up)
         if (dist < NEAR_DIST && dist > 10) {
-            var pullFactor = (1 - dist / NEAR_DIST) * PULL_STRENGTH;
+            var pullFactor = (1 - dist / NEAR_DIST) * PULL_STRENGTH * driftMul;
             d.currentX += dx * pullFactor;
             d.currentY += dy * pullFactor;
         }
