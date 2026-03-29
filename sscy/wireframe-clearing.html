@@ -441,19 +441,28 @@ var lineSettled = false;
 var settleTimer = 0;
 var SETTLE_DELAY = 60;
 
-// Phase 2 ends when last disc reaches top - phase 3 starts immediately
 var PHASE2_END = 1 + (discs.length - 1) * 0.35;
-// Phase 3: 1 unit to go horizontal, then scroll across discs
 var PHASE3_TRANSITION = 1;
 var PHASE3_SCROLL = (discs.length - 1) * 0.4;
-var MAX_SCROLL = PHASE2_END + PHASE3_TRANSITION + PHASE3_SCROLL;
+var PHASE3_START = PHASE2_END + PHASE3_TRANSITION; // where horizontal pan begins
+var MAX_SCROLL = PHASE3_START + PHASE3_SCROLL;
+
+// Dwell gate for horizontal row settling before panning
+var rowSettled = false;
+var rowSettleTimer = 0;
 
 document.addEventListener('wheel', function(e) {
     e.preventDefault();
     if (!lineSettled) {
+        // Phase 1: clamp to 1
         scrollTarget += e.deltaY * 0.0015;
         scrollTarget = Math.max(0, Math.min(1, scrollTarget));
+    } else if (!rowSettled) {
+        // Phases 2+3 transition: allow up to where row is formed, but no panning yet
+        scrollTarget += e.deltaY * 0.001;
+        scrollTarget = Math.max(0, Math.min(PHASE3_START, scrollTarget));
     } else {
+        // Phase 3 pan: scroll across the row
         scrollTarget += e.deltaY * 0.001;
         scrollTarget = Math.max(0, Math.min(MAX_SCROLL, scrollTarget));
     }
@@ -494,6 +503,17 @@ function tick() {
     if (scrollTarget < 0.5) {
         lineSettled = false;
         settleTimer = 0;
+        rowSettled = false;
+        rowSettleTimer = 0;
+    }
+
+    // Unlock horizontal panning once row has settled
+    if (scrollPos > PHASE3_START - 0.05 && scrollTarget >= PHASE3_START - 0.05 && lineSettled) {
+        rowSettleTimer++;
+        if (rowSettleTimer >= SETTLE_DELAY) rowSettled = true;
+    } else if (scrollTarget < PHASE2_END) {
+        rowSettled = false;
+        rowSettleTimer = 0;
     }
 
     // Phase breakdown
