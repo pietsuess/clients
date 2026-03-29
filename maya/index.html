@@ -5,9 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Unprofessional Variety Show - A Queer Cabaret at The Parkside Lounge, NYC</title>
 <meta name="description" content="An unprofessional, unimportant, and undisciplined cabaret-style night of performance. Quarterly at The Parkside Lounge, Lower East Side, NYC. Programmed by Maya Suess.">
-<meta property="og:title" content="Unprofessional Variety Show">
-<meta property="og:description" content="A queer cabaret at The Parkside Lounge, NYC. You never quite know what you'll get, but it's always gonna be a time.">
-<meta property="og:image" content="img/press-1.jpg">
+<meta name="keywords" content="unprofessional variety show, queer cabaret, parkside lounge, lower east side, nyc performance, maya suess, live cabaret nyc, quarterly show">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://mayasuess-jpg.github.io/unprofessionalvarietyshow/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Unprofessional Variety Show">
+<meta property="og:title" content="Unprofessional Variety Show - A Queer Cabaret at The Parkside Lounge, NYC">
+<meta property="og:description" content="A queer cabaret at The Parkside Lounge, NYC. You never quite know what you'll get, but it's always gonna be a time. Quarterly since 2022.">
+<meta property="og:image" content="https://mayasuess-jpg.github.io/unprofessionalvarietyshow/img/press-1.jpg">
+<meta property="og:url" content="https://mayasuess-jpg.github.io/unprofessionalvarietyshow/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Unprofessional Variety Show">
+<meta name="twitter:description" content="A queer cabaret at The Parkside Lounge, NYC. Quarterly since 2022. Programmed by Maya Suess.">
+<meta name="twitter:image" content="https://mayasuess-jpg.github.io/unprofessionalvarietyshow/img/press-1.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -541,6 +551,46 @@ footer a:hover{color:var(--pink)}
 .show-detail-content .sd-crew span{padding:6px 14px;border:1px solid rgba(245,240,230,0.12);border-radius:0;font-size:0.8rem;color:rgba(245,240,230,0.6)}
 
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "EventSeries",
+  "name": "Unprofessional Variety Show",
+  "description": "An unprofessional, unimportant, and undisciplined cabaret-style night of performance. Quarterly at The Parkside Lounge, Lower East Side, NYC.",
+  "url": "https://mayasuess-jpg.github.io/unprofessionalvarietyshow/",
+  "image": "https://mayasuess-jpg.github.io/unprofessionalvarietyshow/img/press-1.jpg",
+  "organizer": {
+    "@type": "Person",
+    "name": "Maya Suess",
+    "url": "https://www.instagram.com/MayaSuess/"
+  },
+  "location": {
+    "@type": "Place",
+    "name": "The Parkside Lounge",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "317 East Houston Street",
+      "addressLocality": "New York",
+      "addressRegion": "NY",
+      "postalCode": "10002",
+      "addressCountry": "US"
+    },
+    "url": "https://www.parksidelounge.nyc/"
+  },
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "performer": {
+    "@type": "PerformingGroup",
+    "name": "Various Performers"
+  },
+  "startDate": "2022-02-01",
+  "eventSchedule": {
+    "@type": "Schedule",
+    "repeatFrequency": "P3M",
+    "byMonth": [2, 5, 8, 10, 12]
+  }
+}
+</script>
 </head>
 <body>
 
@@ -813,6 +863,7 @@ async function init() {
     applyMediaFilter('all');
     renderPress();
     renderContact();
+    injectEventSchema();
   } catch(e) { console.error('Init error:', e); }
 }
 
@@ -1033,6 +1084,51 @@ function renderContact() {
   const accessEl = document.getElementById('accessNote');
   accessEl.textContent = s.venue + ' - ' + s.venueAddress + ' - ' +
     (s.accessibilityNote || 'Ground floor bar, portable ramp to performance space, accessible bathrooms');
+}
+
+/* ========================================
+   SEO - dynamic JSON-LD for upcoming/recent shows
+   ======================================== */
+function injectEventSchema() {
+  var baseUrl = 'https://mayasuess-jpg.github.io/unprofessionalvarietyshow/';
+  var shows = DATA.shows.slice(0, 5);
+  var events = shows.map(function(show) {
+    var performers = (show.performers || []).map(function(p) {
+      return { '@type': 'Person', 'name': typeof p === 'string' ? p : p.name };
+    });
+    var ev = {
+      '@type': 'Event',
+      'name': 'Unprofessional Variety Show: ' + (show.title || ''),
+      'startDate': show.date + (show.time ? 'T' + convertTo24(show.time) : ''),
+      'location': {
+        '@type': 'Place',
+        'name': 'The Parkside Lounge',
+        'address': { '@type': 'PostalAddress', 'streetAddress': '317 East Houston Street', 'addressLocality': 'New York', 'addressRegion': 'NY', 'postalCode': '10002', 'addressCountry': 'US' }
+      },
+      'organizer': { '@type': 'Person', 'name': 'Maya Suess' },
+      'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+      'eventStatus': 'https://schema.org/EventScheduled',
+      'description': show.theme || show.description || ''
+    };
+    if (show.posterImage) ev.image = baseUrl + show.posterImage;
+    if (performers.length) ev.performer = performers;
+    if (show.ticketUrl) ev.offers = { '@type': 'Offer', 'url': show.ticketUrl, 'priceCurrency': 'USD', 'availability': 'https://schema.org/InStock' };
+    if (show.doors) ev.doorTime = show.date + 'T' + convertTo24(show.doors);
+    return ev;
+  });
+  var script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': events });
+  document.head.appendChild(script);
+}
+function convertTo24(timeStr) {
+  if (!timeStr) return '19:30';
+  var m = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!m) return '19:30';
+  var h = parseInt(m[1]); var min = m[2];
+  if (m[3] && m[3].toUpperCase() === 'PM' && h < 12) h += 12;
+  if (m[3] && m[3].toUpperCase() === 'AM' && h === 12) h = 0;
+  return (h < 10 ? '0' : '') + h + ':' + min;
 }
 
 /* ========================================
