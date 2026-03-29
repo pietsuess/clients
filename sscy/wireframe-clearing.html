@@ -20,9 +20,10 @@
         .ground {
             position: fixed;
             inset: 0;
+            perspective: 800px;
+            perspective-origin: 50% 50%;
         }
 
-        /* Lantern glow follows cursor */
         .lantern {
             position: fixed;
             pointer-events: none;
@@ -64,7 +65,6 @@
                 radial-gradient(ellipse at 50% 80%, rgba(59, 120, 100, 0.2), transparent 40%);
         }
 
-        /* Discs - glassmorphic circles matching SSCY hot zones */
         .disc {
             position: absolute;
             width: 245px;
@@ -82,34 +82,32 @@
             -webkit-backdrop-filter: blur(8px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             opacity: 0.03;
-            transform: scale(0.92);
-            transition: opacity 0.8s ease, transform 0.8s ease, background 0.8s ease, border-color 0.6s ease, box-shadow 0.8s ease;
+            transition: opacity 0.8s ease, background 0.8s ease, border-color 0.6s ease, box-shadow 0.8s ease;
             cursor: none;
             overflow: hidden;
+            will-change: transform;
+            transform-style: preserve-3d;
         }
 
         .disc.near {
             opacity: 0.4;
-            transform: scale(0.96);
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(255, 255, 255, 0.1);
         }
 
         .disc.close {
             opacity: 1;
-            transform: scale(1);
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.15);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 60px rgba(201, 168, 76, 0.04);
+            cursor: pointer;
         }
 
         .disc.close:hover {
-            transform: scale(1.05);
             background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.25);
         }
 
-        /* Inner glow per disc */
         .disc-glow {
             position: absolute;
             inset: -30px;
@@ -155,8 +153,8 @@
             margin-top: 12px;
             padding: 6px 16px;
             border-radius: 50px;
-            background: rgba(201, 168, 76, 0.1);
-            border: 1px solid rgba(201, 168, 76, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             font-size: 0.55rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
@@ -172,10 +170,10 @@
         }
 
         .disc-cta:hover {
-            background: rgba(201, 168, 76, 0.25);
+            background: rgba(255, 255, 255, 0.18);
         }
 
-        /* Fullscreen disc */
+        /* Fullscreen */
         .disc.fullscreen {
             position: fixed !important;
             inset: 0 !important;
@@ -184,7 +182,7 @@
             border-radius: 0;
             padding: 0;
             opacity: 1;
-            transform: scale(1) translate(0, 0) !important;
+            transform: none !important;
             z-index: 10001 !important;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             cursor: default;
@@ -195,34 +193,11 @@
             justify-content: center;
         }
 
-        .disc.fullscreen .disc-tag {
-            font-size: 0.65rem;
-            margin-bottom: 14px;
-        }
-
-        .disc.fullscreen .disc-icon {
-            font-size: 3.5rem;
-            margin-bottom: 14px;
-        }
-
-        .disc.fullscreen .disc-name {
-            font-size: 2.4rem;
-            margin-bottom: 16px;
-        }
-
-        .disc.fullscreen .disc-detail {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            max-width: 600px;
-            opacity: 0.55;
-        }
-
-        .disc.fullscreen .disc-cta {
-            opacity: 1;
-            font-size: 0.7rem;
-            padding: 12px 28px;
-            margin-top: 24px;
-        }
+        .disc.fullscreen .disc-tag { font-size: 0.65rem; margin-bottom: 14px; }
+        .disc.fullscreen .disc-icon { font-size: 3.5rem; margin-bottom: 14px; }
+        .disc.fullscreen .disc-name { font-size: 2.4rem; margin-bottom: 16px; }
+        .disc.fullscreen .disc-detail { font-size: 1.05rem; line-height: 1.6; max-width: 600px; opacity: 0.55; }
+        .disc.fullscreen .disc-cta { opacity: 1; font-size: 0.7rem; padding: 12px 28px; margin-top: 24px; }
 
         .disc-close {
             position: absolute;
@@ -244,26 +219,16 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        .disc-close:hover {
-            background: rgba(255, 255, 255, 0.12);
-            color: #fff;
-        }
+        .disc-close:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+        .disc.fullscreen .disc-close { display: flex; cursor: pointer; }
 
-        .disc.fullscreen .disc-close {
-            display: flex;
-            cursor: pointer;
-        }
-
-        /* Dim ground when fullscreen */
         .ground.dimmed .disc:not(.fullscreen) {
             opacity: 0 !important;
             pointer-events: none;
             transition: opacity 0.3s;
         }
 
-        .ground.dimmed .ground-texture {
-            opacity: 0;
-        }
+        .ground.dimmed .ground-texture { opacity: 0; }
 
         .ambient-hint {
             position: fixed;
@@ -289,20 +254,20 @@
 </div>
 <div class="lantern" id="lantern"></div>
 <div class="lantern-dot" id="lanternDot"></div>
-<div class="ambient-hint" id="hint">Explore the clearing</div>
+<div class="ambient-hint" id="hint">Explore</div>
 
 <script>
 var discs = [
-    { tag:"The Land", name:"69 Acres of Sanctuary", detail:"Forests, gardens, ponds, and temples among ancient cedars.", cta:"Explore", glow:"rgba(74,138,62,0.05)", icon:"\u2618" },
-    { tag:"Babaji", name:"Peace. No more than that.", detail:"When asked about his only goal in life.", cta:"More from Babaji", glow:"rgba(100,100,160,0.04)", icon:"\u201C" },
-    { tag:"Retreat", name:"Weekend Yoga Retreat", detail:"Two nights of practice, rest, and renewal from the garden.", cta:"Book", glow:"rgba(59,184,168,0.05)", icon:"\u2726" },
-    { tag:"Venue", name:"The Pond Dome", detail:"Geodesic dome by the water for workshops and events.", cta:"Inquire", glow:"rgba(90,140,160,0.05)", icon:"\u2B21" },
-    { tag:"Shop", name:"Salt Spring Cooking", detail:"The beloved cookbook. 52,000 copies sold.", cta:"Shop", glow:"rgba(201,168,76,0.05)", icon:"\u2661" },
-    { tag:"Training", name:"200-Hour YTT", detail:"Immersive residential teacher training. Yoga Alliance certified.", cta:"Apply", glow:"rgba(180,120,60,0.05)", icon:"\u2600" },
-    { tag:"Karma Yoga", name:"Live & Serve", detail:"Volunteer with room and board. Four hours daily.", cta:"Volunteer", glow:"rgba(80,140,80,0.04)", icon:"\u2698" },
-    { tag:"Event", name:"Music for Peace", detail:"Indian classical concerts in the Pond Dome.", cta:"Tickets", glow:"rgba(140,60,100,0.05)", icon:"\u266B" },
-    { tag:"Sacred", name:"Hanuman Shrine", detail:"Open-air shrine among cedars. Consecrated 1984.", cta:"Sacred Spaces", glow:"rgba(160,120,60,0.04)", icon:"\u2727" },
-    { tag:"Nature", name:"Dandaka Forest", detail:"Primordial cedar-swamp wetland. Boardwalk trail.", cta:"Trail Map", glow:"rgba(40,80,40,0.05)", icon:"\u2E19" }
+    { tag:"Category", name:"Feature One", detail:"A short description of what this section contains.", cta:"Explore", glow:"rgba(74,138,62,0.05)", icon:"\u2726" },
+    { tag:"Category", name:"Feature Two", detail:"Another area of content worth discovering.", cta:"Learn More", glow:"rgba(100,100,160,0.04)", icon:"\u2736" },
+    { tag:"Category", name:"Feature Three", detail:"Supporting detail for this content area.", cta:"View", glow:"rgba(59,184,168,0.05)", icon:"\u2605" },
+    { tag:"Category", name:"Feature Four", detail:"Something interesting lives behind this disc.", cta:"Open", glow:"rgba(90,140,160,0.05)", icon:"\u2B21" },
+    { tag:"Category", name:"Feature Five", detail:"A placeholder for real content to come.", cta:"Details", glow:"rgba(201,168,76,0.05)", icon:"\u2661" },
+    { tag:"Category", name:"Feature Six", detail:"Discover what this area has to offer.", cta:"Enter", glow:"rgba(180,120,60,0.05)", icon:"\u2600" },
+    { tag:"Category", name:"Feature Seven", detail:"Content that reveals itself on approach.", cta:"See More", glow:"rgba(80,140,80,0.04)", icon:"\u2698" },
+    { tag:"Category", name:"Feature Eight", detail:"One more thing to find in the clearing.", cta:"Go", glow:"rgba(140,60,100,0.05)", icon:"\u266B" },
+    { tag:"Category", name:"Feature Nine", detail:"A quiet corner with something to share.", cta:"Discover", glow:"rgba(160,120,60,0.04)", icon:"\u2727" },
+    { tag:"Category", name:"Feature Ten", detail:"The last disc, but not the least.", cta:"Visit", glow:"rgba(40,80,40,0.05)", icon:"\u2E19" }
 ];
 
 var ground = document.getElementById('ground');
@@ -326,25 +291,37 @@ function layoutDiscs() {
     var vw = window.innerWidth;
     var vh = window.innerHeight;
 
-    // Fill the whole page - grid with jitter, no overlaps
+    // Organic scatter across the full page with allowed overlap
     var count = discs.length;
-    var cols = Math.ceil(Math.sqrt(count * (vw / vh)));
-    var rows = Math.ceil(count / cols);
-    var cellW = vw / cols;
-    var cellH = vh / rows;
-    var pad = 20;
+
+    // Use Poisson-like placement: random but spread across the whole viewport
+    var placed = [];
+    var MIN_DIST = DISC_SIZE * 0.55; // allow partial overlap
 
     discs.forEach(function(c, i) {
-        var col = i % cols;
-        var row = Math.floor(i / cols);
-        // Center disc in its cell with some random jitter
-        var x = col * cellW + (cellW - DISC_SIZE) / 2 + (Math.random() - 0.5) * (cellW - DISC_SIZE - pad) * 0.6;
-        var y = row * cellH + (cellH - DISC_SIZE) / 2 + (Math.random() - 0.5) * (cellH - DISC_SIZE - pad) * 0.6;
+        var x, y, attempts = 0, ok;
 
-        x = Math.max(pad, Math.min(vw - DISC_SIZE - pad, x));
-        y = Math.max(pad, Math.min(vh - DISC_SIZE - pad, y));
+        // Try to place with minimum distance, but don't try forever
+        do {
+            x = Math.random() * (vw - DISC_SIZE);
+            y = Math.random() * (vh - DISC_SIZE);
+            ok = true;
+            for (var j = 0; j < placed.length; j++) {
+                var pdx = x - placed[j][0];
+                var pdy = y - placed[j][1];
+                if (Math.sqrt(pdx * pdx + pdy * pdy) < MIN_DIST) {
+                    ok = false;
+                    break;
+                }
+            }
+            attempts++;
+        } while (!ok && attempts < 80);
 
-        // Each disc gets unique drift parameters (speed, phase, radius)
+        placed.push([x, y]);
+
+        // Z-depth: each disc gets a random depth layer
+        var zBase = -100 + Math.random() * 200; // -100 to +100
+
         discData[i] = {
             homeX: x,
             homeY: y,
@@ -352,11 +329,16 @@ function layoutDiscs() {
             baseY: y,
             currentX: x,
             currentY: y,
-            driftSpeedX: 0.15 + Math.random() * 0.25,
-            driftSpeedY: 0.12 + Math.random() * 0.2,
+            zBase: zBase,
+            currentZ: zBase,
+            driftSpeedX: 0.1 + Math.random() * 0.2,
+            driftSpeedY: 0.08 + Math.random() * 0.18,
+            driftSpeedZ: 0.06 + Math.random() * 0.12,
             driftPhaseX: Math.random() * Math.PI * 2,
             driftPhaseY: Math.random() * Math.PI * 2,
-            driftRadius: 20 + Math.random() * 30
+            driftPhaseZ: Math.random() * Math.PI * 2,
+            driftRadius: 25 + Math.random() * 40,
+            driftRadiusZ: 40 + Math.random() * 60
         };
 
         if (discEls[i]) {
@@ -384,9 +366,11 @@ discs.forEach(function(c, i) {
     ground.appendChild(el);
     discEls.push(el);
 
-    el.addEventListener('dblclick', function(e) {
-        e.preventDefault();
+    // Single click to fullscreen
+    el.addEventListener('click', function(e) {
         if (fullscreenDisc) return;
+        if (!el.classList.contains('close')) return; // only when illuminated
+        e.preventDefault();
         goFullscreen(el, i);
     });
 
@@ -427,7 +411,6 @@ function closeFullscreen(el, idx) {
     }, 550);
 }
 
-// Track mouse
 document.addEventListener('mousemove', function(e) {
     mouseX = e.clientX;
     mouseY = e.clientY;
@@ -467,12 +450,15 @@ function tick() {
         var el = discEls[i];
         var d = discData[i];
 
-        // Slowly drift home position around its base
+        // Drift XY
         d.homeX = d.baseX + Math.sin(time * d.driftSpeedX + d.driftPhaseX) * d.driftRadius;
         d.homeY = d.baseY + Math.cos(time * d.driftSpeedY + d.driftPhaseY) * d.driftRadius * 0.7;
-        // Keep drifted home in bounds
-        d.homeX = Math.max(10, Math.min(vw - DISC_SIZE - 10, d.homeX));
-        d.homeY = Math.max(10, Math.min(vh - DISC_SIZE - 10, d.homeY));
+        d.homeX = Math.max(0, Math.min(vw - DISC_SIZE, d.homeX));
+        d.homeY = Math.max(0, Math.min(vh - DISC_SIZE, d.homeY));
+
+        // Drift Z
+        var targetZ = d.zBase + Math.sin(time * d.driftSpeedZ + d.driftPhaseZ) * d.driftRadiusZ;
+        d.currentZ += (targetZ - d.currentZ) * 0.03;
 
         var cx = d.currentX + DISC_HALF;
         var cy = d.currentY + DISC_HALF;
@@ -483,29 +469,27 @@ function tick() {
         if (dist < CLOSE_DIST) {
             el.classList.add('close');
             el.classList.remove('near');
-            el.style.zIndex = 100;
         } else if (dist < NEAR_DIST) {
             el.classList.add('near');
             el.classList.remove('close');
-            el.style.zIndex = i + 1;
         } else {
             el.classList.remove('near', 'close');
-            el.style.zIndex = i + 1;
         }
 
+        // Magnetic pull
         if (dist < NEAR_DIST && dist > 10) {
             var pullFactor = (1 - dist / NEAR_DIST) * PULL_STRENGTH;
             d.currentX += dx * pullFactor;
             d.currentY += dy * pullFactor;
         }
 
-        var homeDistX = d.homeX - d.currentX;
-        var homeDistY = d.homeY - d.currentY;
-        d.currentX += homeDistX * RETURN_STRENGTH;
-        d.currentY += homeDistY * RETURN_STRENGTH;
+        // Spring back
+        d.currentX += (d.homeX - d.currentX) * RETURN_STRENGTH;
+        d.currentY += (d.homeY - d.currentY) * RETURN_STRENGTH;
 
         el.style.left = d.currentX + 'px';
         el.style.top = d.currentY + 'px';
+        el.style.transform = 'translateZ(' + d.currentZ + 'px)';
     }
 }
 
