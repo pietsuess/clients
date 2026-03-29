@@ -277,36 +277,309 @@ p { text-align: justify; text-justify: inter-word; }
 <script>
 // ===== PRODUCT DATA =====
 var PRODUCTS = [
-  { id:100, category:'tickets', title:'Music for Peace: Carnatic Violin & Mridangam', desc:'An evening of South Indian classical music with Shriram Rajagopalan (violin) and Keerthy Raghavan (mridangam). Limited seating.', price:40.00, badge:'Apr 11', badgeClass:'new', event:{ date:'Saturday, April 11, 2026', time:'7:00 pm - 9:00 pm', venue:'Satsang Room' }, icon:'\uD83C\uDFBB' },
-  { id:101, category:'tickets', title:'Sound Bath + Meditation with Farhad Khan', desc:'Crystal bowls, gongs, and chimes for stress release, enhanced concentration, and chakra balancing.', price:0, priceLabel:'By Donation', badge:'May 13', badgeClass:'new', event:{ date:'Tuesday, May 13, 2026', time:'7:30 pm - 8:30 pm', venue:'Salt Spring Centre of Yoga' }, icon:'\uD83D\uDD14' },
-  { id:102, category:'tickets', title:'Music for Peace: Akhil Jobanputra & Tihai Ensemble', desc:'Hindustani classical concert featuring CBC "30 under 30" vocalist with harmonium and tabla.', price:40.00, badge:'Jun 27', badgeClass:'new', event:{ date:'Saturday, June 27, 2026', time:'Doors 6:30 pm, Concert 7:00 - 9:00 pm', venue:'Pond Dome' }, icon:'\uD83C\uDFB6' },
-  { id:103, category:'tickets', title:'Music for Peace: Deepak Ram - Bansuri Flute', desc:'Internationally celebrated bansuri master performs Indian classical music on the bamboo flute.', price:40.00, badge:'Aug 1', badgeClass:'new', event:{ date:'Saturday, August 1, 2026', time:'Doors 6:30 pm, Concert 7:00 - 9:00 pm', venue:'Satsang Room' }, icon:'\uD83C\uDFB5' },
-  { id:1, category:'books', title:'Salt Spring Island Cooking', desc:'The beloved vegetarian cookbook that sold 52,000 copies. Classic sattvic recipes from the Centre\'s kitchen.', price:19.95, icon:'\uD83D\uDCD7' },
-  { id:2, category:'books', title:'The Salt Spring Experience', desc:'Yoga philosophy, Ayurvedic principles, asana practice, and vegetarian recipes combined in one guide.', price:22.95, icon:'\uD83D\uDCD6' },
-  { id:3, category:'books', title:'Ashtanga Yoga Primer', desc:'Baba Hari Dass\'s foundational guide to the eight limbs of yoga.', price:24.95, icon:'\uD83D\uDCDA' },
-  { id:4, category:'books', title:'Silence Speaks', desc:'Collected wisdom from Baba Hari Dass\'s chalkboard. Aphorisms on yoga, life, and spiritual practice.', price:18.95, icon:'\uD83D\uDCDA' },
-  { id:5, category:'books', title:'The Yellow Book', desc:'Baba Hari Dass\'s first publication (1974). A collection of aphorisms.', price:16.95, icon:'\uD83D\uDCDA' },
-  { id:6, category:'books', title:'41st Annual Retreat Kirtan', desc:'Live devotional chanting recorded at the annual community yoga retreat.', price:12.00, icon:'\uD83C\uDFB6' },
-  { id:7, category:'books', title:'Surya Namaskar Mantras', desc:'Sun salutation mantras for your daily practice.', price:8.00, icon:'\uD83C\uDFB5' },
-  { id:10, category:'apparel', title:'Centre Logo T-Shirt', desc:'Soft organic cotton tee with the classic lotus calligraphy logo. Available in natural, sage, and ocean.', price:34.95, badge:'New', badgeClass:'new', icon:'\uD83D\uDC55' },
-  { id:11, category:'apparel', title:'Karma Yoga Hoodie', desc:'Cozy pullover hoodie with "Karma Yoga" print. Ethically produced.', price:54.95, icon:'\uD83E\uDDE5' },
-  { id:12, category:'apparel', title:'SSCY Toque', desc:'Warm knit beanie with embroidered lotus.', price:28.00, icon:'\uD83E\uDDE2' },
-  { id:13, category:'apparel', title:'Centre Tote Bag', desc:'Heavy-duty organic canvas tote with lotus logo.', price:24.95, icon:'\uD83D\uDC5C' },
-  { id:20, category:'yoga', title:'Meditation Cushion (Zafu)', desc:'Buckwheat-filled round cushion in Centre teal. Supports proper meditation posture.', price:59.95, icon:'\uD83E\uDDD8' },
-  { id:21, category:'yoga', title:'Mala Beads (108)', desc:'Handcrafted rudraksha seed mala for japa meditation. Traditional 108 beads.', price:38.00, icon:'\uD83D\uDCFF' },
-  { id:22, category:'yoga', title:'Cork Yoga Block', desc:'Sustainable cork block for support in asana practice.', price:22.00, icon:'\uD83E\uDDF1' },
-  { id:23, category:'yoga', title:'Neti Pot (Ceramic)', desc:'Traditional ceramic neti pot for nasal cleansing.', price:18.95, icon:'\uD83C\uDFFA' },
-  { id:30, category:'garden', title:'Kitchen Garden Seed Collection', desc:'Curated set of 8 seed varieties from the Centre\'s organic gardens. Includes planting guide.', price:24.95, badge:'New', badgeClass:'new', icon:'\uD83C\uDF31' },
-  { id:31, category:'garden', title:'Herb Garden Starter Kit', desc:'Basil, cilantro, dill, and parsley seeds. Organic and open-pollinated.', price:14.95, icon:'\uD83C\uDF3F' },
-  { id:32, category:'garden', title:'Recipe Card Set', desc:'12 recipe cards featuring classic vegetarian dishes from the Centre\'s kitchen.', price:16.95, icon:'\uD83C\uDF72' },
-  { id:40, category:'gifts', title:'Retreat Gift Certificate', desc:'Give the gift of a retreat. Redeemable for any program or personal retreat.', price:150.00, priceLabel:'From $150', icon:'\uD83C\uDF81' },
-  { id:41, category:'gifts', title:'Wellness Gift Certificate', desc:'Redeemable for massage, Ayurveda, or acupuncture at the Centre.', price:75.00, priceLabel:'From $75', icon:'\uD83D\uDC86' },
-  { id:42, category:'gifts', title:'Shop Gift Card', desc:'Gift card for any item in the online store. Delivered by email.', price:50.00, priceLabel:'From $50', icon:'\uD83C\uDF1F' },
-  { id:50, category:'support', title:'Sponsor a Garden Bed', desc:'Your sponsorship keeps the organic gardens growing. Includes a thank-you card.', price:50.00, icon:'\uD83C\uDF3B' },
-  { id:51, category:'support', title:'Feed a Karma Yogi', desc:'Cover meals for a karma yoga volunteer for one week.', price:75.00, icon:'\uD83C\uDF5B' },
-  { id:52, category:'support', title:'Annual Membership', desc:'Become a member of the Dharma Sara Satsang Society.', price:26.25, icon:'\uD83E\uDD1D' },
-  { id:53, category:'support', title:'Temple Maintenance Fund', desc:'Help preserve the Centre\'s sacred spaces.', price:100.00, priceLabel:'From $100', icon:'\uD83C\uDFDB\uFE0F' }
+  // TICKETS & EVENTS -- MUSIC FOR PEACE SERIES
+  {
+    id: 100,
+    category: 'tickets',
+    title: 'Music for Peace: Carnatic Violin & Mridangam',
+    desc: 'An evening of South Indian classical music with Shriram Rajagopalan (violin) and Keerthy Raghavan (mridangam). Intricate melodic structures and rhythmic complexity in a contemplative setting. Limited seating.',
+    price: 40.00,
+    badge: 'Apr 11',
+    badgeClass: 'new',
+    featured: true,
+    event: {
+      date: 'Saturday, April 11, 2026',
+      time: '7:00 pm \u2013 9:00 pm',
+      venue: 'Satsang Room'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg',
+    icon: '\uD83C\uDFBB'
+  },
+  {
+    id: 101,
+    category: 'tickets',
+    title: 'Sound Bath + Meditation with Farhad Khan',
+    desc: 'Crystal bowls, gongs, and chimes for stress release, enhanced concentration, and chakra balancing. Over two decades of healing practice.',
+    price: 0,
+    priceLabel: 'By Donation',
+    badge: 'May 13',
+    badgeClass: 'new',
+    event: {
+      date: 'Tuesday, May 13, 2026',
+      time: '7:30 pm \u2013 8:30 pm',
+      venue: 'Salt Spring Centre of Yoga'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/11/SoundBath-SaltSpring.png',
+    icon: '\uD83D\uDD14'
+  },
+  {
+    id: 102,
+    category: 'tickets',
+    title: 'Music for Peace: Akhil Jobanputra & Tihai Ensemble',
+    desc: 'Hindustani classical concert featuring CBC\'s "30 under 30" vocalist Akhil Jobanputra with Mohan Bhide (harmonium) and Hriday Buddhdev (tabla). Expansive ragas and spontaneous improvisation.',
+    price: 40.00,
+    badge: 'Jun 27',
+    badgeClass: 'new',
+    event: {
+      date: 'Saturday, June 27, 2026',
+      time: 'Doors 6:30 pm, Concert 7:00 pm \u2013 9:00 pm',
+      venue: 'Pond Dome'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg',
+    icon: '\uD83C\uDFB6'
+  },
+  {
+    id: 103,
+    category: 'tickets',
+    title: 'Music for Peace: Deepak Ram \u2013 Bansuri Flute',
+    desc: 'Internationally celebrated bansuri master Deepak Ram performs Indian classical music on the bamboo flute. Deeply expressive and meditative sound.',
+    price: 40.00,
+    badge: 'Aug 1',
+    badgeClass: 'new',
+    event: {
+      date: 'Saturday, August 1, 2026',
+      time: 'Doors 6:30 pm, Concert 7:00 pm \u2013 9:00 pm',
+      venue: 'Satsang Room'
+    },
+    img: 'https://saltspringcentre.com/wp-content/uploads/2025/12/11.jpg',
+    icon: '\uD83C\uDFB5'
+  },
+
+  // BOOKS & MEDIA
+  {
+    id: 1,
+    category: 'books',
+    title: 'Salt Spring Island Cooking',
+    desc: 'The beloved vegetarian cookbook that sold 52,000 copies. Classic sattvic recipes from the Centre\'s kitchen.',
+    price: 19.95,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2017/11/sourdough-1.jpeg',
+    icon: '\uD83D\uDCD7'
+  },
+  {
+    id: 2,
+    category: 'books',
+    title: 'The Salt Spring Experience',
+    desc: 'Yoga philosophy, Ayurvedic principles, asana practice, and vegetarian recipes combined in one guide.',
+    price: 22.95,
+    img: 'https://pictures.abebooks.com/isbn/9781553350095-us.jpg',
+    icon: '\uD83D\uDCD6'
+  },
+  {
+    id: 3,
+    category: 'books',
+    title: 'Ashtanga Yoga Primer',
+    desc: 'Baba Hari Dass\'s foundational guide to the eight limbs of yoga. Published by Sri Ram Publishing.',
+    price: 24.95,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/03/Babaji-header.jpg',
+    icon: '\uD83D\uDCDA'
+  },
+  {
+    id: 4,
+    category: 'books',
+    title: 'Silence Speaks',
+    desc: 'Collected wisdom from Baba Hari Dass\'s chalkboard. Aphorisms on yoga, life, and spiritual practice.',
+    price: 18.95,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2021/11/Babaji-photo-overlay.jpg',
+    icon: '\uD83D\uDCDA'
+  },
+  {
+    id: 5,
+    category: 'books',
+    title: 'The Yellow Book',
+    desc: 'Baba Hari Dass\'s first publication (1974). A collection of aphorisms that launched decades of teaching.',
+    price: 16.95,
+    icon: '\uD83D\uDCDA'
+  },
+  {
+    id: 6,
+    category: 'books',
+    title: '41st Annual Retreat Kirtan',
+    desc: 'Live devotional chanting recorded at the annual community yoga retreat.',
+    price: 12.00,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/08/Kirtan.jpg',
+    icon: '\uD83C\uDFB6'
+  },
+  {
+    id: 7,
+    category: 'books',
+    title: 'Surya Namaskar Mantras',
+    desc: 'Sun salutation mantras for your daily practice.',
+    price: 8.00,
+    icon: '\uD83C\uDFB5'
+  },
+
+  // APPAREL & MERCH
+  {
+    id: 10,
+    category: 'apparel',
+    title: 'Centre Logo T-Shirt',
+    desc: 'Soft organic cotton tee with the classic lotus calligraphy logo. Available in natural, sage, and ocean.',
+    price: 34.95,
+    badge: 'New',
+    badgeClass: 'new',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2021/11/SSCY-Full-Logo.png',
+    icon: '\uD83D\uDC55'
+  },
+  {
+    id: 11,
+    category: 'apparel',
+    title: 'Karma Yoga Hoodie',
+    desc: 'Cozy pullover hoodie with "Karma Yoga" print. Ethically produced, printed on demand.',
+    price: 54.95,
+    icon: '\uD83E\uDDE5'
+  },
+  {
+    id: 12,
+    category: 'apparel',
+    title: 'SSCY Toque',
+    desc: 'Warm knit beanie with embroidered lotus. Perfect for Salt Spring Island winters.',
+    price: 28.00,
+    icon: '\uD83E\uDDE2'
+  },
+  {
+    id: 13,
+    category: 'apparel',
+    title: 'Centre Tote Bag',
+    desc: 'Heavy-duty organic canvas tote with lotus logo. Great for farmers market runs.',
+    price: 24.95,
+    icon: '\uD83D\uDC5C'
+  },
+
+  // YOGA & MEDITATION
+  {
+    id: 20,
+    category: 'yoga',
+    title: 'Meditation Cushion (Zafu)',
+    desc: 'Buckwheat-filled round cushion in Centre teal. Supports proper meditation posture.',
+    price: 59.95,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg',
+    icon: '\uD83E\uDDD8'
+  },
+  {
+    id: 21,
+    category: 'yoga',
+    title: 'Mala Beads (108)',
+    desc: 'Handcrafted rudraksha seed mala for japa meditation. Traditional 108 beads with guru bead.',
+    price: 38.00,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/09/Lotus-photo-jpeg.jpg',
+    icon: '\uD83D\uDCFF'
+  },
+  {
+    id: 22,
+    category: 'yoga',
+    title: 'Cork Yoga Block',
+    desc: 'Sustainable cork block for support in asana practice. Firm, lightweight, and eco-friendly.',
+    price: 22.00,
+    icon: '\uD83E\uDDF1'
+  },
+  {
+    id: 23,
+    category: 'yoga',
+    title: 'Neti Pot (Ceramic)',
+    desc: 'Traditional ceramic neti pot for nasal cleansing. A staple of Ayurvedic self-care.',
+    price: 18.95,
+    icon: '\uD83C\uDFFA'
+  },
+  // GARDEN & SEEDS
+  {
+    id: 30,
+    category: 'garden',
+    title: 'Kitchen Garden Seed Collection',
+    desc: 'Curated set of 8 seed varieties grown in the Centre\'s organic gardens. Includes planting guide.',
+    price: 24.95,
+    badge: 'New',
+    badgeClass: 'new',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/11/Program-House-with-flowers-resized.png',
+    icon: '\uD83C\uDF31'
+  },
+  {
+    id: 31,
+    category: 'garden',
+    title: 'Herb Garden Starter Kit',
+    desc: 'Basil, cilantro, dill, and parsley seeds from the Centre\'s kitchen garden. Organic and open-pollinated.',
+    price: 14.95,
+    icon: '\uD83C\uDF3F'
+  },
+  {
+    id: 32,
+    category: 'garden',
+    title: 'Recipe Card Set',
+    desc: '12 recipe cards featuring classic vegetarian dishes from the Centre\'s 50-year kitchen tradition.',
+    price: 16.95,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2021/10/indian-spices-1.jpg',
+    icon: '\uD83C\uDF72'
+  },
+
+  // GIFT CERTIFICATES
+  {
+    id: 40,
+    category: 'gifts',
+    title: 'Retreat Gift Certificate',
+    desc: 'Give the gift of a retreat at the Centre. Redeemable for any program or personal retreat.',
+    price: 150.00,
+    priceLabel: 'From $150',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2021/11/programs-retreats.jpg',
+    icon: '\uD83C\uDF81'
+  },
+  {
+    id: 41,
+    category: 'gifts',
+    title: 'Wellness Gift Certificate',
+    desc: 'Redeemable for massage, Ayurveda consultation, or acupuncture at the Centre.',
+    price: 75.00,
+    priceLabel: 'From $75',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2023/01/Registered-RMT-massage-Canva-Pro-stock-photo-2023.jpg',
+    icon: '\uD83D\uDC86'
+  },
+  {
+    id: 42,
+    category: 'gifts',
+    title: 'Shop Gift Card',
+    desc: 'Gift card for any item in the online store. Delivered by email.',
+    price: 50.00,
+    priceLabel: 'From $50',
+    icon: '\uD83C\uDF1F'
+  },
+
+  // SUPPORT THE CENTRE
+  {
+    id: 50,
+    category: 'support',
+    title: 'Sponsor a Garden Bed',
+    desc: 'Your sponsorship keeps the organic gardens growing. Includes a thank-you card with garden photos.',
+    price: 50.00,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2021/11/Program-House-Rock-Wall.jpg',
+    icon: '\uD83C\uDF3B'
+  },
+  {
+    id: 51,
+    category: 'support',
+    title: 'Feed a Karma Yogi',
+    desc: 'Cover meals for a karma yoga volunteer for one week. They maintain the Centre in exchange for practice.',
+    price: 75.00,
+    icon: '\uD83C\uDF5B'
+  },
+  {
+    id: 52,
+    category: 'support',
+    title: 'Annual Membership',
+    desc: 'Become a member of the Dharma Sara Satsang Society. Support the Centre\'s mission year-round.',
+    price: 26.25,
+    img: 'https://saltspringcentre.com/wp-content/uploads/2026/03/3-1.jpg',
+    icon: '\uD83E\uDD1D'
+  },
+  {
+    id: 53,
+    category: 'support',
+    title: 'Temple Maintenance Fund',
+    desc: 'Help preserve the Centre\'s sacred spaces. Contributions support ongoing temple and shrine care.',
+    price: 100.00,
+    priceLabel: 'From $100',
+    img: 'https://saltspringcentre.com/wp-content/uploads/2022/01/buddha-background.jpg',
+    icon: '\uD83C\uDFDB\uFE0F'
+  }
 ];
+
 
 var catLabels = { tickets:'Music for Peace', books:'Books & Media', apparel:'Apparel & Merch', yoga:'Yoga & Meditation', garden:'Garden & Seeds', gifts:'Gift Certificates', support:'Support the Centre' };
 function getCatLabel(c) { return catLabels[c] || c; }
