@@ -281,6 +281,7 @@ var smoothX = mouseX;
 var smoothY = mouseY;
 
 var fullscreenDisc = null;
+var hoveredDisc = null;
 var discEls = [];
 var discData = [];
 
@@ -370,13 +371,12 @@ discs.forEach(function(c, i) {
     // Hover to bring to front
     el.addEventListener('mouseenter', function() {
         if (!fullscreenDisc) {
-            el.style.zIndex = 200;
+            hoveredDisc = el;
+            el.style.zIndex = 500;
         }
     });
     el.addEventListener('mouseleave', function() {
-        if (!fullscreenDisc && !el.classList.contains('fullscreen')) {
-            el.style.zIndex = i + 1;
-        }
+        if (hoveredDisc === el) hoveredDisc = null;
     });
 
     ground.appendChild(el);
@@ -545,10 +545,11 @@ function tick() {
         var dist = Math.sqrt(dx * dx + dy * dy);
 
         // Proximity
+        var isHovered = (el === hoveredDisc);
         if (isLining) {
             el.classList.add('close');
             el.classList.remove('near');
-            el.style.zIndex = count - i;
+            if (!isHovered) el.style.zIndex = count - i;
         } else {
             if (dist < CLOSE_DIST) {
                 el.classList.add('close');
@@ -559,6 +560,7 @@ function tick() {
             } else {
                 el.classList.remove('near', 'close');
             }
+            if (!isHovered) el.style.zIndex = i + 1;
         }
 
         // Magnetic pull (scatter mode only)
