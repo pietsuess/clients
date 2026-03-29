@@ -27,15 +27,15 @@
             position: fixed;
             pointer-events: none;
             z-index: 9999;
-            width: 600px;
-            height: 600px;
+            width: 350px;
+            height: 350px;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             background: radial-gradient(
                 circle,
-                rgba(201, 168, 76, 0.07) 0%,
-                rgba(201, 168, 76, 0.03) 35%,
-                rgba(201, 168, 76, 0.008) 60%,
+                rgba(201, 168, 76, 0.1) 0%,
+                rgba(201, 168, 76, 0.04) 40%,
+                rgba(201, 168, 76, 0.008) 70%,
                 transparent 100%
             );
             mix-blend-mode: screen;
@@ -67,15 +67,15 @@
         /* Discs - glassmorphic circles matching SSCY hot zones */
         .disc {
             position: absolute;
-            width: 272px;
-            height: 272px;
+            width: 245px;
+            height: 245px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 40px;
+            padding: 34px;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(8px);
@@ -319,28 +319,30 @@ var fullscreenDisc = null;
 var discEls = [];
 var discData = [];
 
-var DISC_SIZE = 272;
+var DISC_SIZE = 245;
 var DISC_HALF = DISC_SIZE / 2;
 
 function layoutDiscs() {
     var vw = window.innerWidth;
     var vh = window.innerHeight;
 
-    // Organic scattered layout using golden angle
-    var cx = vw / 2;
-    var cy = vh / 2;
-    var goldenAngle = 137.508 * (Math.PI / 180);
-    var maxRadius = Math.min(vw, vh) * 0.46;
+    // Fill the whole page - grid with jitter, no overlaps
+    var count = discs.length;
+    var cols = Math.ceil(Math.sqrt(count * (vw / vh)));
+    var rows = Math.ceil(count / cols);
+    var cellW = vw / cols;
+    var cellH = vh / rows;
+    var pad = 20;
 
     discs.forEach(function(c, i) {
-        var angle = i * goldenAngle;
-        var r = maxRadius * Math.sqrt((i + 0.5) / discs.length);
-        var x = cx + Math.cos(angle) * r - DISC_HALF;
-        var y = cy + Math.sin(angle) * r - DISC_HALF;
+        var col = i % cols;
+        var row = Math.floor(i / cols);
+        // Center disc in its cell with some random jitter
+        var x = col * cellW + (cellW - DISC_SIZE) / 2 + (Math.random() - 0.5) * (cellW - DISC_SIZE - pad) * 0.6;
+        var y = row * cellH + (cellH - DISC_SIZE) / 2 + (Math.random() - 0.5) * (cellH - DISC_SIZE - pad) * 0.6;
 
-        // Keep in bounds
-        x = Math.max(10, Math.min(vw - DISC_SIZE - 10, x));
-        y = Math.max(10, Math.min(vh - DISC_SIZE - 10, y));
+        x = Math.max(pad, Math.min(vw - DISC_SIZE - pad, x));
+        y = Math.max(pad, Math.min(vh - DISC_SIZE - pad, y));
 
         // Each disc gets unique drift parameters (speed, phase, radius)
         discData[i] = {
@@ -354,7 +356,7 @@ function layoutDiscs() {
             driftSpeedY: 0.12 + Math.random() * 0.2,
             driftPhaseX: Math.random() * Math.PI * 2,
             driftPhaseY: Math.random() * Math.PI * 2,
-            driftRadius: 30 + Math.random() * 50
+            driftRadius: 20 + Math.random() * 30
         };
 
         if (discEls[i]) {
@@ -453,8 +455,8 @@ function tick() {
 
     if (fullscreenDisc) return;
 
-    var NEAR_DIST = 380;
-    var CLOSE_DIST = 200;
+    var NEAR_DIST = 260;
+    var CLOSE_DIST = 140;
     var PULL_STRENGTH = 0.015;
     var RETURN_STRENGTH = 0.035;
     var time = Date.now() * 0.001;
