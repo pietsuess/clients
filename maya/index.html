@@ -124,7 +124,7 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
 
 .hero-tagline{
   font-family:'Playfair Display',serif;font-size:clamp(0.8rem,2.1vw,1.5rem);
-  text-align:center;white-space:nowrap;
+  text-align:center;
   margin-top:30px;position:relative;z-index:2;
   color:rgba(245,240,230,0.85);line-height:1.5;
 }
@@ -493,30 +493,94 @@ footer a:hover{color:var(--pink)}
 
 /* RESPONSIVE TWEAKS */
 @media(max-width:768px){
-  .hero{padding:60px 2vw 40px;justify-content:flex-start;padding-top:120px}
-  .hero-title{font-size:9.5vw;width:100%}
-  .hero-title .line1{color:#ff6baa}
-  .hero-title .line2{color:var(--cream)}
-  .hero-tagline{font-size:3.2vw;color:var(--cream);margin-top:20px;opacity:0.85;white-space:normal}
+  /* Hero */
+  .hero{padding:100px 5vw 40px;min-height:70vh}
+  .hero-title{font-size:clamp(2.8rem,13vw,5rem);max-width:100%}
+  .hero-tagline{font-size:0.9rem;white-space:normal;margin-top:16px;padding:0 2vw}
+
+  /* Marquee */
   .marquee-wrap{margin-top:24px}
-  .marquee-track span{font-size:1rem}
-  .section-title{font-size:clamp(2.5rem,14vw,5rem)}
-  .about-text{font-size:1.05rem}
-  .about-quote{font-size:1rem}
-  .show-detail-content{max-width:100% !important;padding:80px 5vw 80px !important}
+  .marquee-track span{font-size:1rem;padding:0 24px}
+
+  /* Next show */
+  .next-show{padding:50px 5vw}
+  .next-show-inner{flex-direction:column;text-align:center;gap:30px}
+  .next-show-poster{width:min(320px,85vw);margin:0 auto}
+  .next-show-info{max-width:100%;text-align:center}
+  .next-show-info .label{font-size:1rem}
+  .next-show-info h2{font-size:clamp(2rem,8vw,3rem)}
+  .next-show-info .performers{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+  .next-show-info .performers span{margin:0}
+
+  /* Section titles */
+  .section-title{font-size:clamp(2.5rem,14vw,5rem);padding:0 5vw}
+  .section-subtitle{padding:0 5vw}
+
+  /* About */
+  .about{padding:50px 5vw}
+  .about-grid{grid-template-columns:1fr;gap:30px}
+  .about-text{font-size:1rem}
+  .about-quote{font-size:0.95rem;padding:20px;margin-top:16px}
+  .about-details .detail-item{padding:16px}
+  .about-details .detail-item h4{font-size:1.1rem}
+
+  /* Shows */
+  .shows{padding:60px 0}
+  .shows-grid{grid-template-columns:1fr 1fr;gap:12px;padding:30px 4vw 0}
+  .show-card .card-info{padding:10px}
+  .show-card .card-info h3{font-size:1rem}
+
+  /* Media */
+  .media{padding:60px 0}
+  .media-filters{padding:0 4vw;gap:8px;justify-content:center}
+  .media-filters button{padding:6px 14px;font-size:0.75rem}
+  .gallery{grid-template-columns:1fr 1fr;gap:8px;padding:0 4vw}
+
+  /* Shop */
+  .shop{padding:60px 0}
+  .shop-grid{grid-template-columns:1fr 1fr;gap:12px;padding:30px 4vw 0}
+  .shop-item .item-info h3{font-size:1rem}
+
+  /* Contact */
+  .contact{padding:60px 5vw}
+  .contact-cta{font-size:1rem;margin:20px auto 30px}
+  .contact-links{gap:10px}
+  .contact-link{padding:10px 18px;font-size:0.75rem}
+
+  /* Show detail overlay */
+  .show-detail-content{max-width:100% !important;padding:70px 5vw 60px !important}
   .show-detail-hero{float:none !important;width:100% !important;margin:0 0 20px 0 !important}
   .show-detail-back{top:12px;left:12px;padding:8px 14px;font-size:0.75rem}
   .show-detail-close{top:12px;right:12px}
   .sd-recap-grid{grid-template-columns:1fr 1fr !important}
+
+  /* Lightbox */
+  .lightbox .lb-nav{width:40px;height:200px}
+  .lightbox .lb-nav svg{width:24px;height:200px}
+  .lightbox .lb-prev{left:2vw}
+  .lightbox .lb-next{right:2vw}
+  .lightbox .lb-caption{padding:0 20px;font-size:0.75rem}
+
+  /* Running text */
+  .big-running .track span{font-size:clamp(3rem,10vw,6rem);padding:0 30px}
+
+  /* Footer */
+  footer{flex-direction:column;align-items:center;text-align:center;gap:8px}
+
+  /* Press */
+  .press-section{padding:30px 4vw 0}
+  .press-link{padding:8px 14px;font-size:0.75rem}
 }
-@media(max-width:600px){
-  .shows-grid{grid-template-columns:1fr 1fr;gap:12px}
-  .show-card .card-info{padding:10px}
-  .show-card .card-info h3{font-size:1.1rem}
-  .gallery{grid-template-columns:1fr}
-  .shop-grid{grid-template-columns:1fr 1fr}
-  .next-show-inner{flex-direction:column;text-align:center}
-  .next-show-poster{width:min(320px,90vw)}
+
+@media(max-width:400px){
+  .hero-title{font-size:clamp(2.2rem,15vw,4rem)}
+  .next-show-poster{width:90vw}
+  .shows-grid{grid-template-columns:1fr;gap:16px}
+  .gallery{grid-template-columns:1fr;gap:12px}
+  .shop-grid{grid-template-columns:1fr}
+  .show-detail-content h1{font-size:clamp(1.8rem,10vw,2.5rem) !important}
+  .contact-links{flex-direction:column;align-items:center}
+  .contact-link{width:100%;text-align:center}
 }
 /* SHOW DETAIL */
 .show-detail{position:fixed;inset:0;z-index:9999;background:var(--plum);display:none;overflow-y:auto}
@@ -589,6 +653,62 @@ footer a:hover{color:var(--pink)}
     "repeatFrequency": "P3M",
     "byMonth": [2, 5, 8, 10, 12]
   }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the Unprofessional Variety Show?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unprofessional Variety Show is a quarterly queer cabaret-style night of live performance at The Parkside Lounge in the Lower East Side of New York City. Each edition features a different theme and a rotating lineup of performers including drag artists, burlesque performers, musicians, comedians, and performance artists. It has been running since February 2022, programmed and emceed by Maya Suess."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where is the Unprofessional Variety Show held?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Parkside Lounge, 317 East Houston Street, New York, NY 10002. It is a dive bar and performance venue in the Lower East Side that has been catering to artists, musicians, and freaks since 1908. The bar is on the ground floor with a portable ramp to the performance space and accessible bathrooms."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often does the Unprofessional Variety Show happen?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The show runs quarterly, roughly every three months. Doors typically open at 7:00 PM with the show starting at 7:30 PM. Each edition has a unique theme with a different lineup of performers."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much are tickets to the Unprofessional Variety Show?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tickets are sliding scale, typically $15 to $25. All money goes directly to the performers. Tickets are sold through Humanitix, where 100% of booking fees go to charity. The venue is 21+ with valid photo ID."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is Maya Suess?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Maya Suess is an artist, educator, and arts administrator who programs and emcees the Unprofessional Variety Show. She was born on a small island off western Canada's coast, holds a BFA from Emily Carr and an MFA from Simon Fraser, and is faculty at Parsons School of Design at The New School. She makes drawings, installations, videos, performances, and other mischievous entities."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I perform at the Unprofessional Variety Show?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Reach out to Maya Suess through Instagram at @MayaSuess or @unprofessionalvarietyshow. The show is built by its community and the door is always open to new performers with wild ideas."
+      }
+    }
+  ]
 }
 </script>
 </head>
