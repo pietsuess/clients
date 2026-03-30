@@ -11,7 +11,7 @@
         :root {
             --slot-h: 24px;
             --legend-w: 100px;
-            --gutter-w: 36px;
+            --gutter-w: 24px;
             --toolbar-h: 44px;
         }
         html, body {
@@ -64,10 +64,9 @@
             font-weight:700; font-size:0.75rem; padding:6px 4px; color:#fff;
         }
         .hdr-legend { width: var(--legend-w); background:#333; font-size:0.5rem; text-transform:uppercase; letter-spacing:0.08em; line-height:1.2; }
-        .hdr-gutter { width: var(--gutter-w); background:#e0c040; font-size:0.55rem; font-weight:600; }
-        .hdr-gutter.first { background: #444; }
+        .hdr-gutter { width: var(--gutter-w); background:#F4D352; font-size:0.6rem; font-weight:700; color:#7a6a10; }
         .hdr-day { flex:1; background:#17A698; }
-        .hdr-gutter.last { background:#e0c040; font-size:0.55rem; }
+        .hdr-gutter.last { background:#F4D352; font-size:0.6rem; }
 
         /* Grid body: legend + [gutter + day-col] * N + gutter */
         .grid-body { display: flex; }
@@ -77,40 +76,44 @@
         .leg-item { display:flex; align-items:center; gap:5px; padding:2px 6px; font-size:0.55rem; font-weight:600; min-height: calc(var(--slot-h) * 2.8); }
         .leg-color { width:7px; min-height:24px; border-radius:2px; flex-shrink:0; }
 
-        /* Time gutter between days */
+        /* Time gutter - ALL gutters use the same yellow from the PDF */
         .gutter {
-            width: var(--gutter-w); background: #f5e6a0; display:flex; flex-direction:column;
-            border-left:1px solid #d4c060; border-right:1px solid #d4c060;
+            width: var(--gutter-w); background: #F4D352; display:flex; flex-direction:column;
+            border-left:1px solid #e0c040; border-right:1px solid #e0c040;
         }
-        .gutter.first-gutter { background: #f0f0f0; border-left:1px solid #ddd; border-right:1px solid #ddd; }
         .gut-slot {
             height: var(--slot-h); display:flex; align-items:center; justify-content:center;
-            font-size:0.55rem; font-weight:600; color:#8a7a30;
+            font-size:0.6rem; font-weight:700; color:#7a6a10;
             border-bottom: 1px solid rgba(0,0,0,0.06);
         }
-        .gut-slot.hour { font-weight:700; color:#6a5a10; border-bottom-color: rgba(0,0,0,0.12); }
-        .first-gutter .gut-slot { color:#666; }
-        .first-gutter .gut-slot.hour { color:#333; }
+        .gut-slot.hour { color:#5a4a00; border-bottom-color: rgba(0,0,0,0.12); }
 
-        /* Day column */
+        /* Day column - row stripes matching PDF mint/cyan */
         .day-col {
             flex:1; position:relative;
             min-height: calc(var(--slot-h) * 34);
             background: repeating-linear-gradient(
                 to bottom,
-                rgba(23,166,152,0.05) 0px, rgba(23,166,152,0.05) calc(var(--slot-h)*2),
-                transparent calc(var(--slot-h)*2), transparent calc(var(--slot-h)*4)
+                #e6f5f0 0px, #e6f5f0 calc(var(--slot-h)*2),
+                #f0faf7 calc(var(--slot-h)*2), #f0faf7 calc(var(--slot-h)*4)
             );
         }
         .sline { position:absolute; left:0; right:0; height:1px; background:#e8e8e8; pointer-events:none; }
         .sline.hour { background:#ccc; }
 
-        /* Events */
+        /* Events - no rounded corners */
         .ev {
-            position:absolute; border-radius:3px; padding:1px 4px;
+            position:absolute; border-radius:0; padding:1px 4px;
             overflow:hidden; cursor:pointer; font-size:0.58rem; line-height:1.15;
             display:flex; flex-direction:column; justify-content:center; align-items:center;
-            text-align:center; border:1px solid rgba(0,0,0,0.06); z-index:2;
+            text-align:center; border:none; z-index:2;
+        }
+        /* Spanning label that covers multiple color columns */
+        .ev-span-label {
+            position:absolute; z-index:3; pointer-events:none;
+            display:flex; align-items:center; justify-content:center; text-align:center;
+            font-size:0.58rem; line-height:1.15; font-weight:700;
+            color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.25);
         }
         .ev:hover { filter:brightness(1.08); }
         .ev-t { font-weight:700; }
@@ -118,13 +121,13 @@
         .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
         .ev.dk .ev-t, .ev.dk .ev-s { color:#333; text-shadow:none; }
 
-        /* Reception */
-        .recep { display:flex; background:#e4e4e4; border-top:2px solid #17A698; min-height:28px; }
+        /* Reception - matching PDF style */
+        .recep { display:flex; background:#F4D352; min-height:32px; }
         .rec-leg { width:var(--legend-w); }
         .rec-gut { width:var(--gutter-w); }
-        .rec-day { flex:1; display:flex; align-items:center; gap:4px; padding:3px 6px; font-size:0.55rem; }
-        .rec-r { width:18px; height:18px; border-radius:50%; border:2px solid #17A698; display:flex; align-items:center; justify-content:center; font-size:0.55rem; font-weight:700; color:#17A698; flex-shrink:0; }
-        .rec-txt { color:#555; line-height:1.3; }
+        .rec-day { flex:1; display:flex; align-items:center; gap:6px; padding:4px 8px; font-size:0.6rem; }
+        .rec-r { width:22px; height:22px; border-radius:50%; background:#17A698; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700; color:#fff; flex-shrink:0; }
+        .rec-txt { color:#5a4a00; font-weight:600; line-height:1.3; font-size:0.58rem; }
 
         /* Status */
         .status { position:fixed; bottom:0; left:0; right:0; height:22px; background:#2c2c2c; color:rgba(255,255,255,0.4); font-size:0.55rem; display:flex; align-items:center; padding:0 12px; gap:12px; z-index:1000; }
@@ -386,7 +389,7 @@ function render(){
     // Headers
     h+='<div class="headers">';
     h+='<div class="hdr hdr-legend">Colour<br>Legend</div>';
-    h+='<div class="hdr hdr-gutter first">TIME</div>';
+    h+='<div class="hdr hdr-gutter">TIME</div>';
     for(var d=0;d<nd;d++){
         h+='<div class="hdr hdr-day">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
         if(d<nd-1) h+='<div class="hdr hdr-gutter"></div>';
@@ -402,8 +405,8 @@ function render(){
     state.venues.forEach(function(v){ h+='<div class="leg-item"><div class="leg-color" style="background:'+v.color+'"></div><span>'+v.name+'</span></div>'; });
     h+='</div>';
 
-    // First gutter (TIME)
-    h+='<div class="gutter first-gutter">';
+    // First gutter (TIME) - same yellow as all gutters
+    h+='<div class="gutter">';
     for(var s=0;s<ns;s++){
         var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
         var lb='';
@@ -422,17 +425,51 @@ function render(){
         // Events for this day - auto-assign columns
         var devs=state.events.filter(function(e){return e.dayIndex===d});
         var laid=assignColumns(devs);
+
+        // Find groups of events with the same title that overlap - they get a spanning label
+        var spanGroups = {};
+        laid.forEach(function(item){
+            var evt=item.evt;
+            var key = evt.title+'|'+evt.startSlot+'|'+evt.spanSlots;
+            if(!spanGroups[key]) spanGroups[key]=[];
+            spanGroups[key].push(item);
+        });
+
+        // Render color blocks
         laid.forEach(function(item){
             var evt=item.evt, v=state.venues.find(function(x){return x.id===evt.venueId});
             var c=v?v.color:'#999';
             var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
             var tc=item.totalCols, col=item.col;
             var wp=100/tc, lp=col*wp;
+            var key = evt.title+'|'+evt.startSlot+'|'+evt.spanSlots;
+            var isSpanned = spanGroups[key] && spanGroups[key].length > 1;
             var cls=brightness(c)>160?'dk':'lt';
             var tl=(evt.title||'').replace(/\n/g,'<br>');
+
             h+='<div class="ev '+cls+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+'">';
+            if(!isSpanned){
+                h+='<div class="ev-t">'+tl+'</div>';
+                if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
+            }
+            h+='</div>';
+        });
+
+        // Render spanning labels for same-title groups
+        var spanned = {};
+        Object.keys(spanGroups).forEach(function(key){
+            var group = spanGroups[key];
+            if(group.length < 2) return;
+            if(spanned[key]) return;
+            spanned[key] = true;
+            var minCol=Infinity, maxCol=0, totalCols=group[0].totalCols;
+            group.forEach(function(item){ if(item.col<minCol)minCol=item.col; if(item.col>maxCol)maxCol=item.col; });
+            var evt=group[0].evt;
+            var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
+            var lp=(minCol/totalCols)*100, wp=((maxCol-minCol+1)/totalCols)*100;
+            var tl=(evt.title||'').replace(/\n/g,'<br>');
+            h+='<div class="ev-span-label" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%">';
             h+='<div class="ev-t">'+tl+'</div>';
-            if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
             h+='</div>';
         });
         h+='</div>';
