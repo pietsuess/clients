@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACYR Schedule Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --slot-height: 22px;
+            --legend-width: 110px;
+            --time-width: 52px;
+            --header-height: 50px;
+            --num-days: 5;
+            --toolbar-height: 48px;
+        }
+
+        html, body {
+            font-family: 'Archivo Narrow', Arial, sans-serif;
+            background: #f0f0f0;
+            overflow-x: auto;
+            height: 100%;
+        }
+
+        /* ---- TOOLBAR ---- */
+        .toolbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--toolbar-height);
+            background: #2c2c2c;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 8px;
+            z-index: 1000;
+            font-size: 0.75rem;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 10px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            height: 100%;
+        }
+
+        .toolbar-group:last-child { border-right: none; }
+
+        .toolbar-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            opacity: 0.5;
+            margin-right: 4px;
+        }
+
+        .toolbar-btn {
+            padding: 5px 12px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+
+        .toolbar-btn:hover { background: rgba(255,255,255,0.15); }
+        .toolbar-btn.primary { background: #17A698; border-color: #17A698; }
+        .toolbar-btn.primary:hover { background: #1fc4b3; }
+
+        /* Venue swatches in toolbar */
+        .venue-swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.15s, transform 0.15s;
+            position: relative;
+        }
+
+        .venue-swatch:hover { transform: scale(1.15); }
+        .venue-swatch.active { border-color: #fff; transform: scale(1.15); }
+
+        .venue-swatch[title]::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.55rem;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 6px;
+            border-radius: 3px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+
+        .venue-swatch:hover::after { opacity: 1; }
+
+        /* ---- SCHEDULE GRID ---- */
+        .schedule-wrap {
+            margin-top: var(--toolbar-height);
+            padding: 16px;
+        }
+
+        .schedule {
+            display: grid;
+            grid-template-columns: var(--legend-width) var(--time-width) repeat(var(--num-days), 1fr) var(--time-width);
+            background: #fff;
+            border: 1px solid #ccc;
+            position: relative;
+            font-size: 0.7rem;
+        }
+
+        /* Title banner */
+        .title-banner {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #17A698, #1fc4b3);
+            padding: 10px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .title-text {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #fff;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .title-year {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-top: 2px;
+        }
+
+        /* Column headers row */
+        .col-header {
+            background: #17A698;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 6px 8px;
+            text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .col-header.legend-header {
+            background: #333;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            line-height: 1.3;
+        }
+
+        .col-header.time-header {
+            background: #444;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* Venue legend */
+        .venue-legend {
+            grid-row: 3 / -1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-right: 1px solid #ddd;
+            padding: 2px 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            line-height: 1.2;
+            min-height: calc(var(--slot-height) * 2.6);
+        }
+
+        .legend-color {
+            width: 8px;
+            min-height: 28px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .legend-name {
+            color: #333;
+        }
+
+        /* Time columns */
+        .time-column {
+            grid-row: 3 / -1;
+            display: flex;
+            flex-direction: column;
+            background: #fafafa;
+            border-right: 1px solid #ddd;
+        }
+
+        .time-column.right {
+            border-right: none;
+            border-left: 1px solid #ddd;
+        }
+
+        .time-slot {
+            height: var(--slot-height);
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 1px solid #eee;
+        }
+
+        .time-slot.hour { border-bottom-color: #ccc; font-weight: 700; color: #333; }
+
+        /* Day columns */
+        .day-column {
+            position: relative;
+            grid-row: 3 / -1;
+            border-right: 1px solid #ddd;
+            min-height: calc(var(--slot-height) * 34);
+        }
+
+        /* Row stripes inside day columns */
+        .day-column::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                rgba(23, 166, 152, 0.06) 0px,
+                rgba(23, 166, 152, 0.06) calc(var(--slot-height) * 2),
+                transparent calc(var(--slot-height) * 2),
+                transparent calc(var(--slot-height) * 4)
+            );
+        }
+
+        /* Grid lines inside day columns */
+        .slot-line {
+            position: absolute;
+            left: 0; right: 0;
+            height: 1px;
+            background: #eee;
+            pointer-events: none;
+        }
+
+        .slot-line.hour { background: #ccc; }
+
+        /* Event blocks */
+        .event {
+            position: absolute;
+            left: 1px;
+            right: 1px;
+            border-radius: 3px;
+            padding: 2px 5px;
+            overflow: hidden;
+            cursor: pointer;
+            font-size: 0.65rem;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid rgba(0,0,0,0.08);
+            transition: filter 0.15s;
+            z-index: 2;
+        }
+
+        .event:hover { filter: brightness(1.08); }
+
+        .event-title {
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .event-subtitle {
+            font-size: 0.55rem;
+            color: rgba(255,255,255,0.8);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* Dark venue text override */
+        .event.light-text .event-title { color: #fff; }
+        .event.dark-text .event-title { color: #333; text-shadow: none; }
+        .event.dark-text .event-subtitle { color: rgba(0,0,0,0.6); text-shadow: none; }
+
+        /* Reception row */
+        .reception-row {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: var(--legend-width) var(--time-width) repeat(var(--num-days), 1fr) var(--time-width);
+            background: #e8e8e8;
+            border-top: 2px solid #17A698;
+            min-height: 30px;
+        }
+
+        .reception-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 4px;
+        }
+
+        .reception-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #17A698;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #17A698;
+        }
+
+        .reception-text {
+            font-size: 0.6rem;
+            color: #555;
+            text-align: center;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Status bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background: #2c2c2c;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 16px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="toolbar" id="toolbar">
+    <div class="toolbar-group">
+        <span class="toolbar-label">Venue</span>
+        <div id="venueSwatches" style="display:flex;gap:3px;"></div>
+    </div>
+    <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="exportJSON()">Save JSON</button>
+        <button class="toolbar-btn" onclick="document.getElementById('importFile').click()">Load JSON</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+    </div>
+    <div class="toolbar-group">
+        <button class="toolbar-btn primary" onclick="exportPDF()">Export PDF</button>
+    </div>
+    <div class="toolbar-group">
+        <span style="opacity:0.4;font-size:0.6rem;">ACYR Schedule Editor</span>
+    </div>
+</div>
+
+<div class="schedule-wrap">
+    <div class="schedule" id="schedule"></div>
+</div>
+
+<div class="status-bar">
+    <span id="statusText">Ready</span>
+    <span id="eventCount"></span>
+</div>
+
+<script>
+// ============================================================
+// DEFAULT STATE: 2024 ACYR Schedule
+// ============================================================
+var DEFAULT_STATE = {
+    config: {
+        title: "ANNUAL COMMUNITY YOGA RETREAT",
+        year: 2024,
+        startHour: 5,
+        endHour: 22,
+        days: [
+            { label: "Thursday", date: "Aug 1" },
+            { label: "Friday", date: "Aug 2" },
+            { label: "Saturday", date: "Aug 3" },
+            { label: "Sunday", date: "Aug 4" },
+            { label: "Monday", date: "Aug 5" }
+        ],
+        reception: [
+            { dayIndex: 0, text: "2pm - 6pm" },
+            { dayIndex: 1, text: "9am - 6pm" },
+            { dayIndex: 2, text: "9am - 1:30pm\n5pm - 6:30pm" },
+            { dayIndex: 3, text: "9am - 1pm\n5pm - 8:30pm" },
+            { dayIndex: 4, text: "9am - 11am" }
+        ]
+    },
+    venues: [
+        { id: "meal",      name: "Meal Circle",       color: "#F9B233" },
+        { id: "hanuman",   name: "Hanuman Temples",   color: "#E8652F" },
+        { id: "volleyball",name: "Volley ball court", color: "#E53935" },
+        { id: "satsang",   name: "Satsang Room",      color: "#7B2D5F" },
+        { id: "garden",    name: "Garden House",       color: "#E91E63" },
+        { id: "yurt",      name: "Yurt",              color: "#C62828" },
+        { id: "latte",     name: "Latte Da!",         color: "#0052A3" },
+        { id: "pond",      name: "Pond Dome",         color: "#00BCD4" },
+        { id: "dining",    name: "Dining Room",       color: "#17A698" },
+        { id: "mound",     name: "Mound",             color: "#2D7A2D" },
+        { id: "school",    name: "School",            color: "#008B8B" },
+        { id: "earthsky",  name: "Earth & Sky Dome",  color: "#76C976" }
+    ],
+    events: [
+        // ---- THURSDAY AUG 1 ----
+        // Brunch 11:30 - noon (slot 13)
+        { id:"t1", dayIndex:0, startSlot:13, spanSlots:3, venueId:"meal", title:"Brunch", subtitle:"" },
+        // Tea/Snack 3:00 (slot 20)
+        { id:"t2", dayIndex:0, startSlot:20, spanSlots:1, venueId:"meal", title:"Tea / Snack", subtitle:"" },
+        // Kids Program 3:30-4:30 (slot 21)
+        { id:"t3", dayIndex:0, startSlot:21, spanSlots:2, venueId:"earthsky", title:"Kids Program", subtitle:"" },
+        // Meet & Greet & Family Asana 4:00-5:00 (slot 22)
+        { id:"t3b", dayIndex:0, startSlot:22, spanSlots:2, venueId:"pond", title:"Meet & Greet\n& Family Asana", subtitle:"" },
+        // Asana Classes 4:00-5:00 (slot 22)
+        { id:"t4", dayIndex:0, startSlot:22, spanSlots:2, venueId:"satsang", title:"Asana Classes", subtitle:"", column:1, totalColumns:2 },
+        // Dinner 6:30-7:30 (slot 27)
+        { id:"t5", dayIndex:0, startSlot:27, spanSlots:3, venueId:"meal", title:"Dinner", subtitle:"" },
+        // Opening Celebration 8:00-9:00 (slot 30)
+        { id:"t6", dayIndex:0, startSlot:30, spanSlots:3, venueId:"satsang", title:"Opening Celebration:\nWelcome &\nKirtan", subtitle:"" },
+        // Opening Prayers & Invocation 8:30-9:30 (slot 7)
+        { id:"t7", dayIndex:0, startSlot:7, spanSlots:4, venueId:"hanuman", title:"Opening Prayers\n& Invocation", subtitle:"" },
+
+        // ---- FRIDAY AUG 2 ----
+        // Pad Kirtan 6:00 (slot 2)
+        { id:"f1", dayIndex:1, startSlot:2, spanSlots:1, venueId:"hanuman", title:"Pad Kirtan", subtitle:"" },
+        // Arati 6:30 (slot 3)
+        { id:"f2", dayIndex:1, startSlot:3, spanSlots:1, venueId:"hanuman", title:"Arati", subtitle:"" },
+        // Shat Karma 7:00 (slot 4)
+        { id:"f3", dayIndex:1, startSlot:4, spanSlots:1, venueId:"satsang", title:"Shat Karma", subtitle:"" },
+        // Pranayama Meditation 7:30-8:30 (slot 5)
+        { id:"f4", dayIndex:1, startSlot:5, spanSlots:3, venueId:"satsang", title:"Pranayama\nMeditation", subtitle:"", column:0, totalColumns:2 },
+        // Latte Da Cafe (slot 5)
+        { id:"f4b", dayIndex:1, startSlot:5, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Kids Program (slot 5)
+        { id:"f4c", dayIndex:1, startSlot:5, spanSlots:3, venueId:"earthsky", title:"Kids\nProgram", subtitle:"", column:1, totalColumns:2 },
+        // Asana Classes 9:30-11:00 (slot 9)
+        { id:"f5", dayIndex:1, startSlot:9, spanSlots:4, venueId:"satsang", title:"Asana Classes", subtitle:"" },
+        // Brunch 11:30 (slot 13)
+        { id:"f6", dayIndex:1, startSlot:13, spanSlots:3, venueId:"meal", title:"Brunch", subtitle:"" },
+        // Jai Store & reading noon-1 (slot 14)
+        { id:"f6b", dayIndex:1, startSlot:14, spanSlots:3, venueId:"mound", title:"Jai Store\n& reading", subtitle:"", column:1, totalColumns:2 },
+        // Latte Da Cafe 12-1 (slot 14)
+        { id:"f6c", dayIndex:1, startSlot:14, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Yoga Sutra Discussion 1:30-3:00 (slot 17)
+        { id:"f7", dayIndex:1, startSlot:17, spanSlots:3, venueId:"satsang", title:"Yoga Sutra\nDiscussion", subtitle:"" },
+        // Tea/Snack 3:00 (slot 20)
+        { id:"f8", dayIndex:1, startSlot:20, spanSlots:1, venueId:"meal", title:"Tea / Snack", subtitle:"" },
+        // Kids Program 3:30-4:30 (slot 21)
+        { id:"f8b", dayIndex:1, startSlot:21, spanSlots:2, venueId:"earthsky", title:"Kids Program", subtitle:"" },
+        // Asana Classes 4:30-5:30 (slot 23)
+        { id:"f9", dayIndex:1, startSlot:22, spanSlots:3, venueId:"satsang", title:"Asana Classes", subtitle:"" },
+        // Arati 5:30-6:00 (slot 25)
+        { id:"f10", dayIndex:1, startSlot:25, spanSlots:2, venueId:"hanuman", title:"Arati", subtitle:"" },
+        // Dinner 6:30 (slot 27)
+        { id:"f11", dayIndex:1, startSlot:27, spanSlots:2, venueId:"meal", title:"Dinner", subtitle:"" },
+        // Jai Store 7:00 (slot 28)
+        { id:"f11b", dayIndex:1, startSlot:28, spanSlots:1, venueId:"mound", title:"Jai Store", subtitle:"", column:1, totalColumns:2 },
+        // Latte Da Cafe 7:30 (slot 29)
+        { id:"f11c", dayIndex:1, startSlot:29, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Capture the Flag 8:00 (slot 30)
+        { id:"f11d", dayIndex:1, startSlot:30, spanSlots:1, venueId:"earthsky", title:"Capture\nthe Flag", subtitle:"", column:1, totalColumns:2 },
+        // DJ Night & Dance 8:00 (slot 30)
+        { id:"f12", dayIndex:1, startSlot:30, spanSlots:2, venueId:"satsang", title:"DJ Night\n& Dance", subtitle:"" },
+
+        // ---- SATURDAY AUG 3 ----
+        { id:"s1", dayIndex:2, startSlot:2, spanSlots:1, venueId:"hanuman", title:"Pad Kirtan", subtitle:"" },
+        { id:"s2", dayIndex:2, startSlot:3, spanSlots:1, venueId:"hanuman", title:"Arati", subtitle:"" },
+        { id:"s3", dayIndex:2, startSlot:4, spanSlots:1, venueId:"satsang", title:"Shat Karma", subtitle:"" },
+        { id:"s4", dayIndex:2, startSlot:5, spanSlots:3, venueId:"satsang", title:"Pranayama\nMeditation", subtitle:"", column:0, totalColumns:2 },
+        { id:"s4b", dayIndex:2, startSlot:5, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        { id:"s4c", dayIndex:2, startSlot:5, spanSlots:3, venueId:"earthsky", title:"Kids\nProgram", subtitle:"", column:1, totalColumns:2 },
+        { id:"s5", dayIndex:2, startSlot:9, spanSlots:4, venueId:"satsang", title:"Asana Classes", subtitle:"" },
+        { id:"s6", dayIndex:2, startSlot:13, spanSlots:3, venueId:"meal", title:"Brunch", subtitle:"" },
+        { id:"s6b", dayIndex:2, startSlot:14, spanSlots:3, venueId:"mound", title:"Jai Store\n& reading", subtitle:"", column:1, totalColumns:2 },
+        { id:"s6c", dayIndex:2, startSlot:14, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Gita Discussion 1:30-3:00 (slot 17)
+        { id:"s7", dayIndex:2, startSlot:17, spanSlots:3, venueId:"satsang", title:"Gita\nDiscussion", subtitle:"" },
+        { id:"s8", dayIndex:2, startSlot:20, spanSlots:1, venueId:"meal", title:"Tea / Snack", subtitle:"" },
+        { id:"s8b", dayIndex:2, startSlot:21, spanSlots:2, venueId:"earthsky", title:"Kids Program", subtitle:"" },
+        { id:"s9", dayIndex:2, startSlot:22, spanSlots:3, venueId:"satsang", title:"Asana Classes", subtitle:"" },
+        // Arati 5:30 (slot 25)
+        { id:"s10", dayIndex:2, startSlot:25, spanSlots:2, venueId:"hanuman", title:"Arati", subtitle:"" },
+        { id:"s11", dayIndex:2, startSlot:27, spanSlots:2, venueId:"meal", title:"Dinner", subtitle:"" },
+        { id:"s11b", dayIndex:2, startSlot:28, spanSlots:1, venueId:"mound", title:"Jai Store", subtitle:"", column:1, totalColumns:2 },
+        { id:"s11c", dayIndex:2, startSlot:29, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Capture the Flag 8:00
+        { id:"s11d", dayIndex:2, startSlot:30, spanSlots:1, venueId:"earthsky", title:"Capture\nthe Flag", subtitle:"", column:1, totalColumns:2 },
+        // Stories & Ramayana 8:00
+        { id:"s12", dayIndex:2, startSlot:30, spanSlots:2, venueId:"satsang", title:"Stories\n& Ramayana", subtitle:"" },
+
+        // ---- SUNDAY AUG 4 ----
+        { id:"su1", dayIndex:3, startSlot:2, spanSlots:1, venueId:"hanuman", title:"Pad Kirtan", subtitle:"" },
+        { id:"su2", dayIndex:3, startSlot:3, spanSlots:1, venueId:"hanuman", title:"Arati", subtitle:"" },
+        { id:"su3", dayIndex:3, startSlot:4, spanSlots:1, venueId:"satsang", title:"Shat Karma", subtitle:"" },
+        { id:"su4", dayIndex:3, startSlot:5, spanSlots:3, venueId:"satsang", title:"Pranayama\nMeditation", subtitle:"", column:0, totalColumns:2 },
+        { id:"su4b", dayIndex:3, startSlot:5, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        { id:"su4c", dayIndex:3, startSlot:5, spanSlots:3, venueId:"earthsky", title:"Kids\nProgram", subtitle:"", column:1, totalColumns:2 },
+        { id:"su5", dayIndex:3, startSlot:9, spanSlots:4, venueId:"satsang", title:"Asana Classes", subtitle:"" },
+        { id:"su6", dayIndex:3, startSlot:13, spanSlots:3, venueId:"meal", title:"Brunch", subtitle:"" },
+        { id:"su6b", dayIndex:3, startSlot:14, spanSlots:1, venueId:"mound", title:"Jai Store", subtitle:"", column:1, totalColumns:2 },
+        { id:"su6c", dayIndex:3, startSlot:14, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Satsang 1:00-2:30 (slot 16)
+        { id:"su7", dayIndex:3, startSlot:16, spanSlots:3, venueId:"satsang", title:"Satsang", subtitle:"" },
+        // Tea/Snack + Hanuman Olympics + Latte Da side by side at 3:00
+        { id:"su8", dayIndex:3, startSlot:20, spanSlots:1, venueId:"meal", title:"Tea /\nSnack", subtitle:"", column:0, totalColumns:3 },
+        { id:"su8b", dayIndex:3, startSlot:20, spanSlots:2, venueId:"hanuman", title:"Hanuman\nOlympics", subtitle:"", column:1, totalColumns:3 },
+        { id:"su8c", dayIndex:3, startSlot:20, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:2, totalColumns:3 },
+        // Asana Classes 4:00
+        { id:"su9", dayIndex:3, startSlot:22, spanSlots:3, venueId:"satsang", title:"Asana\nClasses", subtitle:"" },
+        // Group Photo 5:00
+        { id:"su9b", dayIndex:3, startSlot:24, spanSlots:2, venueId:"earthsky", title:"Group Photo", subtitle:"" },
+        // Arati 5:30
+        { id:"su10", dayIndex:3, startSlot:25, spanSlots:2, venueId:"hanuman", title:"Arati", subtitle:"" },
+        { id:"su11", dayIndex:3, startSlot:27, spanSlots:2, venueId:"meal", title:"Dinner", subtitle:"" },
+        { id:"su11b", dayIndex:3, startSlot:28, spanSlots:1, venueId:"mound", title:"Jai Store", subtitle:"", column:1, totalColumns:2 },
+        { id:"su11c", dayIndex:3, startSlot:29, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        { id:"su11d", dayIndex:3, startSlot:30, spanSlots:1, venueId:"earthsky", title:"Capture\nthe Flag", subtitle:"", column:1, totalColumns:2 },
+        // Concert 8:00
+        { id:"su12", dayIndex:3, startSlot:30, spanSlots:2, venueId:"satsang", title:"Concert", subtitle:"" },
+
+        // ---- MONDAY AUG 5 ----
+        { id:"m1", dayIndex:4, startSlot:2, spanSlots:1, venueId:"hanuman", title:"Pad Kirtan", subtitle:"" },
+        { id:"m2", dayIndex:4, startSlot:3, spanSlots:1, venueId:"hanuman", title:"Arati", subtitle:"" },
+        { id:"m3", dayIndex:4, startSlot:4, spanSlots:1, venueId:"satsang", title:"Shat Karma", subtitle:"" },
+        { id:"m4", dayIndex:4, startSlot:5, spanSlots:3, venueId:"satsang", title:"Pranayama\nMeditation", subtitle:"", column:0, totalColumns:2 },
+        { id:"m4b", dayIndex:4, startSlot:5, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        { id:"m4c", dayIndex:4, startSlot:5, spanSlots:3, venueId:"earthsky", title:"Kids\nProgram", subtitle:"", column:1, totalColumns:2 },
+        // Yajna 10:00-11:00 (slot 10)
+        { id:"m5", dayIndex:4, startSlot:10, spanSlots:3, venueId:"hanuman", title:"Yaj\u00f1a", subtitle:"" },
+        // Asana 9:30 (slot 9)
+        { id:"m5b", dayIndex:4, startSlot:9, spanSlots:4, venueId:"satsang", title:"Asana", subtitle:"", column:1, totalColumns:2 },
+        { id:"m6", dayIndex:4, startSlot:13, spanSlots:3, venueId:"meal", title:"Brunch", subtitle:"" },
+        // Closing Celebration 12:00-2:00 (slot 14)
+        { id:"m7", dayIndex:4, startSlot:14, spanSlots:4, venueId:"satsang", title:"Closing\nCelebration", subtitle:"" },
+        // Jai Store + Latte Da 12:00
+        { id:"m7b", dayIndex:4, startSlot:14, spanSlots:2, venueId:"mound", title:"Jai Store", subtitle:"", column:1, totalColumns:2 },
+        { id:"m7c", dayIndex:4, startSlot:14, spanSlots:4, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Tea/Snack 3:00
+        { id:"m8", dayIndex:4, startSlot:20, spanSlots:1, venueId:"meal", title:"Tea /\nSnack", subtitle:"" },
+        // Pop-up Kirtan 3:00
+        { id:"m8b", dayIndex:4, startSlot:20, spanSlots:2, venueId:"hanuman", title:"Pop-up Kirtan", subtitle:"", column:1, totalColumns:2 },
+        // Asana Classes 4:00-5:00
+        { id:"m9", dayIndex:4, startSlot:22, spanSlots:3, venueId:"satsang", title:"Asana\nClasses", subtitle:"" },
+        // Arati 5:30
+        { id:"m10", dayIndex:4, startSlot:25, spanSlots:2, venueId:"hanuman", title:"Arati", subtitle:"" },
+        // Dinner 6:30
+        { id:"m11", dayIndex:4, startSlot:27, spanSlots:2, venueId:"meal", title:"Dinner", subtitle:"" },
+        // Jai Store 7:00
+        { id:"m11b", dayIndex:4, startSlot:28, spanSlots:1, venueId:"mound", title:"Jai Store", subtitle:"", column:1, totalColumns:2 },
+        // Latte Da 7:30
+        { id:"m11c", dayIndex:4, startSlot:29, spanSlots:2, venueId:"latte", title:"Latte\nDa\nCaf\u00e9", subtitle:"", column:0, totalColumns:2 },
+        // Latte Da Talent Show 8:00
+        { id:"m12", dayIndex:4, startSlot:30, spanSlots:2, venueId:"school", title:"Latte Da\nTalent Show", subtitle:"" }
+    ],
+    images: [],
+    styles: {
+        title: { fontFamily: "Cinzel", fontSize: 28, fontWeight: 700, letterSpacing: 3, color: "#fff" },
+        dayHeaders: { bgColor: "#17A698", textColor: "#fff" },
+        rowStripes: { color1: "rgba(23,166,152,0.06)", color2: "transparent" }
+    }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+var state;
+var activeVenueId = null;
+
+function loadState() {
+    var saved = localStorage.getItem('acyr-schedule');
+    if (saved) {
+        try { state = JSON.parse(saved); return; } catch(e) {}
+    }
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+
+function saveState() {
+    localStorage.setItem('acyr-schedule', JSON.stringify(state));
+    document.getElementById('statusText').textContent = 'Saved';
+    document.getElementById('eventCount').textContent = state.events.length + ' events';
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+    var s = document.getElementById('schedule');
+    var cfg = state.config;
+    var numDays = cfg.days.length;
+    document.documentElement.style.setProperty('--num-days', numDays);
+
+    var numSlots = (cfg.endHour - cfg.startHour) * 2;
+    var html = '';
+
+    // Title banner
+    html += '<div class="title-banner">';
+    html += '<div class="title-text" style="font-family:' + state.styles.title.fontFamily + ';font-size:' + state.styles.title.fontSize + 'px;font-weight:' + state.styles.title.fontWeight + ';letter-spacing:' + state.styles.title.letterSpacing + 'px;color:' + state.styles.title.color + '">' + cfg.title + '</div>';
+    if (cfg.year) html += '<div class="title-year">' + cfg.year + '</div>';
+    html += '</div>';
+
+    // Column headers row
+    html += '<div class="col-header legend-header">Colour<br>Legend</div>';
+    html += '<div class="col-header time-header">TIME</div>';
+    for (var d = 0; d < numDays; d++) {
+        html += '<div class="col-header">' + cfg.days[d].label + ' ' + cfg.days[d].date + '</div>';
+    }
+    html += '<div class="col-header time-header"></div>';
+
+    // Venue legend
+    html += '<div class="venue-legend">';
+    state.venues.forEach(function(v) {
+        html += '<div class="legend-item">';
+        html += '<div class="legend-color" style="background:' + v.color + '"></div>';
+        html += '<div class="legend-name">' + v.name + '</div>';
+        html += '</div>';
+    });
+    html += '</div>';
+
+    // Left time column
+    html += '<div class="time-column">';
+    for (var sl = 0; sl < numSlots; sl++) {
+        var hr = cfg.startHour + Math.floor(sl / 2);
+        var mn = (sl % 2) * 30;
+        var isHour = mn === 0;
+        var label = '';
+        if (isHour) {
+            if (hr === 0) label = '12:00';
+            else if (hr === 12) label = 'NOON';
+            else if (hr < 12) label = hr + ':00';
+            else label = (hr - 12) + ':00';
+        } else {
+            label = '30';
+        }
+        html += '<div class="time-slot' + (isHour ? ' hour' : '') + '">' + label + '</div>';
+    }
+    html += '</div>';
+
+    // Day columns
+    for (var d = 0; d < numDays; d++) {
+        html += '<div class="day-column" data-day="' + d + '">';
+        // Grid lines
+        for (var sl = 1; sl < numSlots; sl++) {
+            var isHour = (sl % 2) === 0;
+            html += '<div class="slot-line' + (isHour ? ' hour' : '') + '" style="top:' + (sl * parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slot-height'))) + 'px"></div>';
+        }
+        // Events
+        var dayEvents = state.events.filter(function(e) { return e.dayIndex === d; });
+        dayEvents.forEach(function(evt) {
+            var venue = state.venues.find(function(v) { return v.id === evt.venueId; });
+            var color = venue ? venue.color : '#999';
+            var slotH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slot-height'));
+            var top = evt.startSlot * slotH;
+            var height = evt.spanSlots * slotH;
+            var totalCols = evt.totalColumns || 1;
+            var col = evt.column || 0;
+            var widthPct = (100 / totalCols);
+            var leftPct = col * widthPct;
+
+            // Determine text color based on background brightness
+            var r = parseInt(color.substr(1,2),16);
+            var g = parseInt(color.substr(3,2),16);
+            var b = parseInt(color.substr(5,2),16);
+            var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            var textClass = brightness > 160 ? 'dark-text' : 'light-text';
+
+            var titleHtml = (evt.title || '').replace(/\n/g, '<br>');
+            var subtitleHtml = (evt.subtitle || '').replace(/\n/g, '<br>');
+
+            html += '<div class="event ' + textClass + '" data-id="' + evt.id + '" style="';
+            html += 'top:' + top + 'px;';
+            html += 'height:' + height + 'px;';
+            html += 'left:calc(' + leftPct + '% + 1px);';
+            html += 'width:calc(' + widthPct + '% - 2px);';
+            html += 'background:' + color + ';';
+            html += '">';
+            html += '<div class="event-title">' + titleHtml + '</div>';
+            if (subtitleHtml) html += '<div class="event-subtitle">' + subtitleHtml + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+
+    // Right time column
+    html += '<div class="time-column right">';
+    for (var sl = 0; sl < numSlots; sl++) {
+        var hr = cfg.startHour + Math.floor(sl / 2);
+        var mn = (sl % 2) * 30;
+        var isHour = mn === 0;
+        var label = '';
+        if (isHour) {
+            var suffix = hr < 12 ? 'a' : 'p';
+            if (hr === 0) label = '12a';
+            else if (hr === 12) label = '12p';
+            else if (hr < 12) label = hr + suffix;
+            else label = (hr - 12) + suffix;
+        } else {
+            label = '30';
+        }
+        html += '<div class="time-slot' + (isHour ? ' hour' : '') + '">' + label + '</div>';
+    }
+    html += '</div>';
+
+    // Reception row
+    html += '<div class="reception-row">';
+    html += '<div class="reception-label"></div>';
+    html += '<div class="reception-label"></div>';
+    for (var d = 0; d < numDays; d++) {
+        var rec = cfg.reception.find(function(r) { return r.dayIndex === d; });
+        html += '<div class="reception-label">';
+        html += '<div class="reception-icon">R</div>';
+        html += '<div class="reception-text">' + (rec ? rec.text.replace(/\n/g, '<br>') : 'Reception') + '</div>';
+        html += '</div>';
+    }
+    html += '<div class="reception-label"></div>';
+    html += '</div>';
+
+    s.innerHTML = html;
+    saveState();
+}
+
+// ============================================================
+// TOOLBAR: Venue swatches
+// ============================================================
+function renderSwatches() {
+    var container = document.getElementById('venueSwatches');
+    container.innerHTML = '';
+    state.venues.forEach(function(v) {
+        var sw = document.createElement('div');
+        sw.className = 'venue-swatch' + (activeVenueId === v.id ? ' active' : '');
+        sw.style.background = v.color;
+        sw.title = v.name;
+        sw.addEventListener('click', function() {
+            activeVenueId = v.id;
+            renderSwatches();
+        });
+        container.appendChild(sw);
+    });
+}
+
+// ============================================================
+// SAVE / LOAD JSON
+// ============================================================
+function exportJSON() {
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'acyr-schedule-' + state.config.year + '.json';
+    a.click();
+}
+
+function importJSON(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var data = JSON.parse(e.target.result);
+            if (data.config && data.venues && data.events) {
+                state = data;
+                render();
+                renderSwatches();
+                document.getElementById('statusText').textContent = 'Loaded ' + file.name;
+            }
+        } catch(err) {
+            alert('Invalid JSON file');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+// ============================================================
+// PDF EXPORT (Vector)
+// ============================================================
+function exportPDF() {
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: [2592, 1728] }); // 36x24 inches
+
+    var cfg = state.config;
+    var numDays = cfg.days.length;
+    var numSlots = (cfg.endHour - cfg.startHour) * 2;
+
+    var W = 2592, H = 1728;
+    var legendW = 140;
+    var timeW = 60;
+    var headerH = 70;
+    var titleH = 60;
+    var receptionH = 40;
+    var dayW = (W - legendW - timeW * 2) / numDays;
+    var slotH = (H - titleH - headerH - receptionH) / numSlots;
+
+    // Title banner
+    doc.setFillColor(23, 166, 152);
+    doc.rect(0, 0, W, titleH, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(36);
+    doc.setTextColor(255, 255, 255);
+    doc.text(cfg.title + (cfg.year ? ' ' + cfg.year : ''), W / 2, titleH / 2 + 12, { align: 'center' });
+
+    // Column headers
+    var headerY = titleH;
+    doc.setFillColor(23, 166, 152);
+    doc.rect(0, headerY, W, headerH, 'F');
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text('COLOUR\nLEGEND', legendW / 2, headerY + headerH / 2, { align: 'center' });
+    doc.text('TIME', legendW + timeW / 2, headerY + headerH / 2, { align: 'center' });
+    for (var d = 0; d < numDays; d++) {
+        var dx = legendW + timeW + d * dayW;
+        doc.setFontSize(12);
+        doc.text(cfg.days[d].label + ' ' + cfg.days[d].date, dx + dayW / 2, headerY + headerH / 2 + 4, { align: 'center' });
+    }
+
+    // Grid area
+    var gridY = titleH + headerH;
+    var gridH = numSlots * slotH;
+
+    // Row stripes
+    for (var sl = 0; sl < numSlots; sl++) {
+        if (Math.floor(sl / 2) % 2 === 0) {
+            doc.setFillColor(232, 245, 243);
+            doc.rect(legendW + timeW, gridY + sl * slotH, numDays * dayW, slotH, 'F');
+        }
+    }
+
+    // Grid lines
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    for (var sl = 1; sl < numSlots; sl++) {
+        var y = gridY + sl * slotH;
+        if (sl % 2 === 0) { doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.8); }
+        else { doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.3); }
+        doc.line(legendW + timeW, y, W - timeW, y);
+    }
+
+    // Day column dividers
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineWidth(0.5);
+    for (var d = 1; d < numDays; d++) {
+        var x = legendW + timeW + d * dayW;
+        doc.line(x, gridY, x, gridY + gridH);
+    }
+
+    // Time labels (left)
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(80, 80, 80);
+    for (var sl = 0; sl < numSlots; sl++) {
+        var hr = cfg.startHour + Math.floor(sl / 2);
+        var mn = (sl % 2) * 30;
+        var label = '';
+        if (mn === 0) {
+            if (hr === 12) label = 'NOON';
+            else if (hr < 12) label = hr + ':00';
+            else label = (hr - 12) + ':00';
+        } else {
+            label = '30';
+        }
+        doc.text(label, legendW + timeW - 4, gridY + sl * slotH + slotH / 2 + 3, { align: 'right' });
+    }
+
+    // Time labels (right)
+    for (var sl = 0; sl < numSlots; sl++) {
+        var hr = cfg.startHour + Math.floor(sl / 2);
+        var mn = (sl % 2) * 30;
+        var label = '';
+        if (mn === 0) {
+            var suffix = hr < 12 ? 'a' : 'p';
+            if (hr === 12) label = '12p';
+            else if (hr < 12) label = hr + suffix;
+            else label = (hr - 12) + suffix;
+        } else {
+            label = '30';
+        }
+        doc.text(label, W - timeW + 4, gridY + sl * slotH + slotH / 2 + 3);
+    }
+
+    // Venue legend
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, gridY, legendW, gridH, 'F');
+    var legendItemH = gridH / state.venues.length;
+    state.venues.forEach(function(v, i) {
+        var ly = gridY + i * legendItemH;
+        var r = parseInt(v.color.substr(1,2),16);
+        var g = parseInt(v.color.substr(3,2),16);
+        var b = parseInt(v.color.substr(5,2),16);
+        doc.setFillColor(r, g, b);
+        doc.rect(8, ly + 6, 10, legendItemH - 12, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(50, 50, 50);
+        doc.text(v.name, 24, ly + legendItemH / 2 + 3);
+    });
+
+    // Events
+    state.events.forEach(function(evt) {
+        var venue = state.venues.find(function(v) { return v.id === evt.venueId; });
+        if (!venue) return;
+        var d = evt.dayIndex;
+        var ex = legendW + timeW + d * dayW;
+        var ey = gridY + evt.startSlot * slotH;
+        var eh = evt.spanSlots * slotH;
+        var totalCols = evt.totalColumns || 1;
+        var col = evt.column || 0;
+        var ew = dayW / totalCols;
+        ex += col * ew;
+
+        var r = parseInt(venue.color.substr(1,2),16);
+        var g = parseInt(venue.color.substr(3,2),16);
+        var b = parseInt(venue.color.substr(5,2),16);
+
+        doc.setFillColor(r, g, b);
+        doc.roundedRect(ex + 1, ey + 1, ew - 2, eh - 2, 2, 2, 'F');
+
+        var brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        if (brightness > 160) doc.setTextColor(50, 50, 50);
+        else doc.setTextColor(255, 255, 255);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.5);
+        var lines = (evt.title || '').split('\n');
+        var textY = ey + eh / 2 - (lines.length - 1) * 4;
+        lines.forEach(function(line, li) {
+            doc.text(line, ex + ew / 2, textY + li * 8, { align: 'center' });
+        });
+    });
+
+    // Reception row
+    var recY = gridY + gridH;
+    doc.setFillColor(230, 230, 230);
+    doc.rect(0, recY, W, receptionH, 'F');
+    doc.setDrawColor(23, 166, 152);
+    doc.setLineWidth(2);
+    doc.line(0, recY, W, recY);
+
+    for (var d = 0; d < numDays; d++) {
+        var rx = legendW + timeW + d * dayW;
+        var rec = cfg.reception.find(function(r) { return r.dayIndex === d; });
+        // R circle
+        doc.setDrawColor(23, 166, 152);
+        doc.setLineWidth(1.5);
+        doc.circle(rx + 16, recY + receptionH / 2, 8);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(23, 166, 152);
+        doc.text('R', rx + 16, recY + receptionH / 2 + 3, { align: 'center' });
+        // Text
+        if (rec) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6);
+            doc.setTextColor(80, 80, 80);
+            var recLines = rec.text.split('\n');
+            recLines.forEach(function(line, li) {
+                doc.text(line, rx + 32, recY + receptionH / 2 - (recLines.length - 1) * 4 + li * 8 + 3);
+            });
+        }
+    }
+
+    doc.save('ACYR_Schedule_' + cfg.year + '.pdf');
+    document.getElementById('statusText').textContent = 'PDF exported';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+render();
+renderSwatches();
+if (activeVenueId === null && state.venues.length > 0) {
+    activeVenueId = state.venues[0].id;
+    renderSwatches();
+}
+</script>
+</body>
+</html>
