@@ -6,190 +6,103 @@
     <title>52 ACYR - Logo Presentation</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fff; font-family: sans-serif; }
 
-        body {
-            font-family: 'Georgia', serif;
-            background: #f8f7f4;
-            color: #2a2a2a;
-        }
-
-        /* Hero */
         .hero {
-            background: #4a9e6e;
-            padding: 80px 60px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            min-height: 80vh;
+            padding: 80px 60px;
         }
-        .hero-logo {
-            max-width: 640px;
-            width: 100%;
-        }
-        .hero-logo img {
+        .hero img {
+            max-width: 560px;
             width: 100%;
             height: auto;
         }
 
-        /* Section headings */
-        .section-title {
-            padding: 60px 60px 24px;
-            font-size: 1.6rem;
-            font-weight: 400;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #1a5276;
-            border-bottom: 1px solid #ddd;
-            margin: 0 60px;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        /* Logo Variants Grid */
-        .variants-grid {
+        .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 0;
             padding: 0 60px;
-            margin-top: 32px;
         }
-        .variant-card {
-            overflow: hidden;
-        }
-        .variant-card img {
+        .grid img {
             width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
             display: block;
         }
-        .variant-label {
-            padding: 14px 16px;
-            font-size: 0.85rem;
+        .grid .label {
+            text-align: center;
+            padding: 12px 0 40px;
+            font-size: 0.8rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #666;
-            text-align: center;
+            color: #999;
         }
 
-        /* Elements Section */
-        .elements-row {
+        .elements {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 40px;
-            padding: 32px 60px 60px;
+            padding: 40px 60px 80px;
             align-items: center;
         }
-        .element-item {
-            text-align: center;
-        }
-        .element-item img, .element-item svg {
+        .elements .item { text-align: center; }
+        .elements img {
             max-width: 100%;
             height: auto;
-            max-height: 260px;
+            max-height: 240px;
         }
-        .element-item .label {
+        .elements .label {
             margin-top: 12px;
             font-size: 0.8rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #888;
-        }
-
-        /* Colour palette */
-        .palette-row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 0;
-            margin: 32px 60px 60px;
-        }
-        .swatch {
-            aspect-ratio: 2;
-            display: flex;
-            align-items: flex-end;
-            padding: 16px;
-            color: #fff;
-            font-size: 0.75rem;
             letter-spacing: 0.08em;
-            font-family: monospace;
-        }
-        .swatch.dark-text { color: #2a2a2a; }
-
-        /* Footer */
-        footer {
-            background: #1a5276;
-            color: rgba(255,255,255,0.5);
-            padding: 40px 60px;
-            font-size: 0.8rem;
-            letter-spacing: 0.1em;
             text-transform: uppercase;
-            text-align: center;
+            color: #999;
         }
     </style>
 </head>
 <body>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-logo">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-03.png" alt="52 ACYR Logo - Teal">
-        </div>
-    </section>
+    <div class="hero">
+        <img src="52ACYR-assets/52_Hand-Sprout_Logo-03.png" alt="52 ACYR Logo - Teal">
+    </div>
 
-    <!-- Logo Variants -->
-    <h2 class="section-title">Logo Variants</h2>
-    <div class="variants-grid">
-        <div class="variant-card">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-01.png" alt="Variant 1 - Light Green">
-            <div class="variant-label">Light Green</div>
+    <div class="grid">
+        <div>
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-01.png" alt="Light Green">
+            <div class="label">Light Green</div>
         </div>
-        <div class="variant-card">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-02.png" alt="Variant 2 - White">
-            <div class="variant-label">White</div>
+        <div>
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-02.png" alt="White">
+            <div class="label">White</div>
         </div>
-        <div class="variant-card">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-03.png" alt="Variant 3 - Teal">
-            <div class="variant-label">Teal</div>
+        <div>
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-03.png" alt="Teal">
+            <div class="label">Teal</div>
         </div>
-        <div class="variant-card">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-04.png" alt="Variant 4 - Blue">
-            <div class="variant-label">Blue</div>
+        <div>
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-04.png" alt="Blue">
+            <div class="label">Blue</div>
         </div>
     </div>
 
-    <!-- Elements -->
-    <h2 class="section-title">Logo Elements</h2>
-    <div class="elements-row">
-        <div class="element-item">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand illustration">
+    <div class="elements">
+        <div class="item">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand + Sprout">
             <div class="label">Hand + Sprout</div>
         </div>
-        <div class="element-item">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="52 ACYR Blue">
+        <div class="item">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="Wordmark Blue">
             <div class="label">Wordmark - Blue</div>
         </div>
-        <div class="element-item">
-            <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-GR.png" alt="52 ACYR Green" style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+        <div class="item">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-GR.png" alt="Wordmark Green" style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
             <div class="label">Wordmark - Green</div>
         </div>
-        <div class="element-item">
+        <div class="item">
             <img src="52ACYR-assets/Lotus.svg" alt="SSCY Lotus">
-            <div class="label">SSCY Lotus Mark</div>
+            <div class="label">SSCY Lotus</div>
         </div>
     </div>
-
-    <!-- Colour Palette -->
-    <h2 class="section-title">Colour Palette</h2>
-    <div class="palette-row">
-        <div class="swatch" style="background: #1a5276;">#1a5276 - Deep Blue</div>
-        <div class="swatch" style="background: #2e86c1;">#2e86c1 - Royal Blue</div>
-        <div class="swatch" style="background: #4a9e6e;">#4a9e6e - Leaf Green</div>
-        <div class="swatch dark-text" style="background: #c8e6c0;">#c8e6c0 - Light Green</div>
-        <div class="swatch dark-text" style="background: #f8f7f4;">#f8f7f4 - Off White</div>
-    </div>
-
-    <footer>
-        52 ACYR - Salt Spring Centre of Yoga - Logo Presentation - March 2026
-    </footer>
 
 </body>
 </html>
