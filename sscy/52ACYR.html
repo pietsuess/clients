@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>52 ACYR - Logo Presentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #f8f7f4;
+            color: #2a2a2a;
+        }
+
+        /* Hero */
+        .hero {
+            background: #1a5276;
+            padding: 80px 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 60px;
+            min-height: 70vh;
+        }
+        .hero-logo {
+            max-width: 480px;
+            width: 100%;
+        }
+        .hero-logo img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .hero-text {
+            color: #fff;
+            max-width: 480px;
+        }
+        .hero-text h1 {
+            font-size: 3.5rem;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+            line-height: 1.1;
+        }
+        .hero-text h2 {
+            font-size: 1.3rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 32px;
+        }
+        .hero-text p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            opacity: 0.85;
+            text-align: justify;
+            text-align-last: left;
+        }
+
+        /* Section headings */
+        .section-title {
+            padding: 60px 60px 24px;
+            font-size: 1.6rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #1a5276;
+            border-bottom: 1px solid #ddd;
+            margin: 0 60px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Logo Variants Grid */
+        .variants-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            padding: 0 60px;
+            margin-top: 32px;
+        }
+        .variant-card {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+        .variant-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+        .variant-card:hover img {
+            transform: scale(1.03);
+        }
+        .variant-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px 16px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+            color: #fff;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Elements Section */
+        .elements-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            padding: 32px 60px 60px;
+            align-items: center;
+        }
+        .element-item {
+            text-align: center;
+        }
+        .element-item img, .element-item svg {
+            max-width: 100%;
+            height: auto;
+            max-height: 260px;
+        }
+        .element-item .label {
+            margin-top: 12px;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        /* Sketch section */
+        .sketch-section {
+            background: #fff;
+            padding: 60px;
+            display: flex;
+            gap: 60px;
+            align-items: center;
+        }
+        .sketch-section img {
+            max-width: 50%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .sketch-section .caption {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #666;
+            text-align: justify;
+            text-align-last: left;
+        }
+        .sketch-section .caption h3 {
+            font-size: 1.4rem;
+            color: #2a2a2a;
+            margin-bottom: 16px;
+            font-weight: 400;
+            letter-spacing: 0.06em;
+        }
+
+        /* Colour palette */
+        .palette-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0;
+            margin: 32px 60px 60px;
+        }
+        .swatch {
+            aspect-ratio: 2;
+            display: flex;
+            align-items: flex-end;
+            padding: 16px;
+            color: #fff;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            font-family: monospace;
+        }
+        .swatch.dark-text { color: #2a2a2a; }
+
+        /* Footer */
+        footer {
+            background: #1a5276;
+            color: rgba(255,255,255,0.5);
+            padding: 40px 60px;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-logo">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-04.png" alt="52 ACYR Logo - Blue">
+        </div>
+        <div class="hero-text">
+            <h1>52 ACYR</h1>
+            <h2>Salt Spring Centre of Yoga</h2>
+            <p>Logo presentation for the 52nd Annual Community Yoga Retreat. The hand-drawn illustration features cupped hands nurturing a young sprout - symbolizing growth, care, and community rooted in nature.</p>
+        </div>
+    </section>
+
+    <!-- Logo Variants -->
+    <h2 class="section-title">Logo Variants</h2>
+    <div class="variants-grid">
+        <div class="variant-card">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-01.png" alt="Variant 1 - Light Green">
+            <div class="variant-label">Light Green</div>
+        </div>
+        <div class="variant-card">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-02.png" alt="Variant 2 - White">
+            <div class="variant-label">White</div>
+        </div>
+        <div class="variant-card">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-03.png" alt="Variant 3 - Teal">
+            <div class="variant-label">Teal</div>
+        </div>
+        <div class="variant-card">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-04.png" alt="Variant 4 - Blue">
+            <div class="variant-label">Blue</div>
+        </div>
+    </div>
+
+    <!-- Elements -->
+    <h2 class="section-title">Logo Elements</h2>
+    <div class="elements-row">
+        <div class="element-item">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand illustration">
+            <div class="label">Hand + Sprout</div>
+        </div>
+        <div class="element-item">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="52 ACYR Blue">
+            <div class="label">Wordmark - Blue</div>
+        </div>
+        <div class="element-item">
+            <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-GR.png" alt="52 ACYR Green" style="background: #2a2a2a; padding: 20px; border-radius: 8px;">
+            <div class="label">Wordmark - Green</div>
+        </div>
+        <div class="element-item">
+            <img src="52ACYR-assets/Lotus.svg" alt="SSCY Lotus">
+            <div class="label">SSCY Lotus Mark</div>
+        </div>
+    </div>
+
+    <!-- Sketch -->
+    <section class="sketch-section">
+        <img src="52ACYR-assets/lettering-sketch.jpeg" alt="Hand-drawn lettering sketch">
+        <div class="caption">
+            <h3>Process</h3>
+            <p>The custom lettering was hand-drawn to complement the illustrated style of the logo. The chunky, textured letterforms echo the organic quality of the hand illustration and give the mark a warm, handmade feeling.</p>
+        </div>
+    </section>
+
+    <!-- Colour Palette -->
+    <h2 class="section-title">Colour Palette</h2>
+    <div class="palette-row">
+        <div class="swatch" style="background: #1a5276;">#1a5276 - Deep Blue</div>
+        <div class="swatch" style="background: #2e86c1;">#2e86c1 - Royal Blue</div>
+        <div class="swatch" style="background: #4a9e6e;">#4a9e6e - Leaf Green</div>
+        <div class="swatch dark-text" style="background: #c8e6c0;">#c8e6c0 - Light Green</div>
+        <div class="swatch dark-text" style="background: #f8f7f4;">#f8f7f4 - Off White</div>
+    </div>
+
+    <footer>
+        52 ACYR - Salt Spring Centre of Yoga - Logo Presentation - March 2026
+    </footer>
+
+</body>
+</html>
