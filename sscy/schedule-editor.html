@@ -152,6 +152,16 @@
         .edit-pop .ep-btn.del { color:#f66; border-color:#f66; }
         .edit-pop .ep-btn.del:hover { background:#f66; color:#fff; }
 
+        .venue-pick {
+            width:28px; height:28px; border-radius:4px; cursor:pointer;
+            border:2px solid transparent; transition:border-color 0.1s;
+            display:flex; align-items:center; justify-content:center;
+            font-size:0.45rem; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);
+            overflow:hidden; line-height:1;
+        }
+        .venue-pick:hover { border-color:rgba(255,255,255,0.5); }
+        .venue-pick.selected { border-color:#fff; }
+
         /* Drag ghost */
         .drag-ghost {
             position:fixed; pointer-events:none; z-index:3000;
@@ -216,22 +226,27 @@
 </div>
 
 <div class="edit-pop" id="editPop">
-    <label>Title</label>
-    <input type="text" id="epTitle">
-    <label>Subtitle</label>
-    <input type="text" id="epSub">
-    <label>Venue</label>
-    <select id="epVenue"></select>
-    <label>Duration</label>
-    <div class="ep-row">
-        <button class="ep-btn" onclick="epDur(-1)">-</button>
-        <span id="epDurVal" style="min-width:30px;text-align:center">2</span>
-        <button class="ep-btn" onclick="epDur(1)">+</button>
-        <span style="opacity:0.4;margin-left:4px" id="epDurTime"></span>
+    <div id="epEventFields">
+        <label>Title</label>
+        <input type="text" id="epTitle">
+        <label>Subtitle</label>
+        <input type="text" id="epSub">
+        <label>Venue</label>
+        <div id="epVenueGrid" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px"></div>
+        <label>Duration</label>
+        <div class="ep-row">
+            <button class="ep-btn" onclick="epDur(-1)">-</button>
+            <span id="epDurVal" style="min-width:50px;text-align:center">2</span>
+            <button class="ep-btn" onclick="epDur(1)">+</button>
+        </div>
     </div>
-    <div class="ep-row" style="margin-top:4px">
+    <div id="epRecFields" style="display:none">
+        <label>Reception Hours</label>
+        <textarea id="epRecText" style="height:50px"></textarea>
+    </div>
+    <div class="ep-row" style="margin-top:8px">
         <button class="ep-btn" onclick="epSave()">Done</button>
-        <button class="ep-btn del" onclick="epDelete()">Delete</button>
+        <button class="ep-btn del" id="epDelBtn" onclick="epDelete()">Delete</button>
     </div>
 </div>
 <div class="sched-wrap">
@@ -946,6 +961,7 @@ function updateFont(inp){
 // INTERACTIONS
 // ============================================================
 var selectedEvtId = null;
+var editingRecDay = null;
 var dragging = null; // {type:'resize'|'move', evtId, startY, origSlot, origSpan, dayIndex}
 
 // Click on day column: stamp new event or select existing
@@ -970,6 +986,15 @@ document.addEventListener('mousedown', function(e) {
         return;
     }
 
+    // Click reception block: show popover for reception
+    var recBlock = e.target.closest('.rec-block[data-recday]');
+    if (recBlock) {
+        e.preventDefault();
+        var dayIdx = parseInt(recBlock.dataset.recday);
+        showReceptionPopover(dayIdx, e.clientX, e.clientY);
+        return;
+    }
+
     // Click existing event: select + show popover
     if (evEl && evEl.dataset.id) {
         e.preventDefault();
@@ -989,23 +1014,7 @@ document.addEventListener('mousedown', function(e) {
     // Single click on empty slot: just close popover (no auto-stamp)
 });
 
-// Double-click on reception block to edit it
-document.addEventListener('dblclick', function(e) {
-    var recBlock = e.target.closest('.rec-block[data-recday]');
-    if (recBlock) {
-        var dayIdx = parseInt(recBlock.dataset.recday);
-        var rec = state.config.reception.find(function(r){return r.dayIndex===dayIdx});
-        if (!rec) { rec={dayIndex:dayIdx,text:''}; state.config.reception.push(rec); }
-        var newText = prompt('Reception hours for ' + state.config.days[dayIdx].label + ':', rec.text.replace(/\n/g, ', '));
-        if (newText !== null) {
-            pushUndo();
-            rec.text = newText.replace(/,\s*/g, '\n');
-            render();
-        }
-        return;
-    }
-
-    // Double-click to add new event
+// Double-click to add new event or edit reception
     var dayCol = e.target.closest('.day-col');
     if (!dayCol || !activeVenueId) return;
     e.preventDefault();
@@ -1100,18 +1109,28 @@ function showPopover(evtId, mx, my) {
     document.getElementById('epTitle').value = (evt.title || '').replace(/\n/g, '\\n');
     document.getElementById('epSub').value = evt.subtitle || '';
 
-    // Build venue select with color indicators
-    var sel = document.getElementById('epVenue');
-    sel.innerHTML = '';
+    // Build venue grid with colored swatches
+    var vg = document.getElementById('epVenueGrid');
+    vg.innerHTML = '';
     state.venues.forEach(function(v) {
-        var opt = document.createElement('option');
-        opt.value = v.id;
-        opt.textContent = '\u25A0 ' + v.name;
-        opt.style.color = v.color;
-        opt.style.fontWeight = '700';
-        if (v.id === evt.venueId) opt.selected = true;
-        sel.appendChild(opt);
+        var pick = document.createElement('div');
+        pick.className = 'venue-pick' + (v.id === evt.venueId ? ' selected' : '');
+        pick.style.background = v.color;
+        pick.title = v.name;
+        pick.textContent = v.name.split(' ').map(function(w){return w[0]}).join('');
+        pick.addEventListener('click', function(){
+            vg.querySelectorAll('.venue-pick').forEach(function(p){p.classList.remove('selected')});
+            pick.classList.add('selected');
+            pick._venueId = v.id;
+        });
+        pick._venueId = v.id;
+        vg.appendChild(pick);
     });
+
+    // Show event fields, hide reception fields
+    document.getElementById('epEventFields').style.display = '';
+    document.getElementById('epRecFields').style.display = 'none';
+    document.getElementById('epDelBtn').style.display = '';
 
     updatePopoverDur();
 
@@ -1119,6 +1138,25 @@ function showPopover(evtId, mx, my) {
     var pw = 220, ph = 260;
     var x = Math.min(mx + 10, window.innerWidth - pw - 10);
     var y = Math.min(my - 20, window.innerHeight - ph - 10);
+    pop.style.left = x + 'px';
+    pop.style.top = Math.max(50, y) + 'px';
+    pop.classList.add('show');
+}
+
+function showReceptionPopover(dayIdx, mx, my) {
+    editingRecDay = dayIdx;
+    selectedEvtId = null;
+    var rec = state.config.reception.find(function(r){return r.dayIndex===dayIdx});
+
+    document.getElementById('epEventFields').style.display = 'none';
+    document.getElementById('epRecFields').style.display = '';
+    document.getElementById('epDelBtn').style.display = 'none';
+    document.getElementById('epRecText').value = rec ? rec.text : '';
+
+    var pop = document.getElementById('editPop');
+    var pw = 220;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    var y = Math.min(my - 20, window.innerHeight - 200);
     pop.style.left = x + 'px';
     pop.style.top = Math.max(50, y) + 'px';
     pop.classList.add('show');
@@ -1156,12 +1194,25 @@ function epDur(delta) {
 }
 
 function epSave() {
+    // Reception save
+    if (editingRecDay !== null) {
+        pushUndo();
+        var rec = state.config.reception.find(function(r){return r.dayIndex===editingRecDay});
+        if (!rec) { rec={dayIndex:editingRecDay,text:''}; state.config.reception.push(rec); }
+        rec.text = document.getElementById('epRecText').value;
+        editingRecDay = null;
+        closePopover();
+        render();
+        return;
+    }
+
     var evt = state.events.find(function(x){return x.id===selectedEvtId});
     if (!evt) return;
     pushUndo();
     evt.title = document.getElementById('epTitle').value.replace(/\\n/g, '\n');
     evt.subtitle = document.getElementById('epSub').value;
-    evt.venueId = document.getElementById('epVenue').value;
+    var selPick = document.querySelector('.venue-pick.selected');
+    if (selPick) evt.venueId = selPick._venueId;
     closePopover();
     render();
 }
