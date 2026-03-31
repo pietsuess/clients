@@ -77,7 +77,15 @@
 
         /* Venue legend - color fills behind name, white text */
         .legend { width: var(--legend-w); border-right:1px solid #ddd; display:flex; flex-direction:column; }
-        .leg-item { display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 8px; font-weight:700; flex:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.15); }
+        .leg-item { display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 8px; font-weight:700; flex:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.15); position:relative; }
+        .leg-item .leg-x {
+            position:absolute; top:2px; right:2px; width:12px; height:12px;
+            display:none; align-items:center; justify-content:center;
+            font-size:0.45rem; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.3);
+            border-radius:50%; cursor:pointer; z-index:4;
+        }
+        .leg-item:hover .leg-x { display:flex; }
+        .leg-item .leg-x:hover { background:rgba(200,0,0,0.7); color:#fff; }
 
         /* Time gutter - ALL gutters use the same yellow from the PDF */
         .gutter {
@@ -114,6 +122,14 @@
             text-align:center; border:none; z-index:2;
             box-sizing:border-box;
         }
+        .ev .ev-x {
+            position:absolute; top:1px; right:1px; width:14px; height:14px;
+            display:none; align-items:center; justify-content:center;
+            font-size:0.5rem; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.35);
+            border-radius:50%; cursor:pointer; line-height:1; z-index:4;
+        }
+        .ev:hover .ev-x { display:flex; }
+        .ev .ev-x:hover { background:rgba(200,0,0,0.7); color:#fff; }
         /* Spanning label that covers multiple color columns */
         .ev-span-label {
             position:absolute; z-index:3; pointer-events:none;
@@ -559,7 +575,7 @@ function render(){
 
     // Legend
     h+='<div class="legend">';
-    state.venues.forEach(function(v){ h+='<div class="leg-item" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'">'+v.name+'</div>'; });
+    state.venues.forEach(function(v,i){ h+='<div class="leg-item" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'"><div class="leg-x" data-legdel="'+i+'" title="Delete '+v.name+'">\u2715</div>'+v.name+'</div>'; });
     h+='</div>';
 
     // First gutter (TIME)
@@ -610,6 +626,7 @@ function render(){
                 h+='<div class="ev-t">'+tl+'</div>';
                 if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
             }
+            h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
             h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
             h+='</div>';
         });
@@ -973,6 +990,27 @@ document.addEventListener('mousedown', function(e) {
     // Close popover if clicking outside
     if (!e.target.closest('.edit-pop') && !evEl) {
         closePopover();
+    }
+
+    // X delete button on venue legend
+    var legDel = e.target.closest('.leg-x[data-legdel]');
+    if (legDel) {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteVenue(parseInt(legDel.dataset.legdel));
+        return;
+    }
+
+    // X delete button on event
+    var xBtn = e.target.closest('.ev-x[data-xid]');
+    if (xBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        pushUndo();
+        state.events = state.events.filter(function(x){return x.id!==xBtn.dataset.xid});
+        closePopover();
+        render();
+        return;
     }
 
     // Resize handle
