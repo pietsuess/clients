@@ -151,6 +151,9 @@
             font-size:0.65rem; width:220px; display:none;
         }
         .edit-pop.show { display:block; }
+        .ep-drag-handle { cursor:grab; padding:2px 0 8px; margin:-4px -4px 8px; text-align:center; border-bottom:1px solid #444; }
+        .ep-drag-handle:active { cursor:grabbing; }
+        .ep-drag-grip { width:30px; height:4px; background:rgba(255,255,255,0.15); border-radius:2px; display:inline-block; }
         .edit-pop label { display:block; margin-bottom:3px; font-size:0.55rem; opacity:0.5; text-transform:uppercase; letter-spacing:0.05em; }
         .edit-pop input[type=text], .edit-pop textarea {
             width:100%; background:#444; color:#fff; border:1px solid #555;
@@ -244,6 +247,7 @@
 </div>
 
 <div class="edit-pop" id="editPop">
+    <div class="ep-drag-handle" id="epDragHandle"><div class="ep-drag-grip"></div></div>
     <div id="epEventFields">
         <label>Title</label>
         <input type="text" id="epTitle">
@@ -1069,7 +1073,8 @@ document.addEventListener('mousedown', function(e) {
             if (idx >= 0) { selectedEvtIds.splice(idx, 1); }
             else { selectedEvtIds.push(id); }
             selectedEvtId = null;
-            closePopover();
+            // Close popover without clearing selection
+            document.getElementById('editPop').classList.remove('show');
             if (selectedEvtIds.length > 0) {
                 showMultiPopover(e.clientX, e.clientY);
             }
@@ -1372,6 +1377,26 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+// Draggable popover
+(function(){
+    var handle = document.getElementById('epDragHandle');
+    var pop = document.getElementById('editPop');
+    var dx=0, dy=0, mx=0, my=0, active=false;
+    handle.addEventListener('mousedown', function(e){
+        e.preventDefault();
+        active = true;
+        mx = e.clientX; my = e.clientY;
+    });
+    document.addEventListener('mousemove', function(e){
+        if(!active) return;
+        dx = e.clientX - mx; dy = e.clientY - my;
+        mx = e.clientX; my = e.clientY;
+        pop.style.left = (pop.offsetLeft + dx) + 'px';
+        pop.style.top = (pop.offsetTop + dy) + 'px';
+    });
+    document.addEventListener('mouseup', function(){ active = false; });
+})();
 
 loadState(); render(); renderSwatches();
 if(!activeVenueId&&state.venues.length)activeVenueId=state.venues[0].id;
