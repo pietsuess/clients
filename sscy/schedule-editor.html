@@ -453,66 +453,67 @@ function saveState(){ localStorage.setItem('acyr-schedule',JSON.stringify(state)
 function brightness(hex){ var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (r*299+g*587+b*114)/1000; }
 
 // Auto-assign columns for overlapping events in a day
+// Each event gets only the columns needed for ITS direct overlaps, not transitive chains
 function assignColumns(dayEvents){
     if(!dayEvents.length) return [];
-    // Sort by startSlot, then by id for stability
     var evts = dayEvents.map(function(e){ return {evt:e, col:0, totalCols:1}; });
     evts.sort(function(a,b){ return a.evt.startSlot - b.evt.startSlot || (a.evt.id < b.evt.id ? -1 : 1); });
 
-    // Find overlapping groups
-    var groups = [];
-    var used = {};
-    for(var i=0;i<evts.length;i++){
-        if(used[i]) continue;
-        var group = [i];
-        used[i] = true;
-        // Find all events that overlap with any event in this group
-        var changed = true;
-        while(changed){
-            changed = false;
-            for(var j=0;j<evts.length;j++){
-                if(used[j]) continue;
-                for(var k=0;k<group.length;k++){
-                    var a = evts[group[k]].evt, b = evts[j].evt;
-                    var aEnd = a.startSlot + a.spanSlots;
-                    var bEnd = b.startSlot + b.spanSlots;
-                    if(a.startSlot < bEnd && b.startSlot < aEnd){
-                        group.push(j); used[j] = true; changed = true; break;
-                    }
-                }
+    // Greedy column assignment: for each event, find the first column not taken by a direct overlap
+    evts.forEach(function(item, i){
+        var e = item.evt;
+        var eEnd = e.startSlot + e.spanSlots;
+        var c = 0;
+        while(true){
+            var conflict = false;
+            for(var j=0;j<i;j++){
+                if(evts[j].col !== c) continue;
+                var o = evts[j].evt;
+                if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){ conflict=true; break; }
             }
+            if(!conflict) break;
+            c++;
         }
-        groups.push(group);
-    }
+        item.col = c;
+    });
 
-    // Assign columns within each group
-    groups.forEach(function(group){
-        if(group.length === 1){ evts[group[0]].col=0; evts[group[0]].totalCols=1; return; }
-        // Greedy column assignment
-        var cols = [];
-        group.sort(function(a,b){ return evts[a].evt.startSlot - evts[b].evt.startSlot; });
-        group.forEach(function(idx){
-            var e = evts[idx].evt;
+    // For each event, totalCols = max columns needed across all slots it occupies
+    evts.forEach(function(item){
+        var e = item.evt;
+        var eEnd = e.startSlot + e.spanSlots;
+        var maxCols = item.col + 1;
+        // Check all other events that overlap this one
+        evts.forEach(function(other){
+            if(other === item) return;
+            var o = other.evt;
+            if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){
+                if(other.col + 1 > maxCols) maxCols = other.col + 1;
+            }
+        });
+        item.totalCols = maxCols;
+    });
+
+    // Normalize: all events overlapping each other should share the same totalCols
+    var changed = true;
+    while(changed){
+        changed = false;
+        evts.forEach(function(item){
+            var e = item.evt;
             var eEnd = e.startSlot + e.spanSlots;
-            var c = 0;
-            while(true){
-                var conflict = false;
-                for(var k=0;k<group.length;k++){
-                    if(group[k]===idx) continue;
-                    if(evts[group[k]].col===c){
-                        var o=evts[group[k]].evt;
-                        if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){ conflict=true; break; }
+            evts.forEach(function(other){
+                if(other === item) return;
+                var o = other.evt;
+                if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){
+                    var m = Math.max(item.totalCols, other.totalCols);
+                    if(item.totalCols !== m || other.totalCols !== m){
+                        item.totalCols = m;
+                        other.totalCols = m;
+                        changed = true;
                     }
                 }
-                if(!conflict) break;
-                c++;
-            }
-            evts[idx].col = c;
+            });
         });
-        var maxCol = 0;
-        group.forEach(function(idx){ if(evts[idx].col > maxCol) maxCol = evts[idx].col; });
-        group.forEach(function(idx){ evts[idx].totalCols = maxCol + 1; });
-    });
+    }
 
     return evts;
 }
@@ -621,7 +622,7 @@ function render(){
         if(rec){
             var recTop = (ns - 1) * SH; // start at last slot, overlap into bottom bar
             var recH = SH * 2; // extends below the grid into bottom bar
-            h+='<div class="rec-block" style="top:'+recTop+'px;height:'+recH+'px">';
+            h+='<div class="rec-block" data-recday="'+d+'" style="top:'+recTop+'px;height:'+recH+'px;cursor:pointer">';
             h+='<div class="rec-circle">R</div>';
             h+='<div class="rec-text">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
             h+='</div>';
@@ -988,8 +989,23 @@ document.addEventListener('mousedown', function(e) {
     // Single click on empty slot: just close popover (no auto-stamp)
 });
 
-// Double-click to add new event (works on empty slots or slots with existing events)
+// Double-click on reception block to edit it
 document.addEventListener('dblclick', function(e) {
+    var recBlock = e.target.closest('.rec-block[data-recday]');
+    if (recBlock) {
+        var dayIdx = parseInt(recBlock.dataset.recday);
+        var rec = state.config.reception.find(function(r){return r.dayIndex===dayIdx});
+        if (!rec) { rec={dayIndex:dayIdx,text:''}; state.config.reception.push(rec); }
+        var newText = prompt('Reception hours for ' + state.config.days[dayIdx].label + ':', rec.text.replace(/\n/g, ', '));
+        if (newText !== null) {
+            pushUndo();
+            rec.text = newText.replace(/,\s*/g, '\n');
+            render();
+        }
+        return;
+    }
+
+    // Double-click to add new event
     var dayCol = e.target.closest('.day-col');
     if (!dayCol || !activeVenueId) return;
     e.preventDefault();
@@ -1084,13 +1100,15 @@ function showPopover(evtId, mx, my) {
     document.getElementById('epTitle').value = (evt.title || '').replace(/\n/g, '\\n');
     document.getElementById('epSub').value = evt.subtitle || '';
 
-    // Build venue select
+    // Build venue select with color indicators
     var sel = document.getElementById('epVenue');
     sel.innerHTML = '';
     state.venues.forEach(function(v) {
         var opt = document.createElement('option');
         opt.value = v.id;
-        opt.textContent = v.name;
+        opt.textContent = '\u25A0 ' + v.name;
+        opt.style.color = v.color;
+        opt.style.fontWeight = '700';
         if (v.id === evt.venueId) opt.selected = true;
         sel.appendChild(opt);
     });
