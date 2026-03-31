@@ -216,6 +216,47 @@
 
         /* Status - inline in toolbar */
         .status-inline { color:rgba(255,255,255,0.35); font-size:0.55rem; }
+
+        /* Sync banner */
+        .sync-banner {
+            position:fixed; top:var(--toolbar-h); left:0; right:0; z-index:999;
+            background:#F9B233; color:#333; padding:6px 16px; font-size:0.7rem; font-weight:600;
+            display:none; align-items:center; gap:8px; justify-content:center;
+        }
+        .sync-banner.show { display:flex; }
+        .sync-banner button {
+            padding:3px 10px; border-radius:3px; border:1px solid #333;
+            background:#fff; color:#333; font-size:0.65rem; cursor:pointer; font-family:inherit;
+        }
+        .sync-banner button:hover { background:#333; color:#fff; }
+        .sync-banner .dismiss { background:none; border:none; color:#666; cursor:pointer; font-size:0.8rem; padding:0 4px; }
+
+        /* Active user dot */
+        .user-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:3px; }
+        .user-dot.green { background:#4caf50; }
+        .user-dot.amber { background:#F9B233; }
+
+        /* Name prompt overlay */
+        .name-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:5000;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .name-box {
+            background:#2c2c2c; color:#fff; padding:24px; border-radius:8px;
+            box-shadow:0 8px 30px rgba(0,0,0,0.5); font-family:inherit; text-align:center;
+            max-width:300px; width:90%;
+        }
+        .name-box h3 { margin-bottom:12px; font-size:0.9rem; }
+        .name-box input {
+            width:100%; background:#444; color:#fff; border:1px solid #555;
+            padding:8px 10px; border-radius:4px; font-size:0.8rem; font-family:inherit;
+            margin-bottom:12px; text-align:center;
+        }
+        .name-box button {
+            padding:6px 20px; border-radius:4px; border:none;
+            background:#17A698; color:#fff; font-size:0.75rem; cursor:pointer; font-family:inherit;
+        }
+        .name-box button:hover { background:#1fc4b3; }
     </style>
 </head>
 <body>
@@ -231,12 +272,22 @@
         <button class="tb-btn primary" onclick="exportPDF()">Export PDF</button>
     </div>
     <div class="tb-group">
+        <button class="tb-btn primary" onclick="publishSchedule()" id="publishBtn">Publish</button>
+    </div>
+    <div class="tb-group">
         <button class="tb-btn" onclick="toggleSettings()">Settings</button>
     </div>
     <div class="tb-group" style="margin-left:auto">
+        <span id="userStatus" style="display:flex;align-items:center;gap:2px"></span>
         <span class="status-inline" id="stxt">Ready</span>
         <span class="status-inline" id="ecnt"></span>
     </div>
+</div>
+
+<div class="sync-banner" id="syncBanner">
+    <span id="syncMsg">A newer version is available.</span>
+    <button onclick="loadPublished()">Load Latest</button>
+    <span class="dismiss" onclick="dismissSync()">&times;</span>
 </div>
 
 <!-- Settings panel -->
@@ -1468,9 +1519,278 @@ document.addEventListener('keydown', function(e) {
     document.addEventListener('mouseup', function(){ active = false; });
 })();
 
+// ============================================================
+// PUBLISH / SYNC VIA GITHUB API
+// ============================================================
+var GITHUB_REPO = 'pietsuess/clients';
+var DATA_PATH = 'sscy/schedule-data.json';
+var HEARTBEAT_PATH = 'sscy/schedule-heartbeat.json';
+var GITHUB_API = 'https://api.github.com';
+
+// User identity
+function getUserName() { return localStorage.getItem('acyr-user-name') || ''; }
+function setUserName(n) { localStorage.setItem('acyr-user-name', n); }
+function getGitHubToken() { return localStorage.getItem('acyr-github-token') || ''; }
+function setGitHubToken(t) { localStorage.setItem('acyr-github-token', t); }
+
+function promptUserName() {
+    if (getUserName()) return;
+    var ov = document.createElement('div');
+    ov.className = 'name-overlay';
+    ov.innerHTML = '<div class="name-box"><h3>Welcome to the Schedule Editor</h3>' +
+        '<p style="font-size:0.7rem;opacity:0.7;margin-bottom:12px">Enter your name so others know who is editing.</p>' +
+        '<input type="text" id="nameInput" placeholder="Your name">' +
+        '<button onclick="saveUserName()">Continue</button></div>';
+    document.body.appendChild(ov);
+    setTimeout(function(){
+        var inp = document.getElementById('nameInput');
+        inp.focus();
+        inp.addEventListener('keydown', function(e){ if(e.key==='Enter') saveUserName(); });
+    }, 100);
+}
+
+function saveUserName() {
+    var name = (document.getElementById('nameInput').value || '').trim();
+    if (!name) return;
+    setUserName(name);
+    var ov = document.querySelector('.name-overlay');
+    if (ov) ov.remove();
+    updateUserStatus();
+}
+
+// GitHub API helpers
+function ghHeaders() {
+    var h = { 'Accept': 'application/vnd.github.v3+json' };
+    var token = getGitHubToken();
+    if (token) h['Authorization'] = 'token ' + token;
+    return h;
+}
+
+function ghFetch(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign(ghHeaders(), opts.headers || {});
+    return fetch(GITHUB_API + '/repos/' + GITHUB_REPO + '/contents/' + path, opts);
+}
+
+// Get file info (sha + content) from GitHub
+function ghGetFile(path) {
+    return ghFetch(path).then(function(r) {
+        if (r.status === 404) return null;
+        if (!r.ok) throw new Error('GitHub API error: ' + r.status);
+        return r.json();
+    });
+}
+
+// Read and decode file content from GitHub API (always fresh, no CDN caching)
+function ghReadJSON(path) {
+    return ghFetch(path).then(function(r) {
+        if (r.status === 404) return null;
+        if (!r.ok) throw new Error('GitHub API error: ' + r.status);
+        return r.json();
+    }).then(function(file) {
+        if (!file || !file.content) return null;
+        var decoded = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+        return JSON.parse(decoded);
+    });
+}
+
+// Put file to GitHub (create or update)
+function ghPutFile(path, content, message) {
+    return ghGetFile(path).then(function(existing) {
+        var body = {
+            message: message,
+            content: btoa(unescape(encodeURIComponent(content)))
+        };
+        if (existing && existing.sha) body.sha = existing.sha;
+        return ghFetch(path, {
+            method: 'PUT',
+            body: JSON.stringify(body)
+        });
+    }).then(function(r) {
+        if (!r.ok) return r.json().then(function(d){ throw new Error(d.message || 'PUT failed'); });
+        return r.json();
+    });
+}
+
+// Publish schedule
+var publishing = false;
+function publishSchedule() {
+    if (publishing) return;
+    var token = getGitHubToken();
+    if (!token) {
+        alert('Set your GitHub token in Settings before publishing.');
+        return;
+    }
+    var name = getUserName() || 'Unknown';
+
+    // Pre-publish: check heartbeat for other active editors
+    publishing = true;
+    document.getElementById('publishBtn').textContent = 'Checking...';
+
+    ghGetFile(HEARTBEAT_PATH).then(function(hbFile) {
+        if (hbFile) {
+            try {
+                var hb = JSON.parse(atob(hbFile.content));
+                var age = Date.now() - new Date(hb.timestamp).getTime();
+                if (hb.name !== name && age < 120000) {
+                    var secs = Math.round(age / 1000);
+                    if (!confirm(hb.name + ' was editing ' + secs + ' seconds ago.\nPublish anyway?')) {
+                        publishing = false;
+                        document.getElementById('publishBtn').textContent = 'Publish';
+                        return Promise.reject('cancelled');
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // Build publish payload with timestamp
+        var payload = JSON.parse(JSON.stringify(state));
+        payload._published = { by: name, at: new Date().toISOString() };
+
+        document.getElementById('publishBtn').textContent = 'Publishing...';
+        return ghPutFile(DATA_PATH, JSON.stringify(payload, null, 2), 'Schedule update by ' + name);
+    }).then(function(result) {
+        if (!result) return; // cancelled
+        document.getElementById('publishBtn').textContent = 'Publish';
+        document.getElementById('stxt').textContent = 'Published';
+        lastPublishedAt = new Date().toISOString();
+        publishing = false;
+    }).catch(function(err) {
+        if (err === 'cancelled') return;
+        publishing = false;
+        document.getElementById('publishBtn').textContent = 'Publish';
+        alert('Publish failed: ' + (err.message || err));
+    });
+}
+
+// Sync check: fetch published version timestamp
+var lastPublishedAt = null;
+var syncDismissed = false;
+
+function checkForUpdates() {
+    ghReadJSON(DATA_PATH)
+        .then(function(data) {
+            if (!data || !data._published) return;
+            var remoteAt = data._published.at;
+            var remoteBy = data._published.by;
+            var localAt = lastPublishedAt;
+
+            // First load: just record the timestamp
+            if (!localAt) {
+                lastPublishedAt = remoteAt;
+                return;
+            }
+
+            // If remote is newer than what we last published/loaded
+            if (remoteAt > localAt && !syncDismissed) {
+                document.getElementById('syncMsg').textContent =
+                    remoteBy + ' published changes. Load latest?';
+                document.getElementById('syncBanner').classList.add('show');
+            }
+        })
+        .catch(function(){});
+}
+
+function loadPublished() {
+    ghReadJSON(DATA_PATH)
+        .then(function(data) {
+            if (!data || !data.config) { alert('No published schedule found.'); return; }
+            lastPublishedAt = data._published ? data._published.at : new Date().toISOString();
+            delete data._published;
+            state = data;
+            mergeDefaults();
+            render(); renderSwatches();
+            dismissSync();
+            document.getElementById('stxt').textContent = 'Loaded latest';
+        })
+        .catch(function(err) { alert('Failed to load: ' + err.message); });
+}
+
+function dismissSync() {
+    document.getElementById('syncBanner').classList.remove('show');
+    syncDismissed = true;
+    // Reset dismiss after 5 min so it can notify again
+    setTimeout(function(){ syncDismissed = false; }, 300000);
+}
+
+// Heartbeat: write presence while editing
+var heartbeatInterval = null;
+
+function writeHeartbeat() {
+    var token = getGitHubToken();
+    var name = getUserName();
+    if (!token || !name) return;
+
+    var hb = JSON.stringify({ name: name, timestamp: new Date().toISOString() });
+    ghPutFile(HEARTBEAT_PATH, hb, 'Heartbeat: ' + name).catch(function(){});
+}
+
+function startHeartbeat() {
+    if (heartbeatInterval) return;
+    writeHeartbeat();
+    heartbeatInterval = setInterval(writeHeartbeat, 30000);
+}
+
+function stopHeartbeat() {
+    if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+}
+
+// Active user status display
+function updateUserStatus() {
+    var el = document.getElementById('userStatus');
+    var name = getUserName();
+    if (!name) { el.innerHTML = ''; return; }
+    el.innerHTML = '<span class="user-dot green"></span><span class="status-inline" style="color:rgba(255,255,255,0.6)">' + name + '</span>';
+
+    // Also check if someone else is active
+    ghReadJSON(HEARTBEAT_PATH)
+        .then(function(hb) {
+            if (!hb || !hb.name || hb.name === name) return;
+            var age = Date.now() - new Date(hb.timestamp).getTime();
+            if (age < 120000) {
+                el.innerHTML = '<span class="user-dot green"></span><span class="status-inline" style="color:rgba(255,255,255,0.6)">' + name + '</span>' +
+                    '<span class="user-dot amber" style="margin-left:6px"></span><span class="status-inline" style="color:#F9B233">' + hb.name + ' editing</span>';
+            }
+        })
+        .catch(function(){});
+}
+
+// Add GitHub token field to settings panel
+var _origRenderSettings = renderSettings;
+renderSettings = function() {
+    _origRenderSettings();
+    var c = document.getElementById('colorSettings');
+
+    var h = '<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Publish Settings</div>';
+
+    // User name
+    h += '<div style="margin-bottom:8px"><span style="font-size:0.55rem;opacity:0.7">Your Name</span>';
+    h += '<input type="text" value="' + (getUserName() || '') + '" onchange="setUserName(this.value);updateUserStatus()" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:inherit;margin-top:3px"></div>';
+
+    // GitHub token
+    h += '<div style="margin-bottom:8px"><span style="font-size:0.55rem;opacity:0.7">GitHub Token</span>';
+    var tok = getGitHubToken();
+    var masked = tok ? '\u2022\u2022\u2022\u2022' + tok.slice(-4) : '';
+    h += '<input type="password" value="' + (tok || '') + '" placeholder="ghp_..." onchange="setGitHubToken(this.value)" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:monospace;margin-top:3px"></div>';
+    h += '<div style="font-size:0.5rem;opacity:0.4;margin-bottom:4px">Needed to publish. Ask Piet for the token.</div>';
+
+    c.innerHTML += h;
+};
+
+// Initialize
 loadState(); render(); renderSwatches();
 if(!activeVenueId&&state.venues.length)activeVenueId=state.venues[0].id;
 renderSwatches();
+
+// Prompt for name on first visit
+promptUserName();
+
+// Start sync check + heartbeat
+checkForUpdates();
+setInterval(checkForUpdates, 60000);
+setInterval(updateUserStatus, 60000);
+startHeartbeat();
+updateUserStatus();
 </script>
 </body>
 </html>
