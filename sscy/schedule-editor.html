@@ -79,6 +79,7 @@
         /* Venue legend - color fills behind name, white text */
         .legend { width: var(--legend-w); border-right:1px solid #ddd; display:flex; flex-direction:column; }
         .leg-item { display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 8px; font-weight:700; flex:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.15); position:relative; cursor:grab; }
+        .leg-item.active-venue { outline:2px solid #fff; outline-offset:-2px; }
         .leg-item.dragging { opacity:0.4; }
         .leg-item.drag-over { border-bottom:3px solid #fff; }
         .leg-item .leg-x {
@@ -218,10 +219,6 @@
 </head>
 <body>
 <div class="toolbar">
-    <div class="tb-group">
-        <span class="tb-label">Venue</span>
-        <div id="vswatches" style="display:flex;gap:2px"></div>
-    </div>
     <div class="tb-group">
         <button class="tb-btn" onclick="undo()">Undo</button>
         <button class="tb-btn" onclick="exportJSON()">Save JSON</button>
@@ -431,7 +428,8 @@ var DEFAULT_STATE = {
         rowStripe2:"#f0faf7",
         receptionBg:"#F4D352",
         receptionCircle:"#17A698",
-        gridLines:"#cccccc"
+        gridLines:"#cccccc",
+        receptionFont:{fontFamily:"Archivo Narrow",fontSize:10,fontWeight:700}
     }
 };
 
@@ -464,7 +462,7 @@ function mergeDefaults(){
     var ds=DEFAULT_STATE.styles;
     if(!state.styles) state.styles={};
     for(var k in ds){ if(state.styles[k]===undefined) state.styles[k]=ds[k]; }
-    ['title','dayHeaders','legendHeader','legendFont','gutterFont','eventFont'].forEach(function(k){
+    ['title','dayHeaders','legendHeader','legendFont','gutterFont','eventFont','receptionFont'].forEach(function(k){
         if(!state.styles[k]) state.styles[k]=JSON.parse(JSON.stringify(ds[k]));
     });
 }
@@ -624,7 +622,7 @@ function render(){
 
     // Legend
     h+='<div class="legend">';
-    state.venues.forEach(function(v,i){ h+='<div class="leg-item" draggable="true" data-legidx="'+i+'" ondragstart="legDragStart(event,'+i+')" ondragover="legDragOver(event,'+i+')" ondragleave="legDragLeave(event)" ondrop="legDrop(event,'+i+')" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'"><div class="leg-x" data-legdel="'+i+'" title="Delete '+v.name+'">\u2715</div>'+v.name+'</div>'; });
+    state.venues.forEach(function(v,i){ h+='<div class="leg-item'+(activeVenueId===v.id?' active-venue':'')+'" draggable="true" data-legidx="'+i+'" data-legvenue="'+v.id+'" ondragstart="legDragStart(event,'+i+')" ondragover="legDragOver(event,'+i+')" ondragleave="legDragLeave(event)" ondrop="legDrop(event,'+i+')" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'"><div class="leg-x" data-legdel="'+i+'" title="Delete '+v.name+'">\u2715</div>'+v.name+'</div>'; });
     h+='</div>';
 
     // First gutter (TIME) - wider
@@ -706,7 +704,7 @@ function render(){
             var recH = SH * 2; // extends below the grid into bottom bar
             h+='<div class="rec-block" data-recday="'+d+'" style="top:'+recTop+'px;height:'+recH+'px;cursor:pointer">';
             h+='<div class="rec-circle">R</div>';
-            h+='<div class="rec-text">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
+            h+='<div class="rec-text" style="font-family:\''+sty.receptionFont.fontFamily+'\';font-size:'+sty.receptionFont.fontSize+'px;font-weight:'+sty.receptionFont.fontWeight+'">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
             h+='</div>';
         }
 
@@ -926,7 +924,8 @@ function renderSettings(){
         {label:'Day Headers',fkey:'dayHeaders',obj:sty.dayHeaders},
         {label:'Legend',fkey:'legendFont',obj:sty.legendFont},
         {label:'Gutters',fkey:'gutterFont',obj:sty.gutterFont},
-        {label:'Events',fkey:'eventFont',obj:sty.eventFont}
+        {label:'Events',fkey:'eventFont',obj:sty.eventFont},
+        {label:'Reception',fkey:'receptionFont',obj:sty.receptionFont}
     ];
     fontGroups.forEach(function(fg){
         h+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #333">';
@@ -1057,6 +1056,14 @@ document.addEventListener('mousedown', function(e) {
     // Close popover if clicking outside
     if (!e.target.closest('.edit-pop') && !evEl) {
         closePopover();
+    }
+
+    // Click legend item to select as active venue
+    var legItem = e.target.closest('.leg-item[data-legvenue]');
+    if (legItem && !e.target.closest('.leg-x')) {
+        activeVenueId = legItem.dataset.legvenue;
+        render();
+        return;
     }
 
     // Click day header to edit
