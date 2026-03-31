@@ -488,7 +488,8 @@ function brightness(hex){ var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.subs
 function assignColumns(dayEvents){
     if(!dayEvents.length) return [];
     var evts = dayEvents.map(function(e){ return {evt:e, col:0, totalCols:1}; });
-    evts.sort(function(a,b){ return a.evt.startSlot - b.evt.startSlot || (a.evt.id < b.evt.id ? -1 : 1); });
+    // Sort by colOrder (user-adjustable), then startSlot, then id
+    evts.sort(function(a,b){ return (a.evt.colOrder||0) - (b.evt.colOrder||0) || a.evt.startSlot - b.evt.startSlot || (a.evt.id < b.evt.id ? -1 : 1); });
 
     // Greedy column assignment: for each event, find the first column not taken by a direct overlap
     evts.forEach(function(item, i){
@@ -1127,11 +1128,22 @@ document.addEventListener('mousemove', function(e) {
                 }
             });
 
+            // Horizontal drag within same day: adjust column order
+            if (newDay === dragging.origDay) {
+                var dayCol = document.querySelector('.day-col[data-day="'+newDay+'"]');
+                if (dayCol) {
+                    var dcRect = dayCol.getBoundingClientRect();
+                    var relX = (e.clientX - dcRect.left) / dcRect.width;
+                    evt.colOrder = Math.round(relX * 10); // 0-10 range
+                }
+            }
+
             if (evt.startSlot !== newSlot || evt.dayIndex !== newDay) {
                 evt.startSlot = newSlot;
                 evt.dayIndex = newDay;
-                render();
+                if (newDay !== dragging.origDay) evt.colOrder = 0; // reset on day change
             }
+            render();
         }
     }
 });
