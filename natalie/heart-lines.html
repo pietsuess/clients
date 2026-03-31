@@ -7,18 +7,13 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; background: #fff; }
-  svg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; pointer-events: none; }
-  .scroll-space { height: 500vh; }
+  .lines-section { height: 300vh; }
+  .lines-section svg { position: sticky; top: 0; width: 100%; height: 100vh; display: block; pointer-events: none; }
 </style>
 </head>
 <body>
 
-<div style="height: 300vh;"></div>
-<div style="position: relative; z-index: 2; background: #fff; padding: 100px 60px;">
-  <h1 style="font-size: 6vw; font-weight: 300; margin-bottom: 60px;">Natalie Squeen</h1>
-  <p style="font-size: 1.4rem; max-width: 100%; text-align: justify; text-align-last: left; line-height: 1.8; margin-bottom: 40px;">Placeholder content. Replace this with whatever you need below the heart reveal.</p>
-  <div style="height: 200vh;"></div>
-</div>
+<div class="lines-section">
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
   <defs>
@@ -181,6 +176,13 @@
     </g>
   </g>
 </svg>
+</div>
+
+<div style="background: #fff; padding: 100px 60px;">
+  <h1 style="font-size: 6vw; font-weight: 300; margin-bottom: 60px;">Natalie Squeen</h1>
+  <p style="font-size: 1.4rem; text-align: justify; text-align-last: left; line-height: 1.8; margin-bottom: 40px;">Placeholder content. Replace this with whatever you need below the heart reveal.</p>
+  <div style="height: 200vh;"></div>
+</div>
 
 <script>
   const topLayer = document.getElementById('top-layer');
