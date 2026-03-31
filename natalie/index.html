@@ -6,14 +6,14 @@
 <title>Squeen</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #fff; }
-  svg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
-  .spacer { height: 300vh; }
+  html, body { width: 100%; background: #fff; }
+  svg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1; }
+  .scroll-space { height: 500vh; }
 </style>
 </head>
 <body>
 
-<div class="spacer"></div>
+<div class="scroll-space"></div>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
   <defs>
@@ -184,44 +184,18 @@
   const maxTravel = (4220.58 - 1920) / 2;
   const center = -maxTravel;
 
-  let progress = 0;
-  const speed = 0.0015;
-  let phase = 'animate'; // 'animate' or 'scroll'
+  // Animation completes over first 50vh of scroll (starts halfway through page movement)
+  const animEnd = window.innerHeight * 0.5;
 
-  function render() {
+  function onScroll() {
+    const progress = Math.min(window.scrollY / animEnd, 1);
     const offset = progress * maxTravel;
     topLayer.setAttribute('transform', `translate(${center - offset}, 0)`);
     bottomLayer.setAttribute('transform', `translate(${center + offset}, 0)`);
   }
 
-  window.addEventListener('wheel', (e) => {
-    if (phase === 'animate') {
-      e.preventDefault();
-      const newProgress = progress + e.deltaY * speed;
-      progress = Math.max(0, Math.min(1, newProgress));
-      render();
-
-      // Animation complete - unlock scrolling
-      if (progress >= 1 && e.deltaY > 0) {
-        phase = 'scroll';
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-      }
-    } else {
-      // In scroll phase, check if we're back at top and scrolling up
-      if (window.scrollY <= 0 && e.deltaY < 0) {
-        e.preventDefault();
-        phase = 'animate';
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-        window.scrollTo(0, 0);
-        progress = 1 + e.deltaY * speed;
-        render();
-      }
-    }
-  }, { passive: false });
-
-  render();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 </script>
 
 </body>
