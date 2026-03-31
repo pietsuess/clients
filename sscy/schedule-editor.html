@@ -1520,9 +1520,11 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// PUBLISH / SYNC (no tokens, no setup)
+// PUBLISH / SYNC (via Google Apps Script - no tokens needed)
 // ============================================================
-var BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019d42be-e102-74ba-b137-4d3e815c788a';
+// To set up: deploy schedule-sync.gs as a Google Apps Script web app,
+// then paste the URL here. See schedule-sync.gs for instructions.
+var SYNC_URL = localStorage.getItem('acyr-sync-url') || '';
 
 // User identity
 function getUserName() { return localStorage.getItem('acyr-user-name') || ''; }
@@ -1553,21 +1555,57 @@ function saveUserName() {
     updateUserStatus();
 }
 
+// Sync setup prompt
+function showSyncSetup() {
+    if (document.getElementById('syncSetup')) return;
+    var ov = document.createElement('div');
+    ov.className = 'name-overlay';
+    ov.id = 'syncSetup';
+    ov.innerHTML = '<div class="name-box" style="max-width:440px">' +
+        '<h3>Publish Setup</h3>' +
+        '<p style="font-size:0.8rem;opacity:0.7;margin-bottom:12px;line-height:1.5">' +
+        'To enable publishing, Piet needs to deploy a small sync script to Google. ' +
+        'Once done, paste the URL below. This only needs to happen once.</p>' +
+        '<input type="text" id="setupSyncUrl" placeholder="https://script.google.com/macros/s/..." value="' + (SYNC_URL || '') + '" style="font-size:0.75rem">' +
+        '<div style="display:flex;gap:8px;justify-content:center">' +
+        '<button onclick="saveSyncSetup()" style="flex:1">Save</button>' +
+        '<button onclick="document.getElementById(\'syncSetup\').remove()" style="flex:1;background:#444">Cancel</button>' +
+        '</div></div>';
+    document.body.appendChild(ov);
+    setTimeout(function(){ document.getElementById('setupSyncUrl').focus(); }, 100);
+}
+
+function saveSyncSetup() {
+    var url = (document.getElementById('setupSyncUrl').value || '').trim();
+    if (!url) return;
+    SYNC_URL = url;
+    localStorage.setItem('acyr-sync-url', url);
+    var ov = document.getElementById('syncSetup');
+    if (ov) ov.remove();
+    publishSchedule();
+}
+
+// Read from sync endpoint (follows Google redirect)
+function syncFetch(url) {
+    return fetch(url, { redirect: 'follow' }).then(function(r) {
+        if (!r.ok) throw new Error('Sync error: ' + r.status);
+        return r.json();
+    });
+}
+
 // Publish schedule
 var publishing = false;
 function publishSchedule() {
     if (publishing) return;
     var name = getUserName();
     if (!name) { promptUserName(); return; }
+    if (!SYNC_URL) { showSyncSetup(); return; }
 
-    // Pre-publish: check who published last
     publishing = true;
     document.getElementById('publishBtn').textContent = 'Publishing...';
 
-    fetch(BLOB_URL).then(function(r) {
-        if (!r.ok) return null;
-        return r.json();
-    }).then(function(remote) {
+    // Check who published last
+    syncFetch(SYNC_URL).then(function(remote) {
         if (remote && remote._meta && remote._meta.publishedBy) {
             var age = Date.now() - new Date(remote._meta.publishedAt).getTime();
             if (remote._meta.publishedBy !== name && age < 300000) {
@@ -1584,10 +1622,11 @@ function publishSchedule() {
         var payload = JSON.parse(JSON.stringify(state));
         payload._meta = { publishedBy: name, publishedAt: new Date().toISOString() };
 
-        return fetch(BLOB_URL, {
-            method: 'PUT',
+        return fetch(SYNC_URL, {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            redirect: 'follow'
         });
     }).then(function(result) {
         if (!result) return;
@@ -1608,10 +1647,8 @@ var lastPublishedAt = null;
 var syncDismissed = false;
 
 function checkForUpdates() {
-    fetch(BLOB_URL).then(function(r) {
-        if (!r.ok) return null;
-        return r.json();
-    }).then(function(data) {
+    if (!SYNC_URL) return;
+    syncFetch(SYNC_URL).then(function(data) {
         if (!data || !data._meta || !data._meta.publishedAt) return;
         var remoteAt = data._meta.publishedAt;
         var remoteBy = data._meta.publishedBy;
@@ -1627,10 +1664,8 @@ function checkForUpdates() {
 }
 
 function loadPublished() {
-    fetch(BLOB_URL).then(function(r) {
-        if (!r.ok) throw new Error('Could not reach server');
-        return r.json();
-    }).then(function(data) {
+    if (!SYNC_URL) { alert('Sync not set up yet. Click Publish first to configure.'); return; }
+    syncFetch(SYNC_URL).then(function(data) {
         if (!data || !data.config) { alert('No published schedule found.'); return; }
         lastPublishedAt = data._meta ? data._meta.publishedAt : new Date().toISOString();
         delete data._meta;
@@ -1745,9 +1780,11 @@ var _origRenderSettings = renderSettings;
 renderSettings = function() {
     _origRenderSettings();
     var c = document.getElementById('colorSettings');
-    var h = '<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Your Name</div>';
-    h += '<input type="text" value="' + (getUserName() || '') + '" onchange="setUserName(this.value);updateUserStatus()" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:inherit">';
-    h += '<div style="font-size:0.5rem;opacity:0.4;margin-top:4px">Shown when you publish so others know who made changes.</div>';
+    var h = '<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Publish Settings</div>';
+    h += '<div style="margin-bottom:8px"><span style="font-size:0.55rem;opacity:0.7">Your Name</span>';
+    h += '<input type="text" value="' + (getUserName() || '') + '" onchange="setUserName(this.value);updateUserStatus()" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:inherit;margin-top:3px"></div>';
+    h += '<div style="margin-bottom:8px"><span style="font-size:0.55rem;opacity:0.7">Sync URL</span>';
+    h += '<input type="text" value="' + (SYNC_URL || '') + '" onchange="SYNC_URL=this.value;localStorage.setItem(\'acyr-sync-url\',this.value)" style="width:100%;font-size:0.5rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:monospace;margin-top:3px"></div>';
     c.innerHTML += h;
 };
 
