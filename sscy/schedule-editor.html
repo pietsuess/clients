@@ -268,6 +268,7 @@
         <input type="file" id="impF" accept=".json" style="display:none" onchange="importJSON(event)">
         <button class="tb-btn" onclick="resetToDefault()" style="color:#f88">Reset</button>
     </div>
+    <div class="tb-group" id="vswatches"></div>
     <div class="tb-group">
         <button class="tb-btn primary" onclick="exportPDF()">Export PDF</button>
     </div>
@@ -795,7 +796,7 @@ function render(){
 }
 
 function renderSwatches(){
-    var c=document.getElementById('vswatches'); c.innerHTML='';
+    var c=document.getElementById('vswatches'); if(!c) return; c.innerHTML='';
     state.venues.forEach(function(v){
         var s=document.createElement('div'); s.className='vswatch'+(activeVenueId===v.id?' active':'');
         s.style.background=v.color; s.title=v.name;
