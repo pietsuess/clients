@@ -234,7 +234,6 @@
         /* Active user dot */
         .user-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:3px; }
         .user-dot.green { background:#4caf50; }
-        .user-dot.amber { background:#F9B233; }
 
         /* Name prompt overlay */
         .name-overlay {
@@ -276,6 +275,7 @@
     </div>
     <div class="tb-group">
         <button class="tb-btn" onclick="toggleSettings()">Settings</button>
+        <button class="tb-btn" onclick="showHelp()">Help</button>
     </div>
     <div class="tb-group" style="margin-left:auto">
         <span id="userStatus" style="display:flex;align-items:center;gap:2px"></span>
@@ -1520,18 +1520,13 @@ document.addEventListener('keydown', function(e) {
 })();
 
 // ============================================================
-// PUBLISH / SYNC VIA GITHUB API
+// PUBLISH / SYNC (no tokens, no setup)
 // ============================================================
-var GITHUB_REPO = 'pietsuess/clients';
-var DATA_PATH = 'sscy/schedule-data.json';
-var HEARTBEAT_PATH = 'sscy/schedule-heartbeat.json';
-var GITHUB_API = 'https://api.github.com';
+var BLOB_URL = 'https://jsonblob.com/api/jsonBlob/019d42be-e102-74ba-b137-4d3e815c788a';
 
 // User identity
 function getUserName() { return localStorage.getItem('acyr-user-name') || ''; }
 function setUserName(n) { localStorage.setItem('acyr-user-name', n); }
-function getGitHubToken() { return localStorage.getItem('acyr-github-token') || ''; }
-function setGitHubToken(t) { localStorage.setItem('acyr-github-token', t); }
 
 function promptUserName() {
     if (getUserName()) return;
@@ -1558,129 +1553,46 @@ function saveUserName() {
     updateUserStatus();
 }
 
-// GitHub API helpers
-function ghHeaders() {
-    var h = { 'Accept': 'application/vnd.github.v3+json' };
-    var token = getGitHubToken();
-    if (token) h['Authorization'] = 'token ' + token;
-    return h;
-}
-
-function ghFetch(path, opts) {
-    opts = opts || {};
-    opts.headers = Object.assign(ghHeaders(), opts.headers || {});
-    return fetch(GITHUB_API + '/repos/' + GITHUB_REPO + '/contents/' + path, opts);
-}
-
-// Get file info (sha + content) from GitHub
-function ghGetFile(path) {
-    return ghFetch(path).then(function(r) {
-        if (r.status === 404) return null;
-        if (!r.ok) throw new Error('GitHub API error: ' + r.status);
-        return r.json();
-    });
-}
-
-// Read and decode file content from GitHub API (always fresh, no CDN caching)
-function ghReadJSON(path) {
-    return ghFetch(path).then(function(r) {
-        if (r.status === 404) return null;
-        if (!r.ok) throw new Error('GitHub API error: ' + r.status);
-        return r.json();
-    }).then(function(file) {
-        if (!file || !file.content) return null;
-        var decoded = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
-        return JSON.parse(decoded);
-    });
-}
-
-// Put file to GitHub (create or update)
-function ghPutFile(path, content, message) {
-    return ghGetFile(path).then(function(existing) {
-        var body = {
-            message: message,
-            content: btoa(unescape(encodeURIComponent(content)))
-        };
-        if (existing && existing.sha) body.sha = existing.sha;
-        return ghFetch(path, {
-            method: 'PUT',
-            body: JSON.stringify(body)
-        });
-    }).then(function(r) {
-        if (!r.ok) return r.json().then(function(d){ throw new Error(d.message || 'PUT failed'); });
-        return r.json();
-    });
-}
-
-// Publish setup panel
-function showPublishSetup() {
-    if (document.getElementById('publishSetup')) return;
-    var ov = document.createElement('div');
-    ov.className = 'name-overlay';
-    ov.id = 'publishSetup';
-    var tok = getGitHubToken() || '';
-    ov.innerHTML = '<div class="name-box">' +
-        '<h3>Publish Setup</h3>' +
-        '<p style="font-size:0.7rem;opacity:0.7;margin-bottom:12px">To publish the schedule online, paste the access token below. Ask Piet if you don\'t have it.</p>' +
-        '<input type="password" id="setupToken" placeholder="Paste token here" value="' + tok + '" style="font-family:monospace">' +
-        '<div style="display:flex;gap:8px;justify-content:center">' +
-        '<button onclick="savePublishSetup()" style="flex:1">Save & Publish</button>' +
-        '<button onclick="document.getElementById(\'publishSetup\').remove()" style="flex:1;background:#444">Cancel</button>' +
-        '</div></div>';
-    document.body.appendChild(ov);
-    setTimeout(function(){ document.getElementById('setupToken').focus(); }, 100);
-}
-
-function savePublishSetup() {
-    var tok = (document.getElementById('setupToken').value || '').trim();
-    if (!tok) return;
-    setGitHubToken(tok);
-    var ov = document.getElementById('publishSetup');
-    if (ov) ov.remove();
-    publishSchedule();
-}
-
 // Publish schedule
 var publishing = false;
 function publishSchedule() {
     if (publishing) return;
-    var token = getGitHubToken();
-    if (!token) {
-        showPublishSetup();
-        return;
-    }
-    var name = getUserName() || 'Unknown';
+    var name = getUserName();
+    if (!name) { promptUserName(); return; }
 
-    // Pre-publish: check heartbeat for other active editors
+    // Pre-publish: check who published last
     publishing = true;
-    document.getElementById('publishBtn').textContent = 'Checking...';
+    document.getElementById('publishBtn').textContent = 'Publishing...';
 
-    ghGetFile(HEARTBEAT_PATH).then(function(hbFile) {
-        if (hbFile) {
-            try {
-                var hb = JSON.parse(atob(hbFile.content));
-                var age = Date.now() - new Date(hb.timestamp).getTime();
-                if (hb.name !== name && age < 120000) {
-                    var secs = Math.round(age / 1000);
-                    if (!confirm(hb.name + ' was editing ' + secs + ' seconds ago.\nPublish anyway?')) {
-                        publishing = false;
-                        document.getElementById('publishBtn').textContent = 'Publish';
-                        return Promise.reject('cancelled');
-                    }
+    fetch(BLOB_URL).then(function(r) {
+        if (!r.ok) return null;
+        return r.json();
+    }).then(function(remote) {
+        if (remote && remote._meta && remote._meta.publishedBy) {
+            var age = Date.now() - new Date(remote._meta.publishedAt).getTime();
+            if (remote._meta.publishedBy !== name && age < 300000) {
+                var mins = Math.round(age / 60000);
+                var label = mins < 1 ? 'just now' : mins + ' min ago';
+                if (!confirm(remote._meta.publishedBy + ' published ' + label + '.\nOverwrite with your version?')) {
+                    publishing = false;
+                    document.getElementById('publishBtn').textContent = 'Publish';
+                    return Promise.reject('cancelled');
                 }
-            } catch(e) {}
+            }
         }
 
-        // Build publish payload with timestamp
         var payload = JSON.parse(JSON.stringify(state));
-        payload._published = { by: name, at: new Date().toISOString() };
+        payload._meta = { publishedBy: name, publishedAt: new Date().toISOString() };
 
-        document.getElementById('publishBtn').textContent = 'Publishing...';
-        return ghPutFile(DATA_PATH, JSON.stringify(payload, null, 2), 'Schedule update by ' + name);
+        return fetch(BLOB_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
     }).then(function(result) {
-        if (!result) return; // cancelled
+        if (!result) return;
         document.getElementById('publishBtn').textContent = 'Publish';
-        document.getElementById('stxt').textContent = 'Published';
+        document.getElementById('stxt').textContent = 'Published by ' + name;
         lastPublishedAt = new Date().toISOString();
         publishing = false;
     }).catch(function(err) {
@@ -1691,117 +1603,106 @@ function publishSchedule() {
     });
 }
 
-// Sync check: fetch published version timestamp
+// Sync check
 var lastPublishedAt = null;
 var syncDismissed = false;
 
 function checkForUpdates() {
-    ghReadJSON(DATA_PATH)
-        .then(function(data) {
-            if (!data || !data._published) return;
-            var remoteAt = data._published.at;
-            var remoteBy = data._published.by;
-            var localAt = lastPublishedAt;
+    fetch(BLOB_URL).then(function(r) {
+        if (!r.ok) return null;
+        return r.json();
+    }).then(function(data) {
+        if (!data || !data._meta || !data._meta.publishedAt) return;
+        var remoteAt = data._meta.publishedAt;
+        var remoteBy = data._meta.publishedBy;
 
-            // First load: just record the timestamp
-            if (!localAt) {
-                lastPublishedAt = remoteAt;
-                return;
-            }
+        if (!lastPublishedAt) { lastPublishedAt = remoteAt; return; }
 
-            // If remote is newer than what we last published/loaded
-            if (remoteAt > localAt && !syncDismissed) {
-                document.getElementById('syncMsg').textContent =
-                    remoteBy + ' published changes. Load latest?';
-                document.getElementById('syncBanner').classList.add('show');
-            }
-        })
-        .catch(function(){});
+        if (remoteAt > lastPublishedAt && !syncDismissed) {
+            document.getElementById('syncMsg').textContent =
+                (remoteBy || 'Someone') + ' published changes. Load latest?';
+            document.getElementById('syncBanner').classList.add('show');
+        }
+    }).catch(function(){});
 }
 
 function loadPublished() {
-    ghReadJSON(DATA_PATH)
-        .then(function(data) {
-            if (!data || !data.config) { alert('No published schedule found.'); return; }
-            lastPublishedAt = data._published ? data._published.at : new Date().toISOString();
-            delete data._published;
-            state = data;
-            mergeDefaults();
-            render(); renderSwatches();
-            dismissSync();
-            document.getElementById('stxt').textContent = 'Loaded latest';
-        })
-        .catch(function(err) { alert('Failed to load: ' + err.message); });
+    fetch(BLOB_URL).then(function(r) {
+        if (!r.ok) throw new Error('Could not reach server');
+        return r.json();
+    }).then(function(data) {
+        if (!data || !data.config) { alert('No published schedule found.'); return; }
+        lastPublishedAt = data._meta ? data._meta.publishedAt : new Date().toISOString();
+        delete data._meta;
+        state = data;
+        mergeDefaults();
+        render(); renderSwatches();
+        dismissSync();
+        document.getElementById('stxt').textContent = 'Loaded latest';
+    }).catch(function(err) { alert('Failed to load: ' + err.message); });
 }
 
 function dismissSync() {
     document.getElementById('syncBanner').classList.remove('show');
     syncDismissed = true;
-    // Reset dismiss after 5 min so it can notify again
     setTimeout(function(){ syncDismissed = false; }, 300000);
 }
 
-// Heartbeat: write presence while editing
-var heartbeatInterval = null;
-
-function writeHeartbeat() {
-    var token = getGitHubToken();
-    var name = getUserName();
-    if (!token || !name) return;
-
-    var hb = JSON.stringify({ name: name, timestamp: new Date().toISOString() });
-    ghPutFile(HEARTBEAT_PATH, hb, 'Heartbeat: ' + name).catch(function(){});
-}
-
-function startHeartbeat() {
-    if (heartbeatInterval) return;
-    writeHeartbeat();
-    heartbeatInterval = setInterval(writeHeartbeat, 30000);
-}
-
-function stopHeartbeat() {
-    if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
-}
-
-// Active user status display
+// User status display
 function updateUserStatus() {
     var el = document.getElementById('userStatus');
     var name = getUserName();
     if (!name) { el.innerHTML = ''; return; }
     el.innerHTML = '<span class="user-dot green"></span><span class="status-inline" style="color:rgba(255,255,255,0.6)">' + name + '</span>';
-
-    // Also check if someone else is active
-    ghReadJSON(HEARTBEAT_PATH)
-        .then(function(hb) {
-            if (!hb || !hb.name || hb.name === name) return;
-            var age = Date.now() - new Date(hb.timestamp).getTime();
-            if (age < 120000) {
-                el.innerHTML = '<span class="user-dot green"></span><span class="status-inline" style="color:rgba(255,255,255,0.6)">' + name + '</span>' +
-                    '<span class="user-dot amber" style="margin-left:6px"></span><span class="status-inline" style="color:#F9B233">' + hb.name + ' editing</span>';
-            }
-        })
-        .catch(function(){});
 }
 
-// Add GitHub token field to settings panel
+// Instructions panel
+function showHelp() {
+    if (document.getElementById('helpPanel')) { document.getElementById('helpPanel').remove(); return; }
+    var ov = document.createElement('div');
+    ov.className = 'name-overlay';
+    ov.id = 'helpPanel';
+    ov.innerHTML = '<div class="name-box" style="max-width:420px;text-align:left;max-height:80vh;overflow-y:auto">' +
+        '<h3 style="text-align:center;margin-bottom:16px">Schedule Editor Help</h3>' +
+        '<div style="font-size:0.7rem;line-height:1.6">' +
+        '<b style="color:#17A698">Adding Events</b><br>' +
+        'Click a venue in the legend (left column) to select it, then <b>double-click</b> an empty time slot to place an event.<br><br>' +
+        '<b style="color:#17A698">Editing Events</b><br>' +
+        '<b>Click</b> an event to edit its title, subtitle, venue, and duration.<br>' +
+        'Use the <b>+/-</b> buttons to adjust duration in 15-minute steps.<br><br>' +
+        '<b style="color:#17A698">Moving & Resizing</b><br>' +
+        '<b>Drag</b> an event to move it to a different time or day.<br>' +
+        '<b>Drag the bottom edge</b> to resize.<br>' +
+        '<b>Drag sideways</b> within a day to reorder side-by-side events.<br><br>' +
+        '<b style="color:#17A698">Duplicating</b><br>' +
+        '<b>Shift+click</b> multiple events to select them, then use the "Duplicate to" buttons to copy them to another day.<br><br>' +
+        '<b style="color:#17A698">Deleting</b><br>' +
+        'Hover over an event and click the <b>X</b>, or select it and press <b>Delete</b>.<br><br>' +
+        '<b style="color:#17A698">Other Editing</b><br>' +
+        'Click <b>day headers</b> to edit the day name and date.<br>' +
+        'Click the <b>title banner</b> to edit the schedule title.<br>' +
+        'Click <b>reception boxes</b> to edit hours.<br>' +
+        'Drag <b>legend venues</b> to reorder them.<br><br>' +
+        '<b style="color:#17A698">Publishing & Syncing</b><br>' +
+        'Click <b>Publish</b> to share your version with others. No setup needed.<br>' +
+        'If someone else publishes, a yellow banner will appear asking to load their changes.<br>' +
+        'Everything saves automatically to your browser. Use <b>Save/Load JSON</b> for file backups.<br><br>' +
+        '<b style="color:#17A698">Keyboard Shortcuts</b><br>' +
+        '<b>Ctrl/Cmd+Z</b> = Undo &nbsp; <b>Escape</b> = Close popup &nbsp; <b>Delete</b> = Remove selected event' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'helpPanel\').remove()" style="margin-top:16px;width:100%">Got it</button>' +
+        '</div>';
+    document.body.appendChild(ov);
+}
+
+// Name field in settings
 var _origRenderSettings = renderSettings;
 renderSettings = function() {
     _origRenderSettings();
     var c = document.getElementById('colorSettings');
-
-    var h = '<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Publish Settings</div>';
-
-    // User name
-    h += '<div style="margin-bottom:8px"><span style="font-size:0.55rem;opacity:0.7">Your Name</span>';
-    h += '<input type="text" value="' + (getUserName() || '') + '" onchange="setUserName(this.value);updateUserStatus()" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:inherit;margin-top:3px"></div>';
-
-    // GitHub token
-    h += '<div style="margin-bottom:8px"><span style="font-size:0.55rem;opacity:0.7">GitHub Token</span>';
-    var tok = getGitHubToken();
-    var masked = tok ? '\u2022\u2022\u2022\u2022' + tok.slice(-4) : '';
-    h += '<input type="password" value="' + (tok || '') + '" placeholder="ghp_..." onchange="setGitHubToken(this.value)" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:monospace;margin-top:3px"></div>';
-    h += '<div style="font-size:0.5rem;opacity:0.4;margin-bottom:4px">Needed to publish. Ask Piet for the token.</div>';
-
+    var h = '<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Your Name</div>';
+    h += '<input type="text" value="' + (getUserName() || '') + '" onchange="setUserName(this.value);updateUserStatus()" style="width:100%;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:inherit">';
+    h += '<div style="font-size:0.5rem;opacity:0.4;margin-top:4px">Shown when you publish so others know who made changes.</div>';
     c.innerHTML += h;
 };
 
@@ -1809,15 +1710,9 @@ renderSettings = function() {
 loadState(); render(); renderSwatches();
 if(!activeVenueId&&state.venues.length)activeVenueId=state.venues[0].id;
 renderSwatches();
-
-// Prompt for name on first visit
 promptUserName();
-
-// Start sync check + heartbeat
 checkForUpdates();
 setInterval(checkForUpdates, 60000);
-setInterval(updateUserStatus, 60000);
-startHeartbeat();
 updateUserStatus();
 </script>
 </body>
