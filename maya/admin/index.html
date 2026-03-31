@@ -641,9 +641,10 @@ body.admin-mode{padding-top:48px}
     <button class="discard-btn" onclick="discardDraft()">Discard Draft</button>
     <button onclick="toggleSettings()">Settings</button>
     <button onclick="openShowEditor(-1)">+ New Show</button>
-    <button class="publish-btn" onclick="publish()">Publish</button>
+    <button class="publish-btn" onclick="publish()" id="publishBtn">Publish</button>
   </div>
 </div>
+<script>if(DEMO_MODE){var pb=document.getElementById('publishBtn');pb.textContent='Demo Mode';pb.style.opacity='0.5';pb.style.cursor='default';}</script>
 
 <!-- SETTINGS PANEL -->
 <div class="settings-panel" id="settingsPanel">
