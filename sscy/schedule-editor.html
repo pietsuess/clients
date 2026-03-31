@@ -121,6 +121,41 @@
             color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.25);
         }
         .ev:hover { filter:brightness(1.08); }
+        .ev.selected { outline:2px solid #fff; outline-offset:-2px; z-index:5; }
+        .ev .ev-resize { position:absolute; bottom:0; left:0; right:0; height:6px; cursor:ns-resize; }
+        .ev .ev-resize:hover { background:rgba(255,255,255,0.3); }
+
+        /* Edit popover */
+        .edit-pop {
+            position:fixed; z-index:2000; background:#2c2c2c; color:#fff;
+            padding:12px; border-radius:6px; box-shadow:0 8px 30px rgba(0,0,0,0.5);
+            font-size:0.65rem; width:220px; display:none;
+        }
+        .edit-pop.show { display:block; }
+        .edit-pop label { display:block; margin-bottom:3px; font-size:0.55rem; opacity:0.5; text-transform:uppercase; letter-spacing:0.05em; }
+        .edit-pop input[type=text], .edit-pop textarea {
+            width:100%; background:#444; color:#fff; border:1px solid #555;
+            padding:4px 6px; border-radius:3px; font-family:inherit; font-size:0.65rem; margin-bottom:8px;
+        }
+        .edit-pop textarea { height:40px; resize:vertical; }
+        .edit-pop select {
+            width:100%; background:#444; color:#fff; border:1px solid #555;
+            padding:4px 6px; border-radius:3px; font-family:inherit; font-size:0.65rem; margin-bottom:8px;
+        }
+        .edit-pop .ep-row { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+        .edit-pop .ep-btn {
+            padding:4px 10px; border-radius:3px; border:1px solid #555;
+            background:#444; color:#fff; font-size:0.6rem; cursor:pointer; font-family:inherit;
+        }
+        .edit-pop .ep-btn:hover { background:#555; }
+        .edit-pop .ep-btn.del { color:#f66; border-color:#f66; }
+        .edit-pop .ep-btn.del:hover { background:#f66; color:#fff; }
+
+        /* Drag ghost */
+        .drag-ghost {
+            position:fixed; pointer-events:none; z-index:3000;
+            border:2px dashed rgba(255,255,255,0.5); border-radius:0; opacity:0.6;
+        }
         .ev-t { font-weight:700; }
         .ev-s { font-size:0.5rem; opacity:0.75; }
         .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
@@ -178,6 +213,25 @@
     <div id="colorSettings"></div>
 </div>
 
+<div class="edit-pop" id="editPop">
+    <label>Title</label>
+    <input type="text" id="epTitle">
+    <label>Subtitle</label>
+    <input type="text" id="epSub">
+    <label>Venue</label>
+    <select id="epVenue"></select>
+    <label>Duration (slots)</label>
+    <div class="ep-row">
+        <button class="ep-btn" onclick="epDur(-1)">-</button>
+        <span id="epDurVal" style="min-width:30px;text-align:center">2</span>
+        <button class="ep-btn" onclick="epDur(1)">+</button>
+        <span style="opacity:0.4;margin-left:4px" id="epDurTime"></span>
+    </div>
+    <div class="ep-row" style="margin-top:4px">
+        <button class="ep-btn" onclick="epSave()">Done</button>
+        <button class="ep-btn del" onclick="epDelete()">Delete</button>
+    </div>
+</div>
 <div class="sched-wrap">
     <div class="sched" id="sched"></div>
 </div>
@@ -510,11 +564,12 @@ function render(){
             var cls=brightness(c)>160?'dk':'lt';
             var tl=(evt.title||'').replace(/\n/g,'<br>');
 
-            h+='<div class="ev '+cls+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+'">';
+            h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+'">';
             if(!isSpanned){
                 h+='<div class="ev-t">'+tl+'</div>';
                 if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
             }
+            h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
             h+='</div>';
         });
 
@@ -836,6 +891,218 @@ function updateFont(inp){
     state.styles[fkey][fprop]=val;
     render(); renderSettings();
 }
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+var selectedEvtId = null;
+var dragging = null; // {type:'resize'|'move', evtId, startY, origSlot, origSpan, dayIndex}
+
+// Click on day column: stamp new event or select existing
+document.addEventListener('mousedown', function(e) {
+    var evEl = e.target.closest('.ev[data-id]');
+    var resizeEl = e.target.closest('.ev-resize[data-id]');
+    var dayCol = e.target.closest('.day-col');
+
+    // Close popover if clicking outside
+    if (!e.target.closest('.edit-pop') && !evEl) {
+        closePopover();
+    }
+
+    // Resize handle
+    if (resizeEl) {
+        e.preventDefault();
+        var id = resizeEl.dataset.id;
+        var evt = state.events.find(function(x){return x.id===id});
+        if (!evt) return;
+        dragging = { type:'resize', evtId:id, startY:e.clientY, origSpan:evt.spanSlots };
+        return;
+    }
+
+    // Click existing event: select + show popover
+    if (evEl && evEl.dataset.id) {
+        e.preventDefault();
+        var id = evEl.dataset.id;
+        selectedEvtId = id;
+        render();
+        showPopover(id, e.clientX, e.clientY);
+
+        // Start move drag after a small movement
+        var evt = state.events.find(function(x){return x.id===id});
+        if (evt) {
+            dragging = { type:'move', evtId:id, startY:e.clientY, startX:e.clientX, origSlot:evt.startSlot, origDay:evt.dayIndex, moved:false };
+        }
+        return;
+    }
+
+    // Click empty slot: stamp new event
+    if (dayCol && activeVenueId) {
+        e.preventDefault();
+        var rect = dayCol.getBoundingClientRect();
+        var y = e.clientY - rect.top;
+        var slot = Math.floor(y / SH);
+        var ns = (state.config.endHour - state.config.startHour) * 2;
+        if (slot < 0 || slot >= ns) return;
+
+        var newEvt = {
+            id: 'e' + Date.now(),
+            dayIndex: parseInt(dayCol.dataset.day),
+            startSlot: slot,
+            spanSlots: 2,
+            venueId: activeVenueId,
+            title: 'New Event'
+        };
+        state.events.push(newEvt);
+        selectedEvtId = newEvt.id;
+        render();
+        showPopover(newEvt.id, e.clientX, e.clientY);
+    }
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+
+    if (dragging.type === 'resize') {
+        var evt = state.events.find(function(x){return x.id===dragging.evtId});
+        if (!evt) return;
+        var dy = e.clientY - dragging.startY;
+        var slotDelta = Math.round(dy / SH);
+        var newSpan = Math.max(1, dragging.origSpan + slotDelta);
+        var ns = (state.config.endHour - state.config.startHour) * 2;
+        if (evt.startSlot + newSpan > ns) newSpan = ns - evt.startSlot;
+        if (evt.spanSlots !== newSpan) {
+            evt.spanSlots = newSpan;
+            render();
+            updatePopoverDur();
+        }
+    }
+
+    if (dragging.type === 'move') {
+        var dx = Math.abs(e.clientX - dragging.startX);
+        var dy = Math.abs(e.clientY - dragging.startY);
+        if (dx > 5 || dy > 5) dragging.moved = true;
+
+        if (dragging.moved) {
+            closePopover();
+            var evt = state.events.find(function(x){return x.id===dragging.evtId});
+            if (!evt) return;
+
+            // Vertical movement: change start slot
+            var slotDelta = Math.round((e.clientY - dragging.startY) / SH);
+            var newSlot = Math.max(0, dragging.origSlot + slotDelta);
+            var ns = (state.config.endHour - state.config.startHour) * 2;
+            if (newSlot + evt.spanSlots > ns) newSlot = ns - evt.spanSlots;
+
+            // Horizontal: detect which day column the mouse is over
+            var dayCols = document.querySelectorAll('.day-col');
+            var newDay = evt.dayIndex;
+            dayCols.forEach(function(dc) {
+                var r = dc.getBoundingClientRect();
+                if (e.clientX >= r.left && e.clientX <= r.right) {
+                    newDay = parseInt(dc.dataset.day);
+                }
+            });
+
+            if (evt.startSlot !== newSlot || evt.dayIndex !== newDay) {
+                evt.startSlot = newSlot;
+                evt.dayIndex = newDay;
+                render();
+            }
+        }
+    }
+});
+
+document.addEventListener('mouseup', function(e) {
+    if (dragging && dragging.type === 'move' && !dragging.moved) {
+        // It was a click, not a drag - popover already shown
+    }
+    dragging = null;
+});
+
+// Popover
+function showPopover(evtId, mx, my) {
+    var pop = document.getElementById('editPop');
+    var evt = state.events.find(function(x){return x.id===evtId});
+    if (!evt) return;
+
+    document.getElementById('epTitle').value = (evt.title || '').replace(/\n/g, '\\n');
+    document.getElementById('epSub').value = evt.subtitle || '';
+
+    // Build venue select
+    var sel = document.getElementById('epVenue');
+    sel.innerHTML = '';
+    state.venues.forEach(function(v) {
+        var opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = v.name;
+        if (v.id === evt.venueId) opt.selected = true;
+        sel.appendChild(opt);
+    });
+
+    updatePopoverDur();
+
+    // Position
+    var pw = 220, ph = 260;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    var y = Math.min(my - 20, window.innerHeight - ph - 10);
+    pop.style.left = x + 'px';
+    pop.style.top = Math.max(50, y) + 'px';
+    pop.classList.add('show');
+}
+
+function updatePopoverDur() {
+    var evt = state.events.find(function(x){return x.id===selectedEvtId});
+    if (!evt) return;
+    document.getElementById('epDurVal').textContent = evt.spanSlots;
+    var mins = evt.spanSlots * 30;
+    var hrs = Math.floor(mins / 60);
+    var m = mins % 60;
+    document.getElementById('epDurTime').textContent = (hrs ? hrs + 'h' : '') + (m ? m + 'm' : '');
+}
+
+function closePopover() {
+    document.getElementById('editPop').classList.remove('show');
+    if (selectedEvtId) {
+        selectedEvtId = null;
+        render();
+    }
+}
+
+function epDur(delta) {
+    var evt = state.events.find(function(x){return x.id===selectedEvtId});
+    if (!evt) return;
+    var ns = (state.config.endHour - state.config.startHour) * 2;
+    evt.spanSlots = Math.max(1, Math.min(ns - evt.startSlot, evt.spanSlots + delta));
+    render();
+    updatePopoverDur();
+}
+
+function epSave() {
+    var evt = state.events.find(function(x){return x.id===selectedEvtId});
+    if (!evt) return;
+    evt.title = document.getElementById('epTitle').value.replace(/\\n/g, '\n');
+    evt.subtitle = document.getElementById('epSub').value;
+    evt.venueId = document.getElementById('epVenue').value;
+    closePopover();
+    render();
+}
+
+function epDelete() {
+    if (!selectedEvtId) return;
+    state.events = state.events.filter(function(x){return x.id!==selectedEvtId});
+    closePopover();
+    render();
+}
+
+// Escape to close popover
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePopover();
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedEvtId && !e.target.closest('input,textarea,select')) {
+            epDelete();
+        }
+    }
+});
 
 loadState(); render(); renderSwatches();
 if(!activeVenueId&&state.venues.length)activeVenueId=state.venues[0].id;
