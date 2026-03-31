@@ -719,6 +719,14 @@ function toggleSettings(){
     if(p.style.display==='none'){p.style.display='block';renderSettings();}else{p.style.display='none';}
 }
 
+document.addEventListener('mousedown', function(e){
+    var p=document.getElementById('settingsPanel');
+    if(p.style.display==='none') return;
+    if(p.contains(e.target)) return;
+    if(e.target.closest('.tb-btn') && e.target.closest('.tb-btn').textContent.trim()==='Settings') return;
+    p.style.display='none';
+});
+
 function renderSettings(){
     var c=document.getElementById('colorSettings');
     var sty=state.styles;
