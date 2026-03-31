@@ -508,33 +508,52 @@ function assignColumns(dayEvents){
         item.col = c;
     });
 
-    // Build per-slot concurrency map and column positions
-    // For each event, compute segments where its width/position changes
+    // Build per-slot layout: for each slot, determine which events are active
+    // and assign them packed column positions (0, 1, 2...) sorted by their global col
     var maxSlot = 0;
     evts.forEach(function(item){ var end = item.evt.startSlot + item.evt.spanSlots; if(end > maxSlot) maxSlot = end; });
 
-    // For each slot, count how many events are active and record which columns are used
-    evts.forEach(function(item){
+    // Build slot map: for each slot, list of active event indices sorted by col
+    var slotMap = [];
+    for (var s = 0; s < maxSlot; s++) {
+        var active = [];
+        evts.forEach(function(item, idx) {
+            var o = item.evt;
+            if (s >= o.startSlot && s < o.startSlot + o.spanSlots) active.push(idx);
+        });
+        // Sort by global col so column order is stable
+        active.sort(function(a, b) { return evts[a].col - evts[b].col; });
+        slotMap[s] = active;
+    }
+
+    // For each event, build segments where its packed column or total count changes
+    evts.forEach(function(item, myIdx) {
         var e = item.evt;
         var eEnd = e.startSlot + e.spanSlots;
-        item.segments = []; // [{startSlot, spanSlots, col, totalCols}]
+        item.segments = [];
 
         var segStart = e.startSlot;
+        var prevPackedCol = -1;
         var prevCount = -1;
+
         for (var s = e.startSlot; s <= eEnd; s++) {
             var count = 0;
+            var packedCol = 0;
             if (s < eEnd) {
-                evts.forEach(function(other){
-                    var o = other.evt;
-                    if (s >= o.startSlot && s < o.startSlot + o.spanSlots) count++;
-                });
+                var active = slotMap[s];
+                count = active.length;
+                // Find this event's packed position among active events at this slot
+                for (var k = 0; k < active.length; k++) {
+                    if (active[k] === myIdx) { packedCol = k; break; }
+                }
             }
-            if (count !== prevCount && s > e.startSlot) {
-                // Close previous segment
-                item.segments.push({startSlot: segStart, spanSlots: s - segStart, totalCols: prevCount, col: item.col});
+
+            if ((count !== prevCount || packedCol !== prevPackedCol) && s > e.startSlot) {
+                item.segments.push({startSlot: segStart, spanSlots: s - segStart, totalCols: prevCount, col: prevPackedCol});
                 segStart = s;
             }
             prevCount = count;
+            prevPackedCol = packedCol;
         }
     });
 
