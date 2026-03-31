@@ -1662,35 +1662,80 @@ function showHelp() {
     var ov = document.createElement('div');
     ov.className = 'name-overlay';
     ov.id = 'helpPanel';
-    ov.innerHTML = '<div class="name-box" style="max-width:420px;text-align:left;max-height:80vh;overflow-y:auto">' +
-        '<h3 style="text-align:center;margin-bottom:16px">Schedule Editor Help</h3>' +
-        '<div style="font-size:0.7rem;line-height:1.6">' +
-        '<b style="color:#17A698">Adding Events</b><br>' +
-        'Click a venue in the legend (left column) to select it, then <b>double-click</b> an empty time slot to place an event.<br><br>' +
-        '<b style="color:#17A698">Editing Events</b><br>' +
-        '<b>Click</b> an event to edit its title, subtitle, venue, and duration.<br>' +
-        'Use the <b>+/-</b> buttons to adjust duration in 15-minute steps.<br><br>' +
-        '<b style="color:#17A698">Moving & Resizing</b><br>' +
-        '<b>Drag</b> an event to move it to a different time or day.<br>' +
-        '<b>Drag the bottom edge</b> to resize.<br>' +
-        '<b>Drag sideways</b> within a day to reorder side-by-side events.<br><br>' +
-        '<b style="color:#17A698">Duplicating</b><br>' +
-        '<b>Shift+click</b> multiple events to select them, then use the "Duplicate to" buttons to copy them to another day.<br><br>' +
-        '<b style="color:#17A698">Deleting</b><br>' +
-        'Hover over an event and click the <b>X</b>, or select it and press <b>Delete</b>.<br><br>' +
-        '<b style="color:#17A698">Other Editing</b><br>' +
-        'Click <b>day headers</b> to edit the day name and date.<br>' +
-        'Click the <b>title banner</b> to edit the schedule title.<br>' +
-        'Click <b>reception boxes</b> to edit hours.<br>' +
-        'Drag <b>legend venues</b> to reorder them.<br><br>' +
-        '<b style="color:#17A698">Publishing & Syncing</b><br>' +
-        'Click <b>Publish</b> to share your version with others. No setup needed.<br>' +
-        'If someone else publishes, a yellow banner will appear asking to load their changes.<br>' +
-        'Everything saves automatically to your browser. Use <b>Save/Load JSON</b> for file backups.<br><br>' +
-        '<b style="color:#17A698">Keyboard Shortcuts</b><br>' +
-        '<b>Ctrl/Cmd+Z</b> = Undo &nbsp; <b>Escape</b> = Close popup &nbsp; <b>Delete</b> = Remove selected event' +
+    var sec = function(color, icon, title) {
+        return '<div style="display:flex;align-items:center;gap:8px;margin:20px 0 8px;padding-bottom:6px;border-bottom:2px solid ' + color + '">' +
+            '<span style="font-size:1.3rem">' + icon + '</span>' +
+            '<span style="font-size:1.1rem;font-weight:700;color:' + color + '">' + title + '</span></div>';
+    };
+    var tip = function(text) {
+        return '<div style="background:rgba(255,255,255,0.05);border-left:3px solid #17A698;padding:8px 12px;margin:8px 0;border-radius:0 4px 4px 0;font-size:0.85rem">' + text + '</div>';
+    };
+    var ex = function(label, desc) {
+        return '<div style="display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:0.9rem">' +
+            '<span style="background:#17A698;color:#fff;padding:2px 8px;border-radius:3px;font-size:0.75rem;font-weight:600;white-space:nowrap">' + label + '</span>' +
+            '<span>' + desc + '</span></div>';
+    };
+    var kbd = function(key) {
+        return '<span style="background:#444;padding:2px 7px;border-radius:3px;font-size:0.8rem;font-family:monospace;border:1px solid #555">' + key + '</span>';
+    };
+
+    ov.innerHTML = '<div class="name-box" style="max-width:520px;text-align:left;max-height:85vh;overflow-y:auto;padding:28px 32px">' +
+        '<h3 style="text-align:center;margin-bottom:4px;font-size:1.3rem">Schedule Editor</h3>' +
+        '<p style="text-align:center;opacity:0.5;font-size:0.8rem;margin-bottom:8px">How to use this tool</p>' +
+
+        sec('#17A698', '\u2795', 'Adding Events') +
+        '<p style="font-size:0.9rem;line-height:1.7">' +
+        'First, select a venue by clicking it in the <b style="color:#F9B233">colour legend</b> on the left (it gets a white outline). ' +
+        'Then <b>double-click</b> any empty time slot to place a new event there.</p>' +
+        tip('The new event appears in your selected venue\'s colour and defaults to 1 hour. Click it to edit the details.') +
+
+        sec('#E8652F', '\u270F\uFE0F', 'Editing Events') +
+        '<p style="font-size:0.9rem;line-height:1.7">' +
+        '<b>Click</b> any event to open its editor popup:</p>' +
+        ex('Title', 'Name of the event (use \\n for a line break)') +
+        ex('Subtitle', 'Optional second line, smaller text') +
+        ex('Venue', 'Click a coloured swatch to change the venue') +
+        ex('Duration', 'Use <b>+/-</b> buttons, adjusts in <b>15-minute</b> steps') +
+
+        sec('#7B2D5F', '\u2B06\uFE0F', 'Moving & Resizing') +
+        ex('Move', '<b>Drag</b> an event to move it to a different time or day') +
+        ex('Resize', '<b>Drag the bottom edge</b> of an event to make it longer or shorter') +
+        ex('Reorder', '<b>Drag sideways</b> within a day to swap side-by-side column positions') +
+
+        sec('#0052A3', '\u274C', 'Deleting') +
+        '<p style="font-size:0.9rem;line-height:1.7">' +
+        'Hover over any event and click the <b style="color:#f66">X</b> in the corner. ' +
+        'Or select it and press ' + kbd('Delete') + '.</p>' +
+
+        sec('#E91E63', '\u2728', 'Duplicating to Other Days') +
+        '<p style="font-size:0.9rem;line-height:1.7">' +
+        'Hold ' + kbd('Shift') + ' and <b>click</b> multiple events to select them (they get a white outline). ' +
+        'A popup appears with day buttons to duplicate them all at once.</p>' +
+        tip('Great for repeating daily events like meals, Arati, or Latte Da Caf&eacute;.') +
+
+        sec('#2D7A2D', '\u2699\uFE0F', 'Schedule Settings') +
+        ex('Day Headers', 'Click any <b style="color:#17A698">teal day header</b> to rename the day or date') +
+        ex('Title', 'Click the <b>title banner</b> at the top to change the schedule name') +
+        ex('Reception', 'Click the <b>white reception boxes</b> at the bottom to edit hours') +
+        ex('Venues', 'Drag legend items to reorder. Use <b>Settings</b> to add, rename, recolour, or delete venues') +
+        ex('Colours', 'Click <b>Settings</b> in the toolbar to adjust all colours and fonts') +
+
+        sec('#F9B233', '\u2601\uFE0F', 'Publishing & Syncing') +
+        '<p style="font-size:0.9rem;line-height:1.7">' +
+        'Click <b style="color:#17A698">Publish</b> to share your schedule with Selena and Saraswati. No passwords or setup needed.</p>' +
+        tip('If someone else publishes changes, a <b style="color:#F9B233">yellow banner</b> appears at the top asking if you want to load their version.') +
+        '<p style="font-size:0.9rem;line-height:1.7">' +
+        'Your work saves automatically to your browser. Use <b>Save JSON</b> / <b>Load JSON</b> to back up or transfer between computers.</p>' +
+
+        sec('#C62828', '\u2328\uFE0F', 'Keyboard Shortcuts') +
+        '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:4px">' +
+        '<div>' + kbd('Ctrl+Z') + ' Undo</div>' +
+        '<div>' + kbd('Esc') + ' Close popup</div>' +
+        '<div>' + kbd('Delete') + ' Remove event</div>' +
+        '<div>' + kbd('Shift+Click') + ' Multi-select</div>' +
         '</div>' +
-        '<button onclick="document.getElementById(\'helpPanel\').remove()" style="margin-top:16px;width:100%">Got it</button>' +
+
+        '<button onclick="document.getElementById(\'helpPanel\').remove()" style="margin-top:24px;width:100%;font-size:0.9rem;padding:10px">Got it</button>' +
         '</div>';
     document.body.appendChild(ov);
 }
