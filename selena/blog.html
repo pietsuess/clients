@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style2.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -34,19 +34,54 @@
   </header>
 
   <!-- HERO -->
-  <section class="hero parallax-bg hero-short" style="background-image: url('images/blog-hero.jpg');">
+  <section class="hero" style="background-image: url('images/blog-hero.jpg'); min-height:50vh;">
     <div class="hero-content">
       <h1>Blog</h1>
       <p>Learn about Rolfing&#8482;</p>
     </div>
   </section>
-  <div class="hero-spacer"></div>
 
   <!-- BLOG GRID -->
   <section>
     <div class="container">
-      <div class="blog-grid" id="blog-list">
-        <!-- Rendered by site.js from content/blog-posts.json -->
+      <div class="blog-grid">
+
+        <a href="blog/footwear.html" class="blog-card" style="color:inherit;">
+          <div class="blog-card-body">
+            <p class="date">March 26, 2020</p>
+            <h3>What kind of shoes are best for me?</h3>
+            <p>Options for minimal support maximum mobility footwear.</p>
+            <span class="read-more">Read More &rarr;</span>
+          </div>
+        </a>
+
+        <a href="blog/ten-series.html" class="blog-card" style="color:inherit;">
+          <div class="blog-card-body">
+            <p class="date">March 18, 2020</p>
+            <h3>What is the Ten Series?</h3>
+            <p>Over a series of 10 sessions, the practitioner and client work together to let go of poor postural habits and unwind holding patterns.</p>
+            <span class="read-more">Read More &rarr;</span>
+          </div>
+        </a>
+
+        <a href="blog/patterns.html" class="blog-card" style="color:inherit;">
+          <div class="blog-card-body">
+            <p class="date">March 2, 2020</p>
+            <h3>What are Patterns in the Body?</h3>
+            <p>Habitual movements and our sense of self create movement memories in the body.</p>
+            <span class="read-more">Read More &rarr;</span>
+          </div>
+        </a>
+
+        <a href="blog/what-is-fascia.html" class="blog-card" style="color:inherit;">
+          <div class="blog-card-body">
+            <p class="date">January 31, 2020</p>
+            <h3>What is Fascia?</h3>
+            <p>Fascia is connective tissue that surrounds, penetrates and connects every part of the body.</p>
+            <span class="read-more">Read More &rarr;</span>
+          </div>
+        </a>
+
       </div>
     </div>
   </section>
@@ -55,21 +90,10 @@
   <footer>
     <div class="container">
       <div class="logo-footer"><img src="images/logo-dark.webp" alt="Salt Spring Rolfing"></div>
-      <div class="footer-address">
-        <p>Our Clinic is located at<br>Unit 5 - 127 Rainbow Road, Salt Spring Island, BC</p>
-      </div>
-      <div class="footer-cta">
-        <a href="booking.html" class="btn">Book A Session</a>
-      </div>
+      <a href="booking.html" class="btn">Book A Session</a>
+      <p>Our Clinic is located at<br>Unit 5 - 127 Rainbow Road, Salt Spring Island, BC</p>
+      <a href="https://www.facebook.com/profile.php?id=100064133013122" target="_blank" rel="noopener" class="social-link">Facebook</a>
     </div>
-    <nav class="footer-nav">
-      <a href="about-sessions.html">About Sessions</a>
-      <a href="about-selena.html">About Selena</a>
-      <a href="faqs.html">FAQs</a>
-      <a href="blog.html">Blog</a>
-      <a href="contact.html">Contact</a>
-      <a href="booking.html">Book A Session</a>
-    </nav>
   </footer>
 
   <script>
@@ -82,23 +106,7 @@
     checkScroll();
     document.querySelector('.nav-toggle').addEventListener('click', function() {
       document.querySelector('nav').classList.toggle('active');
-      document.querySelector('header').classList.toggle('nav-open');
-    });
-    document.querySelectorAll('nav a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        document.querySelector('nav').classList.remove('active');
-        document.querySelector('header').classList.remove('nav-open');
-      });
-    });
-
-    // Hero drift
-    window.addEventListener('scroll', function() {
-      var hero = document.querySelector('.hero');
-      if (hero) {
-        hero.style.backgroundPositionY = (40 + window.scrollY * 0.02) + '%';
-      }
     });
   </script>
-  <script src="js/site.js"></script>
 </body>
 </html>
