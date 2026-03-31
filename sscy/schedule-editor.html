@@ -46,16 +46,20 @@
         .sched-wrap { margin-top: var(--toolbar-h); padding: 20px 20px 60px; }
         .sched { border: 1px solid #aaa; background: #fff; display: flex; flex-direction: column; }
 
-        /* Title banner */
+        /* Title banner - slim fit */
         .title-banner {
             background: linear-gradient(135deg, #17A698, #1fc4b3);
-            padding: 12px 20px; text-align: center;
+            padding: 6px 20px; text-align: center;
         }
         .title-text {
             font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem;
             color:#fff; letter-spacing:3px; text-transform:uppercase;
         }
-        .title-year { font-family:'Cinzel',serif; font-size:0.8rem; color:rgba(255,255,255,0.6); }
+
+        /* Bottom bar matching title */
+        .bottom-bar {
+            padding: 10px; text-align: center;
+        }
 
         /* Headers row */
         .headers { display: flex; }
@@ -121,22 +125,22 @@
         .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
         .ev.dk .ev-t, .ev.dk .ev-s { color:#333; text-shadow:none; }
 
-        /* Reception - inset white box with outlined circle */
+        /* Reception - small inset white box with outlined circle */
         .rec-block {
             position:absolute; z-index:2;
-            display:flex; align-items:center; gap:6px; padding:3px 8px;
-            background:#fff; border:1px solid #ccc;
-            left:12%; right:12%;
+            display:flex; align-items:center; gap:5px; padding:2px 6px;
+            background:#fff; border:1px solid #bbb;
+            left:15%; right:15%;
         }
         .rec-circle {
-            width:22px; height:22px; border-radius:50%;
-            border:2.5px solid #7B2D5F;
+            width:18px; height:18px; border-radius:50%;
+            border:2px solid #7B2D5F;
             display:flex; align-items:center; justify-content:center;
-            font-size:0.6rem; font-weight:700; color:#7B2D5F; flex-shrink:0;
+            font-size:0.5rem; font-weight:700; color:#7B2D5F; flex-shrink:0;
             background:#fff;
         }
         .rec-text {
-            font-weight:700; font-size:0.6rem; color:#333; line-height:1.25;
+            font-weight:700; font-size:0.52rem; color:#333; line-height:1.2;
         }
 
         /* Status - inline in toolbar */
@@ -431,9 +435,7 @@ function render(){
     var sty=state.styles;
 
     // Title
-    h+='<div class="title-banner" style="background:'+sty.titleBg+'"><div class="title-text" style="font-family:'+sty.title.fontFamily+';font-size:'+sty.title.fontSize+'px;color:'+sty.title.color+'">'+cfg.title+'</div>';
-    if(cfg.year) h+='<div class="title-year">'+cfg.year+'</div>';
-    h+='</div>';
+    h+='<div class="title-banner" style="background:'+sty.titleBg+'"><div class="title-text" style="font-family:'+sty.title.fontFamily+';font-size:'+sty.title.fontSize+'px;color:'+sty.title.color+'">'+cfg.title+'</div></div>';
 
     // Headers
     h+='<div class="headers">';
@@ -525,9 +527,9 @@ function render(){
         // Reception block at the bottom of each day column
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
         if(rec){
-            var recSlot = ns - 3; // 9:00-9:30 PM area matching PDF
+            var recSlot = ns - 2; // last two slots, overlapping into bottom bar
             var recTop = recSlot * SH;
-            var recH = SH * 3;
+            var recH = SH * 2;
             h+='<div class="rec-block" style="top:'+recTop+'px;height:'+recH+'px">';
             h+='<div class="rec-circle">R</div>';
             h+='<div class="rec-text">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
@@ -561,7 +563,8 @@ function render(){
 
     h+='</div>'; // end grid-body
 
-    // Reception is now rendered inside day columns (see below)
+    // Bottom bar matching title
+    h+='<div class="bottom-bar" style="background:'+sty.titleBg+'">&nbsp;</div>';
 
     el.innerHTML=h;
     saveState();
