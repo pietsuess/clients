@@ -1014,7 +1014,8 @@ document.addEventListener('mousedown', function(e) {
     // Single click on empty slot: just close popover (no auto-stamp)
 });
 
-// Double-click to add new event or edit reception
+// Double-click to add new event
+document.addEventListener('dblclick', function(e) {
     var dayCol = e.target.closest('.day-col');
     if (!dayCol || !activeVenueId) return;
     e.preventDefault();
