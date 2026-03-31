@@ -1238,8 +1238,8 @@ document.addEventListener('mousemove', function(e) {
         var evt = state.events.find(function(x){return x.id===dragging.evtId});
         if (!evt) return;
         var dy = e.clientY - dragging.startY;
-        var slotDelta = Math.round(dy / SH);
-        var newSpan = Math.max(1, dragging.origSpan + slotDelta);
+        var slotDelta = Math.round(dy / (SH * 0.5)) * 0.5;
+        var newSpan = Math.max(0.5, dragging.origSpan + slotDelta);
         var ns = (state.config.endHour - state.config.startHour) * 2;
         if (evt.startSlot + newSpan > ns) newSpan = ns - evt.startSlot;
         if (evt.spanSlots !== newSpan) {
@@ -1436,7 +1436,7 @@ function epDur(delta) {
     var evt = state.events.find(function(x){return x.id===selectedEvtId});
     if (!evt) return;
     var ns = (state.config.endHour - state.config.startHour) * 2;
-    evt.spanSlots = Math.max(1, Math.min(ns - evt.startSlot, evt.spanSlots + delta));
+    evt.spanSlots = Math.max(0.5, Math.min(ns - evt.startSlot, evt.spanSlots + delta * 0.5));
     render();
     updatePopoverDur();
 }
