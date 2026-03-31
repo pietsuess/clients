@@ -190,6 +190,7 @@
         <div id="vswatches" style="display:flex;gap:2px"></div>
     </div>
     <div class="tb-group">
+        <button class="tb-btn" onclick="undo()">Undo</button>
         <button class="tb-btn" onclick="exportJSON()">Save JSON</button>
         <button class="tb-btn" onclick="document.getElementById('impF').click()">Load JSON</button>
         <input type="file" id="impF" accept=".json" style="display:none" onchange="importJSON(event)">
@@ -397,6 +398,21 @@ var DEFAULT_STATE = {
 };
 
 var state, activeVenueId=null;
+var undoStack = [];
+var MAX_UNDO = 3;
+
+function pushUndo(){
+    undoStack.push(JSON.stringify(state));
+    if(undoStack.length > MAX_UNDO) undoStack.shift();
+}
+
+function undo(){
+    if(!undoStack.length) return;
+    state = JSON.parse(undoStack.pop());
+    render(); renderSwatches();
+    var p=document.getElementById('settingsPanel');
+    if(p.style.display!=='none') renderSettings();
+}
 function loadState(){
     var s=localStorage.getItem('acyr-schedule');
     if(s){
@@ -806,7 +822,7 @@ function renderSettings(){
         h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">';
         h+='<span style="flex:1">'+it.label+'</span>';
         h+='<input type="text" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:70px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:monospace">';
-        h+='<input type="color" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none">';
+        h+='<input type="color" value="'+it.val+'" data-key="'+it.key+'" oninput="updateStyleColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none">';
         h+='</div>';
     });
     // Font settings
@@ -857,7 +873,10 @@ function renderSettings(){
 }
 
 function updateStyleColor(inp){
-    var key=inp.dataset.key, val=inp.value;
+    var key=inp.dataset.key, val=inp.value.trim();
+    if(val && val.charAt(0)!=='#') val='#'+val;
+    if(!/^#[0-9a-fA-F]{3,6}$/.test(val)) return;
+    pushUndo();
     var parts=key.split('.');
     if(parts.length===2) state.styles[parts[0]][parts[1]]=val;
     else state.styles[key]=val;
@@ -865,6 +884,7 @@ function updateStyleColor(inp){
 }
 
 function updateVenueColor(inp){
+    pushUndo();
     state.venues[parseInt(inp.dataset.venue)].color=inp.value;
     render(); renderSwatches(); renderSettings();
 }
@@ -926,6 +946,7 @@ document.addEventListener('mousedown', function(e) {
         var id = resizeEl.dataset.id;
         var evt = state.events.find(function(x){return x.id===id});
         if (!evt) return;
+        pushUndo();
         dragging = { type:'resize', evtId:id, startY:e.clientY, origSpan:evt.spanSlots };
         return;
     }
@@ -963,6 +984,7 @@ document.addEventListener('mousedown', function(e) {
             venueId: activeVenueId,
             title: 'New Event'
         };
+        pushUndo();
         state.events.push(newEvt);
         selectedEvtId = newEvt.id;
         render();
@@ -1091,6 +1113,7 @@ function epDur(delta) {
 function epSave() {
     var evt = state.events.find(function(x){return x.id===selectedEvtId});
     if (!evt) return;
+    pushUndo();
     evt.title = document.getElementById('epTitle').value.replace(/\\n/g, '\n');
     evt.subtitle = document.getElementById('epSub').value;
     evt.venueId = document.getElementById('epVenue').value;
@@ -1100,6 +1123,7 @@ function epSave() {
 
 function epDelete() {
     if (!selectedEvtId) return;
+    pushUndo();
     state.events = state.events.filter(function(x){return x.id!==selectedEvtId});
     closePopover();
     render();
@@ -1108,6 +1132,7 @@ function epDelete() {
 // Escape to close popover
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closePopover();
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
     if (e.key === 'Delete' || e.key === 'Backspace') {
         if (selectedEvtId && !e.target.closest('input,textarea,select')) {
             epDelete();
