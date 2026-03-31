@@ -679,125 +679,173 @@ function hexRGB(hex){
 }
 
 function exportPDF(){
-    var jsPDF=window.jspdf.jsPDF;
-    var doc=new jsPDF({orientation:'landscape',unit:'pt',format:[2592,1728]});
-    var cfg=state.config, sty=state.styles, nd=cfg.days.length, ns=(cfg.endHour-cfg.startHour)*2;
-    var W=2592, H=1728;
+    // Measure the actual rendered schedule on screen to get exact dimensions
+    var schedEl = document.getElementById('sched');
+    var schedRect = schedEl.getBoundingClientRect();
+    var screenW = schedRect.width, screenH = schedRect.height;
 
-    // Scale factor: screen uses ~1200px wide content area, PDF is 2592pt
-    // Match CSS ratios exactly: legend 80, firstGut 36, gut 24, days flex
-    var SC = 2.0; // scale multiplier from screen px to PDF pt
-    var legW = 80*SC;   // 160
-    var firstGutW = 36*SC; // 72
-    var gutW = 24*SC;   // 48
-    var titleH = 50*SC; // 100
-    var hdrH = 35*SC;   // 70
-    var recH = 48*SC;   // 96
-    var bottomH = 16*SC; // 32
-    var totalGutW = firstGutW + (nd-1)*gutW + gutW;
-    var dayW = (W - legW - totalGutW) / nd;
-    var gridH = H - titleH - hdrH - recH - bottomH;
-    var slotH = gridH / ns;
+    // PDF artboard: scale screen dimensions to 36x24 inches (2592x1728 pt)
+    var W = 2592, H = Math.round(W * screenH / screenW);
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({orientation:'landscape', unit:'pt', format:[W, H]});
 
-    // Font size scale: screen CSS rem/px to PDF pt
-    // Screen event font is ~10px, at 2x scale = 20pt in PDF space
-    var FS = SC * 1.0;
+    var SC = W / screenW; // exact scale factor from screen pixels to PDF points
+    var cfg = state.config, sty = state.styles, nd = cfg.days.length, ns = (cfg.endHour - cfg.startHour) * 2;
+
+    // Read CSS variables exactly as the screen uses them
+    var rootStyle = getComputedStyle(document.documentElement);
+    var slotH_px = parseInt(rootStyle.getPropertyValue('--slot-h'));
+    var legW_px = parseInt(rootStyle.getPropertyValue('--legend-w'));
+    var gutW_px = parseInt(rootStyle.getPropertyValue('--gutter-w'));
+    var firstGutW_px = parseInt(rootStyle.getPropertyValue('--first-gutter-w'));
+
+    // Measure actual rendered element positions
+    var titleEl = schedEl.querySelector('.title-banner');
+    var headersEl = schedEl.querySelector('.headers');
+    var gridBodyEl = schedEl.querySelector('.grid-body');
+    var bottomBarEl = schedEl.querySelector('.bottom-bar');
+
+    var titleH = titleEl.getBoundingClientRect().height * SC;
+    var hdrH = headersEl.getBoundingClientRect().height * SC;
+    var gridH = gridBodyEl.getBoundingClientRect().height * SC;
+    var bottomH = bottomBarEl.getBoundingClientRect().height * SC;
+
+    // Scaled fixed widths from CSS vars
+    var legW = legW_px * SC;
+    var gutW = gutW_px * SC;
+    var firstGutW = firstGutW_px * SC;
+    var slotH = slotH_px * SC;
+
+    // Day column width: measure from DOM
+    var dayColEl = schedEl.querySelector('.day-col');
+    var dayW = dayColEl.getBoundingClientRect().width * SC;
 
     function fill(hex){ var c=hexRGB(hex); doc.setFillColor(c[0],c[1],c[2]); }
     function txtC(hex){ var c=hexRGB(hex); doc.setTextColor(c[0],c[1],c[2]); }
     function drawC(hex){ var c=hexRGB(hex); doc.setDrawColor(c[0],c[1],c[2]); }
 
     // ---- TITLE BANNER ----
-    fill(sty.titleBg); doc.rect(0,0,W,titleH,'F');
+    // render(): background:sty.titleBg, font-family:sty.title.fontFamily, font-size:sty.title.fontSize, color:sty.title.color
+    fill(sty.titleBg); doc.rect(0, 0, W, titleH, 'F');
     txtC(sty.title.color);
-    doc.setFont('helvetica','bold'); doc.setFontSize(sty.title.fontSize * FS);
-    doc.text(cfg.title, W/2, titleH/2 + sty.title.fontSize*FS*0.35, {align:'center'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(sty.title.fontSize * SC);
+    doc.text(cfg.title, W/2, titleH/2 + sty.title.fontSize*SC*0.35, {align:'center'});
 
     // ---- HEADER ROW ----
     var hy = titleH;
-    fill(sty.legendHeader.bgColor); doc.rect(0,hy,legW,hdrH,'F');
+    // Legend header: background:sty.legendHeader.bgColor, color:sty.legendHeader.textColor
+    fill(sty.legendHeader.bgColor); doc.rect(0, hy, legW, hdrH, 'F');
     txtC(sty.legendHeader.textColor);
-    doc.setFont('helvetica','bold'); doc.setFontSize(7*FS);
-    doc.text('COLOUR\nLEGEND', legW/2, hy+hdrH/2, {align:'center'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(8*SC); // CSS .hdr-legend font-size:0.5rem = ~8px
+    doc.text('Colour\nLegend', legW/2, hy+hdrH/2, {align:'center'});
 
-    // First gutter header
-    fill(sty.gutterColor); doc.rect(legW,hy,firstGutW,hdrH,'F');
-    txtC(sty.gutterText); doc.setFont('helvetica','bold'); doc.setFontSize(sty.gutterFont.fontSize*FS);
-    doc.text('TIME', legW+firstGutW/2, hy+hdrH/2+3*SC, {align:'center'});
+    // First gutter header: background:sty.gutterColor, color:sty.gutterText
+    fill(sty.gutterColor); doc.rect(legW, hy, firstGutW, hdrH, 'F');
+    txtC(sty.gutterText);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11.5*SC); // CSS .hdr-gutter font-size:0.72rem = ~11.5px
+    doc.text('TIME', legW+firstGutW/2, hy+hdrH/2+11.5*SC*0.35, {align:'center'});
 
-    // Day headers
+    // Day headers: background:sty.dayHeaders.bgColor, color:sty.dayHeaders.textColor, font-family/size/weight from sty.dayHeaders
     for(var d=0;d<nd;d++){
         var dx = legW + firstGutW + d*(dayW+gutW);
-        fill(sty.dayHeaders.bgColor); doc.rect(dx,hy,dayW,hdrH,'F');
+        fill(sty.dayHeaders.bgColor); doc.rect(dx, hy, dayW, hdrH, 'F');
         txtC(sty.dayHeaders.textColor);
-        doc.setFont('helvetica','bold'); doc.setFontSize(sty.dayHeaders.fontSize*FS);
-        doc.text(cfg.days[d].label+' '+cfg.days[d].date, dx+dayW/2, hy+hdrH/2+sty.dayHeaders.fontSize*FS*0.35, {align:'center'});
-        if(d<nd-1){ fill(sty.gutterColor); doc.rect(dx+dayW,hy,gutW,hdrH,'F'); }
+        doc.setFont('helvetica','bold'); doc.setFontSize(sty.dayHeaders.fontSize * SC);
+        doc.text(cfg.days[d].label+' '+cfg.days[d].date, dx+dayW/2, hy+hdrH/2+sty.dayHeaders.fontSize*SC*0.35, {align:'center'});
+        // Inter-day gutter header
+        if(d<nd-1){ fill(sty.gutterColor); doc.rect(dx+dayW, hy, gutW, hdrH, 'F'); }
     }
-    fill(sty.gutterColor); doc.rect(W-gutW,hy,gutW,hdrH,'F');
+    // Right gutter header
+    fill(sty.gutterColor); doc.rect(W-gutW, hy, gutW, hdrH, 'F');
 
     var gy = titleH + hdrH;
 
     // ---- VENUE LEGEND ----
+    // render(): background:v.color, color:#fff, text-shadow, font-family:sty.legendFont.fontFamily, font-size:sty.legendFont.fontSize, font-weight:sty.legendFont.fontWeight
+    // CSS: flex:1 distributes height equally, border-bottom:1px solid rgba(255,255,255,0.15)
     var lih = gridH / state.venues.length;
+    var legFS = sty.legendFont.fontSize * SC;
     state.venues.forEach(function(v,i){
         var ly = gy + i*lih;
         fill(v.color); doc.rect(0, ly, legW, lih, 'F');
-        if(i>0){ doc.setDrawColor(255,255,255); doc.setLineWidth(0.5); doc.line(0,ly,legW,ly); }
-        if(brightness(v.color)>160) doc.setTextColor(50,50,50); else doc.setTextColor(255,255,255);
-        doc.setFont('helvetica','bold'); doc.setFontSize(sty.legendFont.fontSize*FS);
-        var vLines = v.name.split(' ');
-        var lh = sty.legendFont.fontSize*FS*1.2;
-        if(v.name.length > 10 && vLines.length > 1){
-            var mid = Math.ceil(vLines.length/2);
-            var l1 = vLines.slice(0,mid).join(' '), l2 = vLines.slice(mid).join(' ');
-            doc.text(l1, legW/2, ly+lih/2-lh*0.3, {align:'center'});
-            doc.text(l2, legW/2, ly+lih/2+lh*0.7, {align:'center'});
+        // Separator: CSS border-bottom:1px solid rgba(255,255,255,0.15)
+        if(i>0){ doc.setDrawColor(255,255,255); doc.setLineWidth(SC); doc.line(0, ly, legW, ly); }
+        // Text: CSS color:#fff always (text-shadow handles readability on screen)
+        doc.setTextColor(255,255,255);
+        doc.setFont('helvetica','bold'); doc.setFontSize(legFS);
+        // Center text vertically and horizontally, wrapping if needed
+        var words = v.name.split(' ');
+        var lineH = legFS * 1.3;
+        if(v.name.length > 10 && words.length > 1){
+            var mid = Math.ceil(words.length/2);
+            var l1 = words.slice(0,mid).join(' '), l2 = words.slice(mid).join(' ');
+            doc.text(l1, legW/2, ly+lih/2-lineH*0.3, {align:'center'});
+            doc.text(l2, legW/2, ly+lih/2+lineH*0.7, {align:'center'});
         } else {
-            doc.text(v.name, legW/2, ly+lih/2+sty.legendFont.fontSize*FS*0.35, {align:'center'});
+            doc.text(v.name, legW/2, ly+lih/2+legFS*0.35, {align:'center'});
         }
     });
 
-    // ---- TIME GUTTERS ----
-    function drawGutter(gx, gw, showFull){
+    // ---- TIME GUTTER HELPER ----
+    // render() gutter slot: color:sty.gutterText, font-family:sty.gutterFont.fontFamily,
+    //   hour: font-size:sty.gutterFont.fontSize, font-weight:sty.gutterFont.fontWeight
+    //   half: font-size:sty.gutterFont.fontSize-2, font-weight:400
+    // CSS .gutter: background from sty.gutterColor, border:1px solid #e0c040
+    // CSS .gut-slot: border-bottom:1px solid rgba(0,0,0,0.06), .hour: rgba(0,0,0,0.12)
+    var gutFSh = sty.gutterFont.fontSize * SC;       // hour font size
+    var gutFSm = (sty.gutterFont.fontSize - 2) * SC; // half-hour font size
+
+    function drawGutter(gx, gw, labelFn){
         fill(sty.gutterColor); doc.rect(gx, gy, gw, gridH, 'F');
-        var gfs = sty.gutterFont.fontSize * FS;
+        // Gutter borders: CSS border-left/right:1px solid #e0c040
+        drawC('#e0c040'); doc.setLineWidth(SC);
+        doc.line(gx, gy, gx, gy+gridH);
+        doc.line(gx+gw, gy, gx+gw, gy+gridH);
         for(var s=0;s<ns;s++){
             var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
-            var lb='';
-            if(showFull){
-                if(isH){if(hr===12)lb='NOON';else if(hr<12)lb=hr+':00';else lb=(hr-12)+':00';}else lb=':30';
-            } else {
-                if(isH){if(hr===12)lb='12';else if(hr<12)lb=''+hr;else lb=''+(hr-12);}else lb='30';
-            }
+            var lb = labelFn(hr, mn, isH);
             txtC(sty.gutterText);
-            doc.setFont('helvetica',isH?'bold':'normal'); doc.setFontSize(isH?gfs:gfs*0.8);
-            doc.text(lb, gx+gw/2, gy+s*slotH+slotH/2+gfs*0.35, {align:'center'});
-            if(s>0){ drawC('#e0c040'); doc.setLineWidth(isH?0.5:0.25); doc.line(gx,gy+s*slotH,gx+gw,gy+s*slotH); }
+            doc.setFont('helvetica', isH ? 'bold' : 'normal');
+            doc.setFontSize(isH ? gutFSh : gutFSm);
+            doc.text(lb, gx+gw/2, gy+s*slotH+slotH/2+(isH?gutFSh:gutFSm)*0.35, {align:'center'});
+            // Slot borders: CSS rgba(0,0,0,0.06) normal, rgba(0,0,0,0.12) hour
+            if(s>0){
+                doc.setDrawColor(isH?220:235, isH?220:235, isH?220:235);
+                doc.setLineWidth(isH ? 0.5*SC : 0.25*SC);
+                doc.line(gx, gy+s*slotH, gx+gw, gy+s*slotH);
+            }
         }
     }
-    drawGutter(legW, firstGutW, true);
+
+    // First gutter labels: render() line 540 - "NOON", "H:00", "(H-12):00", ":30"
+    drawGutter(legW, firstGutW, function(hr,mn,isH){
+        if(isH){if(hr===12)return'NOON';if(hr<12)return hr+':00';return(hr-12)+':00';}return':30';
+    });
 
     // ---- DAY COLUMNS ----
     var s1=hexRGB(sty.rowStripe1), s2=hexRGB(sty.rowStripe2);
-    var evFS = sty.eventFont.fontSize * FS;
+    // Event font: render() line 579 - font-family:sty.eventFont.fontFamily, font-size:sty.eventFont.fontSize, font-weight:sty.eventFont.fontWeight
+    // CSS .ev: line-height:1.15
+    var evFS = sty.eventFont.fontSize * SC;
     var evLH = evFS * 1.15;
 
     for(var d=0;d<nd;d++){
         var dx = legW + firstGutW + d*(dayW+gutW);
 
-        // Row stripes
+        // Row stripes: render() line 547 - sty.rowStripe1 for 2 slots, sty.rowStripe2 for 2 slots
         for(var s=0;s<ns;s++){
             var sc = Math.floor(s/2)%2===0 ? s1 : s2;
             doc.setFillColor(sc[0],sc[1],sc[2]); doc.rect(dx, gy+s*slotH, dayW, slotH, 'F');
         }
-        // Grid lines
+        // Grid lines: CSS .sline background:#e8e8e8, .sline.hour background:#ccc (= sty.gridLines)
         for(var s=1;s<ns;s++){
-            drawC(sty.gridLines); doc.setLineWidth(s%2===0?0.5:0.25);
+            var isH = s%2===0;
+            if(isH){ drawC(sty.gridLines); } else { drawC('#e8e8e8'); }
+            doc.setLineWidth(isH ? 0.5*SC : 0.25*SC);
             doc.line(dx, gy+s*slotH, dx+dayW, gy+s*slotH);
         }
 
-        // Events
+        // Events: render() uses leftPct/widthPct, border-right:1px solid rgba(255,255,255,0.15)
         var pdfDevs = state.events.filter(function(e){return e.dayIndex===d});
         var pdfLaid = assignColumns(pdfDevs);
 
@@ -814,84 +862,97 @@ function exportPDF(){
         pdfLaid.forEach(function(item){
             var evt=item.evt;
             var v=state.venues.find(function(x){return x.id===evt.venueId}); if(!v)return;
+            // Position: same leftPct/widthPct as render()
             var ex = dx + (item.leftPct/100)*dayW;
             var ew = (item.widthPct/100)*dayW;
             var ey = gy + evt.startSlot*slotH;
             var eh = evt.spanSlots*slotH;
 
             fill(v.color); doc.rect(ex, ey, ew, eh, 'F');
-            // Semi-transparent right border (match screen rgba(255,255,255,0.15))
-            doc.setDrawColor(230,230,230); doc.setLineWidth(0.3);
+            // Right border: render() border-right:1px solid rgba(255,255,255,0.15)
+            doc.setDrawColor(255,255,255); doc.setLineWidth(SC*0.15);
             doc.line(ex+ew, ey, ex+ew, ey+eh);
 
             var isSpanned = spanGroups[item._spanKey] && spanGroups[item._spanKey].length > 1;
             if(!isSpanned){
-                if(brightness(v.color)>160) doc.setTextColor(50,50,50); else doc.setTextColor(255,255,255);
+                // Text color: render() line 572 - brightness>160 ? dark : light (CSS .ev.lt=white, .ev.dk=#333)
+                if(brightness(v.color)>160) doc.setTextColor(51,51,51); else doc.setTextColor(255,255,255);
                 doc.setFont('helvetica','bold'); doc.setFontSize(evFS);
                 var lines=(evt.title||'').split('\n');
-                var ty = ey + eh/2 - (lines.length-1)*evLH/2 + evFS*0.35;
+                // Center text vertically in the block, same as CSS flex justify-content:center
+                var totalTextH = lines.length * evLH;
+                var ty = ey + (eh - totalTextH)/2 + evFS*0.85;
                 lines.forEach(function(l,li){ doc.text(l, ex+ew/2, ty+li*evLH, {align:'center'}); });
             }
         });
 
-        // Spanning labels
+        // Spanning labels: render() line 590-606
         var spanned = {};
         Object.keys(spanGroups).forEach(function(key){
             var group = spanGroups[key];
             if(group.length < 2 || spanned[key]) return;
             spanned[key] = true;
-            var minLeft=Infinity, maxRight=0;
-            group.forEach(function(item){
-                var l = dx + (item.leftPct/100)*dayW;
-                var r = l + (item.widthPct/100)*dayW;
-                if(l<minLeft) minLeft=l; if(r>maxRight) maxRight=r;
-            });
+            // Spanning label uses col/totalCols like render() line 597-601
+            var minCol=Infinity, maxCol=0, totalCols=group[0].totalCols;
+            group.forEach(function(item){ if(item.col<minCol)minCol=item.col; if(item.col>maxCol)maxCol=item.col; });
+            var lp = (minCol/totalCols)*100, wp = ((maxCol-minCol+1)/totalCols)*100;
+            var spanLeft = dx + (lp/100)*dayW;
+            var spanW = (wp/100)*dayW;
             var evt=group[0].evt;
             var ey = gy + evt.startSlot*slotH, eh = evt.spanSlots*slotH;
             var v=state.venues.find(function(x){return x.id===evt.venueId});
-            if(v && brightness(v.color)>160) doc.setTextColor(50,50,50); else doc.setTextColor(255,255,255);
+            if(v && brightness(v.color)>160) doc.setTextColor(51,51,51); else doc.setTextColor(255,255,255);
             doc.setFont('helvetica','bold'); doc.setFontSize(evFS);
             var lines=(evt.title||'').split('\n');
-            var cx = (minLeft+maxRight)/2;
-            var ty = ey + eh/2 - (lines.length-1)*evLH/2 + evFS*0.35;
-            lines.forEach(function(l,li){ doc.text(l, cx, ty+li*evLH, {align:'center'}); });
+            var totalTextH = lines.length * evLH;
+            var ty = ey + (eh - totalTextH)/2 + evFS*0.85;
+            lines.forEach(function(l,li){ doc.text(l, spanLeft+spanW/2, ty+li*evLH, {align:'center'}); });
         });
 
-        if(d<nd-1) drawGutter(dx+dayW, gutW, false);
-    }
-
-    // Right gutter
-    drawGutter(W-gutW, gutW, false);
-
-    // ---- RECEPTION ROW ----
-    var ry = gy + gridH;
-    fill(sty.titleBg); doc.rect(0,ry,W,recH,'F');
-    var recFS = sty.receptionFont.fontSize * FS;
-    for(var d=0;d<nd;d++){
-        var dx = legW + firstGutW + d*(dayW+gutW);
+        // Reception block: render() line 608-617
+        // Position: top=(ns-1)*SH, height=SH*2, left:25% right:25%
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
-        // White inset box (screen: left:25% right:25%)
-        var bx = dx + dayW*0.25, bw = dayW*0.5, by = ry + 6*SC, bh = recH - 12*SC;
-        doc.setFillColor(255,255,255); doc.rect(bx, by, bw, bh, 'F');
-        doc.setDrawColor(187,187,187); doc.setLineWidth(0.5); doc.rect(bx, by, bw, bh, 'S');
-        // R circle (screen: #7B2D5F purple, 18px = 9pt radius at SC)
-        var ccx = bx + 9*SC, ccy = ry + recH/2;
-        drawC('#7B2D5F'); doc.setLineWidth(2); doc.circle(ccx, ccy, 9*SC);
-        txtC('#7B2D5F');
-        doc.setFont('helvetica','bold'); doc.setFontSize(8*FS);
-        doc.text('R', ccx, ccy+8*FS*0.35, {align:'center'});
-        // Reception text
         if(rec){
-            doc.setTextColor(50,50,50); doc.setFont('helvetica','bold'); doc.setFontSize(recFS);
-            var txt = 'Reception\n' + rec.text.replace(/<br>/g,'\n');
-            var rl = txt.split('\n');
-            var rty = ry + recH/2 - (rl.length-1)*recFS*0.6 + recFS*0.35;
-            rl.forEach(function(l,i){ doc.text(l, bx+bw/2+5*SC, rty+i*recFS*1.2, {align:'center'}); });
+            var recTop = gy + (ns-1)*slotH;
+            var recHt = slotH*2;
+            var rbx = dx + dayW*0.25, rbw = dayW*0.5;
+            // CSS .rec-block: background:#fff, border:1px solid #bbb
+            doc.setFillColor(255,255,255); doc.rect(rbx, recTop, rbw, recHt, 'F');
+            doc.setDrawColor(187,187,187); doc.setLineWidth(SC); doc.rect(rbx, recTop, rbw, recHt, 'S');
+            // CSS .rec-circle: 18px, border:2px solid #7B2D5F, color:#7B2D5F, background:#fff
+            var circR = 9*SC;
+            var ccx = rbx + circR + 2*SC, ccy = recTop + recHt/2;
+            doc.setFillColor(255,255,255); doc.circle(ccx, ccy, circR, 'F');
+            drawC('#7B2D5F'); doc.setLineWidth(2*SC); doc.circle(ccx, ccy, circR);
+            txtC('#7B2D5F');
+            doc.setFont('helvetica','bold'); doc.setFontSize(8*SC); // CSS font-size:0.5rem = ~8px
+            doc.text('R', ccx, ccy+8*SC*0.35, {align:'center'});
+            // CSS .rec-text: font-weight:700, font-size from sty.receptionFont, color:#333
+            var recFS = sty.receptionFont.fontSize * SC;
+            doc.setTextColor(51,51,51);
+            doc.setFont('helvetica','bold'); doc.setFontSize(recFS);
+            // render(): "Reception<br>" + rec.text.replace(/\n/g,', ')
+            var recTxt = 'Reception\n' + rec.text.replace(/\n/g,', ').replace(/<br>/g,', ');
+            var rl = recTxt.split('\n');
+            var rty = ccy - (rl.length-1)*recFS*0.6 + recFS*0.2;
+            rl.forEach(function(l,i){ doc.text(l, rbx+rbw/2+5*SC, rty+i*recFS*1.2, {align:'center'}); });
+        }
+
+        // Inter-day gutter: render() line 622-631 - same labels as screen
+        if(d<nd-1){
+            drawGutter(dx+dayW, gutW, function(hr,mn,isH){
+                if(isH){if(hr===12)return'12';if(hr<12)return''+hr;return''+(hr-12);}return'30';
+            });
         }
     }
 
-    // Bottom bar
-    fill(sty.titleBg); doc.rect(0, ry+recH, W, bottomH, 'F');
+    // Right gutter: render() line 634-641 - different label format
+    drawGutter(W-gutW, gutW, function(hr,mn,isH){
+        if(isH){var sf=hr<12?'a':'p';if(hr===12)return'12p';if(hr<12)return hr+sf;return(hr-12)+sf;}return'30';
+    });
+
+    // Bottom bar: render() line 646 - background:sty.titleBg
+    fill(sty.titleBg); doc.rect(0, gy+gridH, W, bottomH, 'F');
 
     doc.save('ACYR_Schedule_'+cfg.year+'.pdf');
     document.getElementById('stxt').textContent='PDF exported';
