@@ -56,9 +56,9 @@
             color:#fff; letter-spacing:3px; text-transform:uppercase;
         }
 
-        /* Bottom bar matching title */
+        /* Bottom bar matching title - tall enough for reception overlap */
         .bottom-bar {
-            padding: 10px; text-align: center;
+            padding: 16px; text-align: center;
         }
 
         /* Headers row */
@@ -84,11 +84,13 @@
         .gutter {
             width: var(--gutter-w); background: #F4D352; display:flex; flex-direction:column;
             border-left:1px solid #e0c040; border-right:1px solid #e0c040;
+            overflow: visible; position: relative; z-index: 3;
         }
         .gut-slot {
             height: var(--slot-h); display:flex; align-items:center; justify-content:center;
             font-size:0.72rem; font-weight:700;
             border-bottom: 1px solid rgba(0,0,0,0.06);
+            overflow: visible; position: relative; z-index: 1;
         }
         .gut-slot.hour { border-bottom-color: rgba(0,0,0,0.12); }
 
@@ -535,9 +537,8 @@ function render(){
         // Reception block at the bottom of each day column
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
         if(rec){
-            var recSlot = ns - 2; // last two slots, overlapping into bottom bar
-            var recTop = recSlot * SH;
-            var recH = SH * 2;
+            var recTop = (ns - 1) * SH; // start at last slot, overlap into bottom bar
+            var recH = SH * 2; // extends below the grid into bottom bar
             h+='<div class="rec-block" style="top:'+recTop+'px;height:'+recH+'px">';
             h+='<div class="rec-circle">R</div>';
             h+='<div class="rec-text">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
