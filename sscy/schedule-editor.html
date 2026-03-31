@@ -508,43 +508,22 @@ function assignColumns(dayEvents){
         item.col = c;
     });
 
-    // For each event, totalCols = max columns needed across all slots it occupies
+    // For each event, totalCols = max concurrent events at any single slot it occupies
+    // This means a tall event gets the WIDEST it can be at each slot level
     evts.forEach(function(item){
         var e = item.evt;
         var eEnd = e.startSlot + e.spanSlots;
-        var maxCols = item.col + 1;
-        // Check all other events that overlap this one
-        evts.forEach(function(other){
-            if(other === item) return;
-            var o = other.evt;
-            if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){
-                if(other.col + 1 > maxCols) maxCols = other.col + 1;
-            }
-        });
-        item.totalCols = maxCols;
-    });
-
-    // Normalize: all events overlapping each other should share the same totalCols
-    var changed = true;
-    while(changed){
-        changed = false;
-        evts.forEach(function(item){
-            var e = item.evt;
-            var eEnd = e.startSlot + e.spanSlots;
+        var maxConcurrent = 1;
+        for (var s = e.startSlot; s < eEnd; s++) {
+            var count = 0;
             evts.forEach(function(other){
-                if(other === item) return;
                 var o = other.evt;
-                if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){
-                    var m = Math.max(item.totalCols, other.totalCols);
-                    if(item.totalCols !== m || other.totalCols !== m){
-                        item.totalCols = m;
-                        other.totalCols = m;
-                        changed = true;
-                    }
-                }
+                if (s >= o.startSlot && s < o.startSlot + o.spanSlots) count++;
             });
-        });
-    }
+            if (count > maxConcurrent) maxConcurrent = count;
+        }
+        item.totalCols = maxConcurrent;
+    });
 
     return evts;
 }
