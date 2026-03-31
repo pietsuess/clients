@@ -319,8 +319,13 @@
     ]).then(function(results) {
       blogPosts = results[0]; testimonials = results[1]; faqs = results[2];
       settings = results[3]; pages = results[4];
-      renderBlogList(); renderTestimonials(); renderFAQs(); renderPages();
-      if (typeof initVisualEditor === 'function') initVisualEditor();
+      loadDrafts();
+      updateDashboard();
+      renderBlogList(); renderTestimonialsList(); renderFaqsList();
+      loadSettings();
+      updatePublishBar();
+      initVisualEditor();
+      renderNavList();
     });
   }
 
