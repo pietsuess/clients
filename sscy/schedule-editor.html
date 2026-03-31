@@ -1613,13 +1613,41 @@ function ghPutFile(path, content, message) {
     });
 }
 
+// Publish setup panel
+function showPublishSetup() {
+    if (document.getElementById('publishSetup')) return;
+    var ov = document.createElement('div');
+    ov.className = 'name-overlay';
+    ov.id = 'publishSetup';
+    var tok = getGitHubToken() || '';
+    ov.innerHTML = '<div class="name-box">' +
+        '<h3>Publish Setup</h3>' +
+        '<p style="font-size:0.7rem;opacity:0.7;margin-bottom:12px">To publish the schedule online, paste the access token below. Ask Piet if you don\'t have it.</p>' +
+        '<input type="password" id="setupToken" placeholder="Paste token here" value="' + tok + '" style="font-family:monospace">' +
+        '<div style="display:flex;gap:8px;justify-content:center">' +
+        '<button onclick="savePublishSetup()" style="flex:1">Save & Publish</button>' +
+        '<button onclick="document.getElementById(\'publishSetup\').remove()" style="flex:1;background:#444">Cancel</button>' +
+        '</div></div>';
+    document.body.appendChild(ov);
+    setTimeout(function(){ document.getElementById('setupToken').focus(); }, 100);
+}
+
+function savePublishSetup() {
+    var tok = (document.getElementById('setupToken').value || '').trim();
+    if (!tok) return;
+    setGitHubToken(tok);
+    var ov = document.getElementById('publishSetup');
+    if (ov) ov.remove();
+    publishSchedule();
+}
+
 // Publish schedule
 var publishing = false;
 function publishSchedule() {
     if (publishing) return;
     var token = getGitHubToken();
     if (!token) {
-        alert('Set your GitHub token in Settings before publishing.');
+        showPublishSetup();
         return;
     }
     var name = getUserName() || 'Unknown';
