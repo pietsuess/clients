@@ -886,21 +886,26 @@ function exportPDF(){
 
             var isSpanned = spanGroups[item._spanKey] && spanGroups[item._spanKey].length > 1;
             if(!isSpanned){
-                // CSS .ev.lt: color:#fff text-shadow, .ev.dk: color:#333
                 if(brightness(v.color)>160) doc.setTextColor(51,51,51); else doc.setTextColor(255,255,255);
-                // .ev-t: font-weight:700
                 pdfFont(doc, sty.eventFont.fontFamily, sty.eventFont.fontWeight); doc.setFontSize(evFS);
-                var lines=(evt.title||'').split('\n');
-                var sub = evt.subtitle ? evt.subtitle.split('\n') : [];
-                var totalLines = lines.length + sub.length;
-                var totalTextH = lines.length * evLH + sub.length * (evSubFS*1.15);
+                // Split on explicit \n, then wrap each line to fit block width
+                var rawLines = (evt.title||'').split('\n');
+                var lines = [];
+                rawLines.forEach(function(rl){ lines = lines.concat(doc.splitTextToSize(rl, ew - 4*SC)); });
+                // Subtitle
+                var subLines = [];
+                if(evt.subtitle){
+                    doc.setFontSize(evSubFS);
+                    evt.subtitle.split('\n').forEach(function(rl){ subLines = subLines.concat(doc.splitTextToSize(rl, ew - 4*SC)); });
+                    doc.setFontSize(evFS);
+                }
+                var totalTextH = lines.length * evLH + subLines.length * (evSubFS*1.15);
                 var ty = ey + (eh - totalTextH)/2 + evFS*0.85;
                 lines.forEach(function(l,li){ doc.text(l, ex+ew/2, ty+li*evLH, {align:'center'}); });
-                // Subtitle: CSS .ev-s: font-size:0.5rem, opacity:0.75
-                if(sub.length){
+                if(subLines.length){
                     doc.setFontSize(evSubFS);
                     var sty2 = ty + lines.length * evLH;
-                    sub.forEach(function(l,li){ doc.text(l, ex+ew/2, sty2+li*(evSubFS*1.15), {align:'center'}); });
+                    subLines.forEach(function(l,li){ doc.text(l, ex+ew/2, sty2+li*(evSubFS*1.15), {align:'center'}); });
                 }
             }
         });
@@ -921,7 +926,9 @@ function exportPDF(){
             var v=state.venues.find(function(x){return x.id===evt.venueId});
             if(v && brightness(v.color)>160) doc.setTextColor(51,51,51); else doc.setTextColor(255,255,255);
             pdfFont(doc, sty.eventFont.fontFamily, sty.eventFont.fontWeight); doc.setFontSize(evFS);
-            var lines=(evt.title||'').split('\n');
+            var rawLines = (evt.title||'').split('\n');
+            var lines = [];
+            rawLines.forEach(function(rl){ lines = lines.concat(doc.splitTextToSize(rl, spanW - 4*SC)); });
             var totalTextH = lines.length * evLH;
             var ty = ey + (eh - totalTextH)/2 + evFS*0.85;
             lines.forEach(function(l,li){ doc.text(l, spanLeft+spanW/2, ty+li*evLH, {align:'center'}); });
@@ -977,7 +984,9 @@ function exportPDF(){
         // Reception text
         doc.setTextColor(51,51,51);
         pdfFont(doc, sty.receptionFont.fontFamily, sty.receptionFont.fontWeight); doc.setFontSize(recFS);
-        var recTxt = 'Reception\n' + rec.text.replace(/\n/g,', ').replace(/<br>/g,', ');
+        // Screen l615: 'Reception<br>' + rec.text.replace(/\n/g,', ')
+        // So \n becomes ", " but <br> stays as a line break
+        var recTxt = 'Reception\n' + rec.text.replace(/\n/g,', ').replace(/<br>/g,'\n');
         var rl = recTxt.split('\n');
         var rlH = recFS * 1.2;
         var rty = ccy - ((rl.length-1)*rlH)/2 + recFS*0.35;
