@@ -64,7 +64,7 @@
             font-weight:700; font-size:0.75rem; padding:6px 4px; color:#fff;
         }
         .hdr-legend { width: var(--legend-w); background:#333; font-size:0.5rem; text-transform:uppercase; letter-spacing:0.08em; line-height:1.2; }
-        .hdr-gutter { width: var(--gutter-w); background:#F4D352; font-size:0.6rem; font-weight:700; color:#7a6a10; }
+        .hdr-gutter { width: var(--gutter-w); background:#F4D352; font-size:0.72rem; font-weight:700; color:#5a4a00; }
         .hdr-day { flex:1; background:#17A698; }
         .hdr-gutter.last { background:#F4D352; font-size:0.6rem; }
 
@@ -83,10 +83,10 @@
         }
         .gut-slot {
             height: var(--slot-h); display:flex; align-items:center; justify-content:center;
-            font-size:0.6rem; font-weight:700; color:#7a6a10;
+            font-size:0.72rem; font-weight:700;
             border-bottom: 1px solid rgba(0,0,0,0.06);
         }
-        .gut-slot.hour { color:#5a4a00; border-bottom-color: rgba(0,0,0,0.12); }
+        .gut-slot.hour { border-bottom-color: rgba(0,0,0,0.12); }
 
         /* Day column - row stripes matching PDF mint/cyan */
         .day-col {
@@ -121,13 +121,21 @@
         .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
         .ev.dk .ev-t, .ev.dk .ev-s { color:#333; text-shadow:none; }
 
-        /* Reception - matching PDF style */
-        .recep { display:flex; background:#F4D352; min-height:32px; }
+        /* Reception - matching PDF: yellow bg, teal circle, bold text */
+        .recep { display:flex; min-height:36px; align-items:stretch; }
         .rec-leg { width:var(--legend-w); }
         .rec-gut { width:var(--gutter-w); }
-        .rec-day { flex:1; display:flex; align-items:center; gap:6px; padding:4px 8px; font-size:0.6rem; }
-        .rec-r { width:22px; height:22px; border-radius:50%; background:#17A698; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:700; color:#fff; flex-shrink:0; }
-        .rec-txt { color:#5a4a00; font-weight:600; line-height:1.3; font-size:0.58rem; }
+        .rec-day {
+            flex:1; display:flex; align-items:center; gap:8px; padding:5px 10px;
+            font-size:0.65rem; border-right:1px solid rgba(0,0,0,0.06);
+        }
+        .rec-r {
+            width:24px; height:24px; border-radius:50%; display:flex;
+            align-items:center; justify-content:center; font-size:0.65rem;
+            font-weight:700; color:#fff; flex-shrink:0;
+        }
+        .rec-label { font-weight:700; font-size:0.62rem; }
+        .rec-hours { font-size:0.58rem; line-height:1.3; opacity:0.8; }
 
         /* Status */
         .status { position:fixed; bottom:0; left:0; right:0; height:22px; background:#2c2c2c; color:rgba(255,255,255,0.4); font-size:0.55rem; display:flex; align-items:center; padding:0 12px; gap:12px; z-index:1000; }
@@ -147,7 +155,16 @@
     <div class="tb-group">
         <button class="tb-btn primary" onclick="exportPDF()">Export PDF</button>
     </div>
+    <div class="tb-group">
+        <button class="tb-btn" onclick="toggleSettings()">Settings</button>
+    </div>
     <div class="tb-group"><span style="opacity:0.3;font-size:0.55rem">ACYR Schedule Editor</span></div>
+</div>
+
+<!-- Settings panel -->
+<div id="settingsPanel" style="display:none;position:fixed;top:var(--toolbar-h);right:0;width:280px;max-height:80vh;overflow-y:auto;background:#2c2c2c;color:#fff;padding:16px;z-index:999;font-size:0.65rem;border-left:1px solid #444;box-shadow:-4px 0 20px rgba(0,0,0,0.3)">
+    <div style="font-weight:700;font-size:0.75rem;margin-bottom:12px;border-bottom:1px solid #444;padding-bottom:8px">Color Settings</div>
+    <div id="colorSettings"></div>
 </div>
 
 <div class="sched-wrap">
@@ -299,9 +316,16 @@ var DEFAULT_STATE = {
     images: [],
     styles: {
         title:{fontFamily:"Cinzel",fontSize:28,fontWeight:700,letterSpacing:3,color:"#fff"},
+        titleBg:"#17A698",
         dayHeaders:{bgColor:"#17A698",textColor:"#fff"},
-        rowStripes:{color1:"rgba(23,166,152,0.06)",color2:"transparent"},
-        gutterColor:"#f5e6a0"
+        legendHeader:{bgColor:"#333333",textColor:"#ffffff"},
+        gutterColor:"#F4D352",
+        gutterText:"#5a4a00",
+        rowStripe1:"#e6f5f0",
+        rowStripe2:"#f0faf7",
+        receptionBg:"#F4D352",
+        receptionCircle:"#17A698",
+        gridLines:"#cccccc"
     }
 };
 
@@ -381,20 +405,22 @@ function render(){
     var el=document.getElementById('sched'), cfg=state.config, nd=cfg.days.length, ns=(cfg.endHour-cfg.startHour)*2;
     var h='';
 
+    var sty=state.styles;
+
     // Title
-    h+='<div class="title-banner"><div class="title-text">'+cfg.title+'</div>';
+    h+='<div class="title-banner" style="background:'+sty.titleBg+'"><div class="title-text" style="font-family:'+sty.title.fontFamily+';font-size:'+sty.title.fontSize+'px;color:'+sty.title.color+'">'+cfg.title+'</div>';
     if(cfg.year) h+='<div class="title-year">'+cfg.year+'</div>';
     h+='</div>';
 
     // Headers
     h+='<div class="headers">';
-    h+='<div class="hdr hdr-legend">Colour<br>Legend</div>';
-    h+='<div class="hdr hdr-gutter">TIME</div>';
+    h+='<div class="hdr hdr-legend" style="background:'+sty.legendHeader.bgColor+';color:'+sty.legendHeader.textColor+'">Colour<br>Legend</div>';
+    h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'">TIME</div>';
     for(var d=0;d<nd;d++){
-        h+='<div class="hdr hdr-day">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
-        if(d<nd-1) h+='<div class="hdr hdr-gutter"></div>';
+        h+='<div class="hdr hdr-day" style="background:'+sty.dayHeaders.bgColor+';color:'+sty.dayHeaders.textColor+'">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
+        if(d<nd-1) h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'"></div>';
     }
-    h+='<div class="hdr hdr-gutter last"></div>';
+    h+='<div class="hdr hdr-gutter last" style="background:'+sty.gutterColor+'"></div>';
     h+='</div>';
 
     // Grid body
@@ -405,8 +431,8 @@ function render(){
     state.venues.forEach(function(v){ h+='<div class="leg-item"><div class="leg-color" style="background:'+v.color+'"></div><span>'+v.name+'</span></div>'; });
     h+='</div>';
 
-    // First gutter (TIME) - same yellow as all gutters
-    h+='<div class="gutter">';
+    // First gutter (TIME)
+    h+='<div class="gutter" style="background:'+sty.gutterColor+'">';
     for(var s=0;s<ns;s++){
         var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
         var lb='';
@@ -417,7 +443,7 @@ function render(){
 
     // Day columns with gutters between
     for(var d=0;d<nd;d++){
-        h+='<div class="day-col" data-day="'+d+'">';
+        h+='<div class="day-col" data-day="'+d+'" style="background:repeating-linear-gradient(to bottom,'+sty.rowStripe1+' 0px,'+sty.rowStripe1+' '+(SH*2)+'px,'+sty.rowStripe2+' '+(SH*2)+'px,'+sty.rowStripe2+' '+(SH*4)+'px)">';
         // Grid lines
         for(var s=1;s<ns;s++){
             h+='<div class="sline'+(s%2===0?' hour':'')+'" style="top:'+(s*SH)+'px"></div>';
@@ -476,7 +502,7 @@ function render(){
 
         // Gutter after day (between days or final)
         if(d<nd-1){
-            h+='<div class="gutter">';
+            h+='<div class="gutter" style="background:'+sty.gutterColor+'">';
             for(var s=0;s<ns;s++){
                 var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
                 var lb='';
@@ -488,7 +514,7 @@ function render(){
     }
 
     // Final gutter (right time)
-    h+='<div class="gutter">';
+    h+='<div class="gutter" style="background:'+sty.gutterColor+'">';
     for(var s=0;s<ns;s++){
         var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
         var lb='';
@@ -500,16 +526,18 @@ function render(){
     h+='</div>'; // end grid-body
 
     // Reception
-    h+='<div class="recep">';
-    h+='<div class="rec-leg"></div>';
-    h+='<div class="rec-gut"></div>';
+    var sty=state.styles;
+    h+='<div class="recep" style="background:'+sty.receptionBg+'">';
+    h+='<div class="rec-leg" style="background:'+sty.receptionBg+'"></div>';
+    h+='<div class="rec-gut" style="background:'+sty.gutterColor+'"></div>';
     for(var d=0;d<nd;d++){
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
         h+='<div class="rec-day">';
-        h+='<div class="rec-r">R</div>';
-        h+='<div class="rec-txt">'+(rec?rec.text.replace(/\n/g,'<br>'):'')+'</div>';
+        h+='<div class="rec-r" style="background:'+sty.receptionCircle+'">R</div>';
+        h+='<div class="rec-label">Reception</div>';
+        h+='<div class="rec-hours">'+(rec?rec.text.replace(/\n/g,'<br>'):'')+'</div>';
         h+='</div>';
-        if(d<nd-1) h+='<div class="rec-gut"></div>';
+        if(d<nd-1) h+='<div class="rec-gut" style="background:'+sty.gutterColor+'"></div>';
     }
     h+='<div class="rec-gut"></div>';
     h+='</div>';
@@ -651,6 +679,58 @@ function exportPDF(){
 
     doc.save('ACYR_Schedule_'+cfg.year+'.pdf');
     document.getElementById('stxt').textContent='PDF exported';
+}
+
+function toggleSettings(){
+    var p=document.getElementById('settingsPanel');
+    if(p.style.display==='none'){p.style.display='block';renderSettings();}else{p.style.display='none';}
+}
+
+function renderSettings(){
+    var c=document.getElementById('colorSettings');
+    var sty=state.styles;
+    var items=[
+        {label:'Title Banner',key:'titleBg',val:sty.titleBg},
+        {label:'Title Text',key:'title.color',val:sty.title.color},
+        {label:'Day Headers',key:'dayHeaders.bgColor',val:sty.dayHeaders.bgColor},
+        {label:'Day Header Text',key:'dayHeaders.textColor',val:sty.dayHeaders.textColor},
+        {label:'Legend Header',key:'legendHeader.bgColor',val:sty.legendHeader.bgColor},
+        {label:'Gutters',key:'gutterColor',val:sty.gutterColor},
+        {label:'Gutter Text',key:'gutterText',val:sty.gutterText},
+        {label:'Row Stripe 1',key:'rowStripe1',val:sty.rowStripe1},
+        {label:'Row Stripe 2',key:'rowStripe2',val:sty.rowStripe2},
+        {label:'Reception Bg',key:'receptionBg',val:sty.receptionBg},
+        {label:'Reception Circle',key:'receptionCircle',val:sty.receptionCircle},
+        {label:'Grid Lines',key:'gridLines',val:sty.gridLines}
+    ];
+    var h='';
+    items.forEach(function(it){
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+        h+='<span>'+it.label+'</span>';
+        h+='<input type="color" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:32px;height:22px;border:none;cursor:pointer;background:none">';
+        h+='</div>';
+    });
+    h+='<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Venue Colors</div>';
+    state.venues.forEach(function(v,i){
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+        h+='<span>'+v.name+'</span>';
+        h+='<input type="color" value="'+v.color+'" data-venue="'+i+'" onchange="updateVenueColor(this)" style="width:32px;height:22px;border:none;cursor:pointer;background:none">';
+        h+='</div>';
+    });
+    c.innerHTML=h;
+}
+
+function updateStyleColor(inp){
+    var key=inp.dataset.key, val=inp.value;
+    var parts=key.split('.');
+    if(parts.length===2) state.styles[parts[0]][parts[1]]=val;
+    else state.styles[key]=val;
+    render();
+}
+
+function updateVenueColor(inp){
+    state.venues[parseInt(inp.dataset.venue)].color=inp.value;
+    render(); renderSwatches();
 }
 
 loadState(); render(); renderSwatches();
