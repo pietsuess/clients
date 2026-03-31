@@ -526,23 +526,28 @@ function assignColumns(dayEvents){
         item.totalCols = maxConcurrent;
     });
 
-    // Stretch: each event expands rightward into empty columns at its slots.
-    // Find the nearest occupied column to the right across ALL slots this event covers.
+    // Calculate leftPct and widthPct for each event.
+    // Each event stretches right until it hits another event's left edge.
+    // Uses the neighbor's own totalCols grid to find its left edge %.
     evts.forEach(function(item){
         var e = item.evt;
         var eEnd = e.startSlot + e.spanSlots;
-        // Find the closest column to the right that has another event at ANY of our slots
-        var nearestRight = item.totalCols; // default: stretch to end
+        var tc = item.totalCols;
+        item.leftPct = (item.col / tc) * 100;
+
+        // Find nearest right neighbor across all overlapping slots
+        var rightEdge = 100;
         for (var s = e.startSlot; s < eEnd; s++) {
             evts.forEach(function(other){
                 if(other === item) return;
                 var o = other.evt;
                 if(s >= o.startSlot && s < o.startSlot + o.spanSlots && other.col > item.col){
-                    if(other.col < nearestRight) nearestRight = other.col;
+                    var nLeft = (other.col / other.totalCols) * 100;
+                    if(nLeft < rightEdge) rightEdge = nLeft;
                 }
             });
         }
-        item.colSpan = nearestRight - item.col;
+        item.widthPct = rightEdge - item.leftPct;
     });
 
     return evts;
@@ -618,9 +623,7 @@ function render(){
             var tl=(evt.title||'').replace(/\n/g,'<br>');
 
             var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
-            var tc=item.totalCols, col=item.col;
-            var span=item.colSpan||1;
-            var wp=(100/tc)*span, lp=(100/tc)*col;
+            var lp=item.leftPct, wp=item.widthPct;
 
             h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
             if(!isSpanned){
