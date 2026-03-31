@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTUS — Branding & Packaging Proposal</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Lato:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f2ee;
+    --rule: #2e2b28;
+    --accent: #b8a898;
+    --muted: #e8e0d4;
+  }
+  html { font-size: 19px; scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--white); font-family: 'Lato', sans-serif; overflow-x: hidden; text-wrap: pretty; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: 0.3;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.2rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(10,10,10,0.88); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav-logo { font-size: 1rem; font-weight: 900; letter-spacing: 0.15em; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a { color: var(--accent); text-decoration: none; font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--white); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; padding: 8rem 4rem 4rem;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border-bottom: 1px solid var(--rule); position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; bottom: -0.1em; right: -0.04em;
+    font-size: clamp(16rem, 30vw, 36rem); font-weight: 900;
+    color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.035);
+    line-height: 1; pointer-events: none; user-select: none; letter-spacing: -0.04em;
+  }
+  .hero-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .label { font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); line-height: 2; }
+  .hero-main { padding-top: 3rem; }
+  .eyebrow { font-family: 'Playfair Display', serif; font-style: italic; font-size: clamp(1rem, 1.3vw, 1.2rem); color: var(--accent); margin-bottom: 1rem; }
+  h1 { font-size: clamp(5rem, 13vw, 12rem); font-weight: 900; letter-spacing: -0.03em; line-height: 0.9; margin-bottom: 2.5rem; }
+  .hero-intro {
+    max-width: 100%; font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 2.8vw, 2.2rem); line-height: 1.8; color: var(--muted);
+    border-left: none; padding-left: 0;
+  }
+  .hero-intro strong { color: var(--white); font-weight: 900; font-family: 'Lato', sans-serif; }
+  .word-colour { color: #FFCC00; font-weight: 900; font-style: normal; }
+  .word-shape { font-family: 'Rubik Mono One', sans-serif; font-style: normal; font-weight: 400; letter-spacing: 0.02em; font-size: 0.9em; }
+  .word-mood { letter-spacing: 0.7em; text-transform: uppercase; font-family: 'Lato', sans-serif; font-weight: 900; font-size: 0.85em; }
+  .hero-intro .gap-sm { display: block; height: 0.6em; }
+  .hero-intro .gap-lg { display: block; height: 1.4em; }
+  .hero-intro .indent { display: inline-block; margin-left: clamp(4rem, 18vw, 16rem); }
+  .hero-intro .indent-sm { display: inline-block; margin-left: clamp(2rem, 10vw, 9rem); }
+  .hero-intro .indent-lg { display: inline-block; margin-left: clamp(6rem, 28vw, 26rem); }
+  .hero-intro .indent-xl { display: inline-block; margin-left: clamp(8rem, 40vw, 38rem); }
+
+  /* PREAMBLE */
+  .preamble {
+    padding: 4rem 4rem 5rem; border-bottom: 1px solid var(--rule);
+    text-align: center;
+  }
+  .preamble p {
+    font-family: 'Lato', sans-serif; font-size: 0.85rem; font-weight: 900;
+    letter-spacing: 0.28em; text-transform: uppercase; color: var(--white);
+    max-width: 700px; margin: 0 auto; line-height: 1.8;
+  }
+  .hero-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--rule);
+    flex-wrap: wrap; gap: 2rem;
+  }
+  .total-label { font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+  .total-amount { font-size: clamp(2.2rem, 4.5vw, 4rem); font-weight: 900; letter-spacing: -0.02em; }
+  .hero-contact { font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); text-align: right; line-height: 2; }
+
+  /* SECTIONS */
+  section { padding: 5.5rem 4rem; border-bottom: 1px solid var(--rule); opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-label {
+    font-size: 0.85rem; font-weight: 900; letter-spacing: 0.28em; text-transform: uppercase; color: var(--black);
+    background: var(--white);
+    margin: 0 -4rem 3.5rem; padding: 1.2rem 4rem;
+  }
+  .section-label::after { display: none; }
+
+  /* PHASE LAYOUT */
+  .phase { display: grid; grid-template-columns: 280px 1fr; gap: 3rem 6rem; align-items: start; }
+  .phase-meta { position: sticky; top: 5rem; }
+  .phase-number { font-size: clamp(4rem, 8vw, 7rem); font-weight: 900; line-height: 1; color: rgba(255,255,255,0.08); letter-spacing: -0.04em; margin-bottom: 0.3rem; }
+  .phase-title { font-size: clamp(1.5rem, 2.4vw, 2rem); font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; margin-bottom: 0.8rem; }
+  .phase-timeline { display: inline-block; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--rule); padding: 0.28rem 0.7rem; margin-bottom: 1.5rem; }
+  .deliverables-label { font-size: clamp(1.1rem, 1.6vw, 1.4rem); font-weight: 900; letter-spacing: 0.05em; color: var(--white); margin-bottom: 0.8rem; }
+  .deliverables-list { list-style: none; }
+  .deliverables-list li { font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem; color: var(--muted); padding: 0.35rem 0; border-bottom: 1px solid var(--rule); line-height: 1.4; }
+  .deliverables-list li:last-child { border-bottom: none; }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; }
+  .step { padding: 1.8rem 0; border-bottom: 1px solid var(--rule); opacity: 0; transform: translateY(14px); transition: opacity 0.45s ease, transform 0.45s ease; }
+  .step.visible { opacity: 1; transform: translateY(0); }
+  .step:last-child { border-bottom: none; }
+  .step-header { display: flex; align-items: baseline; gap: 1.1rem; margin-bottom: 0.8rem; }
+  .step-num { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+  .step-name { font-size: clamp(1.05rem, 1.5vw, 1.3rem); font-weight: 900; }
+  .step-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+  .step-bullets li { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--muted); padding-left: 1.2rem; position: relative; line-height: 1.6; }
+  .step-bullets li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+
+  /* PAYMENT */
+  .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem 6rem; align-items: start; }
+  .payment-total { font-size: clamp(3rem, 6.5vw, 6rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1; margin: 0.5rem 0 1.5rem; }
+  .payment-gst { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-top: 0.3rem; }
+  .breakdown { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+  .breakdown td { padding: 0.65rem 0; font-family: 'Playfair Display', serif; font-style: italic; font-size: 0.95rem; color: var(--muted); border-bottom: 1px solid var(--rule); }
+  .breakdown td:last-child { text-align: right; color: var(--accent); font-weight: 700; font-family: 'Lato', sans-serif; font-style: normal; }
+  .breakdown tr:last-child td { border-bottom: none; }
+  .payment-terms { border-left: 1px solid var(--rule); padding-left: 2.5rem; }
+  .terms-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+  .terms-body { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--muted); line-height: 1.75; }
+  .terms-body p + p { margin-top: 1rem; }
+
+  /* CLOSING */
+  .closing { min-height: 65vh; display: flex; flex-direction: column; justify-content: space-between; border-bottom: none !important; }
+  .closing-headline { font-size: clamp(2.4rem, 6vw, 5.2rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1.2; max-width: 900px; }
+  .closing-headline em { font-style: italic; font-family: 'Playfair Display', serif; font-weight: 400; font-size: 0.88em; color: var(--accent); }
+  .closing-bottom { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 3.5rem; border-top: 1px solid var(--rule); margin-top: 4rem; flex-wrap: wrap; gap: 2rem; }
+  .closing-links a { display: block; color: var(--white); text-decoration: none; font-size: 0.88rem; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--rule); padding-bottom: 0.18rem; margin-bottom: 0.7rem; transition: border-color 0.2s; }
+  .closing-links a:hover { border-color: var(--white); }
+  .cta { display: inline-block; background: var(--white); color: var(--black); font-family: 'Lato', sans-serif; font-weight: 900; font-size: 0.85rem; letter-spacing: 0.22em; text-transform: uppercase; text-decoration: none; padding: 1.1rem 2.8rem; transition: background 0.2s; }
+  .cta:hover { background: var(--accent); }
+
+  @media (max-width: 820px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero, section { padding: 5rem 1.5rem 3rem; }
+    .section-label { margin: 0 -1.5rem 3.5rem; padding: 1.2rem 1.5rem; }
+    .phase { grid-template-columns: 1fr; }
+    .phase-meta { position: static; }
+    .payment-grid { grid-template-columns: 1fr; }
+    .payment-terms { border-left: none; border-top: 1px solid var(--rule); padding: 2rem 0 0; }
+    .closing-bottom { flex-direction: column; align-items: stretch; }
+    .closing-bottom .cta { align-self: flex-end; }
+    .mobile-break { display: block; height: 1.2em; }
+    .voice-line { display: block; text-align: right; margin-left: 0; }
+  }
+  .mobile-break { display: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">LOTUS</div>
+  <ul class="nav-links">
+    <li><a href="#phase1">01</a></li>
+    <li><a href="#phase2">02</a></li>
+    <li><a href="#phase3">03</a></li>
+    <li><a href="#phase4">04</a></li>
+    <li><a href="#payment">Investment</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg">L</div>
+  <div class="hero-top">
+    <div class="label">Branding &<br>Packaging<br>Proposal</div>
+    <div class="label" style="text-align:right">Prepared by<br>Piet Suess<br>2026</div>
+  </div>
+  <div class="hero-main">
+    <div class="eyebrow">A proposal for</div>
+    <h1>LOTUS</h1>
+    <p class="hero-intro">
+      Before anyone registers<br>
+      a single word<br>
+      <span class="indent-sm"><em>on</em> your product,</span><br>
+      <span class="gap-lg"></span>
+      <span class="indent-lg">they already <strong>feel</strong> something.</span><br>
+      <span class="gap-lg"></span>
+      A <span class="word-colour">colour</span>.<br>
+      <span class="gap-sm"></span>
+      <span class="indent">A <span class="word-shape">shape</span>.</span><br>
+      <span class="gap-sm"></span>
+      <span class="indent-lg">A &nbsp;&nbsp;&nbsp;&nbsp;<span class="word-mood">mood</span>.</span><br>
+      <span class="gap-lg"></span>
+      <span class="indent-xl">That first feeling</span><br>
+      <span class="indent-xl">is the <strong>brand</strong>.</span><br>
+      <span class="gap-lg"></span>
+      This is a proposal to build that for Lotus:<br>
+      <span class="mobile-break"></span>
+      <span class="indent voice-line">A visual <strong>voice</strong> and <strong>feeling</strong> that</span><br>
+      <span class="indent-sm">people will <strong>remember</strong> and <strong>connect</strong> with —</span>
+    </p>
+  </div>
+</div>
+
+<!-- PHASE 1 -->
+<section id="phase1">
+  <div class="section-label"><span>Phase 01 — Logo & Brand</span></div>
+  <div class="phase">
+    <div class="phase-meta">
+      <div class="phase-number">01</div>
+      <div class="deliverables-label">What we'll explore</div>
+      <ul class="deliverables-list">
+        <li>1–2 text mark logo concepts</li>
+        <li>1–2 icon logo concepts</li>
+        <li>Refined final logo files</li>
+      </ul>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 01</span><span class="step-name">Getting to Know Lotus</span></div>
+        <ul class="step-bullets">
+          <li>A questionnaire to get the lay of the land — who you are, where you're headed, who you're up against</li>
+          <li>A 45min–1hr call where we talk it all through and get on the same page</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 02</span><span class="step-name">Look & Feel</span></div>
+        <ul class="step-bullets">
+          <li>I'll pull together a visual direction specific to Lotus — mood, references, examples</li>
+          <li>We'll go back and forth on what excites us and what doesn't</li>
+          <li>By the end of this we'll have landed on the flavour, the tone, the visual voice</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 03</span><span class="step-name">Locking Direction</span></div>
+        <ul class="step-bullets">
+          <li>We solidify what the logo needs to say and how it needs to feel</li>
+          <li>No design begins until we're both excited about where it's going</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 04</span><span class="step-name">Presentation</span></div>
+        <ul class="step-bullets">
+          <li>1–2 text mark concepts, each with the thinking behind it</li>
+          <li>1–2 icon concepts — same deal, nothing presented without rationale</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASE 2 -->
+<section id="phase2">
+  <div class="section-label"><span>Phase 02 — Brand Identity & Guidelines</span></div>
+  <div class="phase">
+    <div class="phase-meta">
+      <div class="phase-number">02</div>
+      <div class="deliverables-label">What you'll own</div>
+      <ul class="deliverables-list">
+        <li>Full brand guidelines document</li>
+        <li>Colour palette, type system & supporting graphics</li>
+        <li>All logo files — print & digital</li>
+      </ul>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 01</span><span class="step-name">Refinement</span></div>
+        <ul class="step-bullets">
+          <li>Take your feedback from Phase 1 and work it into the chosen direction</li>
+          <li>Finalise the logo so it feels right in your hands</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 02</span><span class="step-name">Building the System</span></div>
+        <ul class="step-bullets">
+          <li>Colours, fonts, supporting graphic elements — the full palette</li>
+          <li>These are the pieces that make Lotus feel like Lotus everywhere it shows up</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 03</span><span class="step-name">The Rules</span></div>
+        <ul class="step-bullets">
+          <li>How to use the logo, how not to — so it always looks its best</li>
+          <li>Spacing, sizing, placement — the details that keep everything clean</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 04</span><span class="step-name">Hand Off</span></div>
+        <ul class="step-bullets">
+          <li>The complete guidelines presented with every element explained</li>
+          <li>All assets organised, labelled, and ready to use</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASE 3 -->
+<section id="phase3">
+  <div class="section-label"><span>Phase 03 — Packaging</span></div>
+  <div class="phase">
+    <div class="phase-meta">
+      <div class="phase-number">03</div>
+      <div class="deliverables-label">What we'll build</div>
+      <ul class="deliverables-list">
+        <li>1–2 full packaging concepts</li>
+        <li>All panel layouts — print-ready</li>
+        <li>Dieline files & production specs</li>
+      </ul>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 01</span><span class="step-name">Getting Into It</span></div>
+        <ul class="step-bullets">
+          <li>What are we working with — size, materials, print methods, what the shelf looks like</li>
+          <li>I want to understand the product the way you understand it</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 02</span><span class="step-name">Look & Feel</span></div>
+        <ul class="step-bullets">
+          <li>Develop the packaging direction rooted in everything we built in Phase 1 & 2</li>
+          <li>References, mood, what catches the eye on a shelf and what gets lost</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 03</span><span class="step-name">Locking Direction</span></div>
+        <ul class="step-bullets">
+          <li>Nail down the hierarchy — what's big, what's small, where the eye goes first</li>
+          <li>Agree on the layout approach for every panel before I start designing</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 04</span><span class="step-name">Presentation</span></div>
+        <ul class="step-bullets">
+          <li>1–2 full packaging concepts with every panel thought through</li>
+          <li>Realistic 3D mockups so you can feel it before it's printed</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASE 4 -->
+<section id="phase4">
+  <div class="section-label"><span>Phase 04 — Final Files & Support</span></div>
+  <div class="phase">
+    <div class="phase-meta">
+      <div class="phase-number">04</div>
+      <div class="deliverables-label">How we'll finish</div>
+      <ul class="deliverables-list">
+        <li>Final approved files — everything you need</li>
+        <li>Print-ready & digital formats</li>
+        <li>Post-launch support</li>
+      </ul>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 01</span><span class="step-name">Last Looks</span></div>
+        <ul class="step-bullets">
+          <li>We go through everything together one final time</li>
+          <li>Make sure every file is exactly where it needs to be</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 02</span><span class="step-name">File Prep</span></div>
+        <ul class="step-bullets">
+          <li>Finalise all files for sign-off</li>
+          <li>Print-ready, web, digital — every format you'll need</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 03</span><span class="step-name">Delivery</span></div>
+        <ul class="step-bullets">
+          <li>Everything packaged up, clearly named, and organised</li>
+          <li>No hunting around — you'll know exactly where everything lives</li>
+        </ul>
+      </div>
+      <div class="step">
+        <div class="step-header"><span class="step-num">Step 04</span><span class="step-name">I'm Still Here</span></div>
+        <ul class="step-bullets">
+          <li>1–2 minor tweaks after you start using everything in the real world</li>
+          <li>Questions, guidance, whatever comes up — I'm around</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAYMENT -->
+<section id="payment">
+  <div class="section-label"><span>Investment</span></div>
+  <div class="payment-grid">
+    <div>
+      <div style="font-weight:900; letter-spacing:0.15em; font-size:0.95rem; text-transform:uppercase; color:var(--white); margin-bottom:1rem;">Phase 1 & 2 — Logo, Brand & Guidelines</div>
+      <table class="breakdown">
+        <tr><td>Discovery & Direction</td><td>$600</td></tr>
+        <tr><td>Logo Design</td><td>$2,600</td></tr>
+        <tr><td>Brand System & Guidelines</td><td>$1,000</td></tr>
+        <tr><td style="border-bottom:none;"></td><td style="font-weight:900; border-bottom:none;">$4,200</td></tr>
+      </table>
+      <div style="font-weight:900; letter-spacing:0.15em; font-size:0.95rem; text-transform:uppercase; color:var(--white); margin-top:2.5rem; margin-bottom:1rem;">Phase 3 & 4 — Packaging, Delivery & Support</div>
+      <table class="breakdown">
+        <tr><td>Packaging Design</td><td>$2,200</td></tr>
+        <tr><td>Production Files</td><td>$800</td></tr>
+        <tr><td>Post-Launch Support</td><td>$300</td></tr>
+        <tr><td style="border-bottom:none;"></td><td style="font-weight:900; border-bottom:none;">$3,300</td></tr>
+      </table>
+      <div class="total-label" style="margin-top: 2rem; text-align: right;">Total</div>
+      <div class="payment-total" style="text-align: right;">$7,500</div>
+      <div class="payment-gst" style="text-align: right;">+ GST</div>
+    </div>
+    <div class="payment-terms">
+      <div class="terms-label">How it works</div>
+      <div class="terms-body">
+        <p>A 25% deposit ($1,875) gets things moving. That locks in your spot and kicks off Phase 1.</p>
+        <p>The rest is due before I hand over the final files at the end of Phase 4.</p>
+        <p>Every phase includes a round of revisions built in. If we need to go further, additional rounds are $150/hr.</p>
+        <p>Expect 3–5 weeks start to finish.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="closing">
+  <div>
+    <div class="section-label"><span>Press play</span></div>
+    <div class="closing-headline" style="line-height:1.35;">
+      We will<br>
+      make great things<br>
+      when we<br>
+      have fun together.<br>
+      <span style="display:block; height:0.8em;"></span>
+      <span style="float:right;"><em>Let's play.</em></span>
+    </div>
+  </div>
+  <div class="closing-bottom">
+    <div class="closing-links">
+      <a href="mailto:psuess@gmail.com">psuess@gmail.com</a>
+      <a href="tel:7789221711">778.922.1711</a>
+      <a href="https://pietsuess.com" target="_blank">pietsuess.com</a>
+    </div>
+    <a href="mailto:psuess@gmail.com?subject=Lotus%20Proposal%20%E2%80%94%20Let%27s%20Begin" class="cta">Start →</a>
+  </div>
+</section>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('section').forEach(s => io.observe(s));
+
+  const stepIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.step').forEach((step, i) => {
+          setTimeout(() => step.classList.add('visible'), i * 90);
+        });
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('section').forEach(s => stepIO.observe(s));
+</script>
+</body>
+</html>
