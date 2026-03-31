@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Salt Spring Rolfing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="screen">
+    <div class="login-box">
+      <h1>Salt Spring Rolfing</h1>
+      <p>Admin Panel</p>
+      <div id="login-form">
+        <label for="token-input">GitHub Token</label>
+        <input type="password" id="token-input" placeholder="ghp_...">
+        <button id="login-btn" class="btn-primary">Connect</button>
+        <p id="login-error" class="error"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="screen" style="display:none;">
+    <header id="admin-header">
+      <div class="admin-header-inner">
+        <h2>Salt Spring Rolfing</h2>
+        <div class="admin-header-right">
+          <span id="user-name"></span>
+          <button id="logout-btn" class="btn-small">Logout</button>
+        </div>
+      </div>
+      <nav id="admin-nav">
+        <a href="#dashboard" class="nav-item active" data-section="dashboard">Dashboard</a>
+        <a href="#pages" class="nav-item" data-section="pages">Pages</a>
+        <a href="#blog" class="nav-item" data-section="blog">Blog</a>
+        <a href="#testimonials" class="nav-item" data-section="testimonials">Reviews</a>
+        <a href="#faqs" class="nav-item" data-section="faqs">FAQs</a>
+        <a href="#navigation" class="nav-item" data-section="navigation">Navigation</a>
+        <a href="#settings" class="nav-item" data-section="settings">Settings</a>
+      </nav>
+    </header>
+
+    <main id="admin-main">
+
+      <!-- DASHBOARD -->
+      <section id="section-dashboard" class="admin-section">
+        <h1>Dashboard</h1>
+        <div class="dashboard-cards">
+          <a href="#blog" class="dash-card" data-section="blog">
+            <span class="dash-count" id="count-blog">-</span>
+            <span class="dash-label">Blog Posts</span>
+          </a>
+          <a href="#testimonials" class="dash-card" data-section="testimonials">
+            <span class="dash-count" id="count-testimonials">-</span>
+            <span class="dash-label">Reviews</span>
+          </a>
+          <a href="#faqs" class="dash-card" data-section="faqs">
+            <span class="dash-count" id="count-faqs">-</span>
+            <span class="dash-label">FAQs</span>
+          </a>
+          <a href="#pages" class="dash-card" data-section="pages">
+            <span class="dash-count" id="count-pages">-</span>
+            <span class="dash-label">Pages</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- BLOG LIST -->
+      <section id="section-blog" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Blog Posts</h1>
+          <button id="new-post-btn" class="btn-primary">+ New Post</button>
+        </div>
+        <div id="blog-list" class="item-list"></div>
+      </section>
+
+      <!-- BLOG EDITOR -->
+      <section id="section-blog-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="blog-edit-title">New Post</h1>
+          <div>
+            <button id="blog-cancel-btn" class="btn-small">Cancel</button>
+            <button id="blog-save-btn" class="btn-primary">Publish</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Title</label>
+          <input type="text" id="post-title" placeholder="Post title">
+          <div class="form-row">
+            <div>
+              <label>Author</label>
+              <input type="text" id="post-author" value="Selena La Brooy">
+            </div>
+            <div>
+              <label>Date</label>
+              <input type="date" id="post-date">
+            </div>
+          </div>
+          <label>Excerpt</label>
+          <input type="text" id="post-excerpt" placeholder="Short description for the blog listing">
+          <label>Content</label>
+          <div id="post-editor"></div>
+          <div class="form-row" style="margin-top:16px;">
+            <label class="toggle-label">
+              <input type="checkbox" id="post-published" checked>
+              Published
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTIMONIALS LIST -->
+      <section id="section-testimonials" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Client Reviews</h1>
+          <button id="new-testimonial-btn" class="btn-primary">+ New Review</button>
+        </div>
+        <div id="testimonials-list" class="item-list"></div>
+      </section>
+
+      <!-- TESTIMONIAL EDITOR -->
+      <section id="section-testimonial-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="testimonial-edit-title">New Review</h1>
+          <div>
+            <button id="testimonial-cancel-btn" class="btn-small">Cancel</button>
+            <button id="testimonial-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Client Name</label>
+          <input type="text" id="review-name" placeholder="e.g. Jane D.">
+          <label>Credentials / Profession (optional)</label>
+          <input type="text" id="review-credentials" placeholder="e.g. Yoga Instructor">
+          <label>Quote</label>
+          <textarea id="review-quote" rows="6" placeholder="Their testimonial..."></textarea>
+        </div>
+      </section>
+
+      <!-- FAQS LIST -->
+      <section id="section-faqs" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>FAQs</h1>
+          <button id="new-faq-btn" class="btn-primary">+ New FAQ</button>
+        </div>
+        <div id="faqs-list" class="item-list"></div>
+      </section>
+
+      <!-- FAQ EDITOR -->
+      <section id="section-faq-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="faq-edit-title">New FAQ</h1>
+          <div>
+            <button id="faq-cancel-btn" class="btn-small">Cancel</button>
+            <button id="faq-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Question</label>
+          <input type="text" id="faq-question" placeholder="e.g. How often can I come?">
+          <label>Answer</label>
+          <div id="faq-editor"></div>
+        </div>
+      </section>
+
+      <!-- PAGES: VISUAL EDITOR (no iframe) -->
+      <section id="section-pages" class="admin-section admin-section--visual" style="display:none;">
+        <div class="visual-toolbar">
+          <select id="page-picker">
+            <!-- populated dynamically from pages.json -->
+          </select>
+          <button id="add-page-btn" class="btn-small" style="margin-left:4px;">+ Add Page</button>
+          <button id="rename-page-btn" class="btn-small">Rename</button>
+          <button id="delete-page-btn" class="btn-danger" style="margin-left:4px;">Delete Page</button>
+          <span class="visual-hint">Click any highlighted section to edit</span>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;color:#666;">
+              <input type="checkbox" id="page-nav-toggle"> Show in Nav
+            </label>
+            <input type="text" id="page-url" placeholder="page-url.html" style="width:160px;padding:6px 10px;border:1px solid #e0e0e0;border-radius:6px;font-size:13px;">
+          </div>
+        </div>
+        <div id="page-preview" class="page-preview"></div>
+      </section>
+
+      <!-- EDIT MODAL -->
+      <div id="edit-modal" class="edit-modal" style="display:none;">
+        <div class="edit-modal-inner">
+          <div class="edit-modal-header">
+            <h2 id="edit-modal-title">Edit Section</h2>
+            <div>
+              <button id="modal-cancel-btn" class="btn-small">Cancel</button>
+              <button id="modal-save-btn" class="btn-primary">Save</button>
+            </div>
+          </div>
+          <div class="edit-modal-body">
+            <label>Heading</label>
+            <input type="text" id="modal-heading">
+            <label>Content</label>
+            <div id="modal-editor"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGATION -->
+      <section id="section-navigation" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Navigation</h1>
+          <button id="add-nav-link-btn" class="btn-primary">+ Add Link</button>
+        </div>
+        <p style="color:#666;font-size:13px;margin-bottom:20px;">Drag to reorder. Toggle pages on/off to show or hide them in the site navigation.</p>
+        <div id="nav-list" class="item-list"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="section-settings" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Site Settings</h1>
+          <button id="settings-save-btn" class="btn-primary">Save Settings</button>
+        </div>
+        <div class="editor-form">
+          <label>Business Address</label>
+          <input type="text" id="setting-address">
+          <label>Email</label>
+          <input type="email" id="setting-email">
+          <label>Facebook URL</label>
+          <input type="url" id="setting-facebook">
+          <label>Calendly URL</label>
+          <input type="url" id="setting-calendly">
+          <label>Homepage Hero Headline</label>
+          <input type="text" id="setting-hero">
+          <label>Quote Text</label>
+          <textarea id="setting-quote" rows="3"></textarea>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- PUBLISH BAR -->
+    <div id="publish-bar" class="publish-bar" style="display:none;">
+      <span id="pending-count">0 unpublished changes</span>
+      <div>
+        <button id="discard-btn" class="btn-small">Discard</button>
+        <button id="publish-btn" class="btn-primary">Publish</button>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

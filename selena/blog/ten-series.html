@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style2.css">
 </head>
 <body>
 
@@ -79,10 +79,21 @@
   <footer>
     <div class="container">
       <div class="logo-footer"><img src="../images/logo-dark.webp" alt="Salt Spring Rolfing"></div>
-      <a href="../booking.html" class="btn">Book A Session</a>
-      <p>Our Clinic is located at<br>Unit 5 - 127 Rainbow Road, Salt Spring Island, BC</p>
-      <a href="https://www.facebook.com/profile.php?id=100064133013122" target="_blank" rel="noopener" class="social-link">Facebook</a>
+      <div class="footer-address">
+        <p>Our Clinic is located at<br>Unit 5 - 127 Rainbow Road, Salt Spring Island, BC</p>
+      </div>
+      <div class="footer-cta">
+        <a href="../booking.html" class="btn">Book A Session</a>
+      </div>
     </div>
+    <nav class="footer-nav">
+      <a href="../about-sessions.html">About Sessions</a>
+      <a href="../about-selena.html">About Selena</a>
+      <a href="../faqs.html">FAQs</a>
+      <a href="../blog.html">Blog</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../booking.html">Book A Session</a>
+    </nav>
   </footer>
 
   <script>
@@ -95,6 +106,13 @@
     checkScroll();
     document.querySelector('.nav-toggle').addEventListener('click', function() {
       document.querySelector('nav').classList.toggle('active');
+      document.querySelector('header').classList.toggle('nav-open');
+    });
+    document.querySelectorAll('nav a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        document.querySelector('nav').classList.remove('active');
+        document.querySelector('header').classList.remove('nav-open');
+      });
     });
   </script>
 </body>
