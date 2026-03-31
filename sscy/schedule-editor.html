@@ -975,29 +975,34 @@ document.addEventListener('mousedown', function(e) {
         return;
     }
 
-    // Click empty slot: stamp new event
-    if (dayCol && activeVenueId) {
-        e.preventDefault();
-        var rect = dayCol.getBoundingClientRect();
-        var y = e.clientY - rect.top;
-        var slot = Math.floor(y / SH);
-        var ns = (state.config.endHour - state.config.startHour) * 2;
-        if (slot < 0 || slot >= ns) return;
+    // Single click on empty slot: just close popover (no auto-stamp)
+});
 
-        var newEvt = {
-            id: 'e' + Date.now(),
-            dayIndex: parseInt(dayCol.dataset.day),
-            startSlot: slot,
-            spanSlots: 2,
-            venueId: activeVenueId,
-            title: 'New Event'
-        };
-        pushUndo();
-        state.events.push(newEvt);
-        selectedEvtId = newEvt.id;
-        render();
-        showPopover(newEvt.id, e.clientX, e.clientY);
-    }
+// Double-click to add new event (works on empty slots or slots with existing events)
+document.addEventListener('dblclick', function(e) {
+    var dayCol = e.target.closest('.day-col');
+    if (!dayCol || !activeVenueId) return;
+    e.preventDefault();
+
+    var rect = dayCol.getBoundingClientRect();
+    var y = e.clientY - rect.top;
+    var slot = Math.floor(y / SH);
+    var ns = (state.config.endHour - state.config.startHour) * 2;
+    if (slot < 0 || slot >= ns) return;
+
+    var newEvt = {
+        id: 'e' + Date.now(),
+        dayIndex: parseInt(dayCol.dataset.day),
+        startSlot: slot,
+        spanSlots: 2,
+        venueId: activeVenueId,
+        title: 'New Event'
+    };
+    pushUndo();
+    state.events.push(newEvt);
+    selectedEvtId = newEvt.id;
+    render();
+    showPopover(newEvt.id, e.clientX, e.clientY);
 });
 
 document.addEventListener('mousemove', function(e) {
