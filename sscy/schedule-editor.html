@@ -508,21 +508,34 @@ function assignColumns(dayEvents){
         item.col = c;
     });
 
-    // For each event, totalCols = max concurrent events at any single slot it occupies
-    // This means a tall event gets the WIDEST it can be at each slot level
+    // Build per-slot concurrency map and column positions
+    // For each event, compute segments where its width/position changes
+    var maxSlot = 0;
+    evts.forEach(function(item){ var end = item.evt.startSlot + item.evt.spanSlots; if(end > maxSlot) maxSlot = end; });
+
+    // For each slot, count how many events are active and record which columns are used
     evts.forEach(function(item){
         var e = item.evt;
         var eEnd = e.startSlot + e.spanSlots;
-        var maxConcurrent = 1;
-        for (var s = e.startSlot; s < eEnd; s++) {
+        item.segments = []; // [{startSlot, spanSlots, col, totalCols}]
+
+        var segStart = e.startSlot;
+        var prevCount = -1;
+        for (var s = e.startSlot; s <= eEnd; s++) {
             var count = 0;
-            evts.forEach(function(other){
-                var o = other.evt;
-                if (s >= o.startSlot && s < o.startSlot + o.spanSlots) count++;
-            });
-            if (count > maxConcurrent) maxConcurrent = count;
+            if (s < eEnd) {
+                evts.forEach(function(other){
+                    var o = other.evt;
+                    if (s >= o.startSlot && s < o.startSlot + o.spanSlots) count++;
+                });
+            }
+            if (count !== prevCount && s > e.startSlot) {
+                // Close previous segment
+                item.segments.push({startSlot: segStart, spanSlots: s - segStart, totalCols: prevCount, col: item.col});
+                segStart = s;
+            }
+            prevCount = count;
         }
-        item.totalCols = maxConcurrent;
     });
 
     return evts;
@@ -593,21 +606,37 @@ function render(){
         laid.forEach(function(item){
             var evt=item.evt, v=state.venues.find(function(x){return x.id===evt.venueId});
             var c=v?v.color:'#999';
-            var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
-            var tc=item.totalCols, col=item.col;
-            var wp=100/tc, lp=col*wp;
             var isSpanned = spanGroups[item._spanKey] && spanGroups[item._spanKey].length > 1;
             var cls=brightness(c)>160?'dk':'lt';
             var tl=(evt.title||'').replace(/\n/g,'<br>');
 
-            h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
-            if(!isSpanned){
-                h+='<div class="ev-t">'+tl+'</div>';
-                if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
+            // Render segments (variable width per slot region)
+            if (item.segments && item.segments.length > 0) {
+                item.segments.forEach(function(seg, si){
+                    var stop=seg.startSlot*SH, sht=seg.spanSlots*SH;
+                    var swp=100/seg.totalCols, slp=seg.col*swp;
+                    h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+stop+'px;height:'+sht+'px;left:'+slp+'%;width:'+swp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
+                    // Only show text and controls on the first segment
+                    if(si===0){
+                        if(!isSpanned){
+                            h+='<div class="ev-t">'+tl+'</div>';
+                            if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
+                        }
+                        h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
+                    }
+                    // Resize handle on last segment
+                    if(si===item.segments.length-1) h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
+                    h+='</div>';
+                });
+            } else {
+                // Fallback: single block
+                var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
+                h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:0;width:100%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+'">';
+                if(!isSpanned){ h+='<div class="ev-t">'+tl+'</div>'; }
+                h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
+                h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
+                h+='</div>';
             }
-            h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
-            h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
-            h+='</div>';
         });
 
         // Render spanning labels for same-title groups
