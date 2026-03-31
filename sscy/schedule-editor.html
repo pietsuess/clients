@@ -234,6 +234,7 @@
         /* Active user dot */
         .user-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:3px; }
         .user-dot.green { background:#4caf50; }
+        .user-dot.amber { background:#F9B233; }
 
         /* Name prompt overlay */
         .name-overlay {
@@ -1615,8 +1616,25 @@ function publishSchedule() {
     publishing = true;
     document.getElementById('publishBtn').textContent = 'Publishing...';
 
-    // Check who published last
-    syncRead().then(function(remote) {
+    // Check for active editors and recent publishes
+    fetch(SYNC_URL + '?heartbeat=' + encodeURIComponent(name))
+    .then(function(r) { return r.json(); })
+    .then(function(active) {
+        var others = [];
+        for (var n in active) {
+            if (n === name) continue;
+            var age = Date.now() - new Date(active[n]).getTime();
+            if (age < 180000) others.push(n);
+        }
+        if (others.length) {
+            if (!confirm(others.join(' and ') + ' ' + (others.length === 1 ? 'is' : 'are') + ' also editing right now.\nPublish anyway?')) {
+                publishing = false;
+                document.getElementById('publishBtn').textContent = 'Publish';
+                return Promise.reject('cancelled');
+            }
+        }
+        return syncRead();
+    }).then(function(remote) {
         if (remote && remote._meta && remote._meta.publishedBy) {
             var age = Date.now() - new Date(remote._meta.publishedAt).getTime();
             if (remote._meta.publishedBy !== name && age < 300000) {
@@ -1688,7 +1706,38 @@ function dismissSync() {
     setTimeout(function(){ syncDismissed = false; }, 300000);
 }
 
+// Heartbeat: ping the server so others know we're editing
+function sendHeartbeat() {
+    var name = getUserName();
+    if (!name || !SYNC_URL) return;
+    fetch(SYNC_URL + '?heartbeat=' + encodeURIComponent(name))
+        .then(function(r) { return r.json(); })
+        .then(function(active) { renderActiveUsers(active); })
+        .catch(function(){});
+}
+
 // User status display
+function renderActiveUsers(active) {
+    var el = document.getElementById('userStatus');
+    var name = getUserName();
+    if (!name) { el.innerHTML = ''; return; }
+    var h = '<span class="user-dot green"></span><span class="status-inline" style="color:rgba(255,255,255,0.7);font-weight:600">' + name + '</span>';
+
+    if (active) {
+        var others = [];
+        for (var n in active) {
+            if (n === name) continue;
+            var age = Date.now() - new Date(active[n]).getTime();
+            if (age < 180000) others.push(n);
+        }
+        if (others.length) {
+            h += '<span class="user-dot amber" style="margin-left:8px"></span>';
+            h += '<span class="status-inline" style="color:#F9B233;font-weight:600">' + others.join(', ') + ' also editing</span>';
+        }
+    }
+    el.innerHTML = h;
+}
+
 function updateUserStatus() {
     var el = document.getElementById('userStatus');
     var name = getUserName();
@@ -1801,6 +1850,8 @@ promptUserName();
 checkForUpdates();
 setInterval(checkForUpdates, 60000);
 updateUserStatus();
+sendHeartbeat();
+setInterval(sendHeartbeat, 30000);
 </script>
 </body>
 </html>
