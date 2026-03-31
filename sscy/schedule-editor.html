@@ -919,7 +919,16 @@ function addVenue(){
 
 function deleteVenue(idx){
     var v=state.venues[idx];
-    if(!confirm('Delete venue "'+v.name+'"? Events using it will lose their color.')) return;
+    var count=state.events.filter(function(e){return e.venueId===v.id}).length;
+    var msg='Delete venue "'+v.name+'"?';
+    if(count) msg+='\n\n'+count+' event(s) use this venue. They will be reassigned to "'+state.venues[0].name+'".';
+    if(!confirm(msg)) return;
+    pushUndo();
+    // Reassign orphaned events to first venue
+    if(count && state.venues.length > 1){
+        var newId = state.venues[idx===0?1:0].id;
+        state.events.forEach(function(e){ if(e.venueId===v.id) e.venueId=newId; });
+    }
     state.venues.splice(idx,1);
     render(); renderSwatches(); renderSettings();
 }
