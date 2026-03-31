@@ -280,6 +280,7 @@
     </div>
     <div class="tb-group">
         <button class="tb-btn primary" onclick="publishSchedule()" id="publishBtn">Publish</button>
+        <button class="tb-btn" onclick="getLatest()">Get Latest</button>
     </div>
     <div class="tb-group">
         <button class="tb-btn" onclick="toggleSettings()">Settings</button>
@@ -1558,6 +1559,12 @@ function checkForUpdates() {
             document.getElementById('syncBanner').classList.add('show');
         }
     }).catch(function(){});
+}
+
+function getLatest() {
+    if (!SYNC_URL) { alert('Sync not set up yet. Click Publish first to configure.'); return; }
+    if (!confirm('Replace your local schedule with the latest published version?')) return;
+    loadPublished();
 }
 
 function loadPublished() {
