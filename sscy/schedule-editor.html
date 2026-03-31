@@ -269,22 +269,22 @@
 <body>
 <div class="toolbar">
     <div class="tb-group">
-        <button class="tb-btn" onclick="undo()">Undo</button>
-        <button class="tb-btn" onclick="exportJSON()">Save JSON</button>
-        <button class="tb-btn" onclick="document.getElementById('impF').click()">Load JSON</button>
+        <button class="tb-btn" onclick="undo()" data-tip="Undo your last change (Ctrl+Z)">Undo</button>
+        <button class="tb-btn" onclick="exportJSON()" data-tip="Download the schedule as a JSON file for backup">Save JSON</button>
+        <button class="tb-btn" onclick="document.getElementById('impF').click()" data-tip="Load a previously saved JSON file">Load JSON</button>
         <input type="file" id="impF" accept=".json" style="display:none" onchange="importJSON(event)">
-        <button class="tb-btn" onclick="resetToDefault()" style="color:#f88">Reset</button>
+        <button class="tb-btn" onclick="resetToDefault()" style="color:#f88" data-tip="Discard all changes and restore the default schedule">Reset</button>
     </div>
     <div class="tb-group">
-        <button class="tb-btn primary" onclick="exportPDF()">Export PDF</button>
+        <button class="tb-btn primary" onclick="exportPDF()" data-tip="Export a vector PDF for printing at any size">Export PDF</button>
     </div>
     <div class="tb-group">
-        <button class="tb-btn primary" onclick="publishSchedule()" id="publishBtn">Publish</button>
-        <button class="tb-btn" onclick="getLatest()">Get Latest</button>
+        <button class="tb-btn primary" onclick="publishSchedule()" id="publishBtn" data-tip="Share your schedule with the team">Publish</button>
+        <button class="tb-btn" onclick="getLatest()" data-tip="Load the latest published version">Get Latest</button>
     </div>
     <div class="tb-group">
-        <button class="tb-btn" onclick="toggleSettings()">Settings</button>
-        <button class="tb-btn" onclick="showHelp()">Help</button>
+        <button class="tb-btn" onclick="toggleSettings()" data-tip="Adjust colours, fonts, and venues">Settings</button>
+        <button class="tb-btn" onclick="showHelp()" data-tip="How to use this editor">Help</button>
     </div>
     <div class="tb-group" style="margin-left:auto">
         <span id="userStatus" style="display:flex;align-items:center;gap:2px"></span>
@@ -1610,7 +1610,8 @@ document.addEventListener('keydown', function(e) {
 // ============================================================
 // To set up: deploy schedule-sync.gs as a Google Apps Script web app,
 // then paste the URL here. See schedule-sync.gs for instructions.
-var SYNC_URL = localStorage.getItem('acyr-sync-url') || 'https://script.google.com/macros/s/AKfycbz_oduzHN6lUy7C7bU2NTeEDd4ZxUJTC9o35ZXf3SN2T6aqmWnlOrLqdW5T_YE_YfcziQ/exec';
+var DEMO_MODE = new URLSearchParams(window.location.search).has('demo');
+var SYNC_URL = DEMO_MODE ? null : (localStorage.getItem('acyr-sync-url') || 'https://script.google.com/macros/s/AKfycbz_oduzHN6lUy7C7bU2NTeEDd4ZxUJTC9o35ZXf3SN2T6aqmWnlOrLqdW5T_YE_YfcziQ/exec');
 
 // User identity
 function getUserName() { return localStorage.getItem('acyr-user-name') || ''; }
@@ -1693,6 +1694,7 @@ function syncWrite(data) {
 // Publish schedule
 var publishing = false;
 function publishSchedule() {
+    if (DEMO_MODE) { document.getElementById('stxt').textContent = 'Demo mode - changes saved locally only'; return; }
     if (publishing) return;
     var name = getUserName();
     if (!name) { promptUserName(); return; }
