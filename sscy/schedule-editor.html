@@ -75,10 +75,9 @@
         /* Grid body: legend + [gutter + day-col] * N + gutter */
         .grid-body { display: flex; }
 
-        /* Venue legend - items stretch to fill full grid height */
-        .legend { width: var(--legend-w); background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; }
-        .leg-item { display:flex; align-items:center; gap:6px; padding:2px 8px; font-weight:700; flex:1; }
-        .leg-color { width:10px; border-radius:2px; flex-shrink:0; align-self:stretch; margin:4px 0; }
+        /* Venue legend - color fills behind name, white text */
+        .legend { width: var(--legend-w); border-right:1px solid #ddd; display:flex; flex-direction:column; }
+        .leg-item { display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 8px; font-weight:700; flex:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.15); }
 
         /* Time gutter - ALL gutters use the same yellow from the PDF */
         .gutter {
@@ -466,7 +465,7 @@ function render(){
 
     // Legend
     h+='<div class="legend">';
-    state.venues.forEach(function(v){ h+='<div class="leg-item" style="font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'"><div class="leg-color" style="background:'+v.color+'"></div><span>'+v.name+'</span></div>'; });
+    state.venues.forEach(function(v){ h+='<div class="leg-item" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'">'+v.name+'</div>'; });
     h+='</div>';
 
     // First gutter (TIME)
