@@ -14,11 +14,11 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <!-- Heart mask: white heart = visible, black everywhere else = hidden -->
-    <mask id="heart-mask" maskUnits="userSpaceOnUse">
-      <rect width="1920" height="1080" fill="black"/>
+    <!-- Inverse heart mask on top layer: heart cut out, everything else visible -->
+    <mask id="heart-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
+      <rect width="1920" height="1080" fill="white"/>
       <g transform="translate(568.005, 201.74)">
-        <path fill="white" d="M427.71,132.7l-35.72,35.72-35.72-35.72c-57.82-57.82-151.56-57.82-209.38,0h0c-57.82,57.82-57.82,151.56,0,209.38l35.72,35.72,209.38,209.38,209.38-209.38,35.72-35.72c57.82-57.82,57.82-151.56,0-209.38h0c-57.82-57.82-151.56-57.82-209.38,0Z"/>
+        <path fill="black" d="M427.71,132.7l-35.72,35.72-35.72-35.72c-57.82-57.82-151.56-57.82-209.38,0h0c-57.82,57.82-57.82,151.56,0,209.38l35.72,35.72,209.38,209.38,209.38-209.38,35.72-35.72c57.82-57.82,57.82-151.56,0-209.38h0c-57.82-57.82-151.56-57.82-209.38,0Z"/>
       </g>
     </mask>
 
@@ -156,13 +156,13 @@
     </g>
   </defs>
 
-  <!-- Bottom layer: pink lines, only visible through the heart mask -->
-  <g id="bottom-layer" fill="#ef91fb" mask="url(#heart-mask)">
+  <!-- Bottom layer: black lines, no mask, visible through the heart cutout -->
+  <g id="bottom-layer" fill="#000">
     <use href="#lines"/>
   </g>
 
-  <!-- Top layer: black lines, visible everywhere -->
-  <g id="top-layer" fill="#000">
+  <!-- Top layer: black lines, heart cut out (fixed mask doesn't move with layer) -->
+  <g id="top-layer" fill="#000" mask="url(#heart-cutout)">
     <use href="#lines"/>
   </g>
 </svg>
