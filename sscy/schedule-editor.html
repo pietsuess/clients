@@ -121,21 +121,22 @@
         .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
         .ev.dk .ev-t, .ev.dk .ev-s { color:#333; text-shadow:none; }
 
-        /* Reception - matching PDF: outlined circle, inline text, white bg */
+        /* Reception - inset white box with thick outlined circle */
         .rec-block {
-            position:absolute; left:0; right:0; z-index:2;
-            display:flex; align-items:center; gap:6px; padding:3px 8px;
-            background:#fff;
+            position:absolute; z-index:2;
+            display:flex; align-items:center; gap:8px; padding:5px 10px;
+            background:#fff; border:1px solid #ccc;
+            left:8%; right:8%;
         }
         .rec-circle {
-            width:22px; height:22px; border-radius:50%;
-            border:2.5px solid #7B2D5F;
+            width:28px; height:28px; border-radius:50%;
+            border:3px solid #7B2D5F;
             display:flex; align-items:center; justify-content:center;
-            font-size:0.65rem; font-weight:700; color:#7B2D5F; flex-shrink:0;
+            font-size:0.75rem; font-weight:700; color:#7B2D5F; flex-shrink:0;
             background:#fff;
         }
         .rec-text {
-            font-weight:700; font-size:0.65rem; color:#333;
+            font-weight:700; font-size:0.72rem; color:#333; line-height:1.3;
         }
 
         /* Status */
@@ -522,9 +523,9 @@ function render(){
         // Reception block at the bottom of each day column
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
         if(rec){
-            var recSlot = ns - 2; // 2nd to last slot (10:00 PM area)
+            var recSlot = ns - 3; // 9:00-9:30 PM area matching PDF
             var recTop = recSlot * SH;
-            var recH = SH * 2;
+            var recH = SH * 3;
             h+='<div class="rec-block" style="top:'+recTop+'px;height:'+recH+'px">';
             h+='<div class="rec-circle">R</div>';
             h+='<div class="rec-text">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
