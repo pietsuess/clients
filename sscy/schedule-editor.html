@@ -121,21 +121,20 @@
         .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
         .ev.dk .ev-t, .ev.dk .ev-s { color:#333; text-shadow:none; }
 
-        /* Reception - matching PDF: yellow bg, teal circle, bold text */
-        .recep { display:flex; min-height:36px; align-items:stretch; }
-        .rec-leg { width:var(--legend-w); }
-        .rec-gut { width:var(--gutter-w); }
-        .rec-day {
-            flex:1; display:flex; align-items:center; gap:8px; padding:5px 10px;
-            font-size:0.65rem; border-right:1px solid rgba(0,0,0,0.06);
+        /* Reception - rendered inside day columns at the bottom slot */
+        .rec-block {
+            position:absolute; left:0; right:0; z-index:2;
+            display:flex; align-items:center; gap:6px; padding:2px 6px;
+            font-size:0.6rem;
         }
-        .rec-r {
-            width:24px; height:24px; border-radius:50%; display:flex;
-            align-items:center; justify-content:center; font-size:0.65rem;
+        .rec-circle {
+            width:20px; height:20px; border-radius:50%; display:flex;
+            align-items:center; justify-content:center; font-size:0.55rem;
             font-weight:700; color:#fff; flex-shrink:0;
         }
-        .rec-label { font-weight:700; font-size:0.62rem; }
-        .rec-hours { font-size:0.58rem; line-height:1.3; opacity:0.8; }
+        .rec-info { display:flex; flex-direction:column; }
+        .rec-title { font-weight:700; font-size:0.58rem; color:#333; }
+        .rec-hours { font-size:0.52rem; color:#555; line-height:1.25; }
 
         /* Status */
         .status { position:fixed; bottom:0; left:0; right:0; height:22px; background:#2c2c2c; color:rgba(255,255,255,0.4); font-size:0.55rem; display:flex; align-items:center; padding:0 12px; gap:12px; z-index:1000; }
@@ -517,6 +516,22 @@ function render(){
             h+='<div class="ev-t">'+tl+'</div>';
             h+='</div>';
         });
+
+        // Reception block at the bottom of each day column
+        var rec=cfg.reception.find(function(r){return r.dayIndex===d});
+        if(rec){
+            var recSlot = ns - 2; // 2nd to last slot (10:00 PM area)
+            var recTop = recSlot * SH;
+            var recH = SH * 2;
+            h+='<div class="rec-block" style="top:'+recTop+'px;height:'+recH+'px;background:'+sty.receptionBg+'">';
+            h+='<div class="rec-circle" style="background:'+sty.receptionCircle+'">R</div>';
+            h+='<div class="rec-info">';
+            h+='<div class="rec-title">Reception</div>';
+            h+='<div class="rec-hours">'+rec.text.replace(/\n/g,'<br>')+'</div>';
+            h+='</div>';
+            h+='</div>';
+        }
+
         h+='</div>';
 
         // Gutter after day (between days or final)
@@ -544,22 +559,7 @@ function render(){
 
     h+='</div>'; // end grid-body
 
-    // Reception
-    var sty=state.styles;
-    h+='<div class="recep" style="background:'+sty.receptionBg+'">';
-    h+='<div class="rec-leg" style="background:'+sty.receptionBg+'"></div>';
-    h+='<div class="rec-gut" style="background:'+sty.gutterColor+'"></div>';
-    for(var d=0;d<nd;d++){
-        var rec=cfg.reception.find(function(r){return r.dayIndex===d});
-        h+='<div class="rec-day">';
-        h+='<div class="rec-r" style="background:'+sty.receptionCircle+'">R</div>';
-        h+='<div class="rec-label">Reception</div>';
-        h+='<div class="rec-hours">'+(rec?rec.text.replace(/\n/g,'<br>'):'')+'</div>';
-        h+='</div>';
-        if(d<nd-1) h+='<div class="rec-gut" style="background:'+sty.gutterColor+'"></div>';
-    }
-    h+='<div class="rec-gut"></div>';
-    h+='</div>';
+    // Reception is now rendered inside day columns (see below)
 
     el.innerHTML=h;
     saveState();
