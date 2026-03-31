@@ -837,6 +837,7 @@ body.admin-mode{padding-top:48px}
     <div class="btns">
       <button onclick="closeTokenSetup()" style="padding:10px 24px;border:1px solid rgba(245,240,230,0.15);background:transparent;color:var(--cream);font-family:'Space Grotesk',sans-serif;cursor:pointer;border-radius:0">Cancel</button>
       <button onclick="saveToken()" style="padding:10px 24px;background:var(--pink);border:1px solid var(--pink);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;cursor:pointer;border-radius:0">Connect</button>
+      <button onclick="DEMO_MODE=true;closeTokenSetup();toast('Demo mode - edits saved locally only')" style="padding:10px 24px;border:1px solid rgba(245,240,230,0.15);background:transparent;color:rgba(245,240,230,0.5);font-family:'Space Grotesk',sans-serif;cursor:pointer;border-radius:0;font-size:0.8rem">Try Demo</button>
     </div>
   </div>
 </div>
@@ -863,6 +864,7 @@ body.admin-mode{padding-top:48px}
    DATA
    ======================================== */
 var DATA = { shows: [], media: [], settings: {}, shop: [], pages: {} };
+var DEMO_MODE = new URLSearchParams(window.location.search).has('demo');
 var dirty = false;
 var editingShowIdx = -1;
 var editorPerformers = [];
@@ -1612,6 +1614,7 @@ function discardDraft() {
 async function publish() {
   collectSettings();
   collectInlineEdits();
+  if (DEMO_MODE) { toast('Demo mode - changes saved locally only'); saveDraft(); return; }
   var token = localStorage.getItem('upvs-gh-token');
   if (!token) { document.getElementById('tokenSetup').classList.add('active'); return; }
 

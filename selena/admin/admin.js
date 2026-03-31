@@ -10,6 +10,7 @@
   var API = 'https://api.github.com';
 
   // ===== STATE =====
+  var DEMO_MODE = new URLSearchParams(window.location.search).has('demo');
   var token = '';
   var shas = {}; // { filename: sha }
   var blogPosts = [];
@@ -84,6 +85,7 @@
   function publishAll() {
     var files = Object.keys(pendingChanges);
     if (!files.length) { toast('Nothing to publish'); return; }
+    if (DEMO_MODE) { toast('Demo mode - changes not saved to server'); pendingChanges = {}; return; }
 
     $('publish-btn').disabled = true;
     $('publish-btn').textContent = 'Publishing...';
@@ -292,11 +294,34 @@
   }
 
   function initAuth() {
+    if (DEMO_MODE) {
+      $('login-screen').style.display = 'none';
+      $('app').style.display = 'block';
+      $('user-name').textContent = 'Demo';
+      loadAllContentDemo();
+      return;
+    }
     var setupToken = checkSetupToken();
     token = setupToken || localStorage.getItem('selena-cms-token') || '';
     if (token) {
       tryLogin(token);
     }
+  }
+
+  function loadAllContentDemo() {
+    var base = '../content/';
+    Promise.all([
+      fetch(base + 'blog-posts.json').then(function(r){return r.json()}).catch(function(){return []}),
+      fetch(base + 'testimonials.json').then(function(r){return r.json()}).catch(function(){return []}),
+      fetch(base + 'faqs.json').then(function(r){return r.json()}).catch(function(){return []}),
+      fetch(base + 'site-settings.json').then(function(r){return r.json()}).catch(function(){return {}}),
+      fetch(base + 'pages.json').then(function(r){return r.json()}).catch(function(){return {}})
+    ]).then(function(results) {
+      blogPosts = results[0]; testimonials = results[1]; faqs = results[2];
+      settings = results[3]; pages = results[4];
+      renderBlogList(); renderTestimonials(); renderFAQs(); renderPages();
+      if (typeof initVisualEditor === 'function') initVisualEditor();
+    });
   }
 
   function tryLogin(t) {
