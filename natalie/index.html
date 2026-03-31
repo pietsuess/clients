@@ -7,96 +7,185 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #fff; }
-
-  svg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
+  svg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
 
-<svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Heart mask: white heart = visible, black everywhere else = hidden -->
+    <mask id="heart-mask" maskUnits="userSpaceOnUse">
+      <rect width="1920" height="1080" fill="black"/>
+      <g transform="translate(568.005, 201.74)">
+        <path fill="white" d="M427.71,132.7l-35.72,35.72-35.72-35.72c-57.82-57.82-151.56-57.82-209.38,0h0c-57.82,57.82-57.82,151.56,0,209.38l35.72,35.72,209.38,209.38,209.38-209.38,35.72-35.72c57.82-57.82,57.82-151.56,0-209.38h0c-57.82-57.82-151.56-57.82-209.38,0Z"/>
+      </g>
+    </mask>
 
-  <!-- Solid heart shape (always in place, revealed by slats) -->
-  <path id="heart" fill="#ef91fb" d="
-    M735.48,399.48
-    C735.48,380 748,355 766.32,350.92
-    C780,340 790,333 797.16,330.02
-    C810,323 820,321 828,320.46
-    C840,319 850,319 858.84,319.06
-    C870,320 880,322 889.67,324.77
-    C900,329 910,333 920.51,337.47
-    C935,345 945,353 951.35,357.55
-    C960,363 970,368 982.19,371.75
-    C990,360 1000,352 1013.03,347.32
-    C1025,338 1035,333 1043.86,330.76
-    C1055,325 1065,322 1074.7,321.3
-    C1085,319 1095,319 1105.54,318.82
-    C1118,320 1128,322 1136.38,323.79
-    C1148,328 1158,333 1167.22,337.94
-    C1178,347 1190,358 1198.05,367.13
-    C1208,380 1214,393 1213.83,397.14
-    L1213.83,482.18
-    C1212,490 1205,510 1198.05,517.2
-    C1190,530 1180,545 1167.22,558.04
-    C1155,570 1145,580 1136.38,589.09
-    C1125,600 1115,612 1105.54,619.93
-    C1093,632 1083,643 1074.7,650.77
-    C1063,663 1053,674 1043.86,681.61
-    C1032,694 1022,705 1013.03,712.44
-    C1002,725 992,738 982.19,743.28
-    C972,735 962,725 951.35,726.66
-    C940,715 930,705 920.51,695.82
-    C910,683 900,672 889.67,664.98
-    C878,652 868,641 858.84,634.16
-    C848,621 838,610 828,603.32
-    C817,590 807,578 797.16,572.48
-    C785,558 775,545 766.32,538.42
-    C755,525 745,510 735.48,479.51
-    Z"/>
+    <!-- Shared line pattern (from squeen-bg-lines-03.svg, 4220.58 wide) -->
+    <g id="lines">
+      <rect x="0" width="15.78" height="1089.08"/>
+      <rect x="15.78" width="15.78" height="1089.08"/>
+      <rect x="30.84" width="15.78" height="1089.08"/>
+      <rect x="66.5" width="15.78" height="1089.08"/>
+      <rect x="97.33" width="15.78" height="1089.08"/>
+      <rect x="133.65" width="15.78" height="1089.08"/>
+      <rect x="164.49" width="15.78" height="1089.08"/>
+      <rect x="200.15" width="15.78" height="1089.08"/>
+      <rect x="230.98" width="15.78" height="1089.08"/>
+      <rect x="266.91" width="15.78" height="1089.08"/>
+      <rect x="297.75" width="15.78" height="1089.08"/>
+      <rect x="333.4" width="15.78" height="1089.08"/>
+      <rect x="364.24" width="15.78" height="1089.08"/>
+      <rect x="400.56" width="15.78" height="1089.08"/>
+      <rect x="431.4" width="15.78" height="1089.08"/>
+      <rect x="464.5" width="15.78" height="1089.08"/>
+      <rect x="497.6" width="15.78" height="1089.08"/>
+      <rect x="530.7" width="15.78" height="1089.08"/>
+      <rect x="563.8" width="15.78" height="1089.08"/>
+      <rect x="596.9" width="15.78" height="1089.08"/>
+      <rect x="630" width="15.78" height="1089.08"/>
+      <rect x="663.1" width="15.78" height="1089.08"/>
+      <rect x="696.2" width="15.78" height="1089.08"/>
+      <rect x="729.3" width="15.78" height="1089.08"/>
+      <rect x="762.4" width="15.78" height="1089.08"/>
+      <rect x="795.5" width="15.78" height="1089.08"/>
+      <rect x="828.6" width="15.78" height="1089.08"/>
+      <rect x="861.7" width="15.78" height="1089.08"/>
+      <rect x="894.8" width="15.78" height="1089.08"/>
+      <rect x="927.9" width="15.78" height="1089.08"/>
+      <rect x="961" width="15.78" height="1089.08"/>
+      <rect x="994.1" width="15.78" height="1089.08"/>
+      <rect x="1027.2" width="15.78" height="1089.08"/>
+      <rect x="1060.3" width="15.78" height="1089.08"/>
+      <rect x="1093.4" width="15.78" height="1089.08"/>
+      <rect x="1126.5" width="15.78" height="1089.08"/>
+      <rect x="1159.6" width="15.78" height="1089.08"/>
+      <rect x="1192.7" width="15.78" height="1089.08"/>
+      <rect x="1225.8" width="15.78" height="1089.08"/>
+      <rect x="1258.9" width="15.78" height="1089.08"/>
+      <rect x="1292" width="15.78" height="1089.08"/>
+      <rect x="1325.1" width="15.78" height="1089.08"/>
+      <rect x="1358.2" width="15.78" height="1089.08"/>
+      <rect x="1391.3" width="15.78" height="1089.08"/>
+      <rect x="1424.4" width="15.78" height="1089.08"/>
+      <rect x="1457.5" width="15.78" height="1089.08"/>
+      <rect x="1490.6" width="15.78" height="1089.08"/>
+      <rect x="1523.7" width="15.78" height="1089.08"/>
+      <rect x="1556.8" width="15.78" height="1089.08"/>
+      <rect x="1589.9" width="15.78" height="1089.08"/>
+      <rect x="1623" width="15.78" height="1089.08"/>
+      <rect x="1656.1" width="15.78" height="1089.08"/>
+      <rect x="1689.2" width="15.78" height="1089.08"/>
+      <rect x="1722.3" width="15.78" height="1089.08"/>
+      <rect x="1755.4" width="15.78" height="1089.08"/>
+      <rect x="1788.5" width="15.78" height="1089.08"/>
+      <rect x="1821.6" width="15.78" height="1089.08"/>
+      <rect x="1854.7" width="15.78" height="1089.08"/>
+      <rect x="1887.8" width="15.78" height="1089.08"/>
+      <rect x="1920.9" width="15.78" height="1089.08"/>
+      <rect x="1954" width="15.78" height="1089.08"/>
+      <rect x="1987.1" width="15.78" height="1089.08"/>
+      <rect x="2020.2" width="15.78" height="1089.08"/>
+      <rect x="2053.3" width="15.78" height="1089.08"/>
+      <rect x="2086.4" width="15.78" height="1089.08"/>
+      <rect x="2119.5" width="15.78" height="1089.08"/>
+      <rect x="2152.6" width="15.78" height="1089.08"/>
+      <rect x="2185.7" width="15.78" height="1089.08"/>
+      <rect x="2218.8" width="15.78" height="1089.08"/>
+      <rect x="2251.9" width="15.78" height="1089.08"/>
+      <rect x="2285" width="15.78" height="1089.08"/>
+      <rect x="2318.1" width="15.78" height="1089.08"/>
+      <rect x="2351.2" width="15.78" height="1089.08"/>
+      <rect x="2384.3" width="15.78" height="1089.08"/>
+      <rect x="2417.4" width="15.78" height="1089.08"/>
+      <rect x="2450.5" width="15.78" height="1089.08"/>
+      <rect x="2483.6" width="15.78" height="1089.08"/>
+      <rect x="2516.7" width="15.78" height="1089.08"/>
+      <rect x="2549.8" width="15.78" height="1089.08"/>
+      <rect x="2582.9" width="15.78" height="1089.08"/>
+      <rect x="2616" width="15.78" height="1089.08"/>
+      <rect x="2649.1" width="15.78" height="1089.08"/>
+      <rect x="2682.2" width="15.78" height="1089.08"/>
+      <rect x="2715.3" width="15.78" height="1089.08"/>
+      <rect x="2748.4" width="15.78" height="1089.08"/>
+      <rect x="2781.5" width="15.78" height="1089.08"/>
+      <rect x="2814.6" width="15.78" height="1089.08"/>
+      <rect x="2847.7" width="15.78" height="1089.08"/>
+      <rect x="2880.8" width="15.78" height="1089.08"/>
+      <rect x="2913.9" width="15.78" height="1089.08"/>
+      <rect x="2947" width="15.78" height="1089.08"/>
+      <rect x="2980.1" width="15.78" height="1089.08"/>
+      <rect x="3013.2" width="15.78" height="1089.08"/>
+      <rect x="3046.3" width="15.78" height="1089.08"/>
+      <rect x="3079.4" width="15.78" height="1089.08"/>
+      <rect x="3112.5" width="15.78" height="1089.08"/>
+      <rect x="3145.6" width="15.78" height="1089.08"/>
+      <rect x="3178.7" width="15.78" height="1089.08"/>
+      <rect x="3211.8" width="15.78" height="1089.08"/>
+      <rect x="3244.9" width="15.78" height="1089.08"/>
+      <rect x="3278" width="15.78" height="1089.08"/>
+      <rect x="3311.1" width="15.78" height="1089.08"/>
+      <rect x="3344.2" width="15.78" height="1089.08"/>
+      <rect x="3377.3" width="15.78" height="1089.08"/>
+      <rect x="3410.4" width="15.78" height="1089.08"/>
+      <rect x="3443.5" width="15.78" height="1089.08"/>
+      <rect x="3476.6" width="15.78" height="1089.08"/>
+      <rect x="3509.7" width="15.78" height="1089.08"/>
+      <rect x="3542.8" width="15.78" height="1089.08"/>
+      <rect x="3575.9" width="15.78" height="1089.08"/>
+      <rect x="3609" width="15.78" height="1089.08"/>
+      <rect x="3642.1" width="15.78" height="1089.08"/>
+      <rect x="3675.2" width="15.78" height="1089.08"/>
+      <rect x="3708.3" width="15.78" height="1089.08"/>
+      <rect x="3741.4" width="15.78" height="1089.08"/>
+      <rect x="3774.5" width="15.78" height="1089.08"/>
+      <rect x="3807.6" width="15.78" height="1089.08"/>
+      <rect x="3840.7" width="15.78" height="1089.08"/>
+      <rect x="3873.8" width="15.78" height="1089.08"/>
+      <rect x="3906.9" width="15.78" height="1089.08"/>
+      <rect x="3940" width="15.78" height="1089.08"/>
+      <rect x="3973.1" width="15.78" height="1089.08"/>
+      <rect x="4006.2" width="15.78" height="1089.08"/>
+      <rect x="4039.3" width="15.78" height="1089.08"/>
+      <rect x="4072.4" width="15.78" height="1089.08"/>
+      <rect x="4105.5" width="15.78" height="1089.08"/>
+      <rect x="4138.6" width="15.78" height="1089.08"/>
+      <rect x="4171.7" width="15.78" height="1089.08"/>
+      <rect x="4204.8" width="15.78" height="1089.08"/>
+    </g>
+  </defs>
 
-  <!-- Black slats (cover layer) -->
-  <g id="slats"></g>
+  <!-- Bottom layer: pink lines, only visible through the heart mask -->
+  <g id="bottom-layer" fill="#ef91fb" mask="url(#heart-mask)">
+    <use href="#lines"/>
+  </g>
 
+  <!-- Top layer: black lines, visible everywhere -->
+  <g id="top-layer" fill="#000">
+    <use href="#lines"/>
+  </g>
 </svg>
 
 <script>
-  const svgNS = 'http://www.w3.org/2000/svg';
-  const slatsGroup = document.getElementById('slats');
+  const topLayer = document.getElementById('top-layer');
+  const bottomLayer = document.getElementById('bottom-layer');
 
-  const numCells = 100;
-  const cellWidth = 1920 / numCells;
-  const extra = 10;
-  const totalSlats = numCells + extra * 2;
-  const slats = [];
-
-  for (let i = 0; i < totalSlats; i++) {
-    const rect = document.createElementNS(svgNS, 'rect');
-    rect.setAttribute('y', '-50');
-    rect.setAttribute('height', '1180');
-    rect.setAttribute('fill', '#000');
-    slatsGroup.appendChild(rect);
-    slats.push(rect);
-  }
+  // Lines pattern is 4220.58 wide, viewport is 1920
+  // Extra space: 4220.58 - 1920 = 2300.58
+  // Both start centered. Top moves left, bottom moves right.
+  const maxTravel = (4220.58 - 1920) / 2; // ~1150.29
 
   let progress = 0;
-  const speed = 0.002;
+  const speed = 0.0015;
 
   function render() {
-    const slatWidth = cellWidth * (1 - progress * 0.62);
-
-    for (let i = 0; i < totalSlats; i++) {
-      const cellIndex = i - extra;
-      const centerX = cellIndex * cellWidth + cellWidth / 2;
-      const x = centerX - slatWidth / 2;
-      slats[i].setAttribute('x', x.toFixed(2));
-      slats[i].setAttribute('width', slatWidth.toFixed(2));
-    }
+    const offset = progress * maxTravel;
+    // Both start centered at -maxTravel
+    const topX = -maxTravel - offset;   // moves further left
+    const bottomX = -maxTravel + offset; // moves right
+    topLayer.setAttribute('transform', `translate(${topX}, 0)`);
+    bottomLayer.setAttribute('transform', `translate(${bottomX}, 0)`);
   }
 
   window.addEventListener('wheel', (e) => {
