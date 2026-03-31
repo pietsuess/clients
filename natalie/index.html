@@ -6,15 +6,15 @@
 <title>Squeen</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; background: #fff; }
-  body { height: 400vh; }
-  .sticky-wrapper { position: sticky; top: 0; width: 100%; height: 100vh; }
-  svg { width: 100%; height: 100%; display: block; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #fff; }
+  svg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+  .spacer { height: 300vh; }
 </style>
 </head>
 <body>
 
-<div class="sticky-wrapper">
+<div class="spacer"></div>
+
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
   <defs>
     <!-- Heart clip: shows only heart area -->
@@ -176,7 +176,6 @@
     </g>
   </g>
 </svg>
-</div>
 
 <script>
   const topLayer = document.getElementById('top-layer');
@@ -187,6 +186,7 @@
 
   let progress = 0;
   const speed = 0.0015;
+  let phase = 'animate'; // 'animate' or 'scroll'
 
   function render() {
     const offset = progress * maxTravel;
@@ -194,18 +194,32 @@
     bottomLayer.setAttribute('transform', `translate(${center + offset}, 0)`);
   }
 
-  // Reserve first 100vh of scroll for the animation, rest scrolls normally
-  const animScrollRange = window.innerHeight;
+  window.addEventListener('wheel', (e) => {
+    if (phase === 'animate') {
+      e.preventDefault();
+      const newProgress = progress + e.deltaY * speed;
+      progress = Math.max(0, Math.min(1, newProgress));
+      render();
 
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    if (y <= animScrollRange) {
-      progress = y / animScrollRange;
+      // Animation complete - unlock scrolling
+      if (progress >= 1 && e.deltaY > 0) {
+        phase = 'scroll';
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
     } else {
-      progress = 1;
+      // In scroll phase, check if we're back at top and scrolling up
+      if (window.scrollY <= 0 && e.deltaY < 0) {
+        e.preventDefault();
+        phase = 'animate';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        window.scrollTo(0, 0);
+        progress = 1 + e.deltaY * speed;
+        render();
+      }
     }
-    render();
-  });
+  }, { passive: false });
 
   render();
 </script>
