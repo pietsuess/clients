@@ -6,15 +6,11 @@
 <title>Squeen</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; overflow-x: hidden; background: #000; }
-  body { height: 400vh; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #fff; }
 
-  .sticky-container {
-    position: sticky;
-    top: 0;
+  .container {
     width: 100%;
     height: 100vh;
-    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -28,19 +24,17 @@
 
   .bg-lines rect {
     fill: #000;
-    transition: fill 0.3s;
   }
 
   .heart-lines path,
   .heart-lines polygon {
     fill: #000;
-    transition: fill 0.3s;
   }
 </style>
 </head>
 <body>
 
-<div class="sticky-container">
+<div class="container">
   <svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
 
     <!-- Background lines (full-height vertical bars) -->
@@ -161,40 +155,35 @@
   const heartPaths = heartLines.querySelectorAll('path, polygon');
 
   const maxShift = 600;
+  let progress = 0;
+  const speed = 0.0015;
 
   function lerp(a, b, t) {
     return a + (b - a) * t;
   }
 
-  function easeInOutCubic(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
+  function render() {
+    const shift = progress * maxShift;
 
-  function update() {
-    const scrollY = window.scrollY;
-    const maxScroll = document.body.scrollHeight - window.innerHeight;
-    const rawProgress = Math.min(scrollY / maxScroll, 1);
-    const progress = easeInOutCubic(rawProgress);
+    bgLines.setAttribute('transform', `translate(${shift}, 0)`);
+    heartLines.setAttribute('transform', `translate(${-shift}, 0)`);
 
-    const bgShift = progress * maxShift;
-    const heartShift = progress * maxShift;
-
-    bgLines.setAttribute('transform', `translate(${bgShift}, 0)`);
-    heartLines.setAttribute('transform', `translate(${-heartShift}, 0)`);
-
-    // Color transition: black -> original pink
-    const colorProgress = Math.min(rawProgress * 2.5, 1);
-    const r = Math.round(lerp(0, 0xef, colorProgress));
-    const g = Math.round(lerp(0, 0x91, colorProgress));
-    const b = Math.round(lerp(0, 0xfb, colorProgress));
+    const r = Math.round(lerp(0, 0xef, progress));
+    const g = Math.round(lerp(0, 0x91, progress));
+    const b = Math.round(lerp(0, 0xfb, progress));
     const color = `rgb(${r},${g},${b})`;
 
     bgRects.forEach(rect => rect.style.fill = color);
     heartPaths.forEach(el => el.style.fill = color);
   }
 
-  window.addEventListener('scroll', update, { passive: true });
-  update();
+  window.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    progress = Math.max(0, Math.min(1, progress + e.deltaY * speed));
+    render();
+  }, { passive: false });
+
+  render();
 </script>
 
 </body>
