@@ -132,8 +132,15 @@
             font-size:0.5rem; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.35);
             border-radius:50%; cursor:pointer; line-height:1; z-index:4;
         }
-        .ev:hover .ev-x { display:flex; }
+        .ev:hover .ev-x, .ev:hover .ev-dup { display:flex; }
         .ev .ev-x:hover { background:rgba(200,0,0,0.7); color:#fff; }
+        .ev .ev-dup {
+            position:absolute; top:16px; right:1px; width:14px; height:14px;
+            display:none; align-items:center; justify-content:center;
+            font-size:0.6rem; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.35);
+            border-radius:50%; cursor:pointer; line-height:1; z-index:4;
+        }
+        .ev .ev-dup:hover { background:rgba(0,100,0,0.7); color:#fff; }
         /* Spanning label that covers multiple color columns */
         .ev-span-label {
             position:absolute; z-index:3; pointer-events:none;
@@ -728,6 +735,7 @@ function render(){
                 if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
             }
             h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
+            h+='<div class="ev-dup" data-dupid="'+evt.id+'" title="Duplicate">+</div>';
             h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
             h+='</div>';
         });
@@ -1145,6 +1153,22 @@ document.addEventListener('mousedown', function(e) {
         pushUndo();
         state.events = state.events.filter(function(x){return x.id!==xBtn.dataset.xid});
         closePopover();
+        render();
+        return;
+    }
+
+    // + duplicate button on event
+    var dupBtn = e.target.closest('.ev-dup[data-dupid]');
+    if (dupBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        var orig = state.events.find(function(x){return x.id===dupBtn.dataset.dupid});
+        if (!orig) return;
+        pushUndo();
+        var copy = JSON.parse(JSON.stringify(orig));
+        copy.id = 'e' + Date.now() + Math.random().toString(36).substr(2,4);
+        copy.colOrder = (orig.colOrder || 0) + 1;
+        state.events.push(copy);
         render();
         return;
     }
