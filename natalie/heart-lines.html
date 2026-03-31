@@ -194,8 +194,13 @@
   // Animation spread over full 150vh for slower feel
   const animEnd = window.innerHeight * 1.5;
 
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
   function onScroll() {
-    const progress = Math.min(window.scrollY / animEnd, 1);
+    const raw = Math.min(window.scrollY / animEnd, 1);
+    const progress = easeInOutCubic(raw);
     const offset = progress * maxTravel;
     topLayer.setAttribute('transform', `translate(${center - offset}, 0)`);
     bottomLayer.setAttribute('transform', `translate(${center + offset}, 0)`);
