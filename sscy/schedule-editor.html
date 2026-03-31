@@ -106,12 +106,13 @@
         .sline { position:absolute; left:0; right:0; height:1px; background:#e8e8e8; pointer-events:none; }
         .sline.hour { background:#ccc; }
 
-        /* Events - no rounded corners */
+        /* Events - no rounded corners, no gaps */
         .ev {
-            position:absolute; border-radius:0; padding:1px 4px;
+            position:absolute; border-radius:0; padding:0 3px;
             overflow:hidden; cursor:pointer; font-size:0.58rem; line-height:1.15;
             display:flex; flex-direction:column; justify-content:center; align-items:center;
             text-align:center; border:none; z-index:2;
+            box-sizing:border-box;
         }
         /* Spanning label that covers multiple color columns */
         .ev-span-label {
@@ -221,7 +222,7 @@
     <input type="text" id="epSub">
     <label>Venue</label>
     <select id="epVenue"></select>
-    <label>Duration (slots)</label>
+    <label>Duration</label>
     <div class="ep-row">
         <button class="ep-btn" onclick="epDur(-1)">-</button>
         <span id="epDurVal" style="min-width:30px;text-align:center">2</span>
@@ -570,7 +571,9 @@ function render(){
         var spanGroups = {};
         laid.forEach(function(item){
             var evt=item.evt;
-            var key = evt.title+'|'+evt.startSlot+'|'+evt.spanSlots;
+            var normTitle = (evt.title||'').replace(/\s+/g,' ').trim();
+            var key = normTitle+'|'+evt.startSlot+'|'+evt.spanSlots;
+            item._spanKey = key;
             if(!spanGroups[key]) spanGroups[key]=[];
             spanGroups[key].push(item);
         });
@@ -582,12 +585,11 @@ function render(){
             var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
             var tc=item.totalCols, col=item.col;
             var wp=100/tc, lp=col*wp;
-            var key = evt.title+'|'+evt.startSlot+'|'+evt.spanSlots;
-            var isSpanned = spanGroups[key] && spanGroups[key].length > 1;
+            var isSpanned = spanGroups[item._spanKey] && spanGroups[item._spanKey].length > 1;
             var cls=brightness(c)>160?'dk':'lt';
             var tl=(evt.title||'').replace(/\n/g,'<br>');
 
-            h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+'">';
+            h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
             if(!isSpanned){
                 h+='<div class="ev-t">'+tl+'</div>';
                 if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
@@ -1107,11 +1109,15 @@ function showPopover(evtId, mx, my) {
 function updatePopoverDur() {
     var evt = state.events.find(function(x){return x.id===selectedEvtId});
     if (!evt) return;
-    document.getElementById('epDurVal').textContent = evt.spanSlots;
     var mins = evt.spanSlots * 30;
     var hrs = Math.floor(mins / 60);
     var m = mins % 60;
-    document.getElementById('epDurTime').textContent = (hrs ? hrs + 'h' : '') + (m ? m + 'm' : '');
+    var label = '';
+    if (hrs && m) label = hrs + 'h ' + m + 'm';
+    else if (hrs) label = hrs + (hrs===1 ? ' hour' : ' hours');
+    else label = m + ' min';
+    document.getElementById('epDurVal').textContent = label;
+    document.getElementById('epDurTime').textContent = '';
 }
 
 function closePopover() {
