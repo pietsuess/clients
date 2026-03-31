@@ -75,10 +75,10 @@
         /* Grid body: legend + [gutter + day-col] * N + gutter */
         .grid-body { display: flex; }
 
-        /* Venue legend */
-        .legend { width: var(--legend-w); background:#fff; border-right:1px solid #ddd; }
-        .leg-item { display:flex; align-items:center; gap:5px; padding:2px 6px; font-size:0.55rem; font-weight:600; min-height: calc(var(--slot-h) * 2.8); }
-        .leg-color { width:7px; min-height:24px; border-radius:2px; flex-shrink:0; }
+        /* Venue legend - items stretch to fill full grid height */
+        .legend { width: var(--legend-w); background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; }
+        .leg-item { display:flex; align-items:center; gap:6px; padding:2px 8px; font-weight:700; flex:1; }
+        .leg-color { width:10px; border-radius:2px; flex-shrink:0; align-self:stretch; margin:4px 0; }
 
         /* Time gutter - ALL gutters use the same yellow from the PDF */
         .gutter {
