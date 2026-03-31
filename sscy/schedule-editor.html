@@ -157,6 +157,7 @@
         <button class="tb-btn" onclick="exportJSON()">Save JSON</button>
         <button class="tb-btn" onclick="document.getElementById('impF').click()">Load JSON</button>
         <input type="file" id="impF" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button class="tb-btn" onclick="resetToDefault()" style="color:#f88">Reset</button>
     </div>
     <div class="tb-group">
         <button class="tb-btn primary" onclick="exportPDF()">Export PDF</button>
@@ -357,7 +358,14 @@ function loadState(){
 }
 
 // Clear stale localStorage if URL has ?reset
-if(location.search.indexOf('reset')>-1){ localStorage.removeItem('acyr-schedule'); location.search=''; }
+if(location.search.indexOf('reset')>-1){ localStorage.removeItem('acyr-schedule'); history.replaceState(null,'',location.pathname); }
+
+function resetToDefault(){
+    if(!confirm('Discard all changes and reset to defaults?')) return;
+    localStorage.removeItem('acyr-schedule');
+    state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+    render(); renderSwatches();
+}
 function saveState(){ localStorage.setItem('acyr-schedule',JSON.stringify(state)); document.getElementById('stxt').textContent='Saved'; document.getElementById('ecnt').textContent=state.events.length+' events'; }
 
 function brightness(hex){ var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (r*299+g*587+b*114)/1000; }
