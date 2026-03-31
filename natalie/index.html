@@ -14,10 +14,16 @@
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <!-- Heart clip: fixed in viewport space -->
+    <!-- Heart clip: shows only heart area -->
     <clipPath id="heart-clip" clipPathUnits="userSpaceOnUse">
       <path transform="translate(568.005, 201.74)" d="M427.71,132.7l-35.72,35.72-35.72-35.72c-57.82-57.82-151.56-57.82-209.38,0h0c-57.82,57.82-57.82,151.56,0,209.38l35.72,35.72,209.38,209.38,209.38-209.38,35.72-35.72c57.82-57.82,57.82-151.56,0-209.38h0c-57.82-57.82-151.56-57.82-209.38,0Z"/>
     </clipPath>
+
+    <!-- Inverse heart mask: everything EXCEPT the heart -->
+    <mask id="heart-cutout" maskUnits="userSpaceOnUse" x="-5000" y="-5000" width="15000" height="15000">
+      <rect x="-5000" y="-5000" width="15000" height="15000" fill="white"/>
+      <path transform="translate(568.005, 201.74)" fill="black" d="M427.71,132.7l-35.72,35.72-35.72-35.72c-57.82-57.82-151.56-57.82-209.38,0h0c-57.82,57.82-57.82,151.56,0,209.38l35.72,35.72,209.38,209.38,209.38-209.38,35.72-35.72c57.82-57.82,57.82-151.56,0-209.38h0c-57.82-57.82-151.56-57.82-209.38,0Z"/>
+    </mask>
 
     <!-- Line pattern (4220.58 wide) -->
     <g id="lines">
@@ -160,9 +166,11 @@
     </g>
   </g>
 
-  <!-- Top layer: black lines, no clip, covers everything -->
-  <g id="top-layer" fill="#000">
-    <use href="#lines"/>
+  <!-- Top layer: black lines, heart cut out (fixed mask) -->
+  <g mask="url(#heart-cutout)">
+    <g id="top-layer" fill="#000">
+      <use href="#lines"/>
+    </g>
   </g>
 </svg>
 
