@@ -508,54 +508,69 @@ function assignColumns(dayEvents){
         item.col = c;
     });
 
-    // Build per-slot layout: for each slot, determine which events are active
-    // and assign them packed column positions (0, 1, 2...) sorted by their global col
-    var maxSlot = 0;
-    evts.forEach(function(item){ var end = item.evt.startSlot + item.evt.spanSlots; if(end > maxSlot) maxSlot = end; });
-
-    // Build slot map: for each slot, list of active event indices sorted by col
-    var slotMap = [];
-    for (var s = 0; s < maxSlot; s++) {
-        var active = [];
-        evts.forEach(function(item, idx) {
-            var o = item.evt;
-            if (s >= o.startSlot && s < o.startSlot + o.spanSlots) active.push(idx);
-        });
-        // Sort by global col so column order is stable
-        active.sort(function(a, b) { return evts[a].col - evts[b].col; });
-        slotMap[s] = active;
-    }
-
-    // For each event, build segments where its packed column or total count changes
-    evts.forEach(function(item, myIdx) {
+    // Each event keeps its max concurrency as totalCols for consistent width.
+    // Events use their global col. The LAST event in each overlap group
+    // stretches to fill remaining space (width extends to 100%).
+    evts.forEach(function(item){
         var e = item.evt;
         var eEnd = e.startSlot + e.spanSlots;
-        item.segments = [];
-
-        var segStart = e.startSlot;
-        var prevPackedCol = -1;
-        var prevCount = -1;
-
-        for (var s = e.startSlot; s <= eEnd; s++) {
+        var maxConcurrent = 1;
+        for (var s = e.startSlot; s < eEnd; s++) {
             var count = 0;
-            var packedCol = 0;
-            if (s < eEnd) {
-                var active = slotMap[s];
-                count = active.length;
-                // Find this event's packed position among active events at this slot
-                for (var k = 0; k < active.length; k++) {
-                    if (active[k] === myIdx) { packedCol = k; break; }
-                }
-            }
-
-            if ((count !== prevCount || packedCol !== prevPackedCol) && s > e.startSlot) {
-                item.segments.push({startSlot: segStart, spanSlots: s - segStart, totalCols: prevCount, col: prevPackedCol});
-                segStart = s;
-            }
-            prevCount = count;
-            prevPackedCol = packedCol;
+            evts.forEach(function(other){
+                var o = other.evt;
+                if (s >= o.startSlot && s < o.startSlot + o.spanSlots) count++;
+            });
+            if (count > maxConcurrent) maxConcurrent = count;
         }
+        item.totalCols = maxConcurrent;
     });
+
+    // For events whose totalCols > their col+1 AND they are the rightmost event
+    // at some slots, stretch their width to fill remaining space
+    evts.forEach(function(item){
+        var e = item.evt;
+        var eEnd = e.startSlot + e.spanSlots;
+        // Find the max col of any overlapping event
+        var maxCol = item.col;
+        evts.forEach(function(other){
+            if(other === item) return;
+            var o = other.evt;
+            if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){
+                if(other.col > maxCol) maxCol = other.col;
+            }
+        });
+        // If this event is the leftmost (col 0) and totalCols is based on
+        // a denser region, but at some slots it has fewer neighbors,
+        // stretch it: width = 100% - (rightmost neighbor's left edge)
+        // Actually simpler: just set colSpan to fill from this col to totalCols
+        item.colSpan = 1; // default: takes 1 column
+
+        // Check if this is the last (rightmost) event at any of its slots
+        // If so, stretch to fill remaining width
+        var isRightmost = true;
+        for (var s = e.startSlot; s < eEnd; s++) {
+            evts.forEach(function(other){
+                if(other === item) return;
+                var o = other.evt;
+                if(s >= o.startSlot && s < o.startSlot + o.spanSlots && other.col > item.col){
+                    isRightmost = false;
+                }
+            });
+            if (!isRightmost) break;
+        }
+        // If rightmost, stretch to fill
+        if (isRightmost && item.totalCols > item.col + 1) {
+            item.colSpan = item.totalCols - item.col;
+        }
+
+        // Also check: if NOT rightmost but the rightmost neighbor doesn't cover
+        // ALL our slots, we might still need to stretch at some slots.
+        // For simplicity, keep single rect with stretch.
+    });
+
+    // No segments - single rect per event
+    evts.forEach(function(item){ item.segments = null; });
 
     return evts;
 }
@@ -621,7 +636,7 @@ function render(){
             spanGroups[key].push(item);
         });
 
-        // Render color blocks
+        // Render color blocks - single rect per event, using colSpan for stretch
         laid.forEach(function(item){
             var evt=item.evt, v=state.venues.find(function(x){return x.id===evt.venueId});
             var c=v?v.color:'#999';
@@ -629,33 +644,19 @@ function render(){
             var cls=brightness(c)>160?'dk':'lt';
             var tl=(evt.title||'').replace(/\n/g,'<br>');
 
-            // Render segments (variable width per slot region)
-            if (item.segments && item.segments.length > 0) {
-                item.segments.forEach(function(seg, si){
-                    var stop=seg.startSlot*SH, sht=seg.spanSlots*SH;
-                    var swp=100/seg.totalCols, slp=seg.col*swp;
-                    h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+stop+'px;height:'+sht+'px;left:'+slp+'%;width:'+swp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
-                    // Only show text and controls on the first segment
-                    if(si===0){
-                        if(!isSpanned){
-                            h+='<div class="ev-t">'+tl+'</div>';
-                            if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
-                        }
-                        h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
-                    }
-                    // Resize handle on last segment
-                    if(si===item.segments.length-1) h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
-                    h+='</div>';
-                });
-            } else {
-                // Fallback: single block
-                var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
-                h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:0;width:100%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+'">';
-                if(!isSpanned){ h+='<div class="ev-t">'+tl+'</div>'; }
-                h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
-                h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
-                h+='</div>';
+            var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
+            var tc=item.totalCols, col=item.col;
+            var span=item.colSpan||1;
+            var wp=(100/tc)*span, lp=(100/tc)*col;
+
+            h+='<div class="ev '+cls+(selectedEvtId===evt.id?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
+            if(!isSpanned){
+                h+='<div class="ev-t">'+tl+'</div>';
+                if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
             }
+            h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
+            h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
+            h+='</div>';
         });
 
         // Render spanning labels for same-title groups
