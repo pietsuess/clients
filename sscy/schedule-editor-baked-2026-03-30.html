@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACYR Schedule Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --slot-h: 24px;
+            --legend-w: 80px;
+            --gutter-w: 24px;
+            --first-gutter-w: 36px;
+            --toolbar-h: 44px;
+        }
+        html, body {
+            font-family: 'Archivo Narrow', Arial, sans-serif;
+            background: #e8e8e8;
+            overflow: auto;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            position: fixed; top:0; left:0; right:0; height: var(--toolbar-h);
+            background: #2c2c2c; color: #fff; display: flex; align-items: center;
+            padding: 0 12px; gap: 6px; z-index: 1000; font-size: 0.7rem;
+        }
+        .tb-group { display:flex; align-items:center; gap:4px; padding:0 8px; border-right:1px solid rgba(255,255,255,0.1); height:100%; }
+        .tb-group:last-child { border-right:none; }
+        .tb-label { font-size:0.55rem; text-transform:uppercase; letter-spacing:0.06em; opacity:0.4; margin-right:3px; }
+        .tb-btn {
+            padding:4px 10px; border-radius:3px; border:1px solid rgba(255,255,255,0.12);
+            background:rgba(255,255,255,0.05); color:#fff; font-size:0.65rem; cursor:pointer; font-family:inherit;
+        }
+        .tb-btn:hover { background:rgba(255,255,255,0.12); }
+        .tb-btn.primary { background:#17A698; border-color:#17A698; }
+        .tb-btn.primary:hover { background:#1fc4b3; }
+        .vswatch {
+            width:20px; height:20px; border-radius:3px; cursor:pointer;
+            border:2px solid transparent; transition: border-color 0.15s;
+        }
+        .vswatch:hover, .vswatch.active { border-color:#fff; }
+
+        /* Schedule container - framed with breathing room */
+        .sched-wrap { margin-top: var(--toolbar-h); padding: 20px 20px 60px; }
+        .sched { border: 1px solid #aaa; background: #fff; display: flex; flex-direction: column; }
+
+        /* Title banner - slim fit */
+        .title-banner {
+            background: linear-gradient(135deg, #17A698, #1fc4b3);
+            padding: 6px 20px; text-align: center;
+        }
+        .title-text {
+            font-family:'Cinzel',serif; font-weight:700; font-size:1.6rem;
+            color:#fff; letter-spacing:3px; text-transform:uppercase;
+        }
+
+        /* Bottom bar matching title - tall enough for reception overlap */
+        .bottom-bar {
+            padding: 16px; text-align: center;
+        }
+
+        /* Headers row */
+        .headers { display: flex; }
+        .hdr {
+            display:flex; align-items:center; justify-content:center; text-align:center;
+            font-weight:700; font-size:0.75rem; padding:6px 4px; color:#fff;
+        }
+        .hdr-legend { width: var(--legend-w); background:#333; font-size:0.5rem; text-transform:uppercase; letter-spacing:0.08em; line-height:1.2; }
+        .hdr-gutter { width: var(--gutter-w); background:#F4D352; font-size:0.72rem; font-weight:700; color:#5a4a00; }
+        .hdr-day { flex:1; background:#17A698; }
+        .hdr-gutter.last { background:#F4D352; font-size:0.6rem; }
+
+        /* Grid body: legend + [gutter + day-col] * N + gutter */
+        .grid-body { display: flex; }
+
+        /* Venue legend - color fills behind name, white text */
+        .legend { width: var(--legend-w); border-right:1px solid #ddd; display:flex; flex-direction:column; }
+        .leg-item { display:flex; align-items:center; justify-content:center; text-align:center; padding:4px 8px; font-weight:700; flex:1; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); border-bottom:1px solid rgba(255,255,255,0.15); position:relative; cursor:grab; }
+        .leg-item.active-venue { outline:2px solid #fff; outline-offset:-2px; }
+        .leg-item.dragging { opacity:0.4; }
+        .leg-item.drag-over { border-bottom:3px solid #fff; }
+        .leg-item .leg-x {
+            position:absolute; top:2px; right:2px; width:12px; height:12px;
+            display:none; align-items:center; justify-content:center;
+            font-size:0.45rem; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.3);
+            border-radius:50%; cursor:pointer; z-index:4;
+        }
+        .leg-item:hover .leg-x { display:flex; }
+        .leg-item .leg-x:hover { background:rgba(200,0,0,0.7); color:#fff; }
+
+        /* Time gutter - ALL gutters use the same yellow from the PDF */
+        .gutter {
+            width: var(--gutter-w); background: #F4D352; display:flex; flex-direction:column;
+            border-left:1px solid #e0c040; border-right:1px solid #e0c040;
+            overflow: visible; position: relative; z-index: 3;
+        }
+        .gut-slot {
+            height: var(--slot-h); display:flex; align-items:center; justify-content:center;
+            font-size:0.72rem; font-weight:700;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            overflow: visible; position: relative; z-index: 1;
+        }
+        .gut-slot.hour { border-bottom-color: rgba(0,0,0,0.12); }
+
+        /* Day column - row stripes matching PDF mint/cyan */
+        .day-col {
+            flex:1; position:relative;
+            min-height: calc(var(--slot-h) * 34);
+            background: repeating-linear-gradient(
+                to bottom,
+                #e6f5f0 0px, #e6f5f0 calc(var(--slot-h)*2),
+                #f0faf7 calc(var(--slot-h)*2), #f0faf7 calc(var(--slot-h)*4)
+            );
+        }
+        .sline { position:absolute; left:0; right:0; height:1px; background:#e8e8e8; pointer-events:none; }
+        .sline.hour { background:#ccc; }
+
+        /* Events - no rounded corners, no gaps */
+        .ev {
+            position:absolute; border-radius:0; padding:0 3px;
+            overflow:hidden; cursor:pointer; font-size:0.58rem; line-height:1.15;
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
+            text-align:center; border:none; z-index:2;
+            box-sizing:border-box;
+        }
+        .ev .ev-x {
+            position:absolute; top:1px; right:1px; width:14px; height:14px;
+            display:none; align-items:center; justify-content:center;
+            font-size:0.5rem; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.35);
+            border-radius:50%; cursor:pointer; line-height:1; z-index:4;
+        }
+        .ev:hover .ev-x { display:flex; }
+        .ev .ev-x:hover { background:rgba(200,0,0,0.7); color:#fff; }
+        /* Spanning label that covers multiple color columns */
+        .ev-span-label {
+            position:absolute; z-index:3; pointer-events:none;
+            display:flex; align-items:center; justify-content:center; text-align:center;
+            font-size:0.58rem; line-height:1.15; font-weight:700;
+            color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.25);
+        }
+        .ev:hover { filter:brightness(1.08); }
+        .ev.selected { outline:2px solid #fff; outline-offset:-2px; z-index:5; }
+        .ev .ev-resize { position:absolute; bottom:0; left:0; right:0; height:6px; cursor:ns-resize; }
+        .ev .ev-resize:hover { background:rgba(255,255,255,0.3); }
+
+        /* Edit popover */
+        .edit-pop {
+            position:fixed; z-index:2000; background:#2c2c2c; color:#fff;
+            padding:12px; border-radius:6px; box-shadow:0 8px 30px rgba(0,0,0,0.5);
+            font-size:0.65rem; width:220px; display:none;
+        }
+        .edit-pop.show { display:block; }
+        .ep-drag-handle { cursor:grab; padding:2px 0 8px; margin:-4px -4px 8px; text-align:center; border-bottom:1px solid #444; }
+        .ep-drag-handle:active { cursor:grabbing; }
+        .ep-drag-grip { width:30px; height:4px; background:rgba(255,255,255,0.15); border-radius:2px; display:inline-block; }
+        .edit-pop label { display:block; margin-bottom:3px; font-size:0.55rem; opacity:0.5; text-transform:uppercase; letter-spacing:0.05em; }
+        .edit-pop input[type=text], .edit-pop textarea {
+            width:100%; background:#444; color:#fff; border:1px solid #555;
+            padding:4px 6px; border-radius:3px; font-family:inherit; font-size:0.65rem; margin-bottom:8px;
+        }
+        .edit-pop textarea { height:40px; resize:vertical; }
+        .edit-pop select {
+            width:100%; background:#444; color:#fff; border:1px solid #555;
+            padding:4px 6px; border-radius:3px; font-family:inherit; font-size:0.65rem; margin-bottom:8px;
+        }
+        .edit-pop .ep-row { display:flex; gap:6px; align-items:center; margin-bottom:8px; }
+        .edit-pop .ep-btn {
+            padding:4px 10px; border-radius:3px; border:1px solid #555;
+            background:#444; color:#fff; font-size:0.6rem; cursor:pointer; font-family:inherit;
+        }
+        .edit-pop .ep-btn:hover { background:#555; }
+        .edit-pop .ep-btn.del { color:#f66; border-color:#f66; }
+        .edit-pop .ep-btn.del:hover { background:#f66; color:#fff; }
+
+        .venue-pick {
+            width:28px; height:28px; border-radius:4px; cursor:pointer;
+            border:2px solid transparent; transition:border-color 0.1s;
+            display:flex; align-items:center; justify-content:center;
+            font-size:0.45rem; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);
+            overflow:hidden; line-height:1;
+        }
+        .venue-pick:hover { border-color:rgba(255,255,255,0.5); }
+        .venue-pick.selected { border-color:#fff; }
+
+        /* Drag ghost */
+        .drag-ghost {
+            position:fixed; pointer-events:none; z-index:3000;
+            border:2px dashed rgba(255,255,255,0.5); border-radius:0; opacity:0.6;
+        }
+        .ev-t { font-weight:700; }
+        .ev-s { font-size:0.5rem; opacity:0.75; }
+        .ev.lt .ev-t, .ev.lt .ev-s { color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.2); }
+        .ev.dk .ev-t, .ev.dk .ev-s { color:#333; text-shadow:none; }
+
+        /* Reception - narrow inset white box with outlined circle */
+        .rec-block {
+            position:absolute; z-index:2;
+            display:flex; align-items:center; gap:4px; padding:2px 5px;
+            background:#fff; border:1px solid #bbb;
+            left:25%; right:25%;
+        }
+        .rec-circle {
+            width:18px; height:18px; border-radius:50%;
+            border:2px solid #7B2D5F;
+            display:flex; align-items:center; justify-content:center;
+            font-size:0.5rem; font-weight:700; color:#7B2D5F; flex-shrink:0;
+            background:#fff;
+        }
+        .rec-text {
+            font-weight:700; font-size:0.52rem; color:#333; line-height:1.2;
+            flex:1; text-align:center;
+        }
+
+        /* Status - inline in toolbar */
+        .status-inline { color:rgba(255,255,255,0.35); font-size:0.55rem; }
+    </style>
+</head>
+<body>
+<div class="toolbar">
+    <div class="tb-group">
+        <button class="tb-btn" onclick="undo()">Undo</button>
+        <button class="tb-btn" onclick="exportJSON()">Save JSON</button>
+        <button class="tb-btn" onclick="document.getElementById('impF').click()">Load JSON</button>
+        <input type="file" id="impF" accept=".json" style="display:none" onchange="importJSON(event)">
+        <button class="tb-btn" onclick="resetToDefault()" style="color:#f88">Reset</button>
+    </div>
+    <div class="tb-group">
+        <button class="tb-btn primary" onclick="exportPDF()">Export PDF</button>
+    </div>
+    <div class="tb-group">
+        <button class="tb-btn" onclick="toggleSettings()">Settings</button>
+    </div>
+    <div class="tb-group" style="margin-left:auto">
+        <span class="status-inline" id="stxt">Ready</span>
+        <span class="status-inline" id="ecnt"></span>
+    </div>
+</div>
+
+<!-- Settings panel -->
+<div id="settingsPanel" style="display:none;position:fixed;top:var(--toolbar-h);right:20px;width:260px;max-height:calc(100vh - var(--toolbar-h) - 40px);overflow-y:auto;background:#333;color:#fff;padding:14px;z-index:999;font-size:0.65rem;border:1px solid #555;border-top:none;border-radius:0 0 6px 6px;box-shadow:0 4px 20px rgba(0,0,0,0.3)">
+    <div style="font-weight:700;font-size:0.75rem;margin-bottom:12px;border-bottom:1px solid #444;padding-bottom:8px">Color Settings</div>
+    <div id="colorSettings"></div>
+</div>
+
+<div class="edit-pop" id="editPop">
+    <div class="ep-drag-handle" id="epDragHandle"><div class="ep-drag-grip"></div></div>
+    <div id="epEventFields">
+        <label>Title</label>
+        <input type="text" id="epTitle">
+        <label>Subtitle</label>
+        <input type="text" id="epSub">
+        <label>Venue</label>
+        <div id="epVenueGrid" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px"></div>
+        <label>Duration</label>
+        <div class="ep-row">
+            <button class="ep-btn" onclick="epDur(-1)">-</button>
+            <span id="epDurVal" style="min-width:50px;text-align:center">2</span>
+            <button class="ep-btn" onclick="epDur(1)">+</button>
+        </div>
+    </div>
+    <div id="epRecFields" style="display:none">
+        <label>Reception Hours</label>
+        <textarea id="epRecText" style="height:50px"></textarea>
+    </div>
+    <div class="ep-row" style="margin-top:8px">
+        <button class="ep-btn" onclick="epSave()">Done</button>
+        <button class="ep-btn del" id="epDelBtn" onclick="epDelete()">Delete</button>
+    </div>
+</div>
+<div class="sched-wrap">
+    <div class="sched" id="sched"></div>
+</div>
+
+
+<script>
+var SH; // slot height in px, set at render time
+
+var DEFAULT_STATE = {
+    config: {
+        title: "ANNUAL COMMUNITY YOGA RETREAT",
+        year: 2026, startHour: 5, endHour: 22,
+        days: [
+            { label:"Thursday", date:"Aug 1" },
+            { label:"Friday", date:"Aug 2" },
+            { label:"Saturday", date:"Aug 3" },
+            { label:"Sunday", date:"Aug 4" },
+            { label:"Monday", date:"Aug 5" }
+        ],
+        reception: [
+            { dayIndex:0, text:"2pm - 6pm" },
+            { dayIndex:1, text:"9am - 6pm" },
+            { dayIndex:2, text:"9am - 1:30pm\n5pm - 6:30pm" },
+            { dayIndex:3, text:"9am - 1pm\n5pm - 8:30pm" },
+            { dayIndex:4, text:"9am - 11am" }
+        ]
+    },
+    venues: [
+        { id:"meal",     name:"Meal Circle",      color:"#F9B233" },
+        { id:"hanuman",  name:"Hanuman Temples",  color:"#E8652F" },
+        { id:"volley",   name:"Volley ball court",color:"#E53935" },
+        { id:"satsang",  name:"Satsang Room",     color:"#7B2D5F" },
+        { id:"garden",   name:"Garden House",      color:"#E91E63" },
+        { id:"yurt",     name:"Yurt",             color:"#C62828" },
+        { id:"latte",    name:"Latte Da!",        color:"#0052A3" },
+        { id:"pond",     name:"Pond Dome",        color:"#00BCD4" },
+        { id:"dining",   name:"Dining Room",      color:"#17A698" },
+        { id:"mound",    name:"Mound",            color:"#2D7A2D" },
+        { id:"school",   name:"School",           color:"#008B8B" }
+    ],
+    events: [
+        // THURSDAY
+        {id:"t1",dayIndex:0,startSlot:7,spanSlots:4,venueId:"hanuman",title:"Opening Prayers\n& Invocation"},
+        {id:"t2",dayIndex:0,startSlot:13,spanSlots:3,venueId:"meal",title:"Brunch"},
+        {id:"t3",dayIndex:0,startSlot:20,spanSlots:1,venueId:"meal",title:"Tea / Snack"},
+        {id:"t4",dayIndex:0,startSlot:21,spanSlots:3,venueId:"mound",title:"Kids Program"},
+        {id:"t5",dayIndex:0,startSlot:22,spanSlots:2,venueId:"pond",title:"Meet & Greet\n& Family Asana"},
+        {id:"t6",dayIndex:0,startSlot:22,spanSlots:2,venueId:"satsang",title:"Asana Classes"},
+        {id:"t7",dayIndex:0,startSlot:27,spanSlots:3,venueId:"meal",title:"Dinner"},
+        {id:"t8",dayIndex:0,startSlot:29,spanSlots:1,venueId:"mound",title:"Jai Store"},
+        {id:"t9",dayIndex:0,startSlot:30,spanSlots:3,venueId:"satsang",title:"Opening Celebration:\nWelcome &\nKirtan"},
+        {id:"t10",dayIndex:0,startSlot:29,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"t11",dayIndex:0,startSlot:30,spanSlots:1,venueId:"mound",title:"Capture\nthe Flag"},
+
+        // FRIDAY
+        {id:"f1",dayIndex:1,startSlot:2,spanSlots:1,venueId:"hanuman",title:"Pad Kirtan"},
+        {id:"f2",dayIndex:1,startSlot:3,spanSlots:1,venueId:"hanuman",title:"Arati"},
+        {id:"f3",dayIndex:1,startSlot:4,spanSlots:1,venueId:"satsang",title:"Shat Karma"},
+        {id:"f4",dayIndex:1,startSlot:5,spanSlots:3,venueId:"satsang",title:"Pranayama\nMeditation"},
+        {id:"f5",dayIndex:1,startSlot:5,spanSlots:3,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"f6",dayIndex:1,startSlot:5,spanSlots:3,venueId:"mound",title:"Kids\nProgram"},
+        {id:"f7",dayIndex:1,startSlot:9,spanSlots:4,venueId:"satsang",title:"Asana Classes"},
+        {id:"f8",dayIndex:1,startSlot:13,spanSlots:3,venueId:"meal",title:"Brunch"},
+        {id:"f9",dayIndex:1,startSlot:14,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"f10",dayIndex:1,startSlot:14,spanSlots:3,venueId:"mound",title:"Jai Store\n& reading"},
+        {id:"f11",dayIndex:1,startSlot:17,spanSlots:3,venueId:"satsang",title:"Yoga Sutra\nDiscussion"},
+        {id:"f12",dayIndex:1,startSlot:20,spanSlots:1,venueId:"meal",title:"Tea / Snack"},
+        {id:"f13",dayIndex:1,startSlot:21,spanSlots:2,venueId:"mound",title:"Kids Program"},
+        {id:"f14",dayIndex:1,startSlot:22,spanSlots:3,venueId:"satsang",title:"Asana Classes"},
+        {id:"f15",dayIndex:1,startSlot:25,spanSlots:2,venueId:"hanuman",title:"Arati"},
+        {id:"f16",dayIndex:1,startSlot:27,spanSlots:2,venueId:"meal",title:"Dinner"},
+        {id:"f17",dayIndex:1,startSlot:28,spanSlots:1,venueId:"mound",title:"Jai Store"},
+        {id:"f18",dayIndex:1,startSlot:29,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"f19",dayIndex:1,startSlot:30,spanSlots:1,venueId:"mound",title:"Capture\nthe Flag"},
+        {id:"f20",dayIndex:1,startSlot:30,spanSlots:2,venueId:"satsang",title:"DJ Night\n& Dance"},
+
+        // SATURDAY
+        {id:"s1",dayIndex:2,startSlot:2,spanSlots:1,venueId:"hanuman",title:"Pad Kirtan"},
+        {id:"s2",dayIndex:2,startSlot:3,spanSlots:1,venueId:"hanuman",title:"Arati"},
+        {id:"s3",dayIndex:2,startSlot:4,spanSlots:1,venueId:"satsang",title:"Shat Karma"},
+        {id:"s4",dayIndex:2,startSlot:5,spanSlots:3,venueId:"satsang",title:"Pranayama\nMeditation"},
+        {id:"s5",dayIndex:2,startSlot:5,spanSlots:3,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"s6",dayIndex:2,startSlot:5,spanSlots:3,venueId:"mound",title:"Kids\nProgram"},
+        {id:"s7",dayIndex:2,startSlot:9,spanSlots:4,venueId:"satsang",title:"Asana Classes"},
+        {id:"s8",dayIndex:2,startSlot:13,spanSlots:3,venueId:"meal",title:"Brunch"},
+        {id:"s9",dayIndex:2,startSlot:14,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"s10",dayIndex:2,startSlot:14,spanSlots:3,venueId:"mound",title:"Jai Store\n& reading"},
+        {id:"s11",dayIndex:2,startSlot:17,spanSlots:3,venueId:"satsang",title:"Gita\nDiscussion"},
+        {id:"s12",dayIndex:2,startSlot:20,spanSlots:1,venueId:"meal",title:"Tea / Snack"},
+        {id:"s13",dayIndex:2,startSlot:21,spanSlots:2,venueId:"mound",title:"Kids Program"},
+        {id:"s14",dayIndex:2,startSlot:22,spanSlots:3,venueId:"satsang",title:"Asana Classes"},
+        {id:"s15",dayIndex:2,startSlot:25,spanSlots:2,venueId:"hanuman",title:"Arati"},
+        {id:"s16",dayIndex:2,startSlot:27,spanSlots:2,venueId:"meal",title:"Dinner"},
+        {id:"s17",dayIndex:2,startSlot:28,spanSlots:1,venueId:"mound",title:"Jai Store"},
+        {id:"s18",dayIndex:2,startSlot:29,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"s19",dayIndex:2,startSlot:30,spanSlots:1,venueId:"mound",title:"Capture\nthe Flag"},
+        {id:"s20",dayIndex:2,startSlot:30,spanSlots:2,venueId:"satsang",title:"Stories\n& Ramayana"},
+
+        // SUNDAY
+        {id:"su1",dayIndex:3,startSlot:2,spanSlots:1,venueId:"hanuman",title:"Pad Kirtan"},
+        {id:"su2",dayIndex:3,startSlot:3,spanSlots:1,venueId:"hanuman",title:"Arati"},
+        {id:"su3",dayIndex:3,startSlot:4,spanSlots:1,venueId:"satsang",title:"Shat Karma"},
+        {id:"su4",dayIndex:3,startSlot:5,spanSlots:3,venueId:"satsang",title:"Pranayama\nMeditation"},
+        {id:"su5",dayIndex:3,startSlot:5,spanSlots:3,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"su6",dayIndex:3,startSlot:5,spanSlots:3,venueId:"mound",title:"Kids\nProgram"},
+        {id:"su7",dayIndex:3,startSlot:9,spanSlots:4,venueId:"satsang",title:"Asana Classes"},
+        {id:"su8",dayIndex:3,startSlot:13,spanSlots:3,venueId:"meal",title:"Brunch"},
+        {id:"su9",dayIndex:3,startSlot:14,spanSlots:1,venueId:"mound",title:"Jai Store"},
+        {id:"su10",dayIndex:3,startSlot:14,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"su11",dayIndex:3,startSlot:16,spanSlots:3,venueId:"satsang",title:"Satsang"},
+        {id:"su12",dayIndex:3,startSlot:20,spanSlots:1,venueId:"meal",title:"Tea /\nSnack"},
+        {id:"su13",dayIndex:3,startSlot:20,spanSlots:2,venueId:"hanuman",title:"Hanuman\nOlympics"},
+        {id:"su14",dayIndex:3,startSlot:20,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"su15",dayIndex:3,startSlot:22,spanSlots:3,venueId:"satsang",title:"Asana\nClasses"},
+        {id:"su16",dayIndex:3,startSlot:24,spanSlots:2,venueId:"mound",title:"Group Photo"},
+        {id:"su17",dayIndex:3,startSlot:25,spanSlots:2,venueId:"hanuman",title:"Arati"},
+        {id:"su18",dayIndex:3,startSlot:27,spanSlots:2,venueId:"meal",title:"Dinner"},
+        {id:"su19",dayIndex:3,startSlot:28,spanSlots:1,venueId:"mound",title:"Jai Store"},
+        {id:"su20",dayIndex:3,startSlot:29,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"su21",dayIndex:3,startSlot:30,spanSlots:1,venueId:"mound",title:"Capture\nthe Flag"},
+        {id:"su22",dayIndex:3,startSlot:30,spanSlots:2,venueId:"satsang",title:"Concert"},
+
+        // MONDAY
+        {id:"m1",dayIndex:4,startSlot:2,spanSlots:1,venueId:"hanuman",title:"Pad Kirtan"},
+        {id:"m2",dayIndex:4,startSlot:3,spanSlots:1,venueId:"hanuman",title:"Arati"},
+        {id:"m3",dayIndex:4,startSlot:4,spanSlots:1,venueId:"satsang",title:"Shat Karma"},
+        {id:"m4",dayIndex:4,startSlot:5,spanSlots:3,venueId:"satsang",title:"Pranayama\nMeditation"},
+        {id:"m5",dayIndex:4,startSlot:5,spanSlots:3,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"m6",dayIndex:4,startSlot:5,spanSlots:3,venueId:"mound",title:"Kids\nProgram"},
+        {id:"m7",dayIndex:4,startSlot:10,spanSlots:3,venueId:"hanuman",title:"Yaj\u00f1a"},
+        {id:"m8",dayIndex:4,startSlot:9,spanSlots:4,venueId:"satsang",title:"Asana"},
+        {id:"m9",dayIndex:4,startSlot:13,spanSlots:3,venueId:"meal",title:"Brunch"},
+        {id:"m10",dayIndex:4,startSlot:14,spanSlots:4,venueId:"satsang",title:"Closing\nCelebration"},
+        {id:"m11",dayIndex:4,startSlot:14,spanSlots:2,venueId:"mound",title:"Jai Store"},
+        {id:"m12",dayIndex:4,startSlot:14,spanSlots:4,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"m13",dayIndex:4,startSlot:20,spanSlots:1,venueId:"meal",title:"Tea /\nSnack"},
+        {id:"m14",dayIndex:4,startSlot:20,spanSlots:2,venueId:"hanuman",title:"Pop-up Kirtan"},
+        {id:"m15",dayIndex:4,startSlot:22,spanSlots:3,venueId:"satsang",title:"Asana\nClasses"},
+        {id:"m16",dayIndex:4,startSlot:25,spanSlots:2,venueId:"hanuman",title:"Arati"},
+        {id:"m17",dayIndex:4,startSlot:27,spanSlots:2,venueId:"meal",title:"Dinner"},
+        {id:"m18",dayIndex:4,startSlot:28,spanSlots:1,venueId:"mound",title:"Jai Store"},
+        {id:"m19",dayIndex:4,startSlot:29,spanSlots:2,venueId:"latte",title:"Latte\nDa\nCaf\u00e9"},
+        {id:"m20",dayIndex:4,startSlot:30,spanSlots:2,venueId:"school",title:"Latte Da\nTalent Show"}
+    ],
+    images: [],
+    styles: {
+        title:{fontFamily:"Cinzel",fontSize:28,fontWeight:700,letterSpacing:3,color:"#ffffff"},
+        titleBg:"#17A698",
+        dayHeaders:{bgColor:"#17A698",textColor:"#ffffff",fontFamily:"Archivo Narrow",fontSize:13,fontWeight:700},
+        legendHeader:{bgColor:"#333333",textColor:"#ffffff"},
+        legendFont:{fontFamily:"Archivo Narrow",fontSize:10,fontWeight:600},
+        gutterColor:"#F4D352",
+        gutterText:"#5a4a00",
+        gutterFont:{fontFamily:"Archivo Narrow",fontSize:12,fontWeight:700},
+        eventFont:{fontFamily:"Archivo Narrow",fontSize:10,fontWeight:700},
+        rowStripe1:"#e6f5f0",
+        rowStripe2:"#f0faf7",
+        receptionBg:"#F4D352",
+        receptionCircle:"#17A698",
+        gridLines:"#cccccc",
+        receptionFont:{fontFamily:"Archivo Narrow",fontSize:10,fontWeight:700}
+    }
+};
+
+var state, activeVenueId=null;
+var undoStack = [];
+var MAX_UNDO = 3;
+
+// Normalize hex: expand 3-digit to 6-digit, ensure # prefix
+function normHex(v){
+    v=v.trim();
+    if(v.charAt(0)!=='#') v='#'+v;
+    if(/^#[0-9a-fA-F]{3}$/.test(v)) v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3];
+    return v.toLowerCase();
+}
+
+function pushUndo(){
+    undoStack.push(JSON.stringify(state));
+    if(undoStack.length > MAX_UNDO) undoStack.shift();
+}
+
+function undo(){
+    if(!undoStack.length) return;
+    state = JSON.parse(undoStack.pop());
+    mergeDefaults();
+    render(); renderSwatches();
+    var p=document.getElementById('settingsPanel');
+    if(p.style.display!=='none') renderSettings();
+}
+function mergeDefaults(){
+    var ds=DEFAULT_STATE.styles;
+    if(!state.styles) state.styles={};
+    for(var k in ds){ if(state.styles[k]===undefined) state.styles[k]=ds[k]; }
+    ['title','dayHeaders','legendHeader','legendFont','gutterFont','eventFont','receptionFont'].forEach(function(k){
+        if(!state.styles[k]) state.styles[k]=JSON.parse(JSON.stringify(ds[k]));
+    });
+}
+function loadState(){
+    var s=localStorage.getItem('acyr-schedule');
+    if(s){
+        try{ state=JSON.parse(s); mergeDefaults(); return; }catch(e){}
+    }
+    state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+
+// Clear stale localStorage if URL has ?reset
+if(location.search.indexOf('reset')>-1){ localStorage.removeItem('acyr-schedule'); history.replaceState(null,'',location.pathname); }
+
+var editingDayIdx = null;
+var editingTitle = false;
+
+function editTitle(){
+    editingTitle = true;
+    editingDayIdx = null;
+    selectedEvtId = null;
+    editingRecDay = null;
+    var pop = document.getElementById('editPop');
+    var recF = document.getElementById('epRecFields');
+    document.getElementById('epEventFields').style.display = 'none';
+    recF.style.display = '';
+    recF.innerHTML = '<label>Schedule Title</label><input type="text" id="epGenText" value="'+state.config.title+'">';
+    document.getElementById('epDelBtn').style.display = 'none';
+    pop.style.left = (window.innerWidth/2 - 110) + 'px';
+    pop.style.top = '80px';
+    pop.classList.add('show');
+}
+
+function showDayPopover(dayIdx, mx, my){
+    editingDayIdx = dayIdx;
+    editingTitle = false;
+    selectedEvtId = null;
+    editingRecDay = null;
+    var day = state.config.days[dayIdx];
+    var pop = document.getElementById('editPop');
+    var recF = document.getElementById('epRecFields');
+    document.getElementById('epEventFields').style.display = 'none';
+    recF.style.display = '';
+    recF.innerHTML = '<label>Day Name</label><input type="text" id="epDayLabel" value="'+day.label+'"><label>Date</label><input type="text" id="epDayDate" value="'+day.date+'">';
+    document.getElementById('epDelBtn').style.display = 'none';
+    var pw = 220;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    pop.style.left = x + 'px';
+    pop.style.top = '80px';
+    pop.classList.add('show');
+}
+
+function resetToDefault(){
+    if(!confirm('Discard all changes and reset to defaults?')) return;
+    localStorage.removeItem('acyr-schedule');
+    state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+    render(); renderSwatches();
+}
+function saveState(){ localStorage.setItem('acyr-schedule',JSON.stringify(state)); document.getElementById('stxt').textContent='Saved'; document.getElementById('ecnt').textContent=state.events.length+' events'; }
+
+function brightness(hex){ var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (r*299+g*587+b*114)/1000; }
+
+// Auto-assign columns for overlapping events in a day
+// Each event gets only the columns needed for ITS direct overlaps, not transitive chains
+function assignColumns(dayEvents){
+    if(!dayEvents.length) return [];
+    var evts = dayEvents.map(function(e){ return {evt:e, col:0, totalCols:1}; });
+    // Sort by colOrder (user-adjustable), then startSlot, then id
+    evts.sort(function(a,b){ return (a.evt.colOrder||0) - (b.evt.colOrder||0) || a.evt.startSlot - b.evt.startSlot || (a.evt.id < b.evt.id ? -1 : 1); });
+
+    // Greedy column assignment: for each event, find the first column not taken by a direct overlap
+    evts.forEach(function(item, i){
+        var e = item.evt;
+        var eEnd = e.startSlot + e.spanSlots;
+        var c = 0;
+        while(true){
+            var conflict = false;
+            for(var j=0;j<i;j++){
+                if(evts[j].col !== c) continue;
+                var o = evts[j].evt;
+                if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){ conflict=true; break; }
+            }
+            if(!conflict) break;
+            c++;
+        }
+        item.col = c;
+    });
+
+    // Each event keeps its max concurrency as totalCols for consistent width.
+    // Events use their global col. The LAST event in each overlap group
+    // stretches to fill remaining space (width extends to 100%).
+    evts.forEach(function(item){
+        var e = item.evt;
+        var eEnd = e.startSlot + e.spanSlots;
+        var maxConcurrent = 1;
+        for (var s = e.startSlot; s < eEnd; s++) {
+            var count = 0;
+            evts.forEach(function(other){
+                var o = other.evt;
+                if (s >= o.startSlot && s < o.startSlot + o.spanSlots) count++;
+            });
+            if (count > maxConcurrent) maxConcurrent = count;
+        }
+        item.totalCols = maxConcurrent;
+    });
+
+    // Calculate leftPct and widthPct for each event.
+    // Each event stretches right until it hits another event's left edge.
+    // Uses the neighbor's own totalCols grid to find its left edge %.
+    evts.forEach(function(item){
+        var e = item.evt;
+        var eEnd = e.startSlot + e.spanSlots;
+        var tc = item.totalCols;
+        item.leftPct = (item.col / tc) * 100;
+
+        // Find nearest right neighbor across all overlapping slots
+        var rightEdge = 100;
+        for (var s = e.startSlot; s < eEnd; s++) {
+            evts.forEach(function(other){
+                if(other === item) return;
+                var o = other.evt;
+                if(s >= o.startSlot && s < o.startSlot + o.spanSlots && other.col > item.col){
+                    var nLeft = (other.col / other.totalCols) * 100;
+                    if(nLeft < rightEdge) rightEdge = nLeft;
+                }
+            });
+        }
+        item.widthPct = rightEdge - item.leftPct;
+    });
+
+    return evts;
+}
+
+function render(){
+    SH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slot-h'));
+    var el=document.getElementById('sched'), cfg=state.config, nd=cfg.days.length, ns=(cfg.endHour-cfg.startHour)*2;
+    var h='';
+
+    var sty=state.styles;
+
+    // Title
+    h+='<div class="title-banner" style="background:'+sty.titleBg+'"><div class="title-text" onclick="editTitle()" style="cursor:pointer;font-family:'+sty.title.fontFamily+';font-size:'+sty.title.fontSize+'px;color:'+sty.title.color+'" title="Click to edit">'+cfg.title+'</div></div>';
+
+    // Headers
+    h+='<div class="headers">';
+    h+='<div class="hdr hdr-legend" style="background:'+sty.legendHeader.bgColor+';color:'+sty.legendHeader.textColor+'">Colour<br>Legend</div>';
+    h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+';width:var(--first-gutter-w)">TIME</div>';
+    for(var d=0;d<nd;d++){
+        h+='<div class="hdr hdr-day" data-dayedit="'+d+'" style="background:'+sty.dayHeaders.bgColor+';color:'+sty.dayHeaders.textColor+';font-family:\''+sty.dayHeaders.fontFamily+'\';font-size:'+sty.dayHeaders.fontSize+'px;font-weight:'+sty.dayHeaders.fontWeight+';cursor:pointer" title="Click to edit">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
+        if(d<nd-1) h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'"></div>';
+    }
+    h+='<div class="hdr hdr-gutter last" style="background:'+sty.gutterColor+'"></div>';
+    h+='</div>';
+
+    // Grid body
+    h+='<div class="grid-body">';
+
+    // Legend
+    h+='<div class="legend">';
+    state.venues.forEach(function(v,i){ h+='<div class="leg-item'+(activeVenueId===v.id?' active-venue':'')+'" draggable="true" data-legidx="'+i+'" data-legvenue="'+v.id+'" ondragstart="legDragStart(event,'+i+')" ondragover="legDragOver(event,'+i+')" ondragleave="legDragLeave(event)" ondrop="legDrop(event,'+i+')" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'"><div class="leg-x" data-legdel="'+i+'" title="Delete '+v.name+'">\u2715</div>'+v.name+'</div>'; });
+    h+='</div>';
+
+    // First gutter (TIME) - wider
+    h+='<div class="gutter" style="background:'+sty.gutterColor+';width:var(--first-gutter-w)">';
+    for(var s=0;s<ns;s++){
+        var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
+        var lb='';
+        if(isH){if(hr===12)lb='NOON';else if(hr<12)lb=hr+':00';else lb=(hr-12)+':00';}else lb=':30';
+        h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+(isH?sty.gutterFont.fontSize:sty.gutterFont.fontSize-2)+'px;font-weight:'+(isH?sty.gutterFont.fontWeight:400)+'">'+lb+'</div>';
+    }
+    h+='</div>';
+
+    // Day columns with gutters between
+    for(var d=0;d<nd;d++){
+        h+='<div class="day-col" data-day="'+d+'" style="background:repeating-linear-gradient(to bottom,'+sty.rowStripe1+' 0px,'+sty.rowStripe1+' '+(SH*2)+'px,'+sty.rowStripe2+' '+(SH*2)+'px,'+sty.rowStripe2+' '+(SH*4)+'px)">';
+        // Grid lines
+        for(var s=1;s<ns;s++){
+            h+='<div class="sline'+(s%2===0?' hour':'')+'" style="top:'+(s*SH)+'px"></div>';
+        }
+        // Events for this day - auto-assign columns
+        var devs=state.events.filter(function(e){return e.dayIndex===d});
+        var laid=assignColumns(devs);
+
+        // Find groups of events with the same title that overlap - they get a spanning label
+        var spanGroups = {};
+        laid.forEach(function(item){
+            var evt=item.evt;
+            var normTitle = (evt.title||'').replace(/\s+/g,' ').trim();
+            var key = normTitle+'|'+evt.startSlot+'|'+evt.spanSlots;
+            item._spanKey = key;
+            if(!spanGroups[key]) spanGroups[key]=[];
+            spanGroups[key].push(item);
+        });
+
+        // Render color blocks - single rect per event, using colSpan for stretch
+        laid.forEach(function(item){
+            var evt=item.evt, v=state.venues.find(function(x){return x.id===evt.venueId});
+            var c=v?v.color:'#999';
+            var isSpanned = spanGroups[item._spanKey] && spanGroups[item._spanKey].length > 1;
+            var cls=brightness(c)>160?'dk':'lt';
+            var tl=(evt.title||'').replace(/\n/g,'<br>');
+
+            var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
+            var lp=item.leftPct, wp=item.widthPct;
+
+            var isSel = selectedEvtId===evt.id || selectedEvtIds.indexOf(evt.id)>=0;
+            h+='<div class="ev '+cls+(isSel?' selected':'')+'" data-id="'+evt.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;background:'+c+';font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+';border-right:1px solid rgba(255,255,255,0.15)">';
+            if(!isSpanned){
+                h+='<div class="ev-t">'+tl+'</div>';
+                if(evt.subtitle)h+='<div class="ev-s">'+evt.subtitle.replace(/\n/g,'<br>')+'</div>';
+            }
+            h+='<div class="ev-x" data-xid="'+evt.id+'" title="Delete">\u2715</div>';
+            h+='<div class="ev-resize" data-id="'+evt.id+'"></div>';
+            h+='</div>';
+        });
+
+        // Render spanning labels for same-title groups
+        var spanned = {};
+        Object.keys(spanGroups).forEach(function(key){
+            var group = spanGroups[key];
+            if(group.length < 2) return;
+            if(spanned[key]) return;
+            spanned[key] = true;
+            var minCol=Infinity, maxCol=0, totalCols=group[0].totalCols;
+            group.forEach(function(item){ if(item.col<minCol)minCol=item.col; if(item.col>maxCol)maxCol=item.col; });
+            var evt=group[0].evt;
+            var top=evt.startSlot*SH, ht=evt.spanSlots*SH;
+            var lp=(minCol/totalCols)*100, wp=((maxCol-minCol+1)/totalCols)*100;
+            var tl=(evt.title||'').replace(/\n/g,'<br>');
+            h+='<div class="ev-span-label" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%;font-family:\''+sty.eventFont.fontFamily+'\';font-size:'+sty.eventFont.fontSize+'px;font-weight:'+sty.eventFont.fontWeight+'">';
+            h+='<div class="ev-t">'+tl+'</div>';
+            h+='</div>';
+        });
+
+        // Reception block at the bottom of each day column
+        var rec=cfg.reception.find(function(r){return r.dayIndex===d});
+        if(rec){
+            var recTop = (ns - 1) * SH; // start at last slot, overlap into bottom bar
+            var recH = SH * 2; // extends below the grid into bottom bar
+            h+='<div class="rec-block" data-recday="'+d+'" style="top:'+recTop+'px;height:'+recH+'px;cursor:pointer">';
+            h+='<div class="rec-circle">R</div>';
+            h+='<div class="rec-text" style="font-family:\''+sty.receptionFont.fontFamily+'\';font-size:'+sty.receptionFont.fontSize+'px;font-weight:'+sty.receptionFont.fontWeight+'">Reception<br>'+rec.text.replace(/\n/g,', ')+'</div>';
+            h+='</div>';
+        }
+
+        h+='</div>';
+
+        // Gutter after day (between days or final)
+        if(d<nd-1){
+            h+='<div class="gutter" style="background:'+sty.gutterColor+'">';
+            for(var s=0;s<ns;s++){
+                var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
+                var lb='';
+                if(isH){var sf=hr<12?'':'';if(hr===12)lb='12';else if(hr<12)lb=''+hr;else lb=''+(hr-12);}else lb='30';
+                h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+(isH?sty.gutterFont.fontSize:sty.gutterFont.fontSize-2)+'px;font-weight:'+(isH?sty.gutterFont.fontWeight:400)+'">'+lb+'</div>';
+            }
+            h+='</div>';
+        }
+    }
+
+    // Final gutter (right time)
+    h+='<div class="gutter" style="background:'+sty.gutterColor+'">';
+    for(var s=0;s<ns;s++){
+        var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
+        var lb='';
+        if(isH){var sf=hr<12?'a':'p';if(hr===12)lb='12p';else if(hr<12)lb=hr+sf;else lb=(hr-12)+sf;}else lb='30';
+        h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+(isH?sty.gutterFont.fontSize:sty.gutterFont.fontSize-2)+'px;font-weight:'+(isH?sty.gutterFont.fontWeight:400)+'">'+lb+'</div>';
+    }
+    h+='</div>';
+
+    h+='</div>'; // end grid-body
+
+    // Bottom bar matching title
+    h+='<div class="bottom-bar" style="background:'+sty.titleBg+'">&nbsp;</div>';
+
+    el.innerHTML=h;
+    saveState();
+}
+
+function renderSwatches(){
+    var c=document.getElementById('vswatches'); c.innerHTML='';
+    state.venues.forEach(function(v){
+        var s=document.createElement('div'); s.className='vswatch'+(activeVenueId===v.id?' active':'');
+        s.style.background=v.color; s.title=v.name;
+        s.addEventListener('click',function(){activeVenueId=v.id;renderSwatches();});
+        c.appendChild(s);
+    });
+}
+
+function exportJSON(){
+    var b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(b);
+    a.download='acyr-schedule-'+state.config.year+'.json'; a.click();
+}
+
+function importJSON(e){
+    var f=e.target.files[0]; if(!f)return;
+    var r=new FileReader();
+    r.onload=function(ev){try{var d=JSON.parse(ev.target.result);if(d.config&&d.venues&&d.events){state=d;render();renderSwatches();}}catch(er){alert('Invalid JSON');}};
+    r.readAsText(f); e.target.value='';
+}
+
+function exportPDF(){
+    var jsPDF=window.jspdf.jsPDF;
+    var doc=new jsPDF({orientation:'landscape',unit:'pt',format:[2592,1728]});
+    var cfg=state.config,nd=cfg.days.length,ns=(cfg.endHour-cfg.startHour)*2;
+    var W=2592,H=1728,legW=130,gutW=50,titleH=65,hdrH=45,recH=40;
+    var totalGuts=nd+1;
+    var dayW=(W-legW-gutW*totalGuts)/nd;
+    var slotH=(H-titleH-hdrH-recH)/ns;
+
+    // Title
+    doc.setFillColor(23,166,152); doc.rect(0,0,W,titleH,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(32); doc.setTextColor(255,255,255);
+    doc.text(cfg.title+(cfg.year?' '+cfg.year:''),W/2,titleH/2+10,{align:'center'});
+
+    // Headers
+    var hy=titleH;
+    doc.setFillColor(51,51,51); doc.rect(0,hy,legW,hdrH,'F');
+    doc.setFontSize(7); doc.text('COLOUR\nLEGEND',legW/2,hy+hdrH/2,{align:'center'});
+    doc.setFillColor(68,68,68); doc.rect(legW,hy,gutW,hdrH,'F'); doc.text('TIME',legW+gutW/2,hy+hdrH/2+3,{align:'center'});
+    for(var d=0;d<nd;d++){
+        var dx=legW+gutW+d*(dayW+gutW);
+        doc.setFillColor(23,166,152); doc.rect(dx,hy,dayW,hdrH,'F');
+        doc.setFontSize(11); doc.text(cfg.days[d].label+' '+cfg.days[d].date,dx+dayW/2,hy+hdrH/2+4,{align:'center'});
+        if(d<nd-1){doc.setFillColor(224,192,64);doc.rect(dx+dayW,hy,gutW,hdrH,'F');}
+    }
+    doc.setFillColor(224,192,64); doc.rect(W-gutW,hy,gutW,hdrH,'F');
+
+    var gy=titleH+hdrH;
+
+    // Venue legend
+    doc.setFillColor(255,255,255); doc.rect(0,gy,legW,ns*slotH,'F');
+    var lih=ns*slotH/state.venues.length;
+    state.venues.forEach(function(v,i){
+        var ly=gy+i*lih;
+        var r=parseInt(v.color.substr(1,2),16),g=parseInt(v.color.substr(3,2),16),b=parseInt(v.color.substr(5,2),16);
+        doc.setFillColor(r,g,b); doc.rect(8,ly+5,10,lih-10,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(50,50,50);
+        doc.text(v.name,24,ly+lih/2+3);
+    });
+
+    // Time gutter (left)
+    doc.setFillColor(240,240,240); doc.rect(legW,gy,gutW,ns*slotH,'F');
+    for(var s=0;s<ns;s++){
+        var hr=cfg.startHour+Math.floor(s/2),mn=(s%2)*30,isH=mn===0;
+        var lb='';if(isH){if(hr===12)lb='NOON';else if(hr<12)lb=hr+':00';else lb=(hr-12)+':00';}else lb=':30';
+        doc.setFont('helvetica',isH?'bold':'normal'); doc.setFontSize(6.5); doc.setTextColor(isH?50:120,isH?50:120,isH?50:120);
+        doc.text(lb,legW+gutW/2,gy+s*slotH+slotH/2+2,{align:'center'});
+        if(s>0){doc.setDrawColor(isH?180:220,isH?180:220,isH?180:220);doc.setLineWidth(isH?0.5:0.3);doc.line(legW,gy+s*slotH,legW+gutW,gy+s*slotH);}
+    }
+
+    // Day columns + gutters
+    for(var d=0;d<nd;d++){
+        var dx=legW+gutW+d*(dayW+gutW);
+        // Row stripes
+        for(var s=0;s<ns;s++){if(Math.floor(s/2)%2===0){doc.setFillColor(232,245,243);doc.rect(dx,gy+s*slotH,dayW,slotH,'F');}}
+        // Grid lines
+        for(var s=1;s<ns;s++){doc.setDrawColor(s%2===0?180:220,s%2===0?180:220,s%2===0?180:220);doc.setLineWidth(s%2===0?0.5:0.25);doc.line(dx,gy+s*slotH,dx+dayW,gy+s*slotH);}
+        // Events (auto-column)
+        var pdfDevs=state.events.filter(function(e){return e.dayIndex===d});
+        var pdfLaid=assignColumns(pdfDevs);
+        pdfLaid.forEach(function(item){
+            var evt=item.evt;
+            var v=state.venues.find(function(x){return x.id===evt.venueId}); if(!v)return;
+            var tc=item.totalCols,col=item.col;
+            var ew=dayW/tc, ex=dx+col*ew, ey=gy+evt.startSlot*slotH, eh=evt.spanSlots*slotH;
+            var r=parseInt(v.color.substr(1,2),16),g=parseInt(v.color.substr(3,2),16),b=parseInt(v.color.substr(5,2),16);
+            doc.setFillColor(r,g,b); doc.roundedRect(ex+1,ey+1,ew-2,eh-2,2,2,'F');
+            if(brightness(v.color)>160)doc.setTextColor(50,50,50);else doc.setTextColor(255,255,255);
+            doc.setFont('helvetica','bold'); doc.setFontSize(6);
+            var lines=(evt.title||'').split('\n'), ty=ey+eh/2-(lines.length-1)*3.5;
+            lines.forEach(function(l,li){doc.text(l,ex+ew/2,ty+li*7,{align:'center'});});
+        });
+        // Inter-day gutter
+        if(d<nd-1){
+            var gx=dx+dayW;
+            doc.setFillColor(245,230,160); doc.rect(gx,gy,gutW,ns*slotH,'F');
+            for(var s=0;s<ns;s++){
+                var hr=cfg.startHour+Math.floor(s/2),mn=(s%2)*30,isH=mn===0;
+                var lb='';if(isH){if(hr===12)lb='12';else if(hr<12)lb=''+hr;else lb=''+(hr-12);}else lb='30';
+                doc.setFont('helvetica',isH?'bold':'normal');doc.setFontSize(6);doc.setTextColor(isH?100:140,isH?90:130,isH?20:60);
+                doc.text(lb,gx+gutW/2,gy+s*slotH+slotH/2+2,{align:'center'});
+                if(s>0){doc.setDrawColor(200,180,100);doc.setLineWidth(0.3);doc.line(gx,gy+s*slotH,gx+gutW,gy+s*slotH);}
+            }
+        }
+    }
+    // Right gutter
+    var rgx=W-gutW;
+    doc.setFillColor(245,230,160);doc.rect(rgx,gy,gutW,ns*slotH,'F');
+    for(var s=0;s<ns;s++){
+        var hr=cfg.startHour+Math.floor(s/2),mn=(s%2)*30,isH=mn===0;
+        var lb='';if(isH){var sf=hr<12?'a':'p';if(hr===12)lb='12p';else if(hr<12)lb=hr+sf;else lb=(hr-12)+sf;}else lb='30';
+        doc.setFont('helvetica',isH?'bold':'normal');doc.setFontSize(6);doc.setTextColor(isH?100:140,isH?90:130,isH?20:60);
+        doc.text(lb,rgx+gutW/2,gy+s*slotH+slotH/2+2,{align:'center'});
+        if(s>0){doc.setDrawColor(200,180,100);doc.setLineWidth(0.3);doc.line(rgx,gy+s*slotH,rgx+gutW,gy+s*slotH);}
+    }
+
+    // Reception
+    var ry=gy+ns*slotH;
+    doc.setFillColor(228,228,228);doc.rect(0,ry,W,recH,'F');
+    doc.setDrawColor(23,166,152);doc.setLineWidth(2);doc.line(0,ry,W,ry);
+    for(var d=0;d<nd;d++){
+        var dx=legW+gutW+d*(dayW+gutW);
+        var rec=cfg.reception.find(function(r){return r.dayIndex===d});
+        doc.setDrawColor(23,166,152);doc.setLineWidth(1.5);doc.circle(dx+14,ry+recH/2,7);
+        doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(23,166,152);doc.text('R',dx+14,ry+recH/2+3,{align:'center'});
+        if(rec){doc.setFont('helvetica','normal');doc.setFontSize(5.5);doc.setTextColor(80,80,80);var rl=rec.text.split('\n');rl.forEach(function(l,i){doc.text(l,dx+28,ry+recH/2-(rl.length-1)*3.5+i*7+2);});}
+    }
+
+    doc.save('ACYR_Schedule_'+cfg.year+'.pdf');
+    document.getElementById('stxt').textContent='PDF exported';
+}
+
+function toggleSettings(){
+    var p=document.getElementById('settingsPanel');
+    if(p.style.display==='none'){p.style.display='block';renderSettings();}else{p.style.display='none';}
+}
+
+document.addEventListener('mousedown', function(e){
+    var p=document.getElementById('settingsPanel');
+    if(p.style.display==='none') return;
+    if(p.contains(e.target)) return;
+    if(e.target.closest('.tb-btn') && e.target.closest('.tb-btn').textContent.trim()==='Settings') return;
+    p.style.display='none';
+});
+
+function renderSettings(){
+    var c=document.getElementById('colorSettings');
+    var sty=state.styles;
+    var items=[
+        {label:'Title Banner',key:'titleBg',val:sty.titleBg},
+        {label:'Title Text',key:'title.color',val:sty.title.color},
+        {label:'Day Headers',key:'dayHeaders.bgColor',val:sty.dayHeaders.bgColor},
+        {label:'Day Header Text',key:'dayHeaders.textColor',val:sty.dayHeaders.textColor},
+        {label:'Legend Header',key:'legendHeader.bgColor',val:sty.legendHeader.bgColor},
+        {label:'Gutters',key:'gutterColor',val:sty.gutterColor},
+        {label:'Gutter Text',key:'gutterText',val:sty.gutterText},
+        {label:'Row Stripe 1',key:'rowStripe1',val:sty.rowStripe1},
+        {label:'Row Stripe 2',key:'rowStripe2',val:sty.rowStripe2},
+        {label:'Reception Bg',key:'receptionBg',val:sty.receptionBg},
+        {label:'Reception Circle',key:'receptionCircle',val:sty.receptionCircle},
+        {label:'Grid Lines',key:'gridLines',val:sty.gridLines}
+    ];
+    var h='';
+    items.forEach(function(it){
+        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">';
+        h+='<span style="flex:1">'+it.label+'</span>';
+        var nv=normHex(it.val);
+        h+='<input type="text" value="'+nv+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:70px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:monospace">';
+        h+='<input type="color" value="'+nv+'" data-key="'+it.key+'" oninput="updateStyleColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none">';
+        h+='</div>';
+    });
+    // Font settings
+    h+='<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Font Settings</div>';
+    var fonts=['Cinzel','Archivo Narrow','Helvetica','Georgia','Arial','Verdana','Times New Roman','Courier New'];
+    var fontGroups=[
+        {label:'Title',fkey:'title',obj:sty.title},
+        {label:'Day Headers',fkey:'dayHeaders',obj:sty.dayHeaders},
+        {label:'Legend',fkey:'legendFont',obj:sty.legendFont},
+        {label:'Gutters',fkey:'gutterFont',obj:sty.gutterFont},
+        {label:'Events',fkey:'eventFont',obj:sty.eventFont},
+        {label:'Reception',fkey:'receptionFont',obj:sty.receptionFont}
+    ];
+    fontGroups.forEach(function(fg){
+        h+='<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #333">';
+        h+='<div style="font-weight:600;margin-bottom:6px;opacity:0.7">'+fg.label+'</div>';
+        // Font family
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:0.55rem">Family</span>';
+        h+='<select data-fkey="'+fg.fkey+'" data-fprop="fontFamily" onchange="updateFont(this)" style="width:110px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px;border-radius:2px">';
+        fonts.forEach(function(f){ h+='<option value="'+f+'"'+(fg.obj.fontFamily===f?' selected':'')+'>'+f+'</option>'; });
+        h+='</select></div>';
+        // Font size
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:0.55rem">Size</span>';
+        h+='<input type="number" value="'+fg.obj.fontSize+'" data-fkey="'+fg.fkey+'" data-fprop="fontSize" onchange="updateFont(this)" style="width:50px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px;border-radius:2px;text-align:center" min="6" max="72"></div>';
+        // Font weight
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:0.55rem">Weight</span>';
+        h+='<select data-fkey="'+fg.fkey+'" data-fprop="fontWeight" onchange="updateFont(this)" style="width:110px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px;border-radius:2px">';
+        [400,500,600,700,900].forEach(function(w){ h+='<option value="'+w+'"'+(fg.obj.fontWeight==w?' selected':'')+'>'+w+(w===400?' (Normal)':w===700?' (Bold)':'')+'</option>'; });
+        h+='</select></div>';
+        // Letter spacing (title only)
+        if(fg.obj.letterSpacing!==undefined){
+            h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-size:0.55rem">Spacing</span>';
+            h+='<input type="number" value="'+fg.obj.letterSpacing+'" data-fkey="'+fg.fkey+'" data-fprop="letterSpacing" onchange="updateFont(this)" style="width:50px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px;border-radius:2px;text-align:center" min="0" max="20"></div>';
+        }
+        h+='</div>';
+    });
+
+    h+='<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Venues / Locations</div>';
+    state.venues.forEach(function(v,i){
+        h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:5px">';
+        h+='<input type="color" value="'+v.color+'" data-venue="'+i+'" onchange="updateVenueColor(this)" style="width:22px;height:18px;border:none;cursor:pointer;background:none;flex-shrink:0">';
+        h+='<input type="text" value="'+v.color+'" data-vhex="'+i+'" onchange="updateVenueHex(this)" style="width:62px;font-size:0.5rem;background:#444;color:#fff;border:1px solid #555;padding:2px 3px;border-radius:2px;font-family:monospace;flex-shrink:0">';
+        h+='<input type="text" value="'+v.name+'" data-vname="'+i+'" onchange="updateVenueName(this)" style="flex:1;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:inherit">';
+        h+='<button onclick="deleteVenue('+i+')" style="background:none;border:none;color:#f66;cursor:pointer;font-size:0.7rem;padding:0 4px" title="Delete">\u2715</button>';
+        h+='</div>';
+    });
+    h+='<button onclick="addVenue()" style="margin-top:6px;padding:4px 10px;border-radius:3px;border:1px solid #555;background:#444;color:#fff;font-size:0.6rem;cursor:pointer;font-family:inherit;width:100%">+ Add Venue</button>';
+    c.innerHTML=h;
+}
+
+function updateStyleColor(inp){
+    var key=inp.dataset.key, val=normHex(inp.value);
+    if(!/^#[0-9a-fA-F]{6}$/.test(val)) return;
+    pushUndo();
+    var parts=key.split('.');
+    if(parts.length===2) state.styles[parts[0]][parts[1]]=val;
+    else state.styles[key]=val;
+    render(); renderSettings();
+}
+
+function updateVenueColor(inp){
+    pushUndo();
+    state.venues[parseInt(inp.dataset.venue)].color=inp.value;
+    render(); renderSwatches(); renderSettings();
+}
+
+function updateVenueHex(inp){
+    var val=inp.value.trim();
+    if(val.charAt(0)!=='#') val='#'+val;
+    if(/^#[0-9a-fA-F]{6}$/.test(val)){
+        state.venues[parseInt(inp.dataset.vhex)].color=val;
+        render(); renderSwatches(); renderSettings();
+    }
+}
+
+function updateVenueName(inp){
+    state.venues[parseInt(inp.dataset.vname)].name=inp.value;
+    render(); renderSwatches();
+}
+
+function addVenue(){
+    var id='venue-'+Date.now();
+    state.venues.push({id:id, name:'New Venue', color:'#888888'});
+    render(); renderSwatches(); renderSettings();
+}
+
+// Venue legend drag reorder
+var legDragIdx = null;
+function legDragStart(e, idx) { legDragIdx = idx; e.target.classList.add('dragging'); }
+function legDragOver(e, idx) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function legDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function legDrop(e, targetIdx) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (legDragIdx === null || legDragIdx === targetIdx) return;
+    pushUndo();
+    var venue = state.venues.splice(legDragIdx, 1)[0];
+    state.venues.splice(targetIdx, 0, venue);
+    legDragIdx = null;
+    render(); renderSwatches();
+}
+
+function deleteVenue(idx){
+    var v=state.venues[idx];
+    var count=state.events.filter(function(e){return e.venueId===v.id}).length;
+    var msg='Delete venue "'+v.name+'"?';
+    if(count) msg+='\n\n'+count+' event(s) use this venue. They will be reassigned to "'+state.venues[0].name+'".';
+    if(!confirm(msg)) return;
+    pushUndo();
+    // Reassign orphaned events to first venue
+    if(count && state.venues.length > 1){
+        var newId = state.venues[idx===0?1:0].id;
+        state.events.forEach(function(e){ if(e.venueId===v.id) e.venueId=newId; });
+    }
+    state.venues.splice(idx,1);
+    render(); renderSwatches(); renderSettings();
+}
+
+function updateFont(inp){
+    var fkey=inp.dataset.fkey, fprop=inp.dataset.fprop, val=inp.value;
+    if(fprop==='fontSize'||fprop==='fontWeight'||fprop==='letterSpacing') val=parseInt(val);
+    state.styles[fkey][fprop]=val;
+    render(); renderSettings();
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+var selectedEvtId = null;
+var selectedEvtIds = []; // multi-select via shift+click
+var editingRecDay = null;
+var dragging = null; // {type:'resize'|'move', evtId, startY, origSlot, origSpan, dayIndex}
+
+// Click on day column: stamp new event or select existing
+document.addEventListener('mousedown', function(e) {
+    var evEl = e.target.closest('.ev[data-id]');
+    var resizeEl = e.target.closest('.ev-resize[data-id]');
+    var dayCol = e.target.closest('.day-col');
+
+    // Close popover if clicking outside
+    if (!e.target.closest('.edit-pop') && !evEl) {
+        closePopover();
+    }
+
+    // Click legend item to select as active venue
+    var legItem = e.target.closest('.leg-item[data-legvenue]');
+    if (legItem && !e.target.closest('.leg-x')) {
+        activeVenueId = legItem.dataset.legvenue;
+        render();
+        return;
+    }
+
+    // Click day header to edit
+    var dayHdr = e.target.closest('.hdr-day[data-dayedit]');
+    if (dayHdr) {
+        e.preventDefault();
+        var di = parseInt(dayHdr.dataset.dayedit);
+        showDayPopover(di, e.clientX, e.clientY);
+        return;
+    }
+
+    // X delete button on venue legend
+    var legDel = e.target.closest('.leg-x[data-legdel]');
+    if (legDel) {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteVenue(parseInt(legDel.dataset.legdel));
+        return;
+    }
+
+    // X delete button on event
+    var xBtn = e.target.closest('.ev-x[data-xid]');
+    if (xBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        pushUndo();
+        state.events = state.events.filter(function(x){return x.id!==xBtn.dataset.xid});
+        closePopover();
+        render();
+        return;
+    }
+
+    // Resize handle
+    if (resizeEl) {
+        e.preventDefault();
+        var id = resizeEl.dataset.id;
+        var evt = state.events.find(function(x){return x.id===id});
+        if (!evt) return;
+        pushUndo();
+        dragging = { type:'resize', evtId:id, startY:e.clientY, origSpan:evt.spanSlots };
+        return;
+    }
+
+    // Click reception block: show popover for reception
+    var recBlock = e.target.closest('.rec-block[data-recday]');
+    if (recBlock) {
+        e.preventDefault();
+        var dayIdx = parseInt(recBlock.dataset.recday);
+        showReceptionPopover(dayIdx, e.clientX, e.clientY);
+        return;
+    }
+
+    // Click existing event: select + show popover
+    if (evEl && evEl.dataset.id) {
+        e.preventDefault();
+        var id = evEl.dataset.id;
+
+        if (e.shiftKey) {
+            // Shift+click: toggle in multi-selection
+            var idx = selectedEvtIds.indexOf(id);
+            if (idx >= 0) { selectedEvtIds.splice(idx, 1); }
+            else { selectedEvtIds.push(id); }
+            selectedEvtId = null;
+            // Close popover without clearing selection
+            document.getElementById('editPop').classList.remove('show');
+            if (selectedEvtIds.length > 0) {
+                showMultiPopover(e.clientX, e.clientY);
+            }
+            render();
+        } else {
+            // Normal click: single select
+            selectedEvtIds = [id];
+            selectedEvtId = id;
+            render();
+            showPopover(id, e.clientX, e.clientY);
+
+            // Start move drag after a small movement
+            var evt = state.events.find(function(x){return x.id===id});
+            if (evt) {
+                dragging = { type:'move', evtId:id, startY:e.clientY, startX:e.clientX, origSlot:evt.startSlot, origDay:evt.dayIndex, moved:false };
+            }
+        }
+        return;
+    }
+
+    // Single click on empty slot: just close popover (no auto-stamp)
+});
+
+// Double-click to add new event
+document.addEventListener('dblclick', function(e) {
+    var dayCol = e.target.closest('.day-col');
+    if (!dayCol || !activeVenueId) return;
+    e.preventDefault();
+
+    var rect = dayCol.getBoundingClientRect();
+    var y = e.clientY - rect.top;
+    var slot = Math.floor(y / SH);
+    var ns = (state.config.endHour - state.config.startHour) * 2;
+    if (slot < 0 || slot >= ns) return;
+
+    var newEvt = {
+        id: 'e' + Date.now(),
+        dayIndex: parseInt(dayCol.dataset.day),
+        startSlot: slot,
+        spanSlots: 2,
+        venueId: activeVenueId,
+        title: 'New Event'
+    };
+    pushUndo();
+    state.events.push(newEvt);
+    selectedEvtId = newEvt.id;
+    render();
+    showPopover(newEvt.id, e.clientX, e.clientY);
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+
+    if (dragging.type === 'resize') {
+        var evt = state.events.find(function(x){return x.id===dragging.evtId});
+        if (!evt) return;
+        var dy = e.clientY - dragging.startY;
+        var slotDelta = Math.round(dy / SH);
+        var newSpan = Math.max(1, dragging.origSpan + slotDelta);
+        var ns = (state.config.endHour - state.config.startHour) * 2;
+        if (evt.startSlot + newSpan > ns) newSpan = ns - evt.startSlot;
+        if (evt.spanSlots !== newSpan) {
+            evt.spanSlots = newSpan;
+            render();
+            updatePopoverDur();
+        }
+    }
+
+    if (dragging.type === 'move') {
+        var dx = Math.abs(e.clientX - dragging.startX);
+        var dy = Math.abs(e.clientY - dragging.startY);
+        if (dx > 5 || dy > 5) dragging.moved = true;
+
+        if (dragging.moved) {
+            closePopover();
+            var evt = state.events.find(function(x){return x.id===dragging.evtId});
+            if (!evt) return;
+
+            // Vertical movement: change start slot
+            var slotDelta = Math.round((e.clientY - dragging.startY) / SH);
+            var newSlot = Math.max(0, dragging.origSlot + slotDelta);
+            var ns = (state.config.endHour - state.config.startHour) * 2;
+            if (newSlot + evt.spanSlots > ns) newSlot = ns - evt.spanSlots;
+
+            // Horizontal: detect which day column the mouse is over
+            var dayCols = document.querySelectorAll('.day-col');
+            var newDay = evt.dayIndex;
+            dayCols.forEach(function(dc) {
+                var r = dc.getBoundingClientRect();
+                if (e.clientX >= r.left && e.clientX <= r.right) {
+                    newDay = parseInt(dc.dataset.day);
+                }
+            });
+
+            // Horizontal drag within same day: adjust column order
+            if (newDay === dragging.origDay) {
+                var dayCol = document.querySelector('.day-col[data-day="'+newDay+'"]');
+                if (dayCol) {
+                    var dcRect = dayCol.getBoundingClientRect();
+                    var relX = (e.clientX - dcRect.left) / dcRect.width;
+                    evt.colOrder = Math.round(relX * 10); // 0-10 range
+                }
+            }
+
+            if (evt.startSlot !== newSlot || evt.dayIndex !== newDay) {
+                evt.startSlot = newSlot;
+                evt.dayIndex = newDay;
+                if (newDay !== dragging.origDay) evt.colOrder = 0; // reset on day change
+            }
+            render();
+        }
+    }
+});
+
+document.addEventListener('mouseup', function(e) {
+    if (dragging && dragging.type === 'move' && !dragging.moved) {
+        // It was a click, not a drag - popover already shown
+    }
+    dragging = null;
+});
+
+// Popover
+function showPopover(evtId, mx, my) {
+    var pop = document.getElementById('editPop');
+    var evt = state.events.find(function(x){return x.id===evtId});
+    if (!evt) return;
+
+    document.getElementById('epTitle').value = (evt.title || '').replace(/\n/g, '\\n');
+    document.getElementById('epSub').value = evt.subtitle || '';
+
+    // Build venue grid with colored swatches
+    var vg = document.getElementById('epVenueGrid');
+    vg.innerHTML = '';
+    state.venues.forEach(function(v) {
+        var pick = document.createElement('div');
+        pick.className = 'venue-pick' + (v.id === evt.venueId ? ' selected' : '');
+        pick.style.background = v.color;
+        pick.title = v.name;
+        pick.textContent = v.name.split(' ').map(function(w){return w[0]}).join('');
+        pick.addEventListener('click', function(){
+            vg.querySelectorAll('.venue-pick').forEach(function(p){p.classList.remove('selected')});
+            pick.classList.add('selected');
+            pick._venueId = v.id;
+        });
+        pick._venueId = v.id;
+        vg.appendChild(pick);
+    });
+
+    // Show event fields, hide reception fields, clear reception mode
+    editingRecDay = null;
+    document.getElementById('epEventFields').style.display = '';
+    document.getElementById('epRecFields').style.display = 'none';
+    document.getElementById('epDelBtn').style.display = '';
+
+    updatePopoverDur();
+
+    // Position
+    var pw = 220, ph = 260;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    var y = Math.min(my - 20, window.innerHeight - ph - 10);
+    pop.style.left = x + 'px';
+    pop.style.top = Math.max(50, y) + 'px';
+    pop.classList.add('show');
+}
+
+function showMultiPopover(mx, my) {
+    var pop = document.getElementById('editPop');
+    document.getElementById('epEventFields').style.display = 'none';
+    document.getElementById('epRecFields').style.display = 'none';
+    document.getElementById('epDelBtn').style.display = '';
+
+    // Build duplicate-to-day buttons
+    var dupHtml = '<label>' + selectedEvtIds.length + ' events selected</label>';
+    dupHtml += '<label style="margin-top:8px">Duplicate to:</label>';
+    dupHtml += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
+    state.config.days.forEach(function(day, di) {
+        dupHtml += '<button class="ep-btn" onclick="duplicateToDay(' + di + ')" style="flex:1;min-width:60px">' + day.label.substr(0,3) + '</button>';
+    });
+    dupHtml += '</div>';
+
+    // Insert into a temp area
+    var recFields = document.getElementById('epRecFields');
+    recFields.style.display = '';
+    recFields.innerHTML = dupHtml;
+
+    var pw = 220;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    var y = Math.min(my - 20, window.innerHeight - 200);
+    pop.style.left = x + 'px';
+    pop.style.top = Math.max(50, y) + 'px';
+    pop.classList.add('show');
+}
+
+function duplicateToDay(dayIndex) {
+    if (!selectedEvtIds.length) return;
+    pushUndo();
+    selectedEvtIds.forEach(function(id) {
+        var orig = state.events.find(function(x){return x.id===id});
+        if (!orig) return;
+        var copy = JSON.parse(JSON.stringify(orig));
+        copy.id = 'e' + Date.now() + Math.random().toString(36).substr(2,4);
+        copy.dayIndex = dayIndex;
+        state.events.push(copy);
+    });
+    closePopover();
+    render();
+}
+
+function showReceptionPopover(dayIdx, mx, my) {
+    editingRecDay = dayIdx;
+    selectedEvtId = null;
+    var rec = state.config.reception.find(function(r){return r.dayIndex===dayIdx});
+
+    document.getElementById('epEventFields').style.display = 'none';
+    document.getElementById('epRecFields').style.display = '';
+    document.getElementById('epDelBtn').style.display = 'none';
+    document.getElementById('epRecText').value = rec ? rec.text : '';
+
+    var pop = document.getElementById('editPop');
+    var pw = 220;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    var y = Math.min(my - 20, window.innerHeight - 200);
+    pop.style.left = x + 'px';
+    pop.style.top = Math.max(50, y) + 'px';
+    pop.classList.add('show');
+}
+
+function updatePopoverDur() {
+    var evt = state.events.find(function(x){return x.id===selectedEvtId});
+    if (!evt) return;
+    var mins = evt.spanSlots * 30;
+    var hrs = Math.floor(mins / 60);
+    var m = mins % 60;
+    var label = '';
+    if (hrs && m) label = hrs + 'h ' + m + 'm';
+    else if (hrs) label = hrs + (hrs===1 ? ' hour' : ' hours');
+    else label = m + ' min';
+    document.getElementById('epDurVal').textContent = label;
+}
+
+function closePopover() {
+    document.getElementById('editPop').classList.remove('show');
+    // Restore recFields default content
+    document.getElementById('epRecFields').innerHTML = '<label>Reception Hours</label><textarea id="epRecText" style="height:50px"></textarea>';
+    editingRecDay = null;
+    var needRender = selectedEvtId || selectedEvtIds.length;
+    selectedEvtId = null;
+    selectedEvtIds = [];
+    if (needRender) render();
+}
+
+function epDur(delta) {
+    var evt = state.events.find(function(x){return x.id===selectedEvtId});
+    if (!evt) return;
+    var ns = (state.config.endHour - state.config.startHour) * 2;
+    evt.spanSlots = Math.max(1, Math.min(ns - evt.startSlot, evt.spanSlots + delta));
+    render();
+    updatePopoverDur();
+}
+
+function epSave() {
+    // Title save
+    if (editingTitle) {
+        pushUndo();
+        state.config.title = document.getElementById('epGenText').value;
+        editingTitle = false;
+        closePopover(); render(); return;
+    }
+    // Day header save
+    if (editingDayIdx !== null) {
+        pushUndo();
+        state.config.days[editingDayIdx].label = document.getElementById('epDayLabel').value;
+        state.config.days[editingDayIdx].date = document.getElementById('epDayDate').value;
+        editingDayIdx = null;
+        closePopover(); render(); return;
+    }
+    // Reception save
+    if (editingRecDay !== null) {
+        pushUndo();
+        var rec = state.config.reception.find(function(r){return r.dayIndex===editingRecDay});
+        if (!rec) { rec={dayIndex:editingRecDay,text:''}; state.config.reception.push(rec); }
+        rec.text = document.getElementById('epRecText').value;
+        editingRecDay = null;
+        closePopover();
+        render();
+        return;
+    }
+
+    var evt = state.events.find(function(x){return x.id===selectedEvtId});
+    if (!evt) return;
+    pushUndo();
+    evt.title = document.getElementById('epTitle').value.replace(/\\n/g, '\n');
+    evt.subtitle = document.getElementById('epSub').value;
+    var selPick = document.querySelector('.venue-pick.selected');
+    if (selPick) evt.venueId = selPick._venueId;
+    closePopover();
+    render();
+}
+
+function epDelete() {
+    if (!selectedEvtId) return;
+    pushUndo();
+    state.events = state.events.filter(function(x){return x.id!==selectedEvtId});
+    closePopover();
+    render();
+}
+
+// Escape to close popover
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closePopover();
+    if ((e.metaKey || e.ctrlKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedEvtId && !e.target.closest('input,textarea,select')) {
+            epDelete();
+        }
+    }
+});
+
+// Draggable popover
+(function(){
+    var handle = document.getElementById('epDragHandle');
+    var pop = document.getElementById('editPop');
+    var dx=0, dy=0, mx=0, my=0, active=false;
+    handle.addEventListener('mousedown', function(e){
+        e.preventDefault();
+        active = true;
+        mx = e.clientX; my = e.clientY;
+    });
+    document.addEventListener('mousemove', function(e){
+        if(!active) return;
+        dx = e.clientX - mx; dy = e.clientY - my;
+        mx = e.clientX; my = e.clientY;
+        pop.style.left = (pop.offsetLeft + dx) + 'px';
+        pop.style.top = (pop.offsetTop + dy) + 'px';
+    });
+    document.addEventListener('mouseup', function(){ active = false; });
+})();
+
+loadState(); render(); renderSwatches();
+if(!activeVenueId&&state.venues.length)activeVenueId=state.venues[0].id;
+renderSwatches();
+</script>
+</body>
+</html>
