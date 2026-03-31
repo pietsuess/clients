@@ -10,8 +10,9 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
             --slot-h: 24px;
-            --legend-w: 100px;
+            --legend-w: 80px;
             --gutter-w: 24px;
+            --first-gutter-w: 36px;
             --toolbar-h: 44px;
         }
         html, body {
@@ -478,9 +479,42 @@ function loadState(){
 // Clear stale localStorage if URL has ?reset
 if(location.search.indexOf('reset')>-1){ localStorage.removeItem('acyr-schedule'); history.replaceState(null,'',location.pathname); }
 
+var editingDayIdx = null;
+var editingTitle = false;
+
 function editTitle(){
-    var t = prompt('Schedule title:', state.config.title);
-    if(t !== null){ pushUndo(); state.config.title = t; render(); }
+    editingTitle = true;
+    editingDayIdx = null;
+    selectedEvtId = null;
+    editingRecDay = null;
+    var pop = document.getElementById('editPop');
+    var recF = document.getElementById('epRecFields');
+    document.getElementById('epEventFields').style.display = 'none';
+    recF.style.display = '';
+    recF.innerHTML = '<label>Schedule Title</label><input type="text" id="epGenText" value="'+state.config.title+'">';
+    document.getElementById('epDelBtn').style.display = 'none';
+    pop.style.left = (window.innerWidth/2 - 110) + 'px';
+    pop.style.top = '80px';
+    pop.classList.add('show');
+}
+
+function showDayPopover(dayIdx, mx, my){
+    editingDayIdx = dayIdx;
+    editingTitle = false;
+    selectedEvtId = null;
+    editingRecDay = null;
+    var day = state.config.days[dayIdx];
+    var pop = document.getElementById('editPop');
+    var recF = document.getElementById('epRecFields');
+    document.getElementById('epEventFields').style.display = 'none';
+    recF.style.display = '';
+    recF.innerHTML = '<label>Day Name</label><input type="text" id="epDayLabel" value="'+day.label+'"><label>Date</label><input type="text" id="epDayDate" value="'+day.date+'">';
+    document.getElementById('epDelBtn').style.display = 'none';
+    var pw = 220;
+    var x = Math.min(mx + 10, window.innerWidth - pw - 10);
+    pop.style.left = x + 'px';
+    pop.style.top = '80px';
+    pop.classList.add('show');
 }
 
 function resetToDefault(){
@@ -577,7 +611,7 @@ function render(){
     // Headers
     h+='<div class="headers">';
     h+='<div class="hdr hdr-legend" style="background:'+sty.legendHeader.bgColor+';color:'+sty.legendHeader.textColor+'">Colour<br>Legend</div>';
-    h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'">TIME</div>';
+    h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+';width:var(--first-gutter-w)">TIME</div>';
     for(var d=0;d<nd;d++){
         h+='<div class="hdr hdr-day" data-dayedit="'+d+'" style="background:'+sty.dayHeaders.bgColor+';color:'+sty.dayHeaders.textColor+';font-family:\''+sty.dayHeaders.fontFamily+'\';font-size:'+sty.dayHeaders.fontSize+'px;font-weight:'+sty.dayHeaders.fontWeight+';cursor:pointer" title="Click to edit">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
         if(d<nd-1) h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'"></div>';
@@ -593,8 +627,8 @@ function render(){
     state.venues.forEach(function(v,i){ h+='<div class="leg-item" draggable="true" data-legidx="'+i+'" ondragstart="legDragStart(event,'+i+')" ondragover="legDragOver(event,'+i+')" ondragleave="legDragLeave(event)" ondrop="legDrop(event,'+i+')" style="background:'+v.color+';font-family:\''+sty.legendFont.fontFamily+'\';font-size:'+sty.legendFont.fontSize+'px;font-weight:'+sty.legendFont.fontWeight+'"><div class="leg-x" data-legdel="'+i+'" title="Delete '+v.name+'">\u2715</div>'+v.name+'</div>'; });
     h+='</div>';
 
-    // First gutter (TIME)
-    h+='<div class="gutter" style="background:'+sty.gutterColor+'">';
+    // First gutter (TIME) - wider
+    h+='<div class="gutter" style="background:'+sty.gutterColor+';width:var(--first-gutter-w)">';
     for(var s=0;s<ns;s++){
         var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
         var lb='';
@@ -1030,17 +1064,7 @@ document.addEventListener('mousedown', function(e) {
     if (dayHdr) {
         e.preventDefault();
         var di = parseInt(dayHdr.dataset.dayedit);
-        var day = state.config.days[di];
-        var newLabel = prompt('Day name:', day.label);
-        if (newLabel !== null) {
-            var newDate = prompt('Date:', day.date);
-            if (newDate !== null) {
-                pushUndo();
-                day.label = newLabel;
-                day.date = newDate;
-                render();
-            }
-        }
+        showDayPopover(di, e.clientX, e.clientY);
         return;
     }
 
@@ -1359,6 +1383,21 @@ function epDur(delta) {
 }
 
 function epSave() {
+    // Title save
+    if (editingTitle) {
+        pushUndo();
+        state.config.title = document.getElementById('epGenText').value;
+        editingTitle = false;
+        closePopover(); render(); return;
+    }
+    // Day header save
+    if (editingDayIdx !== null) {
+        pushUndo();
+        state.config.days[editingDayIdx].label = document.getElementById('epDayLabel').value;
+        state.config.days[editingDayIdx].date = document.getElementById('epDayDate').value;
+        editingDayIdx = null;
+        closePopover(); render(); return;
+    }
     // Reception save
     if (editingRecDay !== null) {
         pushUndo();
