@@ -526,51 +526,24 @@ function assignColumns(dayEvents){
         item.totalCols = maxConcurrent;
     });
 
-    // For events whose totalCols > their col+1 AND they are the rightmost event
-    // at some slots, stretch their width to fill remaining space
+    // Stretch: each event expands rightward into empty columns at its slots.
+    // Find the nearest occupied column to the right across ALL slots this event covers.
     evts.forEach(function(item){
         var e = item.evt;
         var eEnd = e.startSlot + e.spanSlots;
-        // Find the max col of any overlapping event
-        var maxCol = item.col;
-        evts.forEach(function(other){
-            if(other === item) return;
-            var o = other.evt;
-            if(e.startSlot < o.startSlot+o.spanSlots && o.startSlot < eEnd){
-                if(other.col > maxCol) maxCol = other.col;
-            }
-        });
-        // If this event is the leftmost (col 0) and totalCols is based on
-        // a denser region, but at some slots it has fewer neighbors,
-        // stretch it: width = 100% - (rightmost neighbor's left edge)
-        // Actually simpler: just set colSpan to fill from this col to totalCols
-        item.colSpan = 1; // default: takes 1 column
-
-        // Check if this is the last (rightmost) event at any of its slots
-        // If so, stretch to fill remaining width
-        var isRightmost = true;
+        // Find the closest column to the right that has another event at ANY of our slots
+        var nearestRight = item.totalCols; // default: stretch to end
         for (var s = e.startSlot; s < eEnd; s++) {
             evts.forEach(function(other){
                 if(other === item) return;
                 var o = other.evt;
                 if(s >= o.startSlot && s < o.startSlot + o.spanSlots && other.col > item.col){
-                    isRightmost = false;
+                    if(other.col < nearestRight) nearestRight = other.col;
                 }
             });
-            if (!isRightmost) break;
         }
-        // If rightmost, stretch to fill
-        if (isRightmost && item.totalCols > item.col + 1) {
-            item.colSpan = item.totalCols - item.col;
-        }
-
-        // Also check: if NOT rightmost but the rightmost neighbor doesn't cover
-        // ALL our slots, we might still need to stretch at some slots.
-        // For simplicity, keep single rect with stretch.
+        item.colSpan = nearestRight - item.col;
     });
-
-    // No segments - single rect per event
-    evts.forEach(function(item){ item.segments = null; });
 
     return evts;
 }
