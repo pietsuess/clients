@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unveil — Interactive Mouse Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #2C76E3; overflow: hidden; }
+  .canvas-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60vw; height: 60vh; cursor: crosshair; z-index: 1; touch-action: none; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  .hint { position: fixed; top: 30px; left: 0; width: 100%; text-align: center; font-family: system-ui, sans-serif; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); z-index: 2; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="hint">Click and hold anywhere on the logo</div>
+<canvas id="c"></canvas>
+<div class="canvas-wrap"></div>
+<script>
+(function() {
+  const dots = [
+    {x:411.75,y:45.75},{x:381.25,y:15.25},{x:381.25,y:-15.25},
+    {x:381.25,y:-45.75},{x:381.25,y:-76.25},{x:381.25,y:-106.75},
+    {x:320.25,y:-106.75},{x:320.25,y:-45.75},{x:320.25,y:-15.25},
+    {x:320.25,y:15.25},{x:320.25,y:45.75},{x:198.25,y:-15.25},
+    {x:228.75,y:-15.25},{x:259.25,y:-15.25},{x:259.25,y:-45.75},
+    {x:228.75,y:-76.25},{x:198.25,y:-76.25},{x:167.75,y:-45.75},
+    {x:167.75,y:-15.25},{x:167.75,y:15.25},{x:198.25,y:45.75},
+    {x:228.75,y:45.75},{x:106.75,y:-76.25},{x:106.75,y:-45.75},
+    {x:106.75,y:-15.25},{x:91.5,y:15.25},{x:61,y:45.75},
+    {x:30.5,y:15.25},{x:15.25,y:-15.25},{x:15.25,y:-45.75},
+    {x:15.25,y:-76.25},{x:-45.75,y:45.75},{x:-45.75,y:15.25},
+    {x:-45.75,y:-15.25},{x:-45.75,y:-45.75},{x:-76.25,y:-76.25},
+    {x:-106.75,y:-76.25},{x:-137.25,y:-45.75},{x:-137.25,y:-15.25},
+    {x:-137.25,y:15.25},{x:-137.25,y:45.75},{x:-198.25,y:-76.25},
+    {x:-198.25,y:-45.75},{x:-198.25,y:-15.25},{x:-198.25,y:15.25},
+    {x:-228.75,y:45.75},{x:-259.25,y:45.75},{x:-289.75,y:15.25},
+    {x:-289.75,y:-15.25},{x:-289.75,y:-45.75},{x:-289.75,y:-76.25}
+  ];
+
+  const minX = Math.min(...dots.map(d => d.x));
+  const maxX = Math.max(...dots.map(d => d.x));
+  const minY = Math.min(...dots.map(d => d.y));
+  const maxY = Math.max(...dots.map(d => d.y));
+  const logoW = maxX - minX;
+  const logoH = maxY - minY;
+  const cxLogo = (minX + maxX) / 2;
+  const cyLogo = (minY + maxY) / 2;
+
+  const wrap = document.querySelector('.canvas-wrap');
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  let mouseX = -9999, mouseY = -9999;
+  let hovering = false;
+  let blendFactor = 0;
+  const blendSpeed = 0.08;
+  let idleTimer = null;
+  const idleTimeout = 800;
+  let pressing = false;
+  let pressTime = 0;
+  let pressX = 0, pressY = 0;
+  let pressBlend = 0;
+  const pressBlendSpeed = 0.06;
+
+  function resetIdleTimer() {
+    if (!pressing) hovering = true;
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { if (!pressing) hovering = false; }, idleTimeout);
+  }
+
+  wrap.addEventListener('mouseenter', resetIdleTimer);
+  wrap.addEventListener('mouseleave', () => { hovering = false; pressing = false; clearTimeout(idleTimer); mouseX = -9999; mouseY = -9999; });
+  wrap.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    resetIdleTimer();
+  });
+  wrap.addEventListener('mousedown', (e) => {
+    pressing = true;
+    pressTime = performance.now();
+    pressX = e.clientX;
+    pressY = e.clientY;
+    hovering = false;
+    clearTimeout(idleTimer);
+  });
+  wrap.addEventListener('mouseup', () => {
+    pressing = false;
+    resetIdleTimer();
+  });
+
+  // Touch support — tap to animate radially from that spot
+  wrap.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const t = e.touches[0];
+    pressing = true;
+    pressTime = performance.now();
+    pressX = t.clientX;
+    pressY = t.clientY;
+    hovering = false;
+    clearTimeout(idleTimer);
+  }, { passive: false });
+  wrap.addEventListener('touchend', (e) => {
+    e.preventDefault();
+  }, { passive: false });
+
+  function ltrOffset(d) { return (d.x - minX) / logoW; }
+
+  function dotRadiusAuto(t, offset, maxR) {
+    const growDur = 3.5, dotGrow = 1.0;
+    const shrinkDelay = 2.2, shrinkDur = 3.5, dotShrink = 1.0;
+    const loopLen = shrinkDelay + shrinkDur;
+    const lt = t % loopLen;
+
+    const growDelayT = offset * (growDur - dotGrow);
+    const growProgress = Math.max(0, Math.min(1, (lt - growDelayT) / dotGrow));
+    const growEased = 1 - Math.pow(1 - growProgress, 3);
+
+    const shrinkStart = shrinkDelay + offset * (shrinkDur - dotShrink);
+    const shrinkProgress = Math.max(0, Math.min(1, (lt - shrinkStart) / dotShrink));
+    const shrinkEased = Math.pow(shrinkProgress, 3);
+
+    return maxR * growEased - maxR * shrinkEased;
+  }
+
+  function animate(time) {
+    requestAnimationFrame(animate);
+    const dpr = window.devicePixelRatio || 1;
+    const w = window.innerWidth, h = window.innerHeight;
+    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    ctx.clearRect(0, 0, w, h);
+
+    blendFactor += (hovering ? 1 : 0 - blendFactor) * blendSpeed;
+    blendFactor = Math.max(0, Math.min(1, blendFactor));
+    // Auto-release press after one loop completes
+    const pressDur = (time - pressTime) * 0.001;
+    if (pressing && pressDur > 0) {
+      const loopLenCheck = 2.0 + 2.5 * 0.95 + 1.2 + 0.2;
+      if (pressDur > loopLenCheck) pressing = false;
+    }
+    pressBlend += (pressing ? 1 : 0 - pressBlend) * pressBlendSpeed;
+    pressBlend = Math.max(0, Math.min(1, pressBlend));
+
+    const fitSize = Math.min(w, h) * 0.85;
+    const scale = fitSize / Math.max(logoW, logoH);
+    const offsetX = w / 2;
+    const offsetY = h / 2;
+
+    const maxSize = 50;
+    const t = time * 0.001;
+    const maxR = (maxSize / 2) * scale;
+
+    // Precompute screen positions and distances
+    let maxMouseDist = 0;
+    let maxPressDist = 0;
+    const screenDots = [];
+    for (let i = 0; i < dots.length; i++) {
+      const d = dots[i];
+      const px = (d.x - cxLogo) * scale + offsetX;
+      const py = (d.y - cyLogo) * scale + offsetY;
+      const dx = (px - mouseX) * 0.4;
+      const dy = (py - mouseY) * 1.8;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > maxMouseDist) maxMouseDist = dist;
+      const pdx = (px - pressX) * 0.4;
+      const pdy = (py - pressY) * 1.8;
+      const pdist = Math.sqrt(pdx * pdx + pdy * pdy);
+      if (pdist > maxPressDist) maxPressDist = pdist;
+      screenDots.push({ px, py, ltr: ltrOffset(d), dist, pdist });
+    }
+
+    ctx.fillStyle = '#ffffff';
+
+    for (let i = 0; i < screenDots.length; i++) {
+      const sd = screenDots[i];
+
+      // Auto animation: 0 to 50 to 0
+      const autoR = Math.max(0, dotRadiusAuto(t, sd.ltr, maxR));
+
+      // Mouse-driven radial: 0 at farthest, 50 directly under mouse
+      const normDist = maxMouseDist > 0 ? sd.dist / maxMouseDist : 0;
+      const falloff = 1 - normDist;
+      const eased = falloff * falloff * (3 - 2 * falloff);
+      const mouseR = maxR * eased;
+
+      // Press-driven radial animation from press point
+      const pressNorm = maxPressDist > 0 ? sd.pdist / maxPressDist : 0;
+      const growDur = 2.5, dotGrow = 1.2;
+      const shrinkDelay = 2.0, shrinkDur = 2.5, dotShrink = 1.2;
+      // Loop must be long enough for farthest dot to fully shrink
+      const loopLen = shrinkDelay + shrinkDur * 0.95 + dotShrink + 0.2;
+      const pt = pressDur % loopLen;
+      const pressGrowDelay = pressNorm * growDur * 0.95;
+      const pressGrowProg = Math.max(0, Math.min(1, (pt - pressGrowDelay) / dotGrow));
+      const pressGrowEased = 1 - Math.pow(1 - pressGrowProg, 3);
+      const pressShrinkStart = shrinkDelay + pressNorm * shrinkDur * 0.95;
+      const pressShrinkProg = Math.max(0, Math.min(1, (pt - pressShrinkStart) / dotShrink));
+      const pressShrinkEased = Math.pow(pressShrinkProg, 3);
+      const pressR = maxR * pressGrowEased - maxR * pressShrinkEased;
+
+      // Blend: press overrides hover overrides auto
+      let r;
+      if (pressBlend > 0.01) {
+        const baseR = autoR * (1 - blendFactor) + mouseR * blendFactor;
+        r = baseR * (1 - pressBlend) + Math.max(0, pressR) * pressBlend;
+      } else {
+        r = autoR * (1 - blendFactor) + mouseR * blendFactor;
+      }
+
+      if (r > 0.5) {
+        ctx.beginPath();
+        ctx.arc(sd.px, sd.py, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+  requestAnimationFrame(animate);
+})();
+</script>
+</body>
+</html>
