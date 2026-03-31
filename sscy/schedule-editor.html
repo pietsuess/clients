@@ -474,7 +474,7 @@ function render(){
         var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
         var lb='';
         if(isH){if(hr===12)lb='NOON';else if(hr<12)lb=hr+':00';else lb=(hr-12)+':00';}else lb=':30';
-        h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+sty.gutterFont.fontSize+'px;font-weight:'+sty.gutterFont.fontWeight+'">'+lb+'</div>';
+        h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+(isH?sty.gutterFont.fontSize:sty.gutterFont.fontSize-2)+'px;font-weight:'+(isH?sty.gutterFont.fontWeight:400)+'">'+lb+'</div>';
     }
     h+='</div>';
 
@@ -556,7 +556,7 @@ function render(){
                 var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
                 var lb='';
                 if(isH){var sf=hr<12?'':'';if(hr===12)lb='12';else if(hr<12)lb=''+hr;else lb=''+(hr-12);}else lb='30';
-                h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+sty.gutterFont.fontSize+'px;font-weight:'+sty.gutterFont.fontWeight+'">'+lb+'</div>';
+                h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+(isH?sty.gutterFont.fontSize:sty.gutterFont.fontSize-2)+'px;font-weight:'+(isH?sty.gutterFont.fontWeight:400)+'">'+lb+'</div>';
             }
             h+='</div>';
         }
@@ -568,7 +568,7 @@ function render(){
         var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
         var lb='';
         if(isH){var sf=hr<12?'a':'p';if(hr===12)lb='12p';else if(hr<12)lb=hr+sf;else lb=(hr-12)+sf;}else lb='30';
-        h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+sty.gutterFont.fontSize+'px;font-weight:'+sty.gutterFont.fontWeight+'">'+lb+'</div>';
+        h+='<div class="gut-slot'+(isH?' hour':'')+'" style="color:'+sty.gutterText+';font-family:\''+sty.gutterFont.fontFamily+'\';font-size:'+(isH?sty.gutterFont.fontSize:sty.gutterFont.fontSize-2)+'px;font-weight:'+(isH?sty.gutterFont.fontWeight:400)+'">'+lb+'</div>';
     }
     h+='</div>';
 
