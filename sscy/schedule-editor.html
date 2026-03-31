@@ -682,81 +682,86 @@ function exportPDF(){
     var jsPDF=window.jspdf.jsPDF;
     var doc=new jsPDF({orientation:'landscape',unit:'pt',format:[2592,1728]});
     var cfg=state.config, sty=state.styles, nd=cfg.days.length, ns=(cfg.endHour-cfg.startHour)*2;
-    var W=2592, H=1728, legW=140, gutW=50, firstGutW=60, titleH=70, hdrH=50, recH=50, bottomH=20;
-    var totalGutW = firstGutW + (nd-1)*gutW + gutW; // first + between + right
+    var W=2592, H=1728;
+
+    // Scale factor: screen uses ~1200px wide content area, PDF is 2592pt
+    // Match CSS ratios exactly: legend 80, firstGut 36, gut 24, days flex
+    var SC = 2.0; // scale multiplier from screen px to PDF pt
+    var legW = 80*SC;   // 160
+    var firstGutW = 36*SC; // 72
+    var gutW = 24*SC;   // 48
+    var titleH = 50*SC; // 100
+    var hdrH = 35*SC;   // 70
+    var recH = 48*SC;   // 96
+    var bottomH = 16*SC; // 32
+    var totalGutW = firstGutW + (nd-1)*gutW + gutW;
     var dayW = (W - legW - totalGutW) / nd;
     var gridH = H - titleH - hdrH - recH - bottomH;
     var slotH = gridH / ns;
 
-    // Helper: set fill from hex
+    // Font size scale: screen CSS rem/px to PDF pt
+    // Screen event font is ~10px, at 2x scale = 20pt in PDF space
+    var FS = SC * 1.0;
+
     function fill(hex){ var c=hexRGB(hex); doc.setFillColor(c[0],c[1],c[2]); }
     function txtC(hex){ var c=hexRGB(hex); doc.setTextColor(c[0],c[1],c[2]); }
     function drawC(hex){ var c=hexRGB(hex); doc.setDrawColor(c[0],c[1],c[2]); }
 
-    // Title banner
+    // ---- TITLE BANNER ----
     fill(sty.titleBg); doc.rect(0,0,W,titleH,'F');
     txtC(sty.title.color);
-    doc.setFont('helvetica','bold'); doc.setFontSize(36);
-    doc.text(cfg.title, W/2, titleH/2+12, {align:'center'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(sty.title.fontSize * FS);
+    doc.text(cfg.title, W/2, titleH/2 + sty.title.fontSize*FS*0.35, {align:'center'});
 
-    // Header row
+    // ---- HEADER ROW ----
     var hy = titleH;
-    // Legend header
     fill(sty.legendHeader.bgColor); doc.rect(0,hy,legW,hdrH,'F');
     txtC(sty.legendHeader.textColor);
-    doc.setFontSize(8); doc.text('COLOUR\nLEGEND', legW/2, hy+hdrH/2, {align:'center'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(7*FS);
+    doc.text('COLOUR\nLEGEND', legW/2, hy+hdrH/2, {align:'center'});
 
-    // First gutter header (TIME)
+    // First gutter header
     fill(sty.gutterColor); doc.rect(legW,hy,firstGutW,hdrH,'F');
-    txtC(sty.gutterText); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text('TIME', legW+firstGutW/2, hy+hdrH/2+3, {align:'center'});
+    txtC(sty.gutterText); doc.setFont('helvetica','bold'); doc.setFontSize(sty.gutterFont.fontSize*FS);
+    doc.text('TIME', legW+firstGutW/2, hy+hdrH/2+3*SC, {align:'center'});
 
-    // Day headers + gutter headers
-    var dhRGB = hexRGB(sty.dayHeaders.bgColor);
-    var gutRGB = hexRGB(sty.gutterColor);
+    // Day headers
     for(var d=0;d<nd;d++){
         var dx = legW + firstGutW + d*(dayW+gutW);
-        doc.setFillColor(dhRGB[0],dhRGB[1],dhRGB[2]); doc.rect(dx,hy,dayW,hdrH,'F');
+        fill(sty.dayHeaders.bgColor); doc.rect(dx,hy,dayW,hdrH,'F');
         txtC(sty.dayHeaders.textColor);
-        doc.setFont('helvetica','bold'); doc.setFontSize(14);
-        doc.text(cfg.days[d].label+' '+cfg.days[d].date, dx+dayW/2, hy+hdrH/2+5, {align:'center'});
-        // Inter-day gutter header
-        if(d<nd-1){
-            doc.setFillColor(gutRGB[0],gutRGB[1],gutRGB[2]);
-            doc.rect(dx+dayW,hy,gutW,hdrH,'F');
-        }
+        doc.setFont('helvetica','bold'); doc.setFontSize(sty.dayHeaders.fontSize*FS);
+        doc.text(cfg.days[d].label+' '+cfg.days[d].date, dx+dayW/2, hy+hdrH/2+sty.dayHeaders.fontSize*FS*0.35, {align:'center'});
+        if(d<nd-1){ fill(sty.gutterColor); doc.rect(dx+dayW,hy,gutW,hdrH,'F'); }
     }
-    // Right gutter header
-    doc.setFillColor(gutRGB[0],gutRGB[1],gutRGB[2]);
-    doc.rect(W-gutW,hy,gutW,hdrH,'F');
+    fill(sty.gutterColor); doc.rect(W-gutW,hy,gutW,hdrH,'F');
 
     var gy = titleH + hdrH;
 
-    // Venue legend - full color backgrounds, white text
+    // ---- VENUE LEGEND ----
     var lih = gridH / state.venues.length;
     state.venues.forEach(function(v,i){
         var ly = gy + i*lih;
         fill(v.color); doc.rect(0, ly, legW, lih, 'F');
-        // Thin separator
         if(i>0){ doc.setDrawColor(255,255,255); doc.setLineWidth(0.5); doc.line(0,ly,legW,ly); }
-        // White text, centered
         if(brightness(v.color)>160) doc.setTextColor(50,50,50); else doc.setTextColor(255,255,255);
-        doc.setFont('helvetica','bold'); doc.setFontSize(8);
+        doc.setFont('helvetica','bold'); doc.setFontSize(sty.legendFont.fontSize*FS);
         var vLines = v.name.split(' ');
-        // Wrap long names
+        var lh = sty.legendFont.fontSize*FS*1.2;
         if(v.name.length > 10 && vLines.length > 1){
             var mid = Math.ceil(vLines.length/2);
             var l1 = vLines.slice(0,mid).join(' '), l2 = vLines.slice(mid).join(' ');
-            doc.text(l1, legW/2, ly+lih/2-3, {align:'center'});
-            doc.text(l2, legW/2, ly+lih/2+7, {align:'center'});
+            doc.text(l1, legW/2, ly+lih/2-lh*0.3, {align:'center'});
+            doc.text(l2, legW/2, ly+lih/2+lh*0.7, {align:'center'});
         } else {
-            doc.text(v.name, legW/2, ly+lih/2+3, {align:'center'});
+            doc.text(v.name, legW/2, ly+lih/2+sty.legendFont.fontSize*FS*0.35, {align:'center'});
         }
     });
 
-    // Time gutter helper
+    // ---- TIME GUTTERS ----
     function drawGutter(gx, gw, showFull){
         fill(sty.gutterColor); doc.rect(gx, gy, gw, gridH, 'F');
+        var gfs = sty.gutterFont.fontSize * FS;
         for(var s=0;s<ns;s++){
             var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
             var lb='';
@@ -766,19 +771,18 @@ function exportPDF(){
                 if(isH){if(hr===12)lb='12';else if(hr<12)lb=''+hr;else lb=''+(hr-12);}else lb='30';
             }
             txtC(sty.gutterText);
-            doc.setFont('helvetica',isH?'bold':'normal'); doc.setFontSize(isH?8:6.5);
-            doc.text(lb, gx+gw/2, gy+s*slotH+slotH/2+2.5, {align:'center'});
+            doc.setFont('helvetica',isH?'bold':'normal'); doc.setFontSize(isH?gfs:gfs*0.8);
+            doc.text(lb, gx+gw/2, gy+s*slotH+slotH/2+gfs*0.35, {align:'center'});
             if(s>0){ drawC('#e0c040'); doc.setLineWidth(isH?0.5:0.25); doc.line(gx,gy+s*slotH,gx+gw,gy+s*slotH); }
         }
     }
-
-    // First gutter (TIME - wider, full labels)
     drawGutter(legW, firstGutW, true);
 
-    // Row stripe colors
+    // ---- DAY COLUMNS ----
     var s1=hexRGB(sty.rowStripe1), s2=hexRGB(sty.rowStripe2);
+    var evFS = sty.eventFont.fontSize * FS;
+    var evLH = evFS * 1.15;
 
-    // Day columns
     for(var d=0;d<nd;d++){
         var dx = legW + firstGutW + d*(dayW+gutW);
 
@@ -787,19 +791,16 @@ function exportPDF(){
             var sc = Math.floor(s/2)%2===0 ? s1 : s2;
             doc.setFillColor(sc[0],sc[1],sc[2]); doc.rect(dx, gy+s*slotH, dayW, slotH, 'F');
         }
-
         // Grid lines
         for(var s=1;s<ns;s++){
-            var isH = s%2===0;
-            drawC(sty.gridLines); doc.setLineWidth(isH?0.5:0.25);
+            drawC(sty.gridLines); doc.setLineWidth(s%2===0?0.5:0.25);
             doc.line(dx, gy+s*slotH, dx+dayW, gy+s*slotH);
         }
 
-        // Events using leftPct/widthPct stretch system
+        // Events
         var pdfDevs = state.events.filter(function(e){return e.dayIndex===d});
         var pdfLaid = assignColumns(pdfDevs);
 
-        // Render spanning labels tracking
         var spanGroups = {};
         pdfLaid.forEach(function(item){
             var evt=item.evt;
@@ -810,7 +811,6 @@ function exportPDF(){
             spanGroups[key].push(item);
         });
 
-        // Draw event color blocks
         pdfLaid.forEach(function(item){
             var evt=item.evt;
             var v=state.venues.find(function(x){return x.id===evt.venueId}); if(!v)return;
@@ -820,20 +820,17 @@ function exportPDF(){
             var eh = evt.spanSlots*slotH;
 
             fill(v.color); doc.rect(ex, ey, ew, eh, 'F');
-            // Right border
-            doc.setDrawColor(255,255,255); doc.setLineWidth(0.5);
+            // Semi-transparent right border (match screen rgba(255,255,255,0.15))
+            doc.setDrawColor(230,230,230); doc.setLineWidth(0.3);
             doc.line(ex+ew, ey, ex+ew, ey+eh);
 
             var isSpanned = spanGroups[item._spanKey] && spanGroups[item._spanKey].length > 1;
             if(!isSpanned){
                 if(brightness(v.color)>160) doc.setTextColor(50,50,50); else doc.setTextColor(255,255,255);
-                doc.setFont('helvetica','bold'); doc.setFontSize(8);
+                doc.setFont('helvetica','bold'); doc.setFontSize(evFS);
                 var lines=(evt.title||'').split('\n');
-                var lineH = 9;
-                var ty = ey + eh/2 - (lines.length-1)*lineH/2 + 3;
-                lines.forEach(function(l,li){
-                    doc.text(l, ex+ew/2, ty+li*lineH, {align:'center'});
-                });
+                var ty = ey + eh/2 - (lines.length-1)*evLH/2 + evFS*0.35;
+                lines.forEach(function(l,li){ doc.text(l, ex+ew/2, ty+li*evLH, {align:'center'}); });
             }
         });
 
@@ -847,65 +844,49 @@ function exportPDF(){
             group.forEach(function(item){
                 var l = dx + (item.leftPct/100)*dayW;
                 var r = l + (item.widthPct/100)*dayW;
-                if(l<minLeft) minLeft=l;
-                if(r>maxRight) maxRight=r;
+                if(l<minLeft) minLeft=l; if(r>maxRight) maxRight=r;
             });
             var evt=group[0].evt;
-            var ey = gy + evt.startSlot*slotH;
-            var eh = evt.spanSlots*slotH;
+            var ey = gy + evt.startSlot*slotH, eh = evt.spanSlots*slotH;
             var v=state.venues.find(function(x){return x.id===evt.venueId});
             if(v && brightness(v.color)>160) doc.setTextColor(50,50,50); else doc.setTextColor(255,255,255);
-            doc.setFont('helvetica','bold'); doc.setFontSize(8);
+            doc.setFont('helvetica','bold'); doc.setFontSize(evFS);
             var lines=(evt.title||'').split('\n');
-            var lineH = 9;
             var cx = (minLeft+maxRight)/2;
-            var ty = ey + eh/2 - (lines.length-1)*lineH/2 + 3;
-            lines.forEach(function(l,li){
-                doc.text(l, cx, ty+li*lineH, {align:'center'});
-            });
+            var ty = ey + eh/2 - (lines.length-1)*evLH/2 + evFS*0.35;
+            lines.forEach(function(l,li){ doc.text(l, cx, ty+li*evLH, {align:'center'}); });
         });
 
-        // Inter-day gutter
         if(d<nd-1) drawGutter(dx+dayW, gutW, false);
     }
 
-    // Right gutter (abbreviated labels)
-    var rgx = W - gutW;
-    fill(sty.gutterColor); doc.rect(rgx, gy, gutW, gridH, 'F');
-    for(var s=0;s<ns;s++){
-        var hr=cfg.startHour+Math.floor(s/2), mn=(s%2)*30, isH=mn===0;
-        var lb='';
-        if(isH){var sf=hr<12?'a':'p';if(hr===12)lb='12p';else if(hr<12)lb=hr+sf;else lb=(hr-12)+sf;}else lb='30';
-        txtC(sty.gutterText);
-        doc.setFont('helvetica',isH?'bold':'normal'); doc.setFontSize(isH?7:5.5);
-        doc.text(lb, rgx+gutW/2, gy+s*slotH+slotH/2+2.5, {align:'center'});
-        if(s>0){ drawC('#e0c040'); doc.setLineWidth(isH?0.5:0.25); doc.line(rgx,gy+s*slotH,rgx+gutW,gy+s*slotH); }
-    }
+    // Right gutter
+    drawGutter(W-gutW, gutW, false);
 
-    // Reception row
+    // ---- RECEPTION ROW ----
     var ry = gy + gridH;
-    var recRGB = hexRGB(sty.receptionBg || '#F4D352');
-    var recCirRGB = hexRGB(sty.receptionCircle || '#17A698');
-    doc.setFillColor(recRGB[0],recRGB[1],recRGB[2]); doc.rect(0,ry,W,recH,'F');
+    fill(sty.titleBg); doc.rect(0,ry,W,recH,'F');
+    var recFS = sty.receptionFont.fontSize * FS;
     for(var d=0;d<nd;d++){
         var dx = legW + firstGutW + d*(dayW+gutW);
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
-        // White inset box
-        doc.setFillColor(255,255,255); doc.rect(dx+dayW*0.15, ry+6, dayW*0.7, recH-12, 'F');
-        doc.setDrawColor(180,180,180); doc.setLineWidth(0.5);
-        doc.rect(dx+dayW*0.15, ry+6, dayW*0.7, recH-12, 'S');
-        // R circle
-        var cx = dx+dayW*0.15+12, cy = ry+recH/2;
-        doc.setDrawColor(recCirRGB[0],recCirRGB[1],recCirRGB[2]); doc.setLineWidth(1.5);
-        doc.circle(cx, cy, 7);
-        doc.setTextColor(recCirRGB[0],recCirRGB[1],recCirRGB[2]);
-        doc.setFont('helvetica','bold'); doc.setFontSize(8);
-        doc.text('R', cx, cy+3, {align:'center'});
+        // White inset box (screen: left:25% right:25%)
+        var bx = dx + dayW*0.25, bw = dayW*0.5, by = ry + 6*SC, bh = recH - 12*SC;
+        doc.setFillColor(255,255,255); doc.rect(bx, by, bw, bh, 'F');
+        doc.setDrawColor(187,187,187); doc.setLineWidth(0.5); doc.rect(bx, by, bw, bh, 'S');
+        // R circle (screen: #7B2D5F purple, 18px = 9pt radius at SC)
+        var ccx = bx + 9*SC, ccy = ry + recH/2;
+        drawC('#7B2D5F'); doc.setLineWidth(2); doc.circle(ccx, ccy, 9*SC);
+        txtC('#7B2D5F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8*FS);
+        doc.text('R', ccx, ccy+8*FS*0.35, {align:'center'});
         // Reception text
         if(rec){
-            doc.setTextColor(50,50,50); doc.setFont('helvetica','bold'); doc.setFontSize(7);
-            var txt = 'Reception ' + rec.text.replace(/\n/g,', ').replace(/<br>/g,', ');
-            doc.text(txt, dx+dayW*0.5, ry+recH/2+3, {align:'center'});
+            doc.setTextColor(50,50,50); doc.setFont('helvetica','bold'); doc.setFontSize(recFS);
+            var txt = 'Reception\n' + rec.text.replace(/<br>/g,'\n');
+            var rl = txt.split('\n');
+            var rty = ry + recH/2 - (rl.length-1)*recFS*0.6 + recFS*0.35;
+            rl.forEach(function(l,i){ doc.text(l, bx+bw/2+5*SC, rty+i*recFS*1.2, {align:'center'}); });
         }
     }
 
