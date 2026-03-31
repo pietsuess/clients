@@ -788,13 +788,15 @@ function renderSettings(){
         h+='</div>';
     });
 
-    h+='<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Venue Colors</div>';
+    h+='<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Venues / Locations</div>';
     state.venues.forEach(function(v,i){
-        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-        h+='<span>'+v.name+'</span>';
-        h+='<input type="color" value="'+v.color+'" data-venue="'+i+'" onchange="updateVenueColor(this)" style="width:32px;height:22px;border:none;cursor:pointer;background:none">';
+        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
+        h+='<input type="color" value="'+v.color+'" data-venue="'+i+'" onchange="updateVenueColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none;flex-shrink:0">';
+        h+='<input type="text" value="'+v.name+'" data-vname="'+i+'" onchange="updateVenueName(this)" style="flex:1;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:inherit">';
+        h+='<button onclick="deleteVenue('+i+')" style="background:none;border:none;color:#f66;cursor:pointer;font-size:0.7rem;padding:0 4px" title="Delete">\u2715</button>';
         h+='</div>';
     });
+    h+='<button onclick="addVenue()" style="margin-top:6px;padding:4px 10px;border-radius:3px;border:1px solid #555;background:#444;color:#fff;font-size:0.6rem;cursor:pointer;font-family:inherit;width:100%">+ Add Venue</button>';
     c.innerHTML=h;
 }
 
@@ -808,6 +810,24 @@ function updateStyleColor(inp){
 
 function updateVenueColor(inp){
     state.venues[parseInt(inp.dataset.venue)].color=inp.value;
+    render(); renderSwatches(); renderSettings();
+}
+
+function updateVenueName(inp){
+    state.venues[parseInt(inp.dataset.vname)].name=inp.value;
+    render(); renderSwatches();
+}
+
+function addVenue(){
+    var id='venue-'+Date.now();
+    state.venues.push({id:id, name:'New Venue', color:'#888888'});
+    render(); renderSwatches(); renderSettings();
+}
+
+function deleteVenue(idx){
+    var v=state.venues[idx];
+    if(!confirm('Delete venue "'+v.name+'"? Events using it will lose their color.')) return;
+    state.venues.splice(idx,1);
     render(); renderSwatches(); renderSettings();
 }
 
