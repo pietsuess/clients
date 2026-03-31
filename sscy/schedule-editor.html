@@ -380,9 +380,9 @@ var DEFAULT_STATE = {
     ],
     images: [],
     styles: {
-        title:{fontFamily:"Cinzel",fontSize:28,fontWeight:700,letterSpacing:3,color:"#fff"},
+        title:{fontFamily:"Cinzel",fontSize:28,fontWeight:700,letterSpacing:3,color:"#ffffff"},
         titleBg:"#17A698",
-        dayHeaders:{bgColor:"#17A698",textColor:"#fff",fontFamily:"Archivo Narrow",fontSize:13,fontWeight:700},
+        dayHeaders:{bgColor:"#17A698",textColor:"#ffffff",fontFamily:"Archivo Narrow",fontSize:13,fontWeight:700},
         legendHeader:{bgColor:"#333333",textColor:"#ffffff"},
         legendFont:{fontFamily:"Archivo Narrow",fontSize:10,fontWeight:600},
         gutterColor:"#F4D352",
@@ -400,6 +400,14 @@ var DEFAULT_STATE = {
 var state, activeVenueId=null;
 var undoStack = [];
 var MAX_UNDO = 3;
+
+// Normalize hex: expand 3-digit to 6-digit, ensure # prefix
+function normHex(v){
+    v=v.trim();
+    if(v.charAt(0)!=='#') v='#'+v;
+    if(/^#[0-9a-fA-F]{3}$/.test(v)) v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3];
+    return v.toLowerCase();
+}
 
 function pushUndo(){
     undoStack.push(JSON.stringify(state));
@@ -821,8 +829,9 @@ function renderSettings(){
     items.forEach(function(it){
         h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">';
         h+='<span style="flex:1">'+it.label+'</span>';
-        h+='<input type="text" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:70px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:monospace">';
-        h+='<input type="color" value="'+it.val+'" data-key="'+it.key+'" oninput="updateStyleColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none">';
+        var nv=normHex(it.val);
+        h+='<input type="text" value="'+nv+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:70px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:monospace">';
+        h+='<input type="color" value="'+nv+'" data-key="'+it.key+'" oninput="updateStyleColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none">';
         h+='</div>';
     });
     // Font settings
@@ -873,9 +882,8 @@ function renderSettings(){
 }
 
 function updateStyleColor(inp){
-    var key=inp.dataset.key, val=inp.value.trim();
-    if(val && val.charAt(0)!=='#') val='#'+val;
-    if(!/^#[0-9a-fA-F]{3,6}$/.test(val)) return;
+    var key=inp.dataset.key, val=normHex(inp.value);
+    if(!/^#[0-9a-fA-F]{6}$/.test(val)) return;
     pushUndo();
     var parts=key.split('.');
     if(parts.length===2) state.styles[parts[0]][parts[1]]=val;
