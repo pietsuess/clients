@@ -454,30 +454,34 @@ function pushUndo(){
 function undo(){
     if(!undoStack.length) return;
     state = JSON.parse(undoStack.pop());
+    mergeDefaults();
     render(); renderSwatches();
     var p=document.getElementById('settingsPanel');
     if(p.style.display!=='none') renderSettings();
 }
+function mergeDefaults(){
+    var ds=DEFAULT_STATE.styles;
+    if(!state.styles) state.styles={};
+    for(var k in ds){ if(state.styles[k]===undefined) state.styles[k]=ds[k]; }
+    ['title','dayHeaders','legendHeader','legendFont','gutterFont','eventFont'].forEach(function(k){
+        if(!state.styles[k]) state.styles[k]=JSON.parse(JSON.stringify(ds[k]));
+    });
+}
 function loadState(){
     var s=localStorage.getItem('acyr-schedule');
     if(s){
-        try{
-            state=JSON.parse(s);
-            // Merge in any missing styles from defaults
-            var ds=DEFAULT_STATE.styles;
-            if(!state.styles) state.styles={};
-            for(var k in ds){ if(state.styles[k]===undefined) state.styles[k]=ds[k]; }
-            if(!state.styles.title) state.styles.title=ds.title;
-            if(!state.styles.dayHeaders) state.styles.dayHeaders=ds.dayHeaders;
-            if(!state.styles.legendHeader) state.styles.legendHeader=ds.legendHeader;
-            return;
-        }catch(e){}
+        try{ state=JSON.parse(s); mergeDefaults(); return; }catch(e){}
     }
     state=JSON.parse(JSON.stringify(DEFAULT_STATE));
 }
 
 // Clear stale localStorage if URL has ?reset
 if(location.search.indexOf('reset')>-1){ localStorage.removeItem('acyr-schedule'); history.replaceState(null,'',location.pathname); }
+
+function editTitle(){
+    var t = prompt('Schedule title:', state.config.title);
+    if(t !== null){ pushUndo(); state.config.title = t; render(); }
+}
 
 function resetToDefault(){
     if(!confirm('Discard all changes and reset to defaults?')) return;
@@ -568,14 +572,14 @@ function render(){
     var sty=state.styles;
 
     // Title
-    h+='<div class="title-banner" style="background:'+sty.titleBg+'"><div class="title-text" style="font-family:'+sty.title.fontFamily+';font-size:'+sty.title.fontSize+'px;color:'+sty.title.color+'">'+cfg.title+'</div></div>';
+    h+='<div class="title-banner" style="background:'+sty.titleBg+'"><div class="title-text" onclick="editTitle()" style="cursor:pointer;font-family:'+sty.title.fontFamily+';font-size:'+sty.title.fontSize+'px;color:'+sty.title.color+'" title="Click to edit">'+cfg.title+'</div></div>';
 
     // Headers
     h+='<div class="headers">';
     h+='<div class="hdr hdr-legend" style="background:'+sty.legendHeader.bgColor+';color:'+sty.legendHeader.textColor+'">Colour<br>Legend</div>';
     h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'">TIME</div>';
     for(var d=0;d<nd;d++){
-        h+='<div class="hdr hdr-day" style="background:'+sty.dayHeaders.bgColor+';color:'+sty.dayHeaders.textColor+';font-family:\''+sty.dayHeaders.fontFamily+'\';font-size:'+sty.dayHeaders.fontSize+'px;font-weight:'+sty.dayHeaders.fontWeight+'">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
+        h+='<div class="hdr hdr-day" data-dayedit="'+d+'" style="background:'+sty.dayHeaders.bgColor+';color:'+sty.dayHeaders.textColor+';font-family:\''+sty.dayHeaders.fontFamily+'\';font-size:'+sty.dayHeaders.fontSize+'px;font-weight:'+sty.dayHeaders.fontWeight+';cursor:pointer" title="Click to edit">'+cfg.days[d].label+' '+cfg.days[d].date+'</div>';
         if(d<nd-1) h+='<div class="hdr hdr-gutter" style="background:'+sty.gutterColor+';color:'+sty.gutterText+'"></div>';
     }
     h+='<div class="hdr hdr-gutter last" style="background:'+sty.gutterColor+'"></div>';
@@ -1019,6 +1023,25 @@ document.addEventListener('mousedown', function(e) {
     // Close popover if clicking outside
     if (!e.target.closest('.edit-pop') && !evEl) {
         closePopover();
+    }
+
+    // Click day header to edit
+    var dayHdr = e.target.closest('.hdr-day[data-dayedit]');
+    if (dayHdr) {
+        e.preventDefault();
+        var di = parseInt(dayHdr.dataset.dayedit);
+        var day = state.config.days[di];
+        var newLabel = prompt('Day name:', day.label);
+        if (newLabel !== null) {
+            var newDate = prompt('Date:', day.date);
+            if (newDate !== null) {
+                pushUndo();
+                day.label = newLabel;
+                day.date = newDate;
+                render();
+            }
+        }
+        return;
     }
 
     // X delete button on venue legend
