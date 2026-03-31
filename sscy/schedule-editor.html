@@ -803,9 +803,10 @@ function renderSettings(){
     ];
     var h='';
     items.forEach(function(it){
-        h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-        h+='<span>'+it.label+'</span>';
-        h+='<input type="color" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:32px;height:22px;border:none;cursor:pointer;background:none">';
+        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">';
+        h+='<span style="flex:1">'+it.label+'</span>';
+        h+='<input type="text" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:70px;font-size:0.55rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:monospace">';
+        h+='<input type="color" value="'+it.val+'" data-key="'+it.key+'" onchange="updateStyleColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none">';
         h+='</div>';
     });
     // Font settings
@@ -844,8 +845,9 @@ function renderSettings(){
 
     h+='<div style="font-weight:700;font-size:0.75rem;margin:16px 0 12px;border-bottom:1px solid #444;padding-bottom:8px">Venues / Locations</div>';
     state.venues.forEach(function(v,i){
-        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
-        h+='<input type="color" value="'+v.color+'" data-venue="'+i+'" onchange="updateVenueColor(this)" style="width:24px;height:20px;border:none;cursor:pointer;background:none;flex-shrink:0">';
+        h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:5px">';
+        h+='<input type="color" value="'+v.color+'" data-venue="'+i+'" onchange="updateVenueColor(this)" style="width:22px;height:18px;border:none;cursor:pointer;background:none;flex-shrink:0">';
+        h+='<input type="text" value="'+v.color+'" data-vhex="'+i+'" onchange="updateVenueHex(this)" style="width:62px;font-size:0.5rem;background:#444;color:#fff;border:1px solid #555;padding:2px 3px;border-radius:2px;font-family:monospace;flex-shrink:0">';
         h+='<input type="text" value="'+v.name+'" data-vname="'+i+'" onchange="updateVenueName(this)" style="flex:1;font-size:0.6rem;background:#444;color:#fff;border:1px solid #555;padding:2px 4px;border-radius:2px;font-family:inherit">';
         h+='<button onclick="deleteVenue('+i+')" style="background:none;border:none;color:#f66;cursor:pointer;font-size:0.7rem;padding:0 4px" title="Delete">\u2715</button>';
         h+='</div>';
@@ -865,6 +867,15 @@ function updateStyleColor(inp){
 function updateVenueColor(inp){
     state.venues[parseInt(inp.dataset.venue)].color=inp.value;
     render(); renderSwatches(); renderSettings();
+}
+
+function updateVenueHex(inp){
+    var val=inp.value.trim();
+    if(val.charAt(0)!=='#') val='#'+val;
+    if(/^#[0-9a-fA-F]{6}$/.test(val)){
+        state.venues[parseInt(inp.dataset.vhex)].color=val;
+        render(); renderSwatches(); renderSettings();
+    }
 }
 
 function updateVenueName(inp){
