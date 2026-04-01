@@ -8,15 +8,53 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #fff; font-family: sans-serif; }
 
-        .hero {
+        .hero-parallax {
+            position: relative;
             display: flex;
             justify-content: center;
+            align-items: center;
             padding: 100px 60px 120px;
+            height: 100vh;
+            min-height: 700px;
+            overflow: visible;
         }
-        .hero img {
-            max-width: 644px;
+        .hero-parallax .parallax-container {
+            position: relative;
+            width: 500px;
+            aspect-ratio: 1;
+        }
+        .hero-parallax .layer {
+            position: absolute;
+            will-change: transform;
+            transition: transform 0.05s linear;
+        }
+        .hero-parallax .layer-arch {
+            inset: 8% 5% 0 5%;
+        }
+        .hero-parallax .layer-arch img {
             width: 100%;
             height: auto;
+        }
+        .hero-parallax .layer-text {
+            bottom: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            z-index: 1;
+        }
+        .hero-parallax .layer-text img {
+            width: 100%;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+        .hero-parallax .layer-hand {
+            inset: -5% 5% 15% 5%;
+            z-index: 2;
+        }
+        .hero-parallax .layer-hand img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .elements {
@@ -81,8 +119,18 @@
 
     <p style="text-align: center; color: #999; font-size: 0.8rem; letter-spacing: 0.06em; padding: 30px 60px 0;">Right click to save image for use</p>
 
-    <div class="hero">
-        <a href="52ACYR-assets/52_Hand-Sprout_Logo-02.png" target="_blank"><img src="52ACYR-assets/52_Hand-Sprout_Logo-02.png" alt="52 ACYR Logo - White"></a>
+    <div class="hero-parallax">
+        <div class="parallax-container">
+            <div class="layer layer-arch" data-speed="0.15">
+                <img src="52ACYR-assets/BackArch.svg" alt="">
+            </div>
+            <div class="layer layer-text" data-speed="0.15">
+                <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="52 ACYR">
+            </div>
+            <div class="layer layer-hand" data-speed="0.4">
+                <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand + Sprout">
+            </div>
+        </div>
     </div>
 
     <div class="elements">
@@ -147,5 +195,27 @@
         </div>
     </div>
 
+    <script>
+        const layers = document.querySelectorAll('.hero-parallax .layer');
+        const hero = document.querySelector('.hero-parallax');
+
+        function updateParallax() {
+            const rect = hero.getBoundingClientRect();
+            const centerY = rect.top + rect.height / 2;
+            const viewCenter = window.innerHeight / 2;
+            const offset = viewCenter - centerY;
+
+            layers.forEach(layer => {
+                const speed = parseFloat(layer.dataset.speed);
+                const y = offset * speed;
+                layer.style.transform = layer.classList.contains('layer-text')
+                    ? `translate(-50%, ${y}px)`
+                    : `translateY(${y}px)`;
+            });
+        }
+
+        window.addEventListener('scroll', updateParallax, { passive: true });
+        updateParallax();
+    </script>
 </body>
 </html>
