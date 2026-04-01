@@ -8,73 +8,16 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #fff; font-family: sans-serif; }
 
-        .hero-parallax {
+        .hero {
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            min-height: 700px;
+            padding: 100px 60px 120px;
         }
-
-        .parallax-container {
-            --px: 0;
-            --py: 0;
-            position: relative;
-            width: min(520px, 80vw);
-            aspect-ratio: 1;
-        }
-
-        .layer {
-            position: absolute;
-            pointer-events: none;
-        }
-
-        /* Arch: x:414/2050=20.2%, y:313/2048=15.3%, w:1222/2050=59.6% */
-        .layer-arch {
-            left: 20.2%;
-            top: 15.3%;
-            width: 59.6%;
-            transform: translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
-            transition: transform 0.4s ease-out;
-        }
-        .layer-arch img { width: 100%; height: auto; }
-
-        /* Hand: x:383/2050=18.7%, y:163/2048=8%, w:1254/2050=61.2% */
-        .layer-hand {
-            left: 18.7%;
-            top: 8%;
-            width: 61.2%;
-            z-index: 2;
-            transform: translate(calc(var(--px) * 25px), calc(var(--py) * 25px));
-            transition: transform 0.4s ease-out;
-        }
-        .layer-hand img { width: 100%; height: auto; }
-
-        /* 52 ACYR wordmark: centered in lower arch, approx y:1340-1640 */
-        .layer-acyr {
-            left: 22%;
-            top: 65%;
-            width: 56%;
-            z-index: 1;
-            transform: translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
-            transition: transform 0.4s ease-out;
-        }
-        .layer-acyr img {
+        .hero img {
+            max-width: 644px;
             width: 100%;
             height: auto;
-            filter: brightness(0) invert(1);
         }
-
-        /* SSCY subtitle: starts ~y:1700/2048=83% */
-        .layer-sscy {
-            left: 18%;
-            top: 84%;
-            width: 64%;
-            z-index: 1;
-            transform: translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
-            transition: transform 0.4s ease-out;
-        }
-        .layer-sscy img { width: 100%; height: auto; }
 
         .elements {
             display: grid;
@@ -129,21 +72,8 @@
 
     <p style="text-align: center; color: #999; font-size: 0.8rem; letter-spacing: 0.06em; padding: 30px 60px 0;">Right click to save image for use</p>
 
-    <div class="hero-parallax" id="hero">
-        <div class="parallax-container" id="pContainer">
-            <div class="layer layer-arch">
-                <img src="52ACYR-assets/BackArch.svg" alt="">
-            </div>
-            <div class="layer layer-acyr">
-                <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="52 ACYR">
-            </div>
-            <div class="layer layer-sscy">
-                <img src="52ACYR-assets/SSCY_Font.svg" alt="Salt Spring Centre of Yoga">
-            </div>
-            <div class="layer layer-hand">
-                <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand + Sprout">
-            </div>
-        </div>
+    <div class="hero">
+        <a href="52ACYR-assets/52_Hand-Sprout_Logo-02.png" target="_blank"><img src="52ACYR-assets/52_Hand-Sprout_Logo-02.png" alt="52 ACYR Logo"></a>
     </div>
 
     <div class="elements">
@@ -208,22 +138,5 @@
         </div>
     </div>
 
-    <script>
-        const container = document.getElementById('pContainer');
-        const hero = document.getElementById('hero');
-
-        hero.addEventListener('mousemove', (e) => {
-            const rect = hero.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            container.style.setProperty('--px', x.toFixed(3));
-            container.style.setProperty('--py', y.toFixed(3));
-        });
-
-        hero.addEventListener('mouseleave', () => {
-            container.style.setProperty('--px', '0');
-            container.style.setProperty('--py', '0');
-        });
-    </script>
 </body>
 </html>
