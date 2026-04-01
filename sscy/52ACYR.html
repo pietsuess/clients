@@ -13,48 +13,73 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 100px 60px 120px;
             height: 100vh;
             min-height: 700px;
             overflow: visible;
+            perspective: 1000px;
         }
         .hero-parallax .parallax-container {
             position: relative;
-            width: 500px;
-            aspect-ratio: 1;
+            width: 480px;
+            height: 580px;
+            transform-style: preserve-3d;
         }
         .hero-parallax .layer {
             position: absolute;
             will-change: transform;
-            transition: transform 0.05s linear;
+            transition: transform 0.15s ease-out;
         }
+
+        /* Back arch - deepest layer */
         .hero-parallax .layer-arch {
-            inset: 8% 5% 0 5%;
+            left: 50%;
+            top: 5%;
+            width: 72%;
+            transform: translateX(-50%);
         }
         .hero-parallax .layer-arch img {
             width: 100%;
             height: auto;
         }
-        .hero-parallax .layer-text {
-            bottom: 6%;
+
+        /* 52 ACYR wordmark - sits inside lower arch */
+        .hero-parallax .layer-acyr {
+            bottom: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 58%;
+            z-index: 1;
+        }
+        .hero-parallax .layer-acyr img {
+            width: 100%;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        /* SSCY subtitle - below arch */
+        .hero-parallax .layer-sscy {
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 70%;
             z-index: 1;
         }
-        .hero-parallax .layer-text img {
+        .hero-parallax .layer-sscy img {
             width: 100%;
             height: auto;
-            filter: brightness(0) invert(1);
         }
+
+        /* Hand + sprout - foreground */
         .hero-parallax .layer-hand {
-            inset: -5% 5% 15% 5%;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 72%;
             z-index: 2;
         }
         .hero-parallax .layer-hand img {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
+            height: auto;
         }
 
         .elements {
@@ -119,15 +144,18 @@
 
     <p style="text-align: center; color: #999; font-size: 0.8rem; letter-spacing: 0.06em; padding: 30px 60px 0;">Right click to save image for use</p>
 
-    <div class="hero-parallax">
+    <div class="hero-parallax" id="hero">
         <div class="parallax-container">
-            <div class="layer layer-arch" data-speed="0.15">
+            <div class="layer layer-arch" data-depth="0.02">
                 <img src="52ACYR-assets/BackArch.svg" alt="">
             </div>
-            <div class="layer layer-text" data-speed="0.15">
+            <div class="layer layer-acyr" data-depth="0.02">
                 <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="52 ACYR">
             </div>
-            <div class="layer layer-hand" data-speed="0.4">
+            <div class="layer layer-sscy" data-depth="0.02">
+                <img src="52ACYR-assets/SSCY_Font.svg" alt="Salt Spring Centre of Yoga">
+            </div>
+            <div class="layer layer-hand" data-depth="0.06">
                 <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand + Sprout">
             </div>
         </div>
@@ -196,26 +224,35 @@
     </div>
 
     <script>
-        const layers = document.querySelectorAll('.hero-parallax .layer');
-        const hero = document.querySelector('.hero-parallax');
+        const hero = document.getElementById('hero');
+        const layers = hero.querySelectorAll('.layer');
 
-        function updateParallax() {
+        hero.addEventListener('mousemove', (e) => {
             const rect = hero.getBoundingClientRect();
-            const centerY = rect.top + rect.height / 2;
-            const viewCenter = window.innerHeight / 2;
-            const offset = viewCenter - centerY;
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
 
             layers.forEach(layer => {
-                const speed = parseFloat(layer.dataset.speed);
-                const y = offset * speed;
-                layer.style.transform = layer.classList.contains('layer-text')
-                    ? `translate(-50%, ${y}px)`
-                    : `translateY(${y}px)`;
+                const depth = parseFloat(layer.dataset.depth);
+                const moveX = x * depth * rect.width;
+                const moveY = y * depth * rect.height;
+                const baseTransform = layer.classList.contains('layer-acyr') ||
+                                      layer.classList.contains('layer-sscy') ||
+                                      layer.classList.contains('layer-hand')
+                    ? 'translateX(-50%)' : '';
+                layer.style.transform = `${baseTransform} translate(${moveX}px, ${moveY}px)`;
             });
-        }
+        });
 
-        window.addEventListener('scroll', updateParallax, { passive: true });
-        updateParallax();
+        hero.addEventListener('mouseleave', () => {
+            layers.forEach(layer => {
+                const baseTransform = layer.classList.contains('layer-acyr') ||
+                                      layer.classList.contains('layer-sscy') ||
+                                      layer.classList.contains('layer-hand')
+                    ? 'translateX(-50%)' : '';
+                layer.style.transform = baseTransform;
+            });
+        });
     </script>
 </body>
 </html>
