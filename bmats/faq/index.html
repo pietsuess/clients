@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ - Between the Mountain and the Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #1a1610;
+  color: #d4c9b8;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 60px 40px 40px;
+  border-bottom: 1px solid #3a3228;
+}
+.header h1 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 500;
+  color: #e8dcc8;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.header .subtitle {
+  font-size: 14px;
+  color: #8a7e6e;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+/* NAV / TOC */
+.toc {
+  width: 100%;
+  padding: 32px 40px;
+  border-bottom: 1px solid #3a3228;
+  background: #241f18;
+}
+.toc-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+.toc a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #1a1610;
+  border: 1px solid #3a3228;
+  border-radius: 8px;
+  color: #d4c9b8;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.toc a:hover {
+  border-color: #c4a265;
+  color: #e8dcc8;
+}
+.toc a .icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 28px;
+  text-align: center;
+}
+
+/* MAIN CONTENT */
+.content {
+  width: 100%;
+  padding: 0 40px 80px;
+}
+
+/* FAQ SECTION */
+.faq-section {
+  padding: 48px 0;
+  border-bottom: 1px solid #3a3228;
+}
+.faq-section:last-child {
+  border-bottom: none;
+}
+.section-anchor {
+  display: block;
+  position: relative;
+  top: -20px;
+  visibility: hidden;
+}
+.faq-section h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 500;
+  color: #e8dcc8;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+.faq-section h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.faq-section h2 a:hover {
+  color: #c4a265;
+}
+.faq-section h2 .link-icon {
+  font-size: 0.6em;
+  opacity: 0;
+  margin-left: 8px;
+  transition: opacity 0.15s ease;
+  color: #c4a265;
+}
+.faq-section h2:hover .link-icon {
+  opacity: 1;
+}
+.section-tag {
+  display: inline-block;
+  font-size: 11px;
+  color: #c4a265;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.answer {
+  text-align: justify;
+  text-align-last: left;
+}
+
+.answer p {
+  margin-bottom: 16px;
+  font-size: 15px;
+  color: #d4c9b8;
+}
+
+.answer strong {
+  color: #e8dcc8;
+  font-weight: 600;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+}
+.step-number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: #c4a265;
+  color: #1a1610;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 2px;
+}
+.step-content {
+  flex: 1;
+}
+.step-content p {
+  margin-bottom: 8px;
+}
+
+.callout {
+  background: #241f18;
+  border: 1px solid #3a3228;
+  border-left: 3px solid #c4a265;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+.callout.important {
+  border-left-color: #c4a265;
+}
+
+.screenshot {
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #3a3228;
+  background: #000;
+}
+.screenshot img {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+}
+.screenshot.desktop img {
+  max-width: 700px;
+}
+.screenshot-caption {
+  font-size: 12px;
+  color: #8a7e6e;
+  padding: 8px 12px;
+  background: #241f18;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.link-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #c4a265;
+  color: #1a1610;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s ease;
+  margin: 8px 8px 8px 0;
+}
+.link-btn:hover {
+  background: #d4b275;
+}
+
+.browser-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.browser-list span {
+  display: inline-block;
+  padding: 6px 14px;
+  background: #241f18;
+  border: 1px solid #3a3228;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #d4c9b8;
+}
+
+.sub-steps {
+  margin: 12px 0 12px 16px;
+  border-left: 2px solid #3a3228;
+  padding-left: 16px;
+}
+.sub-steps p {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.sub-steps .browser-label {
+  color: #c4a265;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 40px;
+  border-top: 1px solid #3a3228;
+  background: #241f18;
+}
+.footer p {
+  font-size: 13px;
+  color: #8a7e6e;
+  margin-bottom: 8px;
+}
+.footer a {
+  color: #c4a265;
+  text-decoration: none;
+}
+.footer a:hover {
+  color: #d4b275;
+}
+
+/* BACK TO TOP */
+.back-to-top {
+  display: inline-block;
+  font-size: 12px;
+  color: #8a7e6e;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 24px;
+  transition: color 0.15s ease;
+}
+.back-to-top:hover {
+  color: #c4a265;
+}
+</style>
+</head>
+<body>
+
+<div class="header" id="top">
+  <h1>Frequently Asked Questions</h1>
+  <div class="subtitle">Between the Mountain and the Sky</div>
+</div>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#casting">
+      <span class="icon">📺</span>
+      Casting to a Smart TV
+    </a>
+    <a href="#fullscreen">
+      <span class="icon">⛶</span>
+      Playing in Full Screen
+    </a>
+    <a href="#password">
+      <span class="icon">🔑</span>
+      Lost Password or Link
+    </a>
+    <a href="#privacy">
+      <span class="icon">🔒</span>
+      Privacy / Video Not Available
+    </a>
+    <a href="#contact">
+      <span class="icon">✉</span>
+      Contact Support
+    </a>
+  </div>
+</nav>
+
+<main class="content">
+
+  <!-- CASTING -->
+  <section class="faq-section">
+    <span class="section-anchor" id="casting"></span>
+    <h2><a href="#casting">How do I cast from my phone or iPad to my Smart TV?<span class="link-icon">🔗</span></a></h2>
+    <span class="section-tag">Streaming &amp; Casting</span>
+
+    <div class="answer">
+      <div class="callout important">
+        <strong>First!</strong> Make sure your phone or device is on the <strong>same Wi-Fi network</strong> as your Smart TV.
+      </div>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <p>Tap the <strong>"&gt;"</strong> button at the bottom right of the video to open the menu options.</p>
+          <div class="screenshot">
+            <img src="menu-button.jpg" alt="Arrow pointing to the menu button at the bottom right of the video player">
+            <div class="screenshot-caption">Tap the button shown to reveal player controls</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <p>Once the menu opens, tap the <strong>AirPlay button</strong> (the screen icon with a triangle).</p>
+          <div class="screenshot">
+            <img src="player-controls.jpg" alt="Player controls expanded showing the AirPlay button highlighted">
+            <div class="screenshot-caption">The AirPlay button in the expanded controls</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <p>Select your TV from the list of available devices.</p>
+          <div class="screenshot">
+            <img src="airplay-menu.png" alt="AirPlay device selection menu showing available TVs">
+            <div class="screenshot-caption">Select your TV from the AirPlay device list</div>
+          </div>
+        </div>
+      </div>
+
+      <p>That's it! The film should now be playing on your TV. If you're having trouble, make sure both devices are connected to the same Wi-Fi network and try again.</p>
+    </div>
+    <a href="#top" class="back-to-top">Back to top</a>
+  </section>
+
+  <!-- FULL SCREEN -->
+  <section class="faq-section">
+    <span class="section-anchor" id="fullscreen"></span>
+    <h2><a href="#fullscreen">How do I play the film in full screen?<span class="link-icon">🔗</span></a></h2>
+    <span class="section-tag">Playback</span>
+
+    <div class="answer">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <p><strong>Try a different browser.</strong> Playback issues are most often caused by the browser itself. Switch between Chrome, Firefox, Safari, or Edge to see if that resolves it.</p>
+          <div class="browser-list">
+            <span>Chrome</span>
+            <span>Firefox</span>
+            <span>Safari</span>
+            <span>Edge</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <p><strong>Use the full screen buttons.</strong> Look for the full screen controls at the bottom of the video player.</p>
+          <div class="screenshot desktop">
+            <img src="fullscreen-desktop.png" alt="Desktop view showing full screen buttons at the bottom right of the video player">
+            <div class="screenshot-caption">Full screen buttons on the desktop player</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <p><strong>Don't see the controls?</strong> Tap the <strong>"&gt;"</strong> button to reveal the hidden menu, then use the full screen button from there.</p>
+          <div class="screenshot">
+            <img src="menu-button.jpg" alt="Arrow pointing to the expand menu button">
+            <div class="screenshot-caption">Tap to reveal player controls including full screen</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="#top" class="back-to-top">Back to top</a>
+  </section>
+
+  <!-- PASSWORD -->
+  <section class="faq-section">
+    <span class="section-anchor" id="password"></span>
+    <h2><a href="#password">I can't find my password or the link to watch<span class="link-icon">🔗</span></a></h2>
+    <span class="section-tag">Account Access</span>
+
+    <div class="answer">
+      <p>No worries - you can access the film and reset your password using the links below:</p>
+
+      <div style="margin: 24px 0;">
+        <a href="https://betweenthemountain.mykajabi.com/library" class="link-btn" target="_blank" rel="noopener">Watch the Film</a>
+        <a href="https://betweenthemountain.mykajabi.com/password/new" class="link-btn" target="_blank" rel="noopener">Reset Your Password</a>
+      </div>
+
+      <p>If you're still having trouble after resetting your password, please reach out to us and we'll make sure you can watch the film.</p>
+    </div>
+    <a href="#top" class="back-to-top">Back to top</a>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="faq-section">
+    <span class="section-anchor" id="privacy"></span>
+    <h2><a href="#privacy">"Due to privacy issues, this video is not available"<span class="link-icon">🔗</span></a></h2>
+    <span class="section-tag">Troubleshooting</span>
+
+    <div class="answer">
+      <p>This error usually happens when browser cookie or privacy settings are blocking the video from playing. Here are a few ways to fix it:</p>
+
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <p><strong>Try a different browser.</strong> Switch between Chrome, Firefox, Safari, or Edge.</p>
+          <div class="browser-list">
+            <span>Chrome</span>
+            <span>Firefox</span>
+            <span>Safari</span>
+            <span>Edge</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <p><strong>Try Private / Incognito mode.</strong> Open the link in an incognito or private browsing window. If the video plays there, the issue is your browser's privacy settings.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <p><strong>Adjust your browser's privacy settings:</strong></p>
+          <div class="sub-steps">
+            <p><span class="browser-label">Chrome:</span> Go to Settings &gt; Privacy and Security &gt; Third-party cookies, then select "Block third-party cookies in Incognito Mode" (allow them in normal browsing).</p>
+            <p><span class="browser-label">Safari:</span> Go to Safari &gt; Preferences &gt; Privacy and uncheck "Website tracking" and "Cookies and website data."</p>
+          </div>
+        </div>
+      </div>
+
+      <p>Don't worry - we'll make sure you get to watch the film. If none of the above works, reach out to us.</p>
+    </div>
+    <a href="#top" class="back-to-top">Back to top</a>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="faq-section">
+    <span class="section-anchor" id="contact"></span>
+    <h2><a href="#contact">Still need help?<span class="link-icon">🔗</span></a></h2>
+    <span class="section-tag">Contact</span>
+
+    <div class="answer">
+      <p>We're here to help. Reach out to us and we'll make sure you get to watch the film.</p>
+      <div style="margin: 24px 0;">
+        <a href="mailto:Hello@MPWRCHANGE.COM" class="link-btn">Email Support</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p><a href="https://betweenthemountain.mykajabi.com/library" target="_blank" rel="noopener">Watch the Film</a></p>
+  <p>Between the Mountain and the Sky</p>
+</footer>
+
+</body>
+</html>
