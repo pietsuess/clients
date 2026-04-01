@@ -15,60 +15,63 @@
             height: 100vh;
             min-height: 700px;
         }
+
         .parallax-container {
+            --px: 0;
+            --py: 0;
             position: relative;
-            width: 540px;
-            height: 660px;
+            width: min(500px, 80vw);
+            aspect-ratio: 0.85;
         }
-        .parallax-container .layer {
+
+        .layer {
             position: absolute;
-            will-change: transform;
-            transition: transform 0.15s ease-out;
+            left: 50%;
+            pointer-events: none;
         }
 
-        /* Arch - behind everything, top-center, ~62% width of container */
+        /* Arch - back layer */
         .layer-arch {
-            width: 62%;
-            left: 50%;
+            width: 64%;
             top: 0;
-            margin-left: -31%; /* half of 62% */
+            transform: translateX(-50%) translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
+            transition: transform 0.4s ease-out;
         }
-        .layer-arch img { width: 100%; height: auto; display: block; }
+        .layer-arch img { width: 100%; height: auto; }
 
-        /* Hand - overlaps arch, wider and centered, top edge near arch top */
-        .layer-hand {
-            width: 78%;
-            left: 50%;
-            top: 6%;
-            margin-left: -39%;
-            z-index: 2;
-        }
-        .layer-hand img { width: 100%; height: auto; display: block; }
-
-        /* 52 ACYR wordmark - white, inside lower arch area */
+        /* 52 ACYR wordmark - white, lower area of arch */
         .layer-acyr {
-            width: 60%;
-            left: 50%;
-            bottom: 14%;
-            margin-left: -30%;
-            z-index: 3;
+            width: 55%;
+            bottom: 15%;
+            transform: translateX(-50%) translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
+            transition: transform 0.4s ease-out;
+            z-index: 1;
         }
         .layer-acyr img {
             width: 100%;
             height: auto;
-            display: block;
             filter: brightness(0) invert(1);
         }
 
         /* SSCY subtitle - below arch */
         .layer-sscy {
-            width: 68%;
-            left: 50%;
-            bottom: 0;
-            margin-left: -34%;
+            width: 66%;
+            bottom: 2%;
+            transform: translateX(-50%) translate(calc(var(--px) * 8px), calc(var(--py) * 8px));
+            transition: transform 0.4s ease-out;
             z-index: 1;
         }
-        .layer-sscy img { width: 100%; height: auto; display: block; }
+        .layer-sscy img { width: 100%; height: auto; }
+
+        /* Hand - foreground, moves more */
+        .layer-hand {
+            width: 80%;
+            top: 4%;
+            transform: translateX(-50%) translate(calc(var(--px) * 25px), calc(var(--py) * 25px));
+            transition: transform 0.4s ease-out;
+            z-index: 2;
+        }
+        .layer-hand img { width: 100%; height: auto; }
 
         .elements {
             display: grid;
@@ -78,11 +81,7 @@
             align-items: center;
         }
         .elements .item { text-align: center; }
-        .elements img {
-            max-width: 100%;
-            height: auto;
-            max-height: 264px;
-        }
+        .elements img { max-width: 100%; height: auto; max-height: 264px; }
         .elements .label {
             margin-top: 12px;
             font-size: 0.8rem;
@@ -112,12 +111,7 @@
             justify-content: center;
             padding: 60px;
         }
-        .variant img {
-            width: 100%;
-            max-width: 644px;
-            height: auto;
-            display: block;
-        }
+        .variant img { width: 100%; max-width: 644px; height: auto; display: block; }
         .variant .label {
             text-align: center;
             padding: 16px 0 0;
@@ -133,21 +127,17 @@
     <p style="text-align: center; color: #999; font-size: 0.8rem; letter-spacing: 0.06em; padding: 30px 60px 0;">Right click to save image for use</p>
 
     <div class="hero-parallax" id="hero">
-        <div class="parallax-container">
-            <!-- Back: arch shape -->
-            <div class="layer layer-arch" data-depth="0.02">
+        <div class="parallax-container" id="pContainer">
+            <div class="layer layer-arch">
                 <img src="52ACYR-assets/BackArch.svg" alt="">
             </div>
-            <!-- Middle: 52 ACYR wordmark (white) -->
-            <div class="layer layer-acyr" data-depth="0.02">
+            <div class="layer layer-acyr">
                 <img src="52ACYR-assets/52_Hand-Sprout_Logo-52ACYR-BL.png" alt="52 ACYR">
             </div>
-            <!-- Bottom: SSCY subtitle -->
-            <div class="layer layer-sscy" data-depth="0.02">
+            <div class="layer layer-sscy">
                 <img src="52ACYR-assets/SSCY_Font.svg" alt="Salt Spring Centre of Yoga">
             </div>
-            <!-- Front: hand + sprout -->
-            <div class="layer layer-hand" data-depth="0.06">
+            <div class="layer layer-hand">
                 <img src="52ACYR-assets/52_Hand-Sprout_Logo-Hand.png" alt="Hand + Sprout">
             </div>
         </div>
@@ -216,26 +206,20 @@
     </div>
 
     <script>
+        const container = document.getElementById('pContainer');
         const hero = document.getElementById('hero');
-        const layers = hero.querySelectorAll('.layer');
 
         hero.addEventListener('mousemove', (e) => {
             const rect = hero.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const x = (e.clientX - rect.left) / rect.width - 0.5;  // -0.5 to 0.5
             const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-            layers.forEach(layer => {
-                const depth = parseFloat(layer.dataset.depth);
-                const moveX = x * depth * rect.width;
-                const moveY = y * depth * rect.height;
-                layer.style.transform = `translate(${moveX}px, ${moveY}px)`;
-            });
+            container.style.setProperty('--px', x.toFixed(3));
+            container.style.setProperty('--py', y.toFixed(3));
         });
 
         hero.addEventListener('mouseleave', () => {
-            layers.forEach(layer => {
-                layer.style.transform = 'translate(0, 0)';
-            });
+            container.style.setProperty('--px', '0');
+            container.style.setProperty('--py', '0');
         });
     </script>
 </body>
