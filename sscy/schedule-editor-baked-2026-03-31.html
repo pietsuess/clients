@@ -1000,49 +1000,87 @@ function exportPDF(){
         if(isH){var sf=hr<12?'a':'p';if(hr===12)return'12p';if(hr<12)return hr+sf;return(hr-12)+sf;}return'30';
     });
 
-    // ==== BOTTOM BAR ==== (drawn BEFORE reception so reception layers on top)
-    // l646: background:sty.titleBg
-    fill(sty.titleBg); doc.rect(0, gy+gridH, W, bottomH, 'F');
+    // ==== IMAGES ==== (drawn after events, before bottom bar)
+    var imgPromises = [];
+    if(state.images && state.images.length){
+        state.images.forEach(function(img){
+            var dx = legW + firstGutW + img.dayIndex*(dayW+gutW);
+            var ix = dx + (img.leftPct/100)*dayW;
+            var iw = (img.widthPct/100)*dayW;
+            var iy = gy + img.startSlot*slotH;
+            var ih = img.spanSlots*slotH;
+            imgPromises.push({url:img.url, x:ix, y:iy, w:iw, h:ih});
+        });
+    }
 
-    // ==== RECEPTION BLOCKS ==== (drawn LAST = on top of everything, matching CSS z-index:2)
-    // l610-616: top=(ns-1)*SH, height=SH*2
-    // CSS .rec-block: background:#fff, border:1px solid #bbb, left:25% right:25%
-    // CSS .rec-circle: width:18px height:18px border:2px solid #7B2D5F color:#7B2D5F background:#fff font-size:0.5rem(8px) font-weight:700
-    // CSS .rec-text: font-weight:700 font-size:sty.receptionFont.fontSize color:#333 line-height:1.2
-    //   content: "Reception<br>" + rec.text.replace(/\n/g,', ')
-    var recFS = sty.receptionFont.fontSize * SC;
-    receptionBlocks.forEach(function(rb){
-        var dx = rb.dx, rec = rb.rec;
-        var recTop = gy + (ns-1)*slotH;
-        var recHt = slotH*2;
-        var rbx = dx + dayW*0.25, rbw = dayW*0.5;
+    function finishPDF(){
+        // ==== BOTTOM BAR ==== (drawn BEFORE reception so reception layers on top)
+        fill(sty.titleBg); doc.rect(0, gy+gridH, W, bottomH, 'F');
 
-        doc.setFillColor(255,255,255); doc.rect(rbx, recTop, rbw, recHt, 'F');
-        doc.setDrawColor(187,187,187); doc.setLineWidth(SC); doc.rect(rbx, recTop, rbw, recHt, 'S');
+        // ==== RECEPTION BLOCKS ==== (drawn LAST = on top of everything)
+        var recFS = sty.receptionFont.fontSize * SC;
+        receptionBlocks.forEach(function(rb){
+            var dx = rb.dx, rec = rb.rec;
+            var recTop = gy + (ns-1)*slotH;
+            var recHt = slotH*2;
+            var rbx = dx + dayW*0.25, rbw = dayW*0.5;
 
-        // R circle: 18px diameter = 9px radius
-        var circR = 9*SC;
-        var ccx = rbx + circR + 2*SC, ccy = recTop + recHt/2;
-        doc.setFillColor(255,255,255); doc.circle(ccx, ccy, circR, 'F');
-        drawC('#7B2D5F'); doc.setLineWidth(2*SC); doc.circle(ccx, ccy, circR);
-        txtC('#7B2D5F');
-        doc.setFont('helvetica','bold'); doc.setFontSize(8*SC);
-        doc.text('R', ccx, ccy+8*SC*0.35, {align:'center'});
+            doc.setFillColor(255,255,255); doc.rect(rbx, recTop, rbw, recHt, 'F');
+            doc.setDrawColor(187,187,187); doc.setLineWidth(SC); doc.rect(rbx, recTop, rbw, recHt, 'S');
 
-        // Reception text
-        doc.setTextColor(51,51,51);
-        pdfFont(doc, sty.receptionFont.fontFamily, sty.receptionFont.fontWeight); doc.setFontSize(recFS);
-        // Screen l615: 'Reception<br>' + rec.text.replace(/\n/g,', ')
-        // So \n becomes ", " but <br> stays as a line break
-        var recTxt = 'Reception\n' + rec.text.replace(/\n/g,', ').replace(/<br>/g,'\n');
-        var rl = recTxt.split('\n');
-        var rlH = recFS * 1.2;
-        var rty = ccy - ((rl.length-1)*rlH)/2 + recFS*0.35;
-        rl.forEach(function(l,i){ doc.text(l, rbx+rbw/2+circR*0.5, rty+i*rlH, {align:'center'}); });
-    });
+            var circR = 9*SC;
+            var ccx = rbx + circR + 2*SC, ccy = recTop + recHt/2;
+            doc.setFillColor(255,255,255); doc.circle(ccx, ccy, circR, 'F');
+            drawC('#7B2D5F'); doc.setLineWidth(2*SC); doc.circle(ccx, ccy, circR);
+            txtC('#7B2D5F');
+            doc.setFont('helvetica','bold'); doc.setFontSize(8*SC);
+            doc.text('R', ccx, ccy+8*SC*0.35, {align:'center'});
 
-    doc.save('ACYR_Schedule_'+cfg.year+'.pdf');
-    document.getElementById('stxt').textContent='PDF exported';
+            doc.setTextColor(51,51,51);
+            pdfFont(doc, sty.receptionFont.fontFamily, sty.receptionFont.fontWeight); doc.setFontSize(recFS);
+            var recTxt = 'Reception\n' + rec.text.replace(/\n/g,', ').replace(/<br>/g,'\n');
+            var rl = recTxt.split('\n');
+            var rlH = recFS * 1.2;
+            var rty = ccy - ((rl.length-1)*rlH)/2 + recFS*0.35;
+            rl.forEach(function(l,i){ doc.text(l, rbx+rbw/2+circR*0.5, rty+i*rlH, {align:'center'}); });
+        });
+
+        doc.save('ACYR_Schedule_'+cfg.year+'.pdf');
+        document.getElementById('stxt').textContent='PDF exported';
+    }
+
+    // Add images to PDF, then finish
+    if(imgPromises.length){
+        var loaded = 0;
+        imgPromises.forEach(function(item){
+            var imgEl = new Image();
+            imgEl.crossOrigin = 'anonymous';
+            imgEl.onload = function(){
+                try {
+                    // Draw to canvas to get image data
+                    var c = document.createElement('canvas');
+                    c.width = imgEl.naturalWidth; c.height = imgEl.naturalHeight;
+                    c.getContext('2d').drawImage(imgEl, 0, 0);
+                    var dataUrl = c.toDataURL('image/png');
+                    doc.addImage(dataUrl, 'PNG', item.x, item.y, item.w, item.h);
+                } catch(e){
+                    // If CORS fails for URL images, try adding directly
+                    try { doc.addImage(item.url, 'PNG', item.x, item.y, item.w, item.h); } catch(e2){}
+                }
+                loaded++;
+                if(loaded >= imgPromises.length) finishPDF();
+            };
+            imgEl.onerror = function(){
+                // Try adding data URL directly (works for uploaded base64 images)
+                try { doc.addImage(item.url, 'PNG', item.x, item.y, item.w, item.h); } catch(e){}
+                loaded++;
+                if(loaded >= imgPromises.length) finishPDF();
+            };
+            imgEl.src = item.url;
+        });
+    } else {
+        finishPDF();
+    }
 }
 
 function toggleSettings(){
