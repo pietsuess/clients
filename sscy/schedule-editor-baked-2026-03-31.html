@@ -159,6 +159,30 @@
         }
         .ev:hover { filter:brightness(1.08); }
         .ev.selected { outline:2px solid #fff; outline-offset:-2px; z-index:5; }
+
+        /* Grid images */
+        .grid-img {
+            position:absolute; z-index:2; overflow:hidden; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            border:2px solid transparent; box-sizing:border-box;
+        }
+        .grid-img img { width:100%; height:100%; object-fit:contain; pointer-events:none; }
+        .grid-img:hover { border-color:rgba(255,255,255,0.6); }
+        .grid-img.selected { border-color:#fff; outline:1px dashed rgba(0,0,0,0.5); z-index:5; }
+        .grid-img .img-x {
+            position:absolute; top:2px; right:2px; width:16px; height:16px;
+            display:none; align-items:center; justify-content:center;
+            font-size:0.55rem; color:#fff; background:rgba(200,0,0,0.7);
+            border-radius:50%; cursor:pointer; z-index:4;
+        }
+        .grid-img:hover .img-x { display:flex; }
+        .grid-img .img-resize {
+            position:absolute; bottom:0; left:0; right:0; height:8px;
+            cursor:ns-resize; background:transparent;
+        }
+        .grid-img:hover .img-resize { background:rgba(255,255,255,0.25); }
+        .view-mode .grid-img .img-x, .view-mode .grid-img .img-resize { display:none !important; }
+        .view-mode .grid-img { cursor:default !important; border-color:transparent !important; }
         .ev .ev-resize { position:absolute; bottom:0; left:0; right:0; height:6px; cursor:ns-resize; }
         .ev .ev-resize:hover { background:rgba(255,255,255,0.3); }
 
@@ -292,6 +316,8 @@
         <button class="tb-btn" onclick="getLatest()">Get Latest</button>
     </div>
     <div class="tb-group">
+        <button class="tb-btn" onclick="addImagePrompt()">Add Image</button>
+        <input type="file" id="imgUpload" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
         <button class="tb-btn" onclick="toggleSettings()">Settings</button>
         <button class="tb-btn" onclick="showHelp()">Help</button>
     </div>
@@ -377,6 +403,7 @@ function undo(){
 function mergeDefaults(){
     var ds=DEFAULT_STATE.styles;
     if(!state.styles) state.styles={};
+    if(!state.images) state.images=[];
     for(var k in ds){ if(state.styles[k]===undefined) state.styles[k]=ds[k]; }
     ['title','dayHeaders','legendHeader','legendFont','gutterFont','eventFont','receptionFont'].forEach(function(k){
         if(!state.styles[k]) state.styles[k]=JSON.parse(JSON.stringify(ds[k]));
@@ -613,6 +640,20 @@ function render(){
             h+='<div class="ev-t">'+tl+'</div>';
             h+='</div>';
         });
+
+        // Images for this day
+        if(state.images){
+            state.images.filter(function(img){return img.dayIndex===d}).forEach(function(img){
+                var top=img.startSlot*SH, ht=img.spanSlots*SH;
+                var lp=img.leftPct||0, wp=img.widthPct||100;
+                var isSel = selectedImgId===img.id;
+                h+='<div class="grid-img'+(isSel?' selected':'')+'" data-imgid="'+img.id+'" style="top:'+top+'px;height:'+ht+'px;left:'+lp+'%;width:'+wp+'%">';
+                h+='<img src="'+img.url+'" alt="">';
+                h+='<div class="img-x" data-imgdel="'+img.id+'">\u2715</div>';
+                h+='<div class="img-resize" data-imgrsz="'+img.id+'"></div>';
+                h+='</div>';
+            });
+        }
 
         // Reception block at the bottom of each day column
         var rec=cfg.reception.find(function(r){return r.dayIndex===d});
@@ -1933,6 +1974,182 @@ renderSettings = function() {
     h += '<input type="text" value="' + (SYNC_URL || '') + '" onchange="SYNC_URL=this.value;localStorage.setItem(\'acyr-sync-url\',this.value)" style="width:100%;font-size:0.5rem;background:#444;color:#fff;border:1px solid #555;padding:4px 6px;border-radius:2px;font-family:monospace;margin-top:3px"></div>';
     c.innerHTML += h;
 };
+
+// ===== IMAGE PLACEMENT =====
+var selectedImgId = null;
+var imgDragging = null;
+
+function addImagePrompt(){
+    var ov = document.createElement('div');
+    ov.className = 'name-overlay';
+    ov.id = 'imgPrompt';
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    ov.innerHTML = '<div class="name-box" style="max-width:360px;text-align:left">' +
+        '<h3 style="text-align:center;margin-bottom:12px;font-size:1.1rem">Add Image to Schedule</h3>' +
+        '<p style="font-size:0.85rem;opacity:0.7;margin-bottom:16px;text-align:center">Upload an image file or paste a URL</p>' +
+        '<button onclick="document.getElementById(\'imgUpload\').click();document.getElementById(\'imgPrompt\').remove();" style="width:100%;font-size:0.9rem;padding:10px;margin-bottom:10px;background:#17A698;border-color:#17A698;cursor:pointer;color:#fff;border-radius:4px;border:none">Upload Image File</button>' +
+        '<div style="text-align:center;opacity:0.4;font-size:0.75rem;margin-bottom:10px">or</div>' +
+        '<input type="text" id="imgUrlInput" placeholder="https://example.com/image.png" style="width:100%;font-size:0.8rem;padding:8px;background:#444;color:#fff;border:1px solid #555;border-radius:4px;margin-bottom:10px;font-family:inherit">' +
+        '<button onclick="addImageFromUrl()" style="width:100%;font-size:0.9rem;padding:10px;cursor:pointer;color:#fff;background:#555;border:1px solid #666;border-radius:4px">Add from URL</button>' +
+        '</div>';
+    document.body.appendChild(ov);
+}
+
+function addImageFromUrl(){
+    var url = document.getElementById('imgUrlInput').value.trim();
+    if(!url) return;
+    var prompt = document.getElementById('imgPrompt');
+    if(prompt) prompt.remove();
+    placeImage(url);
+}
+
+function handleImageUpload(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+        placeImage(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+}
+
+function placeImage(url){
+    if(!state.images) state.images = [];
+    var img = {
+        id: 'img' + Date.now(),
+        dayIndex: 0,
+        startSlot: 10,
+        spanSlots: 8,
+        leftPct: 10,
+        widthPct: 80,
+        url: url
+    };
+    pushUndo();
+    state.images.push(img);
+    selectedImgId = img.id;
+    render();
+}
+
+// Image click/delete/drag/resize handlers
+document.addEventListener('mousedown', function(e){
+    if(VIEW_MODE) return;
+
+    // Delete image
+    var delBtn = e.target.closest('[data-imgdel]');
+    if(delBtn){
+        e.stopPropagation();
+        var id = delBtn.dataset.imgdel;
+        pushUndo();
+        state.images = state.images.filter(function(i){ return i.id !== id; });
+        if(selectedImgId === id) selectedImgId = null;
+        render();
+        return;
+    }
+
+    // Resize image
+    var rszHandle = e.target.closest('[data-imgrsz]');
+    if(rszHandle){
+        e.preventDefault();
+        e.stopPropagation();
+        var id = rszHandle.dataset.imgrsz;
+        var img = state.images.find(function(i){ return i.id === id; });
+        if(!img) return;
+        selectedImgId = id;
+        imgDragging = { type:'resize', img:img, startY:e.clientY, origSpan:img.spanSlots };
+        render();
+        return;
+    }
+
+    // Select/drag image
+    var imgEl = e.target.closest('.grid-img');
+    if(imgEl){
+        e.preventDefault();
+        e.stopPropagation();
+        var id = imgEl.dataset.imgid;
+        var img = state.images.find(function(i){ return i.id === id; });
+        if(!img) return;
+        selectedImgId = id;
+        selectedEvtId = null;
+        var dayCol = imgEl.closest('.day-col');
+        var rect = dayCol.getBoundingClientRect();
+        imgDragging = {
+            type:'move', img:img, startY:e.clientY, startX:e.clientX,
+            origSlot:img.startSlot, origDay:img.dayIndex,
+            dayRect:rect
+        };
+        render();
+        return;
+    }
+
+    // Click elsewhere deselects image
+    if(selectedImgId && !e.target.closest('.toolbar') && !e.target.closest('.edit-pop')){
+        selectedImgId = null;
+        render();
+    }
+});
+
+document.addEventListener('mousemove', function(e){
+    if(!imgDragging) return;
+    e.preventDefault();
+    var dy = e.clientY - imgDragging.startY;
+
+    if(imgDragging.type === 'resize'){
+        var slotDelta = Math.round(dy / SH);
+        var newSpan = Math.max(1, imgDragging.origSpan + slotDelta);
+        if(newSpan !== imgDragging.img.spanSlots){
+            imgDragging.img.spanSlots = newSpan;
+            render();
+        }
+        return;
+    }
+
+    if(imgDragging.type === 'move'){
+        var slotDelta = Math.round(dy / SH);
+        var ns = (state.config.endHour - state.config.startHour) * 2;
+        var newSlot = Math.max(0, Math.min(ns - imgDragging.img.spanSlots, imgDragging.origSlot + slotDelta));
+        if(newSlot !== imgDragging.img.startSlot){
+            imgDragging.img.startSlot = newSlot;
+            render();
+        }
+        // Check if dragged to different day column
+        var dayCols = document.querySelectorAll('.day-col');
+        for(var i=0;i<dayCols.length;i++){
+            var r = dayCols[i].getBoundingClientRect();
+            if(e.clientX >= r.left && e.clientX <= r.right){
+                var newDay = parseInt(dayCols[i].dataset.day);
+                if(newDay !== imgDragging.img.dayIndex){
+                    imgDragging.img.dayIndex = newDay;
+                    render();
+                }
+                break;
+            }
+        }
+    }
+});
+
+document.addEventListener('mouseup', function(e){
+    if(imgDragging){
+        if(imgDragging.type === 'move' || imgDragging.type === 'resize'){
+            pushUndo();
+        }
+        imgDragging = null;
+        saveState();
+    }
+});
+
+// Delete selected image with Delete key
+var origKeydown = null;
+document.addEventListener('keydown', function(e){
+    if(selectedImgId && (e.key === 'Delete' || e.key === 'Backspace')){
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        e.preventDefault();
+        pushUndo();
+        state.images = state.images.filter(function(i){ return i.id !== selectedImgId; });
+        selectedImgId = null;
+        render();
+    }
+});
 
 // Initialize
 loadState(); render(); renderSwatches();
