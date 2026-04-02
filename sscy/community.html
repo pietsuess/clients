@@ -674,13 +674,13 @@ a.dash-card { text-decoration: none; color: inherit; display: block; }
     </a>
   </div>
 
-  <!-- HIRING -->
+  <!-- HIRING (dynamic from Apps Script, falls back to static) -->
   <div class="dash-subsection reveal">
     <h3>SSCY is Hiring!</h3>
     <p>Eligible volunteers and part-time staff are encouraged to apply for supplemental income.</p>
   </div>
 
-  <div class="dash-grid">
+  <div class="dash-grid" id="hiringGrid">
     <div class="dash-card reveal d1">
       <h3>Dish Room Lead</h3>
       <p>Part-Time position.</p>
@@ -851,6 +851,165 @@ function toggleAccordion(header) {
 function closeMobileMenu() {
   document.getElementById('mobileMenu').classList.remove('open');
   document.getElementById('hamburger').classList.remove('open');
+}
+
+// ===== DYNAMIC CONTENT (Phase 3) =====
+var DASH_SYNC_URL = localStorage.getItem('sscy-dash-sync-url') || '';
+var dashData = null;
+
+function loadDynamicContent() {
+  if (!DASH_SYNC_URL) return;
+  fetch(DASH_SYNC_URL)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      dashData = data;
+      if (data.hiring && data.hiring.length) renderHiring(data.hiring);
+      if (data.meetings && data.meetings.length) renderMeetings(data.meetings);
+      if (data.announcements && data.announcements.length) renderAnnouncements(data.announcements);
+    })
+    .catch(function() {}); // silent fail, static content stays
+}
+
+function renderHiring(jobs) {
+  var grid = document.getElementById('hiringGrid');
+  if (!grid || !jobs.length) return;
+  var h = '';
+  jobs.forEach(function(job, i) {
+    h += '<div class="dash-card reveal d' + ((i % 4) + 1) + '">';
+    h += '<h3>' + job.title + '</h3>';
+    h += '<p>' + job.description + '</p>';
+    if (job.contact) h += '<p style="margin-top:8px;font-size:0.82rem;color:var(--teal-dark);font-weight:500">' + job.contact + '</p>';
+    h += '</div>';
+  });
+  grid.innerHTML = h;
+  grid.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+function renderMeetings(meetings) {
+  var grid = document.querySelector('#circles .dash-grid');
+  if (!grid || !meetings.length) return;
+  var h = '';
+  meetings.forEach(function(m, i) {
+    h += '<div class="dash-card reveal d' + ((i % 4) + 1) + '">';
+    h += '<h3>' + m.name + '</h3>';
+    var timeStr = m.day + (m.time ? ', ' + m.time : '') + (m.location ? ', ' + m.location : '');
+    h += '<span class="meeting-time">' + timeStr + '</span>';
+    h += '<p>' + m.notes + '</p>';
+    if (m.facilitator) h += '<p style="font-size:0.82rem;color:var(--teal-dark);margin-top:4px">Facilitated by ' + m.facilitator + '</p>';
+    h += '</div>';
+  });
+  grid.innerHTML = h;
+  grid.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+function renderAnnouncements(items) {
+  var hero = document.querySelector('.hero');
+  if (!hero || !items.length) return;
+  items.forEach(function(a) {
+    var banner = document.createElement('div');
+    banner.className = 'announcement-banner';
+    banner.style.cssText = 'background:var(--gold);color:var(--charcoal);padding:14px 32px;text-align:center;font-size:0.88rem;font-weight:600;';
+    if (a.priority === 'urgent') banner.style.background = 'var(--terracotta)'; banner.style.color = 'var(--white)';
+    banner.innerHTML = '<strong>' + a.title + '</strong> &mdash; ' + a.body;
+    hero.insertAdjacentElement('afterend', banner);
+  });
+}
+
+// ===== ADMIN PANEL =====
+function openAdmin() {
+  if (!DASH_SYNC_URL) {
+    var url = prompt('Paste your Community Dashboard Apps Script URL:');
+    if (!url) return;
+    DASH_SYNC_URL = url;
+    localStorage.setItem('sscy-dash-sync-url', url);
+  }
+  // Load current data first
+  fetch(DASH_SYNC_URL)
+    .then(function(r) { return r.json(); })
+    .then(function(data) { dashData = data; showAdminPanel(data); })
+    .catch(function() { alert('Failed to load data from sync URL.'); });
+}
+
+function showAdminPanel(data) {
+  var ov = document.createElement('div');
+  ov.id = 'adminOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;';
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+
+  var hiringHtml = '';
+  (data.hiring || []).forEach(function(job, i) {
+    hiringHtml += '<div style="background:rgba(255,255,255,0.05);padding:12px;border-radius:6px;margin-bottom:8px">';
+    hiringHtml += '<input type="text" value="' + (job.title || '') + '" data-field="hiring-title-' + i + '" placeholder="Job Title" style="width:100%;margin-bottom:4px;padding:6px 8px;background:#444;color:#fff;border:1px solid #555;border-radius:4px;font-family:inherit;font-size:0.8rem">';
+    hiringHtml += '<input type="text" value="' + (job.description || '') + '" data-field="hiring-desc-' + i + '" placeholder="Description" style="width:100%;margin-bottom:4px;padding:6px 8px;background:#444;color:#fff;border:1px solid #555;border-radius:4px;font-family:inherit;font-size:0.8rem">';
+    hiringHtml += '<button onclick="removeHiringRow(' + i + ')" style="background:none;border:1px solid #f66;color:#f66;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:0.7rem">Remove</button>';
+    hiringHtml += '</div>';
+  });
+
+  ov.innerHTML = '<div style="background:#2c2c2c;color:#fff;border-radius:12px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:32px;font-family:Archivo Narrow,sans-serif">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-family:Cinzel,serif;font-size:1.1rem">Dashboard Admin</h3><button onclick="document.getElementById(\'adminOverlay\').remove()" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:0.6">&times;</button></div>' +
+    '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;margin-bottom:8px">Hiring Posts</div>' +
+    '<div id="adminHiring">' + hiringHtml + '</div>' +
+    '<button onclick="addHiringRow()" style="width:100%;padding:8px;background:#17A698;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;margin:8px 0 20px">+ Add Job</button>' +
+    '<button onclick="saveAdmin()" style="width:100%;padding:12px;background:var(--terracotta);color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:0.9rem;font-weight:600">Publish Changes</button>' +
+    '<p style="text-align:center;font-size:0.72rem;opacity:0.4;margin-top:12px">Changes are saved to Google Drive and visible to all dashboard users.</p>' +
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+function addHiringRow() {
+  if (!dashData) dashData = { hiring: [], meetings: [], announcements: [] };
+  dashData.hiring.push({ title: '', description: '', posted: new Date().toISOString().split('T')[0], contact: '' });
+  document.getElementById('adminOverlay').remove();
+  showAdminPanel(dashData);
+}
+
+function removeHiringRow(idx) {
+  dashData.hiring.splice(idx, 1);
+  document.getElementById('adminOverlay').remove();
+  showAdminPanel(dashData);
+}
+
+function saveAdmin() {
+  // Read hiring fields from admin panel
+  var inputs = document.querySelectorAll('[data-field]');
+  inputs.forEach(function(inp) {
+    var parts = inp.dataset.field.split('-');
+    var type = parts[0], field = parts[1], idx = parseInt(parts[2]);
+    if (type === 'hiring') {
+      if (!dashData.hiring[idx]) dashData.hiring[idx] = {};
+      if (field === 'title') dashData.hiring[idx].title = inp.value;
+      if (field === 'desc') dashData.hiring[idx].description = inp.value;
+    }
+  });
+
+  dashData._meta = { updatedAt: new Date().toISOString(), updatedBy: 'Admin' };
+
+  fetch(DASH_SYNC_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dashData)
+  }).then(function() {
+    document.getElementById('adminOverlay').remove();
+    renderHiring(dashData.hiring);
+    alert('Published! Changes may take a moment to appear for others.');
+  }).catch(function(err) {
+    alert('Publish failed: ' + err.message);
+  });
+}
+
+// Load dynamic content on page load
+loadDynamicContent();
+
+// Admin shortcut: triple-click the hero title to open admin
+var heroTitle = document.querySelector('.hero h1');
+if (heroTitle) {
+  var clickCount = 0;
+  heroTitle.addEventListener('click', function() {
+    clickCount++;
+    setTimeout(function() { clickCount = 0; }, 600);
+    if (clickCount >= 3) { clickCount = 0; openAdmin(); }
+  });
 }
 </script>
 </body>
