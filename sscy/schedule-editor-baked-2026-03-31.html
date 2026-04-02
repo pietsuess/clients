@@ -449,7 +449,10 @@ function showDayPopover(dayIdx, mx, my){
     var recF = document.getElementById('epRecFields');
     document.getElementById('epEventFields').style.display = 'none';
     recF.style.display = '';
-    recF.innerHTML = '<label>Day Name</label><input type="text" id="epDayLabel" value="'+day.label+'"><label>Date</label><input type="text" id="epDayDate" value="'+day.date+'">';
+    // Build a native date input from the current day
+    var parsed = parseDayDate(day.date, state.config.year);
+    var isoVal = parsed ? parsed.getFullYear()+'-'+String(parsed.getMonth()+1).padStart(2,'0')+'-'+String(parsed.getDate()).padStart(2,'0') : '';
+    recF.innerHTML = '<label>Date</label><input type="date" id="epDayPicker" value="'+isoVal+'" style="width:100%;background:#444;color:#fff;border:1px solid #555;padding:6px 8px;border-radius:3px;font-family:inherit;font-size:0.7rem;margin-bottom:8px;color-scheme:dark">';
     document.getElementById('epDelBtn').style.display = 'none';
     var pw = 220;
     var x = Math.min(mx + 10, window.innerWidth - pw - 10);
@@ -1636,22 +1639,19 @@ function epSave() {
     // Day header save - auto-update surrounding days
     if (editingDayIdx !== null) {
         pushUndo();
-        var newLabel = document.getElementById('epDayLabel').value;
-        var newDate = document.getElementById('epDayDate').value;
-        state.config.days[editingDayIdx].label = newLabel;
-        state.config.days[editingDayIdx].date = newDate;
-
-        // Try to parse the edited date and cascade to other days
-        var parsed = parseDayDate(newDate, state.config.year);
-        if (parsed) {
+        var pickerVal = document.getElementById('epDayPicker').value;
+        if (pickerVal) {
+            var parts = pickerVal.split('-');
+            var picked = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
             var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
             var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             for (var di = 0; di < state.config.days.length; di++) {
                 var offset = di - editingDayIdx;
-                var d = new Date(parsed.getTime() + offset * 86400000);
+                var d = new Date(picked.getTime() + offset * 86400000);
                 state.config.days[di].label = dayNames[d.getDay()];
                 state.config.days[di].date = monthNames[d.getMonth()] + ' ' + d.getDate();
             }
+            state.config.year = picked.getFullYear();
         }
 
         editingDayIdx = null;
