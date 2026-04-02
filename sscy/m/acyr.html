@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>52nd ACYR | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Join the 52nd Annual Community Yoga Retreat, July 30 to August 2, 2026. Yoga, kirtan, workshops, and community on Salt Spring Island.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../acyr.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+  --acyr-teal: #38918a; --acyr-blue: #007298;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+
+/* HERO */
+.hero { height: 100dvh; height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; background: linear-gradient(160deg, var(--acyr-teal) 0%, var(--acyr-blue) 100%); }
+.hero img.bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,56,80,0.5) 0%, rgba(56,145,138,0.4) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-logo { width: 70vw; max-width: 320px; margin: 0 auto 20px; filter: drop-shadow(0 4px 20px rgba(0,0,0,0.3)); }
+.hero-date { font-size: 0.95rem; color: rgba(255,255,255,0.9); letter-spacing: 0.04em; margin-bottom: 24px; text-align: center; }
+.hero-ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* BUTTONS */
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; margin: 0 4px 10px; }
+.btn-primary { background: var(--terracotta); color: var(--white); }
+.btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.3); color: var(--white); }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 32px 20px; background: var(--teal-deep); }
+.stat { text-align: center; color: var(--white); }
+.stat-num { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 600; color: var(--gold); }
+.stat-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec h2 { font-size: 1.4rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+
+/* SECTION IMAGE */
+.sec-img { width: 100%; border-radius: 12px; margin-bottom: 20px; object-fit: cover; max-height: 40vh; }
+
+/* STRIP */
+.strip { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; }
+.strip img { height: 28vh; min-width: 28vh; object-fit: cover; scroll-snap-align: start; flex-shrink: 0; }
+
+/* QUOTE */
+.quote { text-align: center; padding: 40px 20px; background: var(--cream-warm); }
+.quote blockquote { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--teal-deep); line-height: 1.5; max-width: 90%; margin: 0 auto 8px; }
+.quote cite { font-size: 0.75rem; color: var(--text-light); font-style: normal; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* FEATURES */
+.features { padding: 48px 20px; background: var(--white); }
+.features h2 { font-size: 1.4rem; text-align: center; color: var(--teal-deep); margin-bottom: 24px; }
+.feature-card { background: var(--cream); border-radius: 12px; padding: 24px; margin-bottom: 12px; }
+.feature-card h3 { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 600; color: var(--charcoal); margin-bottom: 6px; }
+.feature-card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; text-align: left; }
+
+/* INCLUDED */
+.included { padding: 48px 20px; }
+.included h2 { font-size: 1.4rem; text-align: center; color: var(--teal-deep); margin-bottom: 24px; }
+.included-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.included-item { text-align: center; padding: 20px 12px; }
+.included-item h3 { font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+.included-item p { font-size: 0.78rem; color: var(--text-light); line-height: 1.5; text-align: center; }
+
+/* SCHEDULE BANNER */
+.schedule-banner { display: block; background: var(--charcoal); color: var(--white); padding: 24px 20px; text-decoration: none; text-align: center; }
+.schedule-banner h3 { font-size: 1rem; color: var(--gold); margin-bottom: 4px; }
+.schedule-banner span { font-size: 0.8rem; opacity: 0.6; color: var(--white); }
+
+/* SHIRTS */
+.shirts { padding: 48px 20px; background: var(--white); }
+.shirts h2 { font-size: 1.4rem; text-align: center; color: var(--teal-deep); margin-bottom: 24px; }
+.shirts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.shirt-card { border-radius: 12px; overflow: hidden; background: var(--cream); }
+.shirt-card img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
+.shirt-label { padding: 10px 12px; font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 600; color: var(--charcoal); text-align: center; }
+
+/* CTA */
+.register { text-align: center; padding: 48px 20px; background: linear-gradient(160deg, var(--acyr-teal), var(--acyr-blue)); color: var(--white); }
+.register h2 { color: var(--white); margin-bottom: 12px; font-size: 1.4rem; }
+.register p { text-align: center; opacity: 0.8; font-size: 0.92rem; margin-bottom: 8px; }
+.register .note { font-size: 0.82rem; opacity: 0.6; margin-bottom: 20px; }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="bg" src="../acyr-images/hero.jpg" alt="Salt Spring Centre of Yoga">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <img src="../52ACYR-assets/Hand_and_Sprout_Tshirt2_web.png" alt="52nd Annual Community Yoga Retreat" class="hero-logo">
+    <p class="hero-date">July 30 &ndash; August 2, 2026<br>Salt Spring Island, BC</p>
+    <div class="hero-ctas">
+      <a href="https://saltspringcentre.com/annual-community-yoga-retreat-2025-guest-registration/" class="btn btn-primary" target="_blank">Register Now</a>
+      <a href="#about" class="btn btn-outline">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">52</div><div class="stat-lbl">Years Running</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">Day Retreat</div></div>
+  <div class="stat"><div class="stat-num">50+</div><div class="stat-lbl">Classes</div></div>
+  <div class="stat"><div class="stat-num">69</div><div class="stat-lbl">Acres</div></div>
+</div>
+
+<!-- ABOUT -->
+<section class="sec" id="about">
+  <span class="label">Discover the Magic</span>
+  <h2>A Tradition of Connection</h2>
+  <p>For over fifty years, the Annual Community Yoga Retreat has brought together practitioners, families, and seekers from around the world. Immerse yourself in the warmth of community, deepen your yoga practice, and reconnect with your inner peace.</p>
+  <p>Rooted in the teachings of Baba Hari Dass, the retreat offers an authentic yoga experience that includes asana, pranayama, meditation, philosophy, kirtan, and sacred ceremony.</p>
+</section>
+
+<!-- PHOTO STRIP -->
+<div class="strip">
+  <img src="../acyr-images/1.jpg" alt="Community yoga" loading="lazy">
+  <img src="../acyr-images/2.jpg" alt="Retreat activities" loading="lazy">
+  <img src="../acyr-images/3.jpg" alt="Yoga classes" loading="lazy">
+  <img src="../acyr-images/6.jpg" alt="Kirtan" loading="lazy">
+  <img src="../acyr-images/8.jpg" alt="Workshop" loading="lazy">
+  <img src="../acyr-images/11.jpg" alt="Meals" loading="lazy">
+  <img src="../acyr-images/12.jpg" alt="Nature" loading="lazy">
+</div>
+
+<!-- QUOTE -->
+<div class="quote">
+  <blockquote>"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
+  <cite>Baba Hari Dass</cite>
+</div>
+
+<!-- DEEPEN -->
+<section class="sec sec-alt">
+  <img class="sec-img" src="../acyr-images/3.jpg" alt="Yoga practice" loading="lazy">
+  <span class="label">Authentic Yoga Lineage</span>
+  <h2>Deepen Your Practice</h2>
+  <p>The retreat draws on a rich lineage of classical yoga. Expect kirtan, sacred ceremonies, pranayama, philosophy, meditation, and asana classes led by experienced teachers.</p>
+</section>
+
+<!-- FAMILY -->
+<section class="sec">
+  <img class="sec-img" src="../acyr-images/6.jpg" alt="Family activities" loading="lazy">
+  <span class="label">Fun for Everyone</span>
+  <h2>Family Friendly</h2>
+  <p>Classes for all skill levels, from gentle yoga to advanced practice. Dedicated children's programming and activities for all ages. Come as you are.</p>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <h2>Why Attend?</h2>
+  <div class="feature-card">
+    <h3>A Tradition of Connection</h3>
+    <p>Fifty-two years of bringing together practitioners, seekers, and families in a spirit of shared growth.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Authentic Yoga Lineage</h3>
+    <p>Teachings rooted in the tradition of Baba Hari Dass: kirtan, ceremonies, philosophy, pranayama, meditation, and asana.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Kirtan &amp; Community</h3>
+    <p>Soulful music, community gatherings, and evening celebrations that nourish the spirit.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Serene Natural Setting</h3>
+    <p>Sixty-nine acres of forests, gardens, and ocean vistas on Salt Spring Island.</p>
+  </div>
+</section>
+
+<!-- INCLUDED -->
+<section class="included">
+  <h2>What's Included</h2>
+  <div class="included-grid">
+    <div class="included-item">
+      <h3>Yoga Sessions</h3>
+      <p>All skill levels, adults and children</p>
+    </div>
+    <div class="included-item">
+      <h3>Workshops</h3>
+      <p>Wellness, philosophy, creative expression</p>
+    </div>
+    <div class="included-item">
+      <h3>Kirtan &amp; Gatherings</h3>
+      <p>Music, ceremony, celebration</p>
+    </div>
+    <div class="included-item">
+      <h3>Vegetarian Meals</h3>
+      <p>Fresh from the Centre's gardens</p>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE 2 -->
+<div class="quote">
+  <blockquote>"The whole universe is one family."</blockquote>
+  <cite>Vasudhaiva Kutumbakam</cite>
+</div>
+
+<!-- SCHEDULE -->
+<a href="../schedule-editor-baked-2026-03-31.html" class="schedule-banner">
+  <h3>View the Full Schedule</h3>
+  <span>Classes, workshops, kirtan, meals, and more</span>
+</a>
+
+<!-- SHIRTS -->
+<section class="shirts">
+  <h2>Retreat Apparel</h2>
+  <div class="shirts-grid">
+    <div class="shirt-card">
+      <img src="../acyr-images/shirts/MensBlue_Tee.jpg" alt="Men's Blue Tee" loading="lazy">
+      <div class="shirt-label">Men's Tee - Blue</div>
+    </div>
+    <div class="shirt-card">
+      <img src="../acyr-images/shirts/MensBlue_tank.jpg" alt="Men's Blue Tank" loading="lazy">
+      <div class="shirt-label">Men's Tank - Blue</div>
+    </div>
+    <div class="shirt-card">
+      <img src="../acyr-images/shirts/WomensBlue_Tank.jpg" alt="Women's Blue Tank" loading="lazy">
+      <div class="shirt-label">Women's Tank - Blue</div>
+    </div>
+    <div class="shirt-card">
+      <img src="../acyr-images/shirts/MensGreen_Tee.jpg" alt="Men's Green Tee" loading="lazy">
+      <div class="shirt-label">Men's Tee - Green</div>
+    </div>
+    <div class="shirt-card">
+      <img src="../acyr-images/shirts/MensGreen_tank.jpg" alt="Men's Green Tank" loading="lazy">
+      <div class="shirt-label">Men's Tank - Green</div>
+    </div>
+    <div class="shirt-card">
+      <img src="../acyr-images/shirts/WomensGreen_Tank.jpg" alt="Women's Green Tank" loading="lazy">
+      <div class="shirt-label">Women's Tank - Green</div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTER -->
+<section class="register">
+  <h2>Join Us This Summer</h2>
+  <p>Registration for 2026 has not opened yet. Sign up for our newsletter to be first to know.</p>
+  <p class="note">July 30 &ndash; August 2, 2026</p>
+  <a href="https://saltspringcentre.com/annual-community-yoga-retreat-2025-guest-registration/" class="btn btn-primary" target="_blank">Register Now</a>
+  <a href="contact.html" class="btn btn-outline">Get in Touch</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="offerings.html">Offerings</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<script>
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+</script>
+</body>
+</html>
