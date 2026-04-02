@@ -468,6 +468,20 @@ function saveState(){ localStorage.setItem('acyr-schedule',JSON.stringify(state)
 
 function brightness(hex){ var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (r*299+g*587+b*114)/1000; }
 
+// Parse "Aug 1" or "Aug 1 2026" or "August 1" into a Date object
+function parseDayDate(str, fallbackYear) {
+    var months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
+        january:0,february:1,march:2,april:3,june:5,july:6,august:7,september:8,october:9,november:10,december:11};
+    var parts = str.trim().replace(/,/g,'').split(/\s+/);
+    if (parts.length < 2) return null;
+    var m = months[parts[0].toLowerCase()];
+    if (m === undefined) return null;
+    var d = parseInt(parts[1]);
+    if (isNaN(d)) return null;
+    var y = parts[2] ? parseInt(parts[2]) : (fallbackYear || new Date().getFullYear());
+    return new Date(y, m, d);
+}
+
 // Auto-assign columns for overlapping events in a day
 // Each event gets only the columns needed for ITS direct overlaps, not transitive chains
 function assignColumns(dayEvents){
@@ -1619,11 +1633,27 @@ function epSave() {
         editingTitle = false;
         closePopover(); render(); return;
     }
-    // Day header save
+    // Day header save - auto-update surrounding days
     if (editingDayIdx !== null) {
         pushUndo();
-        state.config.days[editingDayIdx].label = document.getElementById('epDayLabel').value;
-        state.config.days[editingDayIdx].date = document.getElementById('epDayDate').value;
+        var newLabel = document.getElementById('epDayLabel').value;
+        var newDate = document.getElementById('epDayDate').value;
+        state.config.days[editingDayIdx].label = newLabel;
+        state.config.days[editingDayIdx].date = newDate;
+
+        // Try to parse the edited date and cascade to other days
+        var parsed = parseDayDate(newDate, state.config.year);
+        if (parsed) {
+            var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+            var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            for (var di = 0; di < state.config.days.length; di++) {
+                var offset = di - editingDayIdx;
+                var d = new Date(parsed.getTime() + offset * 86400000);
+                state.config.days[di].label = dayNames[d.getDay()];
+                state.config.days[di].date = monthNames[d.getMonth()] + ' ' + d.getDate();
+            }
+        }
+
         editingDayIdx = null;
         closePopover(); render(); return;
     }
