@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACYR Schedule Editor</title>
+    <title>ACYR Schedule</title>
+    <script>var VIEW_MODE = location.search.indexOf('view') >= 0;</script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -42,6 +43,14 @@
             border:2px solid transparent; transition: border-color 0.15s;
         }
         .vswatch:hover, .vswatch.active { border-color:#fff; }
+
+        /* VIEW MODE - hide toolbar, disable editing */
+        .view-mode .toolbar { display: none !important; }
+        .view-mode .sched-wrap { margin-top: 0; }
+        .view-mode .ev-x, .view-mode .ev-dup, .view-mode .ev-resize { display: none !important; }
+        .view-mode .ev { cursor: default !important; }
+        .view-mode .leg-x { display: none !important; }
+        .view-mode .name-overlay { display: none !important; }
 
         /* Schedule container - framed with breathing room */
         .sched-wrap { margin-top: var(--toolbar-h); padding: 20px 20px 60px; }
@@ -1929,12 +1938,16 @@ renderSettings = function() {
 loadState(); render(); renderSwatches();
 if(!activeVenueId&&state.venues.length)activeVenueId=state.venues[0].id;
 renderSwatches();
-promptUserName();
-checkForUpdates();
-setInterval(checkForUpdates, 60000);
-updateUserStatus();
-sendHeartbeat();
-setInterval(sendHeartbeat, 30000);
+if (VIEW_MODE) {
+    document.documentElement.classList.add('view-mode');
+} else {
+    promptUserName();
+    checkForUpdates();
+    setInterval(checkForUpdates, 60000);
+    updateUserStatus();
+    sendHeartbeat();
+    setInterval(sendHeartbeat, 30000);
+}
 </script>
 </body>
 </html>
