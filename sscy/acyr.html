@@ -43,8 +43,8 @@ p { text-align: justify; text-justify: inter-word; }
 .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,56,80,0.5) 0%, rgba(56,145,138,0.4) 100%); }
 .hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); max-width: 700px; padding: 0 32px; opacity: 0; transform: scale(0.96); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
 .hero-content.visible { opacity: 1; transform: scale(1); }
-.hero-logo-52 { width: clamp(320px, 50vw, 560px); margin: 0 auto 32px; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3)); }
-.hero-content h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); margin-bottom: 12px; font-weight: 600; white-space: nowrap; }
+.hero-logo-52 { width: clamp(280px, 42vw, 480px); margin: 0 auto 32px; filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3)); }
+.hero-content h1 { display: none; }
 .hero-content .hero-date { font-size: 1.2rem; color: rgba(255,255,255,0.9); letter-spacing: 0.06em; margin-bottom: 32px; font-weight: 400; text-align: center; }
 .hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
@@ -107,7 +107,6 @@ p { text-align: justify; text-justify: inter-word; }
 .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 900px; margin: 0 auto; }
 .feature-card { background: var(--cream); border-radius: 16px; padding: 36px; position: relative; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.08); }
-.feature-icon { font-size: 2.2rem; margin-bottom: 16px; }
 .feature-card h3 { font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 600; color: var(--charcoal); margin-bottom: 10px; }
 .feature-card p { font-size: 0.92rem; color: var(--text-light); line-height: 1.7; text-align: left; }
 
@@ -116,7 +115,6 @@ p { text-align: justify; text-justify: inter-word; }
 .included-section h2 { text-align: center; font-size: 2.4rem; color: var(--teal-deep); margin-bottom: 56px; }
 .included-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1000px; margin: 0 auto; }
 .included-item { text-align: center; padding: 32px 16px; }
-.included-icon { font-size: 2.4rem; margin-bottom: 12px; }
 .included-item h3 { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 600; color: var(--charcoal); margin-bottom: 8px; }
 .included-item p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; text-align: center; }
 
@@ -137,6 +135,16 @@ p { text-align: justify; text-justify: inter-word; }
 /* LOGO SHOWCASE */
 .logo-showcase { padding: 64px 24px; text-align: center; background: var(--white); }
 .logo-showcase img { max-width: 320px; margin: 0 auto; }
+
+/* SHIRTS SECTION */
+.shirts-section { padding: 100px 24px; background: var(--white); }
+.shirts-section h2 { text-align: center; font-size: 2.4rem; color: var(--teal-deep); margin-bottom: 12px; }
+.shirts-section .section-sub { text-align: center; font-size: 1.05rem; color: var(--text-light); max-width: 480px; margin: 0 auto 48px; line-height: 1.7; }
+.shirts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
+.shirt-card { border-radius: 16px; overflow: hidden; background: var(--cream); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.shirt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.08); }
+.shirt-card img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
+.shirt-card .shirt-label { padding: 16px 20px; font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; color: var(--charcoal); text-align: center; letter-spacing: 0.03em; }
 
 /* REVEALS */
 .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -192,6 +200,7 @@ p { text-align: justify; text-justify: inter-word; }
   .split-text { padding: 56px 28px; }
   .features-grid { grid-template-columns: 1fr; max-width: 480px; }
   .included-grid { grid-template-columns: repeat(2, 1fr); }
+  .shirts-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-bar { gap: 36px; flex-wrap: wrap; padding: 44px 24px; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
   .parallax-frame { height: 50vh; }
@@ -265,7 +274,7 @@ p { text-align: justify; text-justify: inter-word; }
   <img src="acyr-images/hero.jpg" alt="Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
   <div class="hero-overlay"></div>
   <div class="hero-content" id="heroText">
-    <img src="52ACYR-assets/Hand_and_Sprout_Tshirt2.png" alt="52nd Annual Community Yoga Retreat" class="hero-logo-52">
+    <img src="52ACYR-assets/Hand_and_Sprout_Tshirt2_web.png" alt="52nd Annual Community Yoga Retreat" class="hero-logo-52">
     <h1>Annual Community Yoga Retreat</h1>
     <p class="hero-date">July 30 &ndash; August 2, 2026 &bull; Salt Spring Island, BC</p>
     <div class="hero-ctas">
@@ -283,8 +292,8 @@ p { text-align: justify; text-justify: inter-word; }
     <div class="stat-lbl">Years Running</div>
   </div>
   <div class="stat-item">
-    <div class="stat-num" data-target="4">0</div>
-    <div class="stat-lbl">Days of Retreat</div>
+    <div class="stat-num" data-target="5">0</div>
+    <div class="stat-lbl">Day Retreat</div>
   </div>
   <div class="stat-item">
     <div class="stat-num">50+</div>
@@ -367,22 +376,18 @@ p { text-align: justify; text-justify: inter-word; }
   <p class="section-sub reveal">Four reasons people return year after year</p>
   <div class="features-grid">
     <div class="feature-card reveal d1">
-      <div class="feature-icon">&#x1F331;</div>
       <h3>A Tradition of Connection</h3>
       <p>Fifty-two years of bringing together practitioners, seekers, and families in a spirit of shared growth and celebration.</p>
     </div>
     <div class="feature-card reveal d2">
-      <div class="feature-icon">&#x1F9D8;</div>
       <h3>Authentic Yoga Lineage</h3>
       <p>Teachings rooted in the tradition of Baba Hari Dass: kirtan, ceremonies, philosophy, pranayama, meditation, and asana.</p>
     </div>
     <div class="feature-card reveal d3">
-      <div class="feature-icon">&#x1F3B6;</div>
       <h3>Kirtan &amp; Community</h3>
       <p>Soulful music, community gatherings, and evening celebrations that nourish the spirit and forge lasting friendships.</p>
     </div>
     <div class="feature-card reveal d4">
-      <div class="feature-icon">&#x1F333;</div>
       <h3>Serene Natural Setting</h3>
       <p>Sixty-nine acres of forests, gardens, and ocean vistas on Salt Spring Island, one of BC's most beautiful Gulf Islands.</p>
     </div>
@@ -395,22 +400,18 @@ p { text-align: justify; text-justify: inter-word; }
   <h2 class="reveal">What's Included</h2>
   <div class="included-grid">
     <div class="included-item reveal d1">
-      <div class="included-icon">&#x1F9D8;&#x200D;&#x2640;&#xFE0F;</div>
       <h3>Yoga Sessions</h3>
       <p>Diverse classes for all skill levels, adults and children alike</p>
     </div>
     <div class="included-item reveal d2">
-      <div class="included-icon">&#x1F4A1;</div>
       <h3>Workshops</h3>
       <p>Inspirational sessions on wellness, philosophy, and creative expression</p>
     </div>
     <div class="included-item reveal d3">
-      <div class="included-icon">&#x1F3B5;</div>
       <h3>Kirtan &amp; Gatherings</h3>
       <p>Soulful music, sacred ceremony, and community celebration</p>
     </div>
     <div class="included-item reveal d4">
-      <div class="included-icon">&#x1F957;</div>
       <h3>Vegetarian Meals</h3>
       <p>Freshly prepared, nourishing food from the Centre's own gardens</p>
     </div>
@@ -432,10 +433,37 @@ p { text-align: justify; text-justify: inter-word; }
 </a>
 
 
-<!-- LOGO SHOWCASE -->
-<div class="logo-showcase reveal">
-  <img src="52ACYR-assets/52_Hand-Sprout_Logo-03.png" alt="52nd ACYR Logo">
-</div>
+<!-- SHIRTS -->
+<section class="shirts-section">
+  <h2 class="reveal">Retreat Apparel</h2>
+  <p class="section-sub reveal">Commemorate the 52nd ACYR</p>
+  <div class="shirts-grid">
+    <div class="shirt-card reveal d1">
+      <img src="acyr-images/shirts/MensBlue_Tee.jpg" alt="Men's Blue Tee">
+      <div class="shirt-label">Men's Tee &mdash; Blue</div>
+    </div>
+    <div class="shirt-card reveal d2">
+      <img src="acyr-images/shirts/MensBlue_tank.jpg" alt="Men's Blue Tank">
+      <div class="shirt-label">Men's Tank &mdash; Blue</div>
+    </div>
+    <div class="shirt-card reveal d3">
+      <img src="acyr-images/shirts/WomensBlue_Tank.jpg" alt="Women's Blue Tank">
+      <div class="shirt-label">Women's Tank &mdash; Blue</div>
+    </div>
+    <div class="shirt-card reveal d1">
+      <img src="acyr-images/shirts/MensGreen_Tee.jpg" alt="Men's Green Tee">
+      <div class="shirt-label">Men's Tee &mdash; Green</div>
+    </div>
+    <div class="shirt-card reveal d2">
+      <img src="acyr-images/shirts/MensGreen_tank.jpg" alt="Men's Green Tank">
+      <div class="shirt-label">Men's Tank &mdash; Green</div>
+    </div>
+    <div class="shirt-card reveal d3">
+      <img src="acyr-images/shirts/WomensGreen_Tank.jpg" alt="Women's Green Tank">
+      <div class="shirt-label">Women's Tank &mdash; Green</div>
+    </div>
+  </div>
+</section>
 
 
 <!-- REGISTER CTA -->
