@@ -71,51 +71,63 @@ function setup() {
   return 'Setup complete!';
 }
 
+// Read a sheet tab into an array of objects using header names as keys
+function readTab(ss, tabName) {
+  var sheet = ss.getSheetByName(tabName);
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function(h) { return String(h).trim().toLowerCase(); });
+  var rows = [];
+  for (var i = 1; i < data.length; i++) {
+    var obj = {};
+    var hasContent = false;
+    for (var c = 0; c < headers.length; c++) {
+      if (headers[c]) {
+        obj[headers[c]] = data[i][c] !== undefined ? data[i][c] : '';
+        if (data[i][c] !== '') hasContent = true;
+      }
+    }
+    if (hasContent) rows.push(obj);
+  }
+  return rows;
+}
+
 function doGet(e) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var result = {};
 
-  // Hiring
-  var hiring = ss.getSheetByName('Hiring');
+  // Hiring - filter out inactive rows
+  var hiringRaw = readTab(ss, 'Hiring');
   result.hiring = [];
-  if (hiring && hiring.getLastRow() > 1) {
-    var data = hiring.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (!data[i][0]) continue;
-      var active = String(data[i][3]).toLowerCase();
-      if (active === 'no' || active === 'false' || active === '0') continue;
-      result.hiring.push({ title: data[i][0], description: data[i][1], contact: data[i][2] || '' });
-    }
-  }
+  hiringRaw.forEach(function(row) {
+    if (!row.title) return;
+    var active = String(row.active || 'yes').toLowerCase();
+    if (active === 'no' || active === 'false' || active === '0') return;
+    result.hiring.push({ title: row.title, description: row.description || '', contact: row.contact || '' });
+  });
 
   // Announcements
-  var ann = ss.getSheetByName('Announcements');
+  var annRaw = readTab(ss, 'Announcements');
   result.announcements = [];
-  if (ann && ann.getLastRow() > 1) {
-    var data = ann.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (!data[i][0]) continue;
-      result.announcements.push({
-        title: data[i][0], body: data[i][1],
-        priority: data[i][2] || 'normal',
-        date: data[i][3] ? Utilities.formatDate(new Date(data[i][3]), 'America/Vancouver', 'yyyy-MM-dd') : ''
-      });
+  annRaw.forEach(function(row) {
+    if (!row.title) return;
+    var dateStr = '';
+    if (row.date) {
+      try { dateStr = Utilities.formatDate(new Date(row.date), 'America/Vancouver', 'yyyy-MM-dd'); } catch(e) {}
     }
-  }
+    result.announcements.push({ title: row.title, body: row.body || '', priority: row.priority || 'normal', date: dateStr });
+  });
 
   // Meetings
-  var meet = ss.getSheetByName('Meetings');
+  var meetRaw = readTab(ss, 'Meetings');
   result.meetings = [];
-  if (meet && meet.getLastRow() > 1) {
-    var data = meet.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (!data[i][0]) continue;
-      result.meetings.push({
-        name: data[i][0], day: data[i][1], time: data[i][2],
-        location: data[i][3] || '', facilitator: data[i][4] || '', notes: data[i][5] || ''
-      });
-    }
-  }
+  meetRaw.forEach(function(row) {
+    if (!row.name) return;
+    result.meetings.push({
+      name: row.name, day: row.day || '', time: row.time || '',
+      location: row.location || '', facilitator: row.facilitator || '', notes: row.notes || ''
+    });
+  });
 
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
