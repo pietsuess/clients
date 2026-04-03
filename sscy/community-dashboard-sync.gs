@@ -1,62 +1,85 @@
-// SSCY Community Dashboard Sync - Google Apps Script
+// SSCY Community Dashboard - Google Sheet Sync
 //
-// SETUP (one time, ~2 minutes):
-// 1. Go to https://script.google.com
-// 2. Click "New project", name it "SSCY Community Dashboard Sync"
-// 3. Delete the default code, paste this entire file
-// 4. Click "Deploy" > "New deployment"
-// 5. Type = "Web app"
-// 6. Execute as: "Me"
-// 7. Who has access: "Anyone"
-// 8. Click "Deploy", authorize when prompted
-// 9. Copy the Web app URL
+// SETUP:
+// 1. Create a Google Sheet called "SSCY Community Dashboard"
+// 2. Create 3 tabs (sheets) named exactly: Hiring, Announcements, Meetings
+// 3. Add header rows:
 //
-// Data is stored as "sscy-community-dashboard.json" in your Google Drive.
-// The dashboard pages fetch this on load to render dynamic sections.
-// Admin users can POST updates from the dashboard admin panel.
-
-var FILE_NAME = 'sscy-community-dashboard.json';
-
-var DEFAULT_DATA = {
-  _meta: { updatedAt: '', updatedBy: '' },
-  announcements: [
-    // { title: 'Water Conservation', body: 'Please conserve water this week.', date: '2026-04-01', priority: 'normal' }
-  ],
-  hiring: [
-    { title: 'Dish Room Lead', description: 'Part-Time position.', posted: '2026-04-01', contact: '' },
-    { title: 'Guest Services Office Administrator', description: 'Temporary, Part-Time.', posted: '2026-04-01', contact: '' },
-    { title: 'Reception Office Support', description: 'Temporary, Part-Time.', posted: '2026-04-01', contact: '' }
-  ],
-  meetings: [
-    { name: 'Community Circle', day: 'Tuesdays', time: '2:00 - 3:00 PM', location: '', facilitator: 'Tash with Coordinators', notes: 'A space for shared reflection, deep listening, dialogue, and strengthening community.' },
-    { name: 'Coordinators Meeting', day: 'Wednesdays', time: '2:00 - 3:00 PM', location: 'School House', facilitator: 'Executive Pod', notes: 'Cross-department alignment and collaboration.' },
-    { name: 'Morning Meetings', day: 'Monday & Wednesday', time: '9:00 - 9:15 AM', location: 'Dining Hall', facilitator: 'Tash & Coordinators', notes: 'Short focused gatherings for announcements and daily logistics.' },
-    { name: 'Work Parties', day: 'Wednesdays', time: '10:00 - 12:30', location: 'TBA', facilitator: 'Anuradha & Operations', notes: 'Hands-on collective efforts in service to the land and Centre.' },
-    { name: 'Department Meetings', day: 'As scheduled', time: '', location: '', facilitator: 'Area Coordinators', notes: 'Internal team alignment and planning sessions.' }
-  ]
-};
-
-function getOrCreateFile(name) {
-  var files = DriveApp.getFilesByName(name);
-  if (files.hasNext()) return files.next();
-  return DriveApp.createFile(name, JSON.stringify(DEFAULT_DATA, null, 2), 'application/json');
-}
+//    Hiring tab:        Title | Description | Contact | Active
+//    Announcements tab: Title | Body | Priority | Date
+//    Meetings tab:      Name | Day | Time | Location | Facilitator | Notes
+//
+// 4. Add your data rows below the headers
+// 5. Go to Extensions > Apps Script
+// 6. Delete the default code, paste this entire file
+// 7. Click "Deploy" > "New deployment"
+// 8. Type = "Web app"
+// 9. Execute as: "Me"
+// 10. Who has access: "Anyone"
+// 11. Click "Deploy", authorize when prompted
+// 12. Copy the Web app URL and paste it into the dashboard
+//
+// To update content: just edit the spreadsheet. Changes appear on next page load.
+// No admin panel, no JSON files, no extra tools.
 
 function doGet(e) {
-  var file = getOrCreateFile(FILE_NAME);
-  var content = file.getBlob().getDataAsString();
-  return ContentService.createTextOutput(content).setMimeType(ContentService.MimeType.JSON);
-}
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var result = {};
 
-function doPost(e) {
-  var file = getOrCreateFile(FILE_NAME);
-  var data = e.postData.contents;
-  // Validate JSON
-  try { JSON.parse(data); } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({error: 'Invalid JSON'}))
-      .setMimeType(ContentService.MimeType.JSON);
+  // --- HIRING ---
+  var hiringSheet = ss.getSheetByName('Hiring');
+  result.hiring = [];
+  if (hiringSheet) {
+    var hiringData = hiringSheet.getDataRange().getValues();
+    for (var i = 1; i < hiringData.length; i++) { // skip header row
+      var row = hiringData[i];
+      if (!row[0]) continue; // skip empty rows
+      var active = String(row[3]).toLowerCase();
+      if (active === 'no' || active === 'false' || active === '0') continue; // skip inactive
+      result.hiring.push({
+        title: row[0],
+        description: row[1],
+        contact: row[2] || ''
+      });
+    }
   }
-  file.setContent(data);
-  return ContentService.createTextOutput(JSON.stringify({ok: true}))
+
+  // --- ANNOUNCEMENTS ---
+  var annSheet = ss.getSheetByName('Announcements');
+  result.announcements = [];
+  if (annSheet) {
+    var annData = annSheet.getDataRange().getValues();
+    for (var i = 1; i < annData.length; i++) {
+      var row = annData[i];
+      if (!row[0]) continue;
+      result.announcements.push({
+        title: row[0],
+        body: row[1],
+        priority: row[2] || 'normal',
+        date: row[3] ? Utilities.formatDate(new Date(row[3]), 'America/Vancouver', 'yyyy-MM-dd') : ''
+      });
+    }
+  }
+
+  // --- MEETINGS ---
+  var meetSheet = ss.getSheetByName('Meetings');
+  result.meetings = [];
+  if (meetSheet) {
+    var meetData = meetSheet.getDataRange().getValues();
+    for (var i = 1; i < meetData.length; i++) {
+      var row = meetData[i];
+      if (!row[0]) continue;
+      result.meetings.push({
+        name: row[0],
+        day: row[1],
+        time: row[2],
+        location: row[3] || '',
+        facilitator: row[4] || '',
+        notes: row[5] || ''
+      });
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
