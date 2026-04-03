@@ -48,6 +48,21 @@ p { text-align: justify; text-justify: inter-word; }
 .sign-out-btn { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transition: color 0.2s ease, background 0.2s ease; background: none; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; margin-left: 4px; }
 .sign-out-btn:hover { color: var(--terracotta); border-color: var(--terracotta); background: rgba(193,120,56,0.05); }
 
+/* HELP PANEL */
+.help-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.help-panel { background: var(--white); border-radius: 12px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative; }
+.help-panel h2 { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--teal-deep); text-align: center; margin-bottom: 24px; }
+.help-panel .help-close { position: sticky; top: 0; float: right; background: var(--cream); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; color: var(--text-light); display: flex; align-items: center; justify-content: center; z-index: 1; }
+.help-panel .help-close:hover { background: var(--cream-warm); color: var(--charcoal); }
+.help-section { margin-bottom: 28px; }
+.help-section h3 { font-family: 'Cinzel', serif; font-size: 0.92rem; font-weight: 600; color: var(--teal-deep); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid var(--teal); }
+.help-section p { font-size: 0.88rem; line-height: 1.7; color: var(--text); margin-bottom: 8px; text-align: left; }
+.help-section ul { list-style: none; margin: 0 0 12px; padding: 0; }
+.help-section ul li { padding: 5px 0 5px 16px; font-size: 0.85rem; line-height: 1.6; color: var(--text); position: relative; }
+.help-section ul li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+.help-tip { background: var(--cream); border-left: 3px solid var(--teal); padding: 10px 14px; margin: 10px 0; border-radius: 0 6px 6px 0; font-size: 0.85rem; line-height: 1.6; }
+.help-contact { display: inline-block; background: var(--teal); color: var(--white); padding: 4px 12px; border-radius: 50px; font-size: 0.78rem; font-weight: 600; margin: 2px 0; }
+
 /* HERO */
 .hero { height: 40vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); }
 .hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); max-width: 700px; padding: 0 32px; }
@@ -224,6 +239,7 @@ a.dash-card { text-decoration: none; color: inherit; display: block; }
       <a href="offerings.html">Offerings</a>
       <a href="rentals.html">Rentals</a>
       <a href="contact.html">Contact</a>
+      <button class="sign-out-btn" onclick="showHelp()">Help</button>
       <button class="sign-out-btn" id="signOutBtn" onclick="signOut()">Sign Out</button>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Menu" onclick="document.getElementById('mobileMenu').classList.toggle('open');this.classList.toggle('open');">
@@ -239,6 +255,7 @@ a.dash-card { text-decoration: none; color: inherit; display: block; }
   <a href="offerings.html">Offerings</a>
   <a href="rentals.html">Rentals</a>
   <a href="contact.html">Contact</a>
+  <a href="#" onclick="event.preventDefault();closeMobileMenu();showHelp();">Help</a>
   <a href="#" onclick="event.preventDefault();closeMobileMenu();signOut();">Sign Out</a>
 </div>
 
@@ -852,6 +869,101 @@ function closeMobileMenu() {
   document.getElementById('mobileMenu').classList.remove('open');
   document.getElementById('hamburger').classList.remove('open');
 }
+
+// ===== HELP PANEL =====
+function showHelp() {
+  if (document.getElementById('helpOverlay')) { document.getElementById('helpOverlay').remove(); return; }
+  var ov = document.createElement('div');
+  ov.className = 'help-overlay';
+  ov.id = 'helpOverlay';
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+
+  ov.innerHTML = '<div class="help-panel">' +
+    '<button class="help-close" onclick="document.getElementById(\'helpOverlay\').remove()">\u2715</button>' +
+    '<h2>Community Dashboard Guide</h2>' +
+
+    '<div class="help-section">' +
+    '<h3>What Is This?</h3>' +
+    '<p>This dashboard is your central hub for everything at the Salt Spring Centre of Yoga. Directory, forms, policies, meetings, safety info, and community resources are all here in one place.</p>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Getting Around</h3>' +
+    '<p>Use the <strong>colored keys</strong> at the top of the page to jump directly to any section:</p>' +
+    '<ul>' +
+    '<li><strong>Directory</strong> \u2014 Calendar, yoga classes, emergency contacts</li>' +
+    '<li><strong>Staff</strong> \u2014 Handbooks, schedules, venue booking, organizational structure</li>' +
+    '<li><strong>Land &amp; Safety</strong> \u2014 Maintenance dispatch, water leak hotline, fire preparedness, Work Safe BC</li>' +
+    '<li><strong>Forms</strong> \u2014 All request forms (schedule changes, time away, purchase orders, guest requests, etc.)</li>' +
+    '<li><strong>Well-being</strong> \u2014 Crisis support, mental health resources, DEI, wellness programs</li>' +
+    '<li><strong>Circles</strong> \u2014 All regular meetings with days, times, and locations</li>' +
+    '<li><strong>Policies</strong> \u2014 Shift coverage, sick policy, meal opt-out, schedule changes, governance (click to expand each)</li>' +
+    '<li><strong>Community</strong> \u2014 Sister organizations, job postings, coordinator resources, social media</li>' +
+    '</ul>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Emergency Contacts</h3>' +
+    '<p>Emergency numbers appear in orange-bordered banners throughout the dashboard. Key numbers to save in your phone:</p>' +
+    '<ul>' +
+    '<li><span class="help-contact">866-662-1275</span> SSCY Emergency Team</li>' +
+    '<li><span class="help-contact">831-777-4349</span> Maintenance Dispatch (TEXT only)</li>' +
+    '<li><span class="help-contact">831-226-0005</span> Water Leak Hotline</li>' +
+    '<li><span class="help-contact">988</span> Suicide &amp; Crisis Lifeline</li>' +
+    '<li><span class="help-contact">1.888.967.5377</span> Work Safe BC</li>' +
+    '</ul>' +
+    '<div class="help-tip">On mobile, tap any phone number to call or text directly.</div>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Policies</h3>' +
+    '<p>The Policies section uses expandable panels. Click any policy title to expand it and read the full details. Click again to collapse.</p>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Passphrase &amp; Access</h3>' +
+    '<p>This dashboard is protected by a community passphrase. Once entered, you will not be asked again on this device unless you sign out.</p>' +
+    '<ul>' +
+    '<li><strong>Sign Out</strong> clears your access on this device. You will need the passphrase again to re-enter.</li>' +
+    '<li>If the passphrase changes, you will be prompted automatically on your next visit.</li>' +
+    '<li>If you have forgotten the passphrase, ask at Community Circle or email the office.</li>' +
+    '</ul>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>For Administrators</h3>' +
+    '<p>Administrators can update dynamic content (hiring posts, meeting schedules, announcements) through the admin panel.</p>' +
+    '<ul>' +
+    '<li><strong>Open Admin</strong>: Triple-click the "Community Dashboard" title in the hero area at the top of the page.</li>' +
+    '<li>First time: you will be asked to paste the Apps Script sync URL. This is saved in your browser for future use.</li>' +
+    '<li>Add, edit, or remove job postings and click <strong>Publish Changes</strong> to save.</li>' +
+    '<li>Published changes are stored in Google Drive and appear for all dashboard users on their next page load.</li>' +
+    '</ul>' +
+    '<div class="help-tip">Static content (policies, emergency numbers, forms, resource links) is updated by editing the HTML directly. Contact Piet for changes to these sections.</div>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Technical Notes</h3>' +
+    '<ul>' +
+    '<li>This page works offline once loaded (except dynamic content).</li>' +
+    '<li>Bookmark this page for quick access.</li>' +
+    '<li>Best viewed in Chrome, Safari, or Firefox.</li>' +
+    '<li>On mobile, the dashboard automatically loads a mobile-optimized version.</li>' +
+    '</ul>' +
+    '</div>' +
+
+    '<button onclick="document.getElementById(\'helpOverlay\').remove()" style="width:100%;padding:14px;background:var(--teal);color:var(--white);border:none;border-radius:50px;cursor:pointer;font-family:Archivo Narrow,sans-serif;font-size:1rem;font-weight:600;margin-top:8px">Got It</button>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+// Close help with Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('helpOverlay')) {
+    document.getElementById('helpOverlay').remove();
+  }
+});
 
 // ===== DYNAMIC CONTENT (Phase 3) =====
 var DASH_SYNC_URL = localStorage.getItem('sscy-dash-sync-url') || '';
