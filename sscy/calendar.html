@@ -536,10 +536,19 @@ p { text-align: justify; text-justify: inter-word; }
   <button class="filter-key" data-filter="community">Community</button>
 </div>
 
+<!-- RETREAT GURU LIVE PROGRAMS -->
+<div class="section-header" id="programs">
+  <h2>Programs &amp; Registration</h2>
+  <p>Live from Retreat Guru. Book directly.</p>
+</div>
+<div style="max-width:1200px;margin:0 auto;padding:0 32px 40px;">
+  <div id="rbg-connect"></div>
+</div>
+
 <!-- UPCOMING RETREATS -->
 <div class="section-header" id="retreats">
-  <h2>Upcoming Retreats</h2>
-  <p>Multi-day immersions in yoga, Ayurveda, meditation, and nature</p>
+  <h2>Upcoming Events</h2>
+  <p>Concerts, retreats, and special events</p>
 </div>
 
 <div class="events-grid" id="eventsGrid">
@@ -554,6 +563,17 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
   <div class="classes-grid" id="classesGrid">
     <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- GOOGLE CALENDAR -->
+<section style="padding:64px 32px;background:var(--cream);">
+  <div class="section-header" style="padding-top:0;">
+    <h2>Community Calendar</h2>
+    <p>Classes, community events, and temple schedule</p>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;">
+    <iframe src="https://calendar.google.com/calendar/embed?src=c_t567jg3h1u3hgj7fii50ie8k6k%40group.calendar.google.com&ctz=America/Vancouver&showTitle=0&showNav=1&showPrint=0&showTabs=1&showCalendars=0" style="border:none;width:100%;height:600px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);background:var(--white);" loading="lazy"></iframe>
   </div>
 </section>
 
@@ -1292,6 +1312,31 @@ function closeMobileMenu() {
     </div>
   </div>
 </div>
+
+<!-- RETREAT GURU WIDGET -->
+<script>
+var rbgOptions = {
+  customer: "saltspringcentre",
+  retreatType: "program",
+  buttonColor: "#3bb8a8",
+  highlightColor: "#2a8a7d",
+  font: "Archivo Narrow",
+  defaultRoute: "/programs",
+  tableSettings: {
+    title: true,
+    dates: true,
+    prices: true,
+    spaces: true,
+    teachers: true,
+    moreLink: true
+  }
+};
+</script>
+<script src="https://s3.amazonaws.com/rbgconnect.retreat.guru/public/rbg-connect.min.js"></script>
+<style>
+#rbg-connect { font-family: 'Archivo Narrow', sans-serif !important; }
+#rbg-connect a { color: var(--teal-dark) !important; }
+</style>
 
 </body>
 </html>
