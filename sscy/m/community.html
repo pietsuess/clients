@@ -49,6 +49,20 @@ p { text-align: justify; text-justify: inter-word; }
 .menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
 .menu .sign-out-link { color: var(--terracotta); font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; margin-top: 16px; padding: 10px 32px; border: 1.5px solid var(--terracotta); border-radius: 50px; }
 
+/* HELP PANEL */
+.help-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.help-panel { background: var(--white); border-radius: 12px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 28px 20px; position: relative; }
+.help-panel h2 { font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--teal-deep); text-align: center; margin-bottom: 20px; }
+.help-panel .help-close { position: sticky; top: 0; float: right; background: var(--cream); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; color: var(--text-light); display: flex; align-items: center; justify-content: center; z-index: 1; }
+.help-section { margin-bottom: 24px; }
+.help-section h3 { font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; color: var(--teal-deep); margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid var(--teal); }
+.help-section p { font-size: 0.82rem; line-height: 1.6; color: var(--text); margin-bottom: 6px; text-align: left; }
+.help-section ul { list-style: none; margin: 0 0 8px; padding: 0; }
+.help-section ul li { padding: 4px 0 4px 14px; font-size: 0.8rem; line-height: 1.5; color: var(--text); position: relative; }
+.help-section ul li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+.help-tip { background: var(--cream); border-left: 3px solid var(--teal); padding: 8px 12px; margin: 8px 0; border-radius: 0 6px 6px 0; font-size: 0.8rem; line-height: 1.5; }
+.help-contact { display: inline-block; background: var(--teal); color: var(--white); padding: 3px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600; margin: 2px 0; }
+
 /* HERO */
 .hero { padding: 52px 0 0; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); display: flex; align-items: center; justify-content: center; min-height: 30vh; }
 .hero-content { text-align: center; color: var(--white); padding: 40px 24px 32px; }
@@ -160,6 +174,7 @@ a.emergency-number { text-decoration: none; padding: 8px 0; }
   <a href="shop.html" onclick="closeMenu()">Shop</a>
   <a href="rentals.html" onclick="closeMenu()">Rentals</a>
   <a href="contact.html" onclick="closeMenu()">Contact</a>
+  <a href="#" onclick="event.preventDefault();closeMenu();showHelp();">Help</a>
   <a href="#" class="sign-out-link" onclick="event.preventDefault();closeMenu();signOut();">Sign Out</a>
 </div>
 
@@ -669,6 +684,40 @@ checkAuth();
 function closeMenu() {
   document.getElementById('menu').classList.remove('open');
   document.getElementById('ham').classList.remove('open');
+}
+
+// Help panel
+function showHelp() {
+  if (document.getElementById('helpOverlay')) { document.getElementById('helpOverlay').remove(); return; }
+  var ov = document.createElement('div');
+  ov.className = 'help-overlay';
+  ov.id = 'helpOverlay';
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+  ov.innerHTML = '<div class="help-panel">' +
+    '<button class="help-close" onclick="document.getElementById(\'helpOverlay\').remove()">\u2715</button>' +
+    '<h2>Dashboard Guide</h2>' +
+    '<div class="help-section"><h3>What Is This?</h3><p>Your central hub for everything at the Salt Spring Centre of Yoga. Directory, forms, policies, meetings, safety info, and community resources.</p></div>' +
+    '<div class="help-section"><h3>Getting Around</h3><p>Tap the <strong>colored keys</strong> below the nav to jump to any section:</p>' +
+    '<ul><li><strong>Directory</strong> \u2014 Calendar, classes, emergency contacts</li>' +
+    '<li><strong>Staff</strong> \u2014 Handbooks, schedules, venue booking</li>' +
+    '<li><strong>Land</strong> \u2014 Maintenance dispatch, water leak, fire prep, Work Safe BC</li>' +
+    '<li><strong>Forms</strong> \u2014 All request forms</li>' +
+    '<li><strong>Well-being</strong> \u2014 Crisis support, mental health, DEI</li>' +
+    '<li><strong>Circles</strong> \u2014 Meeting days, times, locations</li>' +
+    '<li><strong>Policies</strong> \u2014 Tap to expand each policy</li>' +
+    '<li><strong>Community</strong> \u2014 Sister orgs, jobs, coordinator resources</li></ul></div>' +
+    '<div class="help-section"><h3>Emergency Contacts</h3><p>Save these to your phone:</p>' +
+    '<ul><li><span class="help-contact">866-662-1275</span> SSCY Emergency Team</li>' +
+    '<li><span class="help-contact">831-777-4349</span> Maintenance Dispatch (TEXT)</li>' +
+    '<li><span class="help-contact">831-226-0005</span> Water Leak Hotline</li>' +
+    '<li><span class="help-contact">988</span> Suicide &amp; Crisis Lifeline</li>' +
+    '<li><span class="help-contact">1.888.967.5377</span> Work Safe BC</li></ul>' +
+    '<div class="help-tip">Tap any phone number in the dashboard to call or text directly.</div></div>' +
+    '<div class="help-section"><h3>Passphrase</h3><p>Once entered, you will not be asked again on this device unless you sign out. If you have forgotten it, ask at Community Circle or email the office.</p></div>' +
+    '<div class="help-section"><h3>For Admins</h3><p>Triple-tap the "Community Dashboard" title to open the admin panel for managing hiring posts.</p></div>' +
+    '<button onclick="document.getElementById(\'helpOverlay\').remove()" style="width:100%;padding:12px;background:var(--teal);color:var(--white);border:none;border-radius:50px;cursor:pointer;font-family:Archivo Narrow,sans-serif;font-size:0.9rem;font-weight:600;margin-top:8px">Got It</button>' +
+    '</div>';
+  document.body.appendChild(ov);
 }
 
 // Accordion toggle
