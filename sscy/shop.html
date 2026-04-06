@@ -1040,8 +1040,8 @@ p { text-align: justify; text-justify: inter-word; }
       <span>Total</span>
       <span class="total-amount" id="cartTotal">$0.00</span>
     </div>
-    <button class="checkout-btn" onclick="handleCheckout()">Proceed to Checkout</button>
-    <p class="checkout-note">This is a prototype. No real payment will be processed.</p>
+    <button class="checkout-btn" onclick="window.open('https://square.link/u/PLACEHOLDER','_blank')">Checkout via Square</button>
+    <p class="checkout-note">Square checkout coming soon. For now, email your order to <a href="mailto:info@saltspringcentre.com" style="color:var(--teal-dark);">info@saltspringcentre.com</a> or call 250-537-2326.</p>
   </div>
 </div>
 
@@ -1113,6 +1113,8 @@ p { text-align: justify; text-justify: inter-word; }
 
 <script>
 // ===== PRODUCT DATA =====
+// To connect a product to Square: add squareLink: 'https://square.link/u/XXXXX' to any product below.
+// Products with a squareLink will open Square Checkout directly. Others use the cart.
 const PRODUCTS = [
   // TICKETS & EVENTS -- MUSIC FOR PEACE SERIES
   {
@@ -1480,9 +1482,13 @@ function openProductModal(id) {
   document.getElementById('pmPrice').textContent = priceText;
 
   var btn = document.getElementById('pmBtn');
-  var btnText = p.category === 'tickets' ? 'Get Tickets' : p.category === 'support' ? 'Donate' : 'Add to Cart';
+  var btnText = p.category === 'tickets' ? 'Get Tickets' : p.category === 'support' ? 'Donate' : 'Buy Now';
   btn.textContent = btnText;
-  btn.onclick = function() { addToCart(id); closeProductModal(); };
+  if (p.squareLink) {
+    btn.onclick = function() { window.open(p.squareLink, '_blank'); };
+  } else {
+    btn.onclick = function() { addToCart(id); closeProductModal(); };
+  }
 
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
