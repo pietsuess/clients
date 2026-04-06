@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Administration Guide | Salt Spring Centre of Yoga</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../admin-guide.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+
+/* HERO */
+.hero { padding: 52px 0 0; background: var(--charcoal); display: flex; align-items: center; justify-content: center; min-height: 25vh; }
+.hero-content { text-align: center; color: var(--white); padding: 40px 24px 32px; }
+.hero-content h1 { font-size: 1.6rem; color: var(--white); letter-spacing: 0.04em; margin-bottom: 10px; }
+.hero-content p { font-size: 0.88rem; color: rgba(255,255,255,0.75); text-align: center; line-height: 1.6; }
+
+/* ANCHOR PILLS - horizontal scroll row */
+.anchor-nav { display: flex; gap: 8px; padding: 14px 16px; background: var(--cream-warm); position: sticky; top: 52px; z-index: 80; border-bottom: 1px solid rgba(0,0,0,0.06); overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+.anchor-nav::-webkit-scrollbar { display: none; }
+.anchor-pill { display: inline-block; padding: 6px 14px; background: var(--charcoal); color: var(--white); border-radius: 50px; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em; text-decoration: none; white-space: nowrap; flex-shrink: 0; transition: background 0.25s ease; }
+.anchor-pill:hover { background: var(--teal-deep); color: var(--white); }
+
+/* SECTIONS */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec h2 { font-size: 1.3rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+
+/* STATUS BADGES */
+.status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; margin-bottom: 16px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-connected .status-dot { background: #2e8b57; }
+.status-connected .status-text { color: #2e8b57; }
+.status-placeholder .status-dot { background: var(--gold); }
+.status-placeholder .status-text { color: #b8941f; }
+
+/* CONTENT BLOCK */
+.content-block { max-width: 100%; }
+.content-block p { font-size: 0.88rem; line-height: 1.7; color: var(--text); margin-bottom: 0.8em; }
+.content-block ul { list-style: none; margin: 0 0 1.2em; }
+.content-block ul li { padding: 4px 0; font-size: 0.85rem; line-height: 1.6; color: var(--text); position: relative; padding-left: 16px; }
+.content-block ul li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+.content-block ol { margin: 0 0 1.2em; padding-left: 20px; }
+.content-block ol li { padding: 4px 0; font-size: 0.85rem; line-height: 1.6; color: var(--text); }
+.content-block h3 { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--charcoal); margin: 1.5em 0 0.6em; }
+.content-block h3:first-child { margin-top: 0; }
+
+/* LINK CARDS */
+.link-card { display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: var(--white); border: 1.5px solid rgba(0,0,0,0.1); border-radius: 10px; font-size: 0.85rem; font-weight: 600; color: var(--teal-dark); text-decoration: none; transition: border-color 0.25s ease, box-shadow 0.25s ease; margin: 6px 0; }
+.link-card:hover { border-color: var(--teal); box-shadow: 0 4px 16px rgba(0,0,0,0.08); color: var(--teal-dark); }
+.link-card::after { content: '\2192'; }
+.link-cards-wrap { margin: 16px 0 20px; }
+
+/* TABLES */
+.admin-table { width: 100%; border-collapse: collapse; margin: 16px 0 20px; font-size: 0.78rem; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.admin-table th { background: var(--charcoal); color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 12px; text-align: left; white-space: nowrap; }
+.admin-table td { padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.06); vertical-align: top; line-height: 1.5; }
+.admin-table tr:nth-child(even) td { background: rgba(0,0,0,0.015); }
+.admin-table code { background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 3px; font-size: 0.75rem; font-family: monospace; }
+
+/* TIP BOXES */
+.tip-box { background: var(--cream-warm); border-left: 3px solid var(--teal); border-radius: 0 8px 8px 0; padding: 16px 18px; margin: 18px 0; }
+.tip-box p { font-size: 0.82rem; margin-bottom: 0.4em; text-align: left; }
+.tip-box p:last-child { margin-bottom: 0; }
+.tip-box strong { color: var(--teal-deep); }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Site Administration Guide</h1>
+    <p>How this website works, where to manage content, and who to contact.</p>
+  </div>
+</section>
+
+<!-- ANCHOR PILLS -->
+<div class="anchor-nav" id="anchorNav">
+  <a href="#overview" class="anchor-pill">Overview</a>
+  <a href="#content" class="anchor-pill">Content</a>
+  <a href="#booking" class="anchor-pill">Booking</a>
+  <a href="#payments" class="anchor-pill">Payments</a>
+  <a href="#forms" class="anchor-pill">Forms</a>
+  <a href="#calendar" class="anchor-pill">Calendar</a>
+  <a href="#schedule" class="anchor-pill">Schedule</a>
+  <a href="#blog" class="anchor-pill">Blog</a>
+  <a href="#technical" class="anchor-pill">Technical</a>
+</div>
+
+
+<!-- 1. OVERVIEW -->
+<section class="sec" id="overview">
+  <span class="label">How This Site Works</span>
+  <h2>Site Architecture</h2>
+  <div class="content-block">
+    <p>This website is a collection of static HTML pages hosted for free on GitHub Pages. There is no WordPress, no database, no server to maintain.</p>
+    <p>Content is managed through external tools: Google Sheets, Google Calendar, Retreat Guru, and Stripe. When you update content in those tools, the website updates automatically on the next page load.</p>
+
+    <h3>Pages on the Site</h3>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Page</th><th>URL</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Homepage</td><td><code>/</code></td><td>Landing page, hero, about, featured programs</td></tr>
+        <tr><td>Offerings</td><td><code>/offerings.html</code></td><td>All programs, classes, retreats (pulls from Retreat Guru)</td></tr>
+        <tr><td>Calendar</td><td><code>/calendar.html</code></td><td>Events, classes, Google Calendar embed, Retreat Guru programs</td></tr>
+        <tr><td>Shop</td><td><code>/shop.html</code></td><td>Books, music, apparel, gift certificates</td></tr>
+        <tr><td>Blog</td><td><code>/blog.html</code></td><td>News and articles (pulls from WordPress)</td></tr>
+        <tr><td>Rentals</td><td><code>/rentals.html</code></td><td>Venue spaces for retreats and workshops</td></tr>
+        <tr><td>Contact</td><td><code>/contact.html</code></td><td>Location, phone, contact form</td></tr>
+        <tr><td>ACYR</td><td><code>/acyr.html</code></td><td>52nd Annual Community Yoga Retreat landing page</td></tr>
+        <tr><td>Community Dashboard</td><td><code>/community.html</code></td><td>Internal portal for residents/staff (passphrase protected)</td></tr>
+        <tr><td>Schedule Editor</td><td><code>/schedule-editor.html</code></td><td>Interactive ACYR schedule builder</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- 2. CONTENT MANAGEMENT -->
+<section class="sec sec-alt" id="content">
+  <span class="label">Google Sheets</span>
+  <h2>Managing Dashboard Content</h2>
+  <div class="content-block">
+    <div class="status-badge status-connected"><span class="status-dot"></span><span class="status-text">Connected</span></div>
+    <p>The Community Dashboard pulls all its content from a Google Sheet. To update content, open the spreadsheet and edit the appropriate tab. Changes appear on the dashboard the next time someone loads the page.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://docs.google.com/spreadsheets/d/1ohKlsmcs_1RWoEDEJEtlOckKprKHH70MwZUb5b19R7Y/" target="_blank" rel="noopener" class="link-card">Open the Community Dashboard Spreadsheet</a>
+    </div>
+
+    <h3>Spreadsheet Tabs</h3>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Tab</th><th>What It Controls</th><th>Key Columns</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Hiring</td><td>Job postings on Community section</td><td>Title, Description, Contact, Active (yes/no)</td></tr>
+        <tr><td>Announcements</td><td>Banner alerts below dashboard hero</td><td>Title, Body, Priority (normal/urgent), Date</td></tr>
+        <tr><td>Meetings</td><td>Circles &amp; Meetings section</td><td>Name, Day, Time, Location, Facilitator, Notes</td></tr>
+        <tr><td>Emergency</td><td>Emergency banners (by section)</td><td>Section, Title, Phone, Description</td></tr>
+        <tr><td>Forms</td><td>Forms &amp; Requests section</td><td>Title, Description, URL, Active</td></tr>
+        <tr><td>Staff Resources</td><td>Staff section cards</td><td>Title, Description, URL, Active</td></tr>
+        <tr><td>Wellbeing Resources</td><td>Well-being section cards</td><td>Title, Description, URL, Active</td></tr>
+        <tr><td>Community Links</td><td>Community + Coordinator cards</td><td>Title, Description, URL, Category, Active</td></tr>
+        <tr><td>Policies</td><td>Accordion panels in Policies section</td><td>Title, Body (use line breaks for formatting)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box">
+      <p><strong>Tip:</strong> Set Active to "no" to hide an item without deleting it.</p>
+      <p><strong>Tip:</strong> The Section column in Emergency determines where the banner appears: "directory", "land", or "wellbeing".</p>
+      <p><strong>Tip:</strong> Priority "urgent" in Announcements shows a red/terracotta banner instead of gold.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- 3. BOOKING & REGISTRATION -->
+<section class="sec" id="booking">
+  <span class="label">Retreat Guru</span>
+  <h2>Programs &amp; Registration</h2>
+  <div class="content-block">
+    <div class="status-badge status-connected"><span class="status-dot"></span><span class="status-text">Connected</span></div>
+    <p>Programs, retreats, and registration are managed through Retreat Guru. The website automatically displays current programs using the Retreat Guru widget. When you add or update a program in Retreat Guru, it appears on the website automatically.</p>
+    <p>The widget appears on the Offerings page and Calendar page. Registration and payments are handled entirely by Retreat Guru.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://saltspringcentre.secure.retreat.guru/admin/" target="_blank" rel="noopener" class="link-card">Retreat Guru Dashboard</a>
+      <a href="https://help.retreat.guru" target="_blank" rel="noopener" class="link-card">Retreat Guru Help Center</a>
+    </div>
+
+    <h3>How It Works</h3>
+    <ul>
+      <li>Programs are displayed via the "rbg-connect" JavaScript widget</li>
+      <li>No WordPress plugin is needed</li>
+      <li>The widget reads directly from your Retreat Guru account</li>
+      <li>Styling is partially customizable (colors and fonts are set to match the site)</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- 4. PAYMENTS & DONATIONS -->
+<section class="sec sec-alt" id="payments">
+  <span class="label">Stripe</span>
+  <h2>Payments &amp; Donations</h2>
+  <div class="content-block">
+    <div class="status-badge status-placeholder"><span class="status-dot"></span><span class="status-text">Setup Required</span></div>
+    <p>Donations and shop purchases will be processed through Stripe. Stripe Payment Links are the simplest approach: create a link in the Stripe dashboard, paste it into the site. No coding needed to add new products or change prices.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://dashboard.stripe.com" target="_blank" rel="noopener" class="link-card">Stripe Dashboard</a>
+      <a href="https://dashboard.stripe.com/payment-links" target="_blank" rel="noopener" class="link-card">Create a Payment Link</a>
+    </div>
+
+    <h3>Setup Steps</h3>
+    <ol>
+      <li>Create a Stripe account (or use the existing one) at stripe.com</li>
+      <li>In the Stripe Dashboard, go to Payment Links</li>
+      <li>Create a link for each donation tier ($25, $50, $108, $200) and each shop product</li>
+      <li>Send the Payment Link URLs to the site developer to wire into the donate buttons and shop cards</li>
+    </ol>
+
+    <h3>Current Status</h3>
+    <ul>
+      <li>Donate modal shows tiers but the "Donate via Stripe" button links to a placeholder</li>
+      <li>Shop products display but purchase buttons are placeholders</li>
+      <li>Interac E-Transfer instructions are live (payment@saltspringcentre.com)</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- 5. FORMS -->
+<section class="sec" id="forms">
+  <span class="label">Google Forms</span>
+  <h2>Contact &amp; Request Forms</h2>
+  <div class="content-block">
+    <div class="status-badge status-placeholder"><span class="status-dot"></span><span class="status-text">Setup Required</span></div>
+    <p>Contact form and other request forms will use Google Forms. Create a form in Google Drive, copy the embed code or link, and it gets added to the appropriate page.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://docs.google.com/forms/" target="_blank" rel="noopener" class="link-card">Google Forms</a>
+    </div>
+
+    <h3>Forms Needed</h3>
+    <ul>
+      <li>Contact / General Inquiry (for contact.html)</li>
+      <li>Accident / Incident Report</li>
+      <li>Schedule Adjustment Request</li>
+      <li>Time Away Request</li>
+      <li>Purchase Order</li>
+      <li>Guest Request forms</li>
+      <li>Other forms listed on the Community Dashboard</li>
+    </ul>
+
+    <h3>Setup Steps</h3>
+    <ol>
+      <li>Create each form in Google Forms</li>
+      <li>Set up email notifications so responses go to the right person</li>
+      <li>Send the form URLs to the site developer to add to the dashboard and contact page</li>
+    </ol>
+  </div>
+</section>
+
+
+<!-- 6. CALENDAR -->
+<section class="sec sec-alt" id="calendar">
+  <span class="label">Google Calendar</span>
+  <h2>Community Calendar</h2>
+  <div class="content-block">
+    <div class="status-badge status-connected"><span class="status-dot"></span><span class="status-text">Connected</span></div>
+    <p>The community calendar is a Google Calendar embedded on the Community Dashboard and Calendar page. To add or edit events, open the calendar in Google Calendar. Changes appear on the website immediately.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://calendar.google.com/calendar/u/0/r?cid=c_t567jg3h1u3hgj7fii50ie8k6k@group.calendar.google.com" target="_blank" rel="noopener" class="link-card">Edit Community Calendar</a>
+    </div>
+
+    <div class="tip-box">
+      <p><strong>Tip:</strong> Anyone with edit access to this calendar can add events.</p>
+      <p><strong>Tip:</strong> Events show in month, week, and agenda views on the site.</p>
+      <p><strong>Tip:</strong> The calendar must remain set to "public" for the embed to work without Google sign-in.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- 7. SCHEDULE EDITOR -->
+<section class="sec" id="schedule">
+  <span class="label">ACYR Schedule</span>
+  <h2>Retreat Schedule Editor</h2>
+  <div class="content-block">
+    <div class="status-badge status-connected"><span class="status-dot"></span><span class="status-text">Connected</span></div>
+    <p>The ACYR schedule is edited using a custom browser-based editor. Multiple people can edit simultaneously (presence tracking via heartbeat). Changes are synced through Google Apps Script. The public schedule is viewed at the "baked" URL with ?view appended.</p>
+
+    <div class="link-cards-wrap">
+      <a href="../schedule-editor-baked-2026-04-02.html" target="_blank" rel="noopener" class="link-card">Open Schedule Editor</a>
+      <a href="../schedule-editor-baked-2026-04-02.html?view" target="_blank" rel="noopener" class="link-card">View Public Schedule</a>
+    </div>
+
+    <h3>How to Use</h3>
+    <ul>
+      <li>Double-click a time slot to add an event</li>
+      <li>Click an event to edit title, venue, or duration</li>
+      <li>Drag events to move them, drag the bottom edge to resize</li>
+      <li>Click Publish to share your changes with other editors</li>
+      <li>Click Get Latest to load changes others have published</li>
+      <li>Export PDF for printing</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- 8. BLOG -->
+<section class="sec sec-alt" id="blog">
+  <span class="label">WordPress</span>
+  <h2>Blog &amp; News</h2>
+  <div class="content-block">
+    <div class="status-badge status-connected"><span class="status-dot"></span><span class="status-text">Connected</span></div>
+    <p>Blog posts are managed in WordPress. The blog page on this site fetches posts automatically from the WordPress REST API. To publish a new post, log into WordPress and create a post as usual. Posts appear on the site on the next page load.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://saltspringcentre.com/wp-admin/" target="_blank" rel="noopener" class="link-card">WordPress Admin</a>
+    </div>
+
+    <div class="tip-box">
+      <p><strong>Note:</strong> After the domain migration, the WordPress admin will be at blog.saltspringcentre.com/wp-admin</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- 9. TECHNICAL -->
+<section class="sec" id="technical">
+  <span class="label">Infrastructure</span>
+  <h2>Technical Details</h2>
+  <div class="content-block">
+
+    <h3>Hosting</h3>
+    <ul>
+      <li>Website: GitHub Pages (free)</li>
+      <li>Blog: Flywheel managed WordPress</li>
+      <li>DNS: Cloudflare</li>
+      <li>Domain: saltspringcentre.com, registered at GoDaddy, expires February 2027</li>
+    </ul>
+
+    <h3>Deployment</h3>
+    <p>The website files are in a GitHub repository. Pushing changes to the main branch automatically deploys the site. No build step, no compilation, just HTML files.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://github.com/pietsuess/clients" target="_blank" rel="noopener" class="link-card">GitHub Repository</a>
+      <a href="https://dash.cloudflare.com" target="_blank" rel="noopener" class="link-card">Cloudflare Dashboard</a>
+      <a href="https://dcc.godaddy.com" target="_blank" rel="noopener" class="link-card">GoDaddy Domain</a>
+      <a href="https://getflywheel.com" target="_blank" rel="noopener" class="link-card">Flywheel Hosting</a>
+    </div>
+
+    <h3>Key Files</h3>
+    <table class="admin-table">
+      <thead>
+        <tr><th>File</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>community-dashboard-sync.gs</code></td><td>Apps Script that reads from the Google Sheet</td></tr>
+        <tr><td><code>schedule-sync.gs</code></td><td>Apps Script for schedule editor sync</td></tr>
+        <tr><td><code>babaji-qa.js</code></td><td>Baba Hari Dass Q&amp;A quotes database</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip-box">
+      <p><strong>For site emergencies:</strong> Contact Piet Suess</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="offerings.html">Offerings</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+    <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<script>
+// Menu
+function closeMenu() {
+  document.getElementById('menu').classList.remove('open');
+  document.getElementById('ham').classList.remove('open');
+}
+
+// Smooth scroll for anchor pills
+document.querySelectorAll('.anchor-pill').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      closeMenu();
+      var offset = 52 + document.getElementById('anchorNav').offsetHeight + 12;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+</body>
+</html>

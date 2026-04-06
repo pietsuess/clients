@@ -247,22 +247,11 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
   <div class="contact-form reveal-right">
     <h2>Send a Message</h2>
-    <form id="contactForm" onsubmit="handleSubmit(event)">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" required placeholder="Your name">
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required placeholder="Your email address">
-      </div>
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" required placeholder="How can we help you?"></textarea>
-      </div>
-      <button type="submit" class="form-submit">Send Message</button>
-      <div class="form-success" id="formSuccess">Thank you for your message. We will be in touch soon.</div>
-    </form>
+    <div style="background:var(--cream-warm);border-radius:12px;padding:32px 28px;margin-bottom:28px;">
+      <p style="font-size:0.95rem;color:var(--text);line-height:1.7;margin-bottom:20px;">Contact form will be connected to Google Forms. In the meantime, please reach out by email.</p>
+      <a href="mailto:info@saltspringcentre.com" style="display:inline-flex;align-items:center;padding:14px 40px;background:var(--teal-dark);color:var(--white);border-radius:50px;font-family:'Archivo Narrow',sans-serif;font-size:1rem;font-weight:600;transition:background 0.25s ease, transform 0.2s ease;text-decoration:none;" onmouseover="this.style.background='#3bb8a8'" onmouseout="this.style.background='#2a8a7d'">Email Us</a>
+      <p style="font-size:0.82rem;color:var(--text-light);margin-top:14px;">info@saltspringcentre.com</p>
+    </div>
     <div style="text-align:center;margin-top:40px;padding-top:32px;border-top:1px solid rgba(0,0,0,0.06);">
       <p style="font-size:0.88rem;color:var(--text-light);margin-bottom:14px;text-align:center;">Want to support the Centre?</p>
       <a href="#" onclick="event.preventDefault();openDonate();" style="display:inline-block;padding:14px 40px;background:var(--terracotta);color:var(--white);border-radius:50px;font-family:'Archivo Narrow',sans-serif;font-size:1rem;font-weight:600;transition:0.25s;text-decoration:none;">Make a Donation</a>
@@ -367,16 +356,6 @@ p { text-align: justify; text-justify: inter-word; }
 
 <!-- SCRIPTS -->
 <script>
-// Form submission
-function handleSubmit(e) {
-  e.preventDefault();
-  var form = document.getElementById('contactForm');
-  var success = document.getElementById('formSuccess');
-  success.style.display = 'block';
-  form.reset();
-  setTimeout(function() { success.style.display = 'none'; }, 5000);
-}
-
 // Hero parallax
 var heroImg = document.getElementById('heroImg');
 window.addEventListener('scroll', function() {
