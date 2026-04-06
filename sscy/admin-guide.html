@@ -226,7 +226,7 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
   <div class="content-block reveal d1">
     <p>This website is a collection of static HTML pages hosted for free on GitHub Pages. There is no WordPress, no database, no server to maintain.</p>
-    <p>Content is managed through external tools: Google Sheets, Google Calendar, Retreat Guru, and Stripe. When you update content in those tools, the website updates automatically on the next page load.</p>
+    <p>Content is managed through external tools: Google Sheets, Google Calendar, Retreat Guru, and Square. When you update content in those tools, the website updates automatically on the next page load.</p>
 
     <h3>Pages on the Site</h3>
     <table class="admin-table">
@@ -327,31 +327,43 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- ============================================ -->
 <section class="admin-section" id="payments">
   <div class="section-header reveal">
-    <span class="label">Stripe</span>
+    <span class="label">Square</span>
     <h2>Payments &amp; Donations</h2>
   </div>
   <div class="content-block reveal d1">
     <div class="status-badge status-placeholder"><span class="status-dot"></span><span class="status-text">Setup Required</span></div>
-    <p>Donations and shop purchases will be processed through Stripe. Stripe Payment Links are the simplest approach: create a link in the Stripe dashboard, paste it into the site. No coding needed to add new products or change prices.</p>
+    <p>Donations and shop purchases are processed through Square. Square Payment Links let you create a checkout link in the Square Dashboard and paste it into the site. No coding needed to add new products or change prices.</p>
 
     <div class="link-cards-wrap">
-      <a href="https://dashboard.stripe.com" target="_blank" rel="noopener" class="link-card">Stripe Dashboard</a>
-      <a href="https://dashboard.stripe.com/payment-links" target="_blank" rel="noopener" class="link-card">Create a Payment Link</a>
+      <a href="https://squareup.com/dashboard" target="_blank" rel="noopener" class="link-card">Square Dashboard</a>
+      <a href="https://squareup.com/dashboard/online-checkout/payment-links" target="_blank" rel="noopener" class="link-card">Create a Payment Link</a>
     </div>
 
     <h3>Setup Steps</h3>
     <ol>
-      <li>Create a Stripe account (or use the existing one) at stripe.com</li>
-      <li>In the Stripe Dashboard, go to Payment Links</li>
-      <li>Create a link for each donation tier ($25, $50, $108, $200) and each shop product</li>
-      <li>Send the Payment Link URLs to the site developer to wire into the donate buttons and shop cards</li>
+      <li>Log into the existing Square account at squareup.com/dashboard</li>
+      <li>Go to Payments &gt; Payment Links</li>
+      <li>Create a "Donation" link with preset amounts ($25, $50, $108, $200) and custom amount enabled</li>
+      <li>Create individual links for each shop product (books, apparel, gift certificates)</li>
+      <li>Copy each Payment Link URL and send to the site developer to wire into the donate buttons and shop cards</li>
     </ol>
+
+    <div class="tip-box">
+      <strong>Tip:</strong> Square also offers an "Add button to website" option when creating a Payment Link. This generates a Buy Button embed code you can paste directly into the HTML.
+    </div>
 
     <h3>Current Status</h3>
     <ul>
-      <li>Donate modal shows tiers but the "Complete Donation" button is a placeholder</li>
+      <li>Donate modal shows tiers but the button links to a placeholder URL</li>
       <li>Shop products display but purchase buttons are placeholders</li>
       <li>Interac E-Transfer instructions are live (payment@saltspringcentre.com)</li>
+    </ul>
+
+    <h3>Fees</h3>
+    <ul>
+      <li>3.3% + $0.30 per online transaction (Square free plan)</li>
+      <li>No monthly fee</li>
+      <li>All transactions visible in Square Dashboard alongside in-person sales</li>
     </ul>
   </div>
 </section>

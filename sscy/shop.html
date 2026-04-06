@@ -1080,13 +1080,13 @@ p { text-align: justify; text-justify: inter-word; }
           <option>Restoring key Centre Offerings</option>
         </select>
       </div>
-      <button class="donate-submit" id="donateSubmitBtn" onclick="submitDonation()">Complete Donation</button>
+      <button class="donate-submit" id="donateSubmitBtn" onclick="window.open('https://square.link/u/PLACEHOLDER','_blank')">Donate via Square</button>
       <div class="donate-alt">
         Or send Interac E-Transfer to <strong>payment@saltspringcentre.com</strong>
       </div>
     </div>
     <div class="donate-modal-footer">
-      This is a prototype. In production, this connects to Stripe for secure payment.
+      This is a prototype. In production, this connects to Square for secure payment.
     </div>
   </div>
 </div>
@@ -1509,7 +1509,7 @@ function openDonate(productId) {
   document.getElementById('donateTitle').textContent = product.title;
   document.getElementById('donateTiers').style.display = 'none';
   document.getElementById('donateAmountLabel').textContent = 'Directed gift';
-  document.getElementById('donateSubmitBtn').textContent = 'Complete Donation - $' + product.price.toFixed(2);
+  document.getElementById('donateSubmitBtn').textContent = 'Donate via Square - $' + product.price.toFixed(2);
   document.getElementById('donateOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1521,7 +1521,7 @@ function setDonateAmount(amount) {
   document.querySelectorAll('.tier-btn').forEach(b => {
     b.classList.toggle('active', b.textContent === '$' + amount);
   });
-  document.getElementById('donateSubmitBtn').textContent = 'Complete Donation - $' + amount + '.00';
+  document.getElementById('donateSubmitBtn').textContent = 'Donate via Square - $' + amount + '.00';
 }
 
 function openDonateGeneral() {
@@ -1538,9 +1538,9 @@ function closeDonate() {
   document.body.style.overflow = '';
 }
 
-function submitDonation() {
+function window.open('https://square.link/u/PLACEHOLDER','_blank') {
   closeDonate();
-  showToast('Thank you for your generosity! (Prototype - would process via Stripe)');
+  showToast('Thank you for your generosity! (Prototype - would process via Square)');
 }
 
 // ===== CART FUNCTIONS =====
