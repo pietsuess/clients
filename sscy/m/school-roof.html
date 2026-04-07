@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Roof Fundraiser | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Help restore the Salt Spring Centre School roof. Donate to support this community landmark since 1983.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../school-roof.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+
+/* HERO */
+.hero { height: 40vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark), var(--teal)); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-content h1 { font-size: 1.6rem; color: var(--white); letter-spacing: 0.06em; margin-bottom: 8px; }
+.hero-content p { font-size: 0.88rem; color: rgba(255,255,255,0.9); text-align: center; line-height: 1.6; }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec h2 { font-size: 1.4rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+
+/* MATCHING BOX */
+.matching-box { background: var(--gold); border-radius: 12px; padding: 24px; text-align: center; }
+.matching-box p { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; color: var(--charcoal); line-height: 1.5; text-align: center; margin: 0; }
+
+/* DONATE TIERS */
+.donate-tiers { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 24px; }
+.donate-tier { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: 12px; font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--teal-deep); background: var(--white); border: 2px solid var(--teal); text-decoration: none; min-width: 80px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: 0.25s ease; }
+.donate-tier:hover { background: var(--teal); color: var(--white); }
+
+/* INTERAC */
+.interac-note { text-align: center; }
+.interac-note p { font-size: 0.88rem; color: var(--text); line-height: 1.7; text-align: center; margin-bottom: 0.8em; }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="about.html" onclick="closeMenu()">About</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Help Us Restore the School Roof</h1>
+    <p>A community landmark since 1983 needs your support.</p>
+  </div>
+</section>
+
+<!-- THE CAMPAIGN -->
+<section class="sec" id="campaign">
+  <span class="label">Fundraising Goal: $24,000</span>
+  <h2>The School Building Needs a New Roof</h2>
+  <p>The Salt Spring Centre School has served generations at the Centre, hosting classes and programs. The roof shingles have reached end-of-life and require replacement, with work scheduled for this summer.</p>
+  <p>Founded in 1983 following guidance from Baba Hari Dass, the school began with 12 students and grew into a learning space emphasizing peace, care for one another, and lifelong love of learning, guided by yoga and self-awareness practices.</p>
+</section>
+
+<!-- MATCHING -->
+<section class="sec sec-alt" id="matching">
+  <div class="matching-box">
+    <p>Your donation will be matched up to $6,000, effectively doubling your impact.</p>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section class="sec" id="donate">
+  <div class="donate-tiers">
+    <a href="https://square.link/u/PLACEHOLDER" target="_blank" rel="noopener" class="donate-tier">$50</a>
+    <a href="https://square.link/u/PLACEHOLDER" target="_blank" rel="noopener" class="donate-tier">$100</a>
+    <a href="https://square.link/u/PLACEHOLDER" target="_blank" rel="noopener" class="donate-tier">$250</a>
+    <a href="https://square.link/u/PLACEHOLDER" target="_blank" rel="noopener" class="donate-tier">$500</a>
+    <a href="https://square.link/u/PLACEHOLDER" target="_blank" rel="noopener" class="donate-tier">$1000</a>
+    <a href="https://square.link/u/PLACEHOLDER" target="_blank" rel="noopener" class="donate-tier">Custom Amount</a>
+  </div>
+  <div class="interac-note">
+    <p>Or send an Interac E-Transfer to <strong>payment@saltspringcentre.com</strong> with 'School Roof' in the memo.</p>
+  </div>
+  <div style="margin-top:24px;">
+    <p style="text-align:center;">We are ready to restore the roof, and we cannot do it without the support of this community.</p>
+  </div>
+  <div style="text-align:center;margin-top:16px;">
+    <p style="font-size:0.78rem;color:var(--text-light);">Charitable registration number: 107951173RR0001</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="offerings.html">Offerings</a>
+    <a href="about.html">About</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="contact.html">Contact</a>
+    <a href="faqs.html">FAQs</a>
+    <a href="policies.html">Policies</a>
+    <a href="directions.html">Directions</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+  </div>
+</footer>
+
+<script>
+function closeMenu() { document.getElementById('menu').classList.remove('open'); document.getElementById('ham').classList.remove('open'); }
+</script>
+
+</body>
+</html>
