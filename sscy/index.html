@@ -313,10 +313,10 @@ p { text-align: justify; text-justify: inter-word; }
   background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.8s ease;
   pointer-events: none;
 }
-.hz.visible { pointer-events: auto; }
+.hz.visible { pointer-events: auto; opacity: 1; }
 .hz:hover { transform: scale(1.1); background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
 #hz0 { top: 3%; left: calc(20% - 175px); }
 #hz1 { top: 3%; right: calc(20% - 175px); }
@@ -669,6 +669,12 @@ document.getElementById('floatQuote2').textContent = '\u201C' + rq.a + '\u201D';
 
 // Hero entrance
 setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
+// Fade in hot zones after hero entrance
+setTimeout(function() {
+  document.querySelectorAll('.hz').forEach(function(hz, i) {
+    setTimeout(function() { hz.classList.add('visible'); }, i * 200);
+  });
+}, 1800);
 
 // Nav + hero blur on scroll (desktop only)
 var isMobile = window.innerWidth <= 768;
