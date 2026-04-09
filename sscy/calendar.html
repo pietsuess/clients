@@ -551,7 +551,7 @@ p { text-align: justify; text-justify: inter-word; }
 <!-- INTERACTIVE CALENDAR (EventCalendar) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@event-calendar/build/dist/event-calendar.min.css">
 <style>
-  .ec { --ec-border-color: rgba(0,0,0,0.06); --ec-today-bg-color: rgba(59,184,168,0.08); --ec-highlight-color: rgba(59,184,168,0.12); --ec-button-bg-color: var(--white); --ec-button-border-color: rgba(0,0,0,0.1); --ec-button-active-bg-color: #3bb8a8; --ec-button-active-border-color: #3bb8a8; font-family: 'Archivo Narrow', sans-serif !important; }
+  .ec { --ec-border-color: rgba(0,0,0,0.06); --ec-today-bg-color: rgba(59,184,168,0.08); --ec-highlight-color: rgba(59,184,168,0.12); --ec-button-bg-color: var(--white); --ec-button-border-color: rgba(0,0,0,0.1); --ec-button-active-bg-color: #3bb8a8; --ec-button-active-border-color: #3bb8a8; --ec-day-grid-cell-min-height: 60px; font-family: 'Archivo Narrow', sans-serif !important; }
   .ec-toolbar { font-family: 'Archivo Narrow', sans-serif; }
   .ec-toolbar .ec-title { font-family: 'Cinzel', serif; font-weight: 600; color: #1a5c53; }
   .ec-event { border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
@@ -1302,15 +1302,34 @@ CLASSES.forEach(function(c) {
   else if (dayMap[c.day] !== undefined) { days = [dayMap[c.day]]; }
   if (!days.length) return;
 
-  var timeParts = c.time ? c.time.match(/(\d+):(\d+)\s*(am|pm)?/i) : null;
-  var hr = 9, mn = '00';
-  if (timeParts) {
-    hr = parseInt(timeParts[1]);
-    mn = timeParts[2] || '00';
-    var ampm = (timeParts[3] || '').toLowerCase();
-    if (ampm === 'pm' && hr < 12) hr += 12;
-    if (ampm === 'am' && hr === 12) hr = 0;
+  // Parse "7:00 - 8:30 PM" or "11:00 AM - 12:15 PM" or "4:30 - 5:45 PM"
+  function parseTime(timeStr) {
+    if (!timeStr) return null;
+    // Find the last AM/PM in the string - that's the period for both times
+    var globalAmpm = '';
+    var ampmMatch = timeStr.match(/(am|pm)\s*$/i);
+    if (ampmMatch) globalAmpm = ampmMatch[1].toLowerCase();
+    // Parse start: first HH:MM
+    var startMatch = timeStr.match(/^(\d+):(\d+)\s*(am|pm)?/i);
+    // Parse end: HH:MM after the dash
+    var endMatch = timeStr.match(/-\s*(\d+):(\d+)\s*(am|pm)?/i);
+    if (!startMatch) return null;
+    var sHr = parseInt(startMatch[1]), sMn = startMatch[2];
+    var sAmpm = (startMatch[3] || '').toLowerCase() || globalAmpm;
+    if (sAmpm === 'pm' && sHr < 12) sHr += 12;
+    if (sAmpm === 'am' && sHr === 12) sHr = 0;
+    var eHr = sHr + 1, eMn = sMn;
+    if (endMatch) {
+      eHr = parseInt(endMatch[1]); eMn = endMatch[2];
+      var eAmpm = (endMatch[3] || '').toLowerCase() || globalAmpm;
+      if (eAmpm === 'pm' && eHr < 12) eHr += 12;
+      if (eAmpm === 'am' && eHr === 12) eHr = 0;
+    }
+    return { sHr: sHr, sMn: sMn, eHr: eHr, eMn: eMn };
   }
+  var t = parseTime(c.time);
+  var hr = t ? t.sHr : 9, mn = t ? t.sMn : '00';
+  var ehr = t ? t.eHr : hr + 1, emn = t ? t.eMn : mn;
 
   var d = new Date(classStart);
   while (d <= classEnd) {
@@ -1319,7 +1338,7 @@ CLASSES.forEach(function(c) {
       ecEvents.push({
         title: c.name + (c.teacher ? ' (' + c.teacher + ')' : ''),
         start: ds + 'T' + String(hr).padStart(2,'0') + ':' + mn + ':00',
-        end: ds + 'T' + String(Math.min(hr + 1, 23)).padStart(2,'0') + ':' + mn + ':00',
+        end: ds + 'T' + String(ehr).padStart(2,'0') + ':' + emn + ':00',
         color: typeColors[c.type || 'class'],
         textColor: typeTextColors[c.type || 'class']
       });
