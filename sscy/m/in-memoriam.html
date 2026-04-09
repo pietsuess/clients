@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Memoriam | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Remembering beloved members of the Salt Spring Centre of Yoga community who have passed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script>if(window.innerWidth>768)window.location.href='../in-memoriam.html';</script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MENU */
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; letter-spacing: 0.03em; }
+
+/* HERO */
+.hero { height: 40vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; padding-top: 52px; }
+.hero img.bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.5) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); padding: 0 24px; }
+.hero-content h1 { font-size: 1.8rem; color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 12px rgba(0,0,0,0.3); margin-bottom: 8px; }
+.hero-content p { font-size: 0.88rem; color: rgba(255,255,255,0.9); text-align: center; line-height: 1.6; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
+
+/* SECTION */
+.sec { padding: 48px 20px; }
+.sec-alt { background: var(--white); }
+.sec-warm { background: var(--cream-warm); }
+.sec h2 { font-size: 1.4rem; text-align: center; margin-bottom: 12px; color: var(--teal-deep); }
+.sec .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--teal); display: block; text-align: center; margin-bottom: 8px; }
+.sec p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+
+/* CONTENT BLOCK */
+.content-block p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 10px; }
+.content-block h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--teal-deep); margin: 1.5em 0 0.5em; }
+.content-block ul { list-style: none; margin: 0 0 1.2em; }
+.content-block ul li { padding: 4px 0; font-size: 0.88rem; line-height: 1.7; position: relative; padding-left: 18px; }
+.content-block ul li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+
+/* OFFERING CARDS */
+.offering-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.offering-card { background: var(--white); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.offering-card h3 { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--charcoal); margin-bottom: 6px; }
+.offering-card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.6; margin-bottom: 6px; text-align: left; }
+
+/* SECTION LINK */
+.section-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); }
+.section-link::after { content: ' \2192'; }
+
+/* CTA */
+.cta { background: linear-gradient(135deg, var(--teal-deep) 0%, var(--teal-dark) 100%); padding: 48px 20px; text-align: center; color: var(--white); }
+.cta h2 { font-size: 1.4rem; color: var(--white); margin-bottom: 12px; }
+.cta p { font-size: 0.88rem; opacity: 0.85; line-height: 1.7; max-width: 90%; margin: 0 auto 16px; text-align: center; }
+.btn { display: inline-block; padding: 12px 32px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; background: var(--white); color: var(--teal-deep); }
+
+/* NOTE */
+.note { font-size: 0.82rem; color: var(--text-light); font-style: italic; text-align: center; margin-top: 16px; }
+
+/* QUOTE */
+.quote { text-align: center; padding: 40px 20px; background: var(--cream-warm); }
+.quote blockquote { font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--teal-deep); line-height: 1.5; max-width: 90%; margin: 0 auto 8px; }
+.quote cite { font-size: 0.75rem; color: var(--text-light); font-style: normal; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* FOOTER */
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MENU -->
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="about.html" onclick="closeMenu()">About</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="bg" src="https://saltspringcentre.com/wp-content/uploads/2021/10/centre-garden-path.jpg" alt="Garden path at the Salt Spring Centre of Yoga">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>In Memoriam</h1>
+    <p>Remembering those who walked this path.</p>
+  </div>
+</section>
+
+<!-- 1. HONORING OUR BELOVED -->
+<section class="sec" id="honoring">
+  <span class="label">Community</span>
+  <h2>Honoring Our Beloved</h2>
+  <div class="content-block">
+    <p>The Salt Spring Centre of Yoga is a community built across generations. We hold in our hearts the memory of those who gave their time, energy, and love to this place. Their contributions live on in every corner of the Centre.</p>
+  </div>
+</section>
+
+<!-- 2. REMEMBERED -->
+<section class="sec sec-warm" id="remembered">
+  <h2>Remembered</h2>
+  <div class="offering-grid">
+    <div class="offering-card">
+      <h3>(Dinesh) Wayne George Pallant</h3>
+      <p>September 4, 1947 -- October 11, 2023. Prayers for peace and joy for the soul's journey and the wonderful memories for his family and satsang.</p>
+    </div>
+    <div class="offering-card">
+      <h3>Anastasia (Ana) Shyla</h3>
+      <p>In loving memory. A cherished member of the Centre community.</p>
+    </div>
+    <div class="offering-card">
+      <h3>Peter</h3>
+      <p>Remembered with love and gratitude by the community.</p>
+    </div>
+    <div class="offering-card">
+      <h3>Lakshmi</h3>
+      <p>Remembered with love and gratitude by the community.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 3. SHARING A MEMORY -->
+<section class="sec" id="sharing">
+  <h2>Sharing a Memory</h2>
+  <div class="content-block">
+    <p>If you would like to share a memory or tribute for a community member, please reach out to us.</p>
+    <a href="contact.html" class="section-link">Contact Us</a>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Support the Centre</h2>
+  <p>Honor their legacy by supporting the community they loved.</p>
+  <a href="donate.html" class="btn">Make a Gift</a>
+</section>
+
+<!-- QUOTE -->
+<div class="quote">
+  <blockquote>"The soul is neither born nor does it die."</blockquote>
+  <cite>Bhagavad Gita</cite>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="about.html">About</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<script>
+function closeMenu() { document.getElementById('menu').classList.remove('open'); document.getElementById('ham').classList.remove('open'); }
+</script>
+
+</body>
+</html>

@@ -324,6 +324,7 @@ p { text-align: justify; text-justify: inter-word; }
       <h3>Yoga Intensive Program</h3>
       <p>Five days of concentrated practice and study. Approved for Yoga Alliance continuing education hours. Suitable for teachers and serious students looking to deepen their understanding of classical yoga.</p>
       <p class="meta">July 2026 &bull; CE hours available</p>
+      <a href="yoga-intensive.html" class="section-link" style="margin-top:8px;">Learn more</a>
     </div>
     <div class="offering-card reveal d2">
       <h3>Going Deeper Silent Retreat</h3>
@@ -622,6 +623,7 @@ p { text-align: justify; text-justify: inter-word; }
     <span class="label">Concert Series</span>
     <h2>Music for Peace 2026</h2>
     <p>Evenings of Indian classical music offered as a reflection of peace, listening, and shared humanity. Performed in the intimate setting of the Satsang Room, each concert is a fundraiser supporting the Centre's programs and community. Tickets are $40 unless otherwise noted.</p>
+    <a href="music-for-peace.html" class="section-link" style="margin-top:12px;">About the concert series</a>
   </div>
   <img src="https://saltspringcentre.com/wp-content/uploads/2024/06/Classical-Indian-Concert.jpg" alt="Classical Indian concert at the Centre" class="section-banner reveal" loading="lazy">
   <div class="offering-grid">
@@ -679,6 +681,7 @@ p { text-align: justify; text-justify: inter-word; }
     <p>Mornings begin with sadhana at 6:30 AM, followed by Arati at the temple. Breakfast is served communally, and the rest of the morning is given to classes, workshops, or service. A freshly prepared lunch gathers the community at midday. Afternoons bring asana practice, free time on the land, or continued study. Dinner is followed by evening offerings: satsang, kirtan, philosophy groups, or simply stillness under the stars.</p>
     <p>All meals are lacto-vegetarian, freshly prepared on-site using produce from the Centre's own gardens wherever possible. Cooking follows sattvic principles, emphasizing purity, balance, and nourishment. Food here is not separate from the practice. It is part of it.</p>
     <p>The Centre is home to three temples: the Hanuman Temple, the Ganesh Temple, and the Holy Mother/Garden Temple. Ceremonies, pujas, and yajnas are held regularly and are open to all visitors. Participation is always optional and never mandatory. The temples and their ceremonies simply hold the space, offering a quiet anchor for those who wish to connect.</p>
+    <a href="temples.html" class="section-link" style="margin-top:12px;">About the temples &amp; ceremonies</a>
   </div>
 </section>
 
@@ -843,7 +846,9 @@ function closeMobileMenu() {
 <!-- RETREAT GURU API -->
 <script>
 (function() {
-  var API = 'https://saltspringcentre.secure.retreat.guru/api/v1/programs?token=ce54314d68b0417fc9be95a93d202c81&public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
+  // Proxied through Cloudflare Worker — token stays server-side
+  // DEPLOY: update URL to your worker route, e.g. saltspringcentre.com/api/retreat-guru/
+  var API = '/api/retreat-guru/?public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
   var grid = document.getElementById('retreatGuruGrid');
   if (!grid) return;
 

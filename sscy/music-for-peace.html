@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent))window.location.href='m/about.html';</script>
-<title>About Us | Salt Spring Centre of Yoga</title>
-<meta name="description" content="The Salt Spring Centre of Yoga: our history, founder Baba Hari Dass, the land, the Dharma Sara Satsang Society, Salt Spring Island, and our team.">
+<script>if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent))window.location.href='m/music-for-peace.html';</script>
+<title>Music for Peace | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Music for Peace concert series at the Salt Spring Centre of Yoga. Live classical Indian music, kirtan, and world music performances March through November 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
@@ -42,23 +42,6 @@ p { text-align: justify; text-justify: inter-word; }
 .hero-content h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); margin-bottom: 16px; }
 .hero-content p { font-size: 1.1rem; color: rgba(255,255,255,0.9); text-align: center; line-height: 1.7; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
 
-/* FILTER KEYS (6 keys) */
-.filter-keys { display: grid; grid-template-columns: repeat(6, 1fr); overflow: hidden; position: sticky; top: 89px; z-index: 80; }
-.filter-key { display: flex; align-items: center; justify-content: center; padding: 28px 8px; font-size: 0.82rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; text-align: center; }
-.filter-key:nth-child(1) { background: #1b6c5e; }
-.filter-key:nth-child(2) { background: #2e7e6f; }
-.filter-key:nth-child(3) { background: #4b9e8e; }
-.filter-key:nth-child(4) { background: #7ecbb7; }
-.filter-key:nth-child(5) { background: #d3b84c; }
-.filter-key:nth-child(6) { background: #a78a30; }
-.filter-key::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
-.filter-key:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-.filter-key:hover::after { height: 100%; }
-.filter-key:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
-
-/* SECTION BANNERS */
-.section-banner { width: 100%; max-height: 45vh; object-fit: cover; object-position: center top; border-radius: 12px; margin-bottom: 32px; }
-
 /* OFFERING SECTIONS */
 .offering-section { padding: 80px 32px; }
 .offering-section:nth-child(even) { background: var(--white); }
@@ -73,9 +56,8 @@ p { text-align: justify; text-justify: inter-word; }
 .offering-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .offering-card h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 8px; }
 .offering-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; margin-bottom: 8px; text-align: left; }
-.offering-card .meta { font-size: 0.78rem; color: var(--teal-dark); font-weight: 500; }
 
-/* CONTENT BLOCK (for text-heavy sections) */
+/* CONTENT BLOCK */
 .content-block { max-width: 800px; margin: 0 auto; }
 .content-block p { font-size: 1.02rem; line-height: 1.85; color: var(--text); margin-bottom: 1em; }
 .content-block h3 { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 600; color: var(--teal-deep); margin: 2em 0 0.6em; }
@@ -108,23 +90,15 @@ p { text-align: justify; text-justify: inter-word; }
 .btn-outline { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal); }
 .btn-outline:hover { background: var(--teal); color: var(--white); }
 
-/* FOUNDER PORTRAIT LAYOUT */
-.founder-layout { display: grid; grid-template-columns: 300px 1fr; gap: 40px; max-width: 1000px; margin: 0 auto 2em; align-items: start; }
-.founder-portrait { width: 100%; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+/* CTA SECTION */
+.cta-section { background: linear-gradient(135deg, var(--teal-deep) 0%, var(--teal-dark) 100%); padding: 80px 32px; text-align: center; color: var(--white); }
+.cta-section h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--white); margin-bottom: 16px; }
+.cta-section p { font-size: 1.02rem; line-height: 1.85; color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto 24px; text-align: center; }
+.cta-section .btn { background: var(--white); color: var(--teal-deep); font-weight: 700; }
+.cta-section .btn:hover { background: var(--cream); }
 
-/* PARALLAX IMAGE FRAME */
-.parallax-frame { width: 100%; height: 50vh; overflow: hidden; position: relative; border-radius: 12px; margin: 0 auto 32px; max-width: 1200px; }
-.parallax-frame img { position: absolute; top: -20%; left: 0; width: 100%; height: 140%; object-fit: cover; will-change: transform; }
-
-/* TEAM CARD LINKS */
-.offering-card a.card-link { display: block; font-size: 0.82rem; font-weight: 500; color: var(--teal-dark); margin-top: 8px; transition: 0.25s ease; }
-.offering-card a.card-link:hover { color: var(--teal); }
-.offering-card a.card-link::after { content: ' \2192'; }
-
-/* MEMBERSHIP BOX */
-.membership-box { background: var(--cream-warm); border-radius: 12px; padding: 28px 32px; max-width: 600px; margin: 2em auto 0; text-align: center; }
-.membership-box p { text-align: center; font-size: 0.95rem; line-height: 1.7; margin-bottom: 0.5em; }
-.membership-box a { font-weight: 600; }
+/* NOTE */
+.note { font-size: 0.88rem; color: var(--text-light); font-style: italic; text-align: center; margin-top: 24px; max-width: 800px; margin-left: auto; margin-right: auto; }
 
 /* REVEALS */
 .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -173,12 +147,8 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* RESPONSIVE */
 @media (max-width: 900px) {
-  .filter-keys { grid-template-columns: repeat(3, 1fr); }
-  .filter-key { padding: 20px 6px; font-size: 0.72rem; }
   .offering-grid { grid-template-columns: 1fr; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
-  .founder-layout { grid-template-columns: 1fr; }
-  .founder-layout img { max-width: 300px; margin: 0 auto; }
 }
 @media (max-width: 768px) {
   body { font-size: 16px; }
@@ -190,21 +160,15 @@ p { text-align: justify; text-justify: inter-word; }
   .hamburger { display: block; background: none; border: none; cursor: pointer; padding: 8px; margin-left: auto; }
   .mobile-menu { top: 49px; z-index: 199; }
   .hero { height: 40vh; margin-top: 49px; }
-  .filter-keys { top: 49px; z-index: 79; }
   .hero-content h1 { font-size: 1.6rem; }
   .hero-content p { font-size: 0.88rem; }
   .offering-section { padding: 48px 16px; }
   .offering-header h2 { font-size: 1.4rem; }
   .offering-grid { grid-template-columns: 1fr; }
-  .section-banner { max-height: 30vh; }
-  .filter-keys { grid-template-columns: repeat(3, 1fr); }
-  .filter-key { padding: 6px 4px; font-size: 0.55rem; }
   .float-quote { padding: 40px 16px; }
   .float-quote blockquote { font-size: 1rem; }
   .footer-top { grid-template-columns: 1fr; gap: 32px; }
-  .founder-layout { grid-template-columns: 1fr; }
-  .founder-layout img { max-width: 260px; margin: 0 auto; }
-  .parallax-frame { height: 35vh; }
+  .cta-section { padding: 48px 16px; }
 }
 </style>
 </head>
@@ -218,6 +182,7 @@ p { text-align: justify; text-justify: inter-word; }
       <a href="calendar.html">Calendar</a>
       <a href="shop.html">Shop</a>
       <a href="offerings.html">Offerings</a>
+      <a href="about.html">About</a>
       <a href="rentals.html">Rentals</a>
       <a href="contact.html">Contact</a>
     </div>
@@ -232,6 +197,7 @@ p { text-align: justify; text-justify: inter-word; }
   <a href="offerings.html">Offerings</a>
   <a href="calendar.html">Calendar</a>
   <a href="shop.html">Shop</a>
+  <a href="about.html">About</a>
   <a href="rentals.html">Rentals</a>
   <a href="blog.html">Blog</a>
   <a href="contact.html">Contact</a>
@@ -239,228 +205,120 @@ p { text-align: justify; text-justify: inter-word; }
 
 <!-- HERO -->
 <section class="hero">
-  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg" alt="Aerial view of the Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/05/music-satsang-room.jpg" alt="Music in the Satsang Room at the Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1>About Us</h1>
-    <p>A 69-acre sanctuary for peace, yoga practice, and community on Salt Spring Island, BC.</p>
+    <h1>Music for Peace</h1>
+    <p>Live music in the Satsang Room, March through November 2026.</p>
   </div>
 </section>
 
-<!-- FILTER KEYS (6) -->
-<div class="filter-keys">
-  <a href="#centre" class="filter-key">The Centre</a>
-  <a href="#founder" class="filter-key">Our Founder</a>
-  <a href="#land" class="filter-key">The Land</a>
-  <a href="#society" class="filter-key">Our Society</a>
-  <a href="#island" class="filter-key">Salt Spring Island</a>
-  <a href="#team" class="filter-key">Our Team</a>
-</div>
-
 <!-- ============================================ -->
-<!-- 1. THE CENTRE -->
+<!-- 1. CONCERT SERIES -->
 <!-- ============================================ -->
-<section class="offering-section" id="centre">
+<section class="offering-section" id="series">
   <div class="offering-header reveal">
-    <span class="label">Est. 1981</span>
-    <h2>A Rare and Sacred Place</h2>
-    <p>The Salt Spring Centre of Yoga is a non-profit educational and spiritual retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
-    <p>Established in 1981, the Centre serves as the primary initiative of the Dharma Sara Satsang Society (founded 1974). For over four decades, thousands have experienced transformation through immersive programs ranging from weekend retreats to full-time karma yoga residencies.</p>
+    <span class="label">Concert Series</span>
+    <h2>Music for Peace 2026</h2>
   </div>
   <div class="content-block reveal d1">
-    <h3>Our Vision</h3>
-    <p>All people can attain peace, resilience, and belonging.</p>
-    <h3>Our Mission</h3>
-    <p>The Salt Spring Centre of Yoga offers the principles and practices of classical yoga for personal development within a peaceful, positive environment.</p>
-  </div>
-  <div style="max-width:800px;margin:2em auto 0;">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Bumble-Bee-Pollinating-1024x683-1.jpg" alt="Bumblebee pollinating flowers at the Centre" class="section-banner reveal d2" loading="lazy">
+    <p>Music for Peace is a concert series hosted at the Salt Spring Centre of Yoga, featuring classical Indian music, kirtan, and world music performances. Concerts are held in the intimate Satsang Room, a beautiful space with natural acoustics and room for approximately 50 guests. All are welcome.</p>
   </div>
 </section>
 
 <!-- WAVE -->
 <div class="wave-divider cream-warm">
   <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- 2. WHAT TO EXPECT -->
+<!-- ============================================ -->
+<section class="offering-section" id="expect" style="background: var(--cream-warm);">
+  <div class="offering-header reveal">
+    <h2>What to Expect</h2>
+  </div>
+  <div class="offering-grid">
+    <div class="offering-card reveal d1">
+      <h3>Classical Indian Music</h3>
+      <p>Performances featuring traditional instruments including sitar, tabla, harmonium, violin, and mridangam.</p>
+    </div>
+    <div class="offering-card reveal d2">
+      <h3>Kirtan &amp; Devotional Music</h3>
+      <p>Community chanting and call-and-response singing in the bhakti yoga tradition.</p>
+    </div>
+    <div class="offering-card reveal d3">
+      <h3>Intimate Venue</h3>
+      <p>The Satsang Room seats approximately 50 guests in a warm, acoustically rich space.</p>
+    </div>
+    <div class="offering-card reveal d4">
+      <h3>By Donation</h3>
+      <p>Most concerts are offered by donation. Some special events may have a suggested contribution.</p>
+    </div>
+  </div>
+</section>
+
+<div class="wave-divider" style="background:var(--cream-warm);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- 3. UPCOMING CONCERTS -->
+<!-- ============================================ -->
+<section class="offering-section" id="upcoming">
+  <div class="offering-header reveal">
+    <h2>Upcoming Concerts</h2>
+  </div>
+  <div class="content-block reveal d1">
+    <p>Concerts run monthly from March through November. Visit our calendar for specific dates, performers, and reservation details.</p>
+    <a href="calendar.html" class="section-link">View Concert Schedule</a>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider cream-warm">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- 4. VENUE -->
+<!-- ============================================ -->
+<section class="offering-section" id="venue" style="background: var(--cream-warm);">
+  <div class="offering-header reveal">
+    <h2>Venue</h2>
+  </div>
+  <div class="content-block reveal d1">
+    <p>All Music for Peace concerts take place in the Satsang Room at the Salt Spring Centre of Yoga, 355 Blackburn Road, Salt Spring Island. Doors typically open at 6:30 PM with concerts beginning at 7:00 PM. Light refreshments may be available.</p>
+    <a href="venues.html" class="section-link">About Our Venues</a>
+  </div>
+</section>
+
+<div class="wave-divider" style="background:var(--cream-warm);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--teal-deep);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- CTA -->
+<!-- ============================================ -->
+<section class="cta-section">
+  <h2 class="reveal">Reserve Your Spot</h2>
+  <p class="reveal d1">Check our calendar for upcoming Music for Peace concerts.</p>
+  <a href="calendar.html" class="btn reveal d2">View Calendar</a>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider" style="background:var(--teal-deep);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream-warm);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
 </div>
 
 <!-- QUOTE -->
 <section class="float-quote">
-  <blockquote class="reveal">"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
+  <blockquote class="reveal">"Music is the highest form of worship."</blockquote>
   <cite class="reveal d1">Baba Hari Dass</cite>
 </section>
 
-<div class="wave-divider cream">
-  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,40 C360,0 1080,60 1440,20 L1440,60 L0,60 Z"/></svg>
-</div>
-
-<!-- ============================================ -->
-<!-- 2. OUR FOUNDER -->
-<!-- ============================================ -->
-<section class="offering-section" id="founder">
-  <div class="offering-header reveal">
-    <span class="label">Baba Hari Dass (1923-2018)</span>
-    <h2>Our Founder and Teacher</h2>
-  </div>
-  <div class="founder-layout reveal d1">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-Shining-Eyes-Square.jpg" alt="Baba Hari Dass" class="founder-portrait" loading="lazy">
-    <div>
-      <p style="font-size:1.02rem;line-height:1.85;color:var(--text);margin-bottom:1em;">Baba Hari Dass, affectionately called Babaji, was a master yogi, scholar, and spiritual teacher. He possessed remarkable abilities in sculpture, music, architecture, yogic philosophy, writing, storytelling, martial arts, and Indian cosmology. He was a leading proponent of Ayurveda and authored numerous books.</p>
-      <p style="font-size:1.02rem;line-height:1.85;color:var(--text);margin-bottom:1em;">Babaji was a mauni sadhu, having undertaken a vow of silence in 1952. He never spoke another audible word, communicating through a small chalkboard worn around his neck. He had an extraordinary gift for distilling complex teachings into their essential form.</p>
-      <p style="font-size:1.02rem;line-height:1.85;color:var(--text);margin-bottom:1em;">His life's aim centered on bringing people to Sadhana, a daily spiritual practice encompassing positive qualities, right conduct, family relationships, ethical livelihood, and inner peace.</p>
-    </div>
-  </div>
-  <div class="content-block reveal d2">
-    <h3>Connection to Western Yoga</h3>
-    <p>Babaji was a formative teacher of Ram Dass, influencing his seminal 1971 work Be Here Now. In 1970, he met American students near Haridwar, India, including Anand Dass (AD), a Canadian who would establish yoga practice in Vancouver.</p>
-    <h3>Founding the Centre</h3>
-    <p>Following Babaji's 1974 visit to Canada, the Dharma Sara Satsang Society was established. After successful annual retreats, the group purchased a heritage farmstead on Salt Spring Island in 1981, creating the Salt Spring Centre of Yoga.</p>
-    <h3>Sri Ram Ashram</h3>
-    <p>Honouring a childhood vow, Babaji established Sri Ram Ashram near Haridwar in 1984 using publishing revenue. This orphanage provides loving care and educational support for abandoned children.</p>
-    <h3>Legacy</h3>
-    <p>Babaji left his body peacefully on September 25, 2018. His influence persists through the institutions he inspired, his writings, and all those whose hearts he touched. His autobiography, The Path Unfolds, documents his life experiences.</p>
-  </div>
-
-  <!-- Founder quote -->
-  <div style="text-align:center;padding:48px 32px 0;">
-    <blockquote class="reveal" style="font-family:'Cinzel',serif;font-size:clamp(1.1rem,2.5vw,1.5rem);color:var(--teal-deep);max-width:520px;margin:0 auto 12px;line-height:1.5;font-weight:500;font-style:italic;">"Love everyone, including yourself. This is real Sadhana."</blockquote>
-    <cite class="reveal d1" style="font-size:0.82rem;color:var(--text-light);font-style:normal;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;">Baba Hari Dass</cite>
-  </div>
-</section>
-
-<!-- WAVE -->
-<div class="wave-divider cream-warm">
-  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
-</div>
-
-<!-- ============================================ -->
-<!-- 3. THE LAND -->
-<!-- ============================================ -->
-<section class="offering-section" id="land" style="background: var(--cream-warm);">
-  <div class="offering-header reveal">
-    <span class="label">69 Acres of Living Sanctuary</span>
-    <h2>The Land</h2>
-    <p>The 69-acre property encompasses diverse natural ecosystems including old growth cedars, maples, and alders. The land includes an organic farm, fruit orchard, and permaculture food forest cultivating nuts, medicinal herbs, and fruit.</p>
-    <p>The property borders the Salt Spring Island Conservancy's Blackburn Lake nature reserve, which hosts over 110 species, many endangered or vulnerable.</p>
-    <p>The Dandaka Forest, located on the Centre's property, is one of the most untouched, primordial cedar-swamp wetlands found in North America.</p>
-  </div>
-
-  <!-- Parallax image frame -->
-  <div class="parallax-frame reveal" style="max-width:1000px;">
-    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg" alt="Aerial view of the Centre's 69-acre property" id="landParallax" loading="lazy">
-  </div>
-
-  <div class="offering-grid" style="margin-top:40px;">
-    <div class="offering-card reveal d1">
-      <h3>Organic Farm</h3>
-      <p>Seasonal vegetables, salad greens, herbs, and medicinal plants grown for the Centre kitchen.</p>
-    </div>
-    <div class="offering-card reveal d2">
-      <h3>Fruit Orchard</h3>
-      <p>Heritage apple and pear varieties, plums, and stone fruit.</p>
-    </div>
-    <div class="offering-card reveal d3">
-      <h3>Permaculture Food Forest</h3>
-      <p>A multi-layered ecosystem of nuts, berries, medicinal herbs, and edible plants.</p>
-    </div>
-    <div class="offering-card reveal d1">
-      <h3>Dandaka Forest</h3>
-      <p>One of North America's most pristine cedar-swamp wetlands.</p>
-    </div>
-    <div class="offering-card reveal d2">
-      <h3>Blackburn Lake</h3>
-      <p>Adjacent nature reserve hosting 110+ species, many endangered.</p>
-    </div>
-    <div class="offering-card reveal d3">
-      <h3>Walking Trails</h3>
-      <p>Forested paths winding through the property for meditation and nature connection.</p>
-    </div>
-  </div>
-</section>
-
-<div class="wave-divider" style="background:var(--cream-warm);">
-  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
-</div>
-
-<!-- ============================================ -->
-<!-- 4. DHARMA SARA SATSANG SOCIETY -->
-<!-- ============================================ -->
-<section class="offering-section" id="society">
-  <div class="offering-header reveal">
-    <span class="label">Founded 1974</span>
-    <h2>Dharma Sara Satsang Society</h2>
-    <p>A Non-Profit Legacy of Yoga and Service. The name signifies 'the essence of right living' (Dharma Sara) and 'gathering with people in truth' (Satsang). Members unite around yoga practices taught by Baba Hari Dass.</p>
-    <p>Inspired by Babaji's teachings, the Society promotes Classical Ashtanga Yoga through spiritual practice (Sadhana), selfless service (Karma Yoga), and community support (Satsang).</p>
-    <p>The Centre envisions itself as a thriving spiritual community offering advanced instruction while maintaining sustainable operations for future generations.</p>
-  </div>
-  <div class="membership-box reveal d1">
-    <p><strong>Annual Membership:</strong> $26.25 CAD (calendar year)</p>
-    <p>Voting eligibility begins after ninety days.</p>
-    <p>Contact: <a href="mailto:membership@saltspringcentre.com">membership@saltspringcentre.com</a></p>
-  </div>
-</section>
-
-<!-- WAVE -->
-<div class="wave-divider cream-warm">
-  <svg viewBox="0 0 1440 60" preserveAspectRatio="none"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
-</div>
-
-<!-- ============================================ -->
-<!-- 5. SALT SPRING ISLAND -->
-<!-- ============================================ -->
-<section class="offering-section" id="island" style="background: var(--cream-warm);">
-  <div class="offering-header reveal">
-    <span class="label">Gulf Islands, BC</span>
-    <h2>Salt Spring Island</h2>
-    <p>Salt Spring Island, the most populous of British Columbia's Gulf Islands, is located between the Lower Mainland and Vancouver Island. The island attracts approximately 11,000 permanent residents, increasing to over 30,000 during peak season.</p>
-    <p>Known for its agricultural heritage, creative communities, and eco-conscious culture, the island features farm stands, native wildlife, ocean access, and freshwater lakes for swimming.</p>
-  </div>
-  <div class="content-block reveal d1">
-    <p style="text-align:center;"><a href="https://www.saltspringtourism.com/" target="_blank" rel="noopener" class="section-link">Learn more about Salt Spring Island</a></p>
-    <h3>Getting Here</h3>
-    <p>Salt Spring Island is accessible by BC Ferries from Tsawwassen (Lower Mainland), Swartz Bay (Victoria), and Crofton (Duncan). Harbour Air offers float plane service from Vancouver.</p>
-    <p>The Centre is located at 355 Blackburn Road, a 10-minute drive from Ganges village.</p>
-  </div>
-</section>
-
-<div class="wave-divider" style="background:var(--cream-warm);">
-  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
-</div>
-
-<!-- ============================================ -->
-<!-- 6. OUR TEAM -->
-<!-- ============================================ -->
-<section class="offering-section" id="team">
-  <div class="offering-header reveal">
-    <span class="label">Staff, Instructors &amp; Board</span>
-    <h2>Our Team</h2>
-    <p>The Salt Spring Centre of Yoga is sustained by dedicated staff, experienced yoga instructors, and a committed Board of Directors. Our community is enriched by karma yoga volunteers who contribute their time and energy in exchange for room, board, and immersive yoga study.</p>
-  </div>
-  <div class="offering-grid">
-    <div class="offering-card reveal d1">
-      <h3>Staff &amp; Volunteers</h3>
-      <p>The heart of daily operations at the Centre.</p>
-      <a href="https://saltspringcentre.com/about-us/staff/" target="_blank" rel="noopener" class="card-link">View staff</a>
-    </div>
-    <div class="offering-card reveal d2">
-      <h3>Yoga Instructors</h3>
-      <p>Experienced teachers offering classes in diverse yoga traditions.</p>
-      <a href="instructors.html" class="card-link">View instructors</a>
-    </div>
-    <div class="offering-card reveal d3">
-      <h3>Board of Directors</h3>
-      <p>Volunteer leadership guiding the Dharma Sara Satsang Society.</p>
-      <a href="https://saltspringcentre.com/about-us/board-of-directors/" target="_blank" rel="noopener" class="card-link">View board</a>
-    </div>
-    <div class="offering-card reveal d4">
-      <h3>Employment Opportunities</h3>
-      <p>Join our team. Current openings and applications.</p>
-      <a href="employment.html" class="card-link">View openings</a>
-    </div>
-  </div>
-</section>
-
 <!-- WAVE TO FOOTER -->
-<div class="wave-divider" style="background:var(--cream);">
+<div class="wave-divider" style="background:var(--cream-warm);">
   <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--charcoal);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
 </div>
 
@@ -514,16 +372,10 @@ p { text-align: justify; text-justify: inter-word; }
 <script>
 // Hero parallax (desktop only)
 var heroImg = document.getElementById('heroImg');
-var landParallax = document.getElementById('landParallax');
 if (window.innerWidth > 768) {
   window.addEventListener('scroll', function() {
     var s = window.scrollY;
     heroImg.style.transform = 'translateY(' + (s * 0.2) + 'px)';
-    if (landParallax) {
-      var rect = landParallax.parentElement.getBoundingClientRect();
-      var offset = rect.top + rect.height / 2 - window.innerHeight / 2;
-      landParallax.style.transform = 'translateY(' + (offset * -0.15) + 'px)';
-    }
   });
 }
 
@@ -535,19 +387,6 @@ var obs = new IntersectionObserver(function(entries) {
   });
 }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
 document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
-
-// Smooth scroll for filter keys
-document.querySelectorAll('.filter-key').forEach(function(a) {
-  a.addEventListener('click', function(e) {
-    var target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      e.preventDefault();
-      var offset = 89 + document.querySelector('.filter-keys').offsetHeight + 16;
-      var top = target.getBoundingClientRect().top + window.pageYOffset - offset;
-      window.scrollTo({ top: top, behavior: 'smooth' });
-    }
-  });
-});
 
 // Mobile menu close on link click
 document.querySelectorAll('.mobile-menu a').forEach(function(a) {
