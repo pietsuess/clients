@@ -209,6 +209,7 @@ p { text-align: justify; text-justify: inter-word; }
   <a href="#overview" class="anchor-pill">Overview</a>
   <a href="#content" class="anchor-pill">Content</a>
   <a href="#booking" class="anchor-pill">Booking</a>
+  <a href="#acuity" class="anchor-pill">Acuity</a>
   <a href="#payments" class="anchor-pill">Payments</a>
   <a href="#forms" class="anchor-pill">Forms</a>
   <a href="#calendar" class="anchor-pill">Calendar</a>
@@ -319,6 +320,63 @@ p { text-align: justify; text-justify: inter-word; }
       <li>No WordPress plugin is needed</li>
       <li>The widget reads directly from your Retreat Guru account</li>
       <li>Styling is partially customizable (colors and fonts are set to match the site)</li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ============================================ -->
+<!-- 3b. CLASS & TREATMENT BOOKING -->
+<!-- ============================================ -->
+<section class="admin-section" id="acuity">
+  <div class="section-header reveal">
+    <span class="label">Acuity Scheduling</span>
+    <h2>Class &amp; Treatment Booking</h2>
+  </div>
+  <div class="content-block reveal d1">
+    <div class="status-badge status-placeholder"><span class="status-dot"></span><span class="status-text">Setup Required</span></div>
+    <p>Yoga class registration and wellness treatment bookings are managed through Acuity Scheduling (Squarespace Scheduling). The booking widget is embedded on the Calendar and Wellness pages.</p>
+
+    <div class="link-cards-wrap">
+      <a href="https://app.acuityscheduling.com" target="_blank" rel="noopener" class="link-card">Acuity Admin Dashboard</a>
+      <a href="https://support.squarespace.com/hc/en-us/categories/200337877" target="_blank" rel="noopener" class="link-card">Acuity Help Center</a>
+    </div>
+
+    <h3>How It Works</h3>
+    <ul>
+      <li>Yoga classes are set up as <strong>Group</strong> appointment types (multiple people per session, with capacity limits)</li>
+      <li>Wellness treatments are set up as <strong>Individual</strong> appointment types (1-on-1, per practitioner)</li>
+      <li>Each practitioner (Savita, Ehlana) has their own calendar with their own availability</li>
+      <li>The website embeds show only the relevant category (Yoga Classes on calendar.html, Wellness on wellness.html)</li>
+      <li>Clients book and pay online through Square (connected in Acuity)</li>
+    </ul>
+
+    <h3>Setup Steps</h3>
+    <ol>
+      <li>Create an Acuity account at acuityscheduling.com (Growing plan, $27/month)</li>
+      <li>Connect your Square account: Integrations &gt; Square &gt; Connect</li>
+      <li>Create appointment type categories: "Yoga Classes" and "Wellness"</li>
+      <li>Add group class types under Yoga Classes (e.g., Vinyasa, Gentle Yoga, Pranayama) with capacity limits</li>
+      <li>Add individual treatment types under Wellness (Swedish Massage, Abhyanga, Shirodhara, Acupuncture, etc.) with pricing</li>
+      <li>Set up practitioner calendars with availability hours</li>
+      <li>Go to Share Your Calendar &gt; Embed Code and copy your owner ID number</li>
+      <li>Send the owner ID to the site developer to replace OWNER_ID in the embed URLs</li>
+    </ol>
+
+    <div class="tip-box">
+      <strong>Tip:</strong> Customize colors in Acuity admin (Appearance settings) to match the site: button color #3bb8a8 (teal), background #faf8f4 (cream).
+    </div>
+
+    <h3>Where It Appears</h3>
+    <ul>
+      <li><strong>calendar.html</strong> &gt; "Book a Yoga Class" section (filtered to Yoga Classes category)</li>
+      <li><strong>wellness.html</strong> &gt; "Book a Treatment" section (filtered to Wellness category)</li>
+    </ul>
+
+    <h3>Cost</h3>
+    <ul>
+      <li>$27/month (Growing plan, includes Square integration and multiple calendars)</li>
+      <li>No additional transaction fees from Acuity (Square's 3.3% + $0.30 applies to payments)</li>
     </ul>
   </div>
 </section>
