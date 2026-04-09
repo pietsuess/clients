@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent))window.location.href='m/blog.html';</script>
+<title>Salt Spring Centre of Yoga - Blog</title>
+<meta name="description" content="News, teachings, recipes, farm updates, and community stories from the Salt Spring Centre of Yoga since 2010.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --gold-light: #e8d5a0;
+  --terracotta: #c17838;
+  --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+  --shadow: rgba(0,0,0,0.08);
+  --shadow-md: rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: 0.3s ease;
+}
+
+html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  font-family: 'Archivo Narrow', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  font-size: 24px;
+}
+
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* STICKY NAV (matching homepage) */
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); }
+.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav-links { position: absolute; right: 32px; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transition: color 0.2s ease, background 0.2s ease; }
+.sticky-nav-links a:hover { color: var(--teal-dark); background: var(--cream-warm); }
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, rgba(26,92,83,0.85) 0%, rgba(42,138,125,0.78) 40%, rgba(45,90,39,0.82) 100%),
+              url('https://saltspringcentre.com/wp-content/uploads/2021/11/Babaji-photo-overlay.jpg') center/cover no-repeat;
+  background-attachment: fixed;
+  color: var(--white);
+  text-align: center;
+  padding: 100px 32px 80px;
+  position: relative;
+}
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.08) 0%, transparent 60%); pointer-events: none; }
+.hero-content { position: relative; max-width: 800px; margin: 0 auto; }
+.hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); margin-bottom: 16px; color: var(--white); }
+.hero p { font-size: 1.1rem; opacity: 0.9; line-height: 1.7; max-width: 640px; margin: 0 auto; text-align: center; }
+.hero .post-count { margin-top: 16px; font-size: 0.82rem; opacity: 0.6; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* FILTER KEYS (matches homepage quick-links) */
+.filter-keys { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; position: sticky; top: 89px; z-index: 80; }
+.filter-key { display: flex; align-items: center; justify-content: center; padding: 28px 8px; font-size: 0.82rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); border: none; cursor: pointer; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; text-align: center; }
+.filter-key:nth-child(1) { background: #1b6c5e; }
+.filter-key:nth-child(2) { background: #2e7e6f; }
+.filter-key:nth-child(3) { background: #4b9e8e; }
+.filter-key:nth-child(4) { background: #7ecbb7; }
+.filter-key:nth-child(5) { background: #e6d798; }
+.filter-key:nth-child(6) { background: #d3b84c; }
+.filter-key:nth-child(7) { background: #be9f31; }
+.filter-key:nth-child(8) { background: #a78a30; }
+.filter-key::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.filter-key:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.filter-key:hover::after { height: 100%; }
+.filter-key:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
+.filter-key.active { text-decoration: underline; text-underline-offset: 4px; }
+
+/* BLOG GRID */
+.blog-section { padding: 48px 32px 64px; }
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.post-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 2px 12px var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+.post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px var(--shadow-md); }
+
+.post-img {
+  width: 100%;
+  aspect-ratio: 16/10;
+  background: var(--cream-warm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.post-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+.post-card:hover .post-img img { transform: scale(1.04); }
+.post-img .placeholder { font-size: 2.5rem; opacity: 0.15; }
+
+.post-body { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+
+.post-date {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  margin-bottom: 6px;
+}
+
+.post-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.post-excerpt {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  flex: 1;
+  text-align: left;
+}
+
+.post-cat {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+.post-link {
+  display: inline-block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--teal-dark);
+  margin-top: auto;
+}
+.post-link::after { content: ' \2192'; }
+
+/* PAGINATION */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+}
+.page-btn {
+  padding: 12px 28px;
+  background: var(--teal);
+  color: var(--white);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Archivo Narrow', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.page-btn:hover { background: var(--teal-dark); }
+.page-btn:disabled { opacity: 0.3; cursor: default; }
+.page-info { font-size: 0.82rem; color: var(--text-light); }
+
+/* LOADING */
+.loading { text-align: center; padding: 80px 32px; color: var(--text-light); font-size: 1rem; }
+.loading-spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid var(--cream-warm); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* FOOTER (matching homepage) */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* SEARCH BAR */
+.search-bar { padding: 24px 32px 0; }
+.search-inner { max-width: 500px; margin: 0 auto; position: relative; display: flex; align-items: center; }
+.search-icon { position: absolute; left: 16px; color: var(--text-light); pointer-events: none; }
+.search-inner input { width: 100%; padding: 14px 44px 14px 48px; border: 1.5px solid rgba(0,0,0,0.1); background: var(--white); border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; color: var(--text); transition: border-color 0.25s, box-shadow 0.25s; }
+.search-inner input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(59,184,168,0.12); }
+.search-inner input::placeholder { color: var(--text-light); opacity: 0.6; }
+.search-clear { position: absolute; right: 14px; background: none; border: none; font-size: 1.2rem; color: var(--text-light); cursor: pointer; padding: 4px; line-height: 1; }
+.search-clear:hover { color: var(--text); }
+
+/* HAMBURGER */
+.hamburger { display: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s ease; border-radius: 2px; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MOBILE MENU */
+.mobile-menu { display: none; position: fixed; top: 89px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 85; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 12px 24px; text-decoration: none; transition: 0.2s; letter-spacing: 0.03em; }
+.mobile-menu a:hover { color: var(--teal); }
+.mobile-menu .mobile-donate { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .blog-grid { grid-template-columns: 1fr; padding: 0 16px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  body { font-size: 16px; }
+  .sticky-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+  .sticky-nav-inner { padding: 0 16px; height: 48px; display: flex; align-items: center; width: 100%; }
+  .sticky-nav-links { display: none; }
+  .sn-logo-wrap { position: static !important; transform: none !important; opacity: 1 !important; }
+  .sn-logo { height: 36px !important; }
+  .hamburger { display: block; background: none; border: none; cursor: pointer; padding: 8px; margin-left: auto; }
+  .mobile-menu { top: 49px; z-index: 199; }
+  .hero { margin-top: 49px; }
+  .filter-keys { top: 49px; z-index: 79; }
+  .hero { padding: 64px 16px 48px; }
+  .hero h1 { font-size: 1.6rem; }
+  .hero p { font-size: 0.88rem; }
+  .filter-keys { grid-template-columns: repeat(4, 1fr); }
+  .filter-key { padding: 6px 4px; font-size: 0.55rem; }
+  .blog-section { padding: 32px 16px 48px; }
+  .blog-grid { grid-template-columns: 1fr; }
+  .search-bar { padding: 16px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 24px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; max-width: 440px; width: 100%; overflow: hidden; transform: translateY(20px); transition: transform 0.3s ease; }
+.donate-overlay.open .donate-modal { transform: translateY(0); }
+.donate-modal-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 28px 32px; position: relative; }
+.donate-modal-header h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 4px; }
+.donate-modal-header p { font-size: 0.85rem; opacity: 0.8; }
+.donate-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; line-height: 1; }
+.donate-modal-close:hover { opacity: 1; }
+.donate-modal-body { padding: 28px 32px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+.tier-btn { padding: 12px 20px; border: 2px solid rgba(0,0,0,0.12); background: var(--white); border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); transition: 0.3s ease; min-width: 70px; }
+.tier-btn:hover { border-color: var(--teal); color: var(--teal-dark); }
+.tier-btn.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-amount-label { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; text-align: center; margin-bottom: 20px; }
+.donate-field { margin-bottom: 16px; }
+.donate-field label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 6px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; transition: border-color 0.2s; }
+.donate-field input:focus, .donate-field select:focus { outline: none; border-color: var(--teal); }
+.donate-submit { width: 100%; background: var(--terracotta); color: var(--white); border: none; padding: 14px; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; transition: 0.3s ease; margin-top: 8px; }
+.donate-submit:hover { background: #a8632e; }
+.donate-alt { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); font-size: 0.8rem; color: var(--text-light); text-align: center; }
+.donate-alt strong { color: var(--text); }
+.donate-modal-footer { padding: 0 32px 24px; text-align: center; font-size: 0.72rem; color: var(--text-light); }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <div class="sn-logo-wrap"><a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a></div>
+    <div class="sticky-nav-links">
+      <a href="calendar.html">Calendar</a>
+      <a href="shop.html">Shop</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="about.html">About</a>
+      <a href="rentals.html">Rentals</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu" onclick="document.getElementById('mobileMenu').classList.toggle('open');this.classList.toggle('open');">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="offerings.html">Offerings</a>
+  <a href="calendar.html">Calendar</a>
+  <a href="shop.html">Shop</a>
+  <a href="about.html">About</a>
+  <a href="rentals.html">Rentals</a>
+  <a href="contact.html">Contact</a>
+  <a href="#" class="mobile-donate" onclick="event.preventDefault();closeMobileMenu();openDonate();">Donate</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Blog</h1>
+    <p>News, teachings, recipes, farm updates, and community stories from our 69-acre sanctuary.</p>
+    <div class="post-count" id="postCount"></div>
+  </div>
+</section>
+
+<!-- FILTER KEYS -->
+<div class="filter-keys" id="filterKeys">
+  <button class="filter-key active" data-cat="all">All Posts</button>
+  <button class="filter-key" data-cat="53">Teachings</button>
+  <button class="filter-key" data-cat="76">Community</button>
+  <button class="filter-key" data-cat="112">Farm</button>
+  <button class="filter-key" data-cat="7">Recipes</button>
+  <button class="filter-key" data-cat="67">Events</button>
+  <button class="filter-key" data-cat="73">Karma Yoga</button>
+  <button class="filter-key" data-cat="60">Retreats</button>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar">
+  <div class="search-inner">
+    <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search 679 posts..." oninput="handleSearch()" autcomplete="off">
+    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">&times;</button>
+  </div>
+</div>
+
+<!-- BLOG GRID -->
+<section class="blog-section">
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <div>Loading posts from saltspringcentre.com...</div>
+  </div>
+  <div class="blog-grid" id="blogGrid"></div>
+</section>
+
+<!-- PAGINATION -->
+<div class="pagination" id="pagination" style="display:none;">
+  <button class="page-btn" id="prevBtn" onclick="changePage(-1)">Previous</button>
+  <span class="page-info" id="pageInfo"></span>
+  <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next</button>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="offerings.html">Offerings</a>
+        <a href="about.html">About</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="shop.html">Shop</a>
+        <a href="rentals.html">Rentals</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="offerings.html#karma">Karma Yoga</a>
+        <a href="offerings.html#ytt">Teacher Training</a>
+        <a href="offerings.html#wellness">Wellness</a>
+        <a href="offerings.html#satsang">Satsang</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation Policy</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+var API = 'https://saltspringcentre.com/wp-json/wp/v2';
+var PER_PAGE = 12;
+var currentPage = 1;
+var totalPages = 1;
+var totalPosts = 0;
+var activeCategory = '';
+var searchQuery = '';
+var searchTimer = null;
+var mediaCache = {};
+
+// Category name map for display
+var CAT_NAMES = {};
+
+// Fetch category names once
+fetch(API + '/categories?per_page=50&_fields=id,name')
+  .then(function(r) { return r.json(); })
+  .then(function(cats) {
+    cats.forEach(function(c) { CAT_NAMES[c.id] = c.name.replace(/&amp;/g, '&'); });
+  });
+
+function fetchPosts() {
+  var grid = document.getElementById('blogGrid');
+  var loading = document.getElementById('loading');
+  var pagination = document.getElementById('pagination');
+
+  grid.innerHTML = '';
+  loading.style.display = '';
+  pagination.style.display = 'none';
+
+  var url = API + '/posts?per_page=' + PER_PAGE + '&page=' + currentPage + '&_fields=id,title,date,excerpt,link,featured_media,categories';
+  if (activeCategory) url += '&categories=' + activeCategory;
+  if (searchQuery) url += '&search=' + encodeURIComponent(searchQuery);
+
+  fetch(url)
+    .then(function(r) {
+      totalPages = parseInt(r.headers.get('X-WP-TotalPages')) || 1;
+      totalPosts = parseInt(r.headers.get('X-WP-Total')) || 0;
+      document.getElementById('postCount').textContent = totalPosts + ' posts since 2010';
+      return r.json();
+    })
+    .then(function(posts) {
+      loading.style.display = 'none';
+
+      // Collect media IDs to fetch
+      var mediaIds = posts.filter(function(p) { return p.featured_media && !mediaCache[p.featured_media]; }).map(function(p) { return p.featured_media; });
+
+      // Fetch featured images in batch
+      var mediaPromise = Promise.resolve();
+      if (mediaIds.length > 0) {
+        mediaPromise = fetch(API + '/media?include=' + mediaIds.join(',') + '&_fields=id,source_url&per_page=' + mediaIds.length)
+          .then(function(r) { return r.json(); })
+          .then(function(media) {
+            media.forEach(function(m) { mediaCache[m.id] = m.source_url; });
+          })
+          .catch(function() {});
+      }
+
+      mediaPromise.then(function() {
+        grid.innerHTML = posts.map(function(p) {
+          var date = new Date(p.date);
+          var dateStr = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          var imgUrl = mediaCache[p.featured_media] || '';
+          var catNames = (p.categories || []).map(function(id) { return CAT_NAMES[id] || ''; }).filter(Boolean).slice(0, 2).join(', ');
+          var excerpt = p.excerpt.rendered.replace(/<[^>]+>/g, '').substring(0, 200);
+          if (excerpt.length >= 200) excerpt = excerpt.substring(0, excerpt.lastIndexOf(' ')) + '...';
+
+          return '<a href="' + p.link + '" target="_blank" rel="noopener" class="post-card">' +
+            '<div class="post-img">' +
+              (imgUrl ? '<img src="' + imgUrl + '" alt="" loading="lazy">' : '<div class="placeholder">&#x1F9D8;</div>') +
+            '</div>' +
+            '<div class="post-body">' +
+              (catNames ? '<div class="post-cat">' + catNames + '</div>' : '') +
+              '<div class="post-date">' + dateStr + '</div>' +
+              '<div class="post-title">' + p.title.rendered + '</div>' +
+              '<div class="post-excerpt">' + excerpt + '</div>' +
+              '<span class="post-link">Read more</span>' +
+            '</div>' +
+          '</a>';
+        }).join('');
+
+        // Update pagination
+        pagination.style.display = 'flex';
+        document.getElementById('prevBtn').disabled = currentPage <= 1;
+        document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+        document.getElementById('pageInfo').textContent = 'Page ' + currentPage + ' of ' + totalPages;
+      });
+    })
+    .catch(function(err) {
+      loading.innerHTML = '<p>Could not load posts. <a href="https://saltspringcentre.com/blog/" target="_blank">Visit the blog on saltspringcentre.com</a></p>';
+    });
+}
+
+function changePage(delta) {
+  currentPage += delta;
+  if (currentPage < 1) currentPage = 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  fetchPosts();
+  window.scrollTo({ top: document.querySelector('.blog-section').offsetTop - 160, behavior: 'smooth' });
+}
+
+// Filter keys
+document.getElementById('filterKeys').addEventListener('click', function(e) {
+  var btn = e.target.closest('.filter-key');
+  if (!btn) return;
+  document.querySelectorAll('.filter-key').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  activeCategory = btn.dataset.cat === 'all' ? '' : btn.dataset.cat;
+  currentPage = 1;
+  fetchPosts();
+});
+
+// Search
+function handleSearch() {
+  var input = document.getElementById('searchInput');
+  var clear = document.getElementById('searchClear');
+  clear.style.display = input.value ? '' : 'none';
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(function() {
+    searchQuery = input.value.trim();
+    currentPage = 1;
+    fetchPosts();
+  }, 400);
+}
+
+function clearSearch() {
+  var input = document.getElementById('searchInput');
+  input.value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  searchQuery = '';
+  currentPage = 1;
+  fetchPosts();
+  input.focus();
+}
+
+// Check for ?search= URL param
+var urlSearch = new URLSearchParams(window.location.search).get('search');
+if (urlSearch) {
+  searchQuery = urlSearch;
+  document.getElementById('searchInput').value = urlSearch;
+  document.getElementById('searchClear').style.display = '';
+}
+
+// Initial load
+fetchPosts();
+
+// Mobile menu close on link click
+document.querySelectorAll('.mobile-menu a').forEach(function(a) {
+  a.addEventListener('click', function() {
+    document.getElementById('mobileMenu').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  });
+});
+
+// Donate modal
+var donateAmount = 108;
+function setDonateAmount(amt) {
+  donateAmount = amt;
+  document.querySelectorAll('.tier-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+}
+function openDonate() {
+  document.getElementById('donateOverlay').classList.add('open');
+}
+function closeDonate() {
+  document.getElementById('donateOverlay').classList.remove('open');
+}
+function window.open('https://square.link/u/PLACEHOLDER','_blank') {
+  closeDonate();
+  alert('Thank you for your donation of $' + donateAmount + '. In production, this would process via Square.');
+}
+function closeMobileMenu() {
+  var menu = document.getElementById('mobileMenu');
+  var ham = document.getElementById('hamburger');
+  if (menu) menu.classList.remove('open');
+  if (ham) ham.classList.remove('open');
+}
+</script>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-modal-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-modal-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-modal-body">
+      <div class="donate-tiers" id="donateTiers">
+        <button class="tier-btn" onclick="setDonateAmount(25)">$25</button>
+        <button class="tier-btn" onclick="setDonateAmount(50)">$50</button>
+        <button class="tier-btn active" onclick="setDonateAmount(108)">$108</button>
+        <button class="tier-btn" onclick="setDonateAmount(200)">$200</button>
+      </div>
+      <div class="donate-amount-label">One-time donation</div>
+      <div class="donate-field">
+        <label>Name</label>
+        <input type="text" placeholder="Your full name">
+      </div>
+      <div class="donate-field">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="donate-field">
+        <label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs &amp; Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="window.open('https://square.link/u/PLACEHOLDER','_blank')">Donate via Square</button>
+      <div class="donate-alt">
+        Or send Interac E-Transfer to <strong>payment@saltspringcentre.com</strong>
+      </div>
+    </div>
+    <div class="donate-modal-footer">
+      This is a prototype. In production, this connects to Square for secure payment.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

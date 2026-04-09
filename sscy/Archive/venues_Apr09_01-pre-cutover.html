@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent))window.location.href='m/venues.html';</script>
+<title>Our Venues | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Inspiring spaces for retreats, workshops, and gatherings at the Salt Spring Centre of Yoga. Satsang Room, Garden House, Pond Dome, and Sauna.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; } }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 24px; }
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* STICKY NAV */
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); }
+.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav-links { position: absolute; right: 32px; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transition: color 0.2s ease, background 0.2s ease; }
+.sticky-nav-links a:hover { color: var(--teal-dark); background: var(--cream-warm); }
+
+/* HERO */
+.hero { height: 50vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.hero-img { position: absolute; top: -15%; left: 0; width: 100%; height: 130%; object-fit: cover; will-change: transform; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.5) 100%); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); max-width: 700px; padding: 0 32px; }
+.hero-content h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 20px rgba(0,0,0,0.3); margin-bottom: 16px; }
+.hero-content p { font-size: 1.1rem; color: rgba(255,255,255,0.9); text-align: center; line-height: 1.7; text-shadow: 0 1px 8px rgba(0,0,0,0.3); }
+
+/* FILTER KEYS */
+.filter-keys { display: flex; justify-content: center; gap: 0; }
+.filter-key { flex: 1; max-width: 280px; padding: 18px 12px; text-align: center; font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 600; color: var(--white); text-decoration: none; letter-spacing: 0.03em; transition: opacity 0.2s ease; }
+.filter-key:hover { opacity: 0.85; }
+
+/* OFFERING SECTIONS */
+.offering-section { padding: 80px 32px; }
+.offering-section:nth-child(even) { background: var(--white); }
+.offering-header { text-align: center; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto; }
+.offering-header .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.offering-header h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 16px; }
+.offering-header p { font-size: 1.02rem; line-height: 1.85; color: var(--text); margin-bottom: 1em; }
+
+/* FEATURE LIST */
+.feature-list { list-style: none; max-width: 800px; margin: 0 auto 1.5em; }
+.feature-list li { padding: 6px 0; font-size: 0.95rem; line-height: 1.7; color: var(--text); position: relative; padding-left: 20px; }
+.feature-list li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+
+/* OFFERING CARDS */
+.offering-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+.offering-card { background: var(--white); border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.offering-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.offering-card h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 8px; }
+.offering-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; margin-bottom: 8px; text-align: left; }
+
+/* PRICING BOX */
+.pricing-box { max-width: 800px; margin: 0 auto; background: var(--cream-warm); border-radius: 12px; padding: 32px; text-align: center; }
+.pricing-box h3 { font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 600; color: var(--teal-deep); margin-bottom: 12px; }
+.pricing-box p { font-size: 1.02rem; line-height: 1.85; color: var(--text); margin-bottom: 0.5em; text-align: center; }
+
+/* RULES LIST */
+.rules-list { list-style: none; max-width: 600px; margin: 16px auto 0; text-align: left; }
+.rules-list li { padding: 4px 0; font-size: 0.92rem; line-height: 1.7; color: var(--text); position: relative; padding-left: 20px; }
+.rules-list li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+
+/* WAVE DIVIDER */
+.wave-divider { width: 100%; overflow: hidden; line-height: 0; }
+.wave-divider svg { display: block; width: 100%; height: 60px; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; padding: 14px 36px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: 0.25s ease; cursor: pointer; border: none; letter-spacing: 0.04em; }
+.btn-teal { background: var(--teal); color: var(--white); }
+.btn-teal:hover { background: var(--teal-dark); color: var(--white); }
+.btn-outline { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal); }
+.btn-outline:hover { background: var(--teal); color: var(--white); }
+
+/* CTA SECTION */
+.cta-section { background: linear-gradient(135deg, var(--teal-deep) 0%, var(--teal-dark) 100%); padding: 80px 32px; text-align: center; color: var(--white); }
+.cta-section h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--white); margin-bottom: 16px; }
+.cta-section p { font-size: 1.02rem; line-height: 1.85; color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto 24px; text-align: center; }
+.cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.cta-section .btn-primary { background: var(--white); color: var(--teal-deep); font-weight: 700; }
+.cta-section .btn-primary:hover { background: var(--cream); }
+.cta-section .btn-outline-light { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.4); }
+.cta-section .btn-outline-light:hover { background: rgba(255,255,255,0.15); }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* HAMBURGER */
+.hamburger { display: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s ease; border-radius: 2px; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MOBILE MENU */
+.mobile-menu { display: none; position: fixed; top: 89px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 85; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 12px 24px; text-decoration: none; transition: 0.2s; letter-spacing: 0.03em; }
+.mobile-menu a:hover { color: var(--teal); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .offering-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .filter-keys { flex-wrap: wrap; }
+  .filter-key { min-width: 50%; }
+}
+@media (max-width: 768px) {
+  body { font-size: 16px; }
+  .sticky-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+  .sticky-nav-inner { padding: 0 16px; height: 48px; display: flex; align-items: center; width: 100%; }
+  .sticky-nav-links { display: none; }
+  .sn-logo-wrap { position: static !important; transform: none !important; opacity: 1 !important; }
+  .sn-logo { height: 36px !important; }
+  .hamburger { display: block; background: none; border: none; cursor: pointer; padding: 8px; margin-left: auto; }
+  .mobile-menu { top: 49px; z-index: 199; }
+  .hero { height: 40vh; margin-top: 49px; }
+  .hero-content h1 { font-size: 1.6rem; }
+  .hero-content p { font-size: 0.88rem; }
+  .offering-section { padding: 48px 16px; }
+  .offering-header h2 { font-size: 1.4rem; }
+  .offering-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .cta-section { padding: 48px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <div class="sn-logo-wrap"><a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a></div>
+    <div class="sticky-nav-links">
+      <a href="calendar.html">Calendar</a>
+      <a href="shop.html">Shop</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="about.html">About</a>
+      <a href="rentals.html">Rentals</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu" onclick="document.getElementById('mobileMenu').classList.toggle('open');this.classList.toggle('open');">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="offerings.html">Offerings</a>
+  <a href="calendar.html">Calendar</a>
+  <a href="shop.html">Shop</a>
+  <a href="about.html">About</a>
+  <a href="rentals.html">Rentals</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Garden House yoga studio at the Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Our Venues</h1>
+    <p>Inspiring spaces for retreats, workshops, and gatherings.</p>
+  </div>
+</section>
+
+<!-- FILTER KEYS -->
+<div class="filter-keys">
+  <a href="#satsang" class="filter-key" style="background:#1b6c5e;">Satsang Room</a>
+  <a href="#garden" class="filter-key" style="background:#4b9e8e;">Garden House</a>
+  <a href="#pond" class="filter-key" style="background:#d3b84c;">Pond Dome</a>
+  <a href="#sauna" class="filter-key" style="background:#a78a30;">The Sauna</a>
+</div>
+
+<!-- ============================================ -->
+<!-- 1. PROGRAM HOUSE & SATSANG ROOM -->
+<!-- ============================================ -->
+<section class="offering-section" id="satsang">
+  <div class="offering-header reveal">
+    <span class="label">Primary Venue</span>
+    <h2>Program House &amp; Satsang Room</h2>
+    <p>The hub of Centre life and the primary facility for many popular programs. A heritage house featuring guest rooms, library, dining facilities, and the main yoga space.</p>
+  </div>
+  <ul class="feature-list reveal d1">
+    <li>1,290 sq ft hardwood yoga and Satsang space with wood stove</li>
+    <li>Beautifully appointed library</li>
+    <li>Dining facilities and tea bar</li>
+    <li>Guest rooms</li>
+  </ul>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider" style="background:var(--cream);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream-warm);"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- 2. GARDEN HOUSE & YOGA STUDIO -->
+<!-- ============================================ -->
+<section class="offering-section" id="garden" style="background:var(--cream-warm);">
+  <div class="offering-header reveal">
+    <span class="label">Intimate Space</span>
+    <h2>Garden House &amp; Yoga Studio</h2>
+    <p>The perfect cozy venue for your next retreat or meeting, nestled between Centre gardens and temples.</p>
+  </div>
+  <ul class="feature-list reveal d1">
+    <li>525 sq ft carpeted yoga space</li>
+    <li>5 guest rooms accommodating up to 9 people</li>
+    <li>Free wifi, yoga props (mats, blankets, cushions, blocks)</li>
+    <li>Tea bar access</li>
+  </ul>
+  <div class="offering-grid reveal d2">
+    <div class="offering-card">
+      <h3>Lavender Room</h3>
+      <p>Bright and welcoming space with garden views.</p>
+    </div>
+    <div class="offering-card">
+      <h3>Ganesha Room</h3>
+      <p>Cozy room with warm, natural light.</p>
+    </div>
+    <div class="offering-card">
+      <h3>Fountain Room</h3>
+      <p>Peaceful room overlooking the fountain garden.</p>
+    </div>
+    <div class="offering-card">
+      <h3>View Room</h3>
+      <p>A quiet corner with a desk and views over the grounds.</p>
+    </div>
+  </div>
+</section>
+
+<div class="wave-divider" style="background:var(--cream-warm);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- 3. THE POND DOME -->
+<!-- ============================================ -->
+<section class="offering-section" id="pond">
+  <div class="offering-header reveal">
+    <span class="label">Outdoor Venue</span>
+    <h2>The Pond Dome</h2>
+    <p>An open-air covered venue set beside the Centre's pond. Used for concerts, ceremonies, and warm-weather gatherings.</p>
+  </div>
+</section>
+
+<!-- WAVE -->
+<div class="wave-divider" style="background:var(--cream);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--cream-warm);"><path d="M0,20 C360,60 1080,0 1440,40 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- 4. THE SAUNA -->
+<!-- ============================================ -->
+<section class="offering-section" id="sauna" style="background:var(--cream-warm);">
+  <div class="offering-header reveal">
+    <span class="label">Wood-Fired</span>
+    <h2>The Sauna</h2>
+    <p>A wood-fired sauna available for individual and group rentals.</p>
+  </div>
+  <div class="pricing-box reveal d1">
+    <h3>Pricing</h3>
+    <p>$100 per 2-hour session, plus tax (2-8 people). Each additional hour: $50.</p>
+  </div>
+  <ul class="rules-list reveal d2" style="margin-top:24px;">
+    <li>Bathing suit or shorts required</li>
+    <li>No alcohol, smoking, or illegal drugs</li>
+    <li>Guests under 18 must have adult supervision</li>
+    <li>Quiet hours begin at 9 PM</li>
+    <li>Minimum 1 week advance notice</li>
+    <li>Unavailable during fire bans</li>
+  </ul>
+</section>
+
+<div class="wave-divider" style="background:var(--cream-warm);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--teal-deep);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- ============================================ -->
+<!-- CTA -->
+<!-- ============================================ -->
+<section class="cta-section">
+  <h2 class="reveal">Host Your Event</h2>
+  <p class="reveal d1">Contact us to discuss availability and pricing for your retreat, workshop, or gathering.</p>
+  <div class="cta-buttons reveal d2">
+    <a href="rentals.html" class="btn btn-primary">Inquire About Rentals</a>
+    <a href="mailto:info@saltspringcentre.com?subject=Catering%20Inquiry" class="btn btn-outline-light">Centre-Catered Meals</a>
+  </div>
+</section>
+
+<!-- WAVE TO FOOTER -->
+<div class="wave-divider" style="background:var(--teal-deep);">
+  <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="fill:var(--charcoal);"><path d="M0,0 C480,60 960,20 1440,50 L1440,60 L0,60 Z"/></svg>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="offerings.html">Offerings</a>
+        <a href="about.html">About</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="shop.html">Shop</a>
+        <a href="rentals.html">Rentals</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="offerings.html#karma">Karma Yoga</a>
+        <a href="offerings.html#ytt">Teacher Training</a>
+        <a href="offerings.html#wellness">Wellness</a>
+        <a href="offerings.html#satsang">Satsang</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation Policy</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// Hero parallax (desktop only)
+var heroImg = document.getElementById('heroImg');
+if (window.innerWidth > 768) {
+  window.addEventListener('scroll', function() {
+    var s = window.scrollY;
+    heroImg.style.transform = 'translateY(' + (s * 0.2) + 'px)';
+  });
+}
+
+// Scroll reveals (IntersectionObserver)
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+    else e.target.classList.remove('in-view');
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
+
+// Mobile menu close on link click
+document.querySelectorAll('.mobile-menu a').forEach(function(a) {
+  a.addEventListener('click', function() {
+    document.getElementById('mobileMenu').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent))window.location.href='m/index.html';</script>
+<title>Salt Spring Centre of Yoga</title>
+<meta name="description" content="A 69-acre sanctuary for peace, yoga practice, and community on Salt Spring Island, BC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; } }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; font-size: 24px; }
+html { overflow-x: hidden; }
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* NAV */
+/* Hero logo - floats over hero, then joins sticky nav */
+.hero-top-logo { position: fixed; top: 16px; left: 32px; z-index: 100; height: 52px; transition: opacity 0.2s ease; }
+.hero-top-logo.hidden { opacity: 0; pointer-events: none; }
+.nav-links a { padding: 10px 20px; font-size: 0.92rem; font-weight: 500; color: var(--text-light); border-radius: 50px; transition: 0.25s ease; }
+.nav-links a:hover { background: var(--cream-warm); color: var(--teal-dark); }
+
+/* STICKY NAV BAR - sits below hero, locks to top on scroll */
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); opacity: 0; }
+.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav-links { position: absolute; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transform-style: preserve-3d; transition: color 0.2s ease, background 0.2s ease, box-shadow 0.3s ease; will-change: transform; }
+.sticky-nav-links a:hover { color: var(--teal-dark); }
+
+/* HERO */
+.hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.orbit-section { overflow: visible; }
+.hero-img { position: absolute; top: -5%; left: 0; width: 100%; height: 110%; object-fit: cover; will-change: transform, filter; transition: filter 0.1s linear; }
+.hero-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.18); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); opacity: 0; transform: scale(0.96); transition: all 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.hero-content.visible { opacity: 1; transform: scale(1); }
+.hero-logo { width: clamp(380px, 60vw, 720px); color: var(--white); filter: drop-shadow(0 2px 16px rgba(0,0,0,0.3)); margin-top: -130px; transition: transform 0.15s ease, filter 0.15s ease; transform-style: preserve-3d; }
+
+/* BABAJI Q&A */
+.babaji-qa { background: var(--charcoal); color: var(--white); padding: 52px 32px; }
+.qa-wrap { max-width: 860px; margin: 0 auto; display: flex; align-items: flex-start; gap: 24px; position: relative; min-height: 240px; }
+.qa-refresh { flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: 0.3s ease; order: -1; align-self: center; }
+.qa-refresh:hover { opacity: 1; border-color: var(--gold); background: rgba(255,255,255,0.08); transform: rotate(180deg); }
+.qa-refresh svg { width: 28px; height: 28px; }
+.qa-photo { flex-shrink: 0; width: 180px; height: 220px; border-radius: 16px; object-fit: cover; object-position: center top; border: 3px solid rgba(255,255,255,0.1); align-self: flex-start; }
+.qa-inner { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; min-height: 200px; }
+.qa-label { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 500; text-transform: none; letter-spacing: 0.02em; color: var(--gold); display: block; margin-bottom: 10px; }
+.qa-question { font-size: 1.15rem; font-weight: 400; opacity: 0.6; margin-bottom: 8px; font-style: italic; text-align: justify; text-justify: inter-word; line-height: 1.4; }
+.qa-answer { font-size: 1.35rem; font-weight: 500; line-height: 1.35; color: var(--white); text-align: justify; text-justify: inter-word; }
+.qa-bottom { display: flex; align-items: center; margin-top: 10px; }
+.qa-date { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.4; }
+
+/* MUSIC FOR PEACE BANNER */
+.mfp-banner { display: flex; text-decoration: none; color: var(--white); cursor: pointer; background: var(--teal-deep); overflow: hidden; transition: background 0.3s ease; }
+.mfp-banner:hover { background: #174e46; }
+.mfp-img-wrap { flex-shrink: 0; width: 200px; overflow: hidden; position: relative; }
+.mfp-img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 175%; height: auto; min-height: 175%; object-fit: cover; transition: transform 0.6s ease; }
+.mfp-banner:hover .mfp-img { transform: translate(-50%, -50%) scale(1.06); }
+.mfp-content { flex: 1; display: flex; align-items: center; padding: 36px 48px; gap: 32px; }
+.mfp-text { flex: 1; }
+.mfp-series { font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--gold); margin-bottom: 12px; display: block; }
+.mfp-title { font-family: 'Cinzel', serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 600; color: var(--white); line-height: 1.2; margin-bottom: 12px; }
+.mfp-artists { font-size: 1.3rem; opacity: 0.75; margin-bottom: 20px; font-weight: 400; }
+.mfp-details { display: flex; gap: 32px; font-size: 1.05rem; font-weight: 500; opacity: 0.6; letter-spacing: 0.04em; }
+.mfp-cta-wrap { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mfp-events-link { font-size: 0.88rem; color: rgba(255,255,255,0.6); cursor: pointer; transition: color 0.25s ease; letter-spacing: 0.03em; }
+.mfp-events-link:hover { color: var(--gold); }
+.mfp-cta { display: inline-block; padding: 18px 44px; border-radius: 50px; background: var(--terracotta); color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em; transition: background 0.25s ease, transform 0.2s ease; white-space: nowrap; }
+.mfp-banner:hover .mfp-cta { background: #a8632e; transform: translateY(-2px); }
+@media (max-width: 768px) { .mfp-img-wrap { width: 160px; } .mfp-content { padding: 24px 20px; gap: 20px; flex-direction: column; align-items: flex-start; } .mfp-cta-wrap { align-self: flex-start; } }
+
+/* ABOUT HERO - FULL BLEED */
+.about-hero { position: relative; min-height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: flex-start; }
+.about-hero-img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.about-hero-overlay { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%); }
+.about-hero-content { position: relative; z-index: 2; color: var(--white); max-width: 600px; padding: 80px 64px; }
+.about-hero-content h2 { font-size: clamp(2.2rem, 5vw, 3.4rem); color: var(--white); margin-bottom: 24px; }
+.about-hero-content p { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.2em; opacity: 0.9; color: var(--white); }
+@media (max-width: 768px) { .about-hero-content { padding: 48px 24px; max-width: 100%; } .about-hero { min-height: 80vh; } }
+
+/* QUICK LINKS - KEYS */
+.quick-links { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; }
+.quick-link { display: flex; align-items: center; justify-content: center; padding: 32px 12px; font-size: 0.88rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; }
+.quick-link:nth-child(1) { background: #1b6c5e; }
+.quick-link:nth-child(2) { background: #2e7e6f; }
+.quick-link:nth-child(3) { background: #4b9e8e; }
+.quick-link:nth-child(4) { background: #7ecbb7; }
+.quick-link:nth-child(5) { background: #e6d798; }
+.quick-link:nth-child(6) { background: #d3b84c; }
+.quick-link:nth-child(7) { background: #be9f31; }
+.quick-link:nth-child(8) { background: #a78a30; }
+.quick-link::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.quick-link:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.quick-link:hover::after { height: 100%; }
+.quick-link:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
+.quick-links.sticky { position: sticky; top: 89px; z-index: 80; }
+.quick-link.entered { animation: keyPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: calc(var(--i) * 0.07s); opacity: 0; transform: scaleY(0.5); }
+@keyframes keyPop { to { opacity: 1; transform: scaleY(1); } }
+
+/* FULL-BLEED IMAGE WITH PARALLAX */
+.parallax-frame { position: relative; overflow: hidden; height: 70vh; }
+.parallax-frame img { position: absolute; top: -15%; left: 0; width: 100%; height: 130%; object-fit: cover; will-change: transform; }
+.parallax-frame.short { height: 50vh; }
+
+/* TEXT SECTION */
+.text-section { max-width: 640px; margin: 0 auto; padding: 96px 32px; position: relative; }
+.text-section h2 { font-size: 2.6rem; margin-bottom: 24px; color: var(--teal-deep); }
+.text-section .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.text-section p { font-size: 1.05rem; color: var(--text); line-height: 1.85; margin-bottom: 1.3em; }
+
+/* FLOATING QUOTE - pops up between sections */
+.float-quote { text-align: center; padding: 72px 32px; background: var(--cream-warm); position: relative; overflow: hidden; }
+.float-quote::before { content: '\201C'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; font-size: 12rem; color: var(--teal); opacity: 0.06; line-height: 1; pointer-events: none; }
+.float-quote blockquote { font-family: 'Cinzel', serif; font-size: clamp(1.3rem, 3vw, 1.8rem); color: var(--teal-deep); max-width: 580px; margin: 0 auto 16px; line-height: 1.5; font-weight: 500; position: relative; }
+.float-quote cite { font-size: 0.82rem; color: var(--text-light); font-style: normal; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* SPLIT SECTION */
+.split { display: grid; grid-template-columns: 1fr 1fr; min-height: 75vh; }
+.split.reverse .split-img { order: 2; }
+.split.reverse .split-text { order: 1; }
+.split-img { position: relative; overflow: hidden; }
+.split-img img { position: absolute; top: -10%; left: 0; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.split-text { display: flex; align-items: center; padding: 72px 64px; }
+.split-text-inner { max-width: 420px; }
+.split-text h2 { font-size: 2.2rem; margin-bottom: 20px; color: var(--teal-deep); }
+.split-text .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.split-text p { font-size: 1.02rem; line-height: 1.85; margin-bottom: 1em; }
+.split-text a.text-link { display: inline-block; margin-top: 16px; font-weight: 500; font-size: 0.88rem; color: var(--teal-dark); }
+.split-text a.text-link::after { content: ' \2192'; }
+
+
+/* HORIZONTAL SCROLL STRIP */
+.scroll-strip { overflow-x: auto; overflow-y: hidden; display: flex; gap: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; padding: 4px 0; }
+.scroll-strip:active { cursor: grabbing; }
+.scroll-strip img { height: 40vh; min-width: 40vh; object-fit: cover; scroll-snap-align: start; flex-shrink: 0; border-radius: 0; transition: transform 0.4s ease; }
+.scroll-strip img:hover { transform: scale(1.02); }
+.scroll-strip::-webkit-scrollbar { height: 4px; }
+.scroll-strip::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
+
+/* STATS - count up */
+.stats-bar { display: flex; justify-content: center; gap: 72px; padding: 64px 24px; background: var(--teal-deep); color: var(--white); }
+.stat-item { text-align: center; }
+.stat-num { font-family: 'Cinzel', serif; font-size: 3.4rem; font-weight: 600; color: var(--gold); line-height: 1; }
+.stat-lbl { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.5; margin-top: 6px; }
+
+/* OFFERINGS - tilt cards */
+.offerings-section { padding: 100px 24px; background: var(--white); }
+.offerings-section h2 { text-align: center; font-size: 2.6rem; color: var(--teal-deep); margin-bottom: 56px; }
+.offerings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1080px; margin: 0 auto; }
+.offering-card { position: relative; border-radius: 24px; overflow: hidden; aspect-ratio: 3/4; cursor: pointer; display: block; color: var(--white); text-decoration: none; transition: transform 0.4s ease, box-shadow 0.4s ease; transform-style: preserve-3d; }
+.offering-card:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.offering-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s ease; }
+.offering-card:hover img { transform: scale(1.06); }
+.offering-card-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px 28px; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%); transition: padding 0.4s ease; }
+.offering-card:hover .offering-card-overlay { padding-bottom: 48px; }
+.offering-card-overlay .label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; margin-bottom: 6px; }
+.offering-card-overlay h3 { font-family: 'Cinzel', serif; font-size: 1.3rem; color: var(--white); font-weight: 500; }
+
+/* PARTNERS */
+.partners-section { padding: 72px 24px; text-align: center; }
+.partners-section h2 { font-size: 1.8rem; color: var(--teal-deep); margin-bottom: 8px; }
+.partners-section .sub { color: var(--text-light); font-size: 0.9rem; margin-bottom: 36px; }
+.partners-row { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+.partner-link { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--teal-dark); transition: 0.25s ease; }
+.partner-link:hover { color: var(--teal); }
+
+/* DONATE */
+.donate-section { text-align: center; padding: 100px 24px; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); color: var(--white); position: relative; overflow: hidden; }
+.donate-section::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; border-radius: 50%; background: rgba(255,255,255,0.03); pointer-events: none; }
+.donate-section h2 { font-size: 2.6rem; color: var(--white); margin-bottom: 16px; }
+.donate-section p { max-width: 480px; margin: 0 auto 40px; opacity: 0.75; font-size: 1.05rem; line-height: 1.8; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; padding: 14px 36px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: 0.25s ease; cursor: pointer; border: none; letter-spacing: 0.04em; }
+.btn-donate { background: var(--terracotta); color: var(--white); }
+.btn-donate:hover { background: #a8632e; color: var(--white); }
+.btn-outline-light { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.4); }
+.btn-outline-light:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-left { opacity: 0; transform: translateX(-50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal-right { opacity: 0; transform: translateX(50px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view, .reveal-left.in-view, .reveal-right.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+/* LOTUS WATERMARK */
+.lotus-mark { position: absolute; right: -40px; top: 50%; transform: translateY(-50%); width: 200px; opacity: 0.04; pointer-events: none; }
+
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* HAMBURGER */
+.hamburger { display: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s ease; border-radius: 2px; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MOBILE MENU */
+.mobile-menu { display: none; position: fixed; top: 89px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 85; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 12px 24px; text-decoration: none; transition: 0.2s; letter-spacing: 0.03em; }
+.mobile-menu a:hover { color: var(--teal); }
+.mobile-menu .mobile-donate { background: var(--teal); color: var(--white); border-radius: 50px; padding: 14px 40px; margin-top: 16px; font-family: 'Archivo Narrow', sans-serif; font-weight: 600; font-size: 1rem; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; min-height: auto; }
+  .split.reverse .split-img { order: 0; }
+  .split.reverse .split-text { order: 0; }
+  .split-img { position: relative; height: 50vh; }
+  .split-img img { position: absolute; top: 0; height: 100%; }
+  .split-text { padding: 56px 28px; }
+  .offerings-grid { grid-template-columns: 1fr; max-width: 360px; }
+  .parallax-frame { height: 50vh; }
+  .stats-bar { gap: 36px; flex-wrap: wrap; padding: 44px 24px; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .quick-links { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 768px) {
+  body { font-size: 16px; overflow-x: hidden; }
+  html { overflow-x: hidden; }
+  /* Nav: fixed at top on mobile */
+  .sticky-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+  .sticky-nav-inner { padding: 0 16px; height: 48px; display: flex; align-items: center; width: 100%; }
+  .sticky-nav-links { display: none !important; position: static !important; width: 0 !important; overflow: hidden !important; }
+  .nav-links { display: none; }
+  .sn-logo-wrap { position: static !important; left: auto !important; top: auto !important; transform: none !important; opacity: 1 !important; }
+  .sn-logo { height: 36px !important; }
+  .hamburger { display: block; background: none; border: none; cursor: pointer; padding: 12px; margin-left: auto; margin-right: 4px; }
+  .mobile-menu { top: 49px; z-index: 199; }
+  .hero-top-logo { display: none; }
+  /* Hero: fills screen below nav */
+  .hero { height: 100vh; height: 100dvh; margin-top: 0; padding-top: 49px; overflow: hidden; }
+  .hero-img { top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; transform: none !important; filter: none !important; }
+  .hero-content h1 { font-size: 1.6rem; }
+  .hero-logo { width: clamp(200px, 60vw, 320px) !important; margin-top: -30px !important; }
+  .hero-content { opacity: 1 !important; transform: none !important; }
+  .hz { display: none; }
+  .babaji-qa { padding: 32px 16px; }
+  .qa-wrap { flex-direction: column; text-align: center; gap: 16px; }
+  .qa-photo { width: 120px; height: 150px; }
+  .qa-refresh { width: 48px; height: 48px; }
+  .qa-answer { font-size: 1.1rem; }
+  .qa-question { font-size: 0.95rem; }
+  .mfp-banner { flex-direction: column; }
+  .mfp-img-wrap { width: 100%; height: 200px; }
+  .mfp-content { padding: 24px 16px; }
+  .mfp-title { font-size: 1.4rem; }
+  .about-hero { min-height: 60vh; }
+  .about-hero-content { padding: 32px 16px; }
+  .about-hero-content h2 { font-size: 1.6rem; }
+  .quick-links { grid-template-columns: repeat(4, 1fr); }
+  .quick-link { padding: 6px 4px; font-size: 0.58rem; }
+  .quick-links.sticky { top: 49px; z-index: 79; }
+  .text-section { padding: 48px 16px; }
+  .text-section h2, .split-text h2 { font-size: 1.5rem; }
+  .split-text { padding: 40px 16px; }
+  .split-text-inner { max-width: 100%; }
+  .float-quote { padding: 48px 16px; }
+  .float-quote blockquote { font-size: 1.1rem; }
+  .stats-bar { padding: 32px 16px; }
+  .stat-num { font-size: 2rem; }
+  .offerings-grid { grid-template-columns: 1fr; max-width: 100%; padding: 0 16px; }
+  .donate-section { padding: 64px 16px; }
+  .donate-section h2 { font-size: 1.8rem; }
+  .scroll-strip img { height: 25vh; min-width: 25vh; }
+  .footer-inner { padding: 0; }
+}
+
+/* HOT ZONES */
+.hz {
+  position: absolute; z-index: 6; width: 450px; height: 450px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; cursor: pointer; opacity: 0;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease, opacity 0.8s ease;
+  pointer-events: none;
+}
+.hz.visible { pointer-events: auto; }
+.hz:hover { transform: scale(1.1); background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); }
+#hz0 { top: 3%; left: calc(20% - 175px); }
+#hz1 { top: 3%; right: calc(20% - 175px); }
+#hz2 { bottom: calc(3% - 50px); left: calc(20% - 175px); }
+#hz3 { bottom: calc(3% - 50px); right: calc(20% - 175px); }
+.hz-icon { font-size: 5.4rem; margin-bottom: 10px; opacity: 0.85; line-height: 1; }
+.hz-icon svg { width: 80px; height: 80px; }
+.hz-label { font-size: 2.16rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* DONATE MODAL */
+.donate-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 24px; }
+.donate-overlay.open { opacity: 1; pointer-events: auto; }
+.donate-modal { background: var(--white); border-radius: 12px; max-width: 440px; width: 100%; overflow: hidden; transform: translateY(20px); transition: transform 0.3s ease; }
+.donate-overlay.open .donate-modal { transform: translateY(0); }
+.donate-modal-header { background: linear-gradient(135deg, var(--teal-deep), var(--teal-dark)); color: var(--white); padding: 28px 32px; position: relative; }
+.donate-modal-header h3 { font-family: 'Cinzel', serif; font-size: 1.4rem; margin-bottom: 4px; }
+.donate-modal-header p { font-size: 0.85rem; opacity: 0.8; }
+.donate-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--white); font-size: 1.4rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; line-height: 1; }
+.donate-modal-close:hover { opacity: 1; }
+.donate-modal-body { padding: 28px 32px; }
+.donate-tiers { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+.tier-btn { padding: 12px 20px; border: 2px solid rgba(0,0,0,0.12); background: var(--white); border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 600; color: var(--text); transition: 0.3s ease; min-width: 70px; }
+.tier-btn:hover { border-color: var(--teal); color: var(--teal-dark); }
+.tier-btn.active { background: var(--teal); color: var(--white); border-color: var(--teal); }
+.donate-amount-label { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; text-align: center; margin-bottom: 20px; }
+.donate-field { margin-bottom: 16px; }
+.donate-field label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin-bottom: 6px; }
+.donate-field input, .donate-field select { width: 100%; padding: 10px 14px; border: 1px solid rgba(0,0,0,0.15); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.9rem; transition: border-color 0.2s; }
+.donate-field input:focus, .donate-field select:focus { outline: none; border-color: var(--teal); }
+.donate-submit { width: 100%; background: var(--terracotta); color: var(--white); border: none; padding: 14px; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; transition: 0.3s ease; margin-top: 8px; }
+.donate-submit:hover { background: #a8632e; }
+.donate-alt { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.08); font-size: 0.8rem; color: var(--text-light); text-align: center; }
+.donate-alt strong { color: var(--text); }
+.donate-modal-footer { padding: 0 32px 24px; text-align: center; font-size: 0.72rem; color: var(--text-light); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/11/sscy_hero.jpg" alt="Salt Spring Centre of Yoga" class="hero-img" id="heroImg">
+  <div class="hero-overlay"></div>
+  <a href="index.html"><img src="logo-full-white.svg" alt="Salt Spring Centre of Yoga" class="hero-top-logo"></a>
+  <div class="hero-content" id="heroText">
+    <img src="logo-text-h-white.svg" alt="The Salt Spring Centre of Yoga" class="hero-logo">
+  </div>
+  <!-- HOT ZONES -->
+  <div class="hz" id="hz0" onclick="location.href='offerings.html'" data-x="0" data-y="0">
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#3bb8a8"/></svg></div>
+    <div class="hz-label">Find Peace</div>
+  </div>
+  <div class="hz" id="hz1" onclick="location.href='offerings.html#ytt'" data-x="1" data-y="0">
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20" fill="#c9a84c"/></svg></div>
+    <div class="hz-label">Learn</div>
+  </div>
+  <div class="hz" id="hz2" onclick="location.href='shop.html'" data-x="0" data-y="1">
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12" fill="#c17838"/></svg></div>
+    <div class="hz-label">Give Back</div>
+  </div>
+  <div class="hz" id="hz3" onclick="location.href='rentals.html'" data-x="1" data-y="1">
+    <div class="hz-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2" fill="#2a8a7d"/></svg></div>
+    <div class="hz-label">Host</div>
+  </div>
+</section>
+
+
+<!-- STICKY NAV - sits below hero, sticks to top on scroll -->
+<nav class="sticky-nav" id="stickyNav">
+  <div class="sticky-nav-inner">
+    <div class="sn-logo-wrap"><a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a></div>
+    <div class="sticky-nav-links">
+      <a href="calendar.html">Calendar</a>
+      <a href="shop.html">Shop</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="about.html">About</a>
+      <a href="rentals.html">Rentals</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu" onclick="document.getElementById('mobileMenu').classList.toggle('open');this.classList.toggle('open');">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="offerings.html">Offerings</a>
+  <a href="calendar.html">Calendar</a>
+  <a href="shop.html">Shop</a>
+  <a href="about.html">About</a>
+  <a href="rentals.html">Rentals</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="#" class="mobile-donate" onclick="event.preventDefault();closeMobileMenu();openDonate();">Donate</a>
+</div>
+
+<!-- BABAJI Q&A -->
+<div class="babaji-qa">
+  <div class="qa-wrap">
+    <button class="qa-refresh" onclick="showQA()" aria-label="Next quote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </button>
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-w-Chalkboard-1970s.jpg" alt="Baba Hari Dass with chalkboard" class="qa-photo">
+    <div class="qa-inner">
+      <span class="qa-label">From the Chalkboard of Baba Hari Dass</span>
+      <div class="qa-question" id="qaQuestion"></div>
+      <div class="qa-answer" id="qaAnswer"></div>
+      <div class="qa-bottom">
+        <div class="qa-date" id="qaDate"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY ZONE: keys stay pinned through this container -->
+<div class="sticky-zone">
+<!-- QUICK LINKS -->
+<div class="quick-links sticky" id="quickLinks">
+  <a href="calendar.html" class="quick-link" style="--i:0">Calendar</a>
+  <a href="offerings.html#classes" class="quick-link" style="--i:1">Classes</a>
+  <a href="offerings.html#wellness" class="quick-link" style="--i:2">Wellness</a>
+  <a href="shop.html#donate" class="quick-link" style="--i:3">Donate</a>
+  <a href="offerings.html#ytt" class="quick-link" style="--i:4">Teacher Training</a>
+  <a href="offerings.html#karma" class="quick-link" style="--i:5">Karma Yoga</a>
+  <a href="https://saltspringcentre.com/resources/" target="_blank" class="quick-link" style="--i:6">Resources</a>
+  <a href="blog.html" class="quick-link" style="--i:7">Blog</a>
+</div>
+
+<!-- ============================================ -->
+<!-- EVERYTHING BELOW HERE IS THE FULL REWRITE    -->
+<!-- ============================================ -->
+
+<!-- MUSIC FOR PEACE BANNER -->
+<a href="shop.html" class="mfp-banner">
+  <div class="mfp-img-wrap">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2026/03/Violin-Concert-April-11-2026-Shriram-Rajagopalan.jpg" alt="Carnatic Violin Concert" class="mfp-img" loading="lazy">
+  </div>
+  <div class="mfp-content">
+    <div class="mfp-text">
+      <span class="mfp-series">Music for Peace Concert Series</span>
+      <h2 class="mfp-title">Carnatic Violin &amp; Mridangam</h2>
+      <p class="mfp-artists">Shriram Rajagopalan &bull; Keerthy Raghavan</p>
+      <div class="mfp-details">
+        <span>Saturday, April 11</span>
+        <span>7:00 pm</span>
+        <span>Satsang Room</span>
+      </div>
+    </div>
+    <div class="mfp-cta-wrap">
+      <span class="mfp-cta">Get Tickets &bull; $40</span>
+      <span class="mfp-events-link" onclick="event.preventDefault();event.stopPropagation();location.href='calendar.html';">View All Events</span>
+    </div>
+  </div>
+</a>
+
+<!-- ABOUT - FULL BLEED IMAGE WITH TEXT OVERLAY -->
+<section class="about-hero" id="about">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2025/12/Nature-and-Nurture-Webpage-9.jpg" alt="Salt Spring Centre of Yoga" class="about-hero-img" id="aboutImg" loading="lazy">
+  <div class="about-hero-overlay"></div>
+  <div class="about-hero-content">
+    <span class="label reveal" style="color:var(--gold);">Est. 1981</span>
+    <h2 class="reveal d1">A Rare and Sacred Place</h2>
+    <p class="reveal d2">The Salt Spring Centre of Yoga is a non-profit retreat centre dedicated to teaching the core principles of yoga: peace, resilience, and belonging. Founded by master yogi Baba Hari Dass, the Centre is the west coast of Canada's longest running spiritual and wellness retreat centre.</p>
+    <p class="reveal d3">Whether you are here for a weekend retreat, a yoga immersion, or a full-time karma exchange, the Centre becomes the container you need for deep, challenging, and playful personal work.</p>
+  </div>
+</section>
+
+<!-- FLOATING QUOTE 1 -->
+<section class="float-quote">
+  <blockquote class="reveal">"Work honestly, meditate every day, meet people without fear, and play."</blockquote>
+  <cite class="reveal d1">Baba Hari Dass</cite>
+</section>
+</div><!-- end sticky-zone -->
+
+<!-- SPLIT: The Land -->
+<section class="split">
+  <div class="split-img">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg" alt="Aerial view of the Centre" loading="lazy">
+  </div>
+  <div class="split-text" style="background:var(--white);">
+    <div class="split-text-inner">
+      <span class="label reveal-right">The Land</span>
+      <h2 class="reveal-right d1">69 Acres of Living Sanctuary</h2>
+      <p class="reveal-right d2">An organic farm, fruit orchard, permaculture food forest, pristine streams and ponds, and the Dandaka Forest, one of the most untouched cedar-swamp wetlands in North America.</p>
+      <p class="reveal-right d3">Over 110 species call this land home. The Centre borders the Salt Spring Island Conservancy's Blackburn Lake nature reserve.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HORIZONTAL SCROLL STRIP -->
+<div class="scroll-strip" id="scrollStrip1">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Bumble-Bee-Pollinating-1024x683-1.jpg" alt="Bumblebee" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Pond-Dome-header-1.jpg" alt="Pond Dome" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Hanuman-Shrine.jpg" alt="Hanuman Shrine" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/05/Farm-truck-with-bounty.jpg" alt="Farm harvest" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Fountain.jpg" alt="Fountain" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/apple-variety-scaled-1.jpg" alt="Apple varieties" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Ganesh.jpg" alt="Ganesh" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/serene.jpg" alt="Serene grounds" loading="lazy">
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num" data-target="69">0</div><div class="stat-lbl">Acres</div></div>
+  <div class="stat-item"><div class="stat-num" data-target="45">0</div><div class="stat-lbl">Years</div></div>
+  <div class="stat-item"><div class="stat-num" data-target="52">0</div><div class="stat-lbl">Annual Retreats</div></div>
+  <div class="stat-item"><div class="stat-num" data-target="20" data-suffix="+">0</div><div class="stat-lbl">Programs</div></div>
+</div>
+
+<!-- FOUNDER - SPLIT -->
+<section class="split reverse" id="founder">
+  <div class="split-img" style="display:flex;align-items:center;justify-content:center;background:var(--cream-warm);">
+    <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Baba-Hari-Dass-Shining-Eyes-Square.jpg" alt="Baba Hari Dass" loading="lazy" data-no-parallax style="position:relative;top:auto;left:auto;width:65%;height:auto;border-radius:16px;">
+  </div>
+  <div class="split-text" style="background:var(--cream-warm);">
+    <div class="split-text-inner">
+      <span class="label reveal-left">Our Founder</span>
+      <h2 class="reveal-left d1">Baba Hari Dass</h2>
+      <p class="reveal-left d2">A master yogi and scholar who undertook a vow of silence in 1952 and never spoke another audible word. He communicated by means of a small chalkboard, conveying a great deal in the fewest possible words, and through his deep presence.</p>
+      <p class="reveal-left d3">Babaji left his body on September 25, 2018. His wisdom and his impact lives on in the institutions he inspired, his writings, and all those whose hearts he touched.</p>
+      <a href="https://www.babaharidass.org" target="_blank" rel="noopener" class="text-link reveal-left d4">Learn more about Babaji</a>
+    </div>
+  </div>
+</section>
+
+<!-- FLOATING QUOTE 2 -->
+<section class="float-quote" style="background:var(--cream);">
+  <blockquote class="reveal" id="floatQuote2"></blockquote>
+  <cite class="reveal d1">Baba Hari Dass</cite>
+</section>
+
+<!-- COMMUNITY - FULL BLEED -->
+<section class="about-hero">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/YTT-200-Graduating-class-2019-hero.jpg" alt="Yoga Teacher Training graduating class" class="about-hero-img" loading="lazy">
+  <div class="about-hero-overlay"></div>
+  <div class="about-hero-content">
+    <span class="label reveal" style="color:var(--gold);">What We Offer</span>
+    <h2 class="reveal d1">Practice, Community, Service</h2>
+    <p class="reveal d2">From weekend retreats and 200-hour teacher training to karma yoga residencies and daily classes, the Centre holds space for every stage of the path.</p>
+    <div class="reveal d3" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;">
+      <a href="offerings.html" class="btn btn-donate">Retreats &amp; Programs</a>
+      <a href="rentals.html" class="btn btn-outline-light">Spaces &amp; Venues</a>
+      <a href="shop.html" class="btn btn-outline-light">Shop &amp; Donate</a>
+    </div>
+  </div>
+</section>
+
+<!-- HORIZONTAL SCROLL STRIP 2 -->
+<div class="scroll-strip" id="scrollStrip2">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/Sauna-at-night.jpg" alt="Sauna at night" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/12/Garden-House-yoga-space-empty.jpg" alt="Yoga space" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/05/harvesting-salad.jpg" alt="Harvesting salad" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/people-on-lawn-10.jpg" alt="Community on lawn" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Tree-Pose-in-Boots-scaled-1.jpg" alt="Tree pose" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Grounding-with-music.jpg" alt="Grounding with music" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/03/Organic-Greens-in-Hoop-House-1024x768-1.jpg" alt="Organic greens" loading="lazy">
+  <img src="https://saltspringcentre.com/wp-content/uploads/2022/10/Forest-walk-school-photo.jpg" alt="Forest walk" loading="lazy">
+</div>
+
+<!-- OUR FAMILY -->
+<section class="partners-section reveal" id="partners">
+  <span class="label" style="color:var(--teal);display:block;text-align:center;margin-bottom:14px;">Our Family</span>
+  <h2>Sister Organizations</h2>
+  <p class="sub">Founded through the teachings of Baba Hari Dass, these centres carry forward his vision across the world.</p>
+  <div class="partners-row">
+    <a href="https://www.mountmadonna.org" target="_blank" rel="noopener" class="partner-link">Mount Madonna Center</a>
+    <a href="https://www.sriramashram.org" target="_blank" rel="noopener" class="partner-link">Sri Ram Ashram</a>
+    <a href="https://www.srirampublishing.org" target="_blank" rel="noopener" class="partner-link">Sri Ram Publishing</a>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section class="donate-section">
+  <h2 class="reveal">Support This Sanctuary</h2>
+  <p class="reveal d1">Every donation helps preserve 69 acres of peace for future visitors.</p>
+  <div class="reveal d2" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="#" class="btn btn-donate" onclick="event.preventDefault();openDonate();">Donate Now</a>
+    <a href="shop.html" class="btn btn-outline-light">Visit the Shop</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="offerings.html">Offerings</a>
+        <a href="about.html">About</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="shop.html">Shop</a>
+        <a href="rentals.html">Rentals</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="offerings.html#karma">Karma Yoga</a>
+        <a href="offerings.html#ytt">Teacher Training</a>
+        <a href="offerings.html#wellness">Wellness</a>
+        <a href="offerings.html#satsang">Satsang</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation Policy</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="babaji-qa.js"></script>
+<script>
+// Q&A
+// Filter: single Q&A only, combined length under 280 chars for consistent height
+var shortQas = qas.filter(function(q) {
+  return !Array.isArray(q.q) && (q.q.length + q.a.length) < 280;
+});
+function showQA() {
+  var qa = shortQas[Math.floor(Math.random() * shortQas.length)];
+  var qEl = document.getElementById('qaQuestion');
+  var aEl = document.getElementById('qaAnswer');
+  qEl.textContent = '\u201C' + qa.q + '\u201D';
+  aEl.textContent = qa.a;
+  var dateEl = document.getElementById('qaDate');
+  if (dateEl && qa.d) dateEl.textContent = 'Darshan, ' + qa.d;
+}
+showQA();
+
+// Random floating quote
+var simpleQas = qas.filter(function(q) { return !Array.isArray(q.q) && q.a.length < 120; });
+var rq = simpleQas[Math.floor(Math.random() * simpleQas.length)];
+document.getElementById('floatQuote2').textContent = '\u201C' + rq.a + '\u201D';
+
+// Hero entrance
+setTimeout(function() { document.getElementById('heroText').classList.add('visible'); }, 900);
+
+// Nav + hero blur on scroll (desktop only)
+var isMobile = window.innerWidth <= 768;
+var nav = document.getElementById('siteNav');
+var navLogo = document.getElementById('navLogo');
+var heroImg = document.getElementById('heroImg');
+if (!isMobile) {
+  window.addEventListener('scroll', function() {
+    var s = window.scrollY;
+    var h = window.innerHeight;
+    var blur = Math.min(s / h * 12, 12);
+    heroImg.style.filter = 'blur(' + blur + 'px)';
+    heroImg.style.transform = 'translateY(' + (s * 0.15) + 'px)';
+    var heroContent = document.getElementById('heroText');
+    if (heroContent) {
+      heroContent.style.opacity = Math.max(0, 1 - s / (h * 0.5));
+      heroContent.style.transform = 'scale(' + Math.max(0.9, 1 - s / (h * 5)) + ') translateY(' + (s * 0.2) + 'px)';
+    }
+  });
+}
+
+// Sticky nav - scroll-driven slide
+var stickyNav = document.getElementById('stickyNav');
+var heroTopLogo = document.querySelector('.hero-top-logo');
+var navLinks = document.querySelector('.sticky-nav-links');
+var navLogoWrap = document.querySelector('.sn-logo-wrap');
+var navInner = document.querySelector('.sticky-nav-inner');
+
+// Capture original position before sticky kicks in
+var navPinPoint = stickyNav.offsetTop;
+// Recalc on resize
+window.addEventListener('resize', function() {
+  window.scrollTo(0, 0);
+  navPinPoint = stickyNav.offsetTop;
+});
+
+function checkSticky() {
+  var rect = stickyNav.getBoundingClientRect();
+  var pinned = rect.top <= 0;
+  stickyNav.classList.toggle('pinned', pinned);
+  if (heroTopLogo) heroTopLogo.classList.toggle('hidden', pinned);
+
+  // Calculate how far past the pin point we've scrolled (0 to 1 over 200px)
+  var scrollPast = Math.max(0, Math.min(1, (window.scrollY - navPinPoint) / 200));
+
+  // Slide links: center to right, and compress gap
+  var innerWidth = navInner.offsetWidth;
+  var linksWidth = navLinks.offsetWidth;
+  var centerLeft = (innerWidth - linksWidth) / 2;
+  var rightLeft = innerWidth - linksWidth - 32;
+  var currentLeft = centerLeft + (rightLeft - centerLeft) * scrollPast;
+  navLinks.style.left = currentLeft + 'px';
+
+  // Gap: starts wide (64px), compresses to tight (4px)
+  var gap = 64 - (60 * scrollPast);
+  navLinks.style.gap = gap + 'px';
+
+  // Font size: starts large (1.4rem = ~22px), shrinks to final (0.92rem = ~15px)
+  var fontSize = 1.4 - (0.48 * scrollPast);
+  var padding = 14 + (- 4 * scrollPast); // 14px to 10px vertical
+  var paddingH = 32 - (12 * scrollPast); // 32px to 20px horizontal
+  var letterSpacing = 0.12 - (0.09 * scrollPast); // 0.12em to 0.03em
+  navLinkEls.forEach(function(link) {
+    link.style.fontSize = fontSize + 'rem';
+    link.style.padding = padding + 'px ' + paddingH + 'px';
+    link.style.letterSpacing = letterSpacing + 'em';
+  });
+
+  // Fade logo in (faster, starts earlier)
+  if (navLogoWrap) navLogoWrap.style.opacity = Math.min(1, scrollPast * 3);
+}
+// Per-link scroll-driven entrance
+var navLinkEls = document.querySelectorAll('.sticky-nav-links a');
+var linkEntrances = [
+  { y: 40, x: -30, rot: -12, scale: 0.6 },  // Calendar: drops in from upper-left, spins
+  { y: 60, x: 0,   rot: 8,   scale: 0.5 },  // Shop: rises from below, tilts
+  { y: 30, x: 20,  rot: -6,  scale: 0.7 },  // Offerings: slides from right
+  { y: 35, x: -10, rot: 10,  scale: 0.65 },  // About: drifts in
+  { y: 50, x: -15, rot: 15,  scale: 0.55 },  // Rentals: tumbles in
+  { y: 45, x: 25,  rot: -10, scale: 0.65 }   // Contact: swings from right
+];
+var navEntranceDone = false;
+
+function animateNavLinks() {
+  if (navEntranceDone) return;
+
+  var rect = stickyNav.getBoundingClientRect();
+  // Progress: 0 when nav is at bottom of viewport, 1 well before it reaches top
+  var viewH = window.innerHeight;
+  var progress = Math.max(0, Math.min(1, 1 - (rect.top / (viewH * 0.85))));
+  // Smooth ease-out curve
+  var eased = 1 - Math.pow(1 - progress, 3);
+
+  var allDone = true;
+  navLinkEls.forEach(function(link, i) {
+    var e = linkEntrances[i];
+    // Stagger: each link slightly delayed
+    var stagger = Math.max(0, Math.min(1, (eased - i * 0.08) / 0.6));
+    var linkEase = 1 - Math.pow(1 - stagger, 2.5);
+
+    if (linkEase < 0.99) allDone = false;
+
+    var ty = e.y * (1 - linkEase);
+    var tx = e.x * (1 - linkEase);
+    var rot = e.rot * (1 - linkEase);
+    var sc = e.scale + (1 - e.scale) * linkEase;
+    var op = linkEase;
+
+    link.style.opacity = op;
+    link.style.transform = 'perspective(400px) translateX(' + tx + 'px) translateY(' + ty + 'px) rotate(' + rot + 'deg) scale(' + sc + ')';
+  });
+
+  if (allDone) {
+    navEntranceDone = true;
+    // Clear inline transforms so mouse interactions take over cleanly
+    navLinkEls.forEach(function(link) {
+      link.style.opacity = '';
+      link.style.transform = '';
+    });
+  }
+}
+
+if (!isMobile) {
+  window.addEventListener('scroll', function() {
+    checkSticky();
+    animateNavLinks();
+  });
+  checkSticky();
+  animateNavLinks();
+} else {
+  // On mobile: show logo immediately, no scroll animations
+  if (navLogoWrap) navLogoWrap.style.opacity = '1';
+}
+
+// Quick links entrance
+var qlObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.quick-link').forEach(function(k) { k.classList.add('entered'); });
+      qlObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+qlObs.observe(document.getElementById('quickLinks'));
+
+// Scroll reveals
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+    else e.target.classList.remove('in-view');
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(function(el) { obs.observe(el); });
+
+// Parallax on split images and frames
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  var pEls = document.querySelectorAll('.parallax-frame img, .split-img img:not([data-no-parallax]), .about-hero-img');
+  window.addEventListener('scroll', function() {
+    pEls.forEach(function(el) {
+      var r = el.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      var progress = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
+      el.style.transform = 'translateY(' + (progress * -50) + 'px)';
+    });
+  });
+}
+
+// Stat count-up
+var statObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (!e.isIntersecting) return;
+    var nums = e.target.querySelectorAll('.stat-num');
+    nums.forEach(function(n) {
+      var target = parseInt(n.dataset.target);
+      var suffix = n.dataset.suffix || '';
+      var duration = 1500;
+      var start = performance.now();
+      function tick(now) {
+        var progress = Math.min((now - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        n.textContent = Math.round(target * eased) + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+    statObs.unobserve(e.target);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.stats-bar').forEach(function(el) { statObs.observe(el); });
+
+// Drag-to-scroll on photo strips
+document.querySelectorAll('.scroll-strip').forEach(function(strip) {
+  var isDown = false, startX, scrollLeft;
+  strip.addEventListener('mousedown', function(e) { isDown = true; startX = e.pageX - strip.offsetLeft; scrollLeft = strip.scrollLeft; });
+  strip.addEventListener('mouseleave', function() { isDown = false; });
+  strip.addEventListener('mouseup', function() { isDown = false; });
+  strip.addEventListener('mousemove', function(e) {
+    if (!isDown) return;
+    e.preventDefault();
+    strip.scrollLeft = scrollLeft - (e.pageX - strip.offsetLeft - startX) * 1.5;
+  });
+});
+
+// Offering card tilt on mouse move
+document.querySelectorAll('.offering-card').forEach(function(card) {
+  card.addEventListener('mousemove', function(e) {
+    var r = card.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width - 0.5;
+    var y = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = 'perspective(800px) rotateY(' + (x * 8) + 'deg) rotateX(' + (-y * 8) + 'deg)';
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.transform = 'perspective(800px) rotateY(0) rotateX(0)';
+  });
+});
+// ===== HOT ZONES =====
+(function() {
+  var hero = document.querySelector('.hero');
+  var zones = document.querySelectorAll('.hz');
+  if (!hero || !zones.length) return;
+
+  function getDiscCenter(zone) {
+    var r = zone.getBoundingClientRect();
+    var hr = hero.getBoundingClientRect();
+    return { x: r.left + r.width / 2 - hr.left, y: r.top + r.height / 2 - hr.top };
+  }
+
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    var px = e.clientX - rect.left;
+    var py = e.clientY - rect.top;
+
+    zones.forEach(function(zone) {
+      var center = getDiscCenter(zone);
+      var dx = px - center.x;
+      var dy = py - center.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Ramp: full opacity at disc center, fades over 500px distance
+      var progress = Math.max(0, Math.min(1, 1 - dist / 500));
+
+      var opacity = 0.05 + progress * 0.9; // 5% to 95%
+      var scale = 0.9 + progress * 0.1;
+
+      // 3D tilt: face toward mouse
+      var tiltX = (dy / 300) * -30 * progress;
+      var tiltY = (dx / 300) * 30 * progress;
+
+      zone.style.opacity = opacity;
+      zone.style.transform = 'scale(' + scale + ') perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg)';
+      zone.classList.add('visible');
+    });
+  });
+
+  hero.addEventListener('mouseleave', function() {
+    zones.forEach(function(zone) {
+      zone.style.opacity = 0.05;
+      zone.style.transform = 'scale(0.9) perspective(400px) rotateX(0deg) rotateY(0deg)';
+    });
+  });
+})();
+
+// ===== NAV LINK INTERACTIONS =====
+(function() {
+  var navBar = document.querySelector('.sticky-nav');
+  var links = document.querySelectorAll('.sticky-nav-links a');
+  if (!navBar || !links.length) return;
+
+  var PULL_RADIUS = 120; // magnetic pull range in px
+  var TILT_MAX = 25;     // max 3D tilt degrees
+  var LIFT_MAX = 12;     // max Y lift in px
+  var MAGNETIC_MAX = 8;  // max magnetic pull in px
+  var SCALE_MAX = 1.15;  // max scale on closest link
+
+  function resetLink(link) {
+    link.style.transform = '';
+    link.style.background = '';
+    link.style.boxShadow = '';
+  }
+
+  navBar.addEventListener('mousemove', function(e) {
+    var barRect = navBar.getBoundingClientRect();
+    var mx = e.clientX;
+    var my = e.clientY;
+
+    links.forEach(function(link) {
+      var r = link.getBoundingClientRect();
+      var cx = r.left + r.width / 2;
+      var cy = r.top + r.height / 2;
+      var dx = mx - cx;
+      var dy = my - cy;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > PULL_RADIUS * 1.5) {
+
+        resetLink(link);
+        return;
+      }
+
+      var progress = Math.max(0, 1 - dist / PULL_RADIUS);
+      var cubicProgress = progress * progress * (3 - 2 * progress); // smoothstep
+
+      // Magnetic pull: use dx/dy directly scaled, no direction normalization (avoids center jitter)
+      var pullX = (dx / PULL_RADIUS) * MAGNETIC_MAX * cubicProgress;
+      var pullY = (dy / PULL_RADIUS) * MAGNETIC_MAX * cubicProgress * 0.5;
+
+      // 3D tilt: face toward cursor
+      var tiltY = (dx / PULL_RADIUS) * TILT_MAX * cubicProgress;
+      var tiltX = -(dy / PULL_RADIUS) * TILT_MAX * cubicProgress * 0.6;
+
+      // Lift and scale
+      var lift = -LIFT_MAX * cubicProgress;
+      var scale = 1 + (SCALE_MAX - 1) * cubicProgress;
+
+      // Glassmorphic glow
+      var bgAlpha = 0.08 * cubicProgress;
+      var shadowAlpha = 0.12 * cubicProgress;
+      var shadowBlur = 20 * cubicProgress;
+
+
+      link.style.transform = 'perspective(400px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) translateX(' + pullX + 'px) translateY(' + (pullY + lift) + 'px) scale(' + scale + ')';
+      link.style.background = 'rgba(59,184,168,' + bgAlpha + ')';
+      link.style.boxShadow = '0 ' + (4 + shadowBlur * 0.5) + 'px ' + shadowBlur + 'px rgba(26,92,83,' + shadowAlpha + ')';
+    });
+  });
+
+  navBar.addEventListener('mouseleave', function() {
+    links.forEach(function(link) {
+      delete link.dataset.mouseActive;
+      resetLink(link);
+    });
+  });
+})();
+
+// ===== HERO LOGO 3D TILT =====
+(function() {
+  var hero = document.querySelector('.hero');
+  var logo = document.querySelector('.hero-logo');
+  if (!hero || !logo) return;
+
+  hero.addEventListener('mousemove', function(e) {
+    var rect = hero.getBoundingClientRect();
+    var cx = rect.width / 2;
+    var cy = rect.height / 2;
+    var px = e.clientX - rect.left;
+    var py = e.clientY - rect.top;
+    var dx = (px - cx) / cx; // -1 to 1
+    var dy = (py - cy) / cy; // -1 to 1
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    var progress = Math.min(1, dist);
+
+    var tiltX = dy * -15;
+    var tiltY = dx * 15;
+    var scale = 1 + progress * 0.06;
+    var shadow = 16 + progress * 24;
+
+    logo.style.transform = 'perspective(600px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) scale(' + scale + ')';
+    logo.style.filter = 'drop-shadow(0 2px ' + shadow + 'px rgba(0,0,0,' + (0.3 + progress * 0.15) + '))';
+  });
+
+  hero.addEventListener('mouseleave', function() {
+    logo.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale(1)';
+    logo.style.filter = 'drop-shadow(0 2px 16px rgba(0,0,0,0.3))';
+  });
+})();
+
+// Mobile menu close on link click
+document.querySelectorAll('.mobile-menu a').forEach(function(a) {
+  a.addEventListener('click', function() {
+    document.getElementById('mobileMenu').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  });
+});
+
+// Donate modal
+var donateAmount = 108;
+function setDonateAmount(amt) {
+  donateAmount = amt;
+  document.querySelectorAll('.tier-btn').forEach(function(b) { b.classList.remove('active'); });
+  event.target.classList.add('active');
+}
+function openDonate() {
+  document.getElementById('donateOverlay').classList.add('open');
+}
+function closeDonate() {
+  document.getElementById('donateOverlay').classList.remove('open');
+}
+function submitDonation() {
+  closeDonate();
+  alert('Thank you for your donation of $' + donateAmount + '. In production, this would process via Square.');
+}
+function closeMobileMenu() {
+  var menu = document.getElementById('mobileMenu');
+  var ham = document.getElementById('hamburger');
+  if (menu) menu.classList.remove('open');
+  if (ham) ham.classList.remove('open');
+}
+</script>
+
+<!-- DONATE MODAL -->
+<div class="donate-overlay" id="donateOverlay" onclick="if(event.target===this)closeDonate()">
+  <div class="donate-modal">
+    <div class="donate-modal-header">
+      <h3>Make a Donation</h3>
+      <p>Salt Spring Centre of Yoga</p>
+      <button class="donate-modal-close" onclick="closeDonate()">&times;</button>
+    </div>
+    <div class="donate-modal-body">
+      <div class="donate-tiers" id="donateTiers">
+        <button class="tier-btn" onclick="setDonateAmount(25)">$25</button>
+        <button class="tier-btn" onclick="setDonateAmount(50)">$50</button>
+        <button class="tier-btn active" onclick="setDonateAmount(108)">$108</button>
+        <button class="tier-btn" onclick="setDonateAmount(200)">$200</button>
+      </div>
+      <div class="donate-amount-label">One-time donation</div>
+      <div class="donate-field">
+        <label>Name</label>
+        <input type="text" placeholder="Your full name">
+      </div>
+      <div class="donate-field">
+        <label>Email</label>
+        <input type="email" placeholder="you@example.com">
+      </div>
+      <div class="donate-field">
+        <label>Direct your gift</label>
+        <select>
+          <option>No Preference</option>
+          <option>Meeting Basic Needs &amp; Preserving Spaces</option>
+          <option>Bringing the Centre into solid financial position</option>
+          <option>Restoring key Centre Offerings</option>
+        </select>
+      </div>
+      <button class="donate-submit" onclick="window.open('https://square.link/u/PLACEHOLDER','_blank')">Donate via Square</button>
+      <p style="font-size:0.78rem;color:var(--text-light);text-align:center;margin-top:10px;">Square payment processing coming soon. For now, please use Interac E-Transfer.</p>
+      <div class="donate-alt">
+        Or send Interac E-Transfer to <strong>payment@saltspringcentre.com</strong>
+      </div>
+    </div>
+    <div class="donate-modal-footer">
+      Charitable registration number: 107951173RR0001
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

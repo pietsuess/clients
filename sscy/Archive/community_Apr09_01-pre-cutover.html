@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>if(/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent))window.location.href='m/community.html';</script>
+<title>Community Dashboard | Salt Spring Centre of Yoga</title>
+<meta name="description" content="SSCY Community Dashboard - directory, staff resources, forms, policies, and everything you need in one place.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .reveal, .reveal-left, .reveal-right { opacity: 1 !important; transform: none !important; } }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 24px; }
+h1, h2 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+h3 { font-family: 'Archivo Narrow', sans-serif; font-weight: 600; line-height: 1.3; }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+/* PASSPHRASE GATE */
+.auth-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.auth-overlay.hidden { display: none; }
+.auth-card { background: var(--white); border-radius: 12px; max-width: 420px; width: 100%; padding: 48px 40px; text-align: center; box-shadow: 0 12px 48px rgba(0,0,0,0.2); }
+.auth-card h2 { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--teal-deep); margin-bottom: 8px; }
+.auth-card p { font-size: 0.88rem; color: var(--text-light); margin-bottom: 24px; text-align: center; }
+.auth-card input { width: 100%; padding: 14px 18px; border: 1.5px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; text-align: center; letter-spacing: 0.1em; margin-bottom: 16px; transition: border-color 0.2s; }
+.auth-card input:focus { outline: none; border-color: var(--teal); }
+.auth-card button { width: 100%; padding: 14px; background: var(--teal); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 1rem; font-weight: 600; transition: 0.25s ease; }
+.auth-card button:hover { background: var(--teal-dark); }
+.auth-error { color: var(--terracotta); font-size: 0.82rem; margin-top: 8px; display: none; }
+
+/* STICKY NAV */
+.sticky-nav { background: rgba(250,248,244,0.97); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 10px 0; position: sticky; top: 0; z-index: 90; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.sticky-nav-inner { position: relative; padding: 0 32px; height: 68px; }
+.sticky-nav .sn-logo-wrap { position: absolute; left: 32px; top: 50%; transform: translateY(-50%); }
+.sticky-nav .sn-logo { height: 52px; }
+.sticky-nav-links { position: absolute; right: 32px; top: 50%; display: flex; gap: 4px; transform: translateY(-50%); }
+.sticky-nav-links a { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transition: color 0.2s ease, background 0.2s ease; }
+.sticky-nav-links a:hover { color: var(--teal-dark); background: var(--cream-warm); }
+.sign-out-btn { padding: 10px 20px; font-family: 'Archivo Narrow', sans-serif; font-size: 0.82rem; font-weight: 500; color: var(--text-light); text-decoration: none; border-radius: 50px; letter-spacing: 0.03em; transition: color 0.2s ease, background 0.2s ease; background: none; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; margin-left: 4px; }
+.sign-out-btn:hover { color: var(--terracotta); border-color: var(--terracotta); background: rgba(193,120,56,0.05); }
+
+/* HELP PANEL */
+.help-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.help-panel { background: var(--white); border-radius: 12px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative; }
+.help-panel h2 { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--teal-deep); text-align: center; margin-bottom: 24px; }
+.help-panel .help-close { position: sticky; top: 0; float: right; background: var(--cream); border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; color: var(--text-light); display: flex; align-items: center; justify-content: center; z-index: 1; }
+.help-panel .help-close:hover { background: var(--cream-warm); color: var(--charcoal); }
+.help-section { margin-bottom: 28px; }
+.help-section h3 { font-family: 'Cinzel', serif; font-size: 0.92rem; font-weight: 600; color: var(--teal-deep); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid var(--teal); }
+.help-section p { font-size: 0.88rem; line-height: 1.7; color: var(--text); margin-bottom: 8px; text-align: left; }
+.help-section ul { list-style: none; margin: 0 0 12px; padding: 0; }
+.help-section ul li { padding: 5px 0 5px 16px; font-size: 0.85rem; line-height: 1.6; color: var(--text); position: relative; }
+.help-section ul li::before { content: '\2022'; color: var(--teal); position: absolute; left: 0; font-weight: 700; }
+.help-tip { background: var(--cream); border-left: 3px solid var(--teal); padding: 10px 14px; margin: 10px 0; border-radius: 0 6px 6px 0; font-size: 0.85rem; line-height: 1.6; }
+.help-contact { display: inline-block; background: var(--teal); color: var(--white); padding: 4px 12px; border-radius: 50px; font-size: 0.78rem; font-weight: 600; margin: 2px 0; }
+
+/* HERO */
+.hero { height: 40vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--teal-deep), var(--teal-dark)); }
+.hero-content { position: relative; z-index: 2; text-align: center; color: var(--white); max-width: 700px; padding: 0 32px; }
+.hero-content h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); color: var(--white); letter-spacing: 0.06em; text-shadow: 0 2px 20px rgba(0,0,0,0.15); margin-bottom: 16px; }
+.hero-content p { font-size: 1.05rem; color: rgba(255,255,255,0.9); text-align: center; line-height: 1.7; }
+.hero-content .land-ack { font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-top: 20px; text-align: center; line-height: 1.6; max-width: 520px; margin-left: auto; margin-right: auto; }
+
+/* FILTER KEYS (8 keys) */
+.filter-keys { display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; position: sticky; top: 89px; z-index: 80; }
+.filter-key { display: flex; align-items: center; justify-content: center; padding: 28px 8px; font-size: 0.82rem; font-weight: 600; font-family: 'Cinzel', serif; color: var(--white); text-decoration: none; letter-spacing: 0.03em; position: relative; overflow: hidden; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease; transform-origin: top center; text-align: center; }
+.filter-key:nth-child(1) { background: #1b6c5e; }
+.filter-key:nth-child(2) { background: #2e7e6f; }
+.filter-key:nth-child(3) { background: #4b9e8e; }
+.filter-key:nth-child(4) { background: #7ecbb7; }
+.filter-key:nth-child(5) { background: #e6d798; }
+.filter-key:nth-child(6) { background: #d3b84c; }
+.filter-key:nth-child(7) { background: #be9f31; }
+.filter-key:nth-child(8) { background: #a78a30; }
+.filter-key::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0; background: rgba(255,255,255,0.15); transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.filter-key:hover { transform: translateY(-8px) scaleY(1.1); z-index: 2; filter: brightness(1.1); color: var(--white); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.filter-key:hover::after { height: 100%; }
+.filter-key:active { transform: translateY(2px) scaleY(0.95); filter: brightness(0.9); box-shadow: none; }
+
+/* DASHBOARD SECTIONS */
+.dash-section { padding: 80px 32px; }
+.dash-section:nth-child(odd) { background: var(--cream); }
+.dash-section:nth-child(even) { background: var(--white); }
+.dash-header { text-align: center; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto; }
+.dash-header .label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.16em; color: var(--teal); margin-bottom: 14px; display: block; }
+.dash-header h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); color: var(--teal-deep); margin-bottom: 16px; }
+.dash-header p { font-size: 1.02rem; line-height: 1.85; color: var(--text); margin-bottom: 1em; }
+
+/* DASHBOARD CARDS */
+.dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
+.dash-card { background: var(--white); border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.dash-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.dash-card h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 8px; }
+.dash-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; text-align: left; }
+a.dash-card { text-decoration: none; color: inherit; display: block; }
+
+/* EMERGENCY BANNER */
+.emergency-banner { background: #fff5f5; border: 2px solid var(--terracotta); border-radius: 12px; padding: 28px; margin-bottom: 24px; }
+.emergency-banner h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--terracotta); margin-bottom: 8px; }
+.emergency-banner p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; text-align: left; }
+.emergency-number { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700; color: var(--teal-deep); display: block; margin: 8px 0; }
+
+/* MEETING CARD */
+.dash-card .meeting-time { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 600; color: var(--teal-dark); display: block; margin-bottom: 8px; }
+
+/* ACCORDION */
+.accordion { border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
+.accordion-header { padding: 20px 28px; background: var(--white); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--charcoal); border-bottom: 1px solid rgba(0,0,0,0.06); user-select: none; }
+.accordion-header::after { content: '+'; font-size: 1.2rem; color: var(--teal); transition: transform 0.3s; }
+.accordion-header.open::after { content: '\2212'; }
+.accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; padding: 0 28px; background: var(--white); }
+.accordion-body.open { max-height: 2000px; padding: 20px 28px; }
+.accordion-body p { font-size: 0.88rem; color: var(--text-light); line-height: 1.7; text-align: left; margin-bottom: 8px; }
+.accordion-body ol, .accordion-body ul { margin: 8px 0 16px 20px; }
+.accordion-body li { font-size: 0.88rem; color: var(--text-light); line-height: 1.7; padding: 2px 0; }
+
+/* SUBSECTION HEADING */
+.dash-subsection { max-width: 1200px; margin: 40px auto 24px; }
+.dash-subsection h3 { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 600; color: var(--teal-deep); margin-bottom: 8px; }
+.dash-subsection p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; text-align: left; margin-bottom: 16px; }
+
+/* SOCIAL INLINE */
+.social-inline { display: flex; gap: 12px; max-width: 1200px; margin: 24px auto 0; }
+.social-inline a { color: var(--teal-dark); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--teal); transition: 0.25s; }
+.social-inline a:hover { background: var(--teal); color: var(--white); }
+
+/* FLOAT QUOTE */
+.float-quote { text-align: center; padding: 72px 32px; background: var(--cream-warm); position: relative; overflow: hidden; }
+.float-quote::before { content: '\201C'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; font-size: 12rem; color: var(--teal); opacity: 0.06; line-height: 1; pointer-events: none; }
+.float-quote blockquote { font-family: 'Cinzel', serif; font-size: clamp(1.3rem, 3vw, 1.8rem); color: var(--teal-deep); max-width: 580px; margin: 0 auto 16px; line-height: 1.5; font-weight: 500; position: relative; text-align: center; }
+.float-quote cite { font-size: 0.82rem; color: var(--text-light); font-style: normal; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.reveal.in-view { opacity: 1; transform: none; }
+.d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; } .d4 { transition-delay: 0.4s; }
+
+/* FOOTER */
+.site-footer { background: var(--charcoal); color: var(--white); padding: 56px 24px 24px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; }
+.footer-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; margin-bottom: 40px; }
+.footer-brand h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 1.1rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.82rem; opacity: 0.5; line-height: 1.7; }
+.social-links { display: flex; gap: 12px; margin-top: 20px; }
+.social-links a { color: var(--white); opacity: 0.4; transition: 0.25s; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+.social-links a:hover { opacity: 1; border-color: rgba(255,255,255,0.3); }
+.footer-newsletter h4 { font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 8px; font-weight: 500; }
+.footer-newsletter p { font-size: 0.78rem; opacity: 0.45; margin-bottom: 14px; text-align: left; }
+.nl-form { display: flex; gap: 8px; }
+.nl-form input { flex: 1; padding: 11px 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 50px; color: var(--white); font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; }
+.nl-form input:focus { outline: none; border-color: rgba(255,255,255,0.3); }
+.nl-form input::placeholder { color: rgba(255,255,255,0.3); }
+.nl-form button { padding: 11px 22px; background: var(--teal-dark); color: var(--white); border: none; border-radius: 50px; cursor: pointer; font-family: 'Archivo Narrow', sans-serif; font-size: 0.85rem; font-weight: 600; transition: 0.25s; }
+.nl-form button:hover { background: var(--teal); }
+.footer-nav { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 24px; margin-bottom: 24px; }
+.footer-nav-links { display: flex; flex-wrap: wrap; gap: 6px 22px; justify-content: center; }
+.footer-nav-links a { color: var(--white); font-size: 0.78rem; opacity: 0.4; transition: 0.25s; }
+.footer-nav-links a:hover { opacity: 1; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; text-align: center; }
+.footer-bottom p { font-size: 0.65rem; opacity: 0.3; line-height: 1.8; text-align: center; }
+
+/* HAMBURGER */
+.hamburger { display: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--text); margin: 5px 0; transition: 0.3s ease; border-radius: 2px; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* MOBILE MENU */
+.mobile-menu { display: none; position: fixed; top: 89px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 85; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 12px 24px; text-decoration: none; transition: 0.2s; letter-spacing: 0.03em; }
+.mobile-menu a:hover { color: var(--teal); }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .filter-keys { grid-template-columns: repeat(4, 1fr); }
+  .filter-key { padding: 20px 6px; font-size: 0.72rem; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 768px) {
+  body { font-size: 16px; }
+  .sticky-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+  .sticky-nav-inner { padding: 0 16px; height: 48px; display: flex; align-items: center; width: 100%; }
+  .sticky-nav-links { display: none; }
+  .sn-logo-wrap { position: static !important; transform: none !important; opacity: 1 !important; }
+  .sn-logo { height: 36px !important; }
+  .hamburger { display: block; background: none; border: none; cursor: pointer; padding: 8px; margin-left: auto; }
+  .mobile-menu { top: 49px; z-index: 199; }
+  .hero { height: 40vh; margin-top: 49px; }
+  .filter-keys { top: 49px; z-index: 79; }
+  .hero-content h1 { font-size: 1.6rem; }
+  .hero-content p { font-size: 0.88rem; }
+  .dash-section { padding: 48px 16px; }
+  .dash-header h2 { font-size: 1.4rem; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .filter-keys { grid-template-columns: repeat(4, 1fr); }
+  .filter-key { padding: 6px 4px; font-size: 0.55rem; }
+  .float-quote { padding: 40px 16px; }
+  .float-quote blockquote { font-size: 1rem; }
+  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .auth-card { padding: 32px 24px; }
+  .sign-out-btn { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- PASSPHRASE GATE -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <h2>Community Access</h2>
+    <p>Enter the community passphrase to continue.</p>
+    <form id="authForm" onsubmit="return handleAuth(event)">
+      <input type="password" id="authInput" placeholder="Passphrase" autocomplete="off" autofocus>
+      <button type="submit">Enter</button>
+    </form>
+    <div class="auth-error" id="authError">Incorrect passphrase. Please try again.</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <div class="sn-logo-wrap"><a href="index.html"><img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga" class="sn-logo"></a></div>
+    <div class="sticky-nav-links">
+      <a href="calendar.html">Calendar</a>
+      <a href="shop.html">Shop</a>
+      <a href="offerings.html">Offerings</a>
+      <a href="about.html">About</a>
+      <a href="rentals.html">Rentals</a>
+      <a href="contact.html">Contact</a>
+      <button class="sign-out-btn" onclick="showHelp()">Help</button>
+      <button class="sign-out-btn" id="signOutBtn" onclick="signOut()">Sign Out</button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu" onclick="document.getElementById('mobileMenu').classList.toggle('open');this.classList.toggle('open');">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="calendar.html">Calendar</a>
+  <a href="shop.html">Shop</a>
+  <a href="offerings.html">Offerings</a>
+  <a href="about.html">About</a>
+  <a href="rentals.html">Rentals</a>
+  <a href="contact.html">Contact</a>
+  <a href="#" onclick="event.preventDefault();closeMobileMenu();showHelp();">Help</a>
+  <a href="#" onclick="event.preventDefault();closeMobileMenu();signOut();">Sign Out</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Community Dashboard</h1>
+    <p>Welcome home. Everything you need, all in one place.</p>
+    <p class="land-ack">We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+  </div>
+</section>
+
+<!-- FILTER KEYS -->
+<div class="filter-keys">
+  <a class="filter-key" href="#directory">Directory</a>
+  <a class="filter-key" href="#staff">Staff</a>
+  <a class="filter-key" href="#land">Land &amp; Safety</a>
+  <a class="filter-key" href="#forms">Forms</a>
+  <a class="filter-key" href="#wellbeing">Well-being</a>
+  <a class="filter-key" href="#circles">Circles</a>
+  <a class="filter-key" href="#policies">Policies</a>
+  <a class="filter-key" href="#community">Community</a>
+</div>
+
+<!-- ========================================== -->
+<!-- 1. DIRECTORY -->
+<!-- ========================================== -->
+<section class="dash-section" id="directory">
+  <div class="dash-header reveal">
+    <span class="label">Directory</span>
+    <h2>Quick Access</h2>
+    <p>Essential links and contacts for daily life at the Centre.</p>
+  </div>
+
+  <div id="emergencyDirectory" style="max-width:1200px;margin:0 auto 24px;"></div>
+  <div class="reveal" style="max-width:1200px;margin:0 auto 24px;">
+    <iframe src="https://calendar.google.com/calendar/embed?src=c_t567jg3h1u3hgj7fii50ie8k6k%40group.calendar.google.com&ctz=America/Vancouver&showTitle=0&showNav=1&showPrint=0&showTabs=1&showCalendars=0" style="border:none;width:100%;height:600px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08);background:var(--white);" loading="lazy"></iframe>
+  </div>
+  <div class="dash-grid" id="directoryGrid">
+    <a href="offerings.html#classes" class="dash-card reveal d1">
+      <h3>Weekly Yoga Classes</h3>
+      <p>Online and on-land offerings.</p>
+    </a>
+    <a href="offerings.html#classes" class="dash-card reveal d2">
+      <h3>Weekly Yoga Classes</h3>
+      <p>Online and on-land offerings.</p>
+    </a>
+    <a href="contact.html" class="dash-card reveal d3">
+      <h3>Contact &amp; Directions</h3>
+      <p>355 Blackburn Road, Salt Spring Island. 250-537-2326</p>
+    </a>
+  </div>
+</section>
+
+<!-- ========================================== -->
+<!-- 2. STAFF RESOURCES -->
+<!-- ========================================== -->
+<section class="dash-section" id="staff">
+  <div class="dash-header reveal">
+    <span class="label">Staff Resources</span>
+    <h2>Staff &amp; Volunteer Hub</h2>
+    <p>Handbooks, schedules, organizational structure, and key information for all team members.</p>
+  </div>
+
+  <div class="dash-grid" id="staffGrid"></div>
+</section>
+
+<!-- ========================================== -->
+<!-- 3. LAND & SAFETY -->
+<!-- ========================================== -->
+<section class="dash-section" id="land">
+  <div class="dash-header reveal">
+    <span class="label">Land &amp; Safety</span>
+    <h2>Land Care &amp; Safety</h2>
+    <p>Maintenance, emergency dispatch, fire preparedness, and workplace safety resources.</p>
+  </div>
+
+  <div id="emergencyLand" style="max-width:1200px;margin:0 auto 24px;"></div>
+  <div class="dash-grid" id="landGrid"></div>
+</section>
+
+<!-- ========================================== -->
+<!-- 4. FORMS -->
+<!-- ========================================== -->
+<section class="dash-section" id="forms">
+  <div class="dash-header reveal">
+    <span class="label">Forms</span>
+    <h2>Forms &amp; Requests</h2>
+    <p>All the forms you need, from schedule changes to purchase orders.</p>
+  </div>
+  <div class="dash-grid" id="formsGrid"></div>
+</section>
+
+<!-- ========================================== -->
+<!-- 5. WELL-BEING -->
+<!-- ========================================== -->
+<section class="dash-section" id="wellbeing">
+  <div class="dash-header reveal">
+    <span class="label">Well-being</span>
+    <h2>Well-being &amp; Support</h2>
+    <p>Mental health resources, crisis support, and wellness programs for our community.</p>
+  </div>
+  <div id="emergencyWellbeing" style="max-width:1200px;margin:0 auto 24px;"></div>
+  <div class="dash-grid" id="wellbeingGrid"></div>
+</section>
+
+<!-- ========================================== -->
+<!-- 6. CIRCLES & MEETINGS -->
+<!-- ========================================== -->
+<section class="dash-section" id="circles">
+  <div class="dash-header reveal">
+    <span class="label">Circles &amp; Meetings</span>
+    <h2>Circles &amp; Meetings</h2>
+    <p>Regular gatherings that keep our community connected and aligned.</p>
+  </div>
+  <div class="dash-grid" id="circlesGrid"></div>
+</section>
+
+<!-- BABA HARI DASS QUOTE -->
+<div class="float-quote reveal">
+  <blockquote>"Work Honestly. Meditate Every Day. Meet People Without Fear. Play."</blockquote>
+  <cite>Baba Hari Dass</cite>
+</div>
+
+<!-- ========================================== -->
+<!-- 7. POLICIES & GOVERNANCE -->
+<!-- ========================================== -->
+<section class="dash-section" id="policies">
+  <div class="dash-header reveal">
+    <span class="label">Policies &amp; Governance</span>
+    <h2>Policies &amp; Governance</h2>
+    <p>Community agreements, workplace policies, and governance structure.</p>
+  </div>
+  <div id="policiesContainer" style="max-width:1200px;margin:0 auto;"></div>
+</section>
+
+<!-- ========================================== -->
+<!-- 8. COMMUNITY -->
+<!-- ========================================== -->
+<section class="dash-section" id="community">
+  <div class="dash-header reveal">
+    <span class="label">Community</span>
+    <h2>Our Community</h2>
+    <p>Our extended family of organizations, career opportunities, and shared resources.</p>
+  </div>
+
+  <div class="dash-grid" id="communityOrgsGrid"></div>
+
+  <div class="dash-subsection reveal">
+    <h3>SSCY is Hiring!</h3>
+    <p>Eligible volunteers and part-time staff are encouraged to apply for supplemental income.</p>
+  </div>
+  <div class="dash-grid" id="hiringGrid"></div>
+
+  <!-- SOCIAL MEDIA -->
+  <div class="dash-subsection reveal">
+    <h3>Follow SSCY</h3>
+  </div>
+  <div class="social-inline reveal">
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg>
+    </a>
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg>
+    </a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </a>
+  </div>
+
+  <!-- COORDINATOR RESOURCES -->
+  <div class="dash-subsection reveal">
+    <h3>Coordinator Resources</h3>
+  </div>
+  <div class="dash-grid" id="coordGrid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Salt Spring Centre of Yoga</h3>
+        <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+        <div class="social-links">
+          <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+          <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-newsletter">
+        <h4>Join Our Community</h4>
+        <p>Stay connected with news, courses, and retreats.</p>
+        <form class="nl-form" onsubmit="event.preventDefault();this.innerHTML='<p style=\'padding:10px;opacity:0.7;\'>Thank you!</p>';">
+          <input type="email" placeholder="Your email" required aria-label="Email">
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <nav class="footer-nav">
+      <div class="footer-nav-links">
+        <a href="offerings.html">Offerings</a>
+        <a href="about.html">About</a>
+        <a href="calendar.html">Calendar</a>
+        <a href="shop.html">Shop</a>
+        <a href="rentals.html">Rentals</a>
+        <a href="blog.html">Blog</a>
+        <a href="contact.html">Contact</a>
+        <a href="offerings.html#karma">Karma Yoga</a>
+        <a href="offerings.html#ytt">Teacher Training</a>
+        <a href="offerings.html#wellness">Wellness</a>
+        <a href="offerings.html#satsang">Satsang</a>
+        <a href="https://saltspringcentre.com/terms-of-use/" target="_blank">Terms</a>
+        <a href="https://saltspringcentre.com/cancellation-policy/" target="_blank">Cancellation Policy</a>
+      </div>
+    </nav>
+    <div class="footer-bottom">
+      <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+      <p>Dharma Sara Satsang Society &bull; Est. 1974</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script>
+// Passphrase Gate
+var HASH = 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3';
+
+function checkAuth() {
+  var stored = localStorage.getItem('sscy-dash-auth');
+  if (stored === HASH) {
+    document.getElementById('authOverlay').classList.add('hidden');
+  }
+}
+
+async function hashString(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  var input = document.getElementById('authInput').value;
+  var hashed = await hashString(input);
+  if (hashed === HASH) {
+    localStorage.setItem('sscy-dash-auth', HASH);
+    document.getElementById('authOverlay').classList.add('hidden');
+  } else {
+    document.getElementById('authError').style.display = 'block';
+    document.getElementById('authInput').value = '';
+    document.getElementById('authInput').focus();
+  }
+  return false;
+}
+
+function signOut() {
+  localStorage.removeItem('sscy-dash-auth');
+  document.getElementById('authOverlay').classList.remove('hidden');
+  document.getElementById('authInput').value = '';
+  document.getElementById('authError').style.display = 'none';
+  document.getElementById('authInput').focus();
+}
+
+checkAuth();
+
+// Scroll reveals (IntersectionObserver)
+var obs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) e.target.classList.add('in-view');
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+
+document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+
+// Accordion toggle
+function toggleAccordion(header) {
+  var body = header.nextElementSibling;
+  var isOpen = header.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.accordion-header.open').forEach(function(h) {
+    h.classList.remove('open');
+    h.nextElementSibling.classList.remove('open');
+  });
+  // Toggle clicked
+  if (!isOpen) {
+    header.classList.add('open');
+    body.classList.add('open');
+  }
+}
+
+// Mobile menu close helper
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
+// ===== HELP PANEL =====
+function showHelp() {
+  if (document.getElementById('helpOverlay')) { document.getElementById('helpOverlay').remove(); return; }
+  var ov = document.createElement('div');
+  ov.className = 'help-overlay';
+  ov.id = 'helpOverlay';
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+
+  ov.innerHTML = '<div class="help-panel">' +
+    '<button class="help-close" onclick="document.getElementById(\'helpOverlay\').remove()">\u2715</button>' +
+    '<h2>Community Dashboard Guide</h2>' +
+
+    '<div class="help-section">' +
+    '<h3>What Is This?</h3>' +
+    '<p>This dashboard is your central hub for everything at the Salt Spring Centre of Yoga. Directory, forms, policies, meetings, safety info, and community resources are all here in one place.</p>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Getting Around</h3>' +
+    '<p>Use the <strong>colored keys</strong> at the top of the page to jump directly to any section:</p>' +
+    '<ul>' +
+    '<li><strong>Directory</strong> \u2014 Calendar, yoga classes, emergency contacts</li>' +
+    '<li><strong>Staff</strong> \u2014 Handbooks, schedules, venue booking, organizational structure</li>' +
+    '<li><strong>Land &amp; Safety</strong> \u2014 Maintenance dispatch, water leak hotline, fire preparedness, Work Safe BC</li>' +
+    '<li><strong>Forms</strong> \u2014 All request forms (schedule changes, time away, purchase orders, guest requests, etc.)</li>' +
+    '<li><strong>Well-being</strong> \u2014 Crisis support, mental health resources, DEI, wellness programs</li>' +
+    '<li><strong>Circles</strong> \u2014 All regular meetings with days, times, and locations</li>' +
+    '<li><strong>Policies</strong> \u2014 Shift coverage, sick policy, meal opt-out, schedule changes, governance (click to expand each)</li>' +
+    '<li><strong>Community</strong> \u2014 Sister organizations, job postings, coordinator resources, social media</li>' +
+    '</ul>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Emergency Contacts</h3>' +
+    '<p>Emergency numbers appear in orange-bordered banners throughout the dashboard. Key numbers to save in your phone:</p>' +
+    '<ul>' +
+    '<li><span class="help-contact">866-662-1275</span> SSCY Emergency Team</li>' +
+    '<li><span class="help-contact">831-777-4349</span> Maintenance Dispatch (TEXT only)</li>' +
+    '<li><span class="help-contact">831-226-0005</span> Water Leak Hotline</li>' +
+    '<li><span class="help-contact">988</span> Suicide &amp; Crisis Lifeline</li>' +
+    '<li><span class="help-contact">1.888.967.5377</span> Work Safe BC</li>' +
+    '</ul>' +
+    '<div class="help-tip">On mobile, tap any phone number to call or text directly.</div>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Policies</h3>' +
+    '<p>The Policies section uses expandable panels. Click any policy title to expand it and read the full details. Click again to collapse.</p>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Passphrase &amp; Access</h3>' +
+    '<p>This dashboard is protected by a community passphrase. Once entered, you will not be asked again on this device unless you sign out.</p>' +
+    '<ul>' +
+    '<li><strong>Sign Out</strong> clears your access on this device. You will need the passphrase again to re-enter.</li>' +
+    '<li>If the passphrase changes, you will be prompted automatically on your next visit.</li>' +
+    '<li>If you have forgotten the passphrase, ask at Community Circle or email the office.</li>' +
+    '</ul>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>For Administrators</h3>' +
+    '<p>Hiring posts, meeting schedules, and announcements are managed through a shared <strong>Google Sheet</strong> called "SSCY Community Dashboard."</p>' +
+    '<ul>' +
+    '<li>Open the spreadsheet and edit the <strong>Hiring</strong>, <strong>Meetings</strong>, or <strong>Announcements</strong> tab.</li>' +
+    '<li>Changes appear on the dashboard the next time someone loads the page.</li>' +
+    '<li>To hide a hiring post, set the Active column to "no".</li>' +
+    '<li>Set an announcement\'s Priority to "urgent" for a terracotta-colored banner.</li>' +
+    '</ul>' +
+    '<div class="help-tip">Static content (policies, emergency numbers, forms, resource links) is updated by editing the HTML directly. Contact Piet for changes to these sections.</div>' +
+    '</div>' +
+
+    '<div class="help-section">' +
+    '<h3>Technical Notes</h3>' +
+    '<ul>' +
+    '<li>This page works offline once loaded (except dynamic content).</li>' +
+    '<li>Bookmark this page for quick access.</li>' +
+    '<li>Best viewed in Chrome, Safari, or Firefox.</li>' +
+    '<li>On mobile, the dashboard automatically loads a mobile-optimized version.</li>' +
+    '</ul>' +
+    '</div>' +
+
+    '<button onclick="document.getElementById(\'helpOverlay\').remove()" style="width:100%;padding:14px;background:var(--teal);color:var(--white);border:none;border-radius:50px;cursor:pointer;font-family:Archivo Narrow,sans-serif;font-size:1rem;font-weight:600;margin-top:8px">Got It</button>' +
+    '</div>';
+
+  document.body.appendChild(ov);
+}
+
+// Close help with Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('helpOverlay')) {
+    document.getElementById('helpOverlay').remove();
+  }
+});
+
+// ===== GOOGLE SHEET SYNC =====
+var DASH_SYNC_URL = 'https://script.google.com/macros/s/AKfycbzD34FzmeBn7NcDH92_7yudZtkdZmmVC16257jr7hl89NF8gNmNgMr-bFtqBy8PW_ve/exec';
+
+// Reusable: render an array of link cards into a grid
+function renderCards(gridId, items, titleKey, descKey, urlKey) {
+  var grid = document.getElementById(gridId);
+  if (!grid || !items.length) return;
+  var h = '';
+  items.forEach(function(item, i) {
+    var tag = item[urlKey] ? 'a' : 'div';
+    var href = item[urlKey] ? ' href="' + item[urlKey] + '" target="_blank" rel="noopener"' : '';
+    h += '<' + tag + href + ' class="dash-card reveal d' + ((i % 4) + 1) + '">';
+    h += '<h3>' + item[titleKey] + '</h3>';
+    if (item[descKey]) h += '<p>' + item[descKey] + '</p>';
+    if (item.contact) h += '<p style="margin-top:8px;font-size:0.82rem;color:var(--teal-dark);font-weight:500">' + item.contact + '</p>';
+    h += '</' + tag + '>';
+  });
+  grid.innerHTML = h;
+  grid.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+// Render emergency banners for a specific section
+function renderEmergency(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el || !items.length) return;
+  var h = '';
+  items.forEach(function(e) {
+    h += '<div class="emergency-banner reveal">';
+    h += '<h3>' + e.title + '</h3>';
+    if (e.phone) h += '<span class="emergency-number">' + e.phone + '</span>';
+    if (e.description) h += '<p>' + e.description + '</p>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+  el.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+// Render meetings with prominent times
+function renderMeetings(items) {
+  var grid = document.getElementById('circlesGrid');
+  if (!grid || !items.length) return;
+  var h = '';
+  items.forEach(function(m, i) {
+    h += '<div class="dash-card reveal d' + ((i % 4) + 1) + '">';
+    h += '<h3>' + m.name + '</h3>';
+    var timeStr = m.day + (m.time ? ', ' + m.time : '') + (m.location ? ', ' + m.location : '');
+    h += '<span class="meeting-time">' + timeStr + '</span>';
+    if (m.notes) h += '<p>' + m.notes + '</p>';
+    if (m.facilitator) h += '<p style="font-size:0.82rem;color:var(--teal-dark);margin-top:4px">Facilitated by ' + m.facilitator + '</p>';
+    h += '</div>';
+  });
+  grid.innerHTML = h;
+  grid.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+// Render policies as accordions
+function renderPolicies(items) {
+  var el = document.getElementById('policiesContainer');
+  if (!el || !items.length) return;
+  var h = '';
+  items.forEach(function(p) {
+    var bodyHtml = String(p.body || '').replace(/\n/g, '<br>');
+    h += '<div class="accordion reveal">';
+    h += '<div class="accordion-header" onclick="toggleAccordion(this)">' + p.title + '</div>';
+    h += '<div class="accordion-body"><p style="text-align:left">' + bodyHtml + '</p></div>';
+    h += '</div>';
+  });
+  el.innerHTML = h;
+  el.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+// Render announcements as banners below hero
+function renderAnnouncements(items) {
+  var hero = document.querySelector('.hero');
+  if (!hero || !items.length) return;
+  document.querySelectorAll('.announcement-banner').forEach(function(b) { b.remove(); });
+  items.forEach(function(a) {
+    var banner = document.createElement('div');
+    banner.className = 'announcement-banner';
+    var isUrgent = String(a.priority).toLowerCase() === 'urgent';
+    banner.style.cssText = 'padding:14px 32px;text-align:center;font-size:0.88rem;font-weight:600;' +
+      (isUrgent ? 'background:var(--terracotta);color:var(--white);' : 'background:var(--gold);color:var(--charcoal);');
+    banner.innerHTML = '<strong>' + a.title + '</strong> &mdash; ' + a.body;
+    hero.insertAdjacentElement('afterend', banner);
+  });
+}
+
+// Render community links split by category
+function renderCommunity(items) {
+  var orgsGrid = document.getElementById('communityOrgsGrid');
+  var coordGrid = document.querySelector('#community .dash-subsection ~ .dash-subsection');
+  if (!orgsGrid) return;
+
+  var orgs = items.filter(function(c) { return c.category !== 'coordinator'; });
+  var coords = items.filter(function(c) { return c.category === 'coordinator'; });
+
+  renderCards('communityOrgsGrid', orgs, 'title', 'description', 'url');
+
+  // Coordinator resources grid (after social links)
+  var coordGridEl = document.getElementById('coordGrid');
+  if (coordGridEl && coords.length) {
+    renderCards('coordGrid', coords, 'title', 'description', 'url');
+  }
+}
+
+// Load everything from the sheet
+function loadDynamicContent() {
+  fetch(DASH_SYNC_URL)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      // Emergency banners by section
+      if (data.emergency && data.emergency.length) {
+        var dirEmg = data.emergency.filter(function(e) { return e.section === 'directory'; });
+        var landEmg = data.emergency.filter(function(e) { return e.section === 'land'; });
+        var wbEmg = data.emergency.filter(function(e) { return e.section === 'wellbeing'; });
+        if (dirEmg.length) renderEmergency('emergencyDirectory', dirEmg);
+        if (landEmg.length) renderEmergency('emergencyLand', landEmg);
+        if (wbEmg.length) renderEmergency('emergencyWellbeing', wbEmg);
+      }
+      if (data.staff && data.staff.length) renderCards('staffGrid', data.staff, 'title', 'description', 'url');
+      if (data.forms && data.forms.length) renderCards('formsGrid', data.forms, 'title', 'description', 'url');
+      if (data.wellbeing && data.wellbeing.length) renderCards('wellbeingGrid', data.wellbeing, 'title', 'description', 'url');
+      if (data.meetings && data.meetings.length) renderMeetings(data.meetings);
+      if (data.policies && data.policies.length) renderPolicies(data.policies);
+      if (data.hiring && data.hiring.length) renderCards('hiringGrid', data.hiring, 'title', 'description', 'url');
+      if (data.community && data.community.length) renderCommunity(data.community);
+      if (data.announcements && data.announcements.length) renderAnnouncements(data.announcements);
+    })
+    .catch(function(err) { console.log('Dashboard sync:', err); });
+}
+
+loadDynamicContent();
+</script>
+</body>
+</html>
