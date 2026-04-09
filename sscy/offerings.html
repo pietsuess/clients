@@ -846,9 +846,8 @@ function closeMobileMenu() {
 <!-- RETREAT GURU API -->
 <script>
 (function() {
-  // Proxied through Cloudflare Worker — token stays server-side
-  // DEPLOY: update URL to your worker route, e.g. saltspringcentre.com/api/retreat-guru/
-  var API = '/api/retreat-guru/?public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
+  // TODO: switch to Cloudflare Worker proxy once deployed (see workers/retreat-guru-proxy.js)
+  var API = 'https://saltspringcentre.secure.retreat.guru/api/v1/programs?token=ce54314d68b0417fc9be95a93d202c81&public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
   var grid = document.getElementById('retreatGuruGrid');
   if (!grid) return;
 
