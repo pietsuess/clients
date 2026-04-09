@@ -71,7 +71,10 @@ p { text-align: justify; text-justify: inter-word; }
 
 /* OFFERING CARDS */
 .offering-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
-.offering-card { background: var(--white); border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.offering-card { background: var(--white); border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden; }
+.offering-card[data-bg]::before { content: ''; position: absolute; inset: 0; background-size: cover; background-position: center; background-image: var(--card-bg); opacity: 0.10; pointer-events: none; z-index: 0; transition: opacity 0.4s ease; }
+.offering-card[data-bg]:hover::before { opacity: 0.18; }
+.offering-card > * { position: relative; z-index: 1; }
 .offering-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .offering-card h3 { font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600; color: var(--charcoal); margin-bottom: 8px; }
 .offering-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.6; margin-bottom: 8px; text-align: left; }
@@ -290,53 +293,53 @@ p { text-align: justify; text-justify: inter-word; }
     <h2>About Our Retreats</h2>
   </div>
   <div class="offering-grid">
-    <div class="offering-card reveal d1">
+    <div class="offering-card reveal d1" data-bg style="--card-bg:url('images/2021/11/retreat-1.jpg')">
       <h3>Yoga &amp; Wellness Weekends</h3>
       <p>Two or three night retreats open to all levels. A full immersion in asana, breathwork, meditation, nature walks, and freshly prepared vegetarian meals. Led by resident Karma Yogis and visiting teachers.</p>
       <p class="meta">Monthly, April through November</p>
     </div>
-    <div class="offering-card reveal d2">
+    <div class="offering-card reveal d2" data-bg style="--card-bg:url('images/2026/03/Spring-Cleanse-Retreat-2.jpg')">
       <h3>Spring Cleanse Retreat</h3>
       <p>Five-day Ayurvedic detox with Savita Leah Young. Khichadi cleanse, Shat Karma purification, sound bath, forest bathing, and wood-fired sauna. A deep seasonal reset for body and mind.</p>
       <p class="meta">April 2 - 6</p>
     </div>
-    <div class="offering-card reveal d3">
+    <div class="offering-card reveal d3" data-bg style="--card-bg:url('images/2025/12/Nature-and-Nurture-Webpage-9.jpg')">
       <h3>Nature &amp; Nurture: Heal Through Yoga</h3>
       <p>Four-day retreat with Ishwarya Chaitanya. Classical Hatha yoga, Vedanta philosophy, Hindu rituals, forest walks, and periods of silence. An invitation to slow down and listen.</p>
       <p class="meta">May 14 - 17 &amp; October 2 - 4</p>
     </div>
-    <div class="offering-card reveal d1">
+    <div class="offering-card reveal d1" data-bg style="--card-bg:url('images/2021/12/serene.jpg')">
       <h3>Breath as a Gateway to Raja Yoga</h3>
       <p>Seven-day Akhanda Yoga immersion with Dr. Yogrishi Vishvketu. Rooted in Himalayan traditions, this intensive focuses on pranayama mastery, meditation, and the subtler limbs of classical yoga.</p>
       <p class="meta">June 10 - 16</p>
     </div>
-    <div class="offering-card reveal d2">
+    <div class="offering-card reveal d2" data-bg style="--card-bg:url('images/2025/11/Agni-Protocol.jpg')">
       <h3>Agni Protocol Spring Detox</h3>
       <p>An Ayurvedic cleanse built around the digestive fire. Guided dietary protocols, herbal support, yoga, and rest. Designed to restore vitality and clarity after the winter months.</p>
       <p class="meta">Spring 2026</p>
     </div>
-    <div class="offering-card reveal d3">
+    <div class="offering-card reveal d3" data-bg style="--card-bg:url('images/2021/10/indian-spices-1.jpg')">
       <h3>Ayurveda &amp; Yoga: I Want More From Life</h3>
       <p>Five-day intensive integrating Ayurveda, psychology, somatic medicine, and nonviolent communication. For those ready to examine their patterns and reclaim energy for what matters most.</p>
       <p class="meta">September 2026</p>
     </div>
-    <div class="offering-card reveal d1">
+    <div class="offering-card reveal d1" data-bg style="--card-bg:url('images/2021/11/programs-retreats.jpg')">
       <h3>Yoga Intensive Program</h3>
       <p>Five days of concentrated practice and study. Approved for Yoga Alliance continuing education hours. Suitable for teachers and serious students looking to deepen their understanding of classical yoga.</p>
       <p class="meta">July 2026 &bull; CE hours available</p>
       <a href="yoga-intensive.html" class="section-link" style="margin-top:8px;">Learn more</a>
     </div>
-    <div class="offering-card reveal d2">
+    <div class="offering-card reveal d2" data-bg style="--card-bg:url('images/2022/03/Forest-Canopy-from-the-ground-1024x683-1.jpg')">
       <h3>Going Deeper Silent Retreat</h3>
       <p>A profound silent retreat created by Baba Hari Dass. Covered windows, minimal light, and a cave-like atmosphere designed for deep inner exploration. Led by Chetna Tracy Boyd and Gita Tanya Roberts.</p>
       <p class="meta">November 18 - 22</p>
     </div>
-    <div class="offering-card reveal d3">
+    <div class="offering-card reveal d3" data-bg style="--card-bg:url('images/2022/05/ACYR-Group-Peace.jpg')">
       <h3>Annual Community Yoga Retreat</h3>
       <p>A 50-year tradition. Family-friendly, multi-day gathering featuring diverse yoga styles, workshops, kirtan, meals, and community. The Centre's flagship event, drawing practitioners from across Canada and beyond.</p>
       <p class="meta">Registration opens later in 2026</p>
     </div>
-    <div class="offering-card reveal d1">
+    <div class="offering-card reveal d1" data-bg style="--card-bg:url('images/2025/12/Personal-Retreat-Instagram-May-2022.jpg')">
       <h3>Personal Retreats</h3>
       <p>Self-directed schedule on 69 acres of sacred land. Light self-serve breakfast, two cooked vegetarian meals per day, and a 24/7 tea bar are included. Access community yoga classes and ceremonies, the library and lounge, forested walking trails, and a swimming lake.</p>
       <p class="meta">Available year-round</p>
