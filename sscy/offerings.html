@@ -278,9 +278,11 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
   <img src="https://saltspringcentre.com/wp-content/uploads/2021/12/DJI_0078.jpg" alt="Aerial view of the Salt Spring Centre of Yoga property" class="section-banner reveal" loading="lazy">
 
-  <!-- RETREAT GURU LIVE PROGRAMS -->
-  <div class="reveal" style="max-width:1200px;margin:0 auto 40px;">
-    <div id="rbg-connect"></div>
+  <!-- RETREAT GURU LIVE PROGRAMS (API) -->
+  <div style="max-width:1200px;margin:0 auto 40px;">
+    <div class="offering-grid" id="retreatGuruGrid">
+      <p style="text-align:center;color:var(--text-light);grid-column:1/-1;">Loading programs...</p>
+    </div>
   </div>
 
   <div class="offering-header reveal" style="margin-top:40px;">
@@ -839,33 +841,69 @@ function closeMobileMenu() {
   </div>
 </div>
 
-<!-- RETREAT GURU WIDGET -->
+<!-- RETREAT GURU API -->
 <script>
-var rbgOptions = {
-  customer: "saltspringcentre",
-  retreatType: "program",
-  buttonColor: "#3bb8a8",
-  highlightColor: "#2a8a7d",
-  font: "Archivo Narrow",
-  defaultRoute: "/programs",
-  tableSettings: {
-    title: true,
-    dates: true,
-    prices: true,
-    spaces: true,
-    teachers: true,
-    moreLink: true
-  }
-};
-</script>
-<script src="https://s3.amazonaws.com/rbgconnect.retreat.guru/public/rbg-connect.min.js"></script>
+(function() {
+  var API = 'https://saltspringcentre.secure.retreat.guru/api/v1/programs?token=ce54314d68b0417fc9be95a93d202c81&public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
+  var grid = document.getElementById('retreatGuruGrid');
+  if (!grid) return;
 
-<!-- Override widget styles to match site -->
-<style>
-#rbg-connect { font-family: 'Archivo Narrow', sans-serif !important; }
-#rbg-connect a { color: var(--teal-dark) !important; }
-#rbg-connect .rbg-event-title { font-family: 'Cinzel', serif !important; font-weight: 600 !important; }
-</style>
+  fetch(API)
+    .then(function(r) { return r.json(); })
+    .then(function(programs) {
+      if (!programs.length) { grid.innerHTML = '<p style="text-align:center;color:var(--text-light);grid-column:1/-1;">No upcoming programs. Check back soon.</p>'; return; }
+
+      // Sort by start date
+      programs.sort(function(a, b) { return (a.start_date || '').localeCompare(b.start_date || ''); });
+
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+      grid.innerHTML = programs.map(function(p, i) {
+        var start = p.start_date ? new Date(p.start_date + 'T12:00:00') : null;
+        var end = p.end_date ? new Date(p.end_date + 'T12:00:00') : null;
+        var dateStr = '';
+        if (start) {
+          dateStr = months[start.getMonth()] + ' ' + start.getDate();
+          if (end && end.getTime() !== start.getTime()) {
+            dateStr += ' \u2013 ' + (end.getMonth() === start.getMonth() ? end.getDate() : months[end.getMonth()] + ' ' + end.getDate());
+          }
+          dateStr += ', ' + start.getFullYear();
+        }
+
+        var teachers = '';
+        if (p.teachers && p.teachers.length) {
+          var names = p.teachers.map(function(t) { return typeof t === 'object' ? t.name : t; }).filter(Boolean);
+          if (names.length) teachers = 'with ' + names.join(', ');
+        }
+
+        // Decode HTML entities
+        var name = p.name ? p.name.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#039;/g, "'").replace(/&quot;/g, '"') : '';
+
+        var link = p.program_link || p.registrations_link || '#';
+
+        var delay = 'd' + ((i % 4) + 1);
+
+        return '<a href="' + link + '" target="_blank" rel="noopener" class="offering-card reveal ' + delay + '" style="text-decoration:none;color:inherit;display:block;">' +
+          '<h3>' + name + '</h3>' +
+          (teachers ? '<p class="meta" style="margin-bottom:6px;">' + teachers + '</p>' : '') +
+          (dateStr ? '<p class="meta">' + dateStr + '</p>' : '') +
+          '<p style="margin-top:12px;font-size:0.82rem;color:var(--teal-dark);font-weight:600;">View Details &amp; Register \u2192</p>' +
+          '</a>';
+      }).join('');
+
+      // Observe reveals
+      grid.querySelectorAll('.reveal').forEach(function(el) {
+        var obs = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); } });
+        }, { threshold: 0.1 });
+        obs.observe(el);
+      });
+    })
+    .catch(function() {
+      grid.innerHTML = '<p style="text-align:center;color:var(--text-light);grid-column:1/-1;">Unable to load programs. <a href="https://saltspringcentre.secure.retreat.guru/program/" target="_blank" style="color:var(--teal-dark);">View programs on Retreat Guru</a></p>';
+    });
+})();
+</script>
 
 </body>
 </html>
