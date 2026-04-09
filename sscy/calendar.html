@@ -539,13 +539,15 @@ p { text-align: justify; text-justify: inter-word; }
 </div>
 
 <!-- RETREAT GURU LIVE PROGRAMS (API) -->
-<div class="section-header" id="programs">
-  <h2>Programs &amp; Registration</h2>
-  <p>Book directly through Retreat Guru.</p>
-</div>
-<div style="max-width:1200px;margin:0 auto;padding:0 32px 40px;">
-  <div class="events-grid" id="retreatGuruCalGrid">
-    <p style="text-align:center;color:var(--text-light);">Loading programs...</p>
+<div id="programsSection">
+  <div class="section-header" id="programs">
+    <h2>Programs &amp; Registration</h2>
+    <p>Book directly through Retreat Guru.</p>
+  </div>
+  <div style="max-width:1200px;margin:0 auto;padding:0 32px 40px;">
+    <div class="events-grid" id="retreatGuruCalGrid">
+      <p style="text-align:center;color:var(--text-light);">Loading programs...</p>
+    </div>
   </div>
 </div>
 
@@ -1142,22 +1144,56 @@ document.getElementById('filterBar').addEventListener('click', e => {
   btn.classList.add('active');
   activeFilter = btn.dataset.filter;
 
-  const retreatSection = document.getElementById('retreats');
-  const classSection = document.getElementById('classes');
+  var programsSection = document.getElementById('programsSection');
+  var retreatSection = document.getElementById('retreats');
+  var classSection = document.getElementById('classes');
+  var eventsGrid = document.getElementById('eventsGrid');
+  var bookSection = document.getElementById('book');
 
   // Show/hide sections based on filter
   if (activeFilter === 'class') {
+    programsSection.style.display = 'none';
     retreatSection.style.display = 'none';
-    document.getElementById('eventsGrid').style.display = 'none';
+    eventsGrid.style.display = 'none';
     classSection.style.display = '';
+    if (bookSection) bookSection.style.display = '';
   } else if (activeFilter === 'community') {
+    programsSection.style.display = 'none';
     retreatSection.style.display = 'none';
-    document.getElementById('eventsGrid').style.display = 'none';
+    eventsGrid.style.display = 'none';
     classSection.style.display = '';
-  } else {
+    if (bookSection) bookSection.style.display = 'none';
+  } else if (activeFilter === 'retreat') {
+    programsSection.style.display = '';
     retreatSection.style.display = '';
-    document.getElementById('eventsGrid').style.display = '';
-    classSection.style.display = (activeFilter === 'retreat' || activeFilter === 'concert') ? 'none' : '';
+    eventsGrid.style.display = '';
+    classSection.style.display = 'none';
+    if (bookSection) bookSection.style.display = 'none';
+    // Filter Retreat Guru cards to retreats only
+    document.querySelectorAll('#retreatGuruCalGrid .event-card').forEach(function(card) {
+      card.style.display = card.dataset.type === 'concert' ? 'none' : '';
+    });
+  } else if (activeFilter === 'concert') {
+    programsSection.style.display = '';
+    retreatSection.style.display = '';
+    eventsGrid.style.display = '';
+    classSection.style.display = 'none';
+    if (bookSection) bookSection.style.display = 'none';
+    // Filter Retreat Guru cards to concerts only
+    document.querySelectorAll('#retreatGuruCalGrid .event-card').forEach(function(card) {
+      card.style.display = card.dataset.type === 'retreat' ? 'none' : '';
+    });
+  } else {
+    // All
+    programsSection.style.display = '';
+    retreatSection.style.display = '';
+    eventsGrid.style.display = '';
+    classSection.style.display = '';
+    if (bookSection) bookSection.style.display = '';
+    // Show all Retreat Guru cards
+    document.querySelectorAll('#retreatGuruCalGrid .event-card').forEach(function(card) {
+      card.style.display = '';
+    });
   }
 
   renderEvents();
