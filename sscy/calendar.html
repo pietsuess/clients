@@ -736,7 +736,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Apr 2',
     img: 'images/2025/01/Blog-Post-picture-horizontal-1200-x-630-1.jpg',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'april-retreat-3',
@@ -750,7 +750,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Apr 16',
     img: 'images/2024/11/Blog-Post-picture-horizontal-1200-x-630-4.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'agni-protocol',
@@ -764,7 +764,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Apr 23',
     img: 'images/2025/11/Agni-Protocol.jpg',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'sound-bath',
@@ -792,7 +792,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'May 8',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'nature-nurture-may',
@@ -806,7 +806,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'May 14',
     img: 'images/2025/08/519270511_18512460514049610_251173067301957564_n.jpg',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'june-retreat-3',
@@ -820,7 +820,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Jun 18',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'mfp-akhil',
@@ -848,7 +848,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Jul 16',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'mfp-deepak',
@@ -876,7 +876,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Aug 28',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'sep-retreat-2',
@@ -890,7 +890,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Sep 18',
     img: 'images/2024/11/FALL-SCHEDULE-5.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'nature-nurture-oct',
@@ -904,7 +904,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Oct 2',
     img: 'images/2025/08/519270511_18512460514049610_251173067301957564_n.jpg',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'oct-retreat-3',
@@ -918,7 +918,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Oct 15',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'soulful-silence',
@@ -932,7 +932,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Oct 22',
     img: 'images/2025/11/Soulful-Silence-Meditation-Retreat-Farhad-Khan-.jpg',
-    url: 'offerings.html',
+    url: 'offerings.html#retreats',
     featured: true
   },
   {
@@ -947,7 +947,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Nov 13',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   },
   {
     id: 'nov-retreat-3',
@@ -961,7 +961,7 @@ const EVENTS = [
     price: 'Inquire',
     badge: 'Nov 26',
     img: 'images/2023/11/Program-House-with-flowers-resized.png',
-    url: 'offerings.html'
+    url: 'offerings.html#retreats'
   }
 ];
 
@@ -1372,7 +1372,7 @@ if (ecEl && window.EventCalendar) {
     eventDurationEditable: false,
     eventClick: function(info) {
       if (info.event.extendedProps && info.event.extendedProps.url) {
-        window.open(info.event.extendedProps.url, '_blank');
+        window.location.href = info.event.extendedProps.url;
       }
     },
     dateClick: function(info) {
