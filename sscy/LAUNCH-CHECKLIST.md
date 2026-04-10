@@ -14,9 +14,30 @@ Updated as work progresses.
 - [ ] Copy the two new nameservers Cloudflare provides
 - [ ] Log into GoDaddy, update nameservers (currently pointed at Jeff's Cloudflare)
 - [ ] Recreate DNS records in new Cloudflare account:
-  - [ ] MX records for email (critical - verify before switchover)
-  - [ ] Any existing subdomains
-  - [ ] SPF / DKIM / DMARC TXT records
+  - [ ] MX records for email (Google Workspace - critical, verify before switchover):
+    ```
+    MX  @  1   aspmx.l.google.com
+    MX  @  5   alt1.aspmx.l.google.com
+    MX  @  5   alt2.aspmx.l.google.com
+    MX  @  10  alt3.aspmx.l.google.com
+    MX  @  10  alt4.aspmx.l.google.com
+    ```
+  - [ ] SPF records (both Google and Sendinblue/Brevo):
+    ```
+    TXT  @  "v=spf1 include:_spf.google.com ~all"
+    TXT  @  "v=spf1 include:spf.sendinblue.com mx ~all"
+    TXT  @  "Sendinblue-code:4516c6461275861f21dea0ce807b6f1c"
+    ```
+  - [ ] DKIM records:
+    ```
+    TXT  google._domainkey  "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAotI+gGpxqhgAnlZcM1FzgGTWD7+nSJOHvqjna3xqauTTcN2wxKY1UuxFa/EU3jlHgOKcIAnvxjnsxjIMzTdH+3tj7suWUmYPIs269Q/M2TyhzNP3O8eRJ8SE+rjwX+f5J4bcIKiyI0D1qQcm+6o935Nmty4Q/SfcHqdUmAxZjzY9Brb7oAZ2HhIjg+pLqSMONSBFPoRKC4sJWQKG0R5HDT537RxGhKksVlr1tCDEJcvIARU0Gno9Yf8aTLozJ6TLCxRDLEECr2rpif23AC+5qr4gELvtjc2OPM3JfyWlvcHFUAfgp83PlvTdnU0Ii4jyaNQTy3DNgcu2VnTepqVjcwIDAQAB"
+    TXT  mail._domainkey  "k=rsa;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDeMVIzrCa3T14JsNY0IRv5/2V1/v2itlviLQBwXsa7shBD6TrBkswsFUToPyMRWC9tbR/5ey0nRBH0ZVxp+lsmTxid2Y2z+FApQ6ra2VsXfbJP3HE6wAO0YTVEJt1TmeczhEd2Jiz/fcabIISgXEdSpTYJhb0ct0VJRxcg4c8c7wIDAQAB"
+    ```
+  - [ ] DMARC record:
+    ```
+    TXT  _dmarc  "v=DMARC1; p=none; sp=none; rua=mailto:dmarc@mailinblue.com!10m; ruf=mailto:dmarc@mailinblue.com!10m; rf=afrf; pct=100; ri=86400"
+    ```
+  - [ ] Any existing subdomains (shop., blog., etc. as they get set up)
 - [ ] Create a Cloudflare Pages project
   - [ ] Connect to `pietsuess/clients` (or a new SSCY-owned repo)
   - [ ] Build output directory: `sscy/`
