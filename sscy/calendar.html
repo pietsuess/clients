@@ -1397,7 +1397,8 @@ if (ecEl && window.EventCalendar) {
         html += '</div>';
         return { html: html };
       }
-      return { domNodes: [] };
+      // Month view: simple title
+      return { html: '<div style="padding:1px 4px;font-size:0.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + info.event.title + '</div>' };
     }
   });
 
