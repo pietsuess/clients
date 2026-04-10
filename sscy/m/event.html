@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event | Salt Spring Centre of Yoga</title>
+<meta name="description" content="Event details at the Salt Spring Centre of Yoga.">
+<script>if(window.innerWidth>768){var qs=window.location.search;window.location.href='../event.html'+qs;}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Archivo+Narrow:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal: #3bb8a8; --teal-dark: #2a8a7d; --teal-deep: #1a5c53;
+  --cream: #faf8f4; --cream-warm: #f3ede3; --gold: #c9a84c;
+  --terracotta: #c17838; --white: #fff; --charcoal: #2c2c2c;
+  --text: #3a3a3a; --text-light: #7a7a7a;
+}
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
+body { font-family: 'Archivo Narrow', sans-serif; background: var(--cream); color: var(--text); line-height: 1.6; font-size: 16px; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; line-height: 1.2; color: var(--charcoal); }
+a { color: var(--teal-dark); text-decoration: none; }
+img { max-width: 100%; display: block; }
+p { text-align: justify; text-justify: inter-word; }
+
+.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(250,248,244,0.97); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 52px; }
+.nav-logo img { height: 36px; }
+.hamburger { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--charcoal); border-radius: 2px; transition: 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+.menu { display: none; position: fixed; top: 52px; left: 0; right: 0; bottom: 0; background: var(--cream); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+.menu.open { display: flex; }
+.menu a { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 500; color: var(--teal-deep); padding: 14px 24px; }
+
+.event-hero { height: 50vh; min-height: 320px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding-top: 52px; }
+.event-hero img.bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.event-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.85) 100%); }
+.event-hero-content { position: relative; z-index: 2; color: var(--white); padding: 0 20px 32px; width: 100%; }
+.type-badge { display: inline-block; padding: 5px 14px; background: var(--teal); color: var(--white); border-radius: 50px; font-family: 'Cinzel', serif; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; }
+.type-badge.concert { background: var(--gold); color: var(--charcoal); }
+.event-hero-content h1 { font-size: 1.5rem; color: var(--white); letter-spacing: 0.02em; text-shadow: 0 2px 14px rgba(0,0,0,0.4); margin-bottom: 8px; line-height: 1.2; }
+.date-line { font-family: 'Cinzel', serif; font-size: 0.85rem; color: rgba(255,255,255,0.95); text-shadow: 0 1px 6px rgba(0,0,0,0.4); }
+
+.event-detail { padding: 32px 20px; }
+.event-body p { font-size: 0.92rem; line-height: 1.7; margin-bottom: 1em; }
+.event-body .lead { font-size: 1rem; color: var(--charcoal); }
+
+.event-info { background: var(--white); border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-top: 24px; }
+.event-info h3 { font-family: 'Cinzel', serif; font-size: 0.78rem; color: var(--teal-deep); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--cream-warm); }
+.info-row { display: flex; flex-direction: column; padding: 10px 0; border-bottom: 1px solid var(--cream-warm); }
+.info-row:last-of-type { border-bottom: none; }
+.info-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); margin-bottom: 3px; }
+.info-value { font-size: 0.88rem; color: var(--charcoal); font-weight: 500; }
+.info-value.price { color: var(--teal-deep); font-weight: 600; }
+.event-info .btn { display: block; text-align: center; margin-top: 16px; padding: 12px 20px; background: var(--teal); color: var(--white); border-radius: 50px; font-size: 0.88rem; font-weight: 600; }
+.event-info .btn-outline { background: transparent; color: var(--teal-dark); border: 1.5px solid var(--teal); margin-top: 8px; }
+
+.related { padding: 32px 20px; background: var(--cream-warm); }
+.related h2 { text-align: center; font-size: 1.2rem; color: var(--teal-deep); margin-bottom: 20px; }
+.related-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.related-card { background: var(--white); border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: block; color: inherit; position: relative; overflow: hidden; }
+.related-card::before { content: ''; position: absolute; inset: 0; background-size: cover; background-position: center; background-image: var(--card-bg); opacity: 0.10; pointer-events: none; }
+.related-card > * { position: relative; z-index: 1; }
+.related-card .meta { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--teal); margin-bottom: 6px; font-weight: 600; }
+.related-card h3 { font-family: 'Cinzel', serif; font-size: 0.88rem; color: var(--charcoal); margin-bottom: 4px; }
+.related-card .related-date { font-size: 0.75rem; color: var(--text-light); }
+
+.not-found { text-align: center; padding: 80px 20px; }
+.not-found h1 { font-size: 1.6rem; color: var(--teal-deep); margin-bottom: 12px; }
+.not-found p { font-size: 0.92rem; color: var(--text-light); margin-bottom: 20px; }
+.not-found .btn { display: inline-block; padding: 12px 24px; background: var(--teal); color: var(--white); border-radius: 50px; font-weight: 600; font-size: 0.88rem; }
+
+.footer { background: var(--charcoal); color: var(--white); padding: 40px 20px 24px; }
+.footer h3 { font-family: 'Archivo Narrow', sans-serif; font-size: 0.92rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.footer p { font-size: 0.78rem; opacity: 0.5; line-height: 1.6; text-align: left; }
+.footer-links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 20px 0; }
+.footer-links a { color: var(--white); font-size: 0.72rem; opacity: 0.4; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 16px; }
+.footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
+.social { display: flex; gap: 12px; margin-top: 12px; }
+.social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo"><img src="../logo-full-teal-light.svg" alt="SSCY"></a>
+  <button class="hamburger" id="ham" onclick="this.classList.toggle('open');document.getElementById('menu').classList.toggle('open');">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="menu" id="menu">
+  <a href="index.html" onclick="closeMenu()">Home</a>
+  <a href="offerings.html" onclick="closeMenu()">Offerings</a>
+  <a href="calendar.html" onclick="closeMenu()">Calendar</a>
+  <a href="shop.html" onclick="closeMenu()">Shop</a>
+  <a href="about.html" onclick="closeMenu()">About</a>
+  <a href="rentals.html" onclick="closeMenu()">Rentals</a>
+  <a href="blog.html" onclick="closeMenu()">Blog</a>
+  <a href="contact.html" onclick="closeMenu()">Contact</a>
+</div>
+
+<main id="eventMain">
+  <div class="not-found">
+    <h1>Loading...</h1>
+  </div>
+</main>
+
+<footer class="footer">
+  <h3>Salt Spring Centre of Yoga</h3>
+  <p>355 Blackburn Road<br>Salt Spring Island, BC, Canada<br>250-537-2326</p>
+  <div class="social">
+    <a href="https://www.instagram.com/saltspringcentre/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></a>
+    <a href="https://www.facebook.com/saltspringcentreofyoga/" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+    <a href="https://www.youtube.com/channel/UC-N5pJ1iVpJ4AKNyv-SaogQ" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48"/></svg></a>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="offerings.html">Offerings</a>
+    <a href="about.html">About</a>
+    <a href="calendar.html">Calendar</a>
+    <a href="shop.html">Shop</a>
+    <a href="rentals.html">Rentals</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-bottom">
+    <p>We gratefully acknowledge that we are on traditional unceded territory of the Hul'qumi'num Treaty Group and Saanich First Nations.</p>
+    <p>Dharma Sara Satsang Society - Est. 1974</p>
+  </div>
+</footer>
+
+<script>
+function closeMenu() { document.getElementById('menu').classList.remove('open'); document.getElementById('ham').classList.remove('open'); }
+</script>
+<script src="../events-data.js"></script>
+<script>
+(function() {
+  function getParam(name) { return new URL(window.location.href).searchParams.get(name); }
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, function(c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  // Mobile uses ../ prefix for images
+  function fixImg(p) { return p && p.indexOf('../') !== 0 && p.indexOf('http') !== 0 ? '../' + p : p; }
+
+  var id = getParam('id');
+  var event = EVENTS.find(function(e) { return e.id === id; });
+  var main = document.getElementById('eventMain');
+
+  if (!event) {
+    main.innerHTML = '<div class="not-found">' +
+      '<h1>Event Not Found</h1>' +
+      '<p>That event does not exist or has been removed.</p>' +
+      '<a href="calendar.html" class="btn">Back to Calendar</a>' +
+      '</div>';
+    return;
+  }
+
+  document.title = event.title + ' | Salt Spring Centre of Yoga';
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', event.desc);
+
+  var typeLabel = event.type === 'concert' ? 'Concert' : 'Retreat';
+  var bookHref = event.type === 'concert' ? 'shop.html' : 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Inquiry: ' + event.title);
+  var bookLabel = event.type === 'concert' ? 'Get Tickets in the Shop' : 'Inquire & Register';
+
+  var html = '<section class="event-hero">' +
+    '<img class="bg" src="' + escapeHtml(fixImg(event.img)) + '" alt="' + escapeHtml(event.title) + '">' +
+    '<div class="event-hero-overlay"></div>' +
+    '<div class="event-hero-content">' +
+      '<span class="type-badge ' + event.type + '">' + typeLabel + '</span>' +
+      '<h1>' + escapeHtml(event.title) + '</h1>' +
+      '<div class="date-line">' + escapeHtml(event.dateLabel) + (event.time ? ' &middot; ' + escapeHtml(event.time) : '') + '</div>' +
+    '</div>' +
+  '</section>';
+
+  html += '<section class="event-detail">' +
+    '<div class="event-body">' +
+      '<p class="lead">' + escapeHtml(event.desc) + '</p>' +
+      (event.type === 'concert'
+        ? '<p>Music for Peace concerts are held in the Satsang Room (and occasionally the Pond Dome), with seating for approximately 50 guests. Each concert supports the Centre\'s programs and community.</p>' +
+          '<p><a href="music-for-peace.html">About the Music for Peace series &rarr;</a></p>'
+        : '<p>This retreat takes place at the Salt Spring Centre of Yoga on 69 acres of protected land. Includes accommodation, lacto-vegetarian meals, and access to grounds, forest trails, and swimming lake.</p>' +
+          '<p><a href="offerings.html#retreats">See all retreats &rarr;</a></p>') +
+    '</div>' +
+    '<aside class="event-info">' +
+      '<h3>Details</h3>' +
+      '<div class="info-row"><span class="info-label">Date</span><span class="info-value">' + escapeHtml(event.dateLabel) + '</span></div>' +
+      (event.time ? '<div class="info-row"><span class="info-label">Time</span><span class="info-value">' + escapeHtml(event.time) + '</span></div>' : '') +
+      '<div class="info-row"><span class="info-label">Venue</span><span class="info-value">' + escapeHtml(event.venue) + '</span></div>' +
+      '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(event.price) + '</span></div>' +
+      '<a href="' + bookHref + '" class="btn">' + bookLabel + '</a>' +
+      '<a href="calendar.html" class="btn btn-outline">Back to Calendar</a>' +
+    '</aside>' +
+  '</section>';
+
+  var related = EVENTS.filter(function(e) { return e.type === event.type && e.id !== event.id; }).slice(0, 4);
+  if (related.length) {
+    html += '<section class="related"><h2>More ' + (event.type === 'concert' ? 'Concerts' : 'Retreats') + '</h2><div class="related-grid">';
+    related.forEach(function(r) {
+      html += '<a class="related-card" href="event.html?id=' + r.id + '" style="--card-bg:url(\'' + fixImg(r.img) + '\')">' +
+        '<div class="meta">' + escapeHtml(r.dateLabel) + '</div>' +
+        '<h3>' + escapeHtml(r.title) + '</h3>' +
+        '<div class="related-date">' + escapeHtml(r.venue) + ' &middot; ' + escapeHtml(r.price) + '</div>' +
+        '</a>';
+    });
+    html += '</div></section>';
+  }
+
+  main.innerHTML = html;
+})();
+</script>
+
+</body>
+</html>
