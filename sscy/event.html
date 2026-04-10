@@ -314,8 +314,17 @@ p { text-align: justify; text-justify: inter-word; }
   // ===== RENDER: retreat / concert (dated events) =====
   function renderEvent(item) {
     var typeLabel = item.type === 'concert' ? 'Concert' : 'Retreat';
-    var bookHref = item.type === 'concert' ? 'shop.html' : 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Inquiry: ' + item.title);
-    var bookLabel = item.type === 'concert' ? 'Get Tickets in the Shop' : 'Inquire & Register';
+    var bookHref, bookLabel;
+    if (item.bookUrl) {
+      bookHref = item.bookUrl;
+      bookLabel = 'Book on Retreat Guru';
+    } else if (item.type === 'concert') {
+      bookHref = 'shop.html';
+      bookLabel = 'Get Tickets in the Shop';
+    } else {
+      bookHref = 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Inquiry: ' + item.title);
+      bookLabel = 'Inquire & Register';
+    }
 
     var html = '<section class="event-hero">' +
       '<img class="event-hero-img" src="' + escapeHtml(item.img) + '" alt="' + escapeHtml(item.title) + '">' +
@@ -329,19 +338,20 @@ p { text-align: justify; text-justify: inter-word; }
 
     html += '<section class="event-detail"><div class="event-detail-inner"><div class="event-body">' +
       '<p class="lead">' + escapeHtml(item.desc) + '</p>' +
+      (item.longDesc ? '<p>' + escapeHtml(item.longDesc) + '</p>' : '') +
       (item.type === 'concert'
         ? '<p>Music for Peace concerts are held in the intimate setting of the Satsang Room (and occasionally the Pond Dome), with seating for approximately 50 guests. Each concert is a fundraiser supporting the Centre\'s programs and community.</p>' +
           '<p>Doors typically open 30 minutes before the performance. Light refreshments may be available. The space is acoustically warm and naturally lit.</p>' +
           '<p><a href="music-for-peace.html">Learn more about the Music for Peace concert series &rarr;</a></p>'
         : '<p>This retreat takes place at the Salt Spring Centre of Yoga, an intentional community on 69 acres of protected land on Salt Spring Island, BC. All retreats include accommodation, lacto-vegetarian meals freshly prepared by the Centre kitchen, and access to the grounds, forest trails, and swimming lake.</p>' +
           '<p>Daily life at the Centre follows a rhythm shaped by decades of practice. Mornings begin with sadhana and Arati at the temple. Meals are taken communally. Evenings bring satsang, kirtan, or stillness.</p>' +
-          '<p><a href="offerings.html#retreats">See all retreats &amp; programs &rarr;</a></p>') +
+          (item.relatedPage ? '<p><a href="' + escapeHtml(item.relatedPage) + '">View the full program page &rarr;</a></p>' : '<p><a href="offerings.html#retreats">See all retreats &amp; programs &rarr;</a></p>')) +
       '</div><aside class="event-info"><h3>Details</h3>' +
-        '<div class="info-row"><span class="info-label">Date</span><span class="info-value">' + escapeHtml(item.dateLabel) + '</span></div>' +
+        (item.dateLabel ? '<div class="info-row"><span class="info-label">Date</span><span class="info-value">' + escapeHtml(item.dateLabel) + '</span></div>' : '') +
         (item.time ? '<div class="info-row"><span class="info-label">Time</span><span class="info-value">' + escapeHtml(item.time) + '</span></div>' : '') +
         '<div class="info-row"><span class="info-label">Venue</span><span class="info-value">' + escapeHtml(item.venue) + '</span></div>' +
         '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(item.price) + '</span></div>' +
-        '<a href="' + bookHref + '" class="btn">' + bookLabel + '</a>' +
+        '<a href="' + escapeHtml(bookHref) + '"' + (item.bookUrl ? ' target="_blank" rel="noopener"' : '') + ' class="btn">' + bookLabel + '</a>' +
         '<a href="calendar.html" class="btn btn-outline">Back to Calendar</a>' +
       '</aside></div></section>';
 
