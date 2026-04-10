@@ -242,5 +242,329 @@ var EVENTS = [
   }
 ];
 
-// Each event's URL is its dedicated detail page
-EVENTS.forEach(function(e) { e.url = 'event.html?id=' + e.id; });
+// ===== WEEKLY CLASSES =====
+var CLASSES_DATA = [
+  {
+    id: 'class-hatha-dorothy',
+    type: 'class',
+    title: 'Hatha Yoga with Dorothy',
+    teacher: 'Dorothy Price',
+    schedule: 'Monday & Thursday, 4:30 - 5:45 PM',
+    days: ['Monday', 'Thursday'],
+    time: '4:30 - 5:45 PM',
+    price: '$118 - $134 / 8-class pass',
+    dropIn: 'Drop-in welcome',
+    format: 'In-person',
+    location: 'Garden House Yoga Studio',
+    level: 'All levels',
+    desc: 'Classical Hatha yoga suitable for all levels. A grounding mid-week and end-of-week practice led by a long-time Centre teacher.',
+    longDesc: 'Dorothy Price brings decades of practice to this accessible Hatha class. Expect a careful sequence of warming postures, standing and seated asana, floor work, and a brief relaxation. The emphasis is on alignment, breath, and listening to the body. Students of all levels and experience are welcome.',
+    img: 'images/2021/12/Class-3-1024x610-1.jpg'
+  },
+  {
+    id: 'class-yoga-flow-john',
+    type: 'class',
+    title: 'Yoga Flow with John Howe',
+    teacher: 'John Howe',
+    schedule: 'Saturday, 9:30 - 10:30 AM',
+    days: ['Saturday'],
+    time: '9:30 - 10:30 AM',
+    price: '$100 / 8 classes &middot; $15 drop-in',
+    format: 'In-person',
+    location: 'Garden House Yoga Studio',
+    level: 'All levels (modifications offered)',
+    desc: 'A flowing, breath-led Saturday morning practice. Energizing and accessible, with modifications offered for all levels.',
+    longDesc: 'John Howe guides a gentle vinyasa-style flow to start your Saturday. Breath leads movement through sun salutations, standing postures, balancing work, and seated stretches. Modifications are offered so students at every level can practice comfortably alongside one another.',
+    img: 'images/2021/11/retreat-2.jpg'
+  },
+  {
+    id: 'class-sacred-sunday',
+    type: 'class',
+    title: 'Sacred Sunday Eco-Yoga with Cara Graci',
+    teacher: 'Cara Graci',
+    schedule: 'Sunday, 11:00 AM - 12:15 PM',
+    days: ['Sunday'],
+    time: '11:00 AM - 12:15 PM',
+    price: 'By donation',
+    format: 'Outdoor',
+    location: 'Pond Dome',
+    level: 'All levels',
+    desc: 'Practice outdoors at the Pond Dome, surrounded by the sounds and rhythms of the natural world. A meditative, earth-connected experience.',
+    longDesc: 'Eco-Yoga with Cara Graci takes place at the Pond Dome, a beautiful open-air space on the Centre grounds. Practice unfolds alongside birdsong, breeze, and the living presence of the land. The class combines gentle asana, breathwork, and moments of stillness that deepen connection to nature and self.',
+    img: 'images/2022/03/pond-dome-2.jpg'
+  },
+  {
+    id: 'class-gentle-hatha-repair',
+    type: 'class',
+    title: 'Gentle Hatha Repair with Cara Graci',
+    teacher: 'Cara Graci',
+    schedule: 'Wednesday, 11:00 AM - 12:15 PM',
+    days: ['Wednesday'],
+    time: '11:00 AM - 12:15 PM',
+    price: 'By donation',
+    format: 'Online / Zoom',
+    level: 'Gentle, therapeutic',
+    desc: 'A slow, therapeutic practice designed to restore and repair. Emphasis on gentle movement, breath, and deep rest. Available in-person and on Zoom.',
+    longDesc: 'Gentle Hatha Repair is a slow, restorative practice with Cara Graci, created for students who need a soft entry point or who are recovering from injury, illness, or fatigue. The class combines supported postures, breath awareness, and extended rest. Props are encouraged. Available online via Zoom.',
+    img: 'images/2025/12/Nature-and-Nurture-Webpage-12.jpg'
+  },
+  {
+    id: 'class-meditation-mellow',
+    type: 'class',
+    title: 'Meditation & Mellow Yoga with Cara Graci',
+    teacher: 'Cara Graci',
+    schedule: 'Thursday, 4:30 - 5:30 PM',
+    days: ['Thursday'],
+    time: '4:30 - 5:30 PM',
+    price: 'Free / donation',
+    format: 'Online / Zoom',
+    level: 'All levels',
+    desc: 'A quiet Thursday practice combining gentle movement with seated meditation. Suitable for beginners and experienced practitioners alike.',
+    longDesc: 'Meditation & Mellow Yoga is a quiet Thursday practice blending slow movement with seated meditation. Cara Graci guides the session online via Zoom. The class is gentle enough for beginners and rich enough for experienced practitioners looking to deepen their sit.',
+    img: 'images/2014/11/Babaji-meditating.jpg'
+  },
+  {
+    id: 'class-mindfulness-nature',
+    type: 'class',
+    title: 'Mindfulness in Nature Eco-Yoga with Cara Graci',
+    teacher: 'Cara Graci',
+    schedule: 'Friday, 4:30 - 5:45 PM',
+    days: ['Friday'],
+    time: '4:30 - 5:45 PM',
+    price: 'By donation',
+    format: 'Outdoor',
+    location: 'Forest & meadow',
+    level: 'All levels',
+    desc: 'Outdoor yoga practice cultivating presence through nature. Breath, movement, and stillness in the forest and meadow.',
+    longDesc: 'Mindfulness in Nature Eco-Yoga takes practice outside, into the forest and meadow of the Centre grounds. Cara Graci weaves gentle movement, breath, and stillness into a practice that cultivates presence with the living world. Please dress for the weather and bring a mat or blanket.',
+    img: 'images/2022/03/Forest-Canopy-from-the-ground-1024x683-1.jpg'
+  },
+  {
+    id: 'class-yoga-sutras',
+    type: 'class',
+    title: 'Yoga Sutras Study Group',
+    teacher: 'Yogeshwar (Will Humphrey)',
+    schedule: 'Monday, 7:00 - 8:00 PM',
+    days: ['Monday'],
+    time: '7:00 - 8:00 PM',
+    price: 'By donation',
+    format: 'Online / Zoom',
+    level: 'All welcome',
+    desc: "Weekly study of Patanjali's Yoga Sutras with Yogeshwar (Will Humphrey). A careful, verse-by-verse exploration of yoga's foundational philosophical text.",
+    longDesc: "Join Yogeshwar (Will Humphrey) for a weekly study of Patanjali's Yoga Sutras. Each session moves verse by verse through the text, using Baba Hari Dass's commentaries as a guide. The group reads translations aloud, discusses meaning, and explores how these ancient teachings apply to practice and daily life. No prior study required.",
+    img: 'images/2022/03/Baba-Hari-Dass-w-Chalkboard-1970s.jpg'
+  },
+  {
+    id: 'class-bhagavad-gita',
+    type: 'class',
+    title: 'Bhagavad Gita Study Group',
+    teacher: 'Mahavir',
+    schedule: 'Tuesday, 7:30 - 8:30 PM',
+    days: ['Tuesday'],
+    time: '7:30 - 8:30 PM',
+    price: 'By donation',
+    format: 'Online / Zoom',
+    level: 'All welcome',
+    desc: 'Weekly reading and discussion of the Bhagavad Gita led by Mahavir, using the translations and commentaries of Baba Hari Dass.',
+    longDesc: "Mahavir leads this weekly scripture study exploring the Bhagavad Gita through Baba Hari Dass's translations and commentaries. The group reads passages together, chants verses in Sanskrit, and discusses the Gita's teachings on dharma, devotion, and selfless action. Beginning and seasoned students are both welcome.",
+    img: 'images/2023/03/Babaji-teaching-black-and-white.jpg'
+  },
+  {
+    id: 'class-sadhana',
+    type: 'class',
+    title: 'Sadhana for Continuing Practitioners',
+    teacher: 'Centre Community',
+    schedule: 'Sunday, 7:30 - 8:40 AM',
+    days: ['Sunday'],
+    time: '7:30 - 8:40 AM',
+    price: 'Free',
+    format: 'Online / Zoom',
+    level: 'Experienced practitioners',
+    desc: 'Early Sunday morning practice for experienced students. A dedicated time for deepening personal sadhana within a supportive group container.',
+    longDesc: "Sadhana for Continuing Practitioners is an early Sunday morning container for students with an established personal practice. The session combines pranayama and seated meditation in silence, supported by the presence of a committed group. Open to experienced practitioners familiar with the Centre's tradition.",
+    img: 'images/2021/12/DawnOverTheGarden-small-1.jpg'
+  }
+];
+
+// ===== COMMUNITY GATHERINGS =====
+var COMMUNITY_DATA = [
+  {
+    id: 'community-sunday-satsang',
+    type: 'community',
+    title: 'Sunday Satsang',
+    schedule: 'Sunday, 2:00 - 3:30 PM',
+    days: ['Sunday'],
+    time: '2:00 - 3:30 PM',
+    price: 'Free (donations welcome)',
+    format: 'Hybrid: in-person + Zoom',
+    location: 'Satsang Room',
+    desc: 'The heart of the weekly community gathering. Kirtan, meditation, spiritual readings, and shared silence.',
+    longDesc: "Satsang means 'union of truth.' Sunday Satsang is the heart of the Centre's weekly community life. The gathering includes kirtan (devotional chanting), meditation, readings from Baba Hari Dass and yogic scripture, and shared silence. Held in the Satsang Room with a simultaneous Zoom feed for those joining from afar. All are welcome regardless of background or belief.",
+    img: 'images/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg'
+  },
+  {
+    id: 'community-vancouver-satsang',
+    type: 'community',
+    title: 'Vancouver Satsang',
+    schedule: 'Wednesday, 6:30 - 8:00 PM',
+    days: ['Wednesday'],
+    time: '6:30 - 8:00 PM',
+    price: 'Free (donations welcome)',
+    format: 'Online / Zoom',
+    desc: 'A mid-week online gathering for the extended community. Yoga Sutra study followed by kirtan.',
+    longDesc: "Vancouver Satsang is a mid-week online gathering rooted in the Centre's community in Vancouver and extending across the country. Each session begins with a brief Yoga Sutra study and closes with kirtan. A way to stay connected to the Centre's teachings between visits.",
+    img: 'images/2022/11/Online-yoga.jpg'
+  },
+  {
+    id: 'community-kirtan-class',
+    type: 'community',
+    title: 'Kirtan Class',
+    schedule: 'Thursday, 7:00 - 8:30 PM',
+    days: ['Thursday'],
+    time: '7:00 - 8:30 PM',
+    price: 'Pay-what-you-can ($20 suggested)',
+    format: 'In-person',
+    location: 'Satsang Room',
+    note: 'Currently paused for summer. Check calendar for return date.',
+    desc: 'Learn to chant, lead kirtan, and play harmonium. A welcoming space for beginners and experienced chanters.',
+    longDesc: "Kirtan Class is a welcoming space to learn the practice of call-and-response devotional chanting. Open to complete beginners and experienced chanters alike, the class covers Sanskrit pronunciation, harmonium basics, leading kirtan, and the history and spirit of the bhakti tradition. Currently on pause for the summer months - check the calendar for the return date.",
+    img: 'images/2022/03/Grounding-with-music.jpg'
+  },
+  {
+    id: 'community-daily-arati',
+    type: 'community',
+    title: 'Daily Arati',
+    schedule: 'Daily, 6:45 - 7:15 AM',
+    days: ['Daily'],
+    time: '6:45 - 7:15 AM',
+    price: 'Free',
+    format: 'In-person',
+    location: 'The Temples',
+    desc: 'The day begins with Arati, a lamp ceremony accompanied by mantras, prayers, and songs. A beautiful, brief ritual that sets the tone for the morning.',
+    longDesc: "Arati is the traditional lamp ceremony that opens the day at the Centre. Held each morning at the temples, the ritual involves offerings of light, incense, and song, accompanied by mantras and prayers. Visitors are warmly welcomed to attend. It is a short, beautiful way to begin a day of practice.",
+    img: 'images/2023/04/Other-ways-to-help-ceremony-at-the-Madonna.jpg'
+  }
+];
+
+// ===== WELLNESS TREATMENTS =====
+var TREATMENTS_DATA = [
+  {
+    id: 'treatment-swedish-massage',
+    type: 'treatment',
+    title: 'Swedish Massage (Deep Flow)',
+    practitioner: 'Registered Massage Therapists',
+    durations: [
+      { time: '60 minutes', price: '$120' },
+      { time: '90 minutes', price: '$180' }
+    ],
+    desc: 'Classic therapeutic bodywork tailored to your needs. Releases tension, improves circulation, and restores ease throughout the body.',
+    longDesc: 'Swedish Massage (Deep Flow) is classic therapeutic bodywork using long, flowing strokes and focused pressure to release muscle tension, improve circulation, and restore ease throughout the body. Each session is tailored to your needs. Suitable for those looking for relaxation, recovery, or relief from chronic tension.',
+    img: 'images/2023/01/Registered-RMT-massage-Canva-Pro-stock-photo-2023.jpg'
+  },
+  {
+    id: 'treatment-maha-therapy',
+    type: 'treatment',
+    title: 'The MAHA Therapy',
+    practitioner: 'Savita Leah Young (Ayurveda, 40+ years)',
+    durations: [ { time: '150 minutes', price: '$270' } ],
+    desc: "The Centre's signature treatment. A 150-minute journey combining Abhyanga oil massage, Swedana herbal steam, Udtana herbal paste exfoliation, and Shirodhara warm oil therapy.",
+    longDesc: "The MAHA Therapy is the Centre's signature wellness treatment, offered by Savita Leah Young. Over 150 minutes, it combines four classical Ayurvedic therapies: Abhyanga (warm oil massage), Swedana (herbal steam), Udtana (herbal paste exfoliation), and Shirodhara (warm oil stream on the forehead). The result is a deeply nourishing, multi-layered experience that leaves the body, mind, and nervous system profoundly restored.",
+    img: 'images/2023/01/2023-Savita-Leah-Young-Wellness-Treatments.jpg'
+  },
+  {
+    id: 'treatment-abhyanga',
+    type: 'treatment',
+    title: 'Abhyanga (Ayurvedic Oil Massage)',
+    practitioner: 'Savita Leah Young',
+    durations: [ { time: '75 minutes', price: '$160' } ],
+    desc: 'Our most popular treatment. Warm herbal oils are applied in long, flowing strokes to nourish the skin, calm the nervous system, and balance the doshas.',
+    longDesc: 'Abhyanga is the classical Ayurvedic oil massage and one of the most requested treatments at the Centre. Warm herbal oils - chosen for your constitution - are applied in long, flowing strokes along the meridians of the body. The practice nourishes the skin, calms the nervous system, improves circulation, and balances the doshas. Allow time to rest after the treatment.',
+    img: 'images/2021/12/serene.jpg'
+  },
+  {
+    id: 'treatment-swedana',
+    type: 'treatment',
+    title: 'Swedana (Herbal Steam)',
+    practitioner: 'Savita Leah Young',
+    durations: [
+      { time: '60 minutes', price: '$128' },
+      { time: '90 minutes', price: '$180' },
+      { time: '30 min add-on', price: '$60' }
+    ],
+    desc: 'A medicated steam treatment that opens the channels, draws toxins to the surface, and deeply relaxes the musculature.',
+    longDesc: 'Swedana is the Ayurvedic medicated steam treatment. Herbal decoctions are infused into warm steam that gently opens the channels of the body, draws toxins to the surface, and deeply relaxes the musculature. Available as a standalone treatment or as an add-on following an oil massage.',
+    img: 'images/2022/01/buddha-background.jpg'
+  },
+  {
+    id: 'treatment-shirodhara',
+    type: 'treatment',
+    title: 'Shirodhara (Oil Therapy)',
+    practitioner: 'Savita Leah Young',
+    durations: [
+      { time: '60 minutes', price: '$120' },
+      { time: '90 minutes', price: '$180' }
+    ],
+    desc: 'A continuous stream of warm oil flows over the forehead, settling the mind into a meditative stillness. Deeply restorative for stress, insomnia, and mental fatigue.',
+    longDesc: "Shirodhara is one of the most profound treatments in the Ayurvedic tradition. A continuous stream of warm, herb-infused oil flows over the 'third eye' on the forehead, settling the nervous system into a deeply meditative stillness. The treatment is especially restorative for stress, insomnia, anxiety, mental fatigue, and the subtle fog that comes with prolonged overwhelm.",
+    img: 'images/2021/12/Fountain.jpg'
+  },
+  {
+    id: 'treatment-acupuncture',
+    type: 'treatment',
+    title: 'Acupuncture (Initial Visit)',
+    practitioner: 'Ehlana Helen (Traditional Chinese Medicine)',
+    durations: [ { time: '90 minutes', price: '$140' } ],
+    desc: 'Comprehensive intake and treatment with Ehlana Helen. Traditional Chinese medicine diagnostics combined with a yoga-informed understanding of the body.',
+    longDesc: 'Your initial acupuncture visit with Ehlana Helen includes a comprehensive intake, pulse and tongue diagnostics, and a full treatment. Ehlana combines classical Traditional Chinese Medicine with a yoga-informed understanding of the body. Follow-up visits are shorter and focused on continued care. Booking via jane app.',
+    bookUrl: 'https://sattvaacupunctureandyoga.janeapp.com',
+    img: 'images/2025/10/needles-accupuncture.avif'
+  },
+  {
+    id: 'treatment-bodywork',
+    type: 'treatment',
+    title: 'Bodywork / Needle-Free',
+    practitioner: 'Ehlana Helen',
+    durations: [ { time: '60 minutes', price: '$100' } ],
+    desc: 'Therapeutic bodywork using acupressure, craniosacral, and other non-invasive modalities. Ideal for those who prefer treatment without needles.',
+    longDesc: 'Needle-Free Bodywork is for those who prefer hands-on therapy without acupuncture needles. Ehlana draws from acupressure, craniosacral work, myofascial release, and other non-invasive modalities to address tension, pain, and energetic imbalance. A gentler option that still accesses deep therapeutic benefit.',
+    bookUrl: 'https://sattvaacupunctureandyoga.janeapp.com',
+    img: 'images/2022/03/Tree-Pose-in-Boots-scaled-1.jpg'
+  },
+  {
+    id: 'treatment-fire-cupping',
+    type: 'treatment',
+    title: 'Fire Cupping',
+    practitioner: 'Ehlana Helen',
+    durations: [ { time: '45 minutes', price: '$75' } ],
+    desc: "Traditional cupping therapy to release deep-seated tension, improve circulation, and support the body's natural healing processes.",
+    longDesc: 'Fire Cupping is a traditional Chinese medicine therapy that uses gentle suction to lift muscle and fascia, release deep-seated tension, improve circulation, and stimulate the flow of qi. A beautiful complement to acupuncture or as a standalone treatment for chronic tightness, especially in the back and shoulders.',
+    bookUrl: 'https://sattvaacupunctureandyoga.janeapp.com',
+    img: 'images/2022/03/Holy-Mother-below-fountain.jpg'
+  },
+  {
+    id: 'treatment-wood-fired-sauna',
+    type: 'treatment',
+    title: 'Wood-Fired Sauna',
+    practitioner: 'Self-directed booking',
+    durations: [ { time: '2 hours (2-8 people)', price: '$100' }, { time: 'Additional hour', price: '+$50' } ],
+    desc: 'Private sauna sessions for 2 to 8 people. Nestled in the forest, heated by wood fire. A cleansing and social experience in a beautiful natural setting.',
+    longDesc: 'The wood-fired sauna at the Centre is nestled in the forest and heated the traditional way. Rent the space privately for 2 to 8 people. A beautiful cleansing experience whether used for solo reflection, a quiet soak with a friend, or a small group gathering. Towels provided. Cold plunge access included.',
+    img: 'images/2021/12/Sauna-at-night.jpg'
+  },
+  {
+    id: 'treatment-reset-rejuvenate',
+    type: 'treatment',
+    title: 'Reset & Rejuvenate with Ayurveda',
+    practitioner: 'Savita Leah Young',
+    durations: [ { time: 'By consultation', price: 'Inquire' } ],
+    desc: 'A specialized Ayurvedic program designed for individuals in cancer remission. Gentle, restorative treatments and dietary guidance to support recovery, rebuild strength, and nourish the whole person.',
+    longDesc: 'Reset & Rejuvenate with Ayurveda is a specialized program designed with deep care for individuals in cancer remission or recovering from serious illness. Savita Leah Young draws on 40+ years of Ayurvedic practice to create a customized combination of gentle, restorative treatments, dietary guidance, and rhythm-of-life recommendations. The program supports recovery, rebuilds strength, and nourishes the whole person. By consultation only.',
+    img: 'images/2022/09/Lotus-photo-jpeg.jpg'
+  }
+];
+
+// ===== COMBINED: single OFFERINGS array for lookups =====
+var OFFERINGS = EVENTS.concat(CLASSES_DATA).concat(COMMUNITY_DATA).concat(TREATMENTS_DATA);
+
+// Each entry gets a URL to its dedicated detail page
+OFFERINGS.forEach(function(o) { o.url = 'event.html?id=' + o.id; });

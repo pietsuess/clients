@@ -717,7 +717,8 @@ const CLASSES = [
     price: 'Free (donation welcome)',
     format: 'In-person',
     desc: 'Lamp ceremony with mantras, prayers, and songs',
-    type: 'community'
+    type: 'community',
+    offeringId: 'community-daily-arati'
   },
   {
     day: 'Sunday',
@@ -728,7 +729,8 @@ const CLASSES = [
     price: 'Free (donation)',
     format: 'Online / Zoom',
     desc: 'Pranayama and meditation for established practitioners',
-    type: 'class'
+    type: 'class',
+    offeringId: 'class-sadhana'
   },
   {
     day: 'Sunday',
@@ -739,7 +741,8 @@ const CLASSES = [
     price: 'By donation',
     format: 'Outdoor / Pond Dome',
     desc: 'Walking meditation and asana flow in nature',
-    type: 'class'
+    type: 'class',
+    offeringId: 'class-sacred-sunday'
   },
   {
     day: 'Sunday',
@@ -750,13 +753,15 @@ const CLASSES = [
     price: 'Free (donation)',
     format: 'Hybrid (in-person + Zoom)',
     desc: 'Kirtan, meditation, and readings from Baba Hari Dass',
-    type: 'community'
+    type: 'community',
+    offeringId: 'community-sunday-satsang'
   },
   {
     day: 'Monday',
     daySort: 2,
     name: 'All Levels Hatha Yoga',
     teacher: 'Dorothy',
+    offeringId: 'class-hatha-dorothy',
     time: '4:30 - 5:45 PM',
     price: '$134/8-class pass (1x/wk), drop-in welcome',
     format: 'In-person',
@@ -772,7 +777,8 @@ const CLASSES = [
     price: 'By donation',
     format: 'Online / Zoom',
     desc: 'Weekly scripture study group',
-    type: 'community'
+    type: 'community',
+    offeringId: 'class-yoga-sutras'
   },
   {
     day: 'Tuesday',
@@ -783,7 +789,8 @@ const CLASSES = [
     price: 'By donation',
     format: 'Online / Zoom',
     desc: 'Weekly scripture study group',
-    type: 'community'
+    type: 'community',
+    offeringId: 'class-bhagavad-gita'
   },
   {
     day: 'Wednesday',
@@ -794,7 +801,8 @@ const CLASSES = [
     price: 'By donation',
     format: 'Online / Zoom',
     desc: 'Slow flow with healing focus',
-    type: 'class'
+    type: 'class',
+    offeringId: 'class-gentle-hatha-repair'
   },
   {
     day: 'Wednesday',
@@ -805,13 +813,15 @@ const CLASSES = [
     price: 'Free',
     format: 'Online / Zoom',
     desc: 'Yoga Sutra study, kirtan, meditation',
-    type: 'community'
+    type: 'community',
+    offeringId: 'community-vancouver-satsang'
   },
   {
     day: 'Thursday',
     daySort: 5,
     name: 'All Levels Hatha Yoga',
     teacher: 'Dorothy',
+    offeringId: 'class-hatha-dorothy',
     time: '4:30 - 5:45 PM',
     price: '$118/8-class pass (2+/wk), drop-in welcome',
     format: 'In-person',
@@ -827,7 +837,8 @@ const CLASSES = [
     price: 'Free / by donation',
     format: 'Online / Zoom',
     desc: '',
-    type: 'class'
+    type: 'class',
+    offeringId: 'class-meditation-mellow'
   },
   {
     day: 'Thursday',
@@ -838,13 +849,15 @@ const CLASSES = [
     price: 'Pay-what-you-can (suggested $20)',
     format: 'In-person',
     desc: 'Devotional chanting with harmonium. Paused for summer.',
-    type: 'community'
+    type: 'community',
+    offeringId: 'community-kirtan-class'
   },
   {
     day: 'Friday',
     daySort: 6,
     name: 'Mindfulness in Nature Eco-Yoga',
     teacher: 'Cara Graci',
+    offeringId: 'class-mindfulness-nature',
     time: '4:30 - 5:45 PM',
     price: 'By donation',
     format: 'Outdoor / Pond Dome',
@@ -1084,13 +1097,15 @@ CLASSES.forEach(function(c) {
   while (d <= classEnd) {
     if (days.indexOf(d.getDay()) >= 0) {
       var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      var classProps = { desc: c.desc || '', price: c.price || '' };
+      if (c.offeringId) classProps.url = 'event.html?id=' + c.offeringId;
       ecEvents.push({
         title: c.name + (c.teacher ? ' (' + c.teacher + ')' : ''),
         start: ds + 'T' + String(hr).padStart(2,'0') + ':' + mn + ':00',
         end: ds + 'T' + String(ehr).padStart(2,'0') + ':' + emn + ':00',
         color: typeColors[c.type || 'class'],
         textColor: typeTextColors[c.type || 'class'],
-        extendedProps: { desc: c.desc || '', price: c.price || '' }
+        extendedProps: classProps
       });
     }
     d.setDate(d.getDate() + 1);
