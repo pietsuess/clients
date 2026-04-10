@@ -81,6 +81,29 @@ p { text-align: justify; text-justify: inter-word; }
 .footer-bottom p { font-size: 0.62rem; opacity: 0.3; text-align: center; }
 .social { display: flex; gap: 12px; margin-top: 12px; }
 .social a { color: var(--white); opacity: 0.4; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); }
+
+/* PRICING & TEACHERS (Retreat Guru) */
+.pricing-section { margin-top: 24px; }
+.pricing-section h2 { font-size: 1.1rem; color: var(--teal-deep); margin-bottom: 12px; }
+.pricing-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.pricing-card { background: var(--white); border: 1px solid var(--cream-warm); border-radius: 10px; padding: 14px; }
+.pricing-card .lodging-name { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+.pricing-card .lodging-price { font-size: 1rem; font-weight: 700; color: var(--teal-deep); margin-bottom: 6px; }
+.pricing-card .lodging-desc { font-size: 0.74rem; line-height: 1.5; color: var(--text-light); text-align: left; }
+.pricing-card .lodging-desc p { font-size: 0.74rem; line-height: 1.5; color: var(--text-light); text-align: left; margin: 0; }
+
+.teachers-section { margin-top: 20px; }
+.teachers-section h2 { font-size: 1.1rem; color: var(--teal-deep); margin-bottom: 10px; }
+.teacher-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.teacher-tag { display: inline-block; padding: 5px 12px; background: var(--cream-warm); color: var(--teal-deep); border-radius: 50px; font-size: 0.75rem; font-weight: 500; }
+
+.rg-content { font-size: 0.92rem; line-height: 1.7; color: var(--text); }
+.rg-content p { margin-bottom: 0.9em; }
+.rg-content h3, .rg-content h4 { font-family: 'Cinzel', serif; color: var(--teal-deep); margin: 1.2em 0 0.4em; font-size: 1rem; }
+.rg-content ul, .rg-content ol { margin: 0 0 0.9em 1.2em; }
+.rg-content li { margin-bottom: 0.3em; }
+.rg-content a { color: var(--teal-dark); }
+.rg-content img { border-radius: 8px; margin: 0.8em 0; }
 </style>
 </head>
 <body>
@@ -148,71 +171,198 @@ function closeMenu() { document.getElementById('menu').classList.remove('open');
   // Mobile uses ../ prefix for images
   function fixImg(p) { return p && p.indexOf('../') !== 0 && p.indexOf('http') !== 0 ? '../' + p : p; }
 
-  var id = getParam('id');
-  var event = EVENTS.find(function(e) { return e.id === id; });
-  var main = document.getElementById('eventMain');
-
-  if (!event) {
-    main.innerHTML = '<div class="not-found">' +
-      '<h1>Event Not Found</h1>' +
-      '<p>That event does not exist or has been removed.</p>' +
-      '<a href="calendar.html" class="btn">Back to Calendar</a>' +
-      '</div>';
-    return;
+  function decodeEntities(s) {
+    if (!s) return '';
+    return s.replace(/&amp;/g,'&').replace(/&#039;/g,"'").replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#8217;/g,"'").replace(/&#8220;/g,'"').replace(/&#8221;/g,'"').replace(/&#8211;/g,'-').replace(/&#8212;/g,'--');
+  }
+  function stripTags(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.innerHTML = s;
+    return d.textContent || d.innerText || '';
+  }
+  function formatDateRange(start, end) {
+    if (!start) return '';
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var s = new Date(start + 'T12:00:00');
+    var out = months[s.getMonth()] + ' ' + s.getDate();
+    if (end && end !== start) {
+      var e = new Date(end + 'T12:00:00');
+      if (e.getMonth() === s.getMonth()) out += ' - ' + e.getDate();
+      else out += ' - ' + months[e.getMonth()] + ' ' + e.getDate();
+    }
+    out += ', ' + s.getFullYear();
+    return out;
   }
 
-  document.title = event.title + ' | Salt Spring Centre of Yoga';
-  var metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) metaDesc.setAttribute('content', event.desc);
+  var main = document.getElementById('eventMain');
+  var localId = getParam('id');
+  var rgId = getParam('rg');
 
-  var typeLabel = event.type === 'concert' ? 'Concert' : 'Retreat';
-  var bookHref = event.type === 'concert' ? 'shop.html' : 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Inquiry: ' + event.title);
-  var bookLabel = event.type === 'concert' ? 'Get Tickets in the Shop' : 'Inquire & Register';
+  // ===== LOCAL EVENT =====
+  if (localId) {
+    var event = EVENTS.find(function(e) { return e.id === localId; });
+    if (!event) {
+      main.innerHTML = '<div class="not-found"><h1>Event Not Found</h1><p>That event does not exist or has been removed.</p><a href="calendar.html" class="btn">Back to Calendar</a></div>';
+      return;
+    }
+    document.title = event.title + ' | Salt Spring Centre of Yoga';
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', event.desc);
 
-  var html = '<section class="event-hero">' +
-    '<img class="bg" src="' + escapeHtml(fixImg(event.img)) + '" alt="' + escapeHtml(event.title) + '">' +
-    '<div class="event-hero-overlay"></div>' +
-    '<div class="event-hero-content">' +
-      '<span class="type-badge ' + event.type + '">' + typeLabel + '</span>' +
-      '<h1>' + escapeHtml(event.title) + '</h1>' +
-      '<div class="date-line">' + escapeHtml(event.dateLabel) + (event.time ? ' &middot; ' + escapeHtml(event.time) : '') + '</div>' +
-    '</div>' +
-  '</section>';
+    var typeLabel = event.type === 'concert' ? 'Concert' : 'Retreat';
+    var bookHref = event.type === 'concert' ? 'shop.html' : 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Inquiry: ' + event.title);
+    var bookLabel = event.type === 'concert' ? 'Get Tickets in the Shop' : 'Inquire & Register';
 
-  html += '<section class="event-detail">' +
-    '<div class="event-body">' +
+    var html = '<section class="event-hero">' +
+      '<img class="bg" src="' + escapeHtml(fixImg(event.img)) + '" alt="' + escapeHtml(event.title) + '">' +
+      '<div class="event-hero-overlay"></div>' +
+      '<div class="event-hero-content">' +
+        '<span class="type-badge ' + event.type + '">' + typeLabel + '</span>' +
+        '<h1>' + escapeHtml(event.title) + '</h1>' +
+        '<div class="date-line">' + escapeHtml(event.dateLabel) + (event.time ? ' &middot; ' + escapeHtml(event.time) : '') + '</div>' +
+      '</div>' +
+    '</section>';
+
+    html += '<section class="event-detail"><div class="event-body">' +
       '<p class="lead">' + escapeHtml(event.desc) + '</p>' +
       (event.type === 'concert'
         ? '<p>Music for Peace concerts are held in the Satsang Room (and occasionally the Pond Dome), with seating for approximately 50 guests. Each concert supports the Centre\'s programs and community.</p>' +
           '<p><a href="music-for-peace.html">About the Music for Peace series &rarr;</a></p>'
         : '<p>This retreat takes place at the Salt Spring Centre of Yoga on 69 acres of protected land. Includes accommodation, lacto-vegetarian meals, and access to grounds, forest trails, and swimming lake.</p>' +
           '<p><a href="offerings.html#retreats">See all retreats &rarr;</a></p>') +
-    '</div>' +
-    '<aside class="event-info">' +
-      '<h3>Details</h3>' +
-      '<div class="info-row"><span class="info-label">Date</span><span class="info-value">' + escapeHtml(event.dateLabel) + '</span></div>' +
-      (event.time ? '<div class="info-row"><span class="info-label">Time</span><span class="info-value">' + escapeHtml(event.time) + '</span></div>' : '') +
-      '<div class="info-row"><span class="info-label">Venue</span><span class="info-value">' + escapeHtml(event.venue) + '</span></div>' +
-      '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(event.price) + '</span></div>' +
-      '<a href="' + bookHref + '" class="btn">' + bookLabel + '</a>' +
-      '<a href="calendar.html" class="btn btn-outline">Back to Calendar</a>' +
-    '</aside>' +
-  '</section>';
+      '</div>' +
+      '<aside class="event-info"><h3>Details</h3>' +
+        '<div class="info-row"><span class="info-label">Date</span><span class="info-value">' + escapeHtml(event.dateLabel) + '</span></div>' +
+        (event.time ? '<div class="info-row"><span class="info-label">Time</span><span class="info-value">' + escapeHtml(event.time) + '</span></div>' : '') +
+        '<div class="info-row"><span class="info-label">Venue</span><span class="info-value">' + escapeHtml(event.venue) + '</span></div>' +
+        '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(event.price) + '</span></div>' +
+        '<a href="' + bookHref + '" class="btn">' + bookLabel + '</a>' +
+        '<a href="calendar.html" class="btn btn-outline">Back to Calendar</a>' +
+      '</aside></section>';
 
-  var related = EVENTS.filter(function(e) { return e.type === event.type && e.id !== event.id; }).slice(0, 4);
-  if (related.length) {
-    html += '<section class="related"><h2>More ' + (event.type === 'concert' ? 'Concerts' : 'Retreats') + '</h2><div class="related-grid">';
-    related.forEach(function(r) {
-      html += '<a class="related-card" href="event.html?id=' + r.id + '" style="--card-bg:url(\'' + fixImg(r.img) + '\')">' +
-        '<div class="meta">' + escapeHtml(r.dateLabel) + '</div>' +
-        '<h3>' + escapeHtml(r.title) + '</h3>' +
-        '<div class="related-date">' + escapeHtml(r.venue) + ' &middot; ' + escapeHtml(r.price) + '</div>' +
-        '</a>';
-    });
-    html += '</div></section>';
+    var related = EVENTS.filter(function(e) { return e.type === event.type && e.id !== event.id; }).slice(0, 4);
+    if (related.length) {
+      html += '<section class="related"><h2>More ' + (event.type === 'concert' ? 'Concerts' : 'Retreats') + '</h2><div class="related-grid">';
+      related.forEach(function(r) {
+        html += '<a class="related-card" href="event.html?id=' + r.id + '" style="--card-bg:url(\'' + fixImg(r.img) + '\')">' +
+          '<div class="meta">' + escapeHtml(r.dateLabel) + '</div>' +
+          '<h3>' + escapeHtml(r.title) + '</h3>' +
+          '<div class="related-date">' + escapeHtml(r.venue) + ' &middot; ' + escapeHtml(r.price) + '</div>' +
+          '</a>';
+      });
+      html += '</div></section>';
+    }
+    main.innerHTML = html;
+    return;
   }
 
-  main.innerHTML = html;
+  // ===== RETREAT GURU PROGRAM =====
+  if (rgId) {
+    main.innerHTML = '<div class="not-found"><h1>Loading...</h1></div>';
+    var apiUrl = 'https://saltspringcentre.secure.retreat.guru/api/v1/programs/' + encodeURIComponent(rgId) + '?token=ce54314d68b0417fc9be95a93d202c81&include=teachers';
+    fetch(apiUrl)
+      .then(function(r) { return r.json(); })
+      .then(function(p) {
+        if (!p || !p.id) throw new Error('not found');
+        renderRG(p);
+      })
+      .catch(function() {
+        main.innerHTML = '<div class="not-found"><h1>Program Not Found</h1><p>This program may no longer be available.</p><a href="offerings.html" class="btn">Back to Offerings</a></div>';
+      });
+    return;
+  }
+
+  main.innerHTML = '<div class="not-found"><h1>No event specified</h1><a href="calendar.html" class="btn">View Calendar</a></div>';
+
+  function renderRG(p) {
+    var name = decodeEntities(p.name || '');
+    var dateStr = formatDateRange(p.start_date, p.end_date);
+    var cats = (p.categories || []).join(',');
+    var isConcert = cats.indexOf('music') >= 0 || /music for peace|concert|kirtan/i.test(name);
+    var typeLabel = isConcert ? 'Concert' : 'Retreat';
+    var typeClass = isConcert ? 'concert' : 'retreat';
+
+    document.title = name + ' | Salt Spring Centre of Yoga';
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', stripTags(p.excerpt || p.content || '').slice(0, 200));
+
+    var heroImg = '';
+    if (p.images && p.images.length) heroImg = (typeof p.images[0] === 'object' ? p.images[0].url : p.images[0]) || '';
+    if (!heroImg && p.pricing_options) {
+      var keys = Object.keys(p.pricing_options);
+      for (var i = 0; i < keys.length; i++) {
+        if (p.pricing_options[keys[i]].image_url) { heroImg = p.pricing_options[keys[i]].image_url; break; }
+      }
+    }
+    if (!heroImg) heroImg = isConcert ? '../images/2024/06/Classical-Indian-Concert.jpg' : '../images/2021/11/programs-retreats.jpg';
+
+    var priceLine = '';
+    var pricingHtml = '';
+    if (p.pricing_options && Object.keys(p.pricing_options).length) {
+      var prices = Object.keys(p.pricing_options).map(function(k) { return p.pricing_options[k]; });
+      var sortedPrices = prices.slice().sort(function(a, b) { return (a.price || 0) - (b.price || 0); });
+      var lowest = sortedPrices[0];
+      if (lowest && lowest.price) priceLine = 'From $' + lowest.price.toFixed(0);
+      pricingHtml = '<div class="pricing-section"><h2>Lodging &amp; Pricing</h2><div class="pricing-grid">';
+      prices.forEach(function(opt) {
+        pricingHtml += '<div class="pricing-card">' +
+          '<div class="lodging-name">' + escapeHtml(decodeEntities(opt.name || '')) + '</div>' +
+          (opt.price ? '<div class="lodging-price">$' + opt.price.toFixed(0) + ' CAD</div>' : '') +
+          '<div class="lodging-desc">' + (opt.description || '') + '</div>' +
+        '</div>';
+      });
+      pricingHtml += '</div></div>';
+    } else {
+      priceLine = 'Inquire';
+    }
+
+    var teachersHtml = '';
+    if (p.teachers && p.teachers.length) {
+      var teacherNames = p.teachers.map(function(t) { return typeof t === 'object' ? t.name : t; }).filter(Boolean);
+      if (teacherNames.length) {
+        teachersHtml = '<div class="teachers-section"><h2>With</h2><div class="teacher-list">';
+        teacherNames.forEach(function(n) {
+          teachersHtml += '<span class="teacher-tag">' + escapeHtml(decodeEntities(n)) + '</span>';
+        });
+        teachersHtml += '</div></div>';
+      }
+    }
+
+    var contentHtml = p.content || p.excerpt || '';
+    var bookLink = p.remote_registration_link || p.program_link || 'https://saltspringcentre.secure.retreat.guru/program/';
+    var bookLabel = p.program_registration_status === 'open' ? 'Continue to Registration' : 'View on Retreat Guru';
+    var venue = decodeEntities(p.location || 'Salt Spring Centre of Yoga');
+    if (p.address) venue += '<br><span style="font-size:0.7rem;color:var(--text-light);font-weight:400;">' + escapeHtml(decodeEntities(p.address)).replace(/\n|\r\n|\\r\\n/g, '<br>') + '</span>';
+
+    var html = '<section class="event-hero">' +
+      '<img class="bg" src="' + escapeHtml(heroImg) + '" alt="' + escapeHtml(name) + '">' +
+      '<div class="event-hero-overlay"></div>' +
+      '<div class="event-hero-content">' +
+        '<span class="type-badge ' + typeClass + '">' + typeLabel + '</span>' +
+        '<h1>' + escapeHtml(name) + '</h1>' +
+        '<div class="date-line">' + escapeHtml(dateStr) + '</div>' +
+      '</div>' +
+    '</section>';
+
+    html += '<section class="event-detail">' +
+      '<div class="event-body">' +
+        '<div class="rg-content">' + contentHtml + '</div>' +
+        teachersHtml +
+        pricingHtml +
+      '</div>' +
+      '<aside class="event-info"><h3>Details</h3>' +
+        '<div class="info-row"><span class="info-label">Dates</span><span class="info-value">' + escapeHtml(dateStr) + '</span></div>' +
+        '<div class="info-row"><span class="info-label">Venue</span><span class="info-value">' + venue + '</span></div>' +
+        (priceLine ? '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(priceLine) + '</span></div>' : '') +
+        (p.available_spaces != null ? '<div class="info-row"><span class="info-label">Availability</span><span class="info-value">' + (p.available_spaces > 0 ? p.available_spaces + ' spaces left' : 'Waitlist') + '</span></div>' : '') +
+        '<a href="' + escapeHtml(bookLink) + '" target="_blank" rel="noopener" class="btn">' + bookLabel + '</a>' +
+        '<a href="offerings.html#retreats" class="btn btn-outline">Back to Offerings</a>' +
+      '</aside>' +
+    '</section>';
+
+    main.innerHTML = html;
+  }
 })();
 </script>
 

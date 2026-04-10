@@ -1165,7 +1165,11 @@ if (ecEl && window.EventCalendar) {
           var endD = new Date(parseInt(endParts[0]), parseInt(endParts[1])-1, parseInt(endParts[2])+1);
           ev.end = endD.getFullYear() + '-' + String(endD.getMonth()+1).padStart(2,'0') + '-' + String(endD.getDate()).padStart(2,'0');
         }
-        if (p.program_link) ev.extendedProps = { url: p.program_link };
+        ev.extendedProps = {
+          url: 'event.html?rg=' + p.id,
+          desc: (p.excerpt || p.content || '').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&#039;/g,"'").slice(0, 140),
+          venue: p.location || 'Salt Spring Centre of Yoga'
+        };
         ec.addEvent(ev);
       });
     })

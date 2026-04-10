@@ -885,11 +885,11 @@ function closeMobileMenu() {
         // Decode HTML entities
         var name = p.name ? p.name.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#039;/g, "'").replace(/&quot;/g, '"') : '';
 
-        var link = p.program_link || p.registrations_link || '#';
+        var link = 'event.html?rg=' + p.id;
 
         var delay = 'd' + ((i % 4) + 1);
 
-        return '<a href="' + link + '" target="_blank" rel="noopener" class="offering-card reveal ' + delay + '" style="text-decoration:none;color:inherit;display:block;">' +
+        return '<a href="' + link + '" class="offering-card reveal ' + delay + '" style="text-decoration:none;color:inherit;display:block;">' +
           '<h3>' + name + '</h3>' +
           (teachers ? '<p class="meta" style="margin-bottom:6px;">' + teachers + '</p>' : '') +
           (dateStr ? '<p class="meta">' + dateStr + '</p>' : '') +
