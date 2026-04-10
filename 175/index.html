@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An Improv Show</title>
+<meta name="description" content="An improv show. A rotating lineup, a new theme every time, and no two nights the same.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fef2c9;
+  --bg-deep:#fbe48a;
+  --ink:#1a0a1e;
+  --ink-rgb:26,10,30;
+  --pink:#ff3d7a;
+  --orange:#ff7a1a;
+  --yellow:#f7c948;
+  --blue:#2b4fd8;
+  --green:#3dcc6a;
+  --gold:#d4a843;
+  --cream:#fff7dc;
+}
+html{scroll-behavior:smooth;scrollbar-gutter:stable;overflow-x:hidden}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Instrument Serif',serif;
+  font-size:18px;
+  overflow-x:hidden;
+  text-wrap:pretty;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 4vw;
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(254,242,201,0.88);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(var(--ink-rgb),0.08);
+}
+nav .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+nav .logo img{height:56px;width:auto;display:block}
+nav .nav-links{display:flex;gap:36px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.82rem;letter-spacing:0.16em;text-transform:uppercase;font-weight:500}
+nav .nav-links a{color:var(--ink);position:relative}
+nav .nav-links a::after{
+  content:'';position:absolute;bottom:-5px;left:0;width:100%;height:2px;
+  background:var(--pink);transform:scaleX(0);transform-origin:right;
+  transition:transform 0.3s ease;
+}
+nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
+
+/* NOISE */
+.noise{
+  position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:0.05;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat:repeat;background-size:256px;mix-blend-mode:multiply;
+}
+
+/* HERO */
+.hero{
+  min-height:90vh;display:flex;flex-direction:column;
+  justify-content:flex-end;align-items:stretch;
+  position:relative;overflow:clip;
+  padding:130px 4vw 0;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 18% 25%,rgba(255,61,122,0.42) 0%,transparent 55%),
+    radial-gradient(ellipse at 82% 70%,rgba(255,122,26,0.48) 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 100%,rgba(43,79,216,0.22) 0%,transparent 60%),
+    var(--bg);
+}
+
+/* Hero poster strip (scrolling images up top) */
+.hero-strip{
+  position:relative;z-index:2;
+  width:100%;overflow:hidden;
+  margin-bottom:48px;
+  padding:0;
+}
+.hero-strip-track{
+  display:flex;gap:20px;will-change:transform;
+  animation:stripScroll 120s linear infinite;
+}
+.hero-strip-track .strip-item{
+  flex-shrink:0;width:260px;height:260px;
+  border:3px solid var(--ink);
+  overflow:hidden;cursor:pointer;
+  transition:transform 0.3s;
+  background:#000;
+}
+.hero-strip-track .strip-item:hover{transform:translateY(-4px) rotate(-1deg)}
+.hero-strip-track .strip-item img{width:100%;height:100%;object-fit:cover;display:block}
+@keyframes stripScroll{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+.hero-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 800;
+  font-size:clamp(4rem,14vw,15rem);
+  line-height:0.82;text-align:left;width:100%;
+  position:relative;z-index:2;
+  font-weight:800;letter-spacing:-0.035em;
+  color:var(--ink);
+  padding-bottom:30px;
+}
+.hero-title em{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-weight:400;color:var(--pink);letter-spacing:-0.01em;
+}
+.hero-tagline{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(1.3rem,2vw,1.9rem);
+  text-align:left;max-width:none;
+  margin-top:20px;position:relative;z-index:2;
+  color:rgba(var(--ink-rgb),0.75);line-height:1.35;
+  padding-bottom:60px;
+}
+
+/* MARQUEE */
+.marquee-wrap{
+  width:100%;overflow:hidden;
+  padding:26px 0;position:relative;z-index:3;
+  border-top:3px solid var(--ink);
+  border-bottom:3px solid var(--ink);
+  background:var(--bg-deep);
+}
+.marquee-track{
+  display:flex;white-space:nowrap;will-change:transform;
+  animation:scroll 42s linear infinite;
+}
+.marquee-track span{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 700;
+  font-size:clamp(1.4rem,3vw,2.4rem);
+  padding:0 40px;color:var(--ink);
+  font-weight:700;text-transform:uppercase;letter-spacing:0.01em;
+  flex-shrink:0;
+}
+.marquee-track span em{
+  font-style:normal;color:var(--pink);
+  font-family:'Instrument Serif',serif;font-style:italic;
+  text-transform:none;letter-spacing:-0.01em;
+}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ABOUT */
+.about{
+  padding:110px 4vw 120px;
+  background:var(--bg);
+  position:relative;
+}
+.about-grid{
+  display:grid;grid-template-columns:1.4fr 1fr;gap:72px;
+  align-items:start;
+}
+.about-text{
+  font-family:'Instrument Serif',serif;
+  font-size:clamp(1.4rem,2vw,2rem);
+  line-height:1.4;color:rgba(var(--ink-rgb),0.9);
+  text-align:justify;text-align-last:left;
+}
+.about-text p{margin-bottom:22px}
+.about-text p:first-child::first-letter{
+  font-size:3.2em;line-height:0.85;float:left;
+  padding:0.06em 0.1em 0 0;color:var(--pink);
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+}
+.about-details{display:flex;flex-direction:column;gap:16px}
+.about-details .detail-item{
+  padding:22px 24px;border:2px solid var(--ink);
+  background:var(--cream);
+}
+.about-details .detail-item h4{
+  font-family:'Bricolage Grotesque',sans-serif;font-size:0.72rem;
+  color:var(--pink);margin-bottom:10px;
+  letter-spacing:0.2em;text-transform:uppercase;font-weight:700;
+}
+.about-details .detail-item p{
+  font-family:'Instrument Serif',serif;
+  font-size:1.1rem;line-height:1.45;color:rgba(var(--ink-rgb),0.8);
+  text-align:justify;text-align-last:left;
+}
+
+/* SHOWS SECTION */
+.shows{
+  padding:120px 0 100px;
+  background:var(--pink);
+  color:var(--cream);
+  position:relative;
+}
+.shows-header{padding:0 4vw 20px}
+.shows .section-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 800;
+  font-size:clamp(3.2rem,9vw,9rem);
+  line-height:0.86;font-weight:800;letter-spacing:-0.03em;
+  color:var(--cream);
+}
+.shows .section-subtitle{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(1.1rem,1.7vw,1.5rem);
+  color:rgba(255,247,220,0.82);margin-top:14px;
+}
+
+.year-block{padding:60px 4vw 0}
+.year-block .year-label{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 800;
+  font-size:clamp(4rem,10vw,10rem);
+  line-height:0.85;font-weight:800;letter-spacing:-0.035em;
+  color:var(--cream);
+  -webkit-text-stroke:2px var(--cream);
+  padding:0 0 34px;
+  display:flex;align-items:baseline;gap:24px;
+}
+.year-block .year-label .year-count{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:0.22em;font-weight:400;
+  -webkit-text-stroke:0;
+  color:rgba(255,247,220,0.7);
+  letter-spacing:0;
+}
+.shows-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:28px;
+}
+.show-card{
+  background:var(--ink);overflow:hidden;
+  transition:transform 0.4s cubic-bezier(0.075,0.82,0.165,1),box-shadow 0.4s;
+  cursor:pointer;border:2px solid var(--ink);
+  display:flex;flex-direction:column;
+}
+.show-card:hover{transform:translateY(-10px);box-shadow:0 26px 46px rgba(0,0,0,0.35)}
+.show-card .card-img{width:100%;aspect-ratio:1;overflow:hidden;background:#000}
+.show-card .card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s cubic-bezier(0.075,0.82,0.165,1)}
+.show-card:hover .card-img img{transform:scale(1.04)}
+.show-card .card-info{padding:18px 20px 22px;color:var(--cream)}
+.show-card .card-info h3{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 24,"wght" 700;
+  font-size:1.5rem;margin-bottom:4px;line-height:1;font-weight:700;
+}
+.show-card .card-info .card-date{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:1rem;color:var(--gold);
+}
+
+/* LIGHTBOX */
+.lightbox{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(10,5,15,0.96);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;padding:60px 90px;
+}
+.lightbox.active{display:flex}
+.lightbox img{max-width:min(92vw,960px);max-height:82vh;object-fit:contain}
+.lightbox .lb-caption{
+  margin-top:22px;max-width:800px;width:100%;text-align:center;
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+  font-size:1.3rem;color:var(--cream);
+}
+.lightbox .lb-caption .lb-date{
+  display:block;font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;
+  color:var(--gold);font-size:1rem;margin-top:6px;
+}
+.lightbox .close-lb{position:absolute;top:24px;right:32px;font-size:2.4rem;color:var(--cream);cursor:pointer;font-family:'Instrument Serif',serif}
+.lightbox .lb-nav{
+  position:fixed;top:50%;transform:translateY(-50%);cursor:pointer;z-index:10001;
+  width:60px;height:300px;background:none;border:none;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0.35;transition:opacity 0.2s;
+}
+.lightbox .lb-nav:hover{opacity:0.95}
+.lightbox .lb-nav svg{width:38px;height:300px;fill:var(--cream)}
+.lightbox .lb-nav:hover svg{fill:var(--pink)}
+.lightbox .lb-prev{left:2vw}
+.lightbox .lb-next{right:2vw}
+
+/* CONTACT */
+.contact{
+  padding:130px 4vw 110px;
+  background:var(--orange);
+  color:var(--cream);
+}
+.contact .section-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 800;
+  font-size:clamp(3.2rem,9vw,9rem);
+  line-height:0.86;font-weight:800;letter-spacing:-0.03em;
+  color:var(--cream);
+}
+.contact-cta{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(1.3rem,2.2vw,2rem);
+  color:rgba(255,247,220,0.95);
+  max-width:none;margin:40px 0 48px;
+  line-height:1.45;text-align:justify;text-align-last:left;
+}
+.contact-links{display:flex;flex-wrap:wrap;gap:16px}
+.contact-link{
+  padding:18px 34px;border:2px solid var(--cream);
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+  font-size:0.82rem;letter-spacing:0.14em;text-transform:uppercase;
+  transition:all 0.25s;background:transparent;color:var(--cream);
+}
+.contact-link:hover{background:var(--cream);color:var(--orange)}
+
+/* FOOTER */
+footer{
+  padding:36px 4vw;background:var(--ink);color:var(--cream);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;font-weight:500;
+}
+footer a{color:var(--pink);transition:color 0.3s}
+footer a:hover{color:var(--cream)}
+
+/* RESPONSIVE */
+@media(max-width:980px){
+  .about-grid{grid-template-columns:1fr;gap:44px}
+}
+@media(max-width:768px){
+  nav{padding:10px 5vw}
+  nav .logo img{height:42px}
+  nav .nav-links{gap:18px;font-size:0.68rem}
+  .hero{padding:110px 5vw 0;min-height:auto}
+  .hero-strip-track .strip-item{width:180px;height:180px}
+  .hero-tagline{padding-bottom:40px}
+  .shows{padding:70px 0 60px}
+  .shows-grid{grid-template-columns:1fr 1fr;gap:14px}
+  .year-block{padding:40px 4vw 0}
+  .year-block .year-label{padding-bottom:22px}
+  .show-card .card-info{padding:12px 14px 16px}
+  .show-card .card-info h3{font-size:1.05rem}
+  .show-card .card-info .card-date{font-size:0.85rem}
+  .about{padding:70px 5vw 80px}
+  .contact{padding:80px 5vw 70px}
+  .contact-links{flex-direction:column;align-items:stretch}
+  .contact-link{text-align:center}
+  .lightbox{padding:40px 20px}
+  .lightbox .lb-nav{width:32px;height:140px}
+  .lightbox .lb-nav svg{width:22px;height:140px}
+}
+</style>
+</head>
+<body>
+
+<div class="noise"></div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <span class="close-lb" onclick="closeLightbox(event)">&times;</span>
+  <span class="lb-nav lb-prev" onclick="lbNav(event,-1)"><svg viewBox="0 0 20 100"><polygon points="20,0 0,50 20,100"/></svg></span>
+  <span class="lb-nav lb-next" onclick="lbNav(event,1)"><svg viewBox="0 0 20 100"><polygon points="0,0 20,50 0,100"/></svg></span>
+  <img id="lb-img" src="" alt="" onclick="event.stopPropagation()">
+  <div class="lb-caption" id="lb-caption"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo"><img src="img/175-logo.png" alt="175"></a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#shows">Shows</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-strip">
+    <div class="hero-strip-track" id="heroStrip"></div>
+  </div>
+  <h1 class="hero-title">
+    An <em>improv</em> show.
+  </h1>
+  <p class="hero-tagline">
+    A rotating lineup, a different theme every time, and no two nights the same.
+  </p>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span><em>Long-form improv</em></span><span>&bull;</span>
+    <span>A new theme every time</span><span>&bull;</span>
+    <span>No two nights the same</span><span>&bull;</span>
+    <span><em>Live at Mateada</em></span><span>&bull;</span>
+    <span>Since 2022</span><span>&bull;</span>
+    <span><em>Long-form improv</em></span><span>&bull;</span>
+    <span>A new theme every time</span><span>&bull;</span>
+    <span>No two nights the same</span><span>&bull;</span>
+    <span><em>Live at Mateada</em></span><span>&bull;</span>
+    <span>Since 2022</span><span>&bull;</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-grid">
+    <div class="about-text">
+      <p>175 is an improv show. We show up, we pick a theme, we make the rest of it up on the spot. There is no script, there are no second drafts, and there is definitely no plan.</p>
+      <p>Every show gets a brand new poster, a brand new idea, and a cast of people willing to make fools of themselves in public. Some nights it is peppers. Some nights it is a sasquatch. Some nights it is cheese doctors. You never quite know what you are going to get, but you are always going to get something.</p>
+      <p>We have been doing this for a while now, and we do not plan on stopping.</p>
+    </div>
+    <div class="about-details">
+      <div class="detail-item">
+        <h4>The Show</h4>
+        <p>Long-form improv in the round. Doors at 7:30, show at 8. Themes change every time. Cast rotates. Nothing is rehearsed and that is the point.</p>
+      </div>
+      <div class="detail-item">
+        <h4>The Group</h4>
+        <p>A rotating cast of improvisers, weirdos, and professional amateurs. New faces welcome. Reach out if you want in.</p>
+      </div>
+      <div class="detail-item">
+        <h4>The Posters</h4>
+        <p>Every show gets its own poster. They are half of the reason we keep doing this. All the art on this page is original, and it is all made for nothing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWS -->
+<section class="shows" id="shows">
+  <div class="shows-header">
+    <div class="section-title">Past Shows.</div>
+    <div class="section-subtitle">Every show we have put up. Click a poster to see it bigger.</div>
+  </div>
+  <div id="showsByYear"></div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="section-title">Get involved.</div>
+  <p class="contact-cta">
+    Want to come to a show? Want to be in one? Want a poster on your wall? Good instincts. Drop us a line. The door is open, and the bar is usually open too.
+  </p>
+  <div class="contact-links">
+    <a href="mailto:hello@175improv.com" class="contact-link">Email</a>
+    <a href="#" class="contact-link">Instagram</a>
+    <a href="#" class="contact-link">Next Show</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>An Improv Show</span>
+  <span>Live at Mateada since 2022</span>
+  <span>Site by <a href="https://pietsuess.com" target="_blank" rel="noopener">Piet Suess</a></span>
+</footer>
+
+<script>
+/* ====================================
+   HARDCODED SHOW DATA - newest first
+   ==================================== */
+const SHOWS = [
+  { title:"Ghetto Blaster",   date:"October 30, 2025",   year:2025, poster:"img/posters/2025-10-30_ghetto-blaster.jpg" },
+  { title:"Empty Sky",        date:"August 28, 2025",    year:2025, poster:"img/posters/2025-08-28_aug28.jpg" },
+  { title:"Bees",             date:"July 27, 2025",      year:2025, poster:"img/posters/2025-07-27_bees.jpg" },
+  { title:"Cheese Doctors",   date:"June 27, 2025",      year:2025, poster:"img/posters/2025-06-27_cheese-doctors.jpg" },
+  { title:"Swords",           date:"May 22, 2025",       year:2025, poster:"img/posters/2025-05-22_swords.jpg" },
+  { title:"Cats",             date:"April 24, 2025",     year:2025, poster:"img/posters/2025-04-24_cats.jpg" },
+  { title:"Crystal Balls",    date:"March 27, 2025",     year:2025, poster:"img/posters/2025-03-27_crystal-balls.jpg" },
+  { title:"Snowmen",          date:"March 6, 2025",      year:2025, poster:"img/posters/2025-03-06_snowmen.jpg" },
+
+  { title:"Serpent",          date:"October 30, 2024",   year:2024, poster:"img/posters/2024-10-30_serpent.jpg" },
+  { title:"Space Potatoes",   date:"September 27, 2024", year:2024, poster:"img/posters/2024-09-27_space-potatoes.jpg" },
+  { title:"Peppers",          date:"August 22, 2024",    year:2024, poster:"img/posters/2024-08-22_peppers.jpg" },
+  { title:"Wheat",            date:"June 27, 2024",      year:2024, poster:"img/posters/2024-06-27_wheat.jpg" },
+
+  { title:"Sasquatch",             date:"December 15, 2023", year:2023, poster:"img/posters/2023-12-15_sasquatch.jpg" },
+  { title:"An Evening of Improv",  date:"May 25, 2023",      year:2023, poster:"img/posters/2023-05-25_evening.jpg" },
+  { title:"An Evening of Comedy",  date:"April 27, 2023",    year:2023, poster:"img/posters/2023-04-27_comedy.jpg" },
+
+  { title:"An Evening of Theatre", date:"December 1, 2022",  year:2022, poster:"img/posters/2022-12-01_theatre.jpg" }
+];
+
+/* Hero strip: scrolling posters */
+function buildHeroStrip(){
+  const track = document.getElementById('heroStrip');
+  // duplicate to make seamless loop
+  const items = [...SHOWS, ...SHOWS];
+  track.innerHTML = items.map((s,i)=>`
+    <div class="strip-item" onclick="openLightbox(${i % SHOWS.length})">
+      <img src="${s.poster}" alt="${s.title}" loading="lazy">
+    </div>
+  `).join('');
+}
+
+/* Render shows grouped by year */
+function renderShowsByYear(){
+  const container = document.getElementById('showsByYear');
+  const years = [...new Set(SHOWS.map(s=>s.year))].sort((a,b)=>b-a);
+  container.innerHTML = years.map(y=>{
+    const yearShows = SHOWS.filter(s=>s.year===y);
+    const cards = yearShows.map(s=>{
+      const idx = SHOWS.indexOf(s);
+      return `
+        <article class="show-card" onclick="openLightbox(${idx})">
+          <div class="card-img"><img src="${s.poster}" alt="${s.title} poster" loading="lazy"></div>
+          <div class="card-info">
+            <h3>${s.title}</h3>
+            <div class="card-date">${s.date}</div>
+          </div>
+        </article>`;
+    }).join('');
+    const count = yearShows.length;
+    return `
+      <div class="year-block">
+        <div class="year-label">${y} <span class="year-count">${count} show${count===1?'':'s'}</span></div>
+        <div class="shows-grid">${cards}</div>
+      </div>`;
+  }).join('');
+}
+
+/* LIGHTBOX */
+let lbIndex=-1;
+function openLightbox(i){
+  lbIndex=i;
+  const s=SHOWS[i];
+  document.getElementById('lb-img').src=s.poster;
+  document.getElementById('lb-caption').innerHTML=`${s.title}<span class="lb-date">${s.date}</span>`;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(e){
+  if(e && e.target.id!=='lightbox' && !e.target.classList.contains('close-lb')) return;
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow='';
+}
+function lbNav(e,dir){
+  e.stopPropagation();
+  lbIndex=(lbIndex+dir+SHOWS.length)%SHOWS.length;
+  const s=SHOWS[lbIndex];
+  document.getElementById('lb-img').src=s.poster;
+  document.getElementById('lb-caption').innerHTML=`${s.title}<span class="lb-date">${s.date}</span>`;
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('lightbox').classList.contains('active')) return;
+  if(e.key==='Escape'){document.getElementById('lightbox').classList.remove('active');document.body.style.overflow='';}
+  if(e.key==='ArrowLeft')lbNav(e,-1);
+  if(e.key==='ArrowRight')lbNav(e,1);
+});
+
+buildHeroStrip();
+renderShowsByYear();
+</script>
+</body>
+</html>
