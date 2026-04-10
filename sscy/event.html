@@ -322,8 +322,9 @@ p { text-align: justify; text-justify: inter-word; }
       bookHref = 'shop.html';
       bookLabel = 'Get Tickets in the Shop';
     } else {
-      bookHref = 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Inquiry: ' + item.title);
-      bookLabel = 'Inquire & Register';
+      // Retreats not on Retreat Guru route through Acuity
+      bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Retreats';
+      bookLabel = 'Book This Retreat';
     }
 
     var html = '<section class="event-hero">' +
@@ -351,7 +352,7 @@ p { text-align: justify; text-justify: inter-word; }
         (item.time ? '<div class="info-row"><span class="info-label">Time</span><span class="info-value">' + escapeHtml(item.time) + '</span></div>' : '') +
         '<div class="info-row"><span class="info-label">Venue</span><span class="info-value">' + escapeHtml(item.venue) + '</span></div>' +
         '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(item.price) + '</span></div>' +
-        '<a href="' + escapeHtml(bookHref) + '"' + (item.bookUrl ? ' target="_blank" rel="noopener"' : '') + ' class="btn">' + bookLabel + '</a>' +
+        '<a href="' + escapeHtml(bookHref) + '"' + (bookHref.indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') + ' class="btn">' + bookLabel + '</a>' +
         '<a href="calendar.html" class="btn btn-outline">Back to Calendar</a>' +
       '</aside></div></section>';
 
@@ -361,7 +362,7 @@ p { text-align: justify; text-justify: inter-word; }
 
   // ===== RENDER: weekly class =====
   function renderClass(item) {
-    var bookHref = 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Class: ' + item.title);
+    var bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Yoga%20Classes';
 
     var html = '<section class="event-hero">' +
       '<img class="event-hero-img" src="' + escapeHtml(item.img) + '" alt="' + escapeHtml(item.title) + '">' +
@@ -388,7 +389,7 @@ p { text-align: justify; text-justify: inter-word; }
         (item.level ? '<div class="info-row"><span class="info-label">Level</span><span class="info-value">' + escapeHtml(item.level) + '</span></div>' : '') +
         '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + item.price + '</span></div>' +
         (item.dropIn ? '<div class="info-row"><span class="info-label">Drop-ins</span><span class="info-value">' + escapeHtml(item.dropIn) + '</span></div>' : '') +
-        '<a href="' + bookHref + '" class="btn">Inquire About This Class</a>' +
+        '<a href="' + bookHref + '" target="_blank" rel="noopener" class="btn">Book This Class</a>' +
         '<a href="calendar.html" class="btn btn-outline">View Calendar</a>' +
       '</aside></div></section>';
 
@@ -398,7 +399,8 @@ p { text-align: justify; text-justify: inter-word; }
 
   // ===== RENDER: community gathering (satsang, kirtan, arati) =====
   function renderCommunity(item) {
-    var bookHref = 'mailto:info@saltspringcentre.com?subject=' + encodeURIComponent('Community: ' + item.title);
+    // Community events route through Acuity (even free ones, for attendance tracking)
+    var bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Community';
 
     var html = '<section class="event-hero">' +
       '<img class="event-hero-img" src="' + escapeHtml(item.img) + '" alt="' + escapeHtml(item.title) + '">' +
@@ -422,7 +424,7 @@ p { text-align: justify; text-justify: inter-word; }
         (item.format ? '<div class="info-row"><span class="info-label">Format</span><span class="info-value">' + escapeHtml(item.format) + '</span></div>' : '') +
         (item.location ? '<div class="info-row"><span class="info-label">Location</span><span class="info-value">' + escapeHtml(item.location) + '</span></div>' : '') +
         '<div class="info-row"><span class="info-label">Price</span><span class="info-value price">' + escapeHtml(item.price) + '</span></div>' +
-        '<a href="' + bookHref + '" class="btn">Contact Us</a>' +
+        '<a href="' + bookHref + '" target="_blank" rel="noopener" class="btn">Register to Attend</a>' +
         '<a href="calendar.html" class="btn btn-outline">View Calendar</a>' +
       '</aside></div></section>';
 
@@ -432,8 +434,9 @@ p { text-align: justify; text-justify: inter-word; }
 
   // ===== RENDER: wellness treatment =====
   function renderTreatment(item) {
-    var bookHref = item.bookUrl || 'mailto:wellness@saltspringcentre.com?subject=' + encodeURIComponent('Booking: ' + item.title);
-    var bookLabel = item.bookUrl ? 'Book Online' : 'Book This Treatment';
+    // Treatments route through Acuity (unless an external practitioner URL like JaneApp is set)
+    var bookHref = item.bookUrl || 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Wellness';
+    var bookLabel = 'Book This Treatment';
 
     var durationsHtml = '';
     if (item.durations && item.durations.length) {
@@ -464,17 +467,14 @@ p { text-align: justify; text-justify: inter-word; }
       (item.longDesc ? '<p>' + escapeHtml(item.longDesc) + '</p>' : '') +
       durationsHtml +
       '<h2>How to Book</h2>' +
-      '<p>' + (item.bookUrl
-        ? 'Book this treatment online through our practitioner\'s scheduling system, or reach out to us directly.'
-        : 'Reach out by phone or email to schedule your treatment. Please let us know any preferences, concerns, or questions ahead of time so we can prepare thoughtfully for your session.') +
-      '</p>' +
-      '<p><strong>Phone:</strong> 250-537-6200<br><strong>Email:</strong> <a href="mailto:wellness@saltspringcentre.com">wellness@saltspringcentre.com</a></p>' +
+      '<p>Book this treatment online through our scheduling system. Select your preferred date and time, and let us know any preferences, concerns, or questions ahead of time so we can prepare thoughtfully for your session.</p>' +
+      '<p>Questions? Call us at <strong>250-537-6200</strong> or email <a href="mailto:wellness@saltspringcentre.com">wellness@saltspringcentre.com</a>.</p>' +
       '<p><a href="wellness.html">Learn more about wellness at the Centre &rarr;</a></p>' +
       '</div><aside class="event-info"><h3>Details</h3>' +
         (item.practitioner ? '<div class="info-row"><span class="info-label">Practitioner</span><span class="info-value">' + escapeHtml(item.practitioner) + '</span></div>' : '') +
         '<div class="info-row"><span class="info-label">Duration</span><span class="info-value">' + escapeHtml(firstDuration.time) + '</span></div>' +
         '<div class="info-row"><span class="info-label">From</span><span class="info-value price">' + escapeHtml(firstDuration.price) + '</span></div>' +
-        '<a href="' + escapeHtml(bookHref) + '"' + (item.bookUrl ? ' target="_blank" rel="noopener"' : '') + ' class="btn">' + bookLabel + '</a>' +
+        '<a href="' + escapeHtml(bookHref) + '" target="_blank" rel="noopener" class="btn">' + bookLabel + '</a>' +
         '<a href="wellness.html" class="btn btn-outline">All Treatments</a>' +
       '</aside></div></section>';
 
