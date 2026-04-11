@@ -300,14 +300,41 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
   line-height:0.86;font-weight:800;letter-spacing:-0.03em;
   color:var(--cream);
 }
+.contact-inner{
+  display:grid;grid-template-columns:1.1fr 1fr;gap:72px;align-items:start;
+}
 .contact-cta{
   font-family:'Instrument Serif',serif;font-style:italic;
   font-size:clamp(1.3rem,2.2vw,2rem);
   color:rgba(255,247,220,0.95);
-  max-width:none;margin:40px 0 48px;
+  max-width:none;margin:40px 0 0;
   line-height:1.45;text-align:justify;text-align-last:left;
 }
-.contact-links{display:flex;flex-wrap:wrap;gap:16px}
+.contact-form{display:flex;flex-direction:column;gap:22px;margin-top:48px}
+.contact-form .field{display:flex;flex-direction:column;gap:8px}
+.contact-form .field-label{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+  font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(255,247,220,0.75);
+}
+.contact-form input,
+.contact-form textarea{
+  font-family:'Instrument Serif',serif;
+  font-size:1.2rem;color:var(--cream);
+  background:transparent;
+  border:none;border-bottom:2px solid rgba(255,247,220,0.55);
+  padding:10px 2px 12px;outline:none;
+  transition:border-color 0.25s;resize:vertical;
+}
+.contact-form input::placeholder,
+.contact-form textarea::placeholder{color:rgba(255,247,220,0.4)}
+.contact-form input:focus,
+.contact-form textarea:focus{border-bottom-color:var(--cream)}
+.contact-form textarea{min-height:140px;line-height:1.45}
+.contact-form .contact-link{
+  align-self:flex-start;cursor:pointer;margin-top:12px;
+  font-family:'Bricolage Grotesque',sans-serif;
+}
 .contact-link{
   padding:18px 34px;border:2px solid var(--cream);
   font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
@@ -315,6 +342,14 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
   transition:all 0.25s;background:transparent;color:var(--cream);
 }
 .contact-link:hover{background:var(--cream);color:var(--orange)}
+.form-thanks{
+  display:none;
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:1.2rem;color:var(--cream);margin-top:8px;
+}
+.contact-form.sent .form-thanks{display:block}
+.contact-form.sent .field,
+.contact-form.sent>button{opacity:0.35;pointer-events:none}
 
 /* FOOTER */
 footer{
@@ -346,8 +381,8 @@ footer a:hover{color:var(--cream)}
   .show-card .card-info .card-date{font-size:0.85rem}
   .about{padding:70px 5vw 80px}
   .contact{padding:80px 5vw 70px}
-  .contact-links{flex-direction:column;align-items:stretch}
-  .contact-link{text-align:center}
+  .contact-inner{grid-template-columns:1fr;gap:20px}
+  .contact-form .contact-link{align-self:stretch;text-align:center}
   .lightbox{padding:40px 20px}
   .lightbox .lb-nav{width:32px;height:140px}
   .lightbox .lb-nav svg{width:22px;height:140px}
@@ -443,14 +478,25 @@ footer a:hover{color:var(--cream)}
 
 <!-- CONTACT -->
 <section class="contact" id="contact">
-  <div class="section-title">Get involved.</div>
-  <p class="contact-cta">
-    Want to come to a show? Want to be in one? Want a poster on your wall? Good instincts. Drop us a line. The door is open, and the bar is usually open too.
-  </p>
-  <div class="contact-links">
-    <a href="mailto:hello@example.com" class="contact-link">Email</a>
-    <a href="#" class="contact-link">Instagram</a>
-    <a href="#" class="contact-link">Next Show</a>
+  <div class="contact-inner">
+    <div class="contact-col contact-col-left">
+      <div class="section-title">Get involved.</div>
+      <p class="contact-cta">
+        Want to come to a show? Want to be in one? Want a poster on your wall? Good instincts. Drop us a line. The door is open, and the bar is usually open too.
+      </p>
+    </div>
+    <form class="contact-form" id="contactForm" onsubmit="return submitForm(event)">
+      <label class="field">
+        <span class="field-label">Name</span>
+        <input type="text" name="name" required autocomplete="name">
+      </label>
+      <label class="field">
+        <span class="field-label">Message</span>
+        <textarea name="message" rows="6" required></textarea>
+      </label>
+      <button type="submit" class="contact-link">Send it</button>
+      <div class="form-thanks" id="formThanks">Thanks. We will get back to you.</div>
+    </form>
   </div>
 </section>
 
@@ -553,6 +599,12 @@ document.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft')lbNav(e,-1);
   if(e.key==='ArrowRight')lbNav(e,1);
 });
+
+function submitForm(e){
+  e.preventDefault();
+  document.getElementById('contactForm').classList.add('sent');
+  return false;
+}
 
 buildHeroStrip();
 renderShowsByYear();
