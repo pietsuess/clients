@@ -2,7 +2,7 @@
 //
 // Serves upcoming events from the SSCY community Google Calendar as JSON.
 // Used by events-data.js to populate the 4 community gatherings dynamically
-// (Sunday Satsang, Vancouver Satsang, Kirtan Class, Daily Arati) plus any
+// (Sunday Satsang, Vancouver Satsang, Kirtan, Daily Arati) plus any
 // other recurring community events SSCY adds to the calendar.
 //
 // SETUP:

@@ -518,9 +518,9 @@ var COMMUNITY_DATA = [
     img: 'images/2022/11/Online-yoga.jpg'
   },
   {
-    id: 'community-kirtan-class',
+    id: 'community-kirtan',
     type: 'community',
-    title: 'Kirtan Class',
+    title: 'Kirtan',
     schedule: 'Wednesday, 7:00 - 8:30 PM',
     days: ['Wednesday'],
     time: '7:00 - 8:30 PM',
@@ -528,8 +528,8 @@ var COMMUNITY_DATA = [
     format: 'In-person',
     location: 'Satsang Room',
     note: 'Currently paused for summer. Check calendar for return date.',
-    desc: 'Learn to chant, lead kirtan, and play harmonium. A welcoming space for beginners and experienced chanters.',
-    longDesc: "Kirtan Class is a welcoming space to learn the practice of call-and-response devotional chanting. Open to complete beginners and experienced chanters alike, the class covers Sanskrit pronunciation, harmonium basics, leading kirtan, and the history and spirit of the bhakti tradition. Currently on pause for the summer months - check the calendar for the return date.",
+    desc: 'Call-and-response devotional chanting with harmonium. A welcoming gathering for beginners and experienced chanters.',
+    longDesc: "Kirtan is a weekly gathering for call-and-response devotional chanting, open to everyone regardless of experience. Beginners and seasoned chanters sit together with harmonium and voice, sharing Sanskrit mantras and the bhakti tradition of devotional music. Currently on pause for the summer months - check the calendar for the return date.",
     img: 'images/2022/03/Grounding-with-music.jpg'
   },
   {

@@ -170,7 +170,7 @@ p { text-align: justify; text-justify: inter-word; }
   <div id="eventsGrid"></div>
 </section>
 
-<!-- WEEKLY CLASSES -->
+<!-- WEEKLY SCHEDULE -->
 <section class="sec sec-alt" id="classesSection">
   <h2>Weekly Classes &amp; Gatherings</h2>
   <p class="sub">Drop in any time. All levels welcome.</p>
@@ -248,7 +248,7 @@ p { text-align: justify; text-justify: inter-word; }
 <script src="../events-data.js"></script>
 <script>
 
-var CLASSES = [
+var SCHEDULE = [
   { day:'Daily', daySort:0, name:'Arati', teacher:'Centre Community', time:'6:45 - 7:15 AM', price:'Free (donation welcome)', format:'In-person', desc:'Lamp ceremony with mantras, prayers, and songs', type:'community' },
   { day:'Sunday', daySort:1, name:'Sadhana for Continuing Practitioners', teacher:'', time:'7:30 - 8:40 AM', price:'Free (donation)', format:'Online / Zoom', desc:'Pranayama and meditation for established practitioners', type:'class' },
   { day:'Sunday', daySort:1, name:'Sacred Sunday Eco-Yoga', teacher:'Cara Graci', time:'11:00 AM - 12:15 PM', price:'By donation', format:'Outdoor / Pond Dome', desc:'Walking meditation and asana flow in nature', type:'class' },
@@ -294,7 +294,7 @@ function renderEvents() {
 
 function renderClasses() {
   var grid = document.getElementById('classesGrid');
-  var filtered = CLASSES.filter(function(c) { return activeFilter === 'all' || activeFilter === 'class' || c.type === activeFilter; }).sort(function(a, b) { return a.daySort - b.daySort; });
+  var filtered = SCHEDULE.filter(function(c) { return activeFilter === 'all' || activeFilter === 'class' || c.type === activeFilter; }).sort(function(a, b) { return a.daySort - b.daySort; });
   grid.innerHTML = filtered.map(function(c) {
     return '<div class="class-card">' +
       '<div class="class-day">' + c.day + '</div>' +

@@ -62,7 +62,7 @@ Acuity admin, Square dashboard, Google Sheets).
 - [ ] SSCY creates recurring events in the community Google Calendar (`c_t567jg3h1u3hgj7fii50ie8k6k@group.calendar.google.com`):
   - Sunday Satsang — every Sunday, 2:00–3:30 PM, Satsang Room, full description in event details
   - Vancouver Satsang — every Wednesday, 6:30–8:00 PM, online, Zoom link in event details
-  - Kirtan Class — every Wednesday, 7:00–8:30 PM (currently paused for summer), Satsang Room
+  - Kirtan — every Wednesday, 7:00–8:30 PM (currently paused for summer), Satsang Room
   - Daily Arati — every day, 6:45–7:15 AM, The Temples
 - [ ] Deploy `community-events-api.gs` as Apps Script web app:
   - Open script.google.com → New project (or add to existing SSCY project)
@@ -203,7 +203,7 @@ Current state: blog.html fetches from `saltspringcentre.com/wp-json/wp/v2/posts`
   - Authorize Acuity to process payments through SSCY's Square account
 - [ ] Create appointment types with these categories:
   - [ ] **Yoga Classes** - all 9 weekly classes (Hatha/Dorothy, Yoga Flow/John, Sacred Sunday, Gentle Hatha Repair, Meditation & Mellow, Mindfulness Nature, Yoga Sutras, Bhagavad Gita, Sadhana)
-  - [ ] **Community** - Sunday Satsang, Vancouver Satsang, Kirtan Class, Daily Arati
+  - [ ] **Community** - Sunday Satsang, Vancouver Satsang, Kirtan, Daily Arati
   - [ ] **Wellness** - all 10 treatments (Swedish Massage, MAHA, Abhyanga, Swedana, Shirodhara, Acupuncture, Bodywork, Fire Cupping, Wood-Fired Sauna, Reset & Rejuvenate)
   - [ ] **Retreats** - local retreats not on Retreat Guru
 - [ ] Customize Acuity appearance to match SSCY colors:

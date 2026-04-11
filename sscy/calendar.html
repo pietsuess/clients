@@ -259,7 +259,7 @@ p { text-align: justify; text-justify: inter-word; }
 
 .event-cta:hover { background: var(--teal-dark); color: var(--white); }
 
-/* ===== WEEKLY CLASSES TABLE ===== */
+/* ===== WEEKLY SCHEDULE TABLE ===== */
 .classes-section {
   background: var(--white);
   padding: 64px 32px;
@@ -628,7 +628,7 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
 </section>
 
-<!-- WEEKLY CLASSES -->
+<!-- WEEKLY SCHEDULE -->
 <section class="classes-section" id="classes">
   <div class="section-header" style="padding-top:0;">
     <h2>Weekly Schedule</h2>
@@ -709,7 +709,7 @@ p { text-align: justify; text-justify: inter-word; }
 <script src="https://cdn.jsdelivr.net/npm/@event-calendar/build/dist/event-calendar.min.js"></script>
 <script src="events-data.js"></script>
 <script>
-const CLASSES = [
+const SCHEDULE = [
   {
     day: 'Daily',
     daySort: 0,
@@ -852,7 +852,7 @@ const CLASSES = [
     format: 'In-person',
     desc: 'Devotional chanting with harmonium. Paused for summer.',
     type: 'community',
-    offeringId: 'community-kirtan-class'
+    offeringId: 'community-kirtan'
   },
   {
     day: 'Friday',
@@ -921,7 +921,7 @@ function renderEvents() {
 
 function renderClasses() {
   const grid = document.getElementById('classesGrid');
-  const filtered = CLASSES.filter(c => activeFilter === 'all' || activeFilter === 'class' || c.type === activeFilter).sort((a, b) => a.daySort - b.daySort);
+  const filtered = SCHEDULE.filter(c => activeFilter === 'all' || activeFilter === 'class' || c.type === activeFilter).sort((a, b) => a.daySort - b.daySort);
 
   grid.innerHTML = filtered.map(c => `
     <div class="class-card" data-type="${c.type}">
@@ -1056,13 +1056,13 @@ EVENTS.forEach(function(e) {
   ecEvents.push(ev);
 });
 
-// Add recurring CLASSES as weekly events (generate 6 months of instances)
+// Add recurring SCHEDULE entries as weekly events (generate 6 months of instances)
 var dayMap = { Sunday: 0, Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6 };
 var classStart = new Date();
 var classEnd = new Date();
 classEnd.setMonth(classEnd.getMonth() + 6);
 
-CLASSES.forEach(function(c) {
+SCHEDULE.forEach(function(c) {
   var days = [];
   if (c.day === 'Daily') { days = [0,1,2,3,4,5,6]; }
   else if (dayMap[c.day] !== undefined) { days = [dayMap[c.day]]; }
