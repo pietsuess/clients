@@ -191,6 +191,52 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
   text-align:justify;text-align-last:left;
 }
 
+/* CAST */
+.cast{
+  padding:110px 4vw 130px;
+  background:var(--ink);color:var(--cream);
+  position:relative;
+}
+.cast-inner{
+  display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start;
+}
+.cast-header{position:sticky;top:120px}
+.cast-title{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 800;
+  font-size:clamp(3rem,7vw,7rem);
+  line-height:0.86;font-weight:800;letter-spacing:-0.03em;
+  color:var(--cream);
+}
+.cast-sub{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(1.1rem,1.6vw,1.5rem);
+  color:rgba(255,247,220,0.6);margin-top:20px;
+  line-height:1.4;
+}
+.cast-list{
+  list-style:none;display:flex;flex-direction:column;
+  border-top:1px solid rgba(255,247,220,0.18);
+}
+.cast-list li{
+  display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+  padding:26px 4px;
+  border-bottom:1px solid rgba(255,247,220,0.18);
+  transition:padding 0.25s,color 0.25s;
+}
+.cast-list li:hover{padding-left:18px;color:var(--pink)}
+.cast-name{
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:"opsz" 96,"wght" 700;
+  font-size:clamp(2rem,4.5vw,4rem);
+  line-height:1;font-weight:700;letter-spacing:-0.02em;
+}
+.cast-role{
+  font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(0.9rem,1.3vw,1.2rem);
+  color:rgba(255,247,220,0.55);
+}
+
 /* SHOWS SECTION */
 .shows{
   padding:120px 0 100px;
@@ -364,6 +410,8 @@ footer a:hover{color:var(--cream)}
 /* RESPONSIVE */
 @media(max-width:980px){
   .about-grid{grid-template-columns:1fr;gap:44px}
+  .cast-inner{grid-template-columns:1fr;gap:40px}
+  .cast-header{position:static}
 }
 @media(max-width:768px){
   nav{padding:10px 5vw}
@@ -380,6 +428,8 @@ footer a:hover{color:var(--cream)}
   .show-card .card-info h3{font-size:1.05rem}
   .show-card .card-info .card-date{font-size:0.85rem}
   .about{padding:70px 5vw 80px}
+  .cast{padding:70px 5vw 80px}
+  .cast-list li{padding:18px 4px}
   .contact{padding:80px 5vw 70px}
   .contact-inner{grid-template-columns:1fr;gap:20px}
   .contact-form .contact-link{align-self:stretch;text-align:center}
@@ -407,6 +457,7 @@ footer a:hover{color:var(--cream)}
   <a href="#" class="logo"><img src="img/175-logo.png" alt=""></a>
   <div class="nav-links">
     <a href="#about">About</a>
+    <a href="#cast">Cast</a>
     <a href="#shows">Shows</a>
     <a href="#contact">Contact</a>
   </div>
@@ -457,13 +508,34 @@ footer a:hover{color:var(--cream)}
       </div>
       <div class="detail-item">
         <h4>The Group</h4>
-        <p>A rotating cast of improvisers, weirdos, and professional amateurs. New faces welcome. Reach out if you want in.</p>
+        <p>A set group that performs together. The lineup evolves over time, but admittance is strict. This is not an open stage.</p>
       </div>
       <div class="detail-item">
         <h4>The Posters</h4>
         <p>Every show gets its own poster. They are half of the reason we keep doing this. All the art on this page is original, and it is all made for nothing.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- CAST -->
+<section class="cast" id="cast">
+  <div class="cast-inner">
+    <div class="cast-header">
+      <div class="cast-title">The cast.</div>
+      <p class="cast-sub">A closed group. These are the people who have taken the stage.</p>
+    </div>
+    <ul class="cast-list">
+      <li><span class="cast-name">Ari Lazer</span></li>
+      <li><span class="cast-name">Ashia Fredeen</span></li>
+      <li><span class="cast-name">Kate Nash</span></li>
+      <li><span class="cast-name">Michael Mann</span></li>
+      <li><span class="cast-name">Piet Suess</span></li>
+      <li><span class="cast-name">Angelo Rosso</span></li>
+      <li><span class="cast-name">Elizabeth Young</span></li>
+      <li><span class="cast-name">Simone Cazabon</span></li>
+      <li><span class="cast-name">Tom van Deursen</span><span class="cast-role">Music &amp; Sound</span></li>
+    </ul>
   </div>
 </section>
 
@@ -528,9 +600,13 @@ const SHOWS = [
 
   { title:"Sasquatch",             date:"December 15, 2023", year:2023, poster:"img/posters/2023-12-15_sasquatch.jpg" },
   { title:"An Evening of Improv",  date:"May 25, 2023",      year:2023, poster:"img/posters/2023-05-25_evening.jpg" },
-  { title:"An Evening of Comedy",  date:"April 27, 2023",    year:2023, poster:"img/posters/2023-04-27_comedy.jpg" },
+  { title:"An Evening of Improv",  date:"April 27, 2023",    year:2023, poster:"img/posters/2023-04-27_evening.jpg" },
 
-  { title:"An Evening of Theatre", date:"December 1, 2022",  year:2022, poster:"img/posters/2022-12-01_theatre.jpg" }
+  { title:"Holiday Theatre",       date:"December 1, 2022",  year:2022, poster:"img/posters/2022-12-01_theatre.jpg" },
+  { title:"An Evening of Theatre", date:"November 3, 2022",  year:2022, poster:"img/posters/2022-11-03_theatre.jpg" },
+  { title:"Saturday Night Special",date:"October 8, 2022",   year:2022, poster:"img/posters/2022-10-08_theatre.jpg" },
+  { title:"An Evening of Theatre", date:"September 1, 2022", year:2022, poster:"img/posters/2022-09-01_theatre.jpg" },
+  { title:"Free Show",             date:"June 16, 2022",     year:2022, poster:"img/posters/2022-06-16_theatre.png" }
 ];
 
 /* Hero strip: scrolling posters */
