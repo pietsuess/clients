@@ -72,6 +72,7 @@ p { text-align: justify; text-justify: inter-word; }
 /* OFFERING CARDS */
 .offering-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; max-width: 1200px; margin: 0 auto; }
 .offering-card { background: var(--white); border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; overflow: hidden; }
+a.offering-card, a.offering-card * { cursor: pointer; }
 .offering-card[data-bg]::before { content: ''; position: absolute; inset: 0; background-size: cover; background-position: center; background-image: var(--card-bg); opacity: 0.10; pointer-events: none; z-index: 0; transition: opacity 0.4s ease; }
 .offering-card[data-bg]:hover::before { opacity: 0.18; }
 .offering-card > * { position: relative; z-index: 1; }
