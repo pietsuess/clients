@@ -214,10 +214,18 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
   color:rgba(255,247,220,0.6);margin-top:20px;
   line-height:1.4;
 }
+.cast-groups{display:flex;flex-direction:column;gap:48px}
+.cast-group-label{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+  font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--pink);margin-bottom:14px;
+}
 .cast-list{
   list-style:none;display:flex;flex-direction:column;
   border-top:1px solid rgba(255,247,220,0.18);
 }
+.cast-list-past .cast-name{color:rgba(255,247,220,0.55)}
+.cast-list-past li:hover .cast-name{color:var(--pink)}
 .cast-list li{
   display:flex;align-items:baseline;justify-content:space-between;gap:24px;
   padding:26px 4px;
@@ -532,16 +540,28 @@ footer a:hover{color:var(--cream)}
       <div class="cast-title">The cast.</div>
       <p class="cast-sub">A closed group. These are the people who have taken the stage.</p>
     </div>
-    <ul class="cast-list">
-      <li><span class="cast-name">Ari Lazer</span></li>
-      <li><span class="cast-name">Ashia Fredeen</span></li>
-      <li><span class="cast-name">Kate Nash</span></li>
-      <li><span class="cast-name">Michael Mann</span></li>
-      <li><span class="cast-name">Piet Suess</span></li>
-      <li><span class="cast-name">Angelo Rosso</span></li>
-      <li><span class="cast-name">Simone Cazabon</span></li>
-      <li><span class="cast-name">Tom van Deursen</span><span class="cast-role">Music &amp; Sound</span></li>
-    </ul>
+    <div class="cast-groups">
+      <div class="cast-group">
+        <h3 class="cast-group-label">Current</h3>
+        <ul class="cast-list">
+          <li><span class="cast-name">Ari Lazer</span></li>
+          <li><span class="cast-name">Piet Suess</span></li>
+          <li><span class="cast-name">Simone Cazabon</span></li>
+          <li><span class="cast-name">Jules Hogan</span><span class="cast-role">Yet to debut</span></li>
+          <li><span class="cast-name">Simon Millerd</span><span class="cast-role">Music &amp; Sound</span></li>
+        </ul>
+      </div>
+      <div class="cast-group">
+        <h3 class="cast-group-label">Former</h3>
+        <ul class="cast-list cast-list-past">
+          <li><span class="cast-name">Michael Mann</span></li>
+          <li><span class="cast-name">Kate Nash</span></li>
+          <li><span class="cast-name">Ashia Fredeen</span></li>
+          <li><span class="cast-name">Angelo Rosso</span></li>
+          <li><span class="cast-name">Tom van Deursen</span><span class="cast-role">Music &amp; Sound</span></li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 
