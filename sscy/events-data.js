@@ -670,3 +670,66 @@ var OFFERINGS = EVENTS.concat(CLASSES_DATA).concat(COMMUNITY_DATA).concat(TREATM
 
 // Each entry gets a URL to its dedicated detail page
 OFFERINGS.forEach(function(o) { o.url = 'event.html?id=' + o.id; });
+
+// ===== DYNAMIC COMMUNITY EVENTS (Google Calendar via Apps Script) =====
+// Replace COMMUNITY_DATA at runtime with live events from the SSCY community
+// Google Calendar. Pulls via the community-events-api Apps Script web app.
+// Falls back silently to hardcoded COMMUNITY_DATA if fetch fails or not deployed.
+//
+// DEPLOY: see sscy/community-events-api.gs for setup instructions. Once
+// deployed, replace COMMUNITY_EVENTS_API below with the Apps Script web app URL.
+var COMMUNITY_EVENTS_API = 'https://script.google.com/macros/s/COMMUNITY_EVENTS_API_PLACEHOLDER/exec';
+
+// Default image fallbacks keyed by title substring — used when Google Calendar
+// events don't have their own image metadata.
+var COMMUNITY_IMAGE_MAP = {
+  'satsang': 'images/2023/04/Other-ways-to-help-Program-in-the-Satsang-Room.jpg',
+  'kirtan': 'images/2022/03/Grounding-with-music.jpg',
+  'arati': 'images/2023/04/Other-ways-to-help-ceremony-at-the-Madonna.jpg',
+  'vancouver': 'images/2022/11/Online-yoga.jpg'
+};
+
+function pickCommunityImage(title) {
+  var lower = (title || '').toLowerCase();
+  for (var key in COMMUNITY_IMAGE_MAP) {
+    if (lower.indexOf(key) >= 0) return COMMUNITY_IMAGE_MAP[key];
+  }
+  return 'images/2023/04/Other-ways-to-help-community-members.jpg';
+}
+
+if (typeof window !== 'undefined' && COMMUNITY_EVENTS_API.indexOf('PLACEHOLDER') < 0) {
+  fetch(COMMUNITY_EVENTS_API)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || !data.events || !data.events.length) return;
+      // Replace COMMUNITY_DATA with live events
+      var fresh = data.events.map(function(e) {
+        return {
+          id: e.id,
+          type: 'community',
+          title: e.title,
+          schedule: e.schedule,
+          days: e.days,
+          time: e.time,
+          price: e.price || 'Free',
+          format: e.format,
+          location: e.location,
+          desc: e.desc,
+          longDesc: e.longDesc,
+          img: pickCommunityImage(e.title),
+          url: 'event.html?id=' + e.id
+        };
+      });
+      // Remove the old hardcoded community entries from OFFERINGS and splice in fresh ones
+      for (var i = OFFERINGS.length - 1; i >= 0; i--) {
+        if (OFFERINGS[i].type === 'community') OFFERINGS.splice(i, 1);
+      }
+      fresh.forEach(function(f) { OFFERINGS.push(f); });
+      // Also replace COMMUNITY_DATA for any code that reads it directly
+      COMMUNITY_DATA.length = 0;
+      fresh.forEach(function(f) { COMMUNITY_DATA.push(f); });
+      // Notify listeners (e.g. event.html) that data refreshed
+      window.dispatchEvent(new CustomEvent('community-events-loaded'));
+    })
+    .catch(function() { /* silent - fall back to hardcoded */ });
+}

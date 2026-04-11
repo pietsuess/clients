@@ -56,11 +56,21 @@ Acuity admin, Square dashboard, Google Sheets).
 - [ ] Remove `PRODUCTS` array and cart logic from `shop.html` / `m/shop.html`
 - [ ] Concert tickets also live in Square Online (as event products)
 
-**Community gatherings**
-- [ ] Decision: do these live in Google Calendar or stay hardcoded?
-  - Option A: SSCY adds Sunday Satsang, Vancouver Satsang, Kirtan, Daily Arati as recurring events in Google Calendar; site reads from Calendar API
-  - Option B: Keep in `events-data.js` since they rarely change (simpler, no account cost)
-  - Recommendation: Option B for now; revisit if changes become frequent
+**Community gatherings → Google Calendar (code ready, needs deployment)**
+- [x] Apps Script written: `sscy/community-events-api.gs`
+- [x] events-data.js wired to fetch from Apps Script on page load and replace hardcoded COMMUNITY_DATA (falls back silently if fetch fails)
+- [ ] SSCY creates recurring events in the community Google Calendar (`c_t567jg3h1u3hgj7fii50ie8k6k@group.calendar.google.com`):
+  - Sunday Satsang — every Sunday, 2:00–3:30 PM, Satsang Room, full description in event details
+  - Vancouver Satsang — every Wednesday, 6:30–8:00 PM, online, Zoom link in event details
+  - Kirtan Class — every Wednesday, 7:00–8:30 PM (currently paused for summer), Satsang Room
+  - Daily Arati — every day, 6:45–7:15 AM, The Temples
+- [ ] Deploy `community-events-api.gs` as Apps Script web app:
+  - Open script.google.com → New project (or add to existing SSCY project)
+  - Paste `community-events-api.gs`
+  - Deploy → New deployment → Web app → Execute as: Me, Access: Anyone
+  - Copy the deployment URL
+- [ ] Replace `COMMUNITY_EVENTS_API_PLACEHOLDER` in `events-data.js` with the Apps Script URL
+- [ ] Once deployed and calendar populated, the 4 hardcoded COMMUNITY_DATA entries in events-data.js can be deleted entirely (they're already overridden at runtime, deleting them just reduces the fallback)
 
 **Blog**
 - [ ] See section 3 — move to WordPress.com free tier at `blog.saltspringcentre.com`
