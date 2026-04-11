@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listen — Salt Spring Centre of Yoga</title>
+<meta name="description" content="Chants, kirtan, and recordings from the Salt Spring Centre of Yoga. Play while browsing the site.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://open.spotify.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Archivo+Narrow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal-deep: #1a5550;
+    --teal-dark: #2a6f67;
+    --teal: #3bb8a8;
+    --gold: #f4d76b;
+    --cream: #faf8f4;
+    --cream-warm: #f4ecdd;
+    --white: #ffffff;
+    --text-light: rgba(26,85,80,0.65);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: linear-gradient(160deg, var(--cream) 0%, var(--cream-warm) 100%);
+    font-family: 'Archivo Narrow', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--teal-deep);
+    padding: 18px 18px 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .wrap { max-width: 100%; flex: 1; display: flex; flex-direction: column; }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .header img { height: 34px; }
+  .header-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .header-text .series {
+    font-family: 'Archivo Narrow', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--teal);
+  }
+  .header-text .title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--teal-deep);
+    margin-top: 2px;
+  }
+  .player-frame {
+    width: 100%;
+    flex: 1;
+    min-height: 380px;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 4px 22px rgba(26,85,80,0.14);
+    background: var(--white);
+    display: block;
+  }
+  .hint {
+    margin-top: 12px;
+    font-size: 0.7rem;
+    color: var(--text-light);
+    text-align: center;
+    letter-spacing: 0.03em;
+    line-height: 1.5;
+  }
+  .hint strong { color: var(--teal-deep); font-weight: 600; }
+  @media (max-height: 520px) {
+    body { padding: 10px; }
+    .header { margin-bottom: 8px; }
+    .header img { height: 28px; }
+    .player-frame { min-height: 320px; }
+    .hint { margin-top: 8px; font-size: 0.66rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <img src="logo-full-teal-light.svg" alt="Salt Spring Centre of Yoga">
+    <div class="header-text">
+      <span class="series">Listen</span>
+      <span class="title">Music from the Centre</span>
+    </div>
+  </div>
+  <iframe
+    class="player-frame"
+    title="Salt Spring Centre of Yoga on Spotify"
+    src="https://open.spotify.com/embed/artist/6b1LHmnUZHMaouFb6KgXeu?utm_source=generator&theme=0"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    allowfullscreen
+    loading="lazy"></iframe>
+  <p class="hint">Keep this window open to play music while you browse <strong>saltspringcentre.com</strong>.</p>
+</div>
+<script>
+  // Heartbeat: the main site uses this timestamp to detect whether the popup is
+  // still alive, so re-clicking Play on another page focuses this window rather
+  // than opening a new one.
+  function beat() {
+    try { localStorage.setItem('sscy-player-alive', String(Date.now())); } catch (e) {}
+  }
+  beat();
+  setInterval(beat, 1000);
+  window.addEventListener('beforeunload', function () {
+    try { localStorage.removeItem('sscy-player-alive'); } catch (e) {}
+  });
+</script>
+</body>
+</html>

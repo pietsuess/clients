@@ -401,6 +401,65 @@ p { text-align: justify; text-justify: inter-word; }
   </div>
 </nav>
 
+<!-- LISTEN BAR: opens a popup Spotify player that persists across navigations -->
+<style>
+.listen-bar { background: linear-gradient(90deg, var(--teal-deep) 0%, var(--teal-dark) 100%); color: var(--white); overflow: hidden; max-height: 56px; transition: max-height 0.4s ease, opacity 0.3s ease; border-bottom: 1px solid rgba(244,215,107,0.18); }
+.listen-bar.dismissed { max-height: 0; opacity: 0; border-bottom: 0; }
+.listen-bar-inner { max-width: 1200px; margin: 0 auto; padding: 13px 32px; display: flex; align-items: center; gap: 14px; }
+.listen-bar .listen-icon { color: var(--gold); flex-shrink: 0; }
+.listen-bar-text { flex: 1; font-family: 'Archivo Narrow', sans-serif; font-size: 0.94rem; font-weight: 500; letter-spacing: 0.03em; color: rgba(255,255,255,0.92); }
+.listen-bar .listen-play { background: var(--gold); color: var(--teal-deep); border: none; padding: 7px 20px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; white-space: nowrap; }
+.listen-bar .listen-play:hover { transform: scale(1.04); background: #f9e089; box-shadow: 0 2px 10px rgba(244,215,107,0.35); }
+.listen-bar .listen-close { background: transparent; border: none; color: rgba(255,255,255,0.55); font-size: 1.5rem; cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s; flex-shrink: 0; }
+.listen-bar .listen-close:hover { color: var(--white); }
+@media (max-width: 720px) { .listen-bar-inner { padding: 10px 16px; gap: 10px; } .listen-bar-text { font-size: 0.82rem; } .listen-bar .listen-play { padding: 6px 14px; font-size: 0.7rem; letter-spacing: 0.06em; } }
+@media (max-width: 480px) { .listen-bar .listen-icon { display: none; } }
+</style>
+<div class="listen-bar" id="listenBar">
+  <div class="listen-bar-inner">
+    <svg class="listen-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <span class="listen-bar-text">Play our music while you browse the site</span>
+    <button class="listen-play" type="button" onclick="openSSCYPlayer()"><svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>Play</button>
+    <button class="listen-close" type="button" aria-label="Dismiss" onclick="closeListenBar()">&times;</button>
+  </div>
+</div>
+<script>
+function openSSCYPlayer() {
+  var features = 'width=440,height=560,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=no';
+  try {
+    var alive = parseInt(localStorage.getItem('sscy-player-alive') || '0', 10);
+    if (Date.now() - alive < 3500) {
+      // Popup reports itself alive — peek at the named window and focus it
+      // without navigating (empty URL means "reuse if exists").
+      var ref = window.open('', 'sscyPlayer');
+      if (ref && !ref.closed) {
+        try {
+          if (ref.location && ref.location.href && ref.location.href.indexOf('about:blank') < 0) {
+            ref.focus();
+            return;
+          }
+        } catch (e) { /* unlikely */ }
+      }
+    }
+  } catch (e) {}
+  var popup = window.open('player.html', 'sscyPlayer', features);
+  if (popup) popup.focus();
+}
+function closeListenBar() {
+  var bar = document.getElementById('listenBar');
+  if (bar) bar.classList.add('dismissed');
+  try { sessionStorage.setItem('sscy-listen-bar-dismissed', '1'); } catch (e) {}
+}
+(function () {
+  try {
+    if (sessionStorage.getItem('sscy-listen-bar-dismissed') === '1') {
+      var bar = document.getElementById('listenBar');
+      if (bar) bar.classList.add('dismissed');
+    }
+  } catch (e) {}
+})();
+</script>
+
 <div class="mobile-menu" id="mobileMenu">
   <a href="offerings.html">Offerings</a>
   <a href="calendar.html">Calendar</a>
@@ -574,24 +633,6 @@ p { text-align: justify; text-justify: inter-word; }
   <img src="images/2022/03/Organic-Greens-in-Hoop-House-1024x768-1.jpg" alt="Organic greens" loading="lazy">
   <img src="images/2022/10/Forest-walk-school-photo.jpg" alt="Forest walk" loading="lazy">
 </div>
-
-<!-- LISTEN - SPOTIFY -->
-<section class="listen-section reveal" id="listen" style="padding:72px 32px;background:var(--cream);text-align:center;">
-  <div style="max-width:720px;margin:0 auto;">
-    <span class="label" style="color:var(--teal);display:block;margin-bottom:14px;">Listen</span>
-    <h2 class="reveal d1">Music from the Centre</h2>
-    <p class="reveal d2 sub" style="max-width:560px;margin:14px auto 32px;">Chants, kirtan, and recordings from our satsang tradition on Spotify.</p>
-    <div class="reveal d3" style="border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.10);background:var(--white);">
-      <iframe
-        title="Salt Spring Centre of Yoga on Spotify"
-        src="https://open.spotify.com/embed/artist/6b1LHmnUZHMaouFb6KgXeu?utm_source=generator"
-        width="100%" height="352" frameborder="0" loading="lazy"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        allowfullscreen
-        style="display:block;border:0;"></iframe>
-    </div>
-  </div>
-</section>
 
 <!-- OUR FAMILY -->
 <section class="partners-section reveal" id="partners">

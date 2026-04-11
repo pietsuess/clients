@@ -166,6 +166,59 @@ p { text-align: justify; text-justify: inter-word; }
   </button>
 </nav>
 
+<!-- LISTEN BAR: popup Spotify player that persists across navigations -->
+<style>
+.listen-bar { position: fixed; top: 52px; left: 0; right: 0; z-index: 95; background: linear-gradient(90deg, var(--teal-deep) 0%, var(--teal-dark) 100%); color: var(--white); overflow: hidden; max-height: 48px; transition: max-height 0.4s ease, opacity 0.3s ease; border-bottom: 1px solid rgba(244,215,107,0.2); }
+.listen-bar.dismissed { max-height: 0; opacity: 0; border-bottom: 0; }
+.listen-bar-inner { padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+.listen-bar .listen-icon { color: var(--gold); flex-shrink: 0; }
+.listen-bar-text { flex: 1; font-family: 'Archivo Narrow', sans-serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.02em; color: rgba(255,255,255,0.92); line-height: 1.2; }
+.listen-bar .listen-play { background: var(--gold); color: var(--teal-deep); border: none; padding: 5px 14px; border-radius: 50px; font-family: 'Archivo Narrow', sans-serif; font-weight: 700; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.listen-bar .listen-close { background: transparent; border: none; color: rgba(255,255,255,0.6); font-size: 1.3rem; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; }
+</style>
+<div class="listen-bar" id="listenBar">
+  <div class="listen-bar-inner">
+    <svg class="listen-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <span class="listen-bar-text">Play our music while you browse</span>
+    <button class="listen-play" type="button" onclick="openSSCYPlayer()"><svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21"/></svg>Play</button>
+    <button class="listen-close" type="button" aria-label="Dismiss" onclick="closeListenBar()">&times;</button>
+  </div>
+</div>
+<script>
+function openSSCYPlayer() {
+  var features = 'width=440,height=560,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=no';
+  try {
+    var alive = parseInt(localStorage.getItem('sscy-player-alive') || '0', 10);
+    if (Date.now() - alive < 3500) {
+      var ref = window.open('', 'sscyPlayer');
+      if (ref && !ref.closed) {
+        try {
+          if (ref.location && ref.location.href && ref.location.href.indexOf('about:blank') < 0) {
+            ref.focus();
+            return;
+          }
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+  var popup = window.open('../player.html', 'sscyPlayer', features);
+  if (popup) popup.focus();
+}
+function closeListenBar() {
+  var bar = document.getElementById('listenBar');
+  if (bar) bar.classList.add('dismissed');
+  try { sessionStorage.setItem('sscy-listen-bar-dismissed', '1'); } catch (e) {}
+}
+(function () {
+  try {
+    if (sessionStorage.getItem('sscy-listen-bar-dismissed') === '1') {
+      var bar = document.getElementById('listenBar');
+      if (bar) bar.classList.add('dismissed');
+    }
+  } catch (e) {}
+})();
+</script>
+
 <!-- MENU -->
 <div class="menu" id="menu">
   <a href="offerings.html" onclick="closeMenu()">Offerings</a>
@@ -293,22 +346,6 @@ p { text-align: justify; text-justify: inter-word; }
   <img src="../images/2022/05/harvesting-salad.jpg" alt="Harvest" loading="lazy">
   <img src="../images/2022/03/Tree-Pose-in-Boots-scaled-1.jpg" alt="Tree pose" loading="lazy">
 </div>
-
-<!-- LISTEN - SPOTIFY -->
-<section style="padding:40px 20px;background:var(--cream);text-align:center;">
-  <span style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--teal);display:block;margin-bottom:8px;">Listen</span>
-  <h2 style="font-family:'Cinzel',serif;font-size:1.4rem;color:var(--teal-deep);margin-bottom:6px;">Music from the Centre</h2>
-  <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:20px;">Chants, kirtan, and recordings on Spotify.</p>
-  <div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.10);background:var(--white);">
-    <iframe
-      title="Salt Spring Centre of Yoga on Spotify"
-      src="https://open.spotify.com/embed/artist/6b1LHmnUZHMaouFb6KgXeu?utm_source=generator"
-      width="100%" height="352" frameborder="0" loading="lazy"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      allowfullscreen
-      style="display:block;border:0;"></iframe>
-  </div>
-</section>
 
 <!-- SISTER ORGS -->
 <section class="partners">
