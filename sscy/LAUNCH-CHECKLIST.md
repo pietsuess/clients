@@ -5,6 +5,79 @@ Updated as work progresses.
 
 ---
 
+## 0. Data Source Migration (hardcoded → live)
+
+**The big picture:** Most site content is hardcoded in `events-data.js` as a
+placeholder. As SSCY's third-party accounts come online, each category
+migrates to its live API source. When this section is fully checked off,
+there will be near-zero hardcoded content in the repo and SSCY staff will
+edit everything through the tools they already use (Retreat Guru admin,
+Acuity admin, Square dashboard, Google Sheets).
+
+| Data | Current source | Target source | Status |
+|---|---|---|---|
+| Retreats (upcoming, dated) | `events-data.js` EVENTS (7 program descriptions) + Retreat Guru API | Retreat Guru API only | Partially live |
+| Retreat Guru programs | Retreat Guru API | Retreat Guru API | ✓ Live |
+| Weekly yoga classes (9) | `events-data.js` CLASSES_DATA + `calendar.html` CLASSES | Acuity Appointment Types API | Hardcoded |
+| Wellness treatments (10) | `events-data.js` TREATMENTS_DATA | Acuity Appointment Types API | Hardcoded |
+| Community gatherings (4) | `events-data.js` COMMUNITY_DATA | Google Calendar or stay hardcoded (free walk-ins) | Hardcoded |
+| Music for Peace concerts | `events-data.js` EVENTS | Retreat Guru or Square Online (tickets) | Hardcoded |
+| Blog posts | WordPress REST API (current Flywheel host) | WordPress.com API (blog.saltspringcentre.com) | Live (source changes) |
+| Shop products | `shop.html` PRODUCTS array | Square Online storefront | Hardcoded |
+| Community calendar overlays | Google Calendar embed | Google Calendar embed | ✓ Live |
+| Community dashboard (9 tabs) | Google Sheets via Apps Script | Google Sheets via Apps Script | ✓ Live |
+
+### Migration tasks
+
+**Retreats → Retreat Guru**
+- [ ] SSCY adds all year-round programs to Retreat Guru as recurring program templates (Yoga & Wellness Weekends, Breath as Gateway, Ayurveda & Yoga I Want More, Yoga Intensive, Going Deeper Silent, Annual Community Retreat, Personal Retreats)
+- [ ] Once they appear in the Retreat Guru API, delete the 7 placeholder retreat entries from `events-data.js`
+- [ ] Verify offerings.html and calendar widget still show them (via the live API fetch)
+- [ ] Delete the hardcoded retreat cards from offerings.html (the retreat grid will render entirely from the API)
+
+**Classes → Acuity**
+- [ ] SSCY creates Acuity account (see section 5)
+- [ ] SSCY creates Appointment Types in Acuity for each weekly class under category "Yoga Classes" (with duration, price, teacher notes)
+- [ ] Extend `events-data.js` or add a new `acuity-data.js` that fetches from `https://acuityscheduling.com/api/v1/appointment-types` (requires API key — Acuity user ID plus API key, do this server-side via Cloudflare Worker for safety)
+- [ ] Replace hardcoded `CLASSES_DATA` with the fetched list
+- [ ] Remove duplicated `CLASSES` array from `calendar.html` and `m/calendar.html`, have them read from the same source
+- [ ] Test: Kirtan-style day change should only require editing Acuity, not touching code
+
+**Treatments → Acuity**
+- [ ] SSCY creates Appointment Types in Acuity for each treatment under category "Wellness"
+- [ ] Include pricing tiers (60 min / 90 min / add-on) as separate appointment types or variations
+- [ ] Same fetch mechanism replaces `TREATMENTS_DATA`
+- [ ] Verify `event.html?id=treatment-*` pages render correctly from fetched data
+
+**Shop → Square Online**
+- [ ] SSCY populates Square Online store with all products
+- [ ] Set up `shop.saltspringcentre.com` subdomain pointing at Square Online
+- [ ] Replace local `shop.html` with a landing page that promotes the store and links out
+- [ ] Remove `PRODUCTS` array and cart logic from `shop.html` / `m/shop.html`
+- [ ] Concert tickets also live in Square Online (as event products)
+
+**Community gatherings**
+- [ ] Decision: do these live in Google Calendar or stay hardcoded?
+  - Option A: SSCY adds Sunday Satsang, Vancouver Satsang, Kirtan, Daily Arati as recurring events in Google Calendar; site reads from Calendar API
+  - Option B: Keep in `events-data.js` since they rarely change (simpler, no account cost)
+  - Recommendation: Option B for now; revisit if changes become frequent
+
+**Blog**
+- [ ] See section 3 — move to WordPress.com free tier at `blog.saltspringcentre.com`
+
+### Cloudflare Worker #3 — Acuity Proxy (required for Acuity integration)
+
+Acuity's Appointment Types API requires basic auth with an API key. That key can't live in client-side JS. So:
+
+- [ ] Build `workers/acuity-proxy.js` following the same pattern as `retreat-guru-proxy.js`
+- [ ] Worker endpoint: `saltspringcentre.com/api/acuity/appointment-types`
+- [ ] Inject Acuity `USER_ID` and `API_KEY` from Worker env vars
+- [ ] Restrict to GET requests on `appointment-types` endpoint only
+- [ ] Cache responses for 5-10 minutes to reduce API calls
+- [ ] Update `events-data.js` (or a new helper) to fetch from this proxy instead of hardcoded arrays
+
+---
+
 ## 1. Cloudflare Migration
 
 **Blocker: needs SSCY email and GoDaddy access.**
