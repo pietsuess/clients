@@ -288,7 +288,14 @@ nav .nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
   display:flex;flex-direction:column;
 }
 .show-card:hover{transform:translateY(-10px);box-shadow:0 26px 46px rgba(0,0,0,0.35)}
-.show-card .card-img{width:100%;aspect-ratio:1;overflow:hidden;background:#000}
+.show-card .card-img{width:100%;aspect-ratio:1;overflow:hidden;background:#000;position:relative}
+.show-card .special-badge{
+  position:absolute;top:14px;left:14px;z-index:2;
+  padding:7px 14px;background:var(--cream);color:var(--ink);
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+  font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);
+}
 .show-card .card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s cubic-bezier(0.075,0.82,0.165,1)}
 .show-card:hover .card-img img{transform:scale(1.04)}
 .show-card .card-info{padding:18px 20px 22px;color:var(--cream)}
@@ -532,7 +539,6 @@ footer a:hover{color:var(--cream)}
       <li><span class="cast-name">Michael Mann</span></li>
       <li><span class="cast-name">Piet Suess</span></li>
       <li><span class="cast-name">Angelo Rosso</span></li>
-      <li><span class="cast-name">Elizabeth Young</span></li>
       <li><span class="cast-name">Simone Cazabon</span></li>
       <li><span class="cast-name">Tom van Deursen</span><span class="cast-role">Music &amp; Sound</span></li>
     </ul>
@@ -600,7 +606,7 @@ const SHOWS = [
   { title:"Wheat",            date:"June 27, 2024",      year:2024, poster:"img/posters/2024-06-27_wheat.jpg" },
   { title:"Cherries",         date:"May 30, 2024",       year:2024, poster:"img/posters/2024-05-30_may30.jpg" },
 
-  { title:"Sasquatch",        date:"December 15, 2023", year:2023, poster:"img/posters/2023-12-15_sasquatch.jpg" },
+  { title:"Sasquatch",        date:"December 15, 2023", year:2023, special:true, poster:"img/posters/2023-12-15_sasquatch.jpg" },
   { title:"Pigeons",          date:"November 23, 2023", year:2023, poster:"img/posters/2023-11-23_pigeons.jpg" },
   { title:"Mannequins",       date:"October 26, 2023",  year:2023, poster:"img/posters/2023-10-26_mannequins.jpg" },
   { title:"Legos",            date:"September 28, 2023",year:2023, poster:"img/posters/2023-09-28_legos.jpg" },
@@ -639,7 +645,7 @@ function renderShowsByYear(){
       const idx = SHOWS.indexOf(s);
       return `
         <article class="show-card" onclick="openLightbox(${idx})">
-          <div class="card-img"><img src="${s.poster}" alt="${s.title} poster" loading="lazy"></div>
+          <div class="card-img">${s.special?'<span class="special-badge">Special</span>':''}<img src="${s.poster}" alt="${s.title} poster" loading="lazy"></div>
           <div class="card-info">
             <h3>${s.title}</h3>
             <div class="card-date">${s.date}</div>
