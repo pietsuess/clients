@@ -882,7 +882,7 @@ let activeFilter = 'all';
 
 function renderEvents() {
   const grid = document.getElementById('eventsGrid');
-  const filtered = EVENTS.filter(e => activeFilter === 'all' || e.type === activeFilter).sort((a, b) => a.date.localeCompare(b.date));
+  const filtered = EVENTS.filter(e => (activeFilter === 'all' || e.type === activeFilter) && e.date).sort((a, b) => a.date.localeCompare(b.date));
 
   grid.innerHTML = filtered.map(e => `
     <div class="event-card" data-type="${e.type}">
@@ -1015,6 +1015,8 @@ var typeTextColors = { retreat: '#fff', concert: '#2c2c2c', class: '#3a3a3a', co
 
 // Add hardcoded EVENTS
 EVENTS.forEach(function(e) {
+  // Skip events without a real date (e.g. year-round programs)
+  if (!e.date) return;
   var ev = { title: e.title, start: e.date, color: typeColors[e.type] || '#3bb8a8', textColor: typeTextColors[e.type] || '#fff' };
   if (e.time) {
     var timeParts = e.time.match(/(\d+):(\d+)\s*(am|pm|AM|PM)?/);

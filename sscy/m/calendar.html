@@ -269,7 +269,7 @@ var activeFilter = 'all';
 
 function renderEvents() {
   var grid = document.getElementById('eventsGrid');
-  var filtered = EVENTS.filter(function(e) { return activeFilter === 'all' || e.type === activeFilter; }).sort(function(a, b) { return a.date.localeCompare(b.date); });
+  var filtered = EVENTS.filter(function(e) { return (activeFilter === 'all' || e.type === activeFilter) && e.date; }).sort(function(a, b) { return a.date.localeCompare(b.date); });
   grid.innerHTML = filtered.map(function(e) {
     var badgeClass = e.type === 'concert' ? ' concert' : '';
     var typeLabel = e.type === 'concert' ? 'Music for Peace' : e.type === 'retreat' ? 'Retreat' : 'Event';
