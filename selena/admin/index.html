@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" id="admin-css">
+  <script>document.getElementById('admin-css').href='admin.css?v='+Date.now();</script>
 </head>
 <body>
 
@@ -21,7 +22,6 @@
         <label for="token-input">GitHub Token</label>
         <input type="password" id="token-input" placeholder="ghp_...">
         <button id="login-btn" class="btn-primary">Connect</button>
-        <button onclick="window.location.search='?demo'" style="margin-top:12px;padding:8px 20px;background:transparent;border:1px solid rgba(0,0,0,0.15);color:#888;cursor:pointer;font-size:0.85rem;width:100%">Try Demo</button>
         <p id="login-error" class="error"></p>
       </div>
     </div>
@@ -31,29 +31,32 @@
   <div id="app" class="screen" style="display:none;">
     <header id="admin-header">
       <div class="admin-header-inner">
-        <h2>Salt Spring Rolfing</h2>
+        <h2 id="site-title">CMS</h2>
+        <select id="site-picker" style="padding:8px 14px;border:1px solid #ccc;border-radius:8px;font-family:inherit;font-size:14px;font-weight:500;background:#fff;"></select>
+        <nav id="admin-nav">
+          <a href="#dashboard" class="nav-item active" data-section="dashboard">Settings</a>
+          <a href="#pages" class="nav-item" data-section="pages">Pages</a>
+          <a href="#blog" class="nav-item" data-section="blog">Blog</a>
+          <a href="#testimonials" class="nav-item" data-section="testimonials">Reviews</a>
+          <a href="#faqs" class="nav-item" data-section="faqs">FAQs</a>
+          <a href="#events" class="nav-item" data-section="events">Events</a>
+          <a href="#products" class="nav-item" data-section="products">Shop</a>
+          <a href="#newsletter" class="nav-item" data-section="newsletter">Newsletter</a>
+        </nav>
         <div class="admin-header-right">
           <span id="user-name"></span>
           <button id="logout-btn" class="btn-small">Logout</button>
         </div>
       </div>
-      <nav id="admin-nav">
-        <a href="#dashboard" class="nav-item active" data-section="dashboard">Dashboard</a>
-        <a href="#pages" class="nav-item" data-section="pages">Pages</a>
-        <a href="#blog" class="nav-item" data-section="blog">Blog</a>
-        <a href="#testimonials" class="nav-item" data-section="testimonials">Reviews</a>
-        <a href="#faqs" class="nav-item" data-section="faqs">FAQs</a>
-        <a href="#navigation" class="nav-item" data-section="navigation">Navigation</a>
-        <a href="#settings" class="nav-item" data-section="settings">Settings</a>
-      </nav>
     </header>
 
     <main id="admin-main">
 
-      <!-- DASHBOARD -->
+      <!-- SETTINGS (combined dashboard + settings + navigation) -->
       <section id="section-dashboard" class="admin-section">
-        <h1>Dashboard</h1>
-        <div class="dashboard-cards">
+        <h1>Site Settings</h1>
+
+        <div class="dashboard-cards" style="margin-bottom:30px;">
           <a href="#blog" class="dash-card" data-section="blog">
             <span class="dash-count" id="count-blog">-</span>
             <span class="dash-label">Blog Posts</span>
@@ -66,10 +69,116 @@
             <span class="dash-count" id="count-faqs">-</span>
             <span class="dash-label">FAQs</span>
           </a>
+          <a href="#events" class="dash-card" data-section="events">
+            <span class="dash-count" id="count-events">-</span>
+            <span class="dash-label">Events</span>
+          </a>
           <a href="#pages" class="dash-card" data-section="pages">
             <span class="dash-count" id="count-pages">-</span>
             <span class="dash-label">Pages</span>
           </a>
+        </div>
+
+        <h2 style="font-size:18px;font-weight:600;margin-bottom:16px;">General</h2>
+        <div class="editor-form">
+          <label>Business Address</label>
+          <input type="text" id="setting-address">
+          <label>Email</label>
+          <input type="email" id="setting-email">
+          <label>Facebook URL</label>
+          <input type="url" id="setting-facebook">
+          <label>Calendly URL</label>
+          <input type="url" id="setting-calendly">
+          <label>E-transfer Email</label>
+          <input type="email" id="setting-etransfer">
+          <label>Wise Payment Link</label>
+          <input type="url" id="setting-wise">
+          <label>Stripe Publishable Key</label>
+          <input type="text" id="setting-stripe-key" placeholder="pk_live_...">
+          <label>Kit (ConvertKit) API Key</label>
+          <input type="text" id="setting-kit-api-key" placeholder="API key">
+          <label>Kit API Secret</label>
+          <input type="password" id="setting-kit-api-secret" placeholder="API secret">
+          <label>Kit Form ID</label>
+          <input type="text" id="setting-kit-form-id" placeholder="Form ID for signup">
+          <div style="margin-top:16px;">
+            <button id="settings-save-btn" class="btn-primary">Save Settings</button>
+          </div>
+        </div>
+
+        <h2 style="margin-top:40px;font-size:18px;font-weight:600;">Site Logo</h2>
+        <div class="editor-form" style="margin-top:16px;">
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div id="logo-preview" style="min-width:120px;min-height:50px;display:flex;align-items:center;justify-content:center;border:1px dashed #e0e0e0;border-radius:8px;padding:8px;">
+              <span style="color:#999;font-size:13px;">No logo set</span>
+            </div>
+            <button class="btn-primary" onclick="CMS.changeLogo()">Change Logo</button>
+          </div>
+        </div>
+
+        <h2 style="margin-top:40px;font-size:18px;font-weight:600;">Fonts & Colors</h2>
+        <div class="editor-form" style="margin-top:16px;">
+          <label>Heading Font</label>
+          <select id="setting-font-heading">
+            <option value="'Playfair Display', Georgia, serif">Playfair Display</option>
+            <option value="'Cormorant Garamond', Georgia, serif">Cormorant Garamond</option>
+            <option value="'Lora', Georgia, serif">Lora</option>
+            <option value="'Merriweather', Georgia, serif">Merriweather</option>
+            <option value="'Poppins', sans-serif">Poppins</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Raleway', sans-serif">Raleway</option>
+            <option value="Georgia, serif">Georgia</option>
+          </select>
+          <label>Body Font</label>
+          <select id="setting-font-body">
+            <option value="'Poppins', 'Helvetica Neue', Arial, sans-serif">Poppins</option>
+            <option value="'Lato', sans-serif">Lato</option>
+            <option value="'Open Sans', sans-serif">Open Sans</option>
+            <option value="'Nunito', sans-serif">Nunito</option>
+            <option value="'Source Sans Pro', sans-serif">Source Sans Pro</option>
+            <option value="'Raleway', sans-serif">Raleway</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="Georgia, serif">Georgia</option>
+          </select>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px;">
+            <div>
+              <label>Primary / Accent Color</label>
+              <input type="color" id="setting-color-accent" style="width:100%;height:44px;padding:2px;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;">
+            </div>
+            <div>
+              <label>Secondary Color</label>
+              <input type="color" id="setting-color-secondary" style="width:100%;height:44px;padding:2px;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;">
+            </div>
+            <div>
+              <label>Background Color</label>
+              <input type="color" id="setting-color-bg" style="width:100%;height:44px;padding:2px;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;">
+            </div>
+            <div>
+              <label>Heading Text Color</label>
+              <input type="color" id="setting-color-heading" style="width:100%;height:44px;padding:2px;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;">
+            </div>
+            <div>
+              <label>Body Text Color</label>
+              <input type="color" id="setting-color-text" style="width:100%;height:44px;padding:2px;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;">
+            </div>
+            <div>
+              <label>Accent Background</label>
+              <input type="color" id="setting-color-bg-light" style="width:100%;height:44px;padding:2px;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;">
+            </div>
+          </div>
+          <div id="font-color-preview" style="margin-top:24px;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
+            <h3 id="preview-heading" style="margin-bottom:8px;font-size:1.5rem;">Heading Preview</h3>
+            <p id="preview-body" style="font-size:14px;line-height:1.7;">This is how your body text will look on the site.</p>
+          </div>
+        </div>
+
+        <h2 style="margin-top:40px;font-size:18px;font-weight:600;">Navigation</h2>
+        <div style="margin-top:16px;">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button id="add-nav-link-btn" class="btn-primary">+ Add Link</button>
+          </div>
+          <p style="color:#666;font-size:13px;margin-bottom:12px;">Toggle pages on/off. Reorder with arrows. Add custom links for blog posts or external pages.</p>
+          <div id="nav-list" class="item-list"></div>
         </div>
       </section>
 
@@ -206,39 +315,191 @@
             <input type="text" id="modal-heading">
             <label>Content</label>
             <div id="modal-editor"></div>
+            <label class="toggle-label" style="margin-top:16px;">
+              <input type="checkbox" id="modal-cta-toggle">
+              Show "Book A Session" button
+            </label>
           </div>
         </div>
       </div>
 
-      <!-- NAVIGATION -->
-      <section id="section-navigation" class="admin-section" style="display:none;">
+      <!-- Navigation and Settings sections merged into Dashboard above -->
+
+      <!-- EVENTS LIST -->
+      <section id="section-events" class="admin-section" style="display:none;">
         <div class="section-header">
-          <h1>Navigation</h1>
-          <button id="add-nav-link-btn" class="btn-primary">+ Add Link</button>
+          <h1>Events</h1>
+          <button id="new-event-btn" class="btn-primary">+ New Event</button>
         </div>
-        <p style="color:#666;font-size:13px;margin-bottom:20px;">Drag to reorder. Toggle pages on/off to show or hide them in the site navigation.</p>
-        <div id="nav-list" class="item-list"></div>
+        <div id="events-list" class="item-list"></div>
       </section>
 
-      <!-- SETTINGS -->
-      <section id="section-settings" class="admin-section" style="display:none;">
+      <!-- EVENT EDITOR -->
+      <section id="section-event-edit" class="admin-section" style="display:none;">
         <div class="section-header">
-          <h1>Site Settings</h1>
-          <button id="settings-save-btn" class="btn-primary">Save Settings</button>
+          <h1 id="event-edit-title">New Event</h1>
+          <div>
+            <button id="event-cancel-btn" class="btn-small">Cancel</button>
+            <button id="event-save-btn" class="btn-primary">Save</button>
+          </div>
         </div>
         <div class="editor-form">
-          <label>Business Address</label>
-          <input type="text" id="setting-address">
-          <label>Email</label>
-          <input type="email" id="setting-email">
-          <label>Facebook URL</label>
-          <input type="url" id="setting-facebook">
-          <label>Calendly URL</label>
-          <input type="url" id="setting-calendly">
-          <label>Homepage Hero Headline</label>
-          <input type="text" id="setting-hero">
-          <label>Quote Text</label>
-          <textarea id="setting-quote" rows="3"></textarea>
+          <label>Title</label>
+          <input type="text" id="event-title" placeholder="Event title">
+          <div class="form-row">
+            <div>
+              <label>Display Dates</label>
+              <input type="text" id="event-dates" placeholder="e.g. Jul 9-12, 2026">
+            </div>
+            <div>
+              <label>Category</label>
+              <select id="event-category">
+                <option value="Embodiment">Embodiment</option>
+                <option value="Ecology">Ecology</option>
+                <option value="Creativity">Creativity</option>
+                <option value="Community">Community</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Start Date</label>
+              <input type="date" id="event-start-date">
+            </div>
+            <div>
+              <label>End Date</label>
+              <input type="date" id="event-end-date">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Facilitator</label>
+              <input type="text" id="event-facilitator" placeholder="e.g. Selena La Brooy">
+            </div>
+            <div>
+              <label>Location</label>
+              <input type="text" id="event-location" value="Rhizome Springs, Salt Spring Island">
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label>Capacity</label>
+              <input type="number" id="event-capacity" placeholder="e.g. 40">
+            </div>
+            <div>
+              <label>Image</label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="event-image-name" style="font-size:13px;color:#666;">No image</span>
+                <button class="btn-small" onclick="CMS.changeEventImage()">Upload</button>
+              </div>
+            </div>
+          </div>
+          <label>Excerpt</label>
+          <input type="text" id="event-excerpt" placeholder="Short description for the events listing">
+          <label>Description</label>
+          <div id="event-editor"></div>
+          <label style="margin-top:16px;">Schedule</label>
+          <div id="event-schedule-editor"></div>
+          <h3 style="margin-top:24px;font-size:16px;font-weight:600;">Pricing</h3>
+          <div id="event-pricing-rows"></div>
+          <button class="btn-small" onclick="CMS.addPricingRow()" style="margin-top:8px;">+ Add Price</button>
+          <div class="form-row" style="margin-top:16px;">
+            <div>
+              <label>Registration URL (external)</label>
+              <input type="url" id="event-registration-url" placeholder="https://...">
+            </div>
+            <div>
+              <label>Stripe Payment Link</label>
+              <input type="url" id="event-stripe-link" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:16px;">
+            <label class="toggle-label">
+              <input type="checkbox" id="event-published" checked>
+              Published
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRODUCTS LIST -->
+      <section id="section-products" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Shop / Products</h1>
+          <button id="new-product-btn" class="btn-primary">+ New Product</button>
+        </div>
+        <div id="products-list" class="item-list"></div>
+      </section>
+
+      <!-- PRODUCT EDITOR -->
+      <section id="section-product-edit" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1 id="product-edit-title">New Product</h1>
+          <div>
+            <button id="product-cancel-btn" class="btn-small">Cancel</button>
+            <button id="product-save-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+        <div class="editor-form">
+          <label>Title</label>
+          <input type="text" id="product-title" placeholder="Product title">
+          <div class="form-row">
+            <div>
+              <label>Price</label>
+              <input type="number" id="product-price" step="0.01" placeholder="0.00">
+            </div>
+            <div>
+              <label>Currency</label>
+              <input type="text" id="product-currency" value="CAD">
+            </div>
+          </div>
+          <label>Stripe Price ID</label>
+          <input type="text" id="product-stripe-id" placeholder="price_xxxxx (from Stripe dashboard)">
+          <label>Category</label>
+          <input type="text" id="product-category" placeholder="e.g. Events, Merchandise">
+          <label>Description</label>
+          <textarea id="product-description" rows="3"></textarea>
+          <label>Linked Event ID (optional)</label>
+          <input type="text" id="product-event-id" placeholder="e.g. saltspringfusion2026">
+          <div class="form-row" style="margin-top:16px;">
+            <label class="toggle-label">
+              <input type="checkbox" id="product-available" checked>
+              Available
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- NEWSLETTER -->
+      <section id="section-newsletter" class="admin-section" style="display:none;">
+        <div class="section-header">
+          <h1>Newsletter</h1>
+        </div>
+        <div class="editor-form">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:30px;">
+            <div class="dash-card" style="cursor:default;">
+              <span class="dash-count" id="count-subscribers">-</span>
+              <span class="dash-label">Subscribers</span>
+            </div>
+            <div class="dash-card" style="cursor:default;">
+              <span class="dash-count" id="count-broadcasts">-</span>
+              <span class="dash-label">Broadcasts Sent</span>
+            </div>
+            <div class="dash-card" style="cursor:default;">
+              <span class="dash-count" id="newsletter-status">-</span>
+              <span class="dash-label">Status</span>
+            </div>
+          </div>
+          <h2 style="font-size:18px;font-weight:600;margin-bottom:16px;">Send Broadcast</h2>
+          <label>Subject</label>
+          <input type="text" id="broadcast-subject" placeholder="Newsletter subject line">
+          <label>Content</label>
+          <div id="broadcast-editor"></div>
+          <button id="send-broadcast-btn" class="btn-primary" style="margin-top:16px;">Send Broadcast</button>
+          <h2 style="font-size:18px;font-weight:600;margin-top:40px;margin-bottom:16px;">Recent Subscribers</h2>
+          <div id="subscribers-list" class="item-list"></div>
+          <h2 style="font-size:18px;font-weight:600;margin-top:40px;margin-bottom:16px;">Past Broadcasts</h2>
+          <div id="broadcasts-list" class="item-list"></div>
         </div>
       </section>
 
@@ -258,6 +519,16 @@
   </div>
 
   <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-  <script src="admin.js"></script>
+  <script>
+    // Register custom font sizes for Quill
+    var Size = Quill.imports['attributors/style/size'];
+    Size.whitelist = ['10px','12px','14px','16px','18px','20px','24px','28px','32px'];
+    Quill.register(Size, true);
+  </script>
+  <script>
+    var s=document.createElement('script');
+    s.src='admin.js?v='+Date.now();
+    document.body.appendChild(s);
+  </script>
 </body>
 </html>
