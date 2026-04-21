@@ -8,11 +8,6 @@
   var BRANCH = 'main';
   var API = 'https://api.github.com';
 
-  // Demo mode: vibe-coding showcase iframe (?demo). Skips token auth, fetches
-  // content over plain HTTP from the deployed site, and turns publish/upload
-  // into local-only no-ops so visitors can poke around without GitHub access.
-  var DEMO = /[?&]demo(=|&|$)/.test(location.search) || location.search.indexOf('demo') === 1;
-
   var SITES = {
     rolfing: { name: 'Salt Spring Rolfing', path: 'rolfing/' },
     rhizome: { name: 'Rhizome Springs', path: 'rhizome/' }
@@ -20,9 +15,6 @@
   var currentSite = localStorage.getItem('selena-cms-site') || 'rolfing';
   var BASE_PATH = SITES[currentSite].path + 'content/';
   var UPLOAD_PATH_PREFIX = SITES[currentSite].path;
-  // In demo, the admin and content sit side-by-side under clients/selena/, so
-  // fetch via relative path instead of GitHub API.
-  var DEMO_CONTENT_BASE = '../content/';
 
   // ===== STATE =====
   var token = '';
@@ -152,10 +144,6 @@
   }
 
   function publishAll() {
-    if (DEMO) {
-      toast('Demo mode — changes are local only and won\'t publish.');
-      return;
-    }
     var files = Object.keys(pendingChanges);
     if (!files.length) { toast('Nothing to publish'); return; }
 
@@ -358,10 +346,6 @@
   }
 
   function getFile(filename) {
-    if (DEMO) {
-      return fetch(DEMO_CONTENT_BASE + filename + '?v=' + Date.now())
-        .then(function(r) { if (!r.ok) throw new Error('File not found: ' + filename); return r.json(); });
-    }
     return fetch(API + '/repos/' + OWNER + '/' + REPO + '/contents/' + BASE_PATH + filename + '?ref=' + BRANCH, { headers: apiHeaders() })
       .then(function(r) { if (!r.ok) throw new Error('File not found: ' + filename); return r.json(); })
       .then(function(data) {
@@ -376,7 +360,6 @@
   }
 
   function putFile(filename, data, message) {
-    if (DEMO) return Promise.resolve({ demo: true });
     var json = JSON.stringify(data, null, 2);
     var encoded = btoa(unescape(encodeURIComponent(json)));
     var body = {
@@ -436,12 +419,6 @@
 
           // Cache the data URL for instant preview
           imageCache[relativePath] = dataUrl;
-
-          if (DEMO) {
-            // Skip GitHub commit; preview-only via cached data URL.
-            resolve(relativePath);
-            return;
-          }
 
           // Commit to GitHub
           var body = {
@@ -527,45 +504,11 @@
   }
 
   function initAuth() {
-    if (DEMO) {
-      enterDemoMode();
-      return;
-    }
     var setupToken = checkSetupToken();
     token = setupToken || localStorage.getItem('selena-cms-token') || '';
     if (token) {
       tryLogin(token);
     }
-  }
-
-  function enterDemoMode() {
-    document.body.classList.add('demo-mode');
-    $('login-screen').style.display = 'none';
-    $('app').style.display = 'block';
-    $('user-name').textContent = 'Demo';
-    var logout = $('logout-btn'); if (logout) logout.style.display = 'none';
-    var picker = $('site-picker'); if (picker) picker.style.display = 'none';
-    var pubBtn = $('publish-btn'); if (pubBtn) pubBtn.textContent = 'Publish (demo)';
-    // Inject demo badge into header
-    var header = document.querySelector('.admin-header-inner');
-    if (header && !document.getElementById('demo-badge')) {
-      var badge = document.createElement('span');
-      badge.id = 'demo-badge';
-      badge.textContent = 'DEMO';
-      badge.style.cssText = 'margin-left:10px;padding:3px 8px;background:#111;color:#fff;font-size:11px;font-weight:600;letter-spacing:1px;border-radius:4px;';
-      var title = $('site-title');
-      if (title && title.parentNode) title.parentNode.insertBefore(badge, title.nextSibling);
-    }
-    // Inject one-time intro banner so visitors know nothing publishes upstream.
-    if (!document.getElementById('demo-banner')) {
-      var banner = document.createElement('div');
-      banner.id = 'demo-banner';
-      banner.style.cssText = 'position:fixed;bottom:16px;left:16px;max-width:340px;background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:14px 16px;box-shadow:0 6px 18px rgba(0,0,0,0.08);font-size:13px;line-height:1.5;color:#333;z-index:9999;';
-      banner.innerHTML = '<strong style="display:block;margin-bottom:4px;">Demo mode</strong>You can click around, edit content, and try the visual editor. Nothing here actually publishes — close this if it gets in the way. <button id="demo-banner-close" style="display:block;margin-top:8px;padding:4px 10px;border:1px solid #ccc;background:#fafafa;border-radius:6px;cursor:pointer;font-size:12px;">Got it</button>';
-      document.body.appendChild(banner);
-      document.getElementById('demo-banner-close').addEventListener('click', function() { banner.remove(); });
-    }
-    loadAllContent();
   }
 
   function tryLogin(t) {
