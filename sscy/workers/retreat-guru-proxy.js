@@ -1,48 +1,72 @@
 /**
  * Cloudflare Worker: Retreat Guru API Proxy
- * Keeps the API token server-side. Only exposes /api/v1/programs (read-only, public).
+ * Keeps the API token server-side. Read-only passthrough for the
+ * public programs endpoints.
  *
- * Deploy: Cloudflare Dashboard > Workers & Pages > Create > paste this code
- * Add environment variable: RETREAT_GURU_TOKEN = ce54314d68b0417fc9be95a93d202c81
- * Set up route: saltspringcentre.com/api/retreat-guru/* or use worker subdomain
+ * Add secret (Settings > Variables & Secrets):
+ *   RETREAT_GURU_TOKEN = the saltspringcentre retreat.guru API token
+ *
+ * Supports:
+ *   GET /programs           -> list, with ?min_date=...&limit=...&include=...
+ *   GET /programs/<id>      -> single program detail, with ?include=...
  */
 
-const UPSTREAM = 'https://saltspringcentre.secure.retreat.guru/api/v1/programs';
+const UPSTREAM_BASE =
+  'https://saltspringcentre.secure.retreat.guru/api/v1';
 
-// Only these query params are forwarded (no token leak, no endpoint abuse)
 const ALLOWED_PARAMS = ['public', 'min_date', 'limit', 'include'];
 
 export default {
   async fetch(request, env) {
-    // CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: corsHeaders(request)
-      });
+      return new Response(null, { headers: corsHeaders(request) });
     }
-
-    // Only GET
     if (request.method !== 'GET') {
       return new Response('Method not allowed', { status: 405 });
     }
 
-    // Build upstream URL with only allowed params + injected token
+    if (!env.RETREAT_GURU_TOKEN) {
+      const body = JSON.stringify({ error: 'Missing token' });
+      return new Response(body, {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders(request)
+        }
+      });
+    }
+
     const incoming = new URL(request.url);
-    const upstream = new URL(UPSTREAM);
+    const parts = incoming.pathname.split('/').filter(Boolean);
+
+    // Find where 'programs' lives in the path so any route prefix
+    // (e.g. /api/retreat-guru/programs/<id>) is ignored.
+    const i = parts.indexOf('programs');
+    if (i === -1) {
+      const body = JSON.stringify({ error: 'Endpoint not allowed' });
+      return new Response(body, {
+        status: 404,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders(request)
+        }
+      });
+    }
+
+    const tail = parts.slice(i).join('/');
+    const upstream = new URL(UPSTREAM_BASE + '/' + tail);
     upstream.searchParams.set('token', env.RETREAT_GURU_TOKEN);
 
     for (const key of ALLOWED_PARAMS) {
       const val = incoming.searchParams.get(key);
       if (val !== null) upstream.searchParams.set(key, val);
     }
-
-    // Always force public=1 so registrations/transactions stay hidden
+    // Force public=1 so registrations/transactions stay hidden.
     upstream.searchParams.set('public', '1');
 
     const response = await fetch(upstream.toString(), {
       headers: { 'Accept': 'application/json' }
     });
-
     const body = await response.text();
 
     return new Response(body, {
