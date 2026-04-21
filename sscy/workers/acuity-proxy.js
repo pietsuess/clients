@@ -34,7 +34,7 @@ export default {
     }
 
     const url = new URL(request.url);
-    // Strip any route prefix (e.g. /api/acuity/); keep only the last segment as the endpoint name.
+    // Last path segment = endpoint (strips any /api/acuity/ prefix).
     const parts = url.pathname.split('/').filter(Boolean);
     const endpoint = parts[parts.length - 1];
 
@@ -46,14 +46,19 @@ export default {
     }
 
     if (!env.ACUITY_USER_ID || !env.ACUITY_API_KEY) {
-      return new Response(JSON.stringify({ error: 'Worker missing Acuity credentials' }), {
+      const body = JSON.stringify({ error: 'Missing credentials' });
+      return new Response(body, {
         status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders(request) }
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders(request)
+        }
       });
     }
 
     const upstream = `${ACUITY_BASE}/${endpoint}`;
-    const authHeader = 'Basic ' + btoa(`${env.ACUITY_USER_ID}:${env.ACUITY_API_KEY}`);
+    const creds = `${env.ACUITY_USER_ID}:${env.ACUITY_API_KEY}`;
+    const authHeader = 'Basic ' + btoa(creds);
 
     const response = await fetch(upstream, {
       headers: {
