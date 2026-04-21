@@ -847,7 +847,8 @@ function closeMobileMenu() {
 <!-- RETREAT GURU API -->
 <script>
 (function() {
-  var API = 'https://sscy-retreat-guru.executive-2ef.workers.dev/programs?public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
+  // TODO: switch to Cloudflare Worker proxy once deployed (see workers/retreat-guru-proxy.js)
+  var API = 'https://saltspringcentre.secure.retreat.guru/api/v1/programs?token=ce54314d68b0417fc9be95a93d202c81&public=1&min_date=' + new Date().toISOString().split('T')[0] + '&limit=0&include=teachers';
   var grid = document.getElementById('retreatGuruGrid');
   if (!grid) return;
 
