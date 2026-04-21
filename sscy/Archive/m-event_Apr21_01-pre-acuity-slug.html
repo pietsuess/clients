@@ -246,7 +246,7 @@ function closeMenu() { document.getElementById('menu').classList.remove('open');
       bookHref = 'shop.html';
       bookLabel = 'Get Tickets';
     } else {
-      bookHref = 'https://app.acuityscheduling.com/schedule/5618a029/?category=Retreats';
+      bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Retreats';
       bookLabel = 'Book This Retreat';
     }
 
@@ -283,7 +283,7 @@ function closeMenu() { document.getElementById('menu').classList.remove('open');
 
   // ===== RENDER: class =====
   function renderClass(item) {
-    var bookHref = 'https://app.acuityscheduling.com/schedule/5618a029/?category=Yoga%20Classes';
+    var bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Yoga%20Classes';
     var html = '<section class="event-hero">' +
       '<img class="bg" src="' + escapeHtml(fixImg(item.img)) + '" alt="' + escapeHtml(item.title) + '">' +
       '<div class="event-hero-overlay"></div>' +
@@ -315,7 +315,7 @@ function closeMenu() { document.getElementById('menu').classList.remove('open');
 
   // ===== RENDER: community =====
   function renderCommunity(item) {
-    var bookHref = 'https://app.acuityscheduling.com/schedule/5618a029/?category=Community';
+    var bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Community';
     var html = '<section class="event-hero">' +
       '<img class="bg" src="' + escapeHtml(fixImg(item.img)) + '" alt="' + escapeHtml(item.title) + '">' +
       '<div class="event-hero-overlay"></div>' +
@@ -346,7 +346,7 @@ function closeMenu() { document.getElementById('menu').classList.remove('open');
 
   // ===== RENDER: treatment =====
   function renderTreatment(item) {
-    var bookHref = item.bookUrl || 'https://app.acuityscheduling.com/schedule/5618a029/?category=Wellness';
+    var bookHref = item.bookUrl || 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Wellness';
     var bookLabel = 'Book Treatment';
 
     var durationsHtml = '';

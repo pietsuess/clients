@@ -323,7 +323,7 @@ p { text-align: justify; text-justify: inter-word; }
       bookLabel = 'Get Tickets in the Shop';
     } else {
       // Retreats not on Retreat Guru route through Acuity
-      bookHref = 'https://app.acuityscheduling.com/schedule/5618a029/?category=Retreats';
+      bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Retreats';
       bookLabel = 'Book This Retreat';
     }
 
@@ -362,7 +362,7 @@ p { text-align: justify; text-justify: inter-word; }
 
   // ===== RENDER: weekly class =====
   function renderClass(item) {
-    var bookHref = 'https://app.acuityscheduling.com/schedule/5618a029/?category=Yoga%20Classes';
+    var bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Yoga%20Classes';
 
     var html = '<section class="event-hero">' +
       '<img class="event-hero-img" src="' + escapeHtml(item.img) + '" alt="' + escapeHtml(item.title) + '">' +
@@ -400,7 +400,7 @@ p { text-align: justify; text-justify: inter-word; }
   // ===== RENDER: community gathering (satsang, kirtan, arati) =====
   function renderCommunity(item) {
     // Community events route through Acuity (even free ones, for attendance tracking)
-    var bookHref = 'https://app.acuityscheduling.com/schedule/5618a029/?category=Community';
+    var bookHref = 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Community';
 
     var html = '<section class="event-hero">' +
       '<img class="event-hero-img" src="' + escapeHtml(item.img) + '" alt="' + escapeHtml(item.title) + '">' +
@@ -435,7 +435,7 @@ p { text-align: justify; text-justify: inter-word; }
   // ===== RENDER: wellness treatment =====
   function renderTreatment(item) {
     // Treatments route through Acuity (unless an external practitioner URL like JaneApp is set)
-    var bookHref = item.bookUrl || 'https://app.acuityscheduling.com/schedule/5618a029/?category=Wellness';
+    var bookHref = item.bookUrl || 'https://app.acuityscheduling.com/schedule.php?owner=OWNER_ID&category=Wellness';
     var bookLabel = 'Book This Treatment';
 
     var durationsHtml = '';
