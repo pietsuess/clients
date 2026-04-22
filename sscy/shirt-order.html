@@ -279,6 +279,10 @@
             <div class="product-info">
                 <div class="product-name">Women's Jersey Racerback Tank Top</div>
                 <div class="product-detail">Bella+Canvas B6008 - Black</div>
+                <div class="price-row">
+                    <label>Cost $</label>
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-b6008-black" class="price-input">
+                </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/b6008-bella-canvas-ladies-jersey-racerback-tank-top/" target="_blank">View Blank</a>
                     <span class="blank-price">$10.19</span>
@@ -291,6 +295,10 @@
             <div class="product-info">
                 <div class="product-name">Women's Jersey Muscle Tank</div>
                 <div class="product-detail">Bella+Canvas B6003 - Athletic Heather</div>
+                <div class="price-row">
+                    <label>Cost $</label>
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-b6003-athheather" class="price-input">
+                </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/bella-canvas-6003-womens-jersey-muscle-tank/" target="_blank">View Blank</a>
                     <span class="blank-price">$10.43</span>
@@ -303,6 +311,10 @@
             <div class="product-info">
                 <div class="product-name">Women's Relaxed Heather T-Shirt</div>
                 <div class="product-detail">Bella+Canvas 6400CVC - Heather Mauve</div>
+                <div class="price-row">
+                    <label>Cost $</label>
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-6400cvc-mauve" class="price-input">
+                </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/bella-canvas-6400cvc-ladies-relaxed-heather-cvc-short-sleeve-t-shirt/" target="_blank">View Blank</a>
                     <span class="blank-price">$10.24</span>
@@ -327,7 +339,10 @@ async function submitPricing() {
     const inputs = document.querySelectorAll('.price-input');
     const products = {
         'bc-3001-dustyblue': 'Bella+Canvas 3001 Unisex Jersey T-Shirt (Dusty Blue)',
-        'bc-6400-dustyblue': 'Bella+Canvas 6400 Women\'s Relaxed Jersey T-Shirt (Dusty Blue)'
+        'bc-6400-dustyblue': 'Bella+Canvas 6400 Women\'s Relaxed Jersey T-Shirt (Dusty Blue)',
+        'bc-b6008-black': 'Bella+Canvas B6008 Women\'s Racerback Tank (Black)',
+        'bc-b6003-athheather': 'Bella+Canvas B6003 Women\'s Muscle Tank (Athletic Heather)',
+        'bc-6400cvc-mauve': 'Bella+Canvas 6400CVC Women\'s Relaxed Heather Tee (Heather Mauve)'
     };
     let lines = [];
     let hasAny = false;
