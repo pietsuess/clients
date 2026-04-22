@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>52 ACYR - T-Shirt Order</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fff; font-family: sans-serif; color: #333; }
+        p { text-align: justify; text-align-last: left; }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 60px 60px;
+        }
+        .hero img {
+            max-width: 320px;
+            width: 100%;
+            height: auto;
+        }
+        .hero .subtitle {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0;
+            width: 100%;
+        }
+
+        .product-card {
+            border: 1px solid #eee;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .product-images img {
+            width: 100%;
+            aspect-ratio: 0.78;
+            object-fit: cover;
+            display: block;
+            cursor: zoom-in;
+        }
+
+        .product-info {
+            padding: 20px 24px 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .product-detail {
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            color: #999;
+        }
+
+        .product-links {
+            margin-top: auto;
+            padding-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-links a {
+            font-size: 0.75rem;
+            color: #007298;
+            text-decoration: none;
+            border: 1px solid #007298;
+            padding: 5px 12px;
+            border-radius: 3px;
+            letter-spacing: 0.04em;
+            transition: background 0.2s, color 0.2s;
+        }
+        .product-links a:hover {
+            background: #007298;
+            color: #fff;
+        }
+        .blank-price {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .price-row label {
+            font-size: 0.75rem;
+            color: #999;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .price-row input {
+            width: 90px;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: #fafafa;
+            color: #333;
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+        .price-row input:focus {
+            outline: none;
+            border-color: #007298;
+        }
+
+        .submit-section {
+            padding: 40px 60px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        .submit-section p {
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+        .submit-btn {
+            display: inline-block;
+            padding: 10px 36px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border: 1px solid #007298;
+            background: transparent;
+            color: #007298;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .submit-btn:hover {
+            background: #007298;
+            color: #fff;
+        }
+        .submit-msg {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #38918a;
+            display: none;
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(255,255,255,0.95);
+            cursor: zoom-out;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 95vw;
+            max-height: 95vh;
+            object-fit: contain;
+        }
+
+        footer {
+            padding: 24px 60px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #999;
+            border-top: 1px solid #eee;
+            letter-spacing: 0.04em;
+        }
+        footer a { color: #007298; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lightboxImg" src="" alt="">
+</div>
+
+<div class="hero">
+    <img src="shirt-order-images/shirt-03.jpg" alt="52 ACYR">
+    <div class="subtitle">T-Shirt Pricing Guide</div>
+</div>
+
+<div class="products">
+
+    <div class="product-card">
+        <div class="product-images">
+            <img src="shirt-order-images/shirt-01.jpg" alt="Unisex Tee - Front" onclick="openLightbox(this)">
+            <img src="shirt-order-images/shirt-02.jpg" alt="Unisex Tee - Back" onclick="openLightbox(this)">
+        </div>
+        <div class="product-info">
+            <div class="product-name">Unisex Jersey T-Shirt</div>
+            <div class="product-detail">Bella+Canvas 3001 - Dusty Blue</div>
+            <div class="price-row">
+                <label>Cost $</label>
+                <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-dustyblue" class="price-input">
+            </div>
+            <div class="product-links">
+                <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
+                <span class="blank-price">$10.04</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="product-images">
+            <img src="shirt-order-images/shirt-05.jpg" alt="Women's Tee - Front" onclick="openLightbox(this)">
+            <img src="shirt-order-images/shirt-06.jpg" alt="Women's Tee - Back" onclick="openLightbox(this)">
+        </div>
+        <div class="product-info">
+            <div class="product-name">Women's Relaxed Jersey T-Shirt</div>
+            <div class="product-detail">Bella+Canvas 6400 - Dusty Blue</div>
+            <div class="price-row">
+                <label>Cost $</label>
+                <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-6400-dustyblue" class="price-input">
+            </div>
+            <div class="product-links">
+                <a href="https://blankclothing.ca/b6400-bella-canvas-missy-jersey-t-shirt/" target="_blank">View Blank</a>
+                <span class="blank-price">$10.21</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="submit-section">
+    <p>Enter your cost per item above, then send the pricing for review.</p>
+    <button class="submit-btn" onclick="submitPricing()">Send Pricing</button>
+    <div class="submit-msg" id="submitMsg">Pricing sent.</div>
+</div>
+
+<footer>
+    52 ACYR &middot; Salt Spring Centre of Yoga &middot; Blanks from <a href="https://blankclothing.ca/" target="_blank">blankclothing.ca</a>
+</footer>
+
+<script>
+function openLightbox(img) {
+    document.getElementById('lightboxImg').src = img.src;
+    document.getElementById('lightbox').classList.add('active');
+}
+
+async function submitPricing() {
+    const inputs = document.querySelectorAll('.price-input');
+    const products = {
+        'bc-3001-dustyblue': 'Bella+Canvas 3001 Unisex Jersey T-Shirt (Dusty Blue)',
+        'bc-6400-dustyblue': 'Bella+Canvas 6400 Women\'s Relaxed Jersey T-Shirt (Dusty Blue)'
+    };
+    let lines = [];
+    let hasAny = false;
+    inputs.forEach(inp => {
+        const val = inp.value.trim();
+        if (val) {
+            lines.push(`${products[inp.dataset.id]}: $${parseFloat(val).toFixed(2)}`);
+            hasAny = true;
+        }
+    });
+
+    if (!hasAny) {
+        alert('Enter at least one price before sending.');
+        return;
+    }
+
+    const btn = document.querySelector('.submit-btn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                access_key: '0f45da86-7dcf-4c66-8881-d7597d02d720',
+                subject: '52 ACYR - T-Shirt Pricing',
+                from_name: '52 ACYR Shirt Order',
+                message: '52 ACYR T-Shirt Pricing\n' +
+                         '========================================\n\n' +
+                         lines.join('\n') + '\n\n' +
+                         'Sent from clients.pietsuess.com/sscy/shirt-order.html'
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            btn.textContent = 'Sent';
+            document.getElementById('submitMsg').style.display = 'block';
+        } else {
+            btn.textContent = 'Error - try again';
+            btn.disabled = false;
+        }
+    } catch (err) {
+        btn.textContent = 'Error - try again';
+        btn.disabled = false;
+    }
+}
+</script>
+
+</body>
+</html>
