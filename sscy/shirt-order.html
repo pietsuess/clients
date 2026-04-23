@@ -102,6 +102,19 @@
             font-size: 0.8rem;
             color: #999;
         }
+        .total-cost {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #007298;
+            display: none;
+        }
+        .grand-total {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #007298;
+            margin-top: 8px;
+            display: none;
+        }
 
         .price-row {
             display: flex;
@@ -221,8 +234,9 @@
             <div class="product-detail">4.2 oz, 100% Airlume combed ringspun cotton</div>
             <div class="price-row">
                 <label>Cost $</label>
-                <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-dustyblue" class="price-input">
+                <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-dustyblue" data-blank="10.04" class="price-input" oninput="updateTotal(this)">
             </div>
+            <div class="total-cost"></div>
             <div class="product-links">
                 <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
                 <span class="blank-price">$10.04</span>
@@ -241,8 +255,9 @@
             <div class="product-detail">7 oz/lin yd, 100% combed ringspun cotton</div>
             <div class="price-row">
                 <label>Cost $</label>
-                <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-6400-dustyblue" class="price-input">
+                <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-6400-dustyblue" data-blank="10.21" class="price-input" oninput="updateTotal(this)">
             </div>
+            <div class="total-cost"></div>
             <div class="product-links">
                 <a href="https://blankclothing.ca/b6400-bella-canvas-missy-jersey-t-shirt/" target="_blank">View Blank</a>
                 <span class="blank-price">$10.21</span>
@@ -267,6 +282,7 @@
 </div>
 
 <div class="submit-section">
+    <div class="grand-total" id="grandTotal"></div>
     <p>Enter your cost per item above, then send the pricing for review.</p>
     <button class="submit-btn" onclick="submitPricing()">Send Pricing</button>
     <div class="submit-msg" id="submitMsg">Pricing sent.</div>
@@ -287,7 +303,7 @@
                 <div class="product-detail">7 oz/lin yd, 100% cotton</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-b6008-black" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-b6008-black" data-blank="10.19" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/b6008-bella-canvas-ladies-jersey-racerback-tank-top/" target="_blank">View Blank</a>
@@ -307,7 +323,7 @@
                 <div class="product-detail">4.2 oz, 90% Airlume combed ringspun cotton, 10% polyester</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-b6003-athheather" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-b6003-athheather" data-blank="10.43" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/bella-canvas-6003-womens-jersey-muscle-tank/" target="_blank">View Blank</a>
@@ -327,7 +343,7 @@
                 <div class="product-detail">7 oz/lin yd, 52% Airlume combed ringspun cotton, 48% polyester</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-6400cvc-mauve" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-6400cvc-mauve" data-blank="10.24" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/bella-canvas-6400cvc-ladies-relaxed-heather-cvc-short-sleeve-t-shirt/" target="_blank">View Blank</a>
@@ -347,7 +363,7 @@
                 <div class="product-detail">4.2 oz, 100% Airlume combed ringspun cotton</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-black" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-black" data-blank="10.04" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
@@ -367,7 +383,7 @@
                 <div class="product-detail">4.2 oz, 100% Airlume combed ringspun cotton</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-mint" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3001-mint" data-blank="10.04" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
@@ -387,7 +403,7 @@
                 <div class="product-detail">4.2 oz, 100% combed ringspun cotton</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3480-black" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3480-black" data-blank="9.20" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/3480-bella-canvas-unisex-jersey-tank-top/" target="_blank">View Blank</a>
@@ -407,7 +423,7 @@
                 <div class="product-detail">4.2 oz, 100% combed ringspun cotton</div>
                 <div class="price-row">
                     <label>Cost $</label>
-                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3480-teal" class="price-input">
+                    <input type="number" step="0.01" min="0" placeholder="0.00" data-id="bc-3480-teal" data-blank="9.20" class="price-input" oninput="updateTotal(this)">
                 </div>
                 <div class="product-links">
                     <a href="https://blankclothing.ca/3480-bella-canvas-unisex-jersey-tank-top/" target="_blank">View Blank</a>
@@ -435,6 +451,40 @@
 </footer>
 
 <script>
+function updateTotal(input) {
+    const blank = parseFloat(input.dataset.blank) || 0;
+    const cost = parseFloat(input.value) || 0;
+    const totalEl = input.closest('.product-info').querySelector('.total-cost');
+    if (cost > 0) {
+        const total = blank + cost;
+        totalEl.textContent = 'Total: $' + total.toFixed(2);
+        totalEl.style.display = 'block';
+    } else {
+        totalEl.style.display = 'none';
+    }
+    updateGrandTotal();
+}
+
+function updateGrandTotal() {
+    const inputs = document.querySelectorAll('.price-input');
+    let count = 0, sum = 0;
+    inputs.forEach(inp => {
+        const cost = parseFloat(inp.value) || 0;
+        if (cost > 0) {
+            const blank = parseFloat(inp.dataset.blank) || 0;
+            sum += blank + cost;
+            count++;
+        }
+    });
+    const el = document.getElementById('grandTotal');
+    if (count > 0) {
+        el.textContent = 'Grand Total: $' + sum.toFixed(2) + ' (' + count + ' item' + (count > 1 ? 's' : '') + ')';
+        el.style.display = 'block';
+    } else {
+        el.style.display = 'none';
+    }
+}
+
 function openLightbox(img) {
     document.getElementById('lightboxImg').src = img.src;
     document.getElementById('lightbox').classList.add('active');
