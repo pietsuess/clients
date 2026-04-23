@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>52 ACYR - T-Shirt Pricing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #fff; font-family: sans-serif; color: #333; }
+        p { text-align: justify; text-align-last: left; }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 80px 60px 60px;
+        }
+        .hero img {
+            max-width: 320px;
+            width: 100%;
+            height: auto;
+        }
+        .hero .subtitle {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #999;
+        }
+
+        .section-header {
+            padding: 30px 60px 16px;
+            border-top: 1px solid #eee;
+        }
+        .screen-cost {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #007298;
+            letter-spacing: 0.04em;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0;
+            width: 100%;
+        }
+        .products-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .product-card {
+            border: 1px solid #eee;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .product-images img {
+            width: 100%;
+            aspect-ratio: 0.72;
+            object-fit: contain;
+            object-position: center top;
+            background: #f5f5f5;
+            display: block;
+            cursor: zoom-in;
+        }
+
+        .product-info {
+            padding: 20px 24px 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .product-name {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .product-detail {
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            color: #999;
+        }
+
+        .cost-breakdown {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .cost-line {
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+        .cost-total {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #007298;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #ddd;
+            padding-top: 4px;
+            margin-top: 2px;
+        }
+
+        .product-links {
+            margin-top: auto;
+            padding-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-links a {
+            font-size: 0.75rem;
+            color: #007298;
+            text-decoration: none;
+            border: 1px solid #007298;
+            padding: 5px 12px;
+            border-radius: 3px;
+            letter-spacing: 0.04em;
+            transition: background 0.2s, color 0.2s;
+        }
+        .product-links a:hover {
+            background: #007298;
+            color: #fff;
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(255,255,255,0.95);
+            cursor: zoom-out;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 95vw;
+            max-height: 95vh;
+            object-fit: contain;
+        }
+
+        footer {
+            padding: 24px 60px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #999;
+            border-top: 1px solid #eee;
+            letter-spacing: 0.04em;
+        }
+        footer a { color: #007298; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lightboxImg" src="" alt="">
+</div>
+
+<div class="hero">
+    <img src="shirt-order-images/shirt-03.jpg" alt="52 ACYR">
+    <div class="subtitle">T-Shirt Pricing</div>
+</div>
+
+<div class="section-header">
+    <div class="screen-cost">Screen cost: $60</div>
+</div>
+
+<div class="products">
+
+    <div class="product-card">
+        <div class="product-images">
+            <img src="shirt-order-images/shirt-01.jpg" alt="Unisex Tee - Front" onclick="openLightbox(this)">
+            <img src="shirt-order-images/shirt-02.jpg" alt="Unisex Tee - Back" onclick="openLightbox(this)">
+        </div>
+        <div class="product-info">
+            <div class="product-name">Unisex Jersey T-Shirt</div>
+            <div class="product-detail">Bella+Canvas 3001 - Dusty Blue</div>
+            <div class="product-detail">4.2 oz, 100% Airlume combed ringspun cotton</div>
+            <div class="cost-breakdown">
+                <div class="cost-line"><span>Blank cost:</span> <span>$10.04</span></div>
+                <div class="cost-line"><span>Printing cost:</span> <span>$8.00</span></div>
+                <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$18.04</span></div>
+            </div>
+            <div class="product-links">
+                <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="product-card">
+        <div class="product-images">
+            <img src="shirt-order-images/shirt-05.jpg" alt="Women's Tee - Front" onclick="openLightbox(this)">
+            <img src="shirt-order-images/shirt-06.jpg" alt="Women's Tee - Back" onclick="openLightbox(this)">
+        </div>
+        <div class="product-info">
+            <div class="product-name">Women's Relaxed Jersey T-Shirt</div>
+            <div class="product-detail">Bella+Canvas 6400 - Dusty Blue</div>
+            <div class="product-detail">7 oz/lin yd, 100% combed ringspun cotton</div>
+            <div class="cost-breakdown">
+                <div class="cost-line"><span>Blank cost:</span> <span>$10.21</span></div>
+                <div class="cost-line"><span>Printing cost:</span> <span>$8.00</span></div>
+                <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$18.21</span></div>
+            </div>
+            <div class="product-links">
+                <a href="https://blankclothing.ca/b6400-bella-canvas-missy-jersey-t-shirt/" target="_blank">View Blank</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="downloads-section" style="padding: 40px 60px 30px; border-top: 1px solid #eee;">
+    <div style="font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 16px;">SVG Files</div>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="shirt-order-images/layout-front.svg" download="52ACYR_ShirtLayout_Front.svg" type="image/svg+xml" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 24px; border: 1px solid #eee; border-radius: 4px; text-decoration: none; color: #333; transition: border-color 0.2s; min-width: 140px;">
+            <img src="shirt-order-images/layout-front.svg" alt="Front Layout" style="height: 60px; width: auto;">
+            <span style="font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">Front Layout .svg</span>
+        </a>
+        <a href="shirt-order-images/layout-back.svg" download="52ACYR_ShirtLayout_Back.svg" type="image/svg+xml" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 24px; border: 1px solid #eee; border-radius: 4px; text-decoration: none; color: #333; transition: border-color 0.2s; min-width: 140px;">
+            <img src="shirt-order-images/layout-back.svg" alt="Back Layout" style="height: 60px; width: auto;">
+            <span style="font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">Back Layout .svg</span>
+        </a>
+    </div>
+</div>
+
+<div style="padding: 50px 60px 20px; border-top: 1px solid #eee;">
+    <img src="shirt-order-images/older-shirts-header.svg" alt="Older Shirt Designs" style="width: 100%; max-width: 600px; display: block; margin: 0 auto 20px;">
+    <div class="screen-cost" style="margin-bottom: 16px;">Screen cost: $30</div>
+    <div class="products products-3" style="gap: 0;">
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/b6008-black-front_3.jpg" alt="B6008 Black - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/b6008-black-back_3.jpg" alt="B6008 Black - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Women's Jersey Racerback Tank Top</div>
+                <div class="product-detail">Bella+Canvas B6008 - Black</div>
+                <div class="product-detail">7 oz/lin yd, 100% cotton</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$10.19</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$15.19</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/b6008-bella-canvas-ladies-jersey-racerback-tank-top/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/b6003-bella-canvas-ladies-tank-blankclothing.ca-athletic-heather_copy__91506_3.jpg" alt="B6003 Athletic Heather - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/b6003-bella-canvas-ladies-tank-blankclothing.ca-athletic-heather-back_copy__13552_3.jpg" alt="B6003 Athletic Heather - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Women's Jersey Muscle Tank</div>
+                <div class="product-detail">Bella+Canvas B6003 - Athletic Heather</div>
+                <div class="product-detail">4.2 oz, 90% Airlume combed ringspun cotton, 10% polyester</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$10.43</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$15.43</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/bella-canvas-6003-womens-jersey-muscle-tank/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/6400cvc-bella-canvas-ladies-tee-blankclothing.ca-heather-mauve__30549_3.jpg" alt="6400CVC Heather Mauve - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/6400cvc-bella-canvas-ladies-tee-blankclothing.ca-deep-heather-back__99687_3.jpg" alt="6400CVC - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Women's Relaxed Heather T-Shirt</div>
+                <div class="product-detail">Bella+Canvas 6400CVC - Heather Mauve</div>
+                <div class="product-detail">7 oz/lin yd, 52% Airlume combed ringspun cotton, 48% polyester</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$10.24</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$15.24</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/bella-canvas-6400cvc-ladies-relaxed-heather-cvc-short-sleeve-t-shirt/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/3001-black-front_3.jpg" alt="3001 Black - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/3001-black-back_3.jpg" alt="3001 Black - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Unisex Jersey T-Shirt</div>
+                <div class="product-detail">Bella+Canvas 3001 - Black</div>
+                <div class="product-detail">4.2 oz, 100% Airlume combed ringspun cotton</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$10.04</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$15.04</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/3001c-bella-canvas-tee-blankclothing.ca-mint_copy__71287_3.jpg" alt="3001 Mint - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/3001c-bella-canvas-tee-blankclothing.ca-mint-back_copy__93725_3.jpg" alt="3001 Mint - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Unisex Jersey T-Shirt</div>
+                <div class="product-detail">Bella+Canvas 3001 - Mint</div>
+                <div class="product-detail">4.2 oz, 100% Airlume combed ringspun cotton</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$10.04</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$15.04</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/bella-canvas-3001c-unisex-jersey-t-shirt/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/3480-black-front_3.jpg" alt="3480 Black - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/3480-black-back_3.jpg" alt="3480 Black - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Unisex Jersey Tank Top</div>
+                <div class="product-detail">Bella+Canvas 3480 - Black</div>
+                <div class="product-detail">4.2 oz, 100% combed ringspun cotton</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$9.20</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$14.20</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/3480-bella-canvas-unisex-jersey-tank-top/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-card" style="background: #f9f9f9;">
+            <div class="product-images">
+                <img src="shirt-order-images/3480-bella-canvas-tank-blankclothing.ca-teal__41357_3.jpg" alt="3480 Teal - Front" onclick="openLightbox(this)">
+                <img src="shirt-order-images/3480-bella-canvas-tank-blankclothing.ca-teal-back__47880_3.jpg" alt="3480 Teal - Back" onclick="openLightbox(this)">
+            </div>
+            <div class="product-info">
+                <div class="product-name">Unisex Jersey Tank Top</div>
+                <div class="product-detail">Bella+Canvas 3480 - Teal</div>
+                <div class="product-detail">4.2 oz, 100% combed ringspun cotton</div>
+                <div class="cost-breakdown">
+                    <div class="cost-line"><span>Blank cost:</span> <span>$9.20</span></div>
+                    <div class="cost-line"><span>Printing cost:</span> <span>$5.00</span></div>
+                    <div class="cost-total"><span>TOTAL UNIT COST:</span> <span>$14.20</span></div>
+                </div>
+                <div class="product-links">
+                    <a href="https://blankclothing.ca/3480-bella-canvas-unisex-jersey-tank-top/" target="_blank">View Blank</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 20px; margin-bottom: 20px;">
+        <a href="shirt-order-images/older-layout-01.svg" download="52ACYR_OlderShirts_Layout_01.svg" type="image/svg+xml" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 24px; border: 1px solid #eee; border-radius: 4px; text-decoration: none; color: #333; transition: border-color 0.2s; min-width: 140px;">
+            <img src="shirt-order-images/older-layout-01.svg" alt="Layout 01" style="height: 60px; width: auto;">
+            <span style="font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">Layout 01 .svg</span>
+        </a>
+        <a href="shirt-order-images/older-layout-02.svg" download="52ACYR_OlderShirts_Layout_02.svg" type="image/svg+xml" style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px 24px; border: 1px solid #eee; border-radius: 4px; text-decoration: none; color: #333; transition: border-color 0.2s; min-width: 140px;">
+            <img src="shirt-order-images/older-layout-02.svg" alt="Layout 02" style="height: 60px; width: auto;">
+            <span style="font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">Layout 02 .svg</span>
+        </a>
+    </div>
+</div>
+
+<footer>
+    52 ACYR &middot; Salt Spring Centre of Yoga &middot; Blanks from <a href="https://blankclothing.ca/" target="_blank">blankclothing.ca</a>
+</footer>
+
+<script>
+function openLightbox(img) {
+    document.getElementById('lightboxImg').src = img.src;
+    document.getElementById('lightbox').classList.add('active');
+}
+</script>
+
+</body>
+</html>
