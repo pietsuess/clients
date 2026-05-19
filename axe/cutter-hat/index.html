@@ -103,15 +103,16 @@
     position: relative;
     z-index: 2;
     border-bottom: 1px solid var(--rule);
+    min-height: calc(100vh - 80px);
+    min-height: calc(100svh - 80px);
   }
-  @media (max-width: 900px) { .product { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { .product { grid-template-columns: 1fr; min-height: 0; } }
 
   .gallery {
     background: var(--paper-2);
     position: relative;
     border-right: 1px solid var(--rule);
     overflow: hidden;
-    min-height: clamp(420px, 76vh, 900px);
     display: flex; flex-direction: column;
   }
   @media (max-width: 900px) { .gallery { border-right: 0; border-bottom: 1px solid var(--rule); } }
@@ -148,6 +149,7 @@
     appearance: none; background: var(--paper-2);
     border: 0; border-right: 1px solid var(--rule);
     aspect-ratio: 1;
+    max-height: 130px;
     cursor: pointer;
     padding: 0;
     transition: background .18s, opacity .18s;
@@ -166,11 +168,18 @@
 
   /* ===== details ===== */
   .details {
-    padding: clamp(40px, 5vw, 80px) clamp(28px, 4vw, 64px);
-    align-self: start;
-    position: sticky; top: 80px;
+    padding: clamp(28px, 3vw, 56px) clamp(28px, 4vw, 56px);
+    align-self: center;
+    max-height: calc(100vh - 80px);
+    max-height: calc(100svh - 80px);
+    overflow-y: auto;
   }
-  @media (max-width: 900px) { .details { position: static; padding: clamp(36px, 6vw, 56px) clamp(20px, 4vw, 32px); } }
+  .details::-webkit-scrollbar { width: 6px; }
+  .details::-webkit-scrollbar-track { background: transparent; }
+  .details::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 999px; }
+  @media (max-width: 900px) {
+    .details { align-self: stretch; max-height: none; overflow: visible; padding: clamp(36px, 6vw, 56px) clamp(20px, 4vw, 32px); }
+  }
   .eyebrow {
     font-family: var(--mono); font-size: 11px;
     letter-spacing: .26em; text-transform: uppercase;
@@ -383,8 +392,12 @@
     border-top: 1px solid var(--rule);
     border-left: 1px solid var(--rule);
   }
-  @media (max-width: 900px) { .garments-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 520px) { .garments-grid { grid-template-columns: 1fr; } }
+  .garments-grid.two-up { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 900px) {
+    .garments-grid { grid-template-columns: repeat(2, 1fr); }
+    .garments-grid.two-up { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) { .garments-grid, .garments-grid.two-up { grid-template-columns: 1fr; } }
   .garments-grid figure {
     margin: 0;
     position: relative;
@@ -466,6 +479,47 @@
     box-shadow: 0 10px 30px rgba(0,0,0,.4);
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+
+  /* ===== lightbox ===== */
+  .lb {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(8, 9, 6, 0.94);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
+    align-items: center; justify-content: center;
+    cursor: zoom-out;
+    padding: clamp(20px, 4vw, 56px);
+  }
+  .lb.open { display: flex; }
+  .lb img {
+    max-width: 100%; max-height: 100%;
+    width: auto; height: auto;
+    object-fit: contain;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  }
+  .lb-close {
+    position: absolute; top: 20px; right: 20px;
+    background: transparent;
+    border: 1px solid rgba(238,231,215,0.7);
+    color: var(--ink-light);
+    width: 42px; height: 42px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s;
+  }
+  .lb-close:hover { background: var(--ink-light); color: #000; }
+  .lb-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+  .lb-caption {
+    position: absolute; left: 50%; bottom: 20px;
+    transform: translateX(-50%);
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: rgba(238,231,215,0.55);
+  }
+  .can-zoom {
+    cursor: zoom-in;
+  }
 
   /* ===== responsive ===== */
   @media (max-width: 900px) {
@@ -611,10 +665,10 @@
 <section class="garments">
   <div class="garments-head">
     <div class="eyebrow">[ Same fish, different cloth ]</div>
-    <h3>Also on the <em>chore shirt</em> and the <em>long-sleeve.</em></h3>
-    <p>The Cutter also goes on a softwashed sand chore shirt (heavy 9oz cotton, button-front) and on a long-sleeve cotton tee. The fish is sized to the panel: dark green stitch on the shirt, full colour on the tee.</p>
+    <h3>Also on the <em>chore shirt.</em></h3>
+    <p>The Cutter also goes on a softwashed sand chore shirt. Heavy 9oz cotton, button-front, embroidered in dark green over the heart.</p>
   </div>
-  <div class="garments-grid">
+  <div class="garments-grid two-up">
     <figure>
       <img src="assets/shirt-cu.jpg" alt="The Cutter embroidered in dark green on the chest of a sand chore shirt" loading="lazy" />
       <figcaption><span>Chore shirt</span><span>Close-up</span></figcaption>
@@ -623,18 +677,10 @@
       <img src="assets/shirt-wide.jpg" alt="Full view of the chore shirt with the Cutter embroidered on the chest" loading="lazy" />
       <figcaption><span>Chore shirt</span><span>Full view</span></figcaption>
     </figure>
-    <figure>
-      <img src="assets/tee-cu.jpg" alt="The Cutter in full colour on the chest of a cream long-sleeve tee" loading="lazy" />
-      <figcaption><span>Long-sleeve</span><span>Close-up</span></figcaption>
-    </figure>
-    <figure>
-      <img src="assets/tee-wide.jpg" alt="Full view of the long-sleeve tee with the Cutter on the chest" loading="lazy" />
-      <figcaption><span>Long-sleeve</span><span>Full view</span></figcaption>
-    </figure>
   </div>
   <div class="garments-cta">
-    <a href="mailto:info@axeandreel.com?subject=The%20Cutter%20shirt%20or%20long-sleeve%20-%20enquiry">
-      Ask about a shirt or long-sleeve
+    <a href="mailto:info@axeandreel.com?subject=The%20Cutter%20chore%20shirt%20-%20enquiry">
+      Ask about the chore shirt
       <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
   </div>
@@ -697,6 +743,74 @@
     const c = colorName ? colorName.textContent : '';
     showToast('Added: The Cutter · ' + c);
   });
+})();
+
+/* ===== LIGHTBOX ===== */
+(function () {
+  const box = document.createElement('div');
+  box.className = 'lb';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.innerHTML = `
+    <button class="lb-close" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <img alt="" />
+    <div class="lb-caption" aria-live="polite"></div>
+  `;
+  document.body.appendChild(box);
+  const lbImg = box.querySelector('img');
+  const lbCap = box.querySelector('.lb-caption');
+
+  function openLb(src, alt, caption) {
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    lbCap.textContent = caption || alt || '';
+    box.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLb() {
+    box.classList.remove('open');
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+  box.addEventListener('click', e => { if (e.target !== lbImg) closeLb(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && box.classList.contains('open')) closeLb(); });
+
+  // Bind clickable images
+  const selectors = [
+    '.gallery-main img.is-on',
+    '.design-art img',
+    '.garments-grid figure img'
+  ];
+  function bind() {
+    document.querySelectorAll(selectors.join(',')).forEach(img => {
+      if (img.dataset.lbBound) return;
+      img.dataset.lbBound = '1';
+      img.classList.add('can-zoom');
+      img.addEventListener('click', e => {
+        e.stopPropagation();
+        const fig = img.closest('figure');
+        let cap = '';
+        if (fig) {
+          const fc = fig.querySelector('figcaption');
+          if (fc) cap = fc.textContent.replace(/\s+/g, ' ').trim();
+        }
+        openLb(img.currentSrc || img.src, img.alt, cap);
+      });
+    });
+  }
+  bind();
+
+  // Gallery: clicking the visible image opens lightbox. Re-bind when image changes.
+  const galleryMain = document.querySelector('.gallery-main');
+  if (galleryMain) {
+    galleryMain.addEventListener('click', e => {
+      if (e.target === lbImg) return;
+      const visible = galleryMain.querySelector('img.is-on');
+      if (visible) openLb(visible.currentSrc || visible.src, visible.alt, '');
+    });
+  }
 })();
 </script>
 </body>
