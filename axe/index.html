@@ -215,6 +215,15 @@
     line-height: 1.25;
   }
 
+  /* meta-band: hero-meta lifted out as its own section */
+  .meta-band {
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 clamp(20px, 3vw, 56px);
+    position: relative; z-index: 2;
+  }
+  .meta-band .hero-meta { margin-top: 0; }
+
   /* tiny corner stamps in the hero whitespace */
   .stamp {
     position: absolute;
@@ -1010,7 +1019,30 @@
     </a>
     <a href="#consign" class="ghost">Consign with us</a>
   </div>
+</section>
 
+<!-- ==================== SCENES (was below About) ==================== -->
+<section class="scenes" aria-label="Scenes from the shop and the island">
+  <figure>
+    <img src="assets/shop-148.jpg" alt="Woman with an axe over her shoulder, standing in front of a woodshed on the island" />
+    <figcaption><span>Axe</span><span>S. Woodward</span></figcaption>
+  </figure>
+  <figure>
+    <img src="assets/shop-62.jpg" alt="A guitar leaning against a denim and boot display in the shop" />
+    <figcaption><span>The Floor</span><span>S. Woodward</span></figcaption>
+  </figure>
+  <figure>
+    <img src="assets/shop-263.jpg" alt="A man with a chainsaw beside a stack of freshly split firewood" />
+    <figcaption><span>The Cut</span><span>S. Woodward</span></figcaption>
+  </figure>
+  <figure>
+    <img src="assets/shop-209.jpg" alt="A couple standing in the cedars on Salt Spring, holding a chicken" />
+    <figcaption><span>The Island</span><span>S. Woodward</span></figcaption>
+  </figure>
+</section>
+
+<!-- ==================== META BAND (lifted from hero) ==================== -->
+<section class="meta-band">
   <div class="hero-meta">
     <div>
       <div class="k">In the shop</div>
@@ -1031,10 +1063,42 @@
   </div>
 </section>
 
-<!-- ==================== STORY ==================== -->
+<!-- ==================== FEED (moved up) ==================== -->
+<section class="section dark" id="feed">
+  <div class="sec-head">
+    <span class="sec-num">[ 01 / Feed ]</span>
+    <h2 class="sec-title">Notes from <em>@axeandreel</em></h2>
+    <span class="sec-aside">Updated from Instagram</span>
+  </div>
+
+  <div class="feed-grid">
+    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+      <div class="date">May 14 . 2026</div>
+      <p class="quote">A Pentax K1000 came in this week. Light meter still works, leatherette still soft. Whoever wants this knows already.</p>
+      <div class="meta"><span>From the bench</span><span>View on Instagram</span></div>
+    </a>
+    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+      <div class="date">May 09 . 2026</div>
+      <p class="quote">Three Hardy reels, two in their original cases. The third has been somewhere it should not have been, and is the better for it.</p>
+      <div class="meta"><span>Just landed</span><span>View on Instagram</span></div>
+    </a>
+    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+      <div class="date">May 02 . 2026</div>
+      <p class="quote">Filson wool, mid-70s, mended once at the elbow with thread that does not quite match. We are leaving it that way.</p>
+      <div class="meta"><span>Workwear</span><span>View on Instagram</span></div>
+    </a>
+  </div>
+
+  <a class="ig-link" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+    Follow on Instagram
+    <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </a>
+</section>
+
+<!-- ==================== STORY (About, photo is the Owner now) ==================== -->
 <section class="section" id="about">
   <div class="sec-head">
-    <span class="sec-num">[ 01 / About ]</span>
+    <span class="sec-num">[ 02 / About ]</span>
     <h2 class="sec-title">As children we roam <em>free.</em></h2>
     <span class="sec-aside">Our quiet thesis</span>
   </div>
@@ -1046,8 +1110,8 @@
     </div>
     <aside class="story-side">
       <figure>
-        <img src="assets/shop-148.jpg" alt="Woman with an axe over her shoulder, standing in front of a woodshed" />
-        <figcaption><span>Axe &amp; Reel</span><span>The Island</span></figcaption>
+        <img src="assets/shop-about-59.jpg" alt="The owner of Axe & Reel inside the shop, under hanging copper pots" />
+        <figcaption><span>The Owner</span><span>Niamh Studio</span></figcaption>
       </figure>
     </aside>
     <div class="story-body">
@@ -1058,30 +1122,10 @@
   </div>
 </section>
 
-<!-- ==================== SCENES ==================== -->
-<section class="scenes" aria-label="Scenes from the shop and the island">
-  <figure>
-    <img src="assets/shop-about-59.jpg" alt="The owner of Axe & Reel standing under hanging copper pots inside the shop" />
-    <figcaption><span>The Owner</span><span>Niamh Studio</span></figcaption>
-  </figure>
-  <figure>
-    <img src="assets/shop-62.jpg" alt="A guitar leaning against a denim and boot display in the shop" />
-    <figcaption><span>The Floor</span><span>S. Woodward</span></figcaption>
-  </figure>
-  <figure>
-    <img src="assets/shop-263.jpg" alt="A man with a chainsaw beside a stack of freshly split firewood" />
-    <figcaption><span>Outside</span><span>S. Woodward</span></figcaption>
-  </figure>
-  <figure>
-    <img src="assets/shop-209.jpg" alt="A couple standing in the cedars on Salt Spring, holding a chicken" />
-    <figcaption><span>The Island</span><span>S. Woodward</span></figcaption>
-  </figure>
-</section>
-
 <!-- ==================== GOODS ==================== -->
 <section class="section" id="goods">
   <div class="sec-head">
-    <span class="sec-num">[ 02 / The Goods ]</span>
+    <span class="sec-num">[ 03 / The Goods ]</span>
     <h2 class="sec-title">A few things from <em>the floor.</em></h2>
     <span class="sec-aside">Tonight's selection</span>
   </div>
@@ -1147,38 +1191,6 @@
   </div>
 
   <div class="shop-grid" id="shop-grid"></div>
-</section>
-
-<!-- ==================== FEED (dark) ==================== -->
-<section class="section dark" id="feed">
-  <div class="sec-head">
-    <span class="sec-num">[ 03 / Feed ]</span>
-    <h2 class="sec-title">Notes from <em>@axeandreel</em></h2>
-    <span class="sec-aside">Updated from Instagram</span>
-  </div>
-
-  <div class="feed-grid">
-    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
-      <div class="date">May 14 . 2026</div>
-      <p class="quote">A Pentax K1000 came in this week. Light meter still works, leatherette still soft. Whoever wants this knows already.</p>
-      <div class="meta"><span>From the bench</span><span>View on Instagram</span></div>
-    </a>
-    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
-      <div class="date">May 09 . 2026</div>
-      <p class="quote">Three Hardy reels, two in their original cases. The third has been somewhere it should not have been, and is the better for it.</p>
-      <div class="meta"><span>Just landed</span><span>View on Instagram</span></div>
-    </a>
-    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
-      <div class="date">May 02 . 2026</div>
-      <p class="quote">Filson wool, mid-70s, mended once at the elbow with thread that does not quite match. We are leaving it that way.</p>
-      <div class="meta"><span>Workwear</span><span>View on Instagram</span></div>
-    </a>
-  </div>
-
-  <a class="ig-link" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
-    Follow on Instagram
-    <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-  </a>
 </section>
 
 <!-- ==================== CONSIGN ==================== -->
