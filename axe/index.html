@@ -72,6 +72,61 @@
   }
   .nav a { text-decoration: none; padding: 4px 0; border-bottom: 1px solid transparent; }
   .nav a:hover { border-bottom-color: var(--ink); }
+  .hamburger {
+    display: none;
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--ink);
+    cursor: pointer;
+    padding: 0;
+    width: 42px; height: 42px;
+    color: var(--ink);
+    align-items: center; justify-content: center;
+  }
+  .hamburger svg {
+    width: 20px; height: 20px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.5; stroke-linecap: round;
+  }
+  .hamburger .x1, .hamburger .x2 { display: none; }
+  .hamburger.is-open .bars { display: none; }
+  .hamburger.is-open .x1, .hamburger.is-open .x2 { display: inline; }
+  .mobile-menu {
+    position: fixed; left: 0; right: 0; top: 0;
+    background: rgba(46, 47, 42, 0.96);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    z-index: 49;
+    padding: 86px clamp(20px, 4vw, 32px) 32px;
+    display: flex; flex-direction: column; gap: 0;
+    transform: translateY(-105%);
+    transition: transform .35s cubic-bezier(.5,0,.2,1);
+    pointer-events: none;
+  }
+  .mobile-menu.open {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .mobile-menu a {
+    padding: 18px 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 26px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .mobile-menu a:last-child { border-bottom: 0; }
+  .mobile-menu a span.sub {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase; color: var(--muted);
+    font-weight: 500;
+  }
+  @media (max-width: 900px) {
+    .hamburger { display: inline-flex; }
+    .nav { display: none; }
+  }
   .brand-lockup {
     display: inline-flex;
     align-items: center;
@@ -1032,6 +1087,32 @@
     .story-side { position: static; }
     .visit-grid { grid-template-columns: 1fr; }
     .sec-aside { display: none; }
+    .lead-photo { height: clamp(420px, 80vh, 700px); }
+    .scenes figcaption,
+    .goods-grid figcaption { opacity: 1; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.7)); }
+    .hero h1 { font-size: clamp(40px, 9vw, 64px); }
+    .news-form { flex-direction: column; border: 0; gap: 10px; }
+    .news-form input { border: 1px solid var(--ink); }
+    .news-form button { padding: 16px; border: 1px solid var(--ink); }
+    .topbar { padding: 12px 18px; }
+    .sec-head { grid-template-columns: 1fr; gap: 8px; }
+    .sec-num { font-size: 11px; }
+    .section { padding: clamp(48px, 8vw, 80px) clamp(18px, 4vw, 32px); }
+    .hero { padding: clamp(50px, 12vw, 100px) clamp(20px, 4vw, 32px); }
+    .stamp.tl, .stamp.bl { display: none; }
+    .featured .fcopy h3 { font-size: clamp(38px, 9vw, 56px); }
+    .meta-band .hero-meta div { padding: 18px 14px; }
+    .meta-band .hero-meta .v { font-size: 15px; }
+  }
+  @media (max-width: 600px) {
+    .hero-meta { grid-template-columns: 1fr; }
+    .hero-meta div { border-right: 0; }
+    .foot-grid { grid-template-columns: 1fr; }
+    .lead-photo .logo-over { width: 78%; }
+    .visit-info dl { grid-template-columns: 1fr; gap: 4px 0; }
+    .visit-info dt { border-top: 1px solid var(--rule); margin-top: 18px; padding-top: 10px; }
+    .visit-info dd { border-top: 0; margin-top: 0; padding-top: 6px; }
+    .hours-grid { font-size: 16px; }
   }
 
   .vis-hidden { position: absolute; clip: rect(0 0 0 0); width: 1px; height: 1px; overflow: hidden; }
@@ -1041,12 +1122,21 @@
 
 <!-- ==================== TOPBAR ==================== -->
 <header class="topbar">
-  <nav class="nav" aria-label="Primary">
-    <a href="#about">About</a>
-    <a href="#goods">Goods</a>
-    <a href="#consign">Consignment</a>
-    <a href="#visit">Visit</a>
-  </nav>
+  <div style="display:inline-flex; align-items:center; gap:18px;">
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg viewBox="0 0 24 24">
+        <path class="bars" d="M3 7h18M3 12h18M3 17h18"/>
+        <path class="x1" d="M6 6l12 12"/>
+        <path class="x2" d="M18 6L6 18"/>
+      </svg>
+    </button>
+    <nav class="nav" aria-label="Primary">
+      <a href="#about">About</a>
+      <a href="#goods">Goods</a>
+      <a href="#consign">Consignment</a>
+      <a href="#visit">Visit</a>
+    </nav>
+  </div>
   <span aria-hidden="true"></span>
   <div class="top-right">
     <button class="ghost" id="search-btn" aria-label="Search">
@@ -1061,6 +1151,15 @@
     </button>
   </div>
 </header>
+
+<!-- ==================== MOBILE MENU ==================== -->
+<nav class="mobile-menu" id="mobile-menu" aria-label="Mobile primary">
+  <a href="#about">About <span class="sub">01</span></a>
+  <a href="#goods">The Goods <span class="sub">02</span></a>
+  <a href="#consign">Consignment <span class="sub">03</span></a>
+  <a href="#visit">Visit <span class="sub">04</span></a>
+  <a href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">Instagram <span class="sub">&#x2197;</span></a>
+</nav>
 
 <!-- ==================== LEAD PHOTO ==================== -->
 <section class="lead-photo" id="top" aria-label="Salt Spring shoreline">
@@ -1685,6 +1784,30 @@ document.getElementById('search-btn').addEventListener('click', () => {
 
 renderShop();
 renderCart();
+
+/* ===== MOBILE MENU ===== */
+(function () {
+  const hb = document.getElementById('hamburger');
+  const mm = document.getElementById('mobile-menu');
+  if (!hb || !mm) return;
+  function close() {
+    mm.classList.remove('open');
+    hb.classList.remove('is-open');
+    hb.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+  function open() {
+    mm.classList.add('open');
+    hb.classList.add('is-open');
+    hb.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  hb.addEventListener('click', () => {
+    mm.classList.contains('open') ? close() : open();
+  });
+  mm.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
 
 /* ===== PARALLAX ===== */
 (function () {

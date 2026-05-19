@@ -432,14 +432,35 @@
     box-shadow: 0 10px 30px rgba(0,0,0,.4);
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+
+  /* ===== responsive ===== */
+  @media (max-width: 900px) {
+    .topbar { padding: 12px 18px; gap: 12px; }
+    .back .label { display: none; }
+    .gallery { min-height: clamp(380px, 60vh, 600px); }
+    .details { padding: clamp(36px, 6vw, 56px) clamp(20px, 5vw, 32px); }
+    .pname { font-size: clamp(44px, 11vw, 72px); }
+    .design-band { padding: clamp(48px, 8vw, 80px) clamp(18px, 4vw, 32px); }
+    .design-art { aspect-ratio: 5 / 4; padding: clamp(28px, 5vw, 40px); }
+    .design-copy h2 { font-size: clamp(32px, 8vw, 50px); }
+    .shirt-img { aspect-ratio: 5/4; }
+    .shirt-copy { padding: clamp(40px, 8vw, 64px) clamp(20px, 5vw, 32px); }
+    .back-band a { font-size: clamp(26px, 7vw, 36px); }
+  }
+  @media (max-width: 500px) {
+    .actions { gap: 12px; }
+    .btn { padding: 16px 18px; font-size: 11px; }
+    .swatch-row .sw { width: 48px; height: 48px; }
+    .thumbs { grid-template-columns: repeat(4, 1fr); }
+  }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <a href="../" class="back">
+  <a href="../" class="back" title="Back to the shop">
     <svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
-    Back to the shop
+    <span class="label">Back to the shop</span>
   </a>
   <a class="brand-mid" href="../" aria-label="Axe & Reel home">
     <img src="../assets/logo.png" alt="Axe & Reel - Saltspring Island B.C." />
