@@ -478,7 +478,13 @@
   @media (max-width: 900px) {
     .featured .fimg { border-right: 0; border-bottom: 1px solid var(--rule); aspect-ratio: 5 / 3; }
   }
-  .featured .fimg img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .5s ease; }
+  .featured .fimg img {
+    width: 100%; height: 100%;
+    padding: clamp(20px, 3vw, 56px);
+    box-sizing: border-box;
+    object-fit: contain; object-position: center;
+    transition: transform .5s ease;
+  }
   .featured:hover .fimg img { transform: scale(1.03); }
   .featured .fcopy {
     padding: clamp(48px, 6vw, 96px) clamp(28px, 4vw, 64px);
@@ -1296,7 +1302,7 @@
 <!-- ==================== FEATURED (Cutter Hat) ==================== -->
 <a class="featured" href="cutter-hat/" aria-label="The Cutter - featured product">
   <div class="fimg">
-    <img src="cutter-hat/assets/hat-bone-front.jpg" alt="The Cutter hat in Bone, embroidered cutthroat trout with Axe & Reel wordmark" loading="lazy" />
+    <img src="cutter-hat/assets/hat-sage-angle.jpg" alt="The Cutter hat in Sage, three-quarter view, embroidered cutthroat trout with Axe & Reel wordmark" loading="lazy" />
   </div>
   <div class="fcopy">
     <div class="eyebrow">Featured · Just dropped</div>

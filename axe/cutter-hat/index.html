@@ -116,7 +116,9 @@
   .gallery-main img {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
-    object-fit: cover; object-position: center;
+    padding: clamp(24px, 5vw, 64px);
+    box-sizing: border-box;
+    object-fit: contain; object-position: center;
     opacity: 0;
     transition: opacity .35s ease;
   }
@@ -474,14 +476,14 @@
 <section class="product">
   <div class="gallery">
     <div class="gallery-main" id="gallery-main">
-      <span class="gallery-tag" id="gallery-tag">Bone / Front</span>
-      <img class="is-on" id="img-1" src="assets/hat-bone-front.jpg" alt="Cutter hat in Bone, front view" />
+      <span class="gallery-tag" id="gallery-tag">Sage / Angle</span>
+      <img id="img-1" src="assets/hat-bone-front.jpg" alt="Cutter hat in Bone, front view" />
       <img id="img-2" src="assets/hat-bone-angle.jpg" alt="Cutter hat in Bone, three-quarter view" />
       <img id="img-3" src="assets/hat-sage-front.jpg" alt="Cutter hat in Sage, front view" />
-      <img id="img-4" src="assets/hat-sage-angle.jpg" alt="Cutter hat in Sage, three-quarter view" />
+      <img class="is-on" id="img-4" src="assets/hat-sage-angle.jpg" alt="Cutter hat in Sage, three-quarter view" />
     </div>
     <div class="thumbs" id="thumbs">
-      <button class="is-on" data-img="img-1" aria-label="Bone, front">
+      <button data-img="img-1" aria-label="Bone, front">
         <img src="assets/hat-bone-front.jpg" alt="" />
       </button>
       <button data-img="img-2" aria-label="Bone, angle">
@@ -490,7 +492,7 @@
       <button data-img="img-3" aria-label="Sage, front">
         <img src="assets/hat-sage-front.jpg" alt="" />
       </button>
-      <button data-img="img-4" aria-label="Sage, angle">
+      <button class="is-on" data-img="img-4" aria-label="Sage, angle">
         <img src="assets/hat-sage-angle.jpg" alt="" />
       </button>
     </div>
@@ -509,11 +511,11 @@
     <div class="swatch-row">
       <div class="label">
         <span>Colorway</span>
-        <span id="color-name">Bone</span>
+        <span id="color-name">Sage</span>
       </div>
       <div class="swatches" role="radiogroup" aria-label="Colorway">
-        <button class="sw bone is-on" data-color="bone" data-front="img-1" data-angle="img-2" aria-label="Bone" title="Bone"></button>
-        <button class="sw sage" data-color="sage" data-front="img-3" data-angle="img-4" aria-label="Sage" title="Sage"></button>
+        <button class="sw bone" data-color="bone" data-front="img-1" data-angle="img-2" aria-label="Bone" title="Bone"></button>
+        <button class="sw sage is-on" data-color="sage" data-front="img-3" data-angle="img-4" aria-label="Sage" title="Sage"></button>
       </div>
     </div>
 
@@ -630,7 +632,7 @@
   }
 
   thumbs.forEach(t => t.addEventListener('click', () => showImg(t.dataset.img)));
-  sws.forEach(s => s.addEventListener('click', () => showImg(s.dataset.front)));
+  sws.forEach(s => s.addEventListener('click', () => showImg(s.dataset.angle)));
 
   // Add to bag (mock)
   const addBtn = document.getElementById('add-btn');
