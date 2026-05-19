@@ -23,7 +23,7 @@
     --display:  "Cormorant Garamond", "Cormorant", Garamond, "Hoefler Text", Georgia, serif;
     --sans:     "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
     --mono:     "JetBrains Mono", ui-monospace, Menlo, monospace;
-    --bone:     #DBCBA4;
+    --beige:    #DBCBA4;
     --sage:     #A7AE85;
   }
   * { box-sizing: border-box; }
@@ -44,30 +44,31 @@
     background-size: 4px 4px; mix-blend-mode: multiply; z-index: 1;
   }
 
-  /* ===== topbar ===== */
+  /* ===== topbar (light) ===== */
   .topbar {
     position: sticky; top: 0; z-index: 50;
-    background: rgba(46, 47, 42, 0.42);
-    backdrop-filter: blur(18px) saturate(1.25);
-    -webkit-backdrop-filter: blur(18px) saturate(1.25);
-    border-bottom: 1px solid rgba(238, 231, 215, 0.12);
+    background: rgba(238, 231, 215, 0.92);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--moss-2);
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 24px;
     padding: 14px clamp(20px, 3vw, 56px);
   }
-  @supports not (backdrop-filter: blur(1px)) { .topbar { background: rgba(46,47,42,0.92); } }
+  @supports not (backdrop-filter: blur(1px)) { .topbar { background: rgba(238,231,215,0.96); } }
   .back {
     display: inline-flex; align-items: center; gap: 10px;
     font-family: var(--sans); font-size: 11px;
     letter-spacing: .22em; text-transform: uppercase; font-weight: 500;
-    color: var(--ink);
+    color: var(--moss-2);
     text-decoration: none;
     padding: 4px 0; border-bottom: 1px solid transparent;
     transition: border-color .15s;
   }
-  .back:hover { border-bottom-color: var(--ink); }
+  .back:hover { border-bottom-color: var(--moss-2); }
   .back svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   .brand-mid {
     text-align: center;
@@ -80,12 +81,12 @@
   .ig-btn {
     display: inline-flex; align-items: center; justify-content: center;
     width: 36px; height: 36px;
-    border: 1px solid var(--ink);
-    color: var(--ink);
+    border: 1px solid var(--moss-2);
+    color: var(--moss-2);
     text-decoration: none;
     transition: background .15s, color .15s;
   }
-  .ig-btn:hover { background: var(--ink); color: var(--paper); }
+  .ig-btn:hover { background: var(--moss-2); color: var(--ink); }
   .ig-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ===== product hero ===== */
@@ -222,8 +223,8 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .sw:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.3); }
-  .sw.bone { background: var(--bone); }
-  .sw.sage { background: var(--sage); }
+  .sw.beige { background: var(--beige); }
+  .sw.sage  { background: var(--sage); }
   .sw.is-on {
     box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
   }
@@ -310,19 +311,16 @@
   }
   @media (max-width: 900px) { .design-grid { grid-template-columns: 1fr; } }
   .design-art {
-    background: var(--bone);
-    border: 1px solid var(--rule);
     aspect-ratio: 1;
     display: flex; align-items: center; justify-content: center;
-    padding: clamp(36px, 4vw, 60px);
+    padding: clamp(20px, 3vw, 40px);
     position: relative;
-    overflow: hidden;
   }
-  .design-art img { max-width: 90%; max-height: 90%; height: auto; }
+  .design-art img { max-width: 100%; max-height: 100%; height: auto; }
   .design-art .stamp {
-    position: absolute; bottom: 14px; right: 16px;
+    position: absolute; bottom: 0; right: 0;
     font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
-    color: rgba(46,47,42,.55);
+    color: var(--muted);
     text-transform: uppercase;
   }
   .design-copy .num {
@@ -345,50 +343,75 @@
     text-wrap: pretty;
   }
 
-  /* ===== shirt section ===== */
-  .shirt-band {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  /* ===== garments section ===== */
+  .garments {
     border-bottom: 1px solid var(--rule);
     position: relative; z-index: 2;
+    padding: clamp(64px, 7vw, 120px) clamp(20px, 3vw, 56px) 0;
   }
-  @media (max-width: 900px) { .shirt-band { grid-template-columns: 1fr; } }
-  .shirt-img {
-    aspect-ratio: 5 / 4;
-    overflow: hidden;
-    border-right: 1px solid var(--rule);
+  .garments-head { max-width: 56ch; margin: 0 0 clamp(36px, 4vw, 56px); }
+  .garments-head .eyebrow {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
   }
-  @media (max-width: 900px) { .shirt-img { border-right: 0; border-bottom: 1px solid var(--rule); } }
-  .shirt-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-  .shirt-copy {
-    padding: clamp(50px, 6vw, 100px) clamp(28px, 4vw, 64px);
-    display: flex; flex-direction: column; justify-content: center;
-  }
-  .shirt-copy .eyebrow { margin-bottom: 18px; }
-  .shirt-copy h3 {
+  .garments-head h3 {
     font-family: var(--display); font-weight: 300;
-    font-size: clamp(34px, 4vw, 56px);
-    line-height: 1; margin: 0;
+    font-size: clamp(34px, 4.2vw, 60px);
+    line-height: 1.02; margin: 0;
     text-wrap: balance;
   }
-  .shirt-copy h3 em { font-style: italic; color: var(--moss); font-weight: 300; }
-  .shirt-copy p {
+  .garments-head h3 em { font-style: italic; color: var(--moss); font-weight: 300; }
+  .garments-head p {
     font-family: var(--display); font-size: clamp(18px, 1.4vw, 23px);
-    line-height: 1.45; margin: 22px 0 0;
+    line-height: 1.45; margin: 18px 0 0;
     color: var(--ink-2); text-wrap: pretty;
-    max-width: 36ch;
   }
-  .shirt-copy a {
-    margin-top: 26px;
+  .garments-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 900px) { .garments-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .garments-grid { grid-template-columns: 1fr; } }
+  .garments-grid figure {
+    margin: 0;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-2);
+  }
+  .garments-grid img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    transition: transform .35s ease, filter .25s ease;
+    filter: saturate(.92);
+  }
+  .garments-grid figure:hover img { transform: scale(1.03); filter: saturate(1); }
+  .garments-grid figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.7));
+    color: var(--ink);
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: .22em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+  .garments-cta { padding: clamp(36px, 4vw, 56px) 0; }
+  .garments-cta a {
     display: inline-flex; align-items: center; gap: 10px;
-    align-self: flex-start;
     font-family: var(--sans); font-size: 11px;
     letter-spacing: .22em; text-transform: uppercase;
     color: var(--ink); text-decoration: none;
     border-bottom: 1px solid var(--ink);
     padding-bottom: 4px; font-weight: 500;
   }
-  .shirt-copy a:hover { color: var(--moss); border-color: var(--moss); }
-  .shirt-copy a svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .garments-cta a:hover { color: var(--moss); border-color: var(--moss); }
+  .garments-cta a svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ===== back to shop ===== */
   .back-band {
@@ -483,17 +506,17 @@
       <img class="is-on" id="img-4" src="assets/hat-sage-angle.jpg" alt="Cutter hat in Sage, three-quarter view" />
     </div>
     <div class="thumbs" id="thumbs">
-      <button data-img="img-1" aria-label="Bone, front">
-        <img src="assets/hat-bone-front.jpg" alt="" />
+      <button class="is-on" data-img="img-4" aria-label="Sage, three-quarter">
+        <img src="assets/hat-sage-angle.jpg" alt="" />
       </button>
-      <button data-img="img-2" aria-label="Bone, angle">
-        <img src="assets/hat-bone-angle.jpg" alt="" />
-      </button>
-      <button data-img="img-3" aria-label="Sage, front">
+      <button data-img="img-3" aria-label="Sage, flat">
         <img src="assets/hat-sage-front.jpg" alt="" />
       </button>
-      <button class="is-on" data-img="img-4" aria-label="Sage, angle">
-        <img src="assets/hat-sage-angle.jpg" alt="" />
+      <button data-img="img-2" aria-label="Beige, three-quarter">
+        <img src="assets/hat-bone-angle.jpg" alt="" />
+      </button>
+      <button data-img="img-1" aria-label="Beige, flat">
+        <img src="assets/hat-bone-front.jpg" alt="" />
       </button>
     </div>
   </div>
@@ -514,8 +537,8 @@
         <span id="color-name">Sage</span>
       </div>
       <div class="swatches" role="radiogroup" aria-label="Colorway">
-        <button class="sw bone" data-color="bone" data-front="img-1" data-angle="img-2" aria-label="Bone" title="Bone"></button>
         <button class="sw sage is-on" data-color="sage" data-front="img-3" data-angle="img-4" aria-label="Sage" title="Sage"></button>
+        <button class="sw beige" data-color="beige" data-front="img-1" data-angle="img-2" aria-label="Beige" title="Beige"></button>
       </div>
     </div>
 
@@ -530,7 +553,7 @@
       <details open>
         <summary>The design</summary>
         <div class="body">
-          A coastal cutthroat trout, drawn from life on a creek behind the shop. Cutthroats are the island fish you do not get on the first cast. The wordmark sits underneath in the house serif, slightly arched, embroidered in matching thread.
+          A coastal cutthroat trout. The kind of island fish you do not get on the first cast. The Axe &amp; Reel title runs in a wave beneath, embroidered in matching thread.
         </div>
       </details>
       <details>
@@ -564,28 +587,45 @@
 <section class="design-band">
   <div class="design-grid">
     <div class="design-art">
-      <img src="assets/design-color.png" alt="The Cutter design - a cutthroat trout illustration with arched Axe & Reel wordmark" />
-      <span class="stamp">Plate 01 / Art print on file</span>
+      <img src="assets/design-color-trsp.png" alt="The Cutter - cutthroat trout illustration with Axe & Reel in a wave" />
+      <span class="stamp">Plate 01 / Art on file</span>
     </div>
     <div class="design-copy">
       <div class="num">[ The Mark ]</div>
       <h2>One <em>fish,</em> drawn properly.</h2>
-      <p>The cutthroat is a careful animal. We wanted a mark that earned its place on the front of a hat without trying to. The drawing is by hand, in two greens and a sand belly, with a faint red slash at the gill that you only see up close. We did not stylise it. The fish does that on its own.</p>
+      <p>The cutthroat is a careful animal. We wanted a mark that earned its place on the front of a hat without trying to. The drawing is by hand, in two greens and a sand belly, with a faint red slash at the gill that you only see up close. The Axe &amp; Reel title runs underneath in a wave. We did not stylise the fish. It does that on its own.</p>
     </div>
   </div>
 </section>
 
-<!-- ============ SHIRT ============ -->
-<section class="shirt-band">
-  <div class="shirt-img">
-    <img src="assets/shirt-cu.jpg" alt="Cutter design embroidered in dark green on a sand-coloured chore shirt" />
+<!-- ============ GARMENTS ============ -->
+<section class="garments">
+  <div class="garments-head">
+    <div class="eyebrow">[ Same fish, different cloth ]</div>
+    <h3>Also on the <em>chore shirt</em> and the <em>long-sleeve.</em></h3>
+    <p>The Cutter also goes on a softwashed sand chore shirt (heavy 9oz cotton, button-front) and on a long-sleeve cotton tee. The fish is sized to the panel: dark green stitch on the shirt, full colour on the tee.</p>
   </div>
-  <div class="shirt-copy">
-    <div class="eyebrow">[ The chore shirt ]</div>
-    <h3>Same fish, different <em>cloth.</em></h3>
-    <p>The Cutter goes on a softwashed sand chore shirt as well. Heavy 9oz cotton, button-front, single chest patch. Same embroidered fish, slightly larger, in dark green over the heart.</p>
-    <a href="mailto:info@axeandreel.com?subject=The%20Cutter%20chore%20shirt%20-%20enquiry">
-      Ask about the shirt
+  <div class="garments-grid">
+    <figure>
+      <img src="assets/shirt-cu.jpg" alt="The Cutter embroidered in dark green on the chest of a sand chore shirt" loading="lazy" />
+      <figcaption><span>Chore shirt</span><span>Close-up</span></figcaption>
+    </figure>
+    <figure>
+      <img src="assets/shirt-wide.jpg" alt="Full view of the chore shirt with the Cutter embroidered on the chest" loading="lazy" />
+      <figcaption><span>Chore shirt</span><span>Full view</span></figcaption>
+    </figure>
+    <figure>
+      <img src="assets/tee-cu.jpg" alt="The Cutter in full colour on the chest of a cream long-sleeve tee" loading="lazy" />
+      <figcaption><span>Long-sleeve</span><span>Close-up</span></figcaption>
+    </figure>
+    <figure>
+      <img src="assets/tee-wide.jpg" alt="Full view of the long-sleeve tee with the Cutter on the chest" loading="lazy" />
+      <figcaption><span>Long-sleeve</span><span>Full view</span></figcaption>
+    </figure>
+  </div>
+  <div class="garments-cta">
+    <a href="mailto:info@axeandreel.com?subject=The%20Cutter%20shirt%20or%20long-sleeve%20-%20enquiry">
+      Ask about a shirt or long-sleeve
       <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
   </div>
@@ -613,12 +653,12 @@
   const sws = document.querySelectorAll('.sw');
 
   const labelMap = {
-    'img-1': 'Bone / Front',
-    'img-2': 'Bone / Angle',
-    'img-3': 'Sage / Front',
-    'img-4': 'Sage / Angle'
+    'img-1': 'Beige / Flat',
+    'img-2': 'Beige / Three-quarter',
+    'img-3': 'Sage / Flat',
+    'img-4': 'Sage / Three-quarter'
   };
-  const colorOf = { 'img-1': 'Bone', 'img-2': 'Bone', 'img-3': 'Sage', 'img-4': 'Sage' };
+  const colorOf = { 'img-1': 'Beige', 'img-2': 'Beige', 'img-3': 'Sage', 'img-4': 'Sage' };
 
   function showImg(id) {
     mainImgs.forEach(im => im.classList.toggle('is-on', im.id === id));
