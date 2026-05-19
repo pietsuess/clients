@@ -312,6 +312,28 @@
   .specs ul { padding: 0; margin: 0 0 0 1.2em; }
   .specs li { margin-bottom: 4px; }
 
+  /* ===== model band ===== */
+  .model-band {
+    position: relative; z-index: 2;
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-2);
+  }
+  @media (max-width: 900px) { .model-band { aspect-ratio: 4 / 5; } }
+  .model-band img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center 22%;
+    cursor: zoom-in;
+  }
+  .model-band .credit {
+    position: absolute; right: 18px; bottom: 14px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    color: rgba(238,231,215,0.78);
+    text-shadow: 0 1px 6px rgba(0,0,0,.45);
+  }
+
   /* ===== design panel ===== */
   .design-band {
     position: relative; z-index: 2;
@@ -646,6 +668,12 @@
   </div>
 </section>
 
+<!-- ============ MODEL ============ -->
+<section class="model-band" aria-label="The Cutter worn on the river">
+  <img src="assets/model.jpg" alt="A man in the Cutter hat and Axe & Reel chore shirt, fly fishing in a river" loading="lazy" />
+  <div class="credit">In the wild</div>
+</section>
+
 <!-- ============ DESIGN ============ -->
 <section class="design-band">
   <div class="design-grid">
@@ -779,7 +807,8 @@
 
   const selectors = [
     '.design-art img',
-    '.garments-grid figure img'
+    '.garments-grid figure img',
+    '.model-band img'
   ];
   document.querySelectorAll(selectors.join(',')).forEach(img => {
     img.classList.add('can-zoom');
