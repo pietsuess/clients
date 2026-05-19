@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Cutter Hat - Axe &amp; Reel</title>
+<meta name="description" content="The Cutter. Embroidered cutthroat trout on a softwashed dad cap, in two colorways. Axe & Reel, Salt Spring Island." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper:    #2E2F2A;
+    --paper-2:  #262723;
+    --paper-3:  #393A35;
+    --ink:      #EEE7D7;
+    --ink-2:    #DDD5C0;
+    --muted:    #969185;
+    --rule:     #50514A;
+    --moss:     #C9A964;
+    --moss-2:   #18181A;
+    --rust:     #C77B3F;
+    --display:  "Cormorant Garamond", "Cormorant", Garamond, "Hoefler Text", Georgia, serif;
+    --sans:     "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono:     "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --bone:     #DBCBA4;
+    --sage:     #A7AE85;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: var(--sans);
+    font-size: clamp(15px, 1.02vw, 17px);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--moss); color: var(--moss-2); }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(26,24,18,.03) 1px, transparent 1px);
+    background-size: 4px 4px; mix-blend-mode: multiply; z-index: 1;
+  }
+
+  /* ===== topbar ===== */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(46, 47, 42, 0.42);
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    border-bottom: 1px solid rgba(238, 231, 215, 0.12);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 14px clamp(20px, 3vw, 56px);
+  }
+  @supports not (backdrop-filter: blur(1px)) { .topbar { background: rgba(46,47,42,0.92); } }
+  .back {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--sans); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase; font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 4px 0; border-bottom: 1px solid transparent;
+    transition: border-color .15s;
+  }
+  .back:hover { border-bottom-color: var(--ink); }
+  .back svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .brand-mid {
+    text-align: center;
+    text-decoration: none;
+  }
+  .brand-mid img {
+    height: clamp(40px, 4.2vw, 56px);
+    width: auto; margin: 0 auto;
+  }
+  .ig-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background .15s, color .15s;
+  }
+  .ig-btn:hover { background: var(--ink); color: var(--paper); }
+  .ig-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ===== product hero ===== */
+  .product {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 0;
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 900px) { .product { grid-template-columns: 1fr; } }
+
+  .gallery {
+    background: var(--paper-2);
+    position: relative;
+    border-right: 1px solid var(--rule);
+    overflow: hidden;
+    min-height: clamp(420px, 76vh, 900px);
+    display: flex; flex-direction: column;
+  }
+  @media (max-width: 900px) { .gallery { border-right: 0; border-bottom: 1px solid var(--rule); } }
+  .gallery-main {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .gallery-main img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+  .gallery-main img.is-on { opacity: 1; }
+  .gallery-tag {
+    position: absolute; top: 18px; left: 18px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase;
+    background: var(--paper); color: var(--ink);
+    padding: 6px 10px; border: 1px solid var(--rule);
+    z-index: 2;
+  }
+  .thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .thumbs button {
+    appearance: none; background: var(--paper-2);
+    border: 0; border-right: 1px solid var(--rule);
+    aspect-ratio: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: background .18s, opacity .18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .thumbs button:last-child { border-right: 0; }
+  .thumbs button img { width: 100%; height: 100%; object-fit: cover; opacity: .82; transition: opacity .18s; }
+  .thumbs button:hover img { opacity: 1; }
+  .thumbs button.is-on { background: var(--paper-3); }
+  .thumbs button.is-on img { opacity: 1; }
+  .thumbs button.is-on::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 2px; background: var(--ink);
+  }
+
+  /* ===== details ===== */
+  .details {
+    padding: clamp(40px, 5vw, 80px) clamp(28px, 4vw, 64px);
+    align-self: start;
+    position: sticky; top: 80px;
+  }
+  @media (max-width: 900px) { .details { position: static; padding: clamp(36px, 6vw, 56px) clamp(20px, 4vw, 32px); } }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .pname {
+    font-family: var(--display);
+    font-weight: 300;
+    font-size: clamp(46px, 6vw, 88px);
+    line-height: .95;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .pname em { font-style: italic; color: var(--moss); font-weight: 300; }
+  .psub {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(19px, 1.5vw, 24px);
+    color: var(--ink-2);
+    margin: 18px 0 0;
+    text-wrap: pretty;
+    max-width: 32ch;
+    line-height: 1.4;
+  }
+  .price-row {
+    display: flex; align-items: baseline; gap: 14px;
+    margin: clamp(28px, 3vw, 40px) 0 0;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+  }
+  .price-row .p {
+    font-family: var(--display); font-weight: 500; font-size: clamp(28px, 3vw, 38px);
+  }
+  .price-row .cur { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; color: var(--muted); text-transform: uppercase; }
+
+  .swatch-row {
+    margin-top: 26px;
+    display: grid; gap: 12px;
+  }
+  .swatch-row .label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; justify-content: space-between;
+  }
+  .swatches { display: flex; gap: 10px; }
+  .sw {
+    appearance: none; cursor: pointer;
+    width: 56px; height: 56px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    padding: 0;
+    position: relative;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .sw:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.3); }
+  .sw.bone { background: var(--bone); }
+  .sw.sage { background: var(--sage); }
+  .sw.is-on {
+    box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
+  }
+
+  .actions {
+    margin-top: 30px;
+    display: grid; gap: 10px;
+  }
+  .btn {
+    appearance: none; cursor: pointer;
+    background: var(--ink); color: var(--paper);
+    border: 0; padding: 18px 22px;
+    font-family: var(--sans); font-size: 12px;
+    letter-spacing: .22em; text-transform: uppercase; font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    transition: background .18s;
+  }
+  .btn:hover { background: var(--moss); color: var(--moss-2); }
+  .btn.ghost {
+    background: transparent; color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .btn.ghost:hover { background: var(--ink); color: var(--paper); }
+
+  .stockline {
+    margin-top: 14px; font-family: var(--mono); font-size: 11px;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .stockline .dot {
+    width: 7px; height: 7px; border-radius: 999px;
+    background: #8FB57A;
+    box-shadow: 0 0 0 4px rgba(143,181,122,.18);
+  }
+
+  /* ===== quiet info table ===== */
+  .specs {
+    margin-top: clamp(32px, 4vw, 48px);
+    border-top: 1px solid var(--rule);
+  }
+  .specs details {
+    border-bottom: 1px solid var(--rule);
+  }
+  .specs summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 18px 0;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: .22em; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .specs summary::-webkit-details-marker { display: none; }
+  .specs summary::after {
+    content: "+";
+    font-family: var(--display); font-size: 22px; line-height: 1;
+    color: var(--muted);
+    transition: transform .2s ease;
+  }
+  .specs details[open] summary::after { content: "−"; color: var(--ink); }
+  .specs .body {
+    padding: 0 0 22px;
+    font-family: var(--display); font-size: 17px; line-height: 1.55;
+    color: var(--ink-2);
+    text-align: justify; text-align-last: left;
+    text-wrap: pretty;
+  }
+  .specs ul { padding: 0; margin: 0 0 0 1.2em; }
+  .specs li { margin-bottom: 4px; }
+
+  /* ===== design panel ===== */
+  .design-band {
+    position: relative; z-index: 2;
+    padding: clamp(64px, 7vw, 120px) clamp(20px, 3vw, 56px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .design-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(40px, 5vw, 96px);
+  }
+  @media (max-width: 900px) { .design-grid { grid-template-columns: 1fr; } }
+  .design-art {
+    background: var(--bone);
+    border: 1px solid var(--rule);
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(36px, 4vw, 60px);
+    position: relative;
+    overflow: hidden;
+  }
+  .design-art img { max-width: 90%; max-height: 90%; height: auto; }
+  .design-art .stamp {
+    position: absolute; bottom: 14px; right: 16px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+    color: rgba(46,47,42,.55);
+    text-transform: uppercase;
+  }
+  .design-copy .num {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px;
+  }
+  .design-copy h2 {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(34px, 4vw, 58px);
+    line-height: 1.02; margin: 0;
+    text-wrap: balance;
+  }
+  .design-copy h2 em { font-style: italic; color: var(--moss); font-weight: 300; }
+  .design-copy p {
+    font-family: var(--display); font-size: clamp(19px, 1.5vw, 24px);
+    line-height: 1.45; color: var(--ink-2);
+    margin: 22px 0 0;
+    text-align: justify; text-align-last: left;
+    text-wrap: pretty;
+  }
+
+  /* ===== shirt section ===== */
+  .shirt-band {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative; z-index: 2;
+  }
+  @media (max-width: 900px) { .shirt-band { grid-template-columns: 1fr; } }
+  .shirt-img {
+    aspect-ratio: 5 / 4;
+    overflow: hidden;
+    border-right: 1px solid var(--rule);
+  }
+  @media (max-width: 900px) { .shirt-img { border-right: 0; border-bottom: 1px solid var(--rule); } }
+  .shirt-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .shirt-copy {
+    padding: clamp(50px, 6vw, 100px) clamp(28px, 4vw, 64px);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .shirt-copy .eyebrow { margin-bottom: 18px; }
+  .shirt-copy h3 {
+    font-family: var(--display); font-weight: 300;
+    font-size: clamp(34px, 4vw, 56px);
+    line-height: 1; margin: 0;
+    text-wrap: balance;
+  }
+  .shirt-copy h3 em { font-style: italic; color: var(--moss); font-weight: 300; }
+  .shirt-copy p {
+    font-family: var(--display); font-size: clamp(18px, 1.4vw, 23px);
+    line-height: 1.45; margin: 22px 0 0;
+    color: var(--ink-2); text-wrap: pretty;
+    max-width: 36ch;
+  }
+  .shirt-copy a {
+    margin-top: 26px;
+    display: inline-flex; align-items: center; gap: 10px;
+    align-self: flex-start;
+    font-family: var(--sans); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 4px; font-weight: 500;
+  }
+  .shirt-copy a:hover { color: var(--moss); border-color: var(--moss); }
+  .shirt-copy a svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ===== back to shop ===== */
+  .back-band {
+    padding: clamp(56px, 6vw, 96px) clamp(20px, 3vw, 56px);
+    text-align: center;
+    border-bottom: 1px solid var(--rule);
+  }
+  .back-band a {
+    font-family: var(--display); font-style: italic; font-weight: 300;
+    font-size: clamp(28px, 3vw, 42px);
+    color: var(--ink); text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 4px;
+  }
+  .back-band a:hover { color: var(--moss); border-color: var(--moss); }
+  .back-band .label {
+    display: block; margin-bottom: 16px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ===== footer ===== */
+  footer {
+    background: var(--moss-2); color: var(--ink);
+    padding: 36px clamp(20px, 3vw, 56px);
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    position: relative; z-index: 2;
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 30px);
+    background: var(--ink); color: var(--paper);
+    padding: 14px 24px;
+    font-family: var(--sans); font-size: 12px;
+    letter-spacing: .22em; text-transform: uppercase; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    z-index: 200;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="../" class="back">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
+    Back to the shop
+  </a>
+  <a class="brand-mid" href="../" aria-label="Axe & Reel home">
+    <img src="../assets/logo.png" alt="Axe & Reel - Saltspring Island B.C." />
+  </a>
+  <a class="ig-btn" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener" aria-label="Instagram">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+  </a>
+</header>
+
+<!-- ============ PRODUCT ============ -->
+<section class="product">
+  <div class="gallery">
+    <div class="gallery-main" id="gallery-main">
+      <span class="gallery-tag" id="gallery-tag">Bone / Front</span>
+      <img class="is-on" id="img-1" src="assets/hat-bone-front.jpg" alt="Cutter hat in Bone, front view" />
+      <img id="img-2" src="assets/hat-bone-angle.jpg" alt="Cutter hat in Bone, three-quarter view" />
+      <img id="img-3" src="assets/hat-sage-front.jpg" alt="Cutter hat in Sage, front view" />
+      <img id="img-4" src="assets/hat-sage-angle.jpg" alt="Cutter hat in Sage, three-quarter view" />
+    </div>
+    <div class="thumbs" id="thumbs">
+      <button class="is-on" data-img="img-1" aria-label="Bone, front">
+        <img src="assets/hat-bone-front.jpg" alt="" />
+      </button>
+      <button data-img="img-2" aria-label="Bone, angle">
+        <img src="assets/hat-bone-angle.jpg" alt="" />
+      </button>
+      <button data-img="img-3" aria-label="Sage, front">
+        <img src="assets/hat-sage-front.jpg" alt="" />
+      </button>
+      <button data-img="img-4" aria-label="Sage, angle">
+        <img src="assets/hat-sage-angle.jpg" alt="" />
+      </button>
+    </div>
+  </div>
+
+  <div class="details">
+    <div class="eyebrow">[ Embroidered, two colorways ]</div>
+    <h1 class="pname">The <em>Cutter.</em></h1>
+    <p class="psub">A west-coast cutthroat, hand-drawn on the island and stitched in Vancouver. Worn loose, brim slightly bent.</p>
+
+    <div class="price-row">
+      <div class="p">$48</div>
+      <span class="cur">CAD · Shipped flat</span>
+    </div>
+
+    <div class="swatch-row">
+      <div class="label">
+        <span>Colorway</span>
+        <span id="color-name">Bone</span>
+      </div>
+      <div class="swatches" role="radiogroup" aria-label="Colorway">
+        <button class="sw bone is-on" data-color="bone" data-front="img-1" data-angle="img-2" aria-label="Bone" title="Bone"></button>
+        <button class="sw sage" data-color="sage" data-front="img-3" data-angle="img-4" aria-label="Sage" title="Sage"></button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="add-btn">Add to bag</button>
+      <a class="btn ghost" href="mailto:info@axeandreel.com?subject=The%20Cutter%20-%20enquiry">Email the shop</a>
+    </div>
+
+    <div class="stockline"><span class="dot"></span> In the shop now · Pickup or local delivery</div>
+
+    <div class="specs">
+      <details open>
+        <summary>The design</summary>
+        <div class="body">
+          A coastal cutthroat trout, drawn from life on a creek behind the shop. Cutthroats are the island fish you do not get on the first cast. The wordmark sits underneath in the house serif, slightly arched, embroidered in matching thread.
+        </div>
+      </details>
+      <details>
+        <summary>The hat</summary>
+        <div class="body">
+          <ul>
+            <li>100% softwashed chino twill, low-profile, unstructured crown</li>
+            <li>Self-fabric strap, antiqued brass slide</li>
+            <li>One size, adjustable, fits 56 to 60 cm</li>
+            <li>Bone is a warm putty cream. Sage is a faded coastal green.</li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Made &amp; shipped</summary>
+        <div class="body">
+          Embroidered in small runs in Vancouver. Designed on Salt Spring. We ship flat in a recycled mailer, normally same week. Island pickup is free at the shop.
+        </div>
+      </details>
+      <details>
+        <summary>Care</summary>
+        <div class="body">
+          Wear it. When it needs it, spot clean with a cloth. Cold hand wash, air dry on a beer can to hold the brim. Never the dryer.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DESIGN ============ -->
+<section class="design-band">
+  <div class="design-grid">
+    <div class="design-art">
+      <img src="assets/design-color.png" alt="The Cutter design - a cutthroat trout illustration with arched Axe & Reel wordmark" />
+      <span class="stamp">Plate 01 / Art print on file</span>
+    </div>
+    <div class="design-copy">
+      <div class="num">[ The Mark ]</div>
+      <h2>One <em>fish,</em> drawn properly.</h2>
+      <p>The cutthroat is a careful animal. We wanted a mark that earned its place on the front of a hat without trying to. The drawing is by hand, in two greens and a sand belly, with a faint red slash at the gill that you only see up close. We did not stylise it. The fish does that on its own.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHIRT ============ -->
+<section class="shirt-band">
+  <div class="shirt-img">
+    <img src="assets/shirt-cu.jpg" alt="Cutter design embroidered in dark green on a sand-coloured chore shirt" />
+  </div>
+  <div class="shirt-copy">
+    <div class="eyebrow">[ The chore shirt ]</div>
+    <h3>Same fish, different <em>cloth.</em></h3>
+    <p>The Cutter goes on a softwashed sand chore shirt as well. Heavy 9oz cotton, button-front, single chest patch. Same embroidered fish, slightly larger, in dark green over the heart.</p>
+    <a href="mailto:info@axeandreel.com?subject=The%20Cutter%20chore%20shirt%20-%20enquiry">
+      Ask about the shirt
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ============ BACK ============ -->
+<section class="back-band">
+  <span class="label">[ More from Axe &amp; Reel ]</span>
+  <a href="../#goods">Back to the shop</a>
+</section>
+
+<footer>
+  <span>© 2026 Axe &amp; Reel</span>
+  <span>The Cutter · Salt Spring</span>
+</footer>
+
+<div class="toast" id="toast">Added to bag</div>
+
+<script>
+(function () {
+  const mainImgs = document.querySelectorAll('.gallery-main img');
+  const thumbs = document.querySelectorAll('.thumbs button');
+  const tag = document.getElementById('gallery-tag');
+  const colorName = document.getElementById('color-name');
+  const sws = document.querySelectorAll('.sw');
+
+  const labelMap = {
+    'img-1': 'Bone / Front',
+    'img-2': 'Bone / Angle',
+    'img-3': 'Sage / Front',
+    'img-4': 'Sage / Angle'
+  };
+  const colorOf = { 'img-1': 'Bone', 'img-2': 'Bone', 'img-3': 'Sage', 'img-4': 'Sage' };
+
+  function showImg(id) {
+    mainImgs.forEach(im => im.classList.toggle('is-on', im.id === id));
+    thumbs.forEach(t => t.classList.toggle('is-on', t.dataset.img === id));
+    if (tag) tag.textContent = labelMap[id] || '';
+    const c = colorOf[id];
+    if (c) {
+      if (colorName) colorName.textContent = c;
+      sws.forEach(s => s.classList.toggle('is-on', s.dataset.color === c.toLowerCase()));
+    }
+  }
+
+  thumbs.forEach(t => t.addEventListener('click', () => showImg(t.dataset.img)));
+  sws.forEach(s => s.addEventListener('click', () => showImg(s.dataset.front)));
+
+  // Add to bag (mock)
+  const addBtn = document.getElementById('add-btn');
+  const toast = document.getElementById('toast');
+  let toastT;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+  addBtn && addBtn.addEventListener('click', () => {
+    const c = colorName ? colorName.textContent : '';
+    showToast('Added: The Cutter · ' + c);
+  });
+})();
+</script>
+</body>
+</html>

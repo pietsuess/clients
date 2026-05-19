@@ -403,6 +403,78 @@
     display: flex; justify-content: space-between;
   }
 
+  /* ======================== FEATURED ======================== */
+  .featured {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative; z-index: 2;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  @media (max-width: 900px) { .featured { grid-template-columns: 1fr; } }
+  .featured .fimg {
+    aspect-ratio: 5 / 4;
+    background: var(--paper-2);
+    border-right: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  @media (max-width: 900px) {
+    .featured .fimg { border-right: 0; border-bottom: 1px solid var(--rule); aspect-ratio: 5 / 3; }
+  }
+  .featured .fimg img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .5s ease; }
+  .featured:hover .fimg img { transform: scale(1.03); }
+  .featured .fcopy {
+    padding: clamp(48px, 6vw, 96px) clamp(28px, 4vw, 64px);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .featured .fcopy .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 18px;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .featured .fcopy .eyebrow::before {
+    content: ""; width: 8px; height: 8px;
+    background: var(--moss); border-radius: 999px;
+    box-shadow: 0 0 0 4px rgba(201,169,100,.18);
+  }
+  .featured .fcopy h3 {
+    font-family: var(--display); font-weight: 300;
+    font-size: clamp(40px, 5vw, 76px);
+    line-height: .98; margin: 0;
+    text-wrap: balance;
+  }
+  .featured .fcopy h3 em { font-style: italic; color: var(--moss); font-weight: 300; }
+  .featured .fcopy p {
+    font-family: var(--display); font-size: clamp(19px, 1.5vw, 24px);
+    line-height: 1.45; margin: 22px 0 0;
+    color: var(--ink-2); text-wrap: pretty;
+    max-width: 38ch;
+  }
+  .featured .fcopy .fcta {
+    margin-top: clamp(28px, 3vw, 40px);
+    display: inline-flex; align-items: center; gap: 10px;
+    align-self: flex-start;
+    border: 1px solid var(--moss);
+    background: var(--moss);
+    color: var(--moss-2);
+    padding: 14px 22px;
+    font-family: var(--sans); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase; font-weight: 600;
+    text-decoration: none;
+    transition: background .18s, color .18s;
+  }
+  .featured .fcopy .fcta:hover { background: var(--moss-2); color: var(--ink); border-color: var(--moss-2); }
+  .featured .fcopy .fcta svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .featured .fcopy .fmeta {
+    margin-top: 22px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
   /* ======================== GOODS (masonry) ======================== */
   .goods-grid {
     columns: 4;
@@ -1121,6 +1193,23 @@
     </div>
   </div>
 </section>
+
+<!-- ==================== FEATURED (Cutter Hat) ==================== -->
+<a class="featured" href="cutter-hat/" aria-label="The Cutter - featured product">
+  <div class="fimg">
+    <img src="cutter-hat/assets/hat-bone-front.jpg" alt="The Cutter hat in Bone, embroidered cutthroat trout with Axe & Reel wordmark" loading="lazy" />
+  </div>
+  <div class="fcopy">
+    <div class="eyebrow">Featured · Just dropped</div>
+    <h3>The <em>Cutter.</em></h3>
+    <p>A west-coast cutthroat, hand-drawn on the island and stitched in Vancouver. Softwashed dad cap in two colorways - Bone and Sage. Also on the chore shirt.</p>
+    <span class="fcta">
+      See the hat
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </span>
+    <div class="fmeta">$48 CAD · In the shop now</div>
+  </div>
+</a>
 
 <!-- ==================== GOODS ==================== -->
 <section class="section" id="goods">
