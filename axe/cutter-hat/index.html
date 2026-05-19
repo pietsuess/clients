@@ -113,34 +113,58 @@
     position: relative;
     border-right: 1px solid var(--rule);
     overflow: hidden;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 1px;
+    display: flex; flex-direction: column;
   }
   @media (max-width: 900px) { .gallery { border-right: 0; border-bottom: 1px solid var(--rule); } }
-  .gallery .cell {
+  .gallery-main {
+    flex: 1;
     position: relative;
-    background: var(--paper-2);
     overflow: hidden;
-    cursor: zoom-in;
   }
-  .gallery .cell img {
+  .gallery-main img {
+    position: absolute; inset: 0;
     width: 100%; height: 100%;
-    padding: clamp(14px, 2.4vw, 32px);
+    padding: clamp(20px, 4vw, 56px);
     box-sizing: border-box;
     object-fit: contain; object-position: center;
-    transition: padding .25s ease, background .25s ease;
+    opacity: 0;
+    transition: opacity .35s ease;
+    cursor: zoom-in;
   }
-  .gallery .cell:hover img { background: var(--paper-3); padding: clamp(10px, 2vw, 24px); }
-  .gallery .cell-tag {
-    position: absolute; top: 12px; left: 12px;
-    font-family: var(--mono); font-size: 10px;
+  .gallery-main img.is-on { opacity: 1; }
+  .gallery-tag {
+    position: absolute; top: 16px; left: 16px;
+    font-family: var(--mono); font-size: 11px;
     letter-spacing: .22em; text-transform: uppercase;
-    color: var(--muted);
-    background: rgba(216, 213, 203, 0.85);
-    padding: 4px 8px;
+    background: var(--paper); color: var(--ink);
+    padding: 6px 10px; border: 1px solid var(--rule);
     z-index: 2;
+  }
+  .thumbs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .thumbs button {
+    appearance: none; background: var(--paper-2);
+    border: 0; border-right: 1px solid var(--rule);
+    aspect-ratio: 1;
+    max-height: 120px;
+    cursor: pointer;
+    padding: 0;
+    transition: background .18s, opacity .18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .thumbs button:last-child { border-right: 0; }
+  .thumbs button img { width: 100%; height: 100%; object-fit: cover; opacity: .82; transition: opacity .18s; }
+  .thumbs button:hover img { opacity: 1; }
+  .thumbs button.is-on { background: var(--paper-3); }
+  .thumbs button.is-on img { opacity: 1; }
+  .thumbs button.is-on::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 2px; background: var(--ink);
   }
 
   /* ===== details ===== */
@@ -538,22 +562,27 @@
 <!-- ============ PRODUCT ============ -->
 <section class="product">
   <div class="gallery">
-    <figure class="cell">
-      <span class="cell-tag">Sage · 3/4</span>
-      <img src="assets/hat-sage-angle.jpg" alt="Cutter hat in Sage, three-quarter view" />
-    </figure>
-    <figure class="cell">
-      <span class="cell-tag">Sage · Flat</span>
-      <img src="assets/hat-sage-front.jpg" alt="Cutter hat in Sage, front view" />
-    </figure>
-    <figure class="cell">
-      <span class="cell-tag">Beige · 3/4</span>
-      <img src="assets/hat-bone-angle.jpg" alt="Cutter hat in Beige, three-quarter view" />
-    </figure>
-    <figure class="cell">
-      <span class="cell-tag">Beige · Flat</span>
-      <img src="assets/hat-bone-front.jpg" alt="Cutter hat in Beige, front view" />
-    </figure>
+    <div class="gallery-main" id="gallery-main">
+      <span class="gallery-tag" id="gallery-tag">Sage / Three-quarter</span>
+      <img id="img-1" src="assets/hat-bone-front.jpg" alt="Cutter hat in Beige, front view" />
+      <img id="img-2" src="assets/hat-bone-angle.jpg" alt="Cutter hat in Beige, three-quarter view" />
+      <img id="img-3" src="assets/hat-sage-front.jpg" alt="Cutter hat in Sage, front view" />
+      <img class="is-on" id="img-4" src="assets/hat-sage-angle.jpg" alt="Cutter hat in Sage, three-quarter view" />
+    </div>
+    <div class="thumbs" id="thumbs">
+      <button class="is-on" data-img="img-4" aria-label="Sage, three-quarter">
+        <img src="assets/hat-sage-angle.jpg" alt="" />
+      </button>
+      <button data-img="img-3" aria-label="Sage, flat">
+        <img src="assets/hat-sage-front.jpg" alt="" />
+      </button>
+      <button data-img="img-2" aria-label="Beige, three-quarter">
+        <img src="assets/hat-bone-angle.jpg" alt="" />
+      </button>
+      <button data-img="img-1" aria-label="Beige, flat">
+        <img src="assets/hat-bone-front.jpg" alt="" />
+      </button>
+    </div>
   </div>
 
   <div class="details">
@@ -568,12 +597,12 @@
 
     <div class="swatch-row">
       <div class="label">
-        <span>Colorways</span>
-        <span>Sage &middot; Beige</span>
+        <span>Colorway</span>
+        <span id="color-name">Sage</span>
       </div>
-      <div class="swatches" aria-label="Colorways">
-        <span class="sw sage" title="Sage"></span>
-        <span class="sw beige" title="Beige"></span>
+      <div class="swatches" role="radiogroup" aria-label="Colorway">
+        <button class="sw sage is-on" data-color="sage" data-front="img-3" data-angle="img-4" aria-label="Sage" title="Sage"></button>
+        <button class="sw beige" data-color="beige" data-front="img-1" data-angle="img-2" aria-label="Beige" title="Beige"></button>
       </div>
     </div>
 
@@ -673,6 +702,34 @@
 
 <script>
 (function () {
+  const mainImgs = document.querySelectorAll('.gallery-main img');
+  const thumbs = document.querySelectorAll('.thumbs button');
+  const tag = document.getElementById('gallery-tag');
+  const colorName = document.getElementById('color-name');
+  const sws = document.querySelectorAll('.sw');
+
+  const labelMap = {
+    'img-1': 'Beige / Flat',
+    'img-2': 'Beige / Three-quarter',
+    'img-3': 'Sage / Flat',
+    'img-4': 'Sage / Three-quarter'
+  };
+  const colorOf = { 'img-1': 'Beige', 'img-2': 'Beige', 'img-3': 'Sage', 'img-4': 'Sage' };
+
+  function showImg(id) {
+    mainImgs.forEach(im => im.classList.toggle('is-on', im.id === id));
+    thumbs.forEach(t => t.classList.toggle('is-on', t.dataset.img === id));
+    if (tag) tag.textContent = labelMap[id] || '';
+    const c = colorOf[id];
+    if (c) {
+      if (colorName) colorName.textContent = c;
+      sws.forEach(s => s.classList.toggle('is-on', s.dataset.color === c.toLowerCase()));
+    }
+  }
+
+  thumbs.forEach(t => t.addEventListener('click', () => showImg(t.dataset.img)));
+  sws.forEach(s => s.addEventListener('click', () => showImg(s.dataset.angle)));
+
   // Add to bag (mock)
   const addBtn = document.getElementById('add-btn');
   const toast = document.getElementById('toast');
@@ -684,7 +741,8 @@
     toastT = setTimeout(() => toast.classList.remove('show'), 1800);
   }
   addBtn && addBtn.addEventListener('click', () => {
-    showToast('Added: The Cutter');
+    const c = colorName ? colorName.textContent : '';
+    showToast('Added: The Cutter · ' + c);
   });
 })();
 
@@ -721,7 +779,6 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && box.classList.contains('open')) closeLb(); });
 
   const selectors = [
-    '.gallery .cell img',
     '.design-art img',
     '.garments-grid figure img'
   ];
@@ -729,15 +786,24 @@
     img.classList.add('can-zoom');
     img.addEventListener('click', e => {
       e.stopPropagation();
-      const fig = img.closest('.cell, figure');
+      const fig = img.closest('figure');
       let cap = '';
       if (fig) {
-        const fc = fig.querySelector('figcaption, .cell-tag');
+        const fc = fig.querySelector('figcaption');
         if (fc) cap = fc.textContent.replace(/\s+/g, ' ').trim();
       }
       openLb(img.currentSrc || img.src, img.alt, cap);
     });
   });
+
+  // Gallery hero: click the visible main image to open lightbox
+  const galleryMain = document.querySelector('.gallery-main');
+  if (galleryMain) {
+    galleryMain.addEventListener('click', e => {
+      const visible = galleryMain.querySelector('img.is-on');
+      if (visible) openLb(visible.currentSrc || visible.src, visible.alt, '');
+    });
+  }
 })();
 </script>
 </body>
