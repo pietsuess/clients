@@ -316,22 +316,23 @@
   .model-band {
     position: relative; z-index: 2;
     width: 100%;
-    aspect-ratio: 21 / 9;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     border-bottom: 1px solid var(--rule);
     background: var(--paper-2);
+    display: flex; align-items: center; justify-content: center;
   }
   @media (max-width: 900px) { .model-band { aspect-ratio: 4 / 5; } }
   .model-band img {
-    width: 100%; height: 100%;
-    object-fit: cover; object-position: center 22%;
+    max-width: 100%; max-height: 100%;
+    width: auto; height: 100%;
+    object-fit: contain;
     cursor: zoom-in;
   }
   .model-band .credit {
     position: absolute; right: 18px; bottom: 14px;
     font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
-    color: rgba(238,231,215,0.78);
-    text-shadow: 0 1px 6px rgba(0,0,0,.45);
+    color: var(--muted);
   }
 
   /* ===== design panel ===== */
