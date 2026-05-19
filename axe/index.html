@@ -1,0 +1,1517 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Axe &amp; Reel - Salt Spring Island</title>
+<meta name="description" content="Camping, fishing, workwear, and the curious gear of a life lived outside. A consignment shop on Salt Spring Island, BC." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper:    #2A2E25;
+    --paper-2:  #22261E;
+    --paper-3:  #353A30;
+    --ink:      #EEE7D7;
+    --ink-2:    #DDD5C0;
+    --muted:    #968F7C;
+    --rule:     #4E5246;
+    --moss:     #C9A964;
+    --moss-2:   #16180F;
+    --rust:     #C77B3F;
+    --display:  "Cormorant Garamond", "Cormorant", Garamond, "Hoefler Text", Georgia, serif;
+    --sans:     "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono:     "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body {
+    font-family: var(--sans);
+    font-size: clamp(15px, 1.02vw, 17px);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--moss); color: var(--paper); }
+  a { color: inherit; }
+  img, svg { display: block; max-width: 100%; }
+
+  /* paper grain - very subtle */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(rgba(26,24,18,.025) 1px, transparent 1px);
+    background-size: 4px 4px;
+    mix-blend-mode: multiply;
+    z-index: 1;
+  }
+
+  /* ======================== TOPBAR ======================== */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 24px;
+    padding: 16px clamp(20px, 3vw, 56px);
+  }
+  .nav {
+    display: flex; gap: 32px; align-items: center;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .nav a { text-decoration: none; padding: 4px 0; border-bottom: 1px solid transparent; }
+  .nav a:hover { border-bottom-color: var(--ink); }
+  .brand-lockup {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 0;
+  }
+  .brand-lockup img {
+    height: clamp(48px, 4.8vw, 64px);
+    width: auto;
+    display: block;
+  }
+  .top-right { display: flex; justify-content: flex-end; align-items: center; gap: 14px; }
+  .ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    border: 1px solid var(--ink);
+    padding: 9px 16px;
+    font-family: var(--sans); font-size: 11px;
+    letter-spacing: .2em; text-transform: uppercase; font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .18s, color .18s;
+  }
+  .ghost:hover { background: var(--ink); color: var(--paper); }
+  .ghost.moss { border-color: var(--moss); color: var(--paper); background: var(--moss); }
+  .ghost.moss:hover { background: var(--moss-2); color: var(--ink); border-color: var(--moss-2); }
+  .icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .cart-count {
+    font-family: var(--mono); font-size: 11px;
+    padding: 0 6px;
+    border-left: 1px solid currentColor;
+    margin-left: 4px;
+    opacity: .9;
+  }
+
+  /* ======================== LEAD PHOTO ======================== */
+  .lead-photo {
+    position: relative;
+    width: 100%;
+    height: clamp(360px, 68vh, 720px);
+    overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-2);
+    z-index: 2;
+  }
+  .lead-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    display: block;
+  }
+  .lead-photo .px {
+    transform: scale(1.18);
+    will-change: transform;
+  }
+  .scenes img {
+    will-change: transform;
+  }
+  .lead-photo .credit {
+    position: absolute; bottom: 14px; right: 18px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    color: rgba(255,255,255,.78);
+    text-shadow: 0 1px 6px rgba(0,0,0,.4);
+  }
+  .lead-photo .logo-over {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(280px, 38vw, 620px);
+    height: auto;
+    filter: drop-shadow(0 4px 18px rgba(0,0,0,.18));
+    pointer-events: none;
+  }
+
+  /* ======================== HERO ======================== */
+  .hero {
+    position: relative;
+    padding: clamp(80px, 12vw, 160px) clamp(20px, 3vw, 56px) clamp(60px, 9vw, 130px);
+    border-bottom: 1px solid var(--rule);
+    z-index: 2;
+    text-align: center;
+  }
+  .hero .eyebrow {
+    font-family: var(--display); font-style: italic; font-weight: 300;
+    font-size: clamp(14px, 1.1vw, 17px);
+    letter-spacing: .12em;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .hero-logo {
+    display: block;
+    margin: 0 auto clamp(40px, 5vw, 64px);
+    width: clamp(280px, 36vw, 540px);
+    height: auto;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-weight: 300;
+    font-size: clamp(40px, 5.6vw, 92px);
+    line-height: 1.05;
+    letter-spacing: -.005em;
+    margin: 0 auto;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+  .hero h1 em { font-style: italic; font-weight: 300; color: var(--moss); }
+  .hero .attrib {
+    font-family: var(--display); font-style: italic; font-weight: 300;
+    font-size: clamp(13px, 1vw, 16px);
+    letter-spacing: .14em;
+    color: var(--muted);
+    margin-top: 28px;
+  }
+  .hero .rule {
+    width: 60px; height: 1px; background: var(--ink); margin: 36px auto;
+  }
+  .hero-cta { display: inline-flex; gap: 14px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+  .hero-meta {
+    margin-top: clamp(48px, 6vw, 80px);
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .hero-meta div {
+    padding: 22px 18px;
+    border-right: 1px solid var(--rule);
+    text-align: left;
+  }
+  .hero-meta div:last-child { border-right: 0; }
+  .hero-meta .k {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+  .hero-meta .v {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(18px, 1.4vw, 22px);
+    line-height: 1.25;
+  }
+
+  /* tiny corner stamps in the hero whitespace */
+  .stamp {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stamp.tl { top: 22px; left: clamp(20px, 3vw, 56px); }
+  .stamp.tr { top: 22px; right: clamp(20px, 3vw, 56px); }
+  .stamp.bl { bottom: 22px; left: clamp(20px, 3vw, 56px); }
+  .stamp.br { bottom: 22px; right: clamp(20px, 3vw, 56px); }
+
+  /* ======================== SECTION ======================== */
+  .section {
+    padding: clamp(64px, 8vw, 130px) clamp(20px, 3vw, 56px);
+    border-bottom: 1px solid var(--rule);
+    position: relative; z-index: 2;
+  }
+  .section.dark { background: var(--moss-2); color: var(--ink); }
+  .section.dark .sec-num,
+  .section.dark .sec-aside { color: rgba(238,231,215,.55); }
+  .section.dark .rule-thin { background: rgba(238,231,215,.25); }
+
+  .sec-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: end;
+    gap: 24px;
+    margin-bottom: clamp(36px, 4vw, 64px);
+    padding-bottom: 18px;
+    border-bottom: 1px solid currentColor;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .26em;
+    text-transform: uppercase;
+  }
+  .sec-title {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(34px, 4.4vw, 64px);
+    line-height: 1.02;
+    letter-spacing: -.005em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .sec-title em { font-style: italic; color: var(--moss); font-weight: 300; }
+  .section.dark .sec-title em { color: var(--moss); }
+  .sec-aside {
+    font-family: var(--display); font-style: italic; font-weight: 300;
+    font-size: 14px;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* ======================== STORY ======================== */
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: clamp(40px, 5vw, 100px);
+    align-items: start;
+  }
+  .story-side {
+    position: sticky; top: 100px;
+    font-family: var(--display); font-style: italic; font-weight: 300;
+    font-size: clamp(18px, 1.4vw, 22px);
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .story-side .label {
+    font-family: var(--mono); font-style: normal; font-size: 11px;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px; display: block;
+  }
+  .story-body p {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(22px, 1.9vw, 30px);
+    line-height: 1.4;
+    margin: 0 0 1em;
+    text-align: justify;
+    text-align-last: left;
+    text-wrap: pretty;
+    color: var(--ink-2);
+  }
+  .story-body p:first-child::first-letter {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 4.6em;
+    line-height: .82;
+    float: left;
+    padding: 8px 14px 0 0;
+    color: var(--moss);
+  }
+  .story-side-images { display: grid; gap: 16px; margin-top: 30px; }
+  .story-side-images figure {
+    margin: 0;
+    border: 1px solid var(--rule);
+    background: var(--paper-2);
+    overflow: hidden;
+  }
+  .story-side-images img {
+    display: block; width: 100%; height: auto;
+    aspect-ratio: 3 / 4;
+    object-fit: cover; object-position: center top;
+  }
+  .story-side-images figcaption {
+    font-family: var(--mono);
+    font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-top: 1px solid var(--rule);
+    display: flex; justify-content: space-between;
+  }
+
+  /* ======================== SCENES (gallery band) ======================== */
+  .scenes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-bottom: 1px solid var(--rule);
+    z-index: 2; position: relative;
+  }
+  @media (max-width: 900px) { .scenes { grid-template-columns: repeat(2, 1fr); } }
+  .scenes figure {
+    margin: 0;
+    position: relative;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-right: 1px solid var(--rule);
+    background: var(--paper-2);
+  }
+  .scenes figure:last-child { border-right: 0; }
+  @media (max-width: 900px) {
+    .scenes figure:nth-child(2n) { border-right: 0; }
+    .scenes figure:nth-child(odd) { border-right: 1px solid var(--rule); }
+    .scenes figure:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
+  }
+  .scenes img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    display: block;
+    filter: saturate(.9);
+    transition: filter .3s ease, transform .35s ease;
+  }
+  .scenes figure:hover img { filter: saturate(1); transform: scale(1.02); }
+  .scenes figcaption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.65));
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+
+  /* ======================== SHOP ======================== */
+  .filters {
+    display: flex; gap: 0; flex-wrap: wrap;
+    margin-bottom: 36px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .chip {
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    padding: 14px 22px;
+    font-family: var(--sans); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ink-2);
+    transition: background .15s, color .15s;
+  }
+  .chip:last-child { border-right: 0; }
+  .chip.is-on { background: var(--ink); color: var(--paper); }
+  .chip:hover:not(.is-on) { background: var(--paper-2); }
+
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 1100px) { .shop-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 720px)  { .shop-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .card {
+    position: relative;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    transition: background .18s;
+  }
+  .card:hover { background: var(--paper-3); }
+  .card-photo {
+    aspect-ratio: 4 / 5;
+    background: var(--paper-3);
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .card-photo svg.illus {
+    width: 62%; height: 62%;
+    color: var(--ink);
+  }
+  .card:hover .card-photo svg.illus {
+    color: var(--moss);
+  }
+  .badge {
+    position: absolute; top: 12px; left: 12px;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid var(--ink);
+  }
+  .badge.sold {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .badge.new {
+    color: var(--moss); border-color: var(--moss);
+  }
+  .card-body { padding: 18px 18px 20px; display: grid; gap: 2px; }
+  .card-meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted);
+  }
+  .card-title {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(18px, 1.4vw, 22px);
+    line-height: 1.2;
+    margin-top: 4px;
+    text-wrap: balance;
+  }
+  .card-foot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-top: 14px;
+  }
+  .price {
+    font-family: var(--display);
+    font-size: clamp(16px, 1.2vw, 19px);
+    font-weight: 500;
+  }
+  .price s { color: var(--muted); font-weight: 400; margin-right: 8px; }
+  .add-btn {
+    appearance: none; border: 0; background: transparent;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    cursor: pointer;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 2px 0;
+    font-weight: 500;
+  }
+  .add-btn:hover { color: var(--moss); border-color: var(--moss); }
+  .add-btn[disabled] { color: var(--muted); border-color: var(--muted); cursor: not-allowed; }
+
+  /* ======================== FEED ======================== */
+  .feed-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(20px, 2vw, 36px);
+  }
+  @media (max-width: 900px) { .feed-grid { grid-template-columns: 1fr; } }
+  .post {
+    background: transparent;
+    border: 1px solid rgba(245,240,226,.25);
+    padding: 26px;
+    position: relative;
+    transition: background .18s, border-color .18s;
+    color: var(--paper-3);
+    text-decoration: none;
+  }
+  .post:hover { background: rgba(245,240,226,.05); border-color: rgba(245,240,226,.5); }
+  .post .date {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: rgba(245,240,226,.55);
+    margin-bottom: 18px;
+  }
+  .post .quote {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(20px, 1.7vw, 26px);
+    line-height: 1.35;
+    text-wrap: pretty;
+    margin: 0 0 30px;
+  }
+  .post .meta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    color: rgba(245,240,226,.55);
+    display: flex; justify-content: space-between;
+    border-top: 1px solid rgba(245,240,226,.15);
+    padding-top: 14px;
+  }
+  .ig-link {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--sans); font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--paper-3);
+    text-decoration: none;
+    margin-top: 32px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid currentColor;
+    font-weight: 500;
+  }
+  .ig-link:hover { color: var(--paper); }
+
+  /* ======================== CONSIGN ======================== */
+  .con-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 900px) { .con-grid { grid-template-columns: 1fr; } }
+  .con-step {
+    padding: 36px 32px 40px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .con-step .num {
+    font-family: var(--display); font-style: italic; font-weight: 300;
+    font-size: clamp(60px, 6vw, 96px); line-height: 1;
+    color: var(--moss);
+    margin-bottom: 12px;
+  }
+  .con-step h3 {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(22px, 1.8vw, 28px);
+    margin: 0 0 14px;
+    line-height: 1.2;
+  }
+  .con-step p {
+    margin: 0;
+    color: var(--ink-2);
+    text-align: justify; text-align-last: left;
+    text-wrap: pretty;
+  }
+  .con-cta { margin-top: clamp(40px, 4vw, 56px); display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .con-cta .phone {
+    font-family: var(--display); font-weight: 400; font-size: 22px;
+    text-decoration: none; color: inherit;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 2px;
+  }
+  .con-cta .phone:hover { color: var(--moss); border-color: var(--moss); }
+
+  /* ======================== VISIT ======================== */
+  .visit-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(36px, 4vw, 80px);
+    align-items: start;
+  }
+  .visit-info { font-family: var(--display); }
+  .visit-info dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: clamp(24px, 3vw, 56px);
+    row-gap: 4px;
+  }
+  .visit-info dt {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    margin-top: 16px;
+  }
+  .visit-info dt:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+  .visit-info dd {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(20px, 1.6vw, 26px);
+    line-height: 1.3;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    margin-top: 16px;
+  }
+  .visit-info dd:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+  .visit-info a { text-decoration: none; border-bottom: 1px solid currentColor; }
+  .hours-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4px 24px;
+    font-family: var(--display); font-size: 18px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .hours-grid .d { color: var(--muted); font-style: italic; font-weight: 300; }
+
+  .map-card {
+    aspect-ratio: 5 / 4;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    position: relative;
+    overflow: hidden;
+  }
+  .map-card iframe { width: 100%; height: 100%; border: 0; display: block; filter: saturate(.85) contrast(.95); }
+  .map-pin {
+    position: absolute;
+    left: 51%; top: 49%;
+    transform: translate(-50%, -100%);
+    text-align: center;
+    pointer-events: none;
+  }
+  .map-pin .dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--moss);
+    border: 2px solid var(--paper);
+    margin: 0 auto 6px;
+    box-shadow: 0 0 0 6px rgba(56,71,58,.18);
+  }
+  .map-pin .lbl {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    font-family: var(--display); font-style: italic;
+    padding: 3px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .map-stamp {
+    position: absolute; bottom: 14px; right: 14px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .compass {
+    position: absolute; top: 14px; right: 14px;
+    width: 42px; height: 42px;
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display); font-style: italic;
+    font-size: 13px;
+    background: var(--paper);
+  }
+
+  /* ======================== NEWSLETTER ======================== */
+  .news {
+    padding: clamp(60px, 7vw, 100px) clamp(20px, 3vw, 56px);
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+    background: var(--paper-3);
+    z-index: 2; position: relative;
+  }
+  .news-inner { max-width: 720px; margin: 0 auto; }
+  .news .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 18px;
+  }
+  .news h2 {
+    font-family: var(--display); font-weight: 300;
+    font-size: clamp(34px, 4vw, 56px);
+    line-height: 1.1; margin: 0;
+    text-wrap: balance;
+  }
+  .news h2 em { font-style: italic; color: var(--moss); }
+  .news p { margin: 18px auto 28px; max-width: 50ch; text-wrap: pretty; color: var(--ink-2); }
+  .news-form {
+    display: flex; gap: 0;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    max-width: 520px; margin: 0 auto;
+  }
+  .news-form input {
+    flex: 1; appearance: none; background: transparent; border: 0;
+    font-family: var(--sans); font-size: 15px;
+    padding: 16px 18px; outline: none; color: var(--ink);
+  }
+  .news-form input::placeholder { color: var(--muted); }
+  .news-form button {
+    appearance: none; border: 0;
+    background: var(--ink); color: var(--paper);
+    padding: 0 26px;
+    font-family: var(--sans); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; font-weight: 500;
+    cursor: pointer;
+  }
+  .news-form button:hover { background: var(--moss); }
+
+  /* ======================== FOOTER ======================== */
+  footer {
+    background: var(--paper);
+    color: var(--ink);
+    padding: clamp(60px, 7vw, 100px) clamp(20px, 3vw, 56px) 32px;
+    z-index: 2; position: relative;
+  }
+  .foot-lockup {
+    text-align: center;
+    padding-bottom: clamp(40px, 5vw, 64px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .foot-lockup img {
+    display: block;
+    margin: 0 auto;
+    width: clamp(320px, 56vw, 880px);
+    height: auto;
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    padding: clamp(40px, 4vw, 56px) 0 36px;
+  }
+  @media (max-width: 900px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+  .foot-grid h4 {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 16px; font-weight: 500;
+  }
+  .foot-grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-family: var(--display); font-size: 17px; font-weight: 400; }
+  .foot-grid a { text-decoration: none; border-bottom: 1px solid transparent; }
+  .foot-grid a:hover { border-bottom-color: var(--ink); }
+  .legal {
+    display: flex; justify-content: space-between;
+    border-top: 1px solid var(--rule);
+    padding-top: 22px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ======================== CART DRAWER ======================== */
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(26,24,18,.55);
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+    z-index: 100;
+  }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(440px, 100%);
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    transform: translateX(100%);
+    transition: transform .3s ease;
+    z-index: 101;
+    display: flex; flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head {
+    padding: 22px 26px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .drawer-head h3 {
+    font-family: var(--display); font-weight: 400; margin: 0;
+    font-size: 28px;
+  }
+  .drawer-head h3 em { font-style: italic; font-weight: 300; }
+  .closex { background: transparent; border: 0; cursor: pointer; padding: 4px; color: var(--ink); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 6px 26px; }
+  .line {
+    display: grid; grid-template-columns: 64px 1fr auto; gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: center;
+  }
+  .line-thumb {
+    width: 64px; height: 64px;
+    background: var(--paper-3); border: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .line-thumb svg { width: 70%; height: 70%; }
+  .line-name { font-family: var(--display); font-size: 19px; line-height: 1.2; font-weight: 500; }
+  .line-meta { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+  .line-price { font-family: var(--display); font-weight: 500; font-size: 18px; }
+  .line-rm {
+    display: block; margin-top: 6px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--muted); cursor: pointer;
+    background: none; border: 0; padding: 0; text-transform: uppercase;
+    text-decoration: underline;
+  }
+  .line-rm:hover { color: var(--ink); }
+  .empty-cart {
+    padding: 80px 20px; text-align: center;
+    color: var(--muted);
+    font-family: var(--display); font-style: italic; font-size: 22px;
+    line-height: 1.4;
+  }
+  .empty-cart svg { width: 64px; height: 64px; margin: 0 auto 20px; display: block; color: var(--muted); }
+  .drawer-foot {
+    border-top: 1px solid var(--rule);
+    padding: 24px 26px;
+  }
+  .totals { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+  .totals .l { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .totals strong { font-family: var(--display); font-size: 30px; font-weight: 400; }
+  .btn-block {
+    display: block; width: 100%; border: 0; cursor: pointer;
+    background: var(--ink); color: var(--paper);
+    padding: 18px;
+    font-family: var(--sans); font-size: 12px; letter-spacing: .26em; text-transform: uppercase; font-weight: 500;
+  }
+  .btn-block:hover { background: var(--moss); }
+  .btn-block[disabled] { opacity: .4; cursor: not-allowed; }
+  .drawer-note {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+    color: var(--muted); margin-top: 14px; text-align: center; text-transform: uppercase;
+  }
+
+  /* ======================== DETAIL MODAL ======================== */
+  .modal { position: fixed; inset: 0; z-index: 110; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal.open { display: flex; }
+  .modal-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    width: min(960px, 100%);
+    max-height: 92vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(26,24,18,.4);
+  }
+  .modal-img {
+    background: var(--paper-3);
+    display: flex; align-items: center; justify-content: center;
+    border-right: 1px solid var(--rule);
+    aspect-ratio: 1;
+  }
+  .modal-img svg { width: 60%; height: 60%; color: var(--ink); }
+  .modal-body { padding: 40px; overflow-y: auto; position: relative; }
+  .modal-body .meta { font-family: var(--mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .modal-body h2 { font-family: var(--display); font-weight: 400; font-size: 38px; line-height: 1.05; margin: 0 0 20px; text-wrap: balance; }
+  .modal-body .price-row { display: flex; align-items: baseline; gap: 16px; margin: 0 0 24px; padding-bottom: 24px; border-bottom: 1px solid var(--rule); }
+  .modal-body .price-row .p { font-family: var(--display); font-size: 28px; font-weight: 500; }
+  .modal-body p { margin: 0 0 22px; text-align: justify; text-align-last: left; color: var(--ink-2); }
+  .modal-body .specs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin-bottom: 28px; font-family: var(--mono); font-size: 12px; letter-spacing: .04em; }
+  .modal-body .specs .k { color: var(--muted); text-transform: uppercase; letter-spacing: .2em; font-size: 10px; }
+  .modal-body .btn-row { display: flex; gap: 12px; }
+  .modal-body .btn-row .ghost { flex: 1; justify-content: center; padding: 14px; }
+  .modal-close-x {
+    position: absolute; top: 18px; right: 18px;
+    background: transparent; border: 1px solid var(--ink);
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink);
+  }
+  @media (max-width: 720px) {
+    .modal-card { grid-template-columns: 1fr; max-height: 96vh; }
+    .modal-img { aspect-ratio: 4/3; border-right: 0; border-bottom: 1px solid var(--rule); }
+    .modal-body { padding: 26px; }
+  }
+
+  /* ======================== TOAST ======================== */
+  .toast {
+    position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 30px);
+    background: var(--ink); color: var(--paper);
+    padding: 14px 22px;
+    font-family: var(--sans); font-size: 12px; letter-spacing: .22em; text-transform: uppercase; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    z-index: 200;
+    box-shadow: 0 10px 30px rgba(26,24,18,.3);
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+
+  /* ======================== RESPONSIVE ======================== */
+  @media (max-width: 900px) {
+    .nav { display: none; }
+    .hero-meta { grid-template-columns: 1fr 1fr; }
+    .hero-meta div { border-bottom: 1px solid var(--rule); }
+    .hero-meta div:nth-child(2n) { border-right: 0; }
+    .story-grid { grid-template-columns: 1fr; }
+    .story-side { position: static; }
+    .visit-grid { grid-template-columns: 1fr; }
+    .sec-aside { display: none; }
+  }
+
+  .vis-hidden { position: absolute; clip: rect(0 0 0 0); width: 1px; height: 1px; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<!-- ==================== TOPBAR ==================== -->
+<header class="topbar">
+  <nav class="nav" aria-label="Primary">
+    <a href="#shop">Shop</a>
+    <a href="#about">About</a>
+    <a href="#consign">Consignment</a>
+    <a href="#visit">Visit</a>
+  </nav>
+  <span aria-hidden="true"></span>
+  <div class="top-right">
+    <button class="ghost" id="search-btn" aria-label="Search">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      Search
+    </button>
+    <a class="ghost" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener" aria-label="Axe & Reel on Instagram">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      Instagram
+    </a>
+    <button class="ghost" id="cart-btn" aria-label="Open bag">
+      Bag <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ==================== LEAD PHOTO ==================== -->
+<section class="lead-photo" id="top" aria-label="Salt Spring shoreline">
+  <img class="px" src="assets/hero-niamh.jpg" alt="A fly fisherman in the shallows of Salt Spring Island, with a lighthouse in the distance" />
+  <img class="logo-over" src="assets/logo.png" alt="Axe & Reel - Saltspring Island B.C." />
+  <div class="credit">Photograph by Niamh Studio</div>
+</section>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <span class="stamp tl">Est. 2019</span>
+  <span class="stamp tr">No. 102 / 111</span>
+  <span class="stamp bl">48° 51' N</span>
+  <span class="stamp br">123° 30' W</span>
+
+  <div class="eyebrow">A consignment shop, Salt Spring Island</div>
+
+  <h1>The best journeys in life are those that <em>answer questions you never thought to ask.</em></h1>
+
+  <div class="attrib">Rick Ridgeway</div>
+
+  <div class="rule"></div>
+
+  <div class="hero-cta">
+    <a href="#shop" class="ghost moss">
+      Browse the shop
+      <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    <a href="#consign" class="ghost">Consign with us</a>
+  </div>
+
+  <div class="hero-meta">
+    <div>
+      <div class="k">In the shop</div>
+      <div class="v">Camping, fishing, workwear, the odd 35mm</div>
+    </div>
+    <div>
+      <div class="k">How it works</div>
+      <div class="v">Consignment that rotates each week</div>
+    </div>
+    <div>
+      <div class="k">Where</div>
+      <div class="v">102 - 111 Rainbow Rd, Salt Spring Island</div>
+    </div>
+    <div>
+      <div class="k">Hours</div>
+      <div class="v">Tue to Sat, 11 to 5</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== STORY ==================== -->
+<section class="section" id="about">
+  <div class="sec-head">
+    <span class="sec-num">[ 01 / About ]</span>
+    <h2 class="sec-title">As children we roam <em>free.</em></h2>
+    <span class="sec-aside">Our quiet thesis</span>
+  </div>
+
+  <div class="story-grid">
+    <aside class="story-side">
+      <span class="label">A note from the shop</span>
+      Exploring is a basic part of human nature. It gives us peace, bonds us with our surroundings, and rewards us with a sense of accomplishment.
+      <div class="story-side-images">
+        <figure>
+          <img src="assets/shop-148.jpg" alt="Woman with an axe over her shoulder, standing in front of a woodshed" />
+          <figcaption><span>Axe</span><span>The Island</span></figcaption>
+        </figure>
+        <figure>
+          <img src="assets/mid-silversmithing.jpg" alt="Man in a brown wool shirt holding a fly rod and a wicker creel" />
+          <figcaption><span>Reel</span><span>In the shop</span></figcaption>
+        </figure>
+      </div>
+    </aside>
+    <div class="story-body">
+      <p>As children we roam free. Our untethered imagination transforms our backyard into a forest, a riverbed into the edge of the known world, the toolshed into a place where genuine adventure begins. A stick becomes a paddle. A walk to the bottom of the field is an expedition. We come home dirty and certain that something has been learned, though we could not yet say what.</p>
+      <p>Axe &amp; Reel is built for the part of you that still recognises that feeling. We carry the gear of people who have lived outside, well, and are passing it on. Lightly used camping and fishing gear, vintage lanterns, 35mm cameras, packs that have already been somewhere. Boots, pants, socks, the right work shirt. A little inventory of the things that make leaving the porch easier.</p>
+      <p>Most of what we sell comes through consignment, so the shop is never the same twice. You wander in, you look, and now and then something on the bench answers a question you did not know you were asking. That, more or less, is the whole point.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCENES ==================== -->
+<section class="scenes" aria-label="Scenes from the shop and the island">
+  <figure>
+    <img src="assets/shop-about-59.jpg" alt="Interior of Axe & Reel, copper pots hanging from a wagon wheel above the shop counter" />
+    <figcaption><span>Inside</span><span>Niamh Studio</span></figcaption>
+  </figure>
+  <figure>
+    <img src="assets/shop-62.jpg" alt="A guitar leaning against a denim and boot display in the shop" />
+    <figcaption><span>The Floor</span><span>S. Woodward</span></figcaption>
+  </figure>
+  <figure>
+    <img src="assets/shop-263.jpg" alt="A man with a chainsaw beside a stack of freshly split firewood" />
+    <figcaption><span>Outside</span><span>S. Woodward</span></figcaption>
+  </figure>
+  <figure>
+    <img src="assets/shop-209.jpg" alt="A couple standing in the cedars on Salt Spring, holding a chicken" />
+    <figcaption><span>The Island</span><span>S. Woodward</span></figcaption>
+  </figure>
+</section>
+
+<!-- ==================== SHOP ==================== -->
+<section class="section" id="shop">
+  <div class="sec-head">
+    <span class="sec-num">[ 02 / Shop ]</span>
+    <h2 class="sec-title">On the floor <em>this week.</em></h2>
+    <span class="sec-aside">Rotates each Friday</span>
+  </div>
+
+  <div class="filters" id="filters" role="tablist">
+    <button class="chip is-on" data-cat="all">Everything</button>
+    <button class="chip" data-cat="camp">Camp</button>
+    <button class="chip" data-cat="fish">Fish</button>
+    <button class="chip" data-cat="wear">Workwear</button>
+    <button class="chip" data-cat="vintage">Vintage</button>
+    <button class="chip" data-cat="paper">Books &amp; paper</button>
+  </div>
+
+  <div class="shop-grid" id="shop-grid"></div>
+</section>
+
+<!-- ==================== FEED (dark) ==================== -->
+<section class="section dark" id="feed">
+  <div class="sec-head">
+    <span class="sec-num">[ 03 / Feed ]</span>
+    <h2 class="sec-title">Notes from <em>@axeandreel</em></h2>
+    <span class="sec-aside">Updated from Instagram</span>
+  </div>
+
+  <div class="feed-grid">
+    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+      <div class="date">May 14 . 2026</div>
+      <p class="quote">A Pentax K1000 came in this week. Light meter still works, leatherette still soft. Whoever wants this knows already.</p>
+      <div class="meta"><span>From the bench</span><span>View on Instagram</span></div>
+    </a>
+    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+      <div class="date">May 09 . 2026</div>
+      <p class="quote">Three Hardy reels, two in their original cases. The third has been somewhere it should not have been, and is the better for it.</p>
+      <div class="meta"><span>Just landed</span><span>View on Instagram</span></div>
+    </a>
+    <a class="post" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+      <div class="date">May 02 . 2026</div>
+      <p class="quote">Filson wool, mid-70s, mended once at the elbow with thread that does not quite match. We are leaving it that way.</p>
+      <div class="meta"><span>Workwear</span><span>View on Instagram</span></div>
+    </a>
+  </div>
+
+  <a class="ig-link" href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">
+    Follow on Instagram
+    <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </a>
+</section>
+
+<!-- ==================== CONSIGN ==================== -->
+<section class="section" id="consign">
+  <div class="sec-head">
+    <span class="sec-num">[ 04 / Consignment ]</span>
+    <h2 class="sec-title">If you have something <em>worth passing on.</em></h2>
+    <span class="sec-aside">60 / 40 in your favour</span>
+  </div>
+
+  <div class="con-grid">
+    <div class="con-step">
+      <div class="num">i.</div>
+      <h3>Drop in for a look</h3>
+      <p>Bring two or three pieces by the shop, Tuesday through Thursday. We talk it through with you on the spot. No appointment, no paperwork until we both know it is a fit.</p>
+    </div>
+    <div class="con-step">
+      <div class="num">ii.</div>
+      <h3>We price it together</h3>
+      <p>We have a sense of what moves on the island. You set the floor, we agree on the asking price, and we tag it. If it has not moved after sixty days, we mark it down before sending it home.</p>
+    </div>
+    <div class="con-step">
+      <div class="num">iii.</div>
+      <h3>You are paid monthly</h3>
+      <p>Sixty per cent to you, forty to us. We e-transfer on the first of every month with a one-page breakdown of what sold and what is still out. Simple, traceable, no chasing.</p>
+    </div>
+  </div>
+
+  <div class="con-cta">
+    <a href="mailto:info@axeandreel.com?subject=Consignment%20enquiry" class="ghost moss">
+      Email the shop
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 6 8 7 8-7"/></svg>
+    </a>
+    <span style="font-family: var(--display); font-style: italic; color: var(--muted);">or</span>
+    <a href="tel:+12505379666" class="phone">250.537.9666</a>
+  </div>
+</section>
+
+<!-- ==================== VISIT ==================== -->
+<section class="section" id="visit">
+  <div class="sec-head">
+    <span class="sec-num">[ 05 / Visit ]</span>
+    <h2 class="sec-title">Find the <em>shop.</em></h2>
+    <span class="sec-aside">Two blocks off Lower Ganges</span>
+  </div>
+
+  <div class="visit-grid">
+    <div class="map-card" aria-label="Shop location on Google Maps">
+      <iframe
+        src="https://www.google.com/maps?q=Axe+%26+Reel+111+Rainbow+Rd+Salt+Spring+Island+BC&amp;t=&amp;z=15&amp;ie=UTF8&amp;output=embed"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Axe & Reel on Google Maps"></iframe>
+    </div>
+
+    <div class="visit-info">
+      <dl>
+        <dt>Address</dt>
+        <dd>102 - 111 Rainbow Road<br/>Salt Spring Island, BC V8K 2V5</dd>
+
+        <dt>Hours</dt>
+        <dd>
+          <div class="hours-grid">
+            <span class="d">Monday</span><span>Closed</span>
+            <span class="d">Tuesday</span><span>11 to 5</span>
+            <span class="d">Wednesday</span><span>11 to 5</span>
+            <span class="d">Thursday</span><span>11 to 5</span>
+            <span class="d">Friday</span><span>11 to 6</span>
+            <span class="d">Saturday</span><span>10 to 6</span>
+            <span class="d">Sunday</span><span>11 to 4</span>
+          </div>
+        </dd>
+
+        <dt>Telephone</dt>
+        <dd><a href="tel:+12505379666">250.537.9666</a></dd>
+
+        <dt>Letters</dt>
+        <dd><a href="mailto:info@axeandreel.com">info@axeandreel.com</a></dd>
+
+        <dt>Parking</dt>
+        <dd>Small lot at rear, off Atkins. Bike racks out front.</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== NEWSLETTER ==================== -->
+<section class="news">
+  <div class="news-inner">
+    <div class="eyebrow">A short letter, once a week</div>
+    <h2>What landed in the shop, and <em>nothing else.</em></h2>
+    <p>Photos of new arrivals, a heads up on consignment drops, and the occasional thought about gear, weather, and where to point yourself on a Sunday. No marketing.</p>
+    <form class="news-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Subscribed';">
+      <input type="email" required placeholder="your@email.com" aria-label="Email address" />
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer>
+  <div class="foot-grid">
+    <div>
+      <h4>The shop</h4>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#consign">Consignment</a></li>
+        <li><a href="#visit">Visit</a></li>
+        <li><a href="https://www.instagram.com/axeandreel/" target="_blank" rel="noopener">Instagram</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Browse</h4>
+      <ul>
+        <li><a href="#shop" data-jump="camp">Camp</a></li>
+        <li><a href="#shop" data-jump="fish">Fish</a></li>
+        <li><a href="#shop" data-jump="wear">Workwear</a></li>
+        <li><a href="#shop" data-jump="vintage">Vintage</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Find us</h4>
+      <ul>
+        <li>102 - 111 Rainbow Rd</li>
+        <li>Salt Spring Island, BC</li>
+        <li>250.537.9666</li>
+        <li><a href="mailto:info@axeandreel.com">info@axeandreel.com</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Hours</h4>
+      <ul style="font-family: var(--display); font-size: 16px;">
+        <li>Tue - Thu &nbsp; 11 to 5</li>
+        <li>Fri &nbsp; 11 to 6</li>
+        <li>Sat &nbsp; 10 to 6</li>
+        <li>Sun &nbsp; 11 to 4</li>
+        <li style="color: var(--muted); font-style: italic;">Closed Mondays</li>
+      </ul>
+    </div>
+  </div>
+  <div class="legal">
+    <span>© 2026 Axe &amp; Reel</span>
+    <span>Built quietly, on the island</span>
+  </div>
+</footer>
+
+<!-- ==================== CART DRAWER ==================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <h3>Your <em>bag</em></h3>
+    <button class="closex" id="close-cart" aria-label="Close cart">
+      <svg class="icon" viewBox="0 0 24 24" style="width:22px; height:22px;"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-foot">
+    <div class="totals"><span class="l">Subtotal</span><strong id="subtotal">$0</strong></div>
+    <button class="btn-block" id="checkout-btn" disabled>Continue to checkout</button>
+    <div class="drawer-note">In-shop pickup, or island delivery at checkout</div>
+  </div>
+</aside>
+
+<!-- ==================== DETAIL MODAL ==================== -->
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-img" id="modal-img"></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Added to bag</div>
+
+<script>
+/* ===== DATA ===== */
+const ITEMS = [
+  { id: 'cam-01', cat: 'camp',    title: 'Trangia 25-1 cookset',             meta: 'Aluminum, complete, well used',  price: 95,  was: 120, badge: null,   icon: 'pot' },
+  { id: 'cam-02', cat: 'camp',    title: 'Estwing camp axe, 24 inch',        meta: 'Leather grip, edge sharp',        price: 85,  was: null, badge: null,   icon: 'axe' },
+  { id: 'cam-03', cat: 'camp',    title: 'Coleman lantern, 1970s',           meta: 'Working mantle, original case',   price: 65,  was: null, badge: 'new',  icon: 'lantern' },
+  { id: 'cam-04', cat: 'camp',    title: 'Kelty external frame pack',        meta: '1980s, frame straight, 60L',      price: 110, was: null, badge: null,   icon: 'pack' },
+  { id: 'fis-01', cat: 'fish',    title: 'Hardy Marquis 6, with case',       meta: 'Salmon reel, England',            price: 320, was: null, badge: null,   icon: 'reel' },
+  { id: 'fis-02', cat: 'fish',    title: 'Sage RPL 8wt rod, 9 foot',         meta: '4-piece, tube and sock',          price: 285, was: null, badge: 'new',  icon: 'rod' },
+  { id: 'fis-03', cat: 'fish',    title: 'Wooden fly box, hand made',        meta: 'Locally made, 56 slots',          price: 48,  was: null, badge: null,   icon: 'box' },
+  { id: 'fis-04', cat: 'fish',    title: 'Pflueger Medalist 1495',           meta: 'Trout reel, clean line',          price: 95,  was: null, badge: null,   icon: 'reel' },
+  { id: 'wer-01', cat: 'wear',    title: 'Filson Mackinaw Cruiser',          meta: 'Wool, size L, mid-70s',           price: 285, was: null, badge: 'new',  icon: 'coat' },
+  { id: 'wer-02', cat: 'wear',    title: 'Pendleton board shirt, plaid',     meta: 'Wool, size M, broken in',         price: 78,  was: 95,   badge: null,   icon: 'shirt' },
+  { id: 'wer-03', cat: 'wear',    title: 'Hand-knit fisherman sweater',      meta: 'Wool, size L, mended once',       price: 145, was: null, badge: null,   icon: 'sweater' },
+  { id: 'wer-04', cat: 'wear',    title: 'Carhartt double-knee, 34W',        meta: 'Brown duck, knees soft',          price: 55,  was: null, badge: 'sold', icon: 'pants' },
+  { id: 'vin-01', cat: 'vintage', title: 'Pentax K1000, 50mm f/2',           meta: '35mm SLR, meter accurate',        price: 220, was: null, badge: 'new',  icon: 'camera' },
+  { id: 'vin-02', cat: 'vintage', title: 'Brass ship\'s lantern',            meta: 'Working wick, 1940s',             price: 175, was: null, badge: null,   icon: 'shipLantern' },
+  { id: 'vin-03', cat: 'vintage', title: 'Carved cedar bear, unsigned',      meta: 'Coast Salish style, 14 inch',     price: 240, was: null, badge: null,   icon: 'bear' },
+  { id: 'pap-01', cat: 'paper',   title: 'Edward Abbey, Desert Solitaire',   meta: 'Hardcover, first ed., 1968',      price: 65,  was: null, badge: null,   icon: 'book' },
+  { id: 'pap-02', cat: 'paper',   title: 'Whole Earth Catalog, fall 1971',   meta: 'Softcover, some wear',            price: 38,  was: 55,   badge: null,   icon: 'book' },
+  { id: 'pap-03', cat: 'paper',   title: 'Patagonia field journal, unused',  meta: '1990s, 80 pages',                 price: 28,  was: null, badge: 'new',  icon: 'book' }
+];
+
+/* ===== ICONS - line-art SVG ===== */
+const ICONS = {
+  pot:    '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 22 L52 22 L48 54 L16 54 Z"/><path d="M18 18 L20 14 L44 14 L46 18"/><circle cx="32" cy="38" r="1.5"/></svg>',
+  axe:    '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M16 14 Q 30 8, 44 24 Q 36 30, 24 28 Z"/><path d="M30 26 L52 54"/></svg>',
+  lantern:'<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M28 8 L36 8 L36 12 L40 16 L42 22 L42 46 L22 46 L22 22 L24 16 L28 12 Z"/><rect x="24" y="22" width="16" height="22"/><path d="M32 46 L32 52"/><path d="M28 52 L36 52"/><circle cx="32" cy="32" r="3"/></svg>',
+  pack:   '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 18 L46 18 L48 56 L16 56 Z"/><path d="M22 10 L26 10 L26 18 M42 10 L38 10 L38 18"/><path d="M22 30 L42 30"/><path d="M28 38 L36 38 L36 48 L28 48 Z"/></svg>',
+  reel:   '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="32" cy="34" r="20"/><circle cx="32" cy="34" r="13"/><circle cx="32" cy="34" r="2.5" fill="currentColor"/><path d="M32 14 L32 6 L42 6"/><path d="M22 18 L18 14 M42 18 L46 14"/></svg>',
+  rod:    '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M52 12 L14 52"/><circle cx="50" cy="14" r="3"/><path d="M40 22 L44 22 M32 30 L36 30 M24 38 L28 38"/></svg>',
+  box:    '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="10" y="18" width="44" height="32"/><path d="M10 28 L54 28"/><path d="M22 28 L22 50 M32 28 L32 50 M42 28 L42 50"/><path d="M10 18 L10 14 L54 14 L54 18"/></svg>',
+  coat:   '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 14 L24 8 L32 14 L40 8 L50 14 L54 22 L48 30 L48 56 L16 56 L16 30 L10 22 Z"/><path d="M32 14 L32 56"/><circle cx="36" cy="30" r=".8" fill="currentColor"/><circle cx="36" cy="38" r=".8" fill="currentColor"/><circle cx="36" cy="46" r=".8" fill="currentColor"/></svg>',
+  shirt:  '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 14 L24 10 L26 16 L32 20 L38 16 L40 10 L50 14 L54 22 L46 26 L46 54 L18 54 L18 26 L10 22 Z"/><path d="M32 20 L32 38"/><path d="M28 28 L36 28 M28 34 L36 34"/></svg>',
+  sweater:'<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 14 L24 10 L32 16 L40 10 L50 14 L54 22 L48 28 L48 54 L16 54 L16 28 L10 22 Z"/><path d="M20 30 L44 30 M20 38 L44 38 M20 46 L44 46" stroke-dasharray="3 3"/></svg>',
+  pants:  '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M16 10 L48 10 L46 32 L42 56 L34 56 L32 32 L30 56 L22 56 L18 32 Z"/><path d="M16 14 L48 14"/><circle cx="26" cy="20" r="1" fill="currentColor"/></svg>',
+  camera: '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="8" y="20" width="48" height="32"/><circle cx="32" cy="36" r="10"/><circle cx="32" cy="36" r="6"/><path d="M22 20 L26 14 L38 14 L42 20"/><circle cx="48" cy="26" r="1.5" fill="currentColor"/></svg>',
+  shipLantern: '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M26 6 L38 6 L38 10 L42 14 L44 18 L44 50 L20 50 L20 18 L22 14 L26 10 Z"/><path d="M22 18 L42 18 L42 46 L22 46 Z"/><path d="M22 24 L42 24 M22 40 L42 40"/><path d="M30 50 L30 56 L34 56 L34 50"/></svg>',
+  bear:   '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="20" cy="18" r="6"/><circle cx="44" cy="18" r="6"/><path d="M12 36 Q 32 20, 52 36 L 52 54 Q 32 60, 12 54 Z"/><circle cx="26" cy="40" r="1.5" fill="currentColor"/><circle cx="38" cy="40" r="1.5" fill="currentColor"/><path d="M32 46 Q 30 48, 32 50 Q 34 48, 32 46"/></svg>',
+  book:   '<svg class="illus" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 10 L46 12 L50 54 L18 52 Z"/><path d="M18 18 L44 20 M18 24 L42 26 M18 30 L40 32 M18 36 L40 38 M18 42 L36 44"/></svg>'
+};
+
+/* ===== STATE ===== */
+let cart = [];
+let filter = 'all';
+const cartCount = document.getElementById('cart-count');
+const subtotal = document.getElementById('subtotal');
+const checkoutBtn = document.getElementById('checkout-btn');
+const drawerBody = document.getElementById('drawer-body');
+const drawer = document.getElementById('drawer');
+const scrim = document.getElementById('scrim');
+const grid = document.getElementById('shop-grid');
+
+const fmt = n => '$' + n.toLocaleString('en-CA');
+
+function renderCart() {
+  cartCount.textContent = cart.reduce((s, l) => s + l.qty, 0);
+  if (!cart.length) {
+    drawerBody.innerHTML = `
+      <div class="empty-cart">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M10 14 L16 14 L22 46 L52 46 L58 22 L20 22"/>
+          <circle cx="26" cy="54" r="3"/><circle cx="46" cy="54" r="3"/>
+        </svg>
+        Your bag is empty.<br/>For now.
+      </div>`;
+    subtotal.textContent = '$0';
+    checkoutBtn.disabled = true;
+    return;
+  }
+  const total = cart.reduce((s, l) => s + l.qty * l.price, 0);
+  drawerBody.innerHTML = cart.map(l => `
+    <div class="line">
+      <div class="line-thumb">${ICONS[l.icon] || ''}</div>
+      <div>
+        <div class="line-name">${l.title}</div>
+        <div class="line-meta">${l.meta} · Qty ${l.qty}</div>
+        <button class="line-rm" data-rm="${l.id}">Remove</button>
+      </div>
+      <div class="line-price">${fmt(l.qty * l.price)}</div>
+    </div>
+  `).join('');
+  subtotal.textContent = fmt(total);
+  checkoutBtn.disabled = false;
+}
+
+function addToCart(id) {
+  const item = ITEMS.find(i => i.id === id);
+  if (!item || item.badge === 'sold') return;
+  const existing = cart.find(l => l.id === id);
+  if (existing) existing.qty += 1;
+  else cart.push({ ...item, qty: 1 });
+  renderCart();
+  showToast('Added: ' + item.title);
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(l => l.id !== id);
+  renderCart();
+}
+
+function openCart() { drawer.classList.add('open'); scrim.classList.add('open'); drawer.setAttribute('aria-hidden','false'); }
+function closeCart() { drawer.classList.remove('open'); scrim.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); }
+
+document.getElementById('cart-btn').addEventListener('click', openCart);
+document.getElementById('close-cart').addEventListener('click', closeCart);
+scrim.addEventListener('click', () => { closeCart(); closeModal(); });
+drawerBody.addEventListener('click', e => {
+  const rm = e.target.closest('[data-rm]');
+  if (rm) removeFromCart(rm.dataset.rm);
+});
+checkoutBtn.addEventListener('click', () => {
+  showToast('Checkout is a mock - wire to Square at launch');
+});
+
+/* ===== SHOP GRID ===== */
+function renderShop() {
+  const visible = filter === 'all' ? ITEMS : ITEMS.filter(i => i.cat === filter);
+  grid.innerHTML = visible.map(i => `
+    <article class="card" data-id="${i.id}" tabindex="0" role="button" aria-label="${i.title}">
+      <div class="card-photo">
+        ${i.badge ? `<span class="badge ${i.badge}">${i.badge === 'new' ? 'Just in' : i.badge === 'sold' ? 'Sold' : i.badge}</span>` : ''}
+        ${ICONS[i.icon] || ''}
+      </div>
+      <div class="card-body">
+        <div class="card-meta">${labelFor(i.cat)}</div>
+        <div class="card-title">${i.title}</div>
+        <div class="card-foot">
+          <div class="price">${i.was ? `<s>${fmt(i.was)}</s>` : ''}${fmt(i.price)}</div>
+          <button class="add-btn" data-add="${i.id}" ${i.badge==='sold' ? 'disabled' : ''}>
+            ${i.badge==='sold' ? 'Sold' : 'Add to bag'}
+          </button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function labelFor(cat) {
+  return ({camp:'Camp', fish:'Fish', wear:'Workwear', vintage:'Vintage', paper:'Books & paper'})[cat] || cat;
+}
+
+grid.addEventListener('click', e => {
+  const addBtn = e.target.closest('[data-add]');
+  if (addBtn) { e.stopPropagation(); addToCart(addBtn.dataset.add); return; }
+  const card = e.target.closest('[data-id]');
+  if (card) openModal(card.dataset.id);
+});
+grid.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const card = e.target.closest('[data-id]');
+    if (card) { e.preventDefault(); openModal(card.dataset.id); }
+  }
+});
+
+/* ===== FILTER CHIPS ===== */
+function setFilter(cat) {
+  filter = cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('is-on', c.dataset.cat === cat));
+  renderShop();
+}
+document.getElementById('filters').addEventListener('click', e => {
+  const chip = e.target.closest('[data-cat]');
+  if (chip) setFilter(chip.dataset.cat);
+});
+document.querySelectorAll('[data-jump]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    setFilter(a.dataset.jump);
+    document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+/* ===== DETAIL MODAL ===== */
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modal-img');
+const modalBody = document.getElementById('modal-body');
+
+function openModal(id) {
+  const i = ITEMS.find(x => x.id === id);
+  if (!i) return;
+  modalImg.innerHTML = ICONS[i.icon] || '';
+  modalBody.innerHTML = `
+    <button class="modal-close-x" aria-label="Close">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="meta">${labelFor(i.cat)} &nbsp;·&nbsp; ${i.id.toUpperCase()}</div>
+    <h2>${i.title}</h2>
+    <div class="price-row">
+      <div class="p">${i.was ? `<s style="color:var(--muted);font-weight:400;margin-right:10px">${fmt(i.was)}</s>` : ''}${fmt(i.price)}</div>
+      ${i.badge==='new' ? '<span class="badge new" style="position:static">Just in</span>' : ''}
+      ${i.badge==='sold' ? '<span class="badge sold" style="position:static">Sold</span>' : ''}
+    </div>
+    <p>${i.meta}. Photographed under shop light. Condition notes are honest - happy to send more photos before you commit. Pickup in-shop is preferred for anything heavy; island delivery available for a flat $8.</p>
+    <div class="specs">
+      <div><div class="k">Condition</div><div>Honest, used</div></div>
+      <div><div class="k">From</div><div>Island consignor</div></div>
+      <div><div class="k">Pickup</div><div>Same day</div></div>
+      <div><div class="k">Delivery</div><div>Island, $8</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="ghost moss" data-add="${i.id}" ${i.badge==='sold'?'disabled':''}>
+        ${i.badge==='sold' ? 'Sold' : 'Add to bag'}
+      </button>
+      <button class="ghost" data-close>Keep browsing</button>
+    </div>
+  `;
+  modalBody.querySelector('[data-add]')?.addEventListener('click', () => { addToCart(i.id); closeModal(); });
+  modalBody.querySelector('[data-close]')?.addEventListener('click', closeModal);
+  modalBody.querySelector('.modal-close-x')?.addEventListener('click', closeModal);
+  modal.classList.add('open');
+  scrim.classList.add('open');
+}
+function closeModal() { modal.classList.remove('open'); scrim.classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCart(); closeModal(); } });
+
+/* ===== TOAST ===== */
+const toast = document.getElementById('toast');
+let toastT;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+/* ===== SEARCH ===== */
+document.getElementById('search-btn').addEventListener('click', () => {
+  const q = prompt('Search the shop');
+  if (!q) return;
+  const ql = q.toLowerCase();
+  const hits = ITEMS.filter(i => i.title.toLowerCase().includes(ql) || i.cat.includes(ql) || i.meta.toLowerCase().includes(ql));
+  if (!hits.length) { showToast('No matches'); return; }
+  setFilter('all');
+  showToast(hits.length + ' match' + (hits.length===1?'':'es'));
+  document.getElementById('shop').scrollIntoView({ behavior: 'smooth' });
+});
+
+renderShop();
+renderCart();
+
+/* ===== PARALLAX ===== */
+(function () {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  const lead = document.querySelector('.lead-photo .px');
+  const sceneFigures = Array.from(document.querySelectorAll('.scenes figure'));
+  let ticking = false;
+  function update() {
+    const y = window.scrollY;
+    if (lead && y < window.innerHeight * 1.4) {
+      lead.style.transform = `translate3d(0, ${y * 0.32}px, 0) scale(1.18)`;
+    }
+    const vh = window.innerHeight;
+    sceneFigures.forEach(fig => {
+      const r = fig.getBoundingClientRect();
+      if (r.bottom < -100 || r.top > vh + 100) return;
+      const progress = (r.top + r.height / 2 - vh / 2) / vh;
+      const shift = Math.max(-22, Math.min(22, -progress * 28));
+      const img = fig.firstElementChild;
+      if (img && img.tagName === 'IMG') {
+        img.style.transform = `translate3d(0, ${shift}px, 0) scale(1.1)`;
+      }
+    });
+    ticking = false;
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  update();
+})();
+</script>
+</body>
+</html>
