@@ -49,14 +49,13 @@
     z-index: 1;
   }
 
-  /* ======================== TOPBAR (light) ======================== */
+  /* ======================== TOPBAR ======================== */
   .topbar {
     position: sticky; top: 0; z-index: 50;
-    background: rgba(238, 231, 215, 0.92);
-    backdrop-filter: blur(18px) saturate(1.1);
-    -webkit-backdrop-filter: blur(18px) saturate(1.1);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    color: var(--moss-2);
+    background: rgba(42, 46, 37, 0.42);
+    backdrop-filter: blur(18px) saturate(1.25);
+    -webkit-backdrop-filter: blur(18px) saturate(1.25);
+    border-bottom: 1px solid rgba(238, 231, 215, 0.12);
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -64,18 +63,8 @@
     padding: 16px clamp(20px, 3vw, 56px);
   }
   @supports not (backdrop-filter: blur(1px)) {
-    .topbar { background: rgba(238, 231, 215, 0.96); }
+    .topbar { background: rgba(42, 46, 37, 0.92); }
   }
-  .topbar .nav a { color: var(--moss-2); }
-  .topbar .nav a:hover { border-bottom-color: var(--moss-2); }
-  .topbar .ghost, .topbar .hamburger {
-    border-color: var(--moss-2);
-    color: var(--moss-2);
-  }
-  .topbar .ghost:hover, .topbar .hamburger:hover { background: var(--moss-2); color: var(--ink); }
-  .topbar .ghost.icon-only:hover svg { color: var(--ink); }
-  .topbar .cart-count { color: var(--moss-2); }
-  .topbar .ghost:hover .cart-count { color: var(--ink); }
   .nav {
     display: flex; gap: 32px; align-items: center;
     font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
@@ -1309,23 +1298,6 @@
     </div>
   </div>
 </section>
-
-<!-- ==================== FEATURED (Cutter Hat) ==================== -->
-<a class="featured" href="cutter-hat/" aria-label="The Cutter - featured product">
-  <div class="fimg">
-    <img src="cutter-hat/assets/hat-sage-angle.jpg" alt="The Cutter hat in Sage, three-quarter view, embroidered cutthroat trout with Axe & Reel wordmark" loading="lazy" />
-  </div>
-  <div class="fcopy">
-    <div class="eyebrow">Featured · Just dropped</div>
-    <h3>The <em>Cutter.</em></h3>
-    <p>A west-coast cutthroat, hand-drawn on the island and stitched in Vancouver. Softwashed dad cap in two colorways - Bone and Sage. Also on the chore shirt.</p>
-    <span class="fcta">
-      See the hat
-      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </span>
-    <div class="fmeta">$48 CAD · In the shop now</div>
-  </div>
-</a>
 
 <!-- ==================== GOODS ==================== -->
 <section class="section" id="goods">
