@@ -328,21 +328,35 @@
   }
   @media (max-width: 900px) { .design-grid { grid-template-columns: 1fr; } }
   .design-art {
-    background: #FFFFFF;
     border: 1px solid var(--rule);
     aspect-ratio: 1;
-    display: flex; align-items: center; justify-content: center;
-    padding: clamp(36px, 4vw, 60px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     position: relative;
     overflow: hidden;
+    background: var(--rule);
+    gap: 1px;
   }
-  .design-art img { max-width: 90%; max-height: 90%; height: auto; }
-  .design-art .stamp {
-    position: absolute; bottom: 14px; right: 16px;
-    font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
+  .design-art .plate {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background: #FFFFFF;
+    padding: clamp(14px, 2vw, 28px);
+    overflow: hidden;
+  }
+  .design-art .plate.invert { background: #000000; }
+  .design-art .plate img {
+    max-width: 92%; max-height: 92%; height: auto;
+    width: auto;
+  }
+  .design-art .plate .tag {
+    position: absolute; bottom: 8px; left: 10px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: .22em;
     color: var(--muted);
     text-transform: uppercase;
   }
+  .design-art .plate.invert .tag { color: rgba(238,231,215,0.55); }
   .design-copy .num {
     font-family: var(--mono); font-size: 12px;
     letter-spacing: .26em; text-transform: uppercase;
@@ -573,8 +587,22 @@
 <section class="design-band">
   <div class="design-grid">
     <div class="design-art">
-      <img src="assets/mark-outline.jpg" alt="The Cutter - black ink line drawing of a cutthroat trout" />
-      <span class="stamp">Plate 01 / Art on file</span>
+      <div class="plate">
+        <img src="assets/mark-color.jpg" alt="The Cutter - color drawing of a cutthroat trout" />
+        <span class="tag">Plate 01 / Colour</span>
+      </div>
+      <div class="plate">
+        <img src="assets/mark-outline.jpg" alt="The Cutter - black ink line drawing of a cutthroat trout" />
+        <span class="tag">Plate 02 / Outline</span>
+      </div>
+      <div class="plate invert">
+        <img src="assets/mark-light.jpg" alt="The Cutter - inverted, white line drawing on black" />
+        <span class="tag">Plate 03 / Inverted</span>
+      </div>
+      <div class="plate">
+        <img src="assets/mark-patch.jpg" alt="The Cutter - color drawing on a patch background" />
+        <span class="tag">Plate 04 / Patch</span>
+      </div>
     </div>
     <div class="design-copy">
       <div class="num">[ The Mark ]</div>
