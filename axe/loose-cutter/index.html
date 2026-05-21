@@ -426,6 +426,36 @@
     display: flex; justify-content: space-between;
   }
 
+  /* ===== shirt band ===== */
+  .shirt-band {
+    border-bottom: 1px solid var(--rule);
+    position: relative; z-index: 2;
+    padding: clamp(48px, 5vw, 80px) clamp(20px, 3vw, 56px);
+  }
+  .shirt-band .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: clamp(24px, 3vw, 36px);
+  }
+  .shirt-band figure {
+    margin: 0 auto;
+    max-width: 720px;
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: var(--paper-2);
+  }
+  .shirt-band img {
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: center;
+    padding: clamp(16px, 2vw, 32px);
+    box-sizing: border-box;
+    transition: transform .35s ease, filter .25s ease;
+    filter: saturate(.92);
+  }
+  .shirt-band figure:hover img { transform: scale(1.02); filter: saturate(1); }
+
   /* ===== back to shop ===== */
   .back-band {
     padding: clamp(56px, 6vw, 96px) clamp(20px, 3vw, 56px);
@@ -691,6 +721,14 @@
   </div>
 </section>
 
+<!-- ============ SHIRT ============ -->
+<section class="shirt-band">
+  <div class="eyebrow">[ Also on the chore shirt ]</div>
+  <figure>
+    <img src="assets/shirt-light.jpg" alt="The Cutter inverted patch on a charcoal softwashed chore shirt, button-front" loading="lazy" />
+  </figure>
+</section>
+
 <!-- ============ BACK ============ -->
 <section class="back-band">
   <span class="label">[ More from Axe &amp; Reel ]</span>
@@ -783,7 +821,8 @@
 
   const selectors = [
     '.design-art img',
-    '.patches-grid figure img'
+    '.patches-grid figure img',
+    '.shirt-band figure img'
   ];
   document.querySelectorAll(selectors.join(',')).forEach(img => {
     img.classList.add('can-zoom');
