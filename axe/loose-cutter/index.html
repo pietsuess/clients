@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The Cutter - Loose Edition - Axe &amp; Reel</title>
-<meta name="description" content="The Cutter, loose edition. A second drawing of the cutthroat trout, embroidered on a softwashed dad cap in two colorways. Axe & Reel, Salt Spring Island." />
+<title>The Cutter Hat - Axe &amp; Reel</title>
+<meta name="description" content="The Cutter. Embroidered cutthroat trout on a softwashed dad cap, in three colorways. Axe & Reel, Salt Spring Island." />
 <link rel="icon" type="image/png" href="../assets/favicon.png" />
 <link rel="apple-touch-icon" href="../assets/favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,6 +27,7 @@
     --sans:     "Inter", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
     --mono:     "JetBrains Mono", ui-monospace, Menlo, monospace;
     --beige:    #DBCBA4;
+    --charcoal: #3A3C39;
     --olive:    #3F4A36;
   }
   * { box-sizing: border-box; }
@@ -141,7 +142,7 @@
   }
   .thumbs {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     border-top: 1px solid var(--rule);
     background: var(--paper);
   }
@@ -238,8 +239,9 @@
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .sw:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.3); }
-  .sw.beige { background: var(--beige); }
-  .sw.olive { background: var(--olive); }
+  .sw.beige    { background: var(--beige); }
+  .sw.charcoal { background: var(--charcoal); }
+  .sw.olive    { background: var(--olive); }
   .sw.is-on {
     box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
   }
@@ -320,32 +322,27 @@
   }
   .design-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: clamp(32px, 4vw, 64px);
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(40px, 5vw, 96px);
   }
+  @media (max-width: 900px) { .design-grid { grid-template-columns: 1fr; } }
   .design-art {
     background: #FFFFFF;
     border: 1px solid var(--rule);
-    aspect-ratio: 3.7 / 1;
+    aspect-ratio: 1;
     display: flex; align-items: center; justify-content: center;
-    padding: clamp(28px, 3vw, 56px);
+    padding: clamp(36px, 4vw, 60px);
     position: relative;
     overflow: hidden;
   }
-  .design-art img { max-width: 92%; max-height: 90%; height: auto; }
+  .design-art img { max-width: 90%; max-height: 90%; height: auto; }
   .design-art .stamp {
     position: absolute; bottom: 14px; right: 16px;
     font-family: var(--mono); font-size: 10px; letter-spacing: .22em;
     color: var(--muted);
     text-transform: uppercase;
   }
-  .design-copy {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(24px, 3vw, 48px);
-    align-items: start;
-  }
-  @media (max-width: 900px) { .design-copy { grid-template-columns: 1fr; } }
   .design-copy .num {
     font-family: var(--mono); font-size: 12px;
     letter-spacing: .26em; text-transform: uppercase;
@@ -359,84 +356,12 @@
   }
   .design-copy h2 em { font-style: italic; color: var(--moss); font-weight: 300; }
   .design-copy p {
-    font-family: var(--display); font-size: clamp(18px, 1.4vw, 22px);
+    font-family: var(--display); font-size: clamp(19px, 1.5vw, 24px);
     line-height: 1.45; color: var(--ink-2);
-    margin: 0;
+    margin: 22px 0 0;
     text-align: justify; text-align-last: left;
     text-wrap: pretty;
   }
-
-  /* ===== embroidery details ===== */
-  .garments {
-    border-bottom: 1px solid var(--rule);
-    position: relative; z-index: 2;
-    padding: clamp(64px, 7vw, 120px) clamp(20px, 3vw, 56px) 0;
-  }
-  .garments-head { max-width: 60ch; margin: 0 0 clamp(36px, 4vw, 56px); }
-  .garments-head .eyebrow {
-    font-family: var(--mono); font-size: 12px;
-    letter-spacing: .26em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 14px;
-  }
-  .garments-head h3 {
-    font-family: var(--display); font-weight: 300;
-    font-size: clamp(34px, 4.2vw, 60px);
-    line-height: 1.02; margin: 0;
-    text-wrap: balance;
-  }
-  .garments-head h3 em { font-style: italic; color: var(--moss); font-weight: 300; }
-  .garments-head p {
-    font-family: var(--display); font-size: clamp(18px, 1.4vw, 23px);
-    line-height: 1.45; margin: 18px 0 0;
-    color: var(--ink-2); text-wrap: pretty;
-  }
-  .garments-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    border-top: 1px solid var(--rule);
-    border-left: 1px solid var(--rule);
-  }
-  @media (max-width: 900px) {
-    .garments-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 520px) { .garments-grid { grid-template-columns: 1fr; } }
-  .garments-grid figure {
-    margin: 0;
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-    background: var(--paper-2);
-  }
-  .garments-grid img {
-    width: 100%; height: 100%;
-    object-fit: cover; object-position: center;
-    transition: transform .35s ease, filter .25s ease;
-    filter: saturate(.92);
-  }
-  .garments-grid figure:hover img { transform: scale(1.03); filter: saturate(1); }
-  .garments-grid figcaption {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    padding: 12px 14px;
-    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.7));
-    color: var(--ink-light);
-    font-family: var(--mono); font-size: 10px;
-    letter-spacing: .22em; text-transform: uppercase;
-    display: flex; justify-content: space-between;
-  }
-  .garments-cta { padding: clamp(36px, 4vw, 56px) 0; }
-  .garments-cta a {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: var(--sans); font-size: 11px;
-    letter-spacing: .22em; text-transform: uppercase;
-    color: var(--ink); text-decoration: none;
-    border-bottom: 1px solid var(--ink);
-    padding-bottom: 4px; font-weight: 500;
-  }
-  .garments-cta a:hover { color: var(--moss); border-color: var(--moss); }
-  .garments-cta a svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ===== back to shop ===== */
   .back-band {
@@ -457,17 +382,6 @@
     font-family: var(--mono); font-size: 11px;
     letter-spacing: .26em; text-transform: uppercase;
     color: var(--muted);
-  }
-  .back-band .sister {
-    display: block; margin-top: 20px;
-    font-family: var(--mono); font-size: 11px;
-    letter-spacing: .22em; text-transform: uppercase;
-    color: var(--muted);
-  }
-  .back-band .sister a {
-    font-family: var(--mono); font-size: 11px; font-style: normal;
-    color: var(--ink); border-bottom: 1px solid var(--ink);
-    padding-bottom: 2px;
   }
 
   /* ===== footer ===== */
@@ -531,7 +445,9 @@
     letter-spacing: .22em; text-transform: uppercase;
     color: rgba(238,231,215,0.55);
   }
-  .can-zoom { cursor: zoom-in; }
+  .can-zoom {
+    cursor: zoom-in;
+  }
 
   /* ===== responsive ===== */
   @media (max-width: 900px) {
@@ -541,7 +457,7 @@
     .details { padding: clamp(36px, 6vw, 56px) clamp(20px, 5vw, 32px); }
     .pname { font-size: clamp(44px, 11vw, 72px); }
     .design-band { padding: clamp(48px, 8vw, 80px) clamp(18px, 4vw, 32px); }
-    .design-art { aspect-ratio: 3.2 / 1; padding: clamp(20px, 4vw, 36px); }
+    .design-art { aspect-ratio: 5 / 4; padding: clamp(28px, 5vw, 40px); }
     .design-copy h2 { font-size: clamp(32px, 8vw, 50px); }
     .back-band a { font-size: clamp(26px, 7vw, 36px); }
   }
@@ -549,7 +465,7 @@
     .actions { gap: 12px; }
     .btn { padding: 16px 18px; font-size: 11px; }
     .swatch-row .sw { width: 48px; height: 48px; }
-    .design-art { aspect-ratio: 2.4 / 1; }
+    .thumbs { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
@@ -572,24 +488,28 @@
 <section class="product">
   <div class="gallery">
     <div class="gallery-main" id="gallery-main">
-      <span class="gallery-tag" id="gallery-tag">Beige / Outline</span>
-      <img class="is-on" id="img-beige" src="assets/loose-hat-bw.jpg" alt="The Cutter, loose edition, in Beige with dark green outline embroidery" />
-      <img id="img-olive" src="assets/loose-hat-color.jpg" alt="The Cutter, loose edition, in Olive with full-colour patch" />
+      <span class="gallery-tag" id="gallery-tag">Beige</span>
+      <img class="is-on" id="img-beige" src="assets/hat-beige.jpg" alt="Cutter hat in Beige" />
+      <img id="img-charcoal" src="assets/hat-charcoal.jpg" alt="Cutter hat in Charcoal" />
+      <img id="img-olive" src="assets/hat-olive.jpg" alt="Cutter hat in Olive" />
     </div>
     <div class="thumbs" id="thumbs">
-      <button class="is-on" data-img="img-beige" aria-label="Beige, outline">
-        <img src="assets/loose-hat-bw.jpg" alt="" />
+      <button class="is-on" data-img="img-beige" aria-label="Beige">
+        <img src="assets/hat-beige.jpg" alt="" />
       </button>
-      <button data-img="img-olive" aria-label="Olive, patch">
-        <img src="assets/loose-hat-color.jpg" alt="" />
+      <button data-img="img-charcoal" aria-label="Charcoal">
+        <img src="assets/hat-charcoal.jpg" alt="" />
+      </button>
+      <button data-img="img-olive" aria-label="Olive">
+        <img src="assets/hat-olive.jpg" alt="" />
       </button>
     </div>
   </div>
 
   <div class="details">
-    <div class="eyebrow">[ Loose edition · two colorways ]</div>
+    <div class="eyebrow">[ Embroidered, three colorways ]</div>
     <h1 class="pname">The <em>Cutter.</em></h1>
-    <p class="psub">The second drawing. Looser line, more motion in the water. Same west-coast cutthroat.</p>
+    <p class="psub">A west-coast cutthroat, hand-drawn on the island and stitched in Vancouver. Worn loose, brim slightly bent.</p>
 
     <div class="price-row">
       <div class="p">$48</div>
@@ -602,14 +522,15 @@
         <span id="color-name">Beige</span>
       </div>
       <div class="swatches" role="radiogroup" aria-label="Colorway">
-        <button class="sw beige is-on" data-color="beige" data-img="img-beige" aria-label="Beige" title="Beige - dark green outline"></button>
-        <button class="sw olive" data-color="olive" data-img="img-olive" aria-label="Olive" title="Olive - full-colour patch"></button>
+        <button class="sw beige is-on" data-color="beige" data-img="img-beige" aria-label="Beige" title="Beige"></button>
+        <button class="sw charcoal" data-color="charcoal" data-img="img-charcoal" aria-label="Charcoal" title="Charcoal"></button>
+        <button class="sw olive" data-color="olive" data-img="img-olive" aria-label="Olive" title="Olive"></button>
       </div>
     </div>
 
     <div class="actions">
       <button class="btn" id="add-btn">Add to bag</button>
-      <a class="btn ghost" href="mailto:info@axeandreel.com?subject=The%20Cutter%20Loose%20-%20enquiry">Email the shop</a>
+      <a class="btn ghost" href="mailto:info@axeandreel.com?subject=The%20Cutter%20-%20enquiry">Email the shop</a>
     </div>
 
     <div class="stockline"><span class="dot"></span> In the shop now · Pickup or local delivery</div>
@@ -618,17 +539,17 @@
       <details open>
         <summary>The design</summary>
         <div class="body">
-          The same cutthroat, drawn looser. Beige carries a direct outline in dark green thread. Olive carries the full-colour patch, yellow body, red spots, cream rope edge.
+          A coastal cutthroat trout. The kind of island fish you do not get on the first cast. The Axe &amp; Reel title runs in a wave beneath, embroidered in matching thread.
         </div>
       </details>
       <details>
         <summary>The hat</summary>
         <div class="body">
           <ul>
-            <li>Softwashed cotton, low-profile 5-panel, unstructured crown</li>
+            <li>100% softwashed chino twill, low-profile, unstructured crown</li>
             <li>Self-fabric strap, antiqued brass slide</li>
             <li>One size, adjustable, fits 56 to 60 cm</li>
-            <li>Beige is a warm sand. Olive is a faded forest green.</li>
+            <li>Beige is a warm sand. Charcoal is a deep slate. Olive is a faded coastal green.</li>
           </ul>
         </div>
       </details>
@@ -652,45 +573,14 @@
 <section class="design-band">
   <div class="design-grid">
     <div class="design-art">
-      <img src="assets/loose-design.png" alt="Two cutthroat trout, drawn side by side: the original Cutter on the left, the loose edition on the right" />
-      <span class="stamp">Plate 02 / Art on file</span>
+      <img src="assets/mark-outline.jpg" alt="The Cutter - black ink line drawing of a cutthroat trout" />
+      <span class="stamp">Plate 01 / Art on file</span>
     </div>
     <div class="design-copy">
-      <div>
-        <div class="num">[ The Mark, loose ]</div>
-        <h2>Same fish, <em>looser line.</em></h2>
-      </div>
-      <p>A second pass at the cutthroat. Less tight, more swim. The original sits at left for comparison. The loose edition runs at right and lives on the hat.</p>
+      <div class="num">[ The Mark ]</div>
+      <h2>One <em>fish,</em> drawn properly.</h2>
+      <p>A cutthroat trout, drawn for the hat. Ideal for embroidering. The Axe &amp; Reel title runs underneath in a wave.</p>
     </div>
-  </div>
-</section>
-
-<!-- ============ EMBROIDERY DETAILS ============ -->
-<section class="garments">
-  <div class="garments-head">
-    <div class="eyebrow">[ Up close ]</div>
-    <h3>Two ways to <em>stitch it.</em></h3>
-    <p>Beige carries a direct-to-cap outline in dark green. Olive carries the full-colour patch, sewn in. Same drawing, two finishes.</p>
-  </div>
-  <div class="garments-grid">
-    <figure>
-      <img src="assets/loose-embroidered-bw.jpg" alt="Close-up of the loose cutthroat embroidered in dark green outline on cream cotton" loading="lazy" />
-      <figcaption><span>Outline</span><span>Detail</span></figcaption>
-    </figure>
-    <figure>
-      <img src="assets/loose-embroidered-color.jpg" alt="Close-up of the loose cutthroat embroidered in full colour: yellow body, red spots, blue eye" loading="lazy" />
-      <figcaption><span>Colour fill</span><span>Detail</span></figcaption>
-    </figure>
-    <figure>
-      <img src="assets/loose-patch-color.jpg" alt="Close-up of the loose cutthroat woven patch with blue background and cream rope border" loading="lazy" />
-      <figcaption><span>Patch</span><span>Detail</span></figcaption>
-    </figure>
-  </div>
-  <div class="garments-cta">
-    <a href="mailto:info@axeandreel.com?subject=The%20Cutter%20Loose%20-%20enquiry">
-      Ask about the loose Cutter
-      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </a>
   </div>
 </section>
 
@@ -698,12 +588,11 @@
 <section class="back-band">
   <span class="label">[ More from Axe &amp; Reel ]</span>
   <a href="../#goods">Back to the shop</a>
-  <span class="sister">Or see the original: <a href="../cutter-hat/">The Cutter</a></span>
 </section>
 
 <footer>
   <span>© 2026 Axe &amp; Reel</span>
-  <span>The Cutter, loose · Salt Spring</span>
+  <span>The Cutter · Salt Spring</span>
 </footer>
 
 <div class="toast" id="toast">Added to bag</div>
@@ -717,10 +606,11 @@
   const sws = document.querySelectorAll('.sw');
 
   const labelMap = {
-    'img-beige': 'Beige / Outline',
-    'img-olive': 'Olive / Patch'
+    'img-beige': 'Beige',
+    'img-charcoal': 'Charcoal',
+    'img-olive': 'Olive'
   };
-  const colorOf = { 'img-beige': 'Beige', 'img-olive': 'Olive' };
+  const colorOf = { 'img-beige': 'Beige', 'img-charcoal': 'Charcoal', 'img-olive': 'Olive' };
 
   function showImg(id) {
     mainImgs.forEach(im => im.classList.toggle('is-on', im.id === id));
@@ -736,6 +626,7 @@
   thumbs.forEach(t => t.addEventListener('click', () => showImg(t.dataset.img)));
   sws.forEach(s => s.addEventListener('click', () => showImg(s.dataset.img)));
 
+  // Add to bag (mock)
   const addBtn = document.getElementById('add-btn');
   const toast = document.getElementById('toast');
   let toastT;
@@ -747,7 +638,7 @@
   }
   addBtn && addBtn.addEventListener('click', () => {
     const c = colorName ? colorName.textContent : '';
-    showToast('Added: The Cutter, loose · ' + c);
+    showToast('Added: The Cutter · ' + c);
   });
 })();
 
@@ -784,23 +675,17 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && box.classList.contains('open')) closeLb(); });
 
   const selectors = [
-    '.design-art img',
-    '.garments-grid figure img'
+    '.design-art img'
   ];
   document.querySelectorAll(selectors.join(',')).forEach(img => {
     img.classList.add('can-zoom');
     img.addEventListener('click', e => {
       e.stopPropagation();
-      const fig = img.closest('figure');
-      let cap = '';
-      if (fig) {
-        const fc = fig.querySelector('figcaption');
-        if (fc) cap = fc.textContent.replace(/\s+/g, ' ').trim();
-      }
-      openLb(img.currentSrc || img.src, img.alt, cap);
+      openLb(img.currentSrc || img.src, img.alt, '');
     });
   });
 
+  // Gallery hero: click the visible main image to open lightbox
   const galleryMain = document.querySelector('.gallery-main');
   if (galleryMain) {
     galleryMain.addEventListener('click', e => {
