@@ -377,6 +377,51 @@
     text-wrap: pretty;
   }
 
+  /* ===== patches ===== */
+  .patches {
+    border-bottom: 1px solid var(--rule);
+    position: relative; z-index: 2;
+    padding: clamp(48px, 5vw, 80px) clamp(20px, 3vw, 56px);
+  }
+  .patches .eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: clamp(24px, 3vw, 36px);
+  }
+  .patches-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 700px) { .patches-grid { grid-template-columns: 1fr; } }
+  .patches-grid figure {
+    margin: 0;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-2);
+  }
+  .patches-grid img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    transition: transform .35s ease, filter .25s ease;
+    filter: saturate(.92);
+  }
+  .patches-grid figure:hover img { transform: scale(1.03); filter: saturate(1); }
+  .patches-grid figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,.7));
+    color: var(--ink-light);
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: .22em; text-transform: uppercase;
+    display: flex; justify-content: space-between;
+  }
+
   /* ===== back to shop ===== */
   .back-band {
     padding: clamp(56px, 6vw, 96px) clamp(20px, 3vw, 56px);
@@ -612,6 +657,21 @@
   </div>
 </section>
 
+<!-- ============ PATCHES ============ -->
+<section class="patches">
+  <div class="eyebrow">[ The patch, up close ]</div>
+  <div class="patches-grid">
+    <figure>
+      <img src="assets/patch-color.jpg" alt="The Cutter colour patch - close-up showing yellow body, red spots, blue background and cream rope border" loading="lazy" />
+      <figcaption><span>Colour patch</span><span>Detail</span></figcaption>
+    </figure>
+    <figure>
+      <img src="assets/patch-light.jpg" alt="The Cutter inverted patch - close-up showing white fish on black background with cream rope border" loading="lazy" />
+      <figcaption><span>Inverted patch</span><span>Detail</span></figcaption>
+    </figure>
+  </div>
+</section>
+
 <!-- ============ BACK ============ -->
 <section class="back-band">
   <span class="label">[ More from Axe &amp; Reel ]</span>
@@ -703,7 +763,8 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && box.classList.contains('open')) closeLb(); });
 
   const selectors = [
-    '.design-art img'
+    '.design-art img',
+    '.patches-grid figure img'
   ];
   document.querySelectorAll(selectors.join(',')).forEach(img => {
     img.classList.add('can-zoom');
