@@ -85,27 +85,28 @@
     var numeric  = panel.querySelector(".panel__numeric");
     var inner    = panel.querySelector(".panel__inner");
 
-    // 0%–4%  eyebrow slides in
-    var pe = mapRange(p, 0.00, 0.04);
+    // First beat is visual: arrows land, dots pulse, then copy appears.
+    // 18%–24% eyebrow slides in
+    var pe = mapRange(p, 0.18, 0.24);
     if (eyebrow) {
       eyebrow.style.opacity = pe;
       eyebrow.style.transform = "translateX(" + (-16 * (1 - pe)) + "px)";
     }
 
-    // 4%–12% verdict fades in with vertical translate ONLY.
+    // 24%–36% verdict fades in with vertical translate ONLY.
     // No scale, no letter-spacing animation: those reflow balanced text,
     // which makes words pop between lines mid-scrub. Locked layout, soft entry.
-    var pv = mapRange(p, 0.04, 0.12);
+    var pv = mapRange(p, 0.24, 0.36);
     if (verdict) {
       verdict.style.opacity = pv;
       verdict.style.transform = "translateY(" + (16 * (1 - pv)) + "px)";
     }
 
-    // 12%–22% evidence sequential reveal (stagger)
+    // 38%–58% evidence sequential reveal (stagger)
     if (evidence.length) {
-      var winStart = 0.12;
-      var step = 0.02;
-      var segLen = 0.06;
+      var winStart = 0.38;
+      var step = 0.045;
+      var segLen = 0.10;
       for (var i = 0; i < evidence.length; i++) {
         var s = winStart + i * step;
         var e = s + segLen;
@@ -115,19 +116,19 @@
       }
     }
 
-    // 22%–28% numeric line reveals
-    var pn = mapRange(p, 0.22, 0.28);
+    // 60%–66% numeric line reveals
+    var pn = mapRange(p, 0.60, 0.66);
     if (numeric) {
       numeric.style.opacity = pn;
       numeric.style.transform = "translateY(" + (16 * (1 - pn)) + "px)";
     }
 
-    // 28%–88% HOLD. 88%–100% inner block fades + translates up.
+    // 66%–88% HOLD. 88%–100% inner block fades + translates up.
     var px = mapRange(p, 0.88, 1.00);
     if (inner) {
       inner.style.opacity = 1 - px;
       inner.style.transform = "translateY(" + (-24 * px) + "px)";
-      var veilIn = smooth01(mapRange(p, 0.10, 0.34));
+      var veilIn = smooth01(mapRange(p, 0.22, 0.44));
       var veilOut = smooth01(1 - mapRange(p, 0.68, 0.86));
       panel.style.setProperty("--text-veil-opacity", (veilIn * veilOut * 0.58).toFixed(3));
     }
@@ -203,10 +204,9 @@
   }
 
   // ===== Canopy wave timing =============================================
-  // Each wave now spans the full travel distance between text blocks:
-  // outgoing block starts leaving at 88%, incoming block is readable at 28%.
-  // That makes lines finish at the next text block, rather than snapping
-  // complete before the reader arrives.
+  // Each wave now finishes before the next text appears:
+  // outgoing block starts leaving at 88%, arrows land at 8%, then the new
+  // copy waits a beat before resolving.
   if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setWaveProgress) {
     function setWave(wave, progress) {
       window.bullfinchCanopy.setWaveProgress(wave, progress);
@@ -217,7 +217,7 @@
         trigger: document.body,
         start: function () { return hero.offsetTop + hero.offsetHeight * 0.35; },
         end: function () {
-          return panelTriggers[0].start + (panelTriggers[0].end - panelTriggers[0].start) * 0.28;
+          return panelTriggers[0].start + (panelTriggers[0].end - panelTriggers[0].start) * 0.08;
         },
         scrub: true,
         invalidateOnRefresh: true,
@@ -233,7 +233,7 @@
             return panelTriggers[idx].start + (panelTriggers[idx].end - panelTriggers[idx].start) * 0.88;
           },
           end: function () {
-            return panelTriggers[idx + 1].start + (panelTriggers[idx + 1].end - panelTriggers[idx + 1].start) * 0.28;
+            return panelTriggers[idx + 1].start + (panelTriggers[idx + 1].end - panelTriggers[idx + 1].start) * 0.08;
           },
           scrub: true,
           invalidateOnRefresh: true,
