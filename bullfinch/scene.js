@@ -596,11 +596,14 @@
   var edgeB     = new Int32Array(EDGE_COUNT);
   var edgeWave  = new Int32Array(EDGE_COUNT);
 
+  var networkMoteSet = new Uint8Array(PARTICLE_POOL);
   for (var en = 0; en < EDGE_COUNT; en++) {
     var edge = finalEdges[en];
     edgeA[en] = edge.a;
     edgeB[en] = edge.b;
     edgeWave[en] = edge.wave;
+    networkMoteSet[edge.a] = 1;
+    networkMoteSet[edge.b] = 1;
     lineThr[en * 2]     = edge.threshold;
     lineThr[en * 2 + 1] = edge.threshold;
     lineEnd[en * 2]     = 0;
@@ -1206,7 +1209,9 @@
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
-        if (i === 0) {
+        if (!networkMoteSet[i]) {
+          alphas[i] = 0.0;
+        } else if (i === 0) {
           alphas[i] = lerp(1.0, 0.25, finalFade);
         } else if (i === 1) {
           // Final red dot is fixed at the floor. Always on — the camera
