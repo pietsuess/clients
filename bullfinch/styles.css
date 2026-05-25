@@ -254,6 +254,54 @@ body.is-fallback .canopy-canvas {
   display: none;
 }
 
+body.is-mote-hovering {
+  cursor: pointer;
+}
+
+.mote-popover {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 75;
+  width: 156px;
+  padding: 8px;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.24);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 18px)) scale(0.96);
+  transform-origin: 50% 100%;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+.mote-popover::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  transform: translateX(-50%) rotate(45deg);
+}
+.mote-popover.is-visible {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 22px)) scale(1);
+}
+.mote-popover__image {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  border-radius: 5px;
+  background: #FFFFFF;
+}
+
 /* ---- Hero --------------------------------------------------------------- */
 .hero {
   min-height: 100vh;

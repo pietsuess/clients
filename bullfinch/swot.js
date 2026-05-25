@@ -123,13 +123,13 @@
       numeric.style.transform = "translateY(" + (16 * (1 - pn)) + "px)";
     }
 
-    // 66%–88% HOLD. 88%–100% inner block fades + translates up.
-    var px = mapRange(p, 0.88, 1.00);
+    // 66%–94% HOLD. 94%–100% inner block fades + translates up.
+    var px = mapRange(p, 0.94, 1.00);
     if (inner) {
       inner.style.opacity = 1 - px;
       inner.style.transform = "translateY(" + (-24 * px) + "px)";
       var veilIn = smooth01(mapRange(p, 0.22, 0.44));
-      var veilOut = smooth01(1 - mapRange(p, 0.68, 0.86));
+      var veilOut = smooth01(1 - mapRange(p, 0.78, 0.90));
       panel.style.setProperty("--text-veil-opacity", (veilIn * veilOut * 0.58).toFixed(3));
     }
   }
