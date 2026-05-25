@@ -41,6 +41,7 @@
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
       <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen presentation">
+        <img class="splash__fallback" id="splash-fallback" src="logo-seq/Logo_To_Ball_00007.png?v=3" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
         <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
       </button>
     </div>
@@ -189,7 +190,8 @@
         var splash = document.getElementById("splash");
         var button = document.getElementById("splash-button");
         var sequence = document.getElementById("splash-sequence");
-        if (!splash || !button || !sequence) return;
+        var fallback = document.getElementById("splash-fallback");
+        if (!splash || !button || !sequence || !fallback) return;
         var sequenceCtx = sequence.getContext("2d");
         if (!sequenceCtx) return;
 
@@ -211,6 +213,7 @@
           if (!img || !img.complete || !img.naturalWidth) return;
           sequenceCtx.clearRect(0, 0, sequence.width, sequence.height);
           sequenceCtx.drawImage(img, 0, 0, sequence.width, sequence.height);
+          fallback.hidden = true;
         }
 
         loadedFrames[0].addEventListener("load", function () { drawFrame(0); }, { once: true });
@@ -219,6 +222,7 @@
         function resetSplash() {
           isPlaying = false;
           splash.hidden = false;
+          fallback.hidden = false;
           splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
           document.body.classList.remove("has-entered");
           drawFrame(0);
