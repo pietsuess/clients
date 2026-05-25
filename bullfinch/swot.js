@@ -172,6 +172,7 @@
 
   // ===== Closing section reveal ==========================================
   var closing = document.getElementById("closing");
+  var redReveal = document.getElementById("red-reveal");
   if (closing) {
     var cLine1 = closing.querySelector(".closing__line--1");
     var cLine2 = closing.querySelector(".closing__line--2");
@@ -199,6 +200,14 @@
             cLine2.style.transform = "translateY(" + (18 * (1 - p2)) + "px)";
           }
         },
+      });
+      ScrollTrigger.create({
+        trigger: closing,
+        start: "top top",
+        end: "+=80%",
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
       });
     }
   }
@@ -249,12 +258,26 @@
           return panelTriggers[4].start + (panelTriggers[4].end - panelTriggers[4].start) * 0.88;
         },
         end: function () {
-          return ScrollTrigger.maxScroll(window) - 36;
+          return redReveal ? redReveal.offsetTop - window.innerHeight * 0.2 : ScrollTrigger.maxScroll(window) - 36;
         },
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
           window.bullfinchCanopy.setConvergenceProgress(self.progress);
+        },
+      });
+    }
+
+    if (redReveal && window.bullfinchCanopy.setRedRevealProgress) {
+      ScrollTrigger.create({
+        trigger: redReveal,
+        start: "top bottom",
+        end: "bottom bottom",
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          window.bullfinchCanopy.setRedRevealProgress(self.progress);
+          document.body.classList.toggle("is-red-stage", self.progress > 0.24);
         },
       });
     }
@@ -291,7 +314,7 @@
       ScrollTrigger.create({
         trigger: document.body,
         start: "top top",
-        endTrigger: footer,
+        endTrigger: redReveal || footer,
         end: "top top",
         scrub: true,
         onUpdate: function (self) {
