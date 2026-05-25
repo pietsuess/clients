@@ -111,77 +111,6 @@
     uConnect:      { value: 0 },
   };
 
-  function buildObjGeometry(objText) {
-    var verts = [];
-    var outVerts = [];
-    var lines = objText.split(/\r?\n/);
-    function parseIndex(token, max) {
-      var value = parseInt(token, 10);
-      if (!value) return -1;
-      return value < 0 ? max + value : value - 1;
-    }
-    for (var li = 0; li < lines.length; li++) {
-      var line = lines[li].trim();
-      if (!line || line.charAt(0) === "#") continue;
-      var parts = line.split(/\s+/);
-      if (parts[0] === "v") {
-        verts.push([
-          parseFloat(parts[1]) || 0,
-          parseFloat(parts[2]) || 0,
-          parseFloat(parts[3]) || 0,
-        ]);
-      } else if (parts[0] === "f" && parts.length >= 4) {
-        var face = [];
-        for (var fi = 1; fi < parts.length; fi++) {
-          face.push(parseIndex(parts[fi].split("/")[0], verts.length));
-        }
-        for (var ti = 1; ti < face.length - 1; ti++) {
-          var tri = [face[0], face[ti], face[ti + 1]];
-          for (var vi = 0; vi < tri.length; vi++) {
-            var vert = verts[tri[vi]] || [0, 0, 0];
-            outVerts.push(vert[0], vert[1], vert[2]);
-          }
-        }
-      }
-    }
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(outVerts, 3));
-    geo.computeBoundingBox();
-    geo.center();
-    geo.computeVertexNormals();
-    geo.normalizeNormals();
-    geo.computeBoundingSphere();
-    return geo;
-  }
-
-  var bgTextLogo = null;
-  var bgTextLogoMat = null;
-  if (window.BULLFINCH_TEXT_OBJ) {
-    var bgTextLogoGeo = buildObjGeometry(window.BULLFINCH_TEXT_OBJ);
-    bgTextLogoMat = new THREE.MeshStandardMaterial({
-      color: readCssColor("--ink"),
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-      roughness: 0.78,
-      metalness: 0.04,
-    });
-    bgTextLogo = new THREE.Mesh(bgTextLogoGeo, bgTextLogoMat);
-    bgTextLogo.renderOrder = 2;
-    bgTextLogo.frustumCulled = false;
-    bgTextLogo.position.set(0, 0.15, -1.65);
-    bgTextLogo.rotation.set(-0.08, 0.04, 0);
-    bgTextLogo.scale.setScalar(mobileLike ? 0.58 : 1.05);
-    bgTextLogo.visible = false;
-    var bgLogoKey = new THREE.DirectionalLight(0xffffff, 0.95);
-    bgLogoKey.position.set(-2.5, 2.8, 4.0);
-    var bgLogoFill = new THREE.HemisphereLight(0xffffff, 0x050505, 0.38);
-    scene.add(bgLogoKey);
-    scene.add(bgLogoFill);
-    scene.add(bgTextLogo);
-  }
-
   var noiseGLSL = [
     "float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
     "float vnoise(vec2 p){",
@@ -1210,7 +1139,6 @@
       uniforms.uLineAlpha.value = initial.lineA + (target.lineA - initial.lineA) * eased;
       partMat.uniforms.uColor.value.lerpColors(initial.part, target.part, eased);
       arrowMat.uniforms.uColor.value.lerpColors(initial.arrow, target.arrow, eased);
-      if (bgTextLogoMat) bgTextLogoMat.color.copy(target.part);
       bgColor.lerpColors(initial.bg, target.bg, eased);
       renderer.setClearColor(bgColor, 1);
       if (t < 1) requestAnimationFrame(tick);
@@ -1346,18 +1274,6 @@
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
-
-      if (bgTextLogo && bgTextLogoMat) {
-        var bgLogoIn = smoothstep(0.34, 0.52, lt);
-        var bgLogoOut = 1 - smoothstep(0.82, 0.94, lt);
-        var bgLogoAlpha = bgLogoIn * bgLogoOut;
-        bgTextLogo.visible = bgLogoAlpha > 0.002;
-        bgTextLogoMat.opacity = bgLogoAlpha * (document.documentElement.getAttribute("data-theme") === "dark" ? 0.18 : 0.12);
-        bgTextLogo.position.y = lerp(1.05, -0.35, lt) + Math.sin(elapsed * 0.24) * 0.035;
-        bgTextLogo.position.z = lerp(-1.9, -0.95, lt);
-        bgTextLogo.rotation.x = -0.08 + Math.sin(elapsed * 0.18) * 0.012;
-        bgTextLogo.rotation.y = 0.04 + Math.sin(elapsed * 0.16) * 0.035;
-      }
 
       if (shockwaveAge >= 0) {
         shockwaveAge += dt;
