@@ -877,20 +877,11 @@
   var camParX = 0;
   var camParY = 0;
   var hoveredMoteIdx = -1;
-  var hoveredMoteX = 0;
-  var hoveredMoteY = 0;
   var hoverVec = new THREE.Vector3();
-  var motePopover = document.createElement("div");
-  motePopover.className = "mote-popover";
-  motePopover.setAttribute("aria-hidden", "true");
-  motePopover.innerHTML = '<div class="mote-popover__image" aria-hidden="true"></div>';
-  document.body.appendChild(motePopover);
 
   function clearHoveredMote() {
     hoveredMoteIdx = -1;
     document.body.classList.remove("is-mote-hovering");
-    motePopover.classList.remove("is-visible");
-    motePopover.setAttribute("aria-hidden", "true");
   }
 
   function findHoveredMote(clientX, clientY) {
@@ -911,8 +902,6 @@
       if (distSq <= hitRadiusSq && distSq < nearestDistSq) {
         nearestDistSq = distSq;
         nearestIdx = hi;
-        hoveredMoteX = sx;
-        hoveredMoteY = sy;
       }
     }
     return nearestIdx;
@@ -923,30 +912,9 @@
     hoveredMoteIdx = idx;
     if (idx >= 0) {
       document.body.classList.add("is-mote-hovering");
-      motePopover.style.left = hoveredMoteX + "px";
-      motePopover.style.top = hoveredMoteY + "px";
-      motePopover.classList.add("is-visible");
-      motePopover.setAttribute("aria-hidden", "false");
     } else {
       clearHoveredMote();
     }
-  }
-
-  function positionHoveredPopover() {
-    if (hoveredMoteIdx < 0) return;
-    var pi = hoveredMoteIdx * 3;
-    hoverVec.set(positions[pi], positions[pi + 1], positions[pi + 2]).project(camera);
-    if (hoverVec.z < -1 || hoverVec.z > 1 || alphas[hoveredMoteIdx] < 0.12) {
-      clearHoveredMote();
-      return;
-    }
-    hoveredMoteX = (hoverVec.x * 0.5 + 0.5) * window.innerWidth;
-    hoveredMoteY = (-hoverVec.y * 0.5 + 0.5) * window.innerHeight;
-    var inset = 88;
-    var x = Math.max(inset, Math.min(window.innerWidth - inset, hoveredMoteX));
-    var y = Math.max(118, Math.min(window.innerHeight - 18, hoveredMoteY));
-    motePopover.style.left = x + "px";
-    motePopover.style.top = y + "px";
   }
 
   if (hasFinePointer) {
@@ -1138,7 +1106,6 @@
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
-      positionHoveredPopover();
 
       if (shockwaveAge >= 0) {
         shockwaveAge += dt;
