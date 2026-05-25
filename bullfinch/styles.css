@@ -348,6 +348,60 @@ body.is-mote-hovering {
   display: block;
   will-change: transform, opacity;
 }
+.hero__scroll-cue,
+.site-footer__top {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-soft);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background-color 260ms ease,
+    border-color 260ms ease,
+    color 260ms ease,
+    opacity 420ms ease,
+    transform 260ms ease;
+}
+.hero__scroll-cue:hover,
+.site-footer__top:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--rule));
+  transform: translateY(-2px);
+}
+.hero__scroll-cue:active,
+.site-footer__top:active {
+  transform: translateY(0);
+}
+.hero__scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: max(28px, env(safe-area-inset-bottom));
+  z-index: 3;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+}
+body.has-entered .hero__scroll-cue {
+  opacity: 0.72;
+  transform: translate(-50%, 0);
+  transition-delay: 980ms;
+}
+body.has-entered .hero__scroll-cue:hover {
+  opacity: 1;
+  transform: translate(-50%, -2px);
+}
+.hero__scroll-cue svg {
+  animation: scrollCueFloat 2.2s ease-in-out infinite;
+}
+
+@keyframes scrollCueFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
 
 @media (max-width: 720px) {
   .hero {
@@ -609,7 +663,8 @@ body.is-mote-hovering {
 .site-footer {
   position: relative;
   z-index: 1;
-  padding: 96px var(--pad-x) max(10px, env(safe-area-inset-bottom));
+  min-height: 112px;
+  padding: 56px var(--pad-x) max(10px, env(safe-area-inset-bottom));
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -628,10 +683,26 @@ body.is-mote-hovering {
   transform: translateY(12px);
   will-change: opacity, transform;
 }
+.site-footer__top {
+  position: absolute;
+  left: 50%;
+  bottom: calc(max(10px, env(safe-area-inset-bottom)) + 26px);
+  transform: translateX(-50%);
+}
+.site-footer__top:hover {
+  transform: translate(-50%, -2px);
+}
+.site-footer__top:active {
+  transform: translate(-50%, 0);
+}
 
 @media (max-width: 720px) {
   .site-footer {
-    padding: 48px var(--pad-x) max(10px, env(safe-area-inset-bottom));
+    min-height: 124px;
+    padding: 56px var(--pad-x) max(10px, env(safe-area-inset-bottom));
+  }
+  .site-footer__top {
+    bottom: calc(max(10px, env(safe-area-inset-bottom)) + 34px);
   }
 }
 
