@@ -1044,11 +1044,11 @@
     var thud = ctx.createOscillator();
     var thudGain = ctx.createGain();
     thud.type = "sine";
-    thud.frequency.setValueAtTime(62, now);
-    thud.frequency.exponentialRampToValueAtTime(19, now + 0.18);
+    thud.frequency.setValueAtTime(118, now);
+    thud.frequency.exponentialRampToValueAtTime(58, now + 0.16);
     thudGain.gain.setValueAtTime(0.0001, now);
-    thudGain.gain.exponentialRampToValueAtTime(1.0, now + 0.006);
-    thudGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+    thudGain.gain.exponentialRampToValueAtTime(1.25, now + 0.006);
+    thudGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
     thud.connect(thudGain);
     thudGain.connect(out);
 
@@ -1056,14 +1056,13 @@
     var pingGain = ctx.createGain();
     var pingFilter = ctx.createBiquadFilter();
     ping.type = "sine";
-    ping.frequency.setValueAtTime(880, now + 0.34);
-    ping.frequency.exponentialRampToValueAtTime(620, now + 1.14);
+    ping.frequency.setValueAtTime(1260, now);
     pingFilter.type = "bandpass";
-    pingFilter.frequency.setValueAtTime(760, now + 0.34);
-    pingFilter.Q.setValueAtTime(9.0, now + 0.34);
-    pingGain.gain.setValueAtTime(0.0001, now + 0.32);
-    pingGain.gain.exponentialRampToValueAtTime(0.12, now + 0.36);
-    pingGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.20);
+    pingFilter.frequency.setValueAtTime(1260, now);
+    pingFilter.Q.setValueAtTime(18.0, now);
+    pingGain.gain.setValueAtTime(0.0001, now);
+    pingGain.gain.exponentialRampToValueAtTime(0.16, now + 0.008);
+    pingGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.48);
     ping.connect(pingFilter);
     pingFilter.connect(pingGain);
     pingGain.connect(ctx.destination);
@@ -1077,9 +1076,9 @@
     noise.start(now);
     noise.stop(now + 0.94);
     thud.start(now);
-    thud.stop(now + 0.26);
-    ping.start(now + 0.32);
-    ping.stop(now + 1.22);
+    thud.stop(now + 0.30);
+    ping.start(now);
+    ping.stop(now + 0.50);
   }
 
   if (hasFinePointer) {
