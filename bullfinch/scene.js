@@ -805,6 +805,8 @@
       var strokeProgress = Math.max(0, Math.min(1, (waveP - threshold) / drawDuration));
       if (strokeProgress > 0.001) {
         activeLineSet[aIdx] = 1;
+      }
+      if (strokeProgress >= 0.999) {
         activeLineSet[bIdx] = 1;
       }
 
@@ -1187,9 +1189,11 @@
         var xi = i * 3;
         var yi = i * 3 + 1;
         // Index 1 = final red dot. ABSOLUTELY STATIONARY. Skip all movement.
-        if (i !== 1) {
-          positions[yi] -= fallSpeed[i] * 0.0020 * fallScale;
+        if (i === 1) {
+          alphas[i] = 1.0;
+          continue;
         }
+        positions[yi] -= fallSpeed[i] * 0.0020 * fallScale;
         if (i === 0) {
           positions[xi] += Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.0008;
         } else {
@@ -1202,12 +1206,13 @@
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
-        if (i === 0) {
-          alphas[i] = lerp(1.0, 0.25, finalFade);
-        } else if (!activeLineSet[i]) {
+        if (!networkMoteSet[i]) {
           alphas[i] = 0.0;
+        } else if (i === 0) {
+          alphas[i] = lerp(1.0, 0.25, finalFade);
         } else if (i === 1) {
-          // Final red dot appears only when the convergence lines are active.
+          // Final red dot is fixed at the floor. Always on — the camera
+          // simply pans down to reveal it. No alpha gating.
           alphas[i] = 1.0;
         } else {
           alphas[i] = lerp(0.9 * gate, 0.25, finalFade);
