@@ -201,14 +201,6 @@
           img.src = src;
           return img;
         });
-        var framesReady = Promise.all(loadedFrames.map(function (img) {
-          if (img.decode) return img.decode().catch(function () {});
-          if (img.complete) return Promise.resolve();
-          return new Promise(function (resolve) {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
-        }));
         var hasStarted = false;
 
         function enter() {
@@ -222,28 +214,26 @@
         function playSequence() {
           if (hasStarted) return;
           hasStarted = true;
-          framesReady.then(function () {
-            sequence.src = loadedFrames[0].src;
-            requestAnimationFrame(function () {
-              splash.classList.add("is-playing");
-              var start = performance.now();
-              var frameDuration = 1000 / 12;
-              var holdLastFrame = 180;
-              function tick(now) {
-                var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
-                sequence.src = loadedFrames[frameIndex].src;
-                if (frameIndex < frames.length - 1) {
-                  requestAnimationFrame(tick);
-                } else {
-                  window.setTimeout(function () {
-                    splash.classList.add("is-sequence-done");
-                    enter();
-                  }, holdLastFrame);
-                }
-              }
+          sequence.src = loadedFrames[0].src;
+          splash.classList.add("is-playing");
+          var start = performance.now();
+          var frameDuration = 1000 / 12;
+          var holdLastFrame = 180;
+          function tick(now) {
+            var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
+            if (loadedFrames[frameIndex].complete && loadedFrames[frameIndex].naturalWidth) {
+              sequence.src = loadedFrames[frameIndex].src;
+            }
+            if (frameIndex < frames.length - 1) {
               requestAnimationFrame(tick);
-            });
-          });
+            } else {
+              window.setTimeout(function () {
+                splash.classList.add("is-sequence-done");
+                enter();
+              }, holdLastFrame);
+            }
+          }
+          requestAnimationFrame(tick);
         }
 
         button.addEventListener("click", function () {
