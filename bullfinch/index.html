@@ -41,7 +41,7 @@
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
       <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen presentation">
-        <img class="splash__sequence" id="splash-sequence" src="logo-seq/Logo_To_Ball_00007.png?v=2" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+        <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
       </button>
     </div>
 
@@ -190,9 +190,11 @@
         var button = document.getElementById("splash-button");
         var sequence = document.getElementById("splash-sequence");
         if (!splash || !button || !sequence) return;
+        var sequenceCtx = sequence.getContext("2d");
+        if (!sequenceCtx) return;
 
         var frames = [];
-        var frameVersion = "v=2";
+        var frameVersion = "v=3";
         for (var i = 7; i <= 28; i++) {
           frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?" + frameVersion);
         }
@@ -202,7 +204,25 @@
           img.src = src;
           return img;
         });
-        var hasStarted = false;
+        var isPlaying = false;
+
+        function drawFrame(index) {
+          var img = loadedFrames[index];
+          if (!img || !img.complete || !img.naturalWidth) return;
+          sequenceCtx.clearRect(0, 0, sequence.width, sequence.height);
+          sequenceCtx.drawImage(img, 0, 0, sequence.width, sequence.height);
+        }
+
+        loadedFrames[0].addEventListener("load", function () { drawFrame(0); }, { once: true });
+        if (loadedFrames[0].complete) drawFrame(0);
+
+        function resetSplash() {
+          isPlaying = false;
+          splash.hidden = false;
+          splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
+          document.body.classList.remove("has-entered");
+          drawFrame(0);
+        }
 
         function enter() {
           splash.classList.add("is-leaving");
@@ -213,16 +233,16 @@
         }
 
         function playSequence() {
-          if (hasStarted) return;
-          hasStarted = true;
-          sequence.src = loadedFrames[0].src;
+          if (isPlaying) return;
+          isPlaying = true;
+          drawFrame(0);
           splash.classList.add("is-playing");
           var start = performance.now();
           var frameDuration = 1000 / 12;
           var holdLastFrame = 180;
           function tick(now) {
             var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
-            sequence.src = loadedFrames[frameIndex].src;
+            drawFrame(frameIndex);
             if (frameIndex < frames.length - 1) {
               requestAnimationFrame(tick);
             } else {
@@ -234,6 +254,10 @@
           }
           requestAnimationFrame(tick);
         }
+
+        window.addEventListener("pageshow", function (event) {
+          if (event.persisted) resetSplash();
+        });
 
         button.addEventListener("click", function () {
           var root = document.documentElement;
