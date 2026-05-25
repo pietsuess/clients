@@ -747,6 +747,19 @@
   var shockwaveAge = -1;
   var SHOCKWAVE_DURATION = 1.55;
 
+  var clickShockwaveMat = shockwaveMat.clone();
+  clickShockwaveMat.uniforms = {
+    uColor: uniforms.uAccent,
+    uAlpha: { value: 0 },
+  };
+  var clickShockwave = new THREE.Mesh(shockwaveGeo, clickShockwaveMat);
+  clickShockwave.scale.setScalar(0.01);
+  clickShockwave.renderOrder = 61;
+  clickShockwave.frustumCulled = false;
+  scene.add(clickShockwave);
+  var clickShockwaveAge = -1;
+  var CLICK_SHOCKWAVE_DURATION = 0.72;
+
   // Per-edge "once drawn, stay drawn" latch. Prevents flicker when
   // No permanent latch — lines reverse with scroll. To kill micro-jitter
   // flicker, we track the previous strokeProgress per edge and only fire
@@ -917,6 +930,14 @@
     }
   }
 
+  function triggerMoteShockwave(idx) {
+    if (idx < 0) return;
+    var pi = idx * 3;
+    clickShockwave.position.set(positions[pi], positions[pi + 1], positions[pi + 2]);
+    clickShockwaveAge = 0;
+    glows[idx] = 1.0;
+  }
+
   if (hasFinePointer) {
     window.addEventListener("mousemove", function (e) {
       mouseNX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -927,6 +948,9 @@
   }
   window.addEventListener("pointerdown", function (e) {
     updateHoveredMote(e.clientX, e.clientY);
+    if (hoveredMoteIdx >= 0) {
+      triggerMoteShockwave(hoveredMoteIdx);
+    }
   }, { passive: true });
 
   // ---- Theme change: lerp gl-* uniforms + clear color over 400ms -------
@@ -1122,6 +1146,21 @@
         }
       } else {
         shockwaveMat.uniforms.uAlpha.value = 0;
+      }
+
+      if (clickShockwaveAge >= 0) {
+        clickShockwaveAge += dt;
+        var clickT = Math.min(1, clickShockwaveAge / CLICK_SHOCKWAVE_DURATION);
+        var clickEase = 1 - Math.pow(1 - clickT, 3);
+        clickShockwave.quaternion.copy(camera.quaternion);
+        clickShockwave.scale.setScalar(0.06 + clickEase * 1.35);
+        clickShockwaveMat.uniforms.uAlpha.value = (1 - smoothstep(0.62, 1.0, clickT)) * 0.78;
+        if (clickT >= 1) {
+          clickShockwaveAge = -1;
+          clickShockwaveMat.uniforms.uAlpha.value = 0;
+        }
+      } else {
+        clickShockwaveMat.uniforms.uAlpha.value = 0;
       }
 
       renderer.render(scene, camera);
