@@ -214,6 +214,11 @@ p {
   visibility: hidden;
   pointer-events: none;
 }
+.splash.is-playing .splash__button {
+  opacity: 0;
+  transform: scale(0.985);
+  pointer-events: none;
+}
 .splash__button {
   position: relative;
   z-index: 1;
@@ -235,6 +240,28 @@ p {
 .splash__logo {
   width: 100%;
   height: auto;
+}
+.splash__sequence {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: min(78vmin, 760px);
+  height: auto;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  pointer-events: none;
+  transition:
+    opacity 180ms ease,
+    transform 520ms ease;
+}
+.splash.is-playing .splash__sequence {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.splash.is-sequence-done .splash__sequence {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.04);
 }
 
 /* ---- Canopy canvas (fixed, behind every section) ------------------------ */
