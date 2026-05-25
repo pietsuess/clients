@@ -1206,9 +1206,7 @@
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
-        if (!networkMoteSet[i]) {
-          alphas[i] = 0.0;
-        } else if (i === 0) {
+        if (i === 0) {
           alphas[i] = lerp(1.0, 0.25, finalFade);
         } else if (i === 1) {
           // Final red dot is fixed at the floor. Always on — the camera
