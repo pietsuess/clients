@@ -938,6 +938,85 @@
     glows[idx] = 1.0;
   }
 
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!window.AudioContext && !window.webkitAudioContext) return null;
+    if (!audioCtx) {
+      var AudioCtor = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtor();
+    }
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playMotePressSound() {
+    var ctx = getAudioContext();
+    if (!ctx) return;
+    var now = ctx.currentTime;
+    var out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, now);
+    out.gain.exponentialRampToValueAtTime(0.13, now + 0.018);
+    out.gain.exponentialRampToValueAtTime(0.0001, now + 0.46);
+    out.connect(ctx.destination);
+
+    var sweep = ctx.createOscillator();
+    var sweepGain = ctx.createGain();
+    var sweepFilter = ctx.createBiquadFilter();
+    sweep.type = "sawtooth";
+    sweep.frequency.setValueAtTime(760, now);
+    sweep.frequency.exponentialRampToValueAtTime(92, now + 0.38);
+    sweepFilter.type = "lowpass";
+    sweepFilter.frequency.setValueAtTime(1600, now);
+    sweepFilter.frequency.exponentialRampToValueAtTime(280, now + 0.38);
+    sweepFilter.Q.setValueAtTime(1.8, now);
+    sweepGain.gain.setValueAtTime(0.0001, now);
+    sweepGain.gain.exponentialRampToValueAtTime(0.26, now + 0.025);
+    sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.40);
+    sweep.connect(sweepFilter);
+    sweepFilter.connect(sweepGain);
+    sweepGain.connect(out);
+
+    var pulse = ctx.createOscillator();
+    var pulseGain = ctx.createGain();
+    pulse.type = "sine";
+    pulse.frequency.setValueAtTime(58, now);
+    pulse.frequency.exponentialRampToValueAtTime(36, now + 0.16);
+    pulseGain.gain.setValueAtTime(0.0001, now);
+    pulseGain.gain.exponentialRampToValueAtTime(0.34, now + 0.012);
+    pulseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    pulse.connect(pulseGain);
+    pulseGain.connect(out);
+
+    var noiseBuffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * 0.18)), ctx.sampleRate);
+    var data = noiseBuffer.getChannelData(0);
+    for (var ni = 0; ni < data.length; ni++) {
+      data[ni] = (Math.random() * 2 - 1) * (1 - ni / data.length);
+    }
+    var noise = ctx.createBufferSource();
+    var noiseFilter = ctx.createBiquadFilter();
+    var noiseGain = ctx.createGain();
+    noise.buffer = noiseBuffer;
+    noiseFilter.type = "bandpass";
+    noiseFilter.frequency.setValueAtTime(1200, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(360, now + 0.16);
+    noiseFilter.Q.setValueAtTime(3.2, now);
+    noiseGain.gain.setValueAtTime(0.0001, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.13, now + 0.01);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(out);
+
+    sweep.start(now);
+    sweep.stop(now + 0.46);
+    pulse.start(now);
+    pulse.stop(now + 0.20);
+    noise.start(now);
+    noise.stop(now + 0.20);
+  }
+
   if (hasFinePointer) {
     window.addEventListener("mousemove", function (e) {
       mouseNX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -950,6 +1029,7 @@
     updateHoveredMote(e.clientX, e.clientY);
     if (hoveredMoteIdx >= 0) {
       triggerMoteShockwave(hoveredMoteIdx);
+      playMotePressSound();
     }
   }, { passive: true });
 
