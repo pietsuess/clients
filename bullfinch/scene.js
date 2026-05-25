@@ -596,14 +596,11 @@
   var edgeB     = new Int32Array(EDGE_COUNT);
   var edgeWave  = new Int32Array(EDGE_COUNT);
 
-  var networkMoteSet = new Uint8Array(PARTICLE_POOL);
   for (var en = 0; en < EDGE_COUNT; en++) {
     var edge = finalEdges[en];
     edgeA[en] = edge.a;
     edgeB[en] = edge.b;
     edgeWave[en] = edge.wave;
-    networkMoteSet[edge.a] = 1;
-    networkMoteSet[edge.b] = 1;
     lineThr[en * 2]     = edge.threshold;
     lineThr[en * 2 + 1] = edge.threshold;
     lineEnd[en * 2]     = 0;
