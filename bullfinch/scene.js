@@ -753,6 +753,7 @@
   // the spark+glow once on rising edge through 0.5. Smoothstep eases the
   // soft entry/exit so brief reversals do not snap.
   var edgePrevStroke = new Float32Array(EDGE_COUNT);
+  var activeLineSet = new Uint8Array(PARTICLE_POOL);
 
   // Spark decay rate — full bright → 0 over 0.4s.
   var SPARK_DECAY = 1 / 0.4;
@@ -769,6 +770,7 @@
     var arrowAlphaAttr = arrowGeo.attributes.aAlpha;
     var dt = dtIn || 0;
     camera.getWorldDirection(tmpCamDir);
+    activeLineSet.fill(0);
     for (var n = 0; n < EDGE_COUNT; n++) {
       var aIdx = edgeA[n];
       var bIdx = edgeB[n];
@@ -788,6 +790,12 @@
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
       var strokeProgress = Math.max(0, Math.min(1, (waveP - threshold) / drawDuration));
+      if (strokeProgress > 0.001) {
+        activeLineSet[aIdx] = 1;
+      }
+      if (strokeProgress >= 0.999) {
+        activeLineSet[bIdx] = 1;
+      }
 
       // Contact spark: fire only when the line reaches the target mote.
       var prev = edgePrevStroke[n];
@@ -891,7 +899,7 @@
     var hitRadius = mobileLike ? 30 : 22;
     var hitRadiusSq = hitRadius * hitRadius;
     for (var hi = 0; hi < PARTICLE_POOL; hi++) {
-      if (!connectedSet[hi] || alphas[hi] < 0.12) continue;
+      if (!activeLineSet[hi] || alphas[hi] < 0.12) continue;
       var pi = hi * 3;
       hoverVec.set(positions[pi], positions[pi + 1], positions[pi + 2]).project(camera);
       if (hoverVec.z < -1 || hoverVec.z > 1) continue;
