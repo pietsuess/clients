@@ -19,6 +19,10 @@
 
     <script>
       (function () {
+        if ("scrollRestoration" in history) {
+          history.scrollRestoration = "manual";
+        }
+        window.scrollTo(0, 0);
         try {
           var saved = localStorage.getItem("bullfinch-pitch-theme");
           var theme = saved === "light" || saved === "dark" ? saved : "dark";
@@ -256,7 +260,12 @@
           isPlaying = false;
           splash.hidden = false;
           splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
-          document.body.classList.remove("has-entered");
+          document.body.classList.remove("has-entered", "has-scrolled");
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(0, { immediate: true });
+          } else {
+            window.scrollTo(0, 0);
+          }
           drawFrame(0);
         }
 
@@ -295,7 +304,7 @@
         }
 
         window.addEventListener("pageshow", function (event) {
-          if (event.persisted) resetSplash();
+          resetSplash();
         });
 
         button.addEventListener("click", function () {
