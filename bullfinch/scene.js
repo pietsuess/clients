@@ -111,94 +111,6 @@
     uConnect:      { value: 0 },
   };
 
-  function buildObjGeometry(objText) {
-    var verts = [];
-    var norms = [];
-    var outVerts = [];
-    var outNorms = [];
-    var lines = objText.split(/\r?\n/);
-    function parseIndex(token, max) {
-      var value = parseInt(token, 10);
-      if (!value) return -1;
-      return value < 0 ? max + value : value - 1;
-    }
-    for (var li = 0; li < lines.length; li++) {
-      var line = lines[li].trim();
-      if (!line || line.charAt(0) === "#") continue;
-      var parts = line.split(/\s+/);
-      if (parts[0] === "v") {
-        verts.push([
-          parseFloat(parts[1]) || 0,
-          parseFloat(parts[2]) || 0,
-          parseFloat(parts[3]) || 0,
-        ]);
-      } else if (parts[0] === "vn") {
-        norms.push([
-          parseFloat(parts[1]) || 0,
-          parseFloat(parts[2]) || 0,
-          parseFloat(parts[3]) || 0,
-        ]);
-      } else if (parts[0] === "f" && parts.length >= 4) {
-        var face = [];
-        for (var fi = 1; fi < parts.length; fi++) {
-          var bits = parts[fi].split("/");
-          face.push({
-            v: parseIndex(bits[0], verts.length),
-            n: bits[2] ? parseIndex(bits[2], norms.length) : -1,
-          });
-        }
-        for (var ti = 1; ti < face.length - 1; ti++) {
-          var tri = [face[0], face[ti], face[ti + 1]];
-          for (var vi = 0; vi < tri.length; vi++) {
-            var vert = verts[tri[vi].v] || [0, 0, 0];
-            var norm = norms[tri[vi].n] || [0, 0, 1];
-            outVerts.push(vert[0], vert[1], vert[2]);
-            outNorms.push(norm[0], norm[1], norm[2]);
-          }
-        }
-      }
-    }
-    var geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(outVerts, 3));
-    geo.setAttribute("normal", new THREE.Float32BufferAttribute(outNorms, 3));
-    geo.computeBoundingBox();
-    geo.center();
-    geo.computeBoundingSphere();
-    return geo;
-  }
-
-  var logoTextGroup = null;
-  var logoTextMat = null;
-  var logoTextProgress = 0;
-  var redRevealProgress = 0;
-  if (window.BULLFINCH_TEXT_OBJ) {
-    var logoTextGeo = buildObjGeometry(window.BULLFINCH_TEXT_OBJ);
-    logoTextMat = new THREE.MeshStandardMaterial({
-      color: readCssColor("--ink"),
-      transparent: true,
-      opacity: 0,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-      roughness: 0.48,
-      metalness: 0.18,
-    });
-    var logoTextMesh = new THREE.Mesh(logoTextGeo, logoTextMat);
-    logoTextMesh.renderOrder = 220;
-    logoTextGroup = new THREE.Group();
-    logoTextGroup.add(logoTextMesh);
-    logoTextGroup.position.set(0, -1.34, 0.08);
-    logoTextGroup.scale.setScalar(mobileLike ? 0.21 : 0.30);
-    logoTextGroup.rotation.x = -0.04;
-    logoTextGroup.rotation.y = 0.04;
-    logoTextGroup.visible = false;
-    var logoKeyLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    logoKeyLight.position.set(-2.2, 2.1, 4.0);
-    var logoFillLight = new THREE.HemisphereLight(0xffffff, 0x111111, 0.55);
-    scene.add(logoKeyLight);
-    scene.add(logoFillLight);
-    scene.add(logoTextGroup);
-  }
-
   var noiseGLSL = [
     "float hash21(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
     "float vnoise(vec2 p){",
@@ -835,23 +747,6 @@
   var shockwaveAge = -1;
   var SHOCKWAVE_DURATION = 1.55;
 
-  var redFillGeo = new THREE.CircleGeometry(1, 128);
-  var redFillMat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#D21A10"),
-    transparent: true,
-    opacity: 0,
-    depthWrite: false,
-    depthTest: false,
-    side: THREE.DoubleSide,
-  });
-  var redFill = new THREE.Mesh(redFillGeo, redFillMat);
-  redFill.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
-  redFill.scale.setScalar(1.05);
-  redFill.renderOrder = 200;
-  redFill.frustumCulled = false;
-  redFill.visible = false;
-  scene.add(redFill);
-
   var clickShockwaveMat = shockwaveMat.clone();
   clickShockwaveMat.uniforms = {
     uColor: uniforms.uAccent,
@@ -1217,7 +1112,6 @@
       part:   partMat.uniforms.uColor.value.clone(),
       arrow:  arrowMat.uniforms.uColor.value.clone(),
       accent: uniforms.uAccent.value.clone(),
-      logo:   logoTextMat ? logoTextMat.color.clone() : null,
       line:   uniforms.uLine.value.clone(),
       lineA:  uniforms.uLineAlpha.value,
       bg:     bgColor.clone(),
@@ -1230,7 +1124,6 @@
       part:   readCssColor("--gl-mote"),
       arrow:  readCssColor("--gl-mote"),
       accent: readCssColor("--gl-accent"),
-      logo:   readCssColor("--ink"),
       line:   targetLine.color,
       lineA:  targetLine.alpha,
       bg:     readCssColor("--bg"),
@@ -1246,7 +1139,6 @@
       uniforms.uLineAlpha.value = initial.lineA + (target.lineA - initial.lineA) * eased;
       partMat.uniforms.uColor.value.lerpColors(initial.part, target.part, eased);
       arrowMat.uniforms.uColor.value.lerpColors(initial.arrow, target.arrow, eased);
-      if (logoTextMat && initial.logo) logoTextMat.color.lerpColors(initial.logo, target.logo, eased);
       bgColor.lerpColors(initial.bg, target.bg, eased);
       renderer.setClearColor(bgColor, 1);
       if (t < 1) requestAnimationFrame(tick);
@@ -1381,50 +1273,7 @@
       // Drives a slow, continuous downward pan over the whole journey.
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
-      var redZoom = smoothstep(0.04, 1.0, redRevealProgress);
-      if (redRevealProgress > 0.001) {
-        var zoomEase = redZoom * redZoom * (3 - 2 * redZoom);
-        camera.position.x = lerp(camera.position.x, FINAL_RED_X, zoomEase);
-        camera.position.y = lerp(camera.position.y, FINAL_RED_Y + 0.02, zoomEase);
-        camera.position.z = lerp(camera.position.z, FINAL_RED_Z + 0.22, zoomEase);
-        camera.lookAt(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
-      } else {
-        camera.lookAt(0, lookY, 0);
-      }
-
-      var redFillIn = smoothstep(0.08, 0.58, redRevealProgress);
-      redFill.visible = redFillIn > 0.002;
-      if (redFill.visible) {
-        redFill.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
-        redFill.quaternion.copy(camera.quaternion);
-        redFill.scale.setScalar(1.05);
-        redFillMat.opacity = smoothstep(0.08, 0.22, redRevealProgress);
-      } else {
-        redFillMat.opacity = 0;
-      }
-
-      particles.visible = true;
-      redParticles.visible = true;
-      lineSegments.visible = true;
-      drawingArrows.visible = true;
-      shockwave.visible = true;
-      clickShockwave.visible = true;
-
-      if (logoTextGroup && logoTextMat) {
-        var logoIn = smoothstep(0.36, 0.88, logoTextProgress);
-        logoTextGroup.visible = logoIn > 0.002;
-        logoTextMat.opacity = logoIn * 0.95;
-        logoTextMat.color.lerpColors(readCssColor("--ink"), new THREE.Color("#FFFFFF"), redFillIn);
-        logoTextGroup.position.set(
-          0,
-          lerp(FINAL_RED_Y - 0.62, FINAL_RED_Y + 0.12, logoIn) + Math.sin(elapsed * 0.62) * 0.012,
-          FINAL_RED_Z + 0.02
-        );
-        logoTextGroup.scale.setScalar(lerp(mobileLike ? 0.08 : 0.10, mobileLike ? 0.13 : 0.17, logoIn));
-        logoTextGroup.quaternion.copy(camera.quaternion);
-        logoTextGroup.rotateX(-0.02 + Math.sin(elapsed * 0.44) * 0.01);
-        logoTextGroup.rotateY(Math.sin(elapsed * 0.38) * 0.025);
-      }
+      camera.lookAt(0, lookY, 0);
 
       if (shockwaveAge >= 0) {
         shockwaveAge += dt;
@@ -1486,17 +1335,11 @@
     previousConvergenceProgress = v;
     setWaveProgress(6, v);
   }
-  function setRedRevealProgress(p) {
-    var v = Math.max(0, Math.min(1, p));
-    redRevealProgress = v;
-    logoTextProgress = v;
-  }
   window.bullfinchCanopy = {
     setProgress: setProgress,
     setLayerTint: setProgress,
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
-    setRedRevealProgress: setRedRevealProgress,
     getLayerTint: function () { return uniforms.uLayerTint.value; },
   };
 })();

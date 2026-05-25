@@ -172,7 +172,6 @@
 
   // ===== Closing section reveal ==========================================
   var closing = document.getElementById("closing");
-  var redReveal = document.getElementById("red-reveal");
   if (closing) {
     var cLine1 = closing.querySelector(".closing__line--1");
     var cLine2 = closing.querySelector(".closing__line--2");
@@ -250,26 +249,12 @@
           return panelTriggers[4].start + (panelTriggers[4].end - panelTriggers[4].start) * 0.88;
         },
         end: function () {
-          return redReveal ? redReveal.offsetTop - window.innerHeight - 36 : ScrollTrigger.maxScroll(window) - 36;
+          return ScrollTrigger.maxScroll(window) - 36;
         },
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
           window.bullfinchCanopy.setConvergenceProgress(self.progress);
-        },
-      });
-    }
-
-    if (redReveal && window.bullfinchCanopy.setRedRevealProgress) {
-      ScrollTrigger.create({
-        trigger: redReveal,
-        start: "top bottom",
-        end: "bottom bottom",
-        scrub: true,
-        invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          window.bullfinchCanopy.setRedRevealProgress(self.progress);
-          document.body.classList.toggle("is-red-stage", self.progress > 0.82);
         },
       });
     }
@@ -285,8 +270,8 @@
       gsap.set(footerLine, { opacity: 0, y: 12 });
       ScrollTrigger.create({
         trigger: document.body,
-        start: function () { return redReveal ? redReveal.offsetTop - window.innerHeight - 36 : ScrollTrigger.maxScroll(window) - 36; },
-        end: function () { return redReveal ? redReveal.offsetTop - window.innerHeight : ScrollTrigger.maxScroll(window); },
+        start: function () { return ScrollTrigger.maxScroll(window) - 36; },
+        end: function () { return ScrollTrigger.maxScroll(window); },
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
