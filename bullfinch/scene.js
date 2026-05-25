@@ -955,66 +955,87 @@
     var ctx = getAudioContext();
     if (!ctx) return;
     var now = ctx.currentTime;
+    var end = now + 1.18;
     var out = ctx.createGain();
     out.gain.setValueAtTime(0.0001, now);
-    out.gain.exponentialRampToValueAtTime(0.13, now + 0.018);
-    out.gain.exponentialRampToValueAtTime(0.0001, now + 0.46);
+    out.gain.exponentialRampToValueAtTime(0.28, now + 0.028);
+    out.gain.exponentialRampToValueAtTime(0.17, now + 0.36);
+    out.gain.exponentialRampToValueAtTime(0.0001, end);
     out.connect(ctx.destination);
 
     var sweep = ctx.createOscillator();
     var sweepGain = ctx.createGain();
     var sweepFilter = ctx.createBiquadFilter();
-    sweep.type = "sawtooth";
-    sweep.frequency.setValueAtTime(760, now);
-    sweep.frequency.exponentialRampToValueAtTime(92, now + 0.38);
+    sweep.type = "square";
+    sweep.frequency.setValueAtTime(1280, now);
+    sweep.frequency.exponentialRampToValueAtTime(42, now + 0.92);
     sweepFilter.type = "lowpass";
-    sweepFilter.frequency.setValueAtTime(1600, now);
-    sweepFilter.frequency.exponentialRampToValueAtTime(280, now + 0.38);
-    sweepFilter.Q.setValueAtTime(1.8, now);
+    sweepFilter.frequency.setValueAtTime(3600, now);
+    sweepFilter.frequency.exponentialRampToValueAtTime(180, now + 0.95);
+    sweepFilter.Q.setValueAtTime(5.5, now);
+    sweepFilter.Q.exponentialRampToValueAtTime(1.1, now + 0.95);
     sweepGain.gain.setValueAtTime(0.0001, now);
-    sweepGain.gain.exponentialRampToValueAtTime(0.26, now + 0.025);
-    sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.40);
+    sweepGain.gain.exponentialRampToValueAtTime(0.34, now + 0.04);
+    sweepGain.gain.exponentialRampToValueAtTime(0.18, now + 0.45);
+    sweepGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.04);
     sweep.connect(sweepFilter);
     sweepFilter.connect(sweepGain);
     sweepGain.connect(out);
 
+    var sub = ctx.createOscillator();
+    var subGain = ctx.createGain();
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(82, now);
+    sub.frequency.exponentialRampToValueAtTime(24, now + 0.58);
+    subGain.gain.setValueAtTime(0.0001, now);
+    subGain.gain.exponentialRampToValueAtTime(0.72, now + 0.018);
+    subGain.gain.exponentialRampToValueAtTime(0.24, now + 0.22);
+    subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
+    sub.connect(subGain);
+    subGain.connect(out);
+
     var pulse = ctx.createOscillator();
     var pulseGain = ctx.createGain();
-    pulse.type = "sine";
-    pulse.frequency.setValueAtTime(58, now);
-    pulse.frequency.exponentialRampToValueAtTime(36, now + 0.16);
-    pulseGain.gain.setValueAtTime(0.0001, now);
-    pulseGain.gain.exponentialRampToValueAtTime(0.34, now + 0.012);
-    pulseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    pulse.type = "triangle";
+    pulse.frequency.setValueAtTime(118, now + 0.20);
+    pulse.frequency.exponentialRampToValueAtTime(34, now + 0.82);
+    pulseGain.gain.setValueAtTime(0.0001, now + 0.16);
+    pulseGain.gain.exponentialRampToValueAtTime(0.42, now + 0.23);
+    pulseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.90);
     pulse.connect(pulseGain);
     pulseGain.connect(out);
 
-    var noiseBuffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * 0.18)), ctx.sampleRate);
+    var noiseBuffer = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * 0.72)), ctx.sampleRate);
     var data = noiseBuffer.getChannelData(0);
     for (var ni = 0; ni < data.length; ni++) {
-      data[ni] = (Math.random() * 2 - 1) * (1 - ni / data.length);
+      var nFade = 1 - ni / data.length;
+      data[ni] = (Math.random() * 2 - 1) * nFade * nFade;
     }
     var noise = ctx.createBufferSource();
     var noiseFilter = ctx.createBiquadFilter();
     var noiseGain = ctx.createGain();
     noise.buffer = noiseBuffer;
     noiseFilter.type = "bandpass";
-    noiseFilter.frequency.setValueAtTime(1200, now);
-    noiseFilter.frequency.exponentialRampToValueAtTime(360, now + 0.16);
-    noiseFilter.Q.setValueAtTime(3.2, now);
+    noiseFilter.frequency.setValueAtTime(2400, now);
+    noiseFilter.frequency.exponentialRampToValueAtTime(180, now + 0.62);
+    noiseFilter.Q.setValueAtTime(6.5, now);
+    noiseFilter.Q.exponentialRampToValueAtTime(1.4, now + 0.62);
     noiseGain.gain.setValueAtTime(0.0001, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.13, now + 0.01);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    noiseGain.gain.exponentialRampToValueAtTime(0.22, now + 0.018);
+    noiseGain.gain.exponentialRampToValueAtTime(0.08, now + 0.26);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.70);
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(out);
 
     sweep.start(now);
-    sweep.stop(now + 0.46);
-    pulse.start(now);
-    pulse.stop(now + 0.20);
+    sweep.stop(now + 1.08);
+    sub.start(now);
+    sub.stop(now + 0.76);
+    pulse.start(now + 0.16);
+    pulse.stop(now + 0.92);
     noise.start(now);
-    noise.stop(now + 0.20);
+    noise.stop(now + 0.74);
   }
 
   if (hasFinePointer) {
