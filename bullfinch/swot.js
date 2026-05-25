@@ -36,12 +36,23 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // ===== Initial reveal of hero (eyebrow + 2 lines, 200ms apart) =========
-  gsap.set(".hero__eyebrow", { opacity: 0, y: 12 });
-  gsap.set(".hero__line",    { opacity: 0, y: 12 });
-  gsap.to(".hero__eyebrow",   { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.05 });
-  gsap.to(".hero__line--1",   { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.05 + 0.20 });
-  gsap.to(".hero__line--2",   { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.05 + 0.40 });
+  // ===== Splash handoff reveal of hero =================================
+  gsap.set(".hero__eyebrow", { opacity: 0, x: -44, y: 0 });
+  gsap.set(".hero__line",    { opacity: 0, x: -72, y: 0 });
+
+  var heroRevealed = false;
+  function revealHero() {
+    if (heroRevealed) return;
+    heroRevealed = true;
+    gsap.to(".hero__eyebrow", { opacity: 1, x: 0, duration: 0.72, ease: "power3.out", delay: 0.05 });
+    gsap.to(".hero__line--1", { opacity: 1, x: 0, duration: 0.78, ease: "power3.out", delay: 0.23 });
+    gsap.to(".hero__line--2", { opacity: 1, x: 0, duration: 0.78, ease: "power3.out", delay: 0.41 });
+  }
+
+  document.addEventListener("bullfinch:splashcomplete", revealHero);
+  if (!document.getElementById("splash") || document.body.classList.contains("has-entered")) {
+    window.setTimeout(revealHero, 80);
+  }
 
   // ===== Hero exit motion (TWO lines, staggered fade) ====================
   // Eyebrow:  0.00 – 0.20

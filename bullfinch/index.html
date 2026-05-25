@@ -228,8 +228,14 @@
           splash.classList.add("is-leaving");
           window.setTimeout(function () {
             splash.hidden = true;
-            document.body.classList.add("has-entered");
-          }, 520);
+          }, 180);
+        }
+
+        function beginHandoff() {
+          document.body.classList.add("has-entered");
+          splash.classList.add("is-sequence-done");
+          document.dispatchEvent(new CustomEvent("bullfinch:splashcomplete"));
+          window.setTimeout(enter, 860);
         }
 
         function playSequence() {
@@ -246,10 +252,7 @@
             if (frameIndex < frames.length - 1) {
               requestAnimationFrame(tick);
             } else {
-              window.setTimeout(function () {
-                splash.classList.add("is-sequence-done");
-                enter();
-              }, holdLastFrame);
+              window.setTimeout(beginHandoff, holdLastFrame);
             }
           }
           requestAnimationFrame(tick);
