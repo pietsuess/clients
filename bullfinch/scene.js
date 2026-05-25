@@ -846,7 +846,7 @@
   });
   var redFill = new THREE.Mesh(redFillGeo, redFillMat);
   redFill.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
-  redFill.scale.setScalar(0.01);
+  redFill.scale.setScalar(1.05);
   redFill.renderOrder = 200;
   redFill.frustumCulled = false;
   redFill.visible = false;
@@ -1381,35 +1381,49 @@
       // Drives a slow, continuous downward pan over the whole journey.
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
-      camera.lookAt(0, lookY, 0);
+      var redZoom = smoothstep(0.04, 1.0, redRevealProgress);
+      if (redRevealProgress > 0.001) {
+        var zoomEase = redZoom * redZoom * (3 - 2 * redZoom);
+        camera.position.x = lerp(camera.position.x, FINAL_RED_X, zoomEase);
+        camera.position.y = lerp(camera.position.y, FINAL_RED_Y + 0.02, zoomEase);
+        camera.position.z = lerp(camera.position.z, FINAL_RED_Z + 0.22, zoomEase);
+        camera.lookAt(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
+      } else {
+        camera.lookAt(0, lookY, 0);
+      }
 
-      var redFillIn = smoothstep(0.10, 0.82, redRevealProgress);
+      var redFillIn = smoothstep(0.08, 0.58, redRevealProgress);
       redFill.visible = redFillIn > 0.002;
       if (redFill.visible) {
         redFill.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
         redFill.quaternion.copy(camera.quaternion);
-        redFill.scale.setScalar(0.05 + redFillIn * 8.8);
-        redFillMat.opacity = smoothstep(0.06, 0.22, redRevealProgress);
+        redFill.scale.setScalar(1.05);
+        redFillMat.opacity = smoothstep(0.08, 0.22, redRevealProgress);
       } else {
         redFillMat.opacity = 0;
       }
 
-      var redStageActive = redRevealProgress > 0.06;
-      particles.visible = !redStageActive;
-      redParticles.visible = !redStageActive;
-      lineSegments.visible = !redStageActive;
-      drawingArrows.visible = !redStageActive;
-      shockwave.visible = !redStageActive;
-      clickShockwave.visible = !redStageActive;
+      particles.visible = true;
+      redParticles.visible = true;
+      lineSegments.visible = true;
+      drawingArrows.visible = true;
+      shockwave.visible = true;
+      clickShockwave.visible = true;
 
       if (logoTextGroup && logoTextMat) {
         var logoIn = smoothstep(0.36, 0.88, logoTextProgress);
         logoTextGroup.visible = logoIn > 0.002;
         logoTextMat.opacity = logoIn * 0.95;
         logoTextMat.color.lerpColors(readCssColor("--ink"), new THREE.Color("#FFFFFF"), redFillIn);
-        logoTextGroup.position.y = lerp(-2.45, -1.34, logoIn) + Math.sin(elapsed * 0.62) * 0.035;
-        logoTextGroup.rotation.x = -0.04 + Math.sin(elapsed * 0.44) * 0.018;
-        logoTextGroup.rotation.y = 0.04 + Math.sin(elapsed * 0.38) * 0.075;
+        logoTextGroup.position.set(
+          0,
+          lerp(FINAL_RED_Y - 0.62, FINAL_RED_Y + 0.12, logoIn) + Math.sin(elapsed * 0.62) * 0.012,
+          FINAL_RED_Z + 0.02
+        );
+        logoTextGroup.scale.setScalar(lerp(mobileLike ? 0.08 : 0.10, mobileLike ? 0.13 : 0.17, logoIn));
+        logoTextGroup.quaternion.copy(camera.quaternion);
+        logoTextGroup.rotateX(-0.02 + Math.sin(elapsed * 0.44) * 0.01);
+        logoTextGroup.rotateY(Math.sin(elapsed * 0.38) * 0.025);
       }
 
       if (shockwaveAge >= 0) {
