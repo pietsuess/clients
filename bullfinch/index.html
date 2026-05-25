@@ -41,7 +41,7 @@
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
       <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen presentation">
-        <img class="splash__sequence" id="splash-sequence" src="logo-seq/Logo_To_Ball_00007.png" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
+        <img class="splash__sequence" id="splash-sequence" src="logo-seq/Logo_To_Ball_00007.png?v=2" alt="" aria-hidden="true" decoding="async" fetchpriority="high" />
       </button>
     </div>
 
@@ -192,8 +192,9 @@
         if (!splash || !button || !sequence) return;
 
         var frames = [];
+        var frameVersion = "v=2";
         for (var i = 7; i <= 28; i++) {
-          frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png");
+          frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?" + frameVersion);
         }
         var loadedFrames = frames.map(function (src) {
           var img = new Image();
@@ -221,9 +222,7 @@
           var holdLastFrame = 180;
           function tick(now) {
             var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
-            if (loadedFrames[frameIndex].complete && loadedFrames[frameIndex].naturalWidth) {
-              sequence.src = loadedFrames[frameIndex].src;
-            }
+            sequence.src = loadedFrames[frameIndex].src;
             if (frameIndex < frames.length - 1) {
               requestAnimationFrame(tick);
             } else {
