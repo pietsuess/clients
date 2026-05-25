@@ -611,6 +611,16 @@
     lineAlphaA[en * 2]     = 0;
     lineAlphaA[en * 2 + 1] = 0;
   }
+  for (var mi = 0; mi < PARTICLE_POOL; mi++) {
+    if (!networkMoteSet[mi]) {
+      alphas[mi] = 0.0;
+      sizes[mi] = 0.0;
+      glows[mi] = 0.0;
+    }
+  }
+  partGeo.attributes.aAlpha.needsUpdate = true;
+  partGeo.attributes.aSize.needsUpdate = true;
+  partGeo.attributes.aGlow.needsUpdate = true;
 
   // aSpark: per-vertex flash decay (set to 1.0 on the frame an edge latches,
   // decays each frame). Drives a brief alpha + tint spike when a line lands.
