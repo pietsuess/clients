@@ -258,7 +258,7 @@
           return panelTriggers[4].start + (panelTriggers[4].end - panelTriggers[4].start) * 0.88;
         },
         end: function () {
-          return redReveal ? redReveal.offsetTop - window.innerHeight * 0.2 : ScrollTrigger.maxScroll(window) - 36;
+          return redReveal ? redReveal.offsetTop - window.innerHeight * 0.72 : ScrollTrigger.maxScroll(window) - 36;
         },
         scrub: true,
         invalidateOnRefresh: true,
@@ -271,13 +271,13 @@
     if (redReveal && window.bullfinchCanopy.setRedRevealProgress) {
       ScrollTrigger.create({
         trigger: redReveal,
-        start: "top bottom",
+        start: "top top",
         end: "bottom bottom",
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
           window.bullfinchCanopy.setRedRevealProgress(self.progress);
-          document.body.classList.toggle("is-red-stage", self.progress > 0.24);
+          document.body.classList.toggle("is-red-stage", self.progress > 0.06);
         },
       });
     }

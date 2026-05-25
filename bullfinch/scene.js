@@ -1383,18 +1383,18 @@
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
 
-      var redFillIn = smoothstep(0.24, 0.78, redRevealProgress);
+      var redFillIn = smoothstep(0.10, 0.82, redRevealProgress);
       redFill.visible = redFillIn > 0.002;
       if (redFill.visible) {
         redFill.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
         redFill.quaternion.copy(camera.quaternion);
         redFill.scale.setScalar(0.05 + redFillIn * 8.8);
-        redFillMat.opacity = smoothstep(0.18, 0.34, redRevealProgress);
+        redFillMat.opacity = smoothstep(0.06, 0.22, redRevealProgress);
       } else {
         redFillMat.opacity = 0;
       }
 
-      var redStageActive = redRevealProgress > 0.22;
+      var redStageActive = redRevealProgress > 0.06;
       particles.visible = !redStageActive;
       redParticles.visible = !redStageActive;
       lineSegments.visible = !redStageActive;
@@ -1403,7 +1403,7 @@
       clickShockwave.visible = !redStageActive;
 
       if (logoTextGroup && logoTextMat) {
-        var logoIn = smoothstep(0.34, 0.82, logoTextProgress);
+        var logoIn = smoothstep(0.36, 0.88, logoTextProgress);
         logoTextGroup.visible = logoIn > 0.002;
         logoTextMat.opacity = logoIn * 0.95;
         logoTextMat.color.lerpColors(readCssColor("--ink"), new THREE.Color("#FFFFFF"), redFillIn);
