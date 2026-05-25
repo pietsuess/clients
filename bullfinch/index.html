@@ -62,11 +62,11 @@
             <span class="hero__line hero__line--2">The market is ready to see it.</span>
           </h1>
         </div>
-        <button class="hero__scroll-cue" type="button" aria-label="Scroll to observations" data-scroll-target="#swot">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <div class="hero__scroll-cue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="m6 9 6 6 6-6" />
           </svg>
-        </button>
+        </div>
       </section>
 
       <section class="swot" id="swot" aria-label="Four observations">
@@ -206,12 +206,18 @@
           }
         }
 
+        function updateScrollIndicator() {
+          document.body.classList.toggle("has-scrolled", window.scrollY > 8);
+        }
+
         document.addEventListener("click", function (event) {
           var trigger = event.target.closest("[data-scroll-target]");
           if (!trigger) return;
           event.preventDefault();
           scrollToTarget(trigger.getAttribute("data-scroll-target"));
         });
+        window.addEventListener("scroll", updateScrollIndicator, { passive: true });
+        updateScrollIndicator();
       })();
     </script>
     <script>

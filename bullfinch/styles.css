@@ -384,11 +384,17 @@ body.is-mote-hovering {
   z-index: 3;
   opacity: 0;
   transform: translate(-50%, 8px);
+  pointer-events: none;
 }
 body.has-entered .hero__scroll-cue {
   opacity: 0.72;
   transform: translate(-50%, 0);
   transition-delay: 980ms;
+}
+body.has-scrolled .hero__scroll-cue {
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition-delay: 0ms;
 }
 body.has-entered .hero__scroll-cue:hover {
   opacity: 1;
