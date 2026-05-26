@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+
+    <title>Bullfinch Earth - Below-canopy ground truth.</title>
+    <meta name="description" content="Ground truth for the nature economy." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bullfinch Earth - Below-canopy ground truth." />
+    <meta property="og:description" content="Ground truth for the nature economy." />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Bullfinch Earth - Below-canopy ground truth." />
+    <meta name="twitter:description" content="Ground truth for the nature economy." />
+    <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
+
+    <script>
+      (function () {
+        if ("scrollRestoration" in history) {
+          history.scrollRestoration = "manual";
+        }
+        window.scrollTo(0, 0);
+        try {
+          var saved = localStorage.getItem("bullfinch-pitch-theme");
+          var theme = saved === "light" || saved === "dark" ? saved : "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="splash" id="splash" aria-label="Begin presentation">
+      <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen presentation">
+        <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
+      </button>
+    </div>
+
+    <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+
+    <header class="site-nav" aria-label="Website navigation">
+      <a class="site-nav__brand" href="#page" data-scroll-target="#page" aria-label="Bullfinch Earth home">
+        <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+          <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+          <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+        </svg>
+      </a>
+      <nav class="site-nav__links" aria-label="Primary">
+        <a href="#problem" data-scroll-target="#problem" aria-label="01 Canopy">01</a>
+        <a href="#product" data-scroll-target="#product" aria-label="02 Sensor layer">02</a>
+        <a href="#opportunity" data-scroll-target="#opportunity" aria-label="03 Opportunity">03</a>
+        <a href="#data" data-scroll-target="#data" aria-label="04 Data layer">04</a>
+        <a href="#proof" data-scroll-target="#proof" aria-label="05 Proof">05</a>
+        <a href="#team" data-scroll-target="#team" aria-label="06 Team">06</a>
+        <a href="#decisions" data-scroll-target="#decisions" aria-label="07 Decisions">07</a>
+        <a href="#closing" data-scroll-target="#closing" aria-label="Contact">Contact</a>
+      </nav>
+    </header>
+
+    <main id="page">
+      <section class="hero" aria-label="Hero">
+        <div class="hero__inner">
+          <p class="hero__eyebrow">
+            <svg class="hero__eyebrow-mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+              <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+              <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+            </svg>
+            <span>BELOW-CANOPY GROUND TRUTH &middot; BULLFINCH EARTH</span>
+          </p>
+          <h1 class="hero__title">
+            <span class="hero__line hero__line--1">Ground truth for</span>
+            <span class="hero__line hero__line--2">the nature economy.</span>
+          </h1>
+        </div>
+        <div class="hero__scroll-cue" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </section>
+
+      <section class="swot" id="swot" aria-label="Four observations">
+        <article class="panel panel--media" id="problem" data-panel="1">
+          <div class="panel__video panel__video--film" aria-label="Video placeholder">
+            <iframe
+              class="panel__video-media"
+              title="Bullfinch Earth video"
+              src="https://www.youtube.com/embed/OuesN29J-t0?si=F8MozPscvRWdcIXK&amp;rel=0&amp;origin=https%3A%2F%2Fwww.bullfinch.earth"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin"
+            ></iframe>
+            <a class="panel__video-fallback" href="https://www.youtube.com/watch?v=OuesN29J-t0" target="_blank" rel="noopener" aria-label="Watch Bullfinch Earth video on YouTube">
+              <img src="https://img.youtube.com/vi/OuesN29J-t0/hqdefault.jpg" alt="" />
+              <span>Watch video</span>
+            </a>
+            <div class="panel__video-inner">
+              <svg class="panel__video-mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+                <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+                <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+              </svg>
+              <p>FIELD FILM PLACEHOLDER</p>
+            </div>
+          </div>
+          <div class="panel__inner">
+            <p class="panel__eyebrow">01 &middot; CANOPY</p>
+            <h2 class="panel__verdict">The forest data stack still starts with a tape measure.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Canopy.</span> Satellites, drones, and LiDAR model the forest from above, but they still need field data to know what is actually there.</p>
+              <p><span class="lead">Ground.</span> Today's foundation is sparse manual plots: people walking transects, measuring trees, and entering observations by hand.</p>
+              <p><span class="lead">Bullfinch.</span> Wearable sensors turn field work already happening below the canopy into continuous, plant-level ecological data.</p>
+            </div>
+            <p class="panel__numeric">SATELLITES &middot; LIDAR &middot; MODELS &middot; STILL NEED GROUND TRUTH</p>
+          </div>
+        </article>
+
+        <article class="panel panel--media" id="product" data-panel="2">
+          <div class="panel__video panel__model" aria-label="Temporary 3D object placeholder">
+            <canvas id="block-wing-model" class="panel__model-canvas"></canvas>
+          </div>
+          <div class="panel__inner">
+            <p class="panel__eyebrow">02 &middot; SENSOR LAYER</p>
+            <h2 class="panel__verdict">Wearable sensing for the people already in the forest.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Capture.</span> Sensors collect below-canopy observations while foresters and land teams do their regular work.</p>
+              <p><span class="lead">Classify.</span> Edge AI resolves those observations into structured signals for species, inventory, biodiversity, and forest condition.</p>
+              <p><span class="lead">Connect.</span> The output becomes a ground-truth layer for registries, insurers, certifiers, land managers, and financial institutions.</p>
+            </div>
+            <p class="panel__numeric">WEARABLE SENSORS &middot; EDGE AI &middot; PLANT-LEVEL RESOLUTION</p>
+          </div>
+        </article>
+
+        <article class="panel" id="opportunity" data-panel="3">
+          <div class="panel__inner">
+            <p class="panel__eyebrow">03 &middot; OPPORTUNITY</p>
+            <h2 class="panel__verdict">Invest in the ground layer. Or start with a pilot.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Investor.</span> Request materials that frame Bullfinch as below-canopy data infrastructure for the nature economy.</p>
+              <p><span class="lead">Pilot.</span> Start with a forestry, MRV, biodiversity, or land-stewardship use case where field data already matters.</p>
+              <p><span class="lead">Team.</span> Talk directly with the people building the product, validating it in the field, and taking it to market.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel" id="data" data-panel="4">
+          <div class="panel__inner">
+            <p class="panel__eyebrow">04 &middot; DATA LAYER</p>
+            <h2 class="panel__verdict">From forester movement to nature-data infrastructure.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Forester.</span> The wearer moves through real terrain at the pace of work, not the pace of a separate survey day.</p>
+              <p><span class="lead">Sensor.</span> Below-canopy observations accumulate continuously, creating a denser record than isolated plots can provide.</p>
+              <p><span class="lead">API.</span> Bullfinch is building toward the API for nature data: a repeatable ground layer that other systems can trust.</p>
+            </div>
+            <p class="panel__numeric">FORESTER &middot; SENSOR &middot; EDGE AI &middot; API FOR NATURE DATA</p>
+          </div>
+        </article>
+
+        <article class="panel" id="proof" data-panel="5">
+          <div class="panel__inner">
+            <p class="panel__eyebrow">05 &middot; PROOF</p>
+            <h2 class="panel__verdict">Built in the field, not just in the lab.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Validation.</span> Northern Hardwoods Research Institute is running Bullfinch in the field to validate species classification and inventory accuracy.</p>
+              <p><span class="lead">Support.</span> NRC IRAP and Conservation X Labs give the work credible early-stage signal.</p>
+              <p><span class="lead">Market.</span> A peer-selected Forest Business Accelerator award points to real forestry relevance, not just climate-tech language.</p>
+            </div>
+            <p class="panel__numeric">NHRI &middot; NRC IRAP &middot; CONSERVATION X LABS &middot; FOREST BUSINESS ACCELERATOR</p>
+          </div>
+        </article>
+
+        <article class="panel panel--media" id="team" data-panel="6">
+          <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
+            <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
+              <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+              <figcaption>Seth Sternberg &middot; CEO</figcaption>
+            </figure>
+            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+              <img src="assets/graham-headshot.png" alt="Graham Smith" />
+              <figcaption>Graham Smith &middot; COO</figcaption>
+            </figure>
+            <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
+              <img src="assets/tim-headshot.gif" alt="Tim Goodsall, PhD" />
+              <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
+            </figure>
+          </div>
+          <div class="panel__inner">
+            <p class="panel__eyebrow">06 &middot; TEAM</p>
+            <h2 class="panel__verdict">The technical risk is real. So is the technical team.</h2>
+            <div class="panel__evidence">
+              <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth.</button> CEO with AR, VR, IoT, wearables, AI, sensor-fusion depth, and hundreds of millions of shipped products.</p>
+              <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham.</button> COO with BC field operations, ecologically sensitive sites, finance, and customer account fluency.</p>
+              <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim.</button> CTO and PhD astrophysicist with advanced imaging and sensing depth: NASA, climate tech, Oxford, Cambridge, and cameras operating on Mars.</p>
+            </div>
+            <p class="panel__numeric">MARS CAMERAS &middot; 300M PRODUCTS &middot; BC FIELD OPERATIONS</p>
+          </div>
+        </article>
+
+
+
+        <article class="panel" id="decisions" data-panel="7">
+          <div class="panel__inner">
+            <p class="panel__eyebrow">07 &middot; DECISIONS</p>
+            <h2 class="panel__verdict">One ground-truth layer. Many decisions.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Forestry.</span> Faster, denser inventory data for teams managing forests at operational scale.</p>
+              <p><span class="lead">Carbon.</span> Better biomass and field validation inputs for MRV systems that cannot rely on canopy models alone.</p>
+              <p><span class="lead">Biodiversity.</span> Repeatable plant-level monitoring for restoration, invasive species, land stewardship, wildfire risk, and forest health.</p>
+            </div>
+            <p class="panel__numeric">FORESTRY &middot; CARBON &middot; BIODIVERSITY &middot; LAND STEWARDSHIP</p>
+          </div>
+        </article>
+
+
+      </section>
+
+      <section class="closing" id="closing" aria-label="Closing">
+        <div class="closing__inner">
+          <svg class="closing__logo bullfinch-mark" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+            <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+            <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+          </svg>
+          <h2 class="closing__title">
+            <span class="closing__line closing__line--1">See the forest</span>
+            <span class="closing__line closing__line--2">from the ground up.</span>
+          </h2>
+          <div class="contact-actions closing__actions">
+            <a href="https://www.bullfinch.earth/_files/ugd/f39c20_30de8a6a942548779f0315c032564511.pdf" target="_blank" rel="noopener">Benefit statement</a>
+            <a href="mailto:hello@bullfinch.earth?subject=Pilot%20conversation">Discuss a pilot</a>
+            <a href="mailto:hello@bullfinch.earth?subject=General%20contact">Contact the team</a>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer" id="site-footer">
+        <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
+        <p class="site-footer__line">BULLFINCH EARTH &middot; SALTSPRING ISLAND &middot; BELOW-CANOPY GROUND TRUTH</p>
+        <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 15 6-6 6 6" />
+          </svg>
+        </button>
+      </footer>
+    </main>
+
+    <div class="bio-modal" id="team-bio-modal" hidden role="dialog" aria-modal="true" aria-labelledby="team-bio-title">
+      <div class="bio-modal__backdrop" data-bio-close></div>
+      <section class="bio-modal__panel" role="document">
+        <button class="bio-modal__close" type="button" aria-label="Close team bio" data-bio-close>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+        <img class="bio-modal__photo" id="team-bio-photo" src="" alt="" />
+        <div class="bio-modal__content">
+          <p class="bio-modal__eyebrow">Team bio</p>
+          <h2 class="bio-modal__title" id="team-bio-title"></h2>
+          <p class="bio-modal__body" id="team-bio-body"></p>
+        </div>
+      </section>
+    </div>
+
+    <button
+      id="theme-toggle"
+      class="theme-toggle"
+      type="button"
+      aria-label="Switch to dark theme"
+      aria-pressed="false"
+    >
+      <span class="theme-toggle__glyph theme-toggle__glyph--sun" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <line x1="12" y1="2" x2="12" y2="4" />
+          <line x1="12" y1="20" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="4" y2="12" />
+          <line x1="20" y1="12" x2="22" y2="12" />
+          <line x1="4.6" y1="4.6" x2="6" y2="6" />
+          <line x1="18" y1="18" x2="19.4" y2="19.4" />
+          <line x1="4.6" y1="19.4" x2="6" y2="18" />
+          <line x1="18" y1="6" x2="19.4" y2="4.6" />
+        </svg>
+      </span>
+      <span class="theme-toggle__glyph theme-toggle__glyph--moon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" />
+        </svg>
+      </span>
+    </button>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="assets/block-wing-obj.js"></script>
+    <script src="theme.js"></script>
+    <script src="scroll.js"></script>
+    <script src="scene.js"></script>
+    <script src="block-wing-renderer.js"></script>
+    <script src="swot.js"></script>
+    <script>
+      if (window.location.protocol === "file:") {
+        document.body.classList.add("is-file-protocol");
+      }
+    </script>
+    <script>
+      (function () {
+        function scrollToTarget(selector) {
+          var target = document.querySelector(selector);
+          if (!target) return;
+          var destination = target;
+          if (selector === "#page") {
+            destination = 0;
+          } else if (selector === "#closing") {
+            destination = target.offsetTop + window.innerHeight * 0.42;
+          } else if (target.classList && target.classList.contains("panel") && typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh();
+            var panelTrigger = ScrollTrigger.getAll().find(function (trigger) {
+              return trigger.trigger === target && trigger.pin === target;
+            });
+            if (panelTrigger) {
+              destination = panelTrigger.start + (panelTrigger.end - panelTrigger.start) * 0.68;
+            } else {
+              destination = target.offsetTop + window.innerHeight * 1.36;
+            }
+          }
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(destination);
+          } else {
+            if (typeof destination === "number") {
+              window.scrollTo({ top: destination, behavior: "smooth" });
+            } else {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        }
+
+        function updateScrollIndicator() {
+          document.body.classList.toggle("has-scrolled", window.scrollY > 8);
+        }
+
+        document.addEventListener("click", function (event) {
+          var trigger = event.target.closest("[data-scroll-target]");
+          if (!trigger) return;
+          event.preventDefault();
+          scrollToTarget(trigger.getAttribute("data-scroll-target"));
+        });
+        window.addEventListener("scroll", updateScrollIndicator, { passive: true });
+        updateScrollIndicator();
+      })();
+    </script>
+    <script>
+      (function () {
+        var modal = document.getElementById("team-bio-modal");
+        var title = document.getElementById("team-bio-title");
+        var body = document.getElementById("team-bio-body");
+        var photo = document.getElementById("team-bio-photo");
+        if (!modal || !title || !body || !photo) return;
+
+        var bios = {
+          seth: {
+            title: "Seth Sternberg · CEO",
+            photo: "assets/seth-headshot.png",
+            body: "Seth brings nearly two decades of experience turning research technologies into scalable products across AR, VR, IoT, wearables, AI, and sensor fusion, with hundreds of millions of products in market. He has worked as both a product leader and software engineer, and holds a mathematics degree with a physics minor from the University of Maryland.",
+          },
+          graham: {
+            title: "Graham Smith · COO",
+            photo: "assets/graham-headshot.png",
+            body: "Graham brings practical field experience from managing construction projects in ecologically sensitive areas along the coast of British Columbia, along with five years as an account manager in finance. For Graham, Bullfinch sits at the intersection of ecology and industry, helping clients build deeper relationships with nature.",
+          },
+          tim: {
+            title: "Tim Goodsall, PhD · CTO",
+            photo: "assets/tim-headshot.gif",
+            body: "Tim is a PhD astrophysicist with more than 15 years in advanced imaging and sensing, spanning NASA, commercial climate technology, Oxford, and Cambridge. He built cameras currently operating on Mars and has delivered major improvements in space-hardware testing and qualification.",
+          },
+        };
+        var lastTrigger = null;
+
+        function openBio(key, trigger) {
+          var bio = bios[key];
+          if (!bio) return;
+          lastTrigger = trigger || document.activeElement;
+          title.textContent = bio.title;
+          body.textContent = bio.body;
+          photo.src = bio.photo;
+          photo.alt = bio.title;
+          modal.hidden = false;
+          document.body.classList.add("is-bio-open");
+          var closeButton = modal.querySelector("[data-bio-close]");
+          if (closeButton) closeButton.focus();
+        }
+
+        function closeBio() {
+          modal.hidden = true;
+          document.body.classList.remove("is-bio-open");
+          if (lastTrigger && typeof lastTrigger.focus === "function") {
+            lastTrigger.focus();
+          }
+        }
+
+        document.addEventListener("click", function (event) {
+          var trigger = event.target.closest("[data-bio-person]");
+          if (trigger) {
+            event.preventDefault();
+            openBio(trigger.getAttribute("data-bio-person"), trigger);
+            return;
+          }
+          if (event.target.closest("[data-bio-close]")) {
+            event.preventDefault();
+            closeBio();
+          }
+        });
+
+        document.addEventListener("keydown", function (event) {
+          var trigger = event.target.closest && event.target.closest("[data-bio-person]");
+          if (trigger && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openBio(trigger.getAttribute("data-bio-person"), trigger);
+            return;
+          }
+          if (!modal.hidden && event.key === "Escape") {
+            closeBio();
+          }
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        var splash = document.getElementById("splash");
+        var button = document.getElementById("splash-button");
+        var sequence = document.getElementById("splash-sequence");
+        if (!splash || !button || !sequence) return;
+        var sequenceCtx = sequence.getContext("2d");
+        if (!sequenceCtx) return;
+
+        var frames = [];
+        var frameVersion = "v=3";
+        for (var i = 7; i <= 28; i++) {
+          frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?" + frameVersion);
+        }
+        var loadedFrames = frames.map(function (src) {
+          var img = new Image();
+          img.decoding = "async";
+          img.src = src;
+          return img;
+        });
+        var isPlaying = false;
+
+        function drawFrame(index) {
+          var img = loadedFrames[index];
+          if (!img || !img.complete || !img.naturalWidth) return;
+          sequenceCtx.clearRect(0, 0, sequence.width, sequence.height);
+          sequenceCtx.drawImage(img, 0, 0, sequence.width, sequence.height);
+        }
+
+        loadedFrames[0].addEventListener("load", function () { drawFrame(0); }, { once: true });
+        if (loadedFrames[0].complete) drawFrame(0);
+
+        function resetSplash() {
+          isPlaying = false;
+          splash.hidden = false;
+          splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
+          document.body.classList.remove("has-entered", "has-scrolled");
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(0, { immediate: true });
+          } else {
+            window.scrollTo(0, 0);
+          }
+          drawFrame(0);
+        }
+
+        function enter() {
+          splash.classList.add("is-leaving");
+          window.setTimeout(function () {
+            splash.hidden = true;
+          }, 180);
+        }
+
+        function beginHandoff() {
+          document.body.classList.add("has-entered");
+          splash.classList.add("is-sequence-done");
+          document.dispatchEvent(new CustomEvent("bullfinch:splashcomplete"));
+          window.setTimeout(enter, 860);
+        }
+
+        function playSequence() {
+          if (isPlaying) return;
+          isPlaying = true;
+          drawFrame(0);
+          splash.classList.add("is-playing");
+          var start = performance.now();
+          var frameDuration = 1000 / 12;
+          var holdLastFrame = 180;
+          function tick(now) {
+            var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
+            drawFrame(frameIndex);
+            if (frameIndex < frames.length - 1) {
+              requestAnimationFrame(tick);
+            } else {
+              window.setTimeout(beginHandoff, holdLastFrame);
+            }
+          }
+          requestAnimationFrame(tick);
+        }
+
+        window.addEventListener("pageshow", function (event) {
+          resetSplash();
+        });
+
+        button.addEventListener("click", function () {
+          var root = document.documentElement;
+          var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+          if (request) {
+            try {
+              var result = request.call(root);
+              if (result && result.then) result.then(playSequence).catch(playSequence);
+              else playSequence();
+            } catch (e) {
+              playSequence();
+            }
+          } else {
+            playSequence();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
