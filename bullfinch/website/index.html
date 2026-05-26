@@ -53,7 +53,7 @@
     <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
 
     <header class="site-nav" aria-label="Website navigation">
-      <a class="site-nav__brand" href="#page" data-scroll-target="#page" aria-label="Bullfinch Earth home">
+      <a class="site-nav__brand" href="./" data-restart-splash aria-label="Restart Bullfinch Earth">
         <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
           <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
           <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
@@ -353,6 +353,12 @@
         }
 
         document.addEventListener("click", function (event) {
+          var restart = event.target.closest("[data-restart-splash]");
+          if (restart) {
+            event.preventDefault();
+            window.location.replace(window.location.pathname + window.location.search);
+            return;
+          }
           var trigger = event.target.closest("[data-scroll-target]");
           if (!trigger) return;
           event.preventDefault();
