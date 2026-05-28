@@ -219,8 +219,9 @@
     }
 
     .splash__sequence {
-      width: clamp(104px, 12vw, 180px);
-      aspect-ratio: 10 / 7;
+      width: clamp(132px, 13vw, 212px);
+      height: auto;
+      aspect-ratio: 1 / 1;
       display: block;
       opacity: 1;
       pointer-events: none;
@@ -302,15 +303,16 @@
     }
 
     .section {
-      min-height: 92svh;
+      min-height: 104svh;
       display: grid;
       align-items: center;
-      padding: clamp(72px, 12vh, 144px) 0;
+      padding: clamp(96px, 16vh, 184px) 0;
       border-top: 1px solid var(--rule-soft);
     }
 
     .section--short {
       min-height: auto;
+      padding: clamp(84px, 12vh, 132px) 0;
     }
 
     .section__head {
@@ -541,6 +543,102 @@
       background: var(--red);
     }
 
+    .connector {
+      position: relative;
+      width: min(100%, var(--max));
+      height: clamp(140px, 20vh, 220px);
+      margin: 0 auto;
+      padding: 0 var(--pad);
+      pointer-events: none;
+    }
+
+    .connector__rail {
+      position: absolute;
+      left: calc(var(--pad) + clamp(120px, 18vw, 260px));
+      top: 18px;
+      bottom: 18px;
+      width: 1px;
+      background: rgba(255, 85, 96, 0.12);
+    }
+
+    .connector__draw {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1px;
+      height: 100%;
+      background: var(--red);
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+
+    .connector__dot,
+    .connector__target {
+      position: absolute;
+      left: -5px;
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: var(--red);
+      box-shadow: 0 0 0 0 rgba(255, 85, 96, 0.38);
+    }
+
+    .connector__dot {
+      top: -5px;
+    }
+
+    .connector__target {
+      bottom: -5px;
+      opacity: 0.28;
+      transition: opacity 360ms ease 720ms, box-shadow 520ms ease 720ms;
+    }
+
+    .connector__arrow {
+      position: absolute;
+      left: -5px;
+      top: calc(100% - 20px);
+      width: 11px;
+      height: 11px;
+      border-right: 1px solid var(--red);
+      border-bottom: 1px solid var(--red);
+      transform: translateY(-22px) rotate(45deg);
+      opacity: 0;
+    }
+
+    .connector__label {
+      position: absolute;
+      left: calc(var(--pad) + clamp(120px, 18vw, 260px) + 28px);
+      bottom: 10px;
+      color: var(--quiet);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .connector.is-visible .connector__draw {
+      animation: drawDown 1100ms cubic-bezier(0.2, 0.72, 0.12, 1) forwards;
+    }
+
+    .connector.is-visible .connector__arrow {
+      animation: arrowDown 1100ms cubic-bezier(0.2, 0.72, 0.12, 1) forwards;
+    }
+
+    .connector.is-visible .connector__target {
+      opacity: 1;
+      box-shadow: 0 0 0 16px rgba(255, 85, 96, 0);
+    }
+
+    @keyframes drawDown {
+      to { transform: scaleY(1); }
+    }
+
+    @keyframes arrowDown {
+      0% { opacity: 0; transform: translateY(-22px) rotate(45deg); }
+      18% { opacity: 1; }
+      100% { opacity: 1; transform: translateY(0) rotate(45deg); }
+    }
+
     @media (max-width: 980px) {
       .hero,
       .section__head,
@@ -552,6 +650,14 @@
       .grid,
       .grid--four {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .connector__rail {
+        left: calc(var(--pad) + 22px);
+      }
+
+      .connector__label {
+        left: calc(var(--pad) + 50px);
       }
 
       .sticky-note {
@@ -635,9 +741,9 @@
       </svg>
     </a>
     <div class="nav__links" aria-hidden="true">
-      <a href="#scope">Scope</a>
+      <a href="#scope">01</a>
       <a href="#film">Film</a>
-      <a href="#website">Website</a>
+      <a href="#website">System</a>
       <a href="#pricing">Pricing</a>
       <a href="#terms">Terms</a>
     </div>
@@ -659,35 +765,55 @@
       <div class="frame">
         <div class="section__head">
           <div>
-            <div class="eyebrow">01 / What This Phase Does</div>
-            <h2>Turn the pitch into a working public system.</h2>
+            <div class="eyebrow">Phase 01 / Website</div>
+            <h2>Build the public site around the story we have already proven.</h2>
           </div>
-          <p>The current build establishes the feeling: dark field space, red convergence, data moving through the forest, and a serious investor-facing cadence. This phase keeps that language and gives Bullfinch the actual market surface around it.</p>
+          <p>The first phase is the website: taking the pitch's strongest visual language and turning it into a clear public-facing system for investors, pilot partners, and technical evaluators. The job is not just to make pages. It is to make the Bullfinch field intelligence system immediately understandable, credible, and worth acting on.</p>
         </div>
-        <div class="grid grid--four">
+        <div class="grid">
           <article class="cell">
-            <div class="cell__num">Website</div>
-            <h3>Public launch site</h3>
-            <p>A refined site architecture that carries the pitch flow into a clearer product, investor, pilot, and team story.</p>
+            <div class="cell__num">Architecture</div>
+            <h3>Investor and pilot paths</h3>
+            <p>Rework the narrative so investors, research partners, and pilot customers each understand where they are in the story and what action to take next.</p>
           </article>
           <article class="cell">
-            <div class="cell__num">Film</div>
-            <h3>Wearable field film</h3>
-            <p>Short field-led video showing the wearable in context, with motion graphics explaining the data layer it creates.</p>
+            <div class="cell__num">Product</div>
+            <h3>Wearable system story</h3>
+            <p>Explain what the wearable captures, why below-canopy ground truth matters, and how field work becomes continuous plant-level ecological data.</p>
           </article>
           <article class="cell">
-            <div class="cell__num">Brand Kit</div>
-            <h3>System for consistency</h3>
-            <p>Logo, type, colour, motion, image, layout, and copy rules so the site and collateral feel like one company.</p>
+            <div class="cell__num">Proof</div>
+            <h3>Field credibility</h3>
+            <p>Bring team bios, validation, pilot context, technical proof, downloadable materials, and benefit language into one coherent trust layer.</p>
           </article>
           <article class="cell">
-            <div class="cell__num">Sales Tools</div>
-            <h3>Materials that close</h3>
-            <p>Investor and pilot materials that make the ask clear, make the benefits legible, and reduce custom explanation.</p>
+            <div class="cell__num">Motion</div>
+            <h3>Interactive continuity</h3>
+            <p>Carry forward the splash, dark field, red dots, arrows, convergence, and scroll rhythm so the site feels like the natural next form of the pitch.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Responsive</div>
+            <h3>Mobile translation</h3>
+            <p>Keep the motion and mood, but simplify layout density, navigation, object placement, and type scale for smaller screens.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Launch</div>
+            <h3>QA and deployment</h3>
+            <p>Prepare the site for real review: optimized media, favicon, browser testing, resource links, analytics readiness, and deployment support.</p>
           </article>
         </div>
       </div>
     </section>
+
+    <div class="connector" aria-hidden="true">
+      <div class="connector__rail">
+        <span class="connector__dot"></span>
+        <span class="connector__draw"></span>
+        <span class="connector__arrow"></span>
+        <span class="connector__target"></span>
+      </div>
+      <span class="connector__label">Next / Field Film</span>
+    </div>
 
     <section class="section" id="film">
       <div class="frame split">
@@ -733,49 +859,59 @@
       </div>
     </section>
 
+    <div class="connector" aria-hidden="true">
+      <div class="connector__rail">
+        <span class="connector__dot"></span>
+        <span class="connector__draw"></span>
+        <span class="connector__arrow"></span>
+        <span class="connector__target"></span>
+      </div>
+      <span class="connector__label">Next / Scope System</span>
+    </div>
+
     <section class="section" id="website">
       <div class="frame">
         <div class="section__head">
           <div>
-            <div class="eyebrow">03 / Website Scope</div>
-            <h2>Keep the motion. Clarify the offer.</h2>
+            <div class="eyebrow">03 / Scope System</div>
+            <h2>Connect the website, film, and sales materials into one launch system.</h2>
           </div>
-          <p>The site should preserve the current scroll rhythm, red dot convergence, dark environmental field, and cinematic entrance, while making the audience, proof, product, and next actions easier to understand.</p>
+          <p>After the website foundation is clear, the remaining work gives Bullfinch the supporting material around it: field footage, product animation, brand rules, benefit language, and sales materials that all speak in the same voice.</p>
         </div>
-        <div class="grid">
+        <div class="grid grid--four">
           <article class="cell">
-            <div class="cell__num">Architecture</div>
-            <h3>Investor and pilot paths</h3>
-            <p>Rework the narrative so investors, research partners, and pilot customers each know where they are in the story.</p>
+            <div class="cell__num">Film</div>
+            <h3>Wearable field film</h3>
+            <p>Show the device in real terrain and make the technology feel practical, embodied, and already moving toward the field.</p>
           </article>
           <article class="cell">
-            <div class="cell__num">Product</div>
-            <h3>Wearable system story</h3>
-            <p>Add clear explanations of what the wearable captures, why ground truth matters, and how data becomes useful.</p>
+            <div class="cell__num">Animation</div>
+            <h3>Data movement</h3>
+            <p>Visualize the path from human movement to sensor capture, edge intelligence, ecological signal, and trusted data output.</p>
           </article>
           <article class="cell">
-            <div class="cell__num">Proof</div>
-            <h3>Field credibility</h3>
-            <p>Bring in team bios, pilots, technical validation, research references, and downloadable benefit materials.</p>
+            <div class="cell__num">Brand Kit</div>
+            <h3>Consistent system</h3>
+            <p>Define the practical visual, motion, copy, and layout rules that keep the site, decks, and one-pagers aligned.</p>
           </article>
           <article class="cell">
-            <div class="cell__num">Motion</div>
-            <h3>Interactive continuity</h3>
-            <p>Extend the pitch's arrow, mote, shockwave, splash, and scrolling system into a stable production site.</p>
-          </article>
-          <article class="cell">
-            <div class="cell__num">Responsive</div>
-            <h3>Mobile translation</h3>
-            <p>Retain animation and pacing while simplifying layout density, navigation, object placement, and text scale on mobile.</p>
-          </article>
-          <article class="cell">
-            <div class="cell__num">Launch</div>
-            <h3>QA and deployment</h3>
-            <p>Browser testing, asset optimization, favicon, hosting path, analytics readiness, and final client review loop.</p>
+            <div class="cell__num">Sales Tools</div>
+            <h3>Materials that close</h3>
+            <p>Give investors and pilot partners concise, downloadable material that makes the benefit and next step easy to share.</p>
           </article>
         </div>
       </div>
     </section>
+
+    <div class="connector" aria-hidden="true">
+      <div class="connector__rail">
+        <span class="connector__dot"></span>
+        <span class="connector__draw"></span>
+        <span class="connector__arrow"></span>
+        <span class="connector__target"></span>
+      </div>
+      <span class="connector__label">Next / Brand Kit</span>
+    </div>
 
     <section class="section">
       <div class="frame split">
@@ -820,6 +956,16 @@
         </div>
       </div>
     </section>
+
+    <div class="connector" aria-hidden="true">
+      <div class="connector__rail">
+        <span class="connector__dot"></span>
+        <span class="connector__draw"></span>
+        <span class="connector__arrow"></span>
+        <span class="connector__target"></span>
+      </div>
+      <span class="connector__label">Next / Pricing</span>
+    </div>
 
     <section class="section section--short" id="pricing">
       <div class="frame">
@@ -879,6 +1025,16 @@
         </div>
       </div>
     </section>
+
+    <div class="connector" aria-hidden="true">
+      <div class="connector__rail">
+        <span class="connector__dot"></span>
+        <span class="connector__draw"></span>
+        <span class="connector__arrow"></span>
+        <span class="connector__target"></span>
+      </div>
+      <span class="connector__label">Next / Expenses</span>
+    </div>
 
     <section class="section section--short">
       <div class="frame">
@@ -946,6 +1102,16 @@
       </div>
     </section>
 
+    <div class="connector" aria-hidden="true">
+      <div class="connector__rail">
+        <span class="connector__dot"></span>
+        <span class="connector__draw"></span>
+        <span class="connector__arrow"></span>
+        <span class="connector__target"></span>
+      </div>
+      <span class="connector__label">Next / Contract</span>
+    </div>
+
     <section class="section" id="terms">
       <div class="frame split">
         <aside class="sticky-note">
@@ -957,8 +1123,8 @@
           <article class="line-item">
             <div class="line-item__id">Phase 01</div>
             <div>
-              <h3>Strategy and production plan</h3>
-              <p>Finalize site map, page objectives, film outline, brand kit outline, production schedule, and source asset list.</p>
+              <h3>Website foundation</h3>
+              <p>Build the public site structure, refine the page story, translate the pitch motion language, and prepare the first launch-ready web experience.</p>
             </div>
             <div class="price">Week 1</div>
           </article>
@@ -1001,7 +1167,7 @@
         <div class="callout">
           <h2>Next step: approve the package, lock the production calendar, and gather source assets.</h2>
           <div class="buttons">
-            <a href="mailto:piet@pietsuess.com?subject=Bullfinch%20Earth%20Project%20Brief">Request contract</a>
+            <a href="#terms">Request contract</a>
             <a href="#pricing">Review pricing</a>
             <a href="#film">Review film scope</a>
           </div>
@@ -1113,6 +1279,30 @@
         } else {
           playSequence();
         }
+      });
+    })();
+
+    (function () {
+      var connectors = Array.prototype.slice.call(document.querySelectorAll(".connector"));
+      if (!connectors.length) return;
+
+      if (!("IntersectionObserver" in window)) {
+        connectors.forEach(function (connector) {
+          connector.classList.add("is-visible");
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.34 });
+
+      connectors.forEach(function (connector) {
+        observer.observe(connector);
       });
     })();
   </script>
