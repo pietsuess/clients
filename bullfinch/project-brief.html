@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bullfinch Earth | Project Brief + Investment</title>
+  <meta name="description" content="Client-facing project brief, scope, contract overview, expenses, and pricing for Bullfinch Earth.">
+  <link rel="icon" href="website/assets/bullfinch-logo.svg" type="image/svg+xml">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #050505;
+      --panel: rgba(255, 255, 255, 0.035);
+      --ink: #f8f8f6;
+      --muted: #9b9b97;
+      --quiet: #5f5f5b;
+      --rule: rgba(255, 255, 255, 0.12);
+      --rule-soft: rgba(255, 255, 255, 0.07);
+      --red: #ff5560;
+      --red-deep: #e63946;
+      --pad: clamp(24px, 5vw, 76px);
+      --max: 1480px;
+      --mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --sans: "Geist", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html {
+      color: var(--ink);
+      background: var(--bg);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 85, 96, 0.14), transparent 22vw),
+        radial-gradient(circle at 72% 8%, rgba(160, 160, 150, 0.14), transparent 28vw),
+        linear-gradient(180deg, #1a1a18 0%, #0a0a09 42%, #020202 100%);
+      animation: cloudShift 24s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(180deg, transparent 0%, black 18%, black 82%, transparent 100%);
+      opacity: 0.7;
+    }
+
+    @keyframes cloudShift {
+      from { filter: saturate(0.82) brightness(0.92); transform: scale(1); }
+      to { filter: saturate(1.04) brightness(1.08); transform: scale(1.045) translate3d(-1.5vw, -1.2vh, 0); }
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 32px;
+      padding: 22px var(--pad);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      backdrop-filter: blur(18px);
+    }
+
+    .mark {
+      width: 24px;
+      height: 24px;
+      color: var(--red);
+    }
+
+    .nav__links {
+      display: flex;
+      gap: clamp(18px, 3vw, 48px);
+    }
+
+    .nav__links a {
+      color: var(--quiet);
+      transition: color 180ms ease;
+    }
+
+    .nav__links a:hover {
+      color: var(--ink);
+    }
+
+    .frame {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 0 var(--pad);
+    }
+
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.52fr);
+      gap: clamp(40px, 8vw, 124px);
+      align-items: end;
+      padding-top: 132px;
+      padding-bottom: clamp(48px, 8vh, 96px);
+    }
+
+    .kicker,
+    .eyebrow {
+      color: var(--red);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.02;
+      text-wrap: balance;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin-top: 22px;
+      font-size: clamp(64px, 10.5vw, 168px);
+    }
+
+    h2 {
+      font-size: clamp(44px, 7.2vw, 112px);
+    }
+
+    h3 {
+      font-size: clamp(25px, 3vw, 44px);
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      text-wrap: pretty;
+    }
+
+    .lead {
+      max-width: 560px;
+      color: var(--ink);
+      font-size: clamp(20px, 2vw, 30px);
+      line-height: 1.18;
+      letter-spacing: -0.01em;
+    }
+
+    .hero__meta {
+      display: grid;
+      gap: 28px;
+      padding-bottom: 12px;
+    }
+
+    .hero__total {
+      border-top: 1px solid var(--rule);
+      padding-top: 20px;
+    }
+
+    .total-number {
+      display: block;
+      margin-top: 8px;
+      color: var(--ink);
+      font-size: clamp(38px, 5vw, 78px);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .section {
+      min-height: 92svh;
+      display: grid;
+      align-items: center;
+      padding: clamp(72px, 12vh, 144px) 0;
+      border-top: 1px solid var(--rule-soft);
+    }
+
+    .section--short {
+      min-height: auto;
+    }
+
+    .section__head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(300px, 0.62fr);
+      gap: clamp(32px, 7vw, 96px);
+      align-items: end;
+      margin-bottom: clamp(40px, 7vh, 88px);
+    }
+
+    .section__head p {
+      font-size: clamp(18px, 1.45vw, 24px);
+      line-height: 1.32;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--rule);
+      border-left: 1px solid var(--rule);
+    }
+
+    .grid--four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .cell {
+      min-height: 280px;
+      padding: clamp(22px, 2.4vw, 36px);
+      border-right: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      background: rgba(255, 255, 255, 0.018);
+    }
+
+    .cell__num {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 40px;
+      color: var(--quiet);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .cell__num::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--red);
+      box-shadow: 0 0 0 0 rgba(255, 85, 96, 0.38);
+      animation: pulse 2.8s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 85, 96, 0.42); }
+      100% { box-shadow: 0 0 0 18px rgba(255, 85, 96, 0); }
+    }
+
+    .cell h3 {
+      margin-bottom: 20px;
+      max-width: 12ch;
+    }
+
+    .cell p,
+    .fine {
+      font-size: 15px;
+      line-height: 1.48;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.6fr) minmax(0, 1fr);
+      gap: clamp(36px, 7vw, 112px);
+      align-items: start;
+    }
+
+    .sticky-note {
+      position: sticky;
+      top: 108px;
+      display: grid;
+      gap: 18px;
+      padding-top: 8px;
+    }
+
+    .list {
+      display: grid;
+      border-top: 1px solid var(--rule);
+    }
+
+    .line-item {
+      display: grid;
+      grid-template-columns: 100px minmax(0, 1fr) minmax(170px, 0.32fr);
+      gap: 28px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--rule-soft);
+      align-items: baseline;
+    }
+
+    .line-item__id {
+      color: var(--red);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .line-item h3 {
+      margin-bottom: 8px;
+      font-size: clamp(23px, 2.2vw, 36px);
+      letter-spacing: -0.015em;
+    }
+
+    .price {
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .table {
+      border-top: 1px solid var(--rule);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px 160px;
+      gap: 28px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--rule-soft);
+      align-items: baseline;
+    }
+
+    .row--head {
+      color: var(--quiet);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .row strong {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .row span:nth-child(2),
+    .row span:nth-child(3) {
+      text-align: right;
+    }
+
+    .row--total {
+      padding-top: 28px;
+      color: var(--ink);
+      font-size: clamp(23px, 2.4vw, 40px);
+      letter-spacing: -0.01em;
+    }
+
+    .callout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+      gap: clamp(32px, 6vw, 84px);
+      align-items: end;
+      padding: clamp(28px, 4vw, 56px) 0;
+      border-top: 1px solid var(--red);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .callout h2 {
+      max-width: 900px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: flex-end;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .buttons a {
+      color: var(--ink);
+      padding-bottom: 8px;
+      border-bottom: 1px solid transparent;
+      transition: color 180ms ease, border-color 180ms ease;
+    }
+
+    .buttons a:hover {
+      color: var(--red);
+      border-color: var(--red);
+    }
+
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 32px var(--pad);
+      color: var(--quiet);
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      border-top: 1px solid var(--rule-soft);
+    }
+
+    .accent-line {
+      position: relative;
+    }
+
+    .accent-line::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -16px;
+      width: min(340px, 42vw);
+      height: 1px;
+      background: var(--red);
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .section__head,
+      .split,
+      .callout {
+        grid-template-columns: 1fr;
+      }
+
+      .grid,
+      .grid--four {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .sticky-note {
+        position: static;
+      }
+
+      .price {
+        text-align: left;
+      }
+
+      .line-item {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .line-item .price {
+        grid-column: 2;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .nav {
+        position: absolute;
+        align-items: flex-start;
+      }
+
+      .nav__links {
+        display: none;
+      }
+
+      .grid,
+      .grid--four {
+        grid-template-columns: 1fr;
+      }
+
+      .cell {
+        min-height: auto;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .row span:nth-child(2),
+      .row span:nth-child(3) {
+        text-align: left;
+      }
+
+      .buttons {
+        justify-content: flex-start;
+      }
+
+      .foot {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Project brief navigation">
+    <a href="#top" aria-label="Bullfinch project brief top">
+      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="25" fill="currentColor"></circle>
+        <path d="M32 11c9.7 0 17.9 6.4 20.4 15.2C45.6 25.3 39 27.7 34 32.6c-5.7 5.6-8.1 13.3-7.2 20.7C17.7 51 11 42.6 11 32c0-11.6 9.4-21 21-21Z" fill="#050505" opacity="0.9"></path>
+      </svg>
+    </a>
+    <div class="nav__links" aria-hidden="true">
+      <a href="#scope">Scope</a>
+      <a href="#film">Film</a>
+      <a href="#website">Website</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#terms">Terms</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <header class="frame hero">
+      <div>
+        <div class="kicker">Bullfinch Earth / Client Brief</div>
+        <h1>Next phase project brief and investment.</h1>
+      </div>
+      <div class="hero__meta">
+        <p class="lead">A production plan for moving the current interactive pitch language into a client-ready website, field film, wearable animation, brand kit, and launch support system.</p>
+        <div class="hero__total">
+          <div class="eyebrow">Recommended Project Budget</div>
+          <span class="total-number">$56,500</span>
+          <p class="fine">Includes strategy, website expansion, film and animation production, brand kit, sales collateral, launch QA, and a working production expense allowance. Applicable tax not included.</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="section" id="scope">
+      <div class="frame">
+        <div class="section__head">
+          <div>
+            <div class="eyebrow">01 / What This Phase Does</div>
+            <h2>Turn the pitch into a working public system.</h2>
+          </div>
+          <p>The current build establishes the feeling: dark field space, red convergence, data moving through the forest, and a serious investor-facing cadence. This phase keeps that language and gives Bullfinch the actual market surface around it.</p>
+        </div>
+        <div class="grid grid--four">
+          <article class="cell">
+            <div class="cell__num">Website</div>
+            <h3>Public launch site</h3>
+            <p>A refined site architecture that carries the pitch flow into a clearer product, investor, pilot, and team story.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Film</div>
+            <h3>Wearable field film</h3>
+            <p>Short field-led video showing the wearable in context, with motion graphics explaining the data layer it creates.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Brand Kit</div>
+            <h3>System for consistency</h3>
+            <p>Logo, type, colour, motion, image, layout, and copy rules so the site and collateral feel like one company.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Sales Tools</div>
+            <h3>Materials that close</h3>
+            <p>Investor and pilot materials that make the ask clear, make the benefits legible, and reduce custom explanation.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="film">
+      <div class="frame split">
+        <aside class="sticky-note">
+          <div class="eyebrow">02 / Field Film</div>
+          <h2 class="accent-line">Make the wearable feel real.</h2>
+          <p>The film should not feel like generic climate technology. It should feel like field work becoming measurable, continuous, and trusted.</p>
+        </aside>
+        <div class="list">
+          <article class="line-item">
+            <div class="line-item__id">Film 01</div>
+            <div>
+              <h3>Concept, script, and shot plan</h3>
+              <p>Define the core story, scene order, voiceover or text structure, required field moments, product closeups, and data animation beats.</p>
+            </div>
+            <div class="price">$2,500</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Film 02</div>
+            <div>
+              <h3>Field capture direction</h3>
+              <p>Shot list and remote or on-site production direction for wearable use, forest movement, hand details, device behaviour, and team presence.</p>
+            </div>
+            <div class="price">$4,500</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Film 03</div>
+            <div>
+              <h3>Wearable and data animation</h3>
+              <p>Motion sequences showing the sensor layer, plant-level signal capture, field-to-model flow, and the shift from manual plots to continuous data.</p>
+            </div>
+            <div class="price">$5,500</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Film 04</div>
+            <div>
+              <h3>Edit, sound, and delivery</h3>
+              <p>One primary cut, short social or meeting cutdowns, sound design, music direction, subtitles, compression, and web-ready exports.</p>
+            </div>
+            <div class="price">$4,000</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="website">
+      <div class="frame">
+        <div class="section__head">
+          <div>
+            <div class="eyebrow">03 / Website Scope</div>
+            <h2>Keep the motion. Clarify the offer.</h2>
+          </div>
+          <p>The site should preserve the current scroll rhythm, red dot convergence, dark environmental field, and cinematic entrance, while making the audience, proof, product, and next actions easier to understand.</p>
+        </div>
+        <div class="grid">
+          <article class="cell">
+            <div class="cell__num">Architecture</div>
+            <h3>Investor and pilot paths</h3>
+            <p>Rework the narrative so investors, research partners, and pilot customers each know where they are in the story.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Product</div>
+            <h3>Wearable system story</h3>
+            <p>Add clear explanations of what the wearable captures, why ground truth matters, and how data becomes useful.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Proof</div>
+            <h3>Field credibility</h3>
+            <p>Bring in team bios, pilots, technical validation, research references, and downloadable benefit materials.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Motion</div>
+            <h3>Interactive continuity</h3>
+            <p>Extend the pitch's arrow, mote, shockwave, splash, and scrolling system into a stable production site.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Responsive</div>
+            <h3>Mobile translation</h3>
+            <p>Retain animation and pacing while simplifying layout density, navigation, object placement, and text scale on mobile.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Launch</div>
+            <h3>QA and deployment</h3>
+            <p>Browser testing, asset optimization, favicon, hosting path, analytics readiness, and final client review loop.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="frame split">
+        <aside class="sticky-note">
+          <div class="eyebrow">04 / Brand Kit</div>
+          <h2 class="accent-line">A smaller kit with real force.</h2>
+          <p>This is not a giant brand book. It is the practical system Bullfinch needs so every public touchpoint feels intentional.</p>
+        </aside>
+        <div class="list">
+          <article class="line-item">
+            <div class="line-item__id">Brand 01</div>
+            <div>
+              <h3>Positioning language</h3>
+              <p>Core description, audience-specific statements, investor promise, pilot promise, proof language, and short boilerplate.</p>
+            </div>
+            <div class="price">$2,000</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Brand 02</div>
+            <div>
+              <h3>Visual system</h3>
+              <p>Colour, typography, logo usage, spacing, buttons, image treatment, data line language, and practical interface examples.</p>
+            </div>
+            <div class="price">$3,500</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Brand 03</div>
+            <div>
+              <h3>Motion and media rules</h3>
+              <p>Guidance for dots, arrows, shockwaves, cloud fields, product reveals, video framing, and data animation rhythm.</p>
+            </div>
+            <div class="price">$1,500</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Brand 04</div>
+            <div>
+              <h3>Templates and handoff</h3>
+              <p>Simple slide, one-page brief, benefits sheet, and web content patterns for ongoing investor and pilot communication.</p>
+            </div>
+            <div class="price">$1,000</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--short" id="pricing">
+      <div class="frame">
+        <div class="section__head">
+          <div>
+            <div class="eyebrow">05 / Detailed Pricing</div>
+            <h2>Recommended contract overview.</h2>
+          </div>
+          <p>Pricing is structured as a single coherent phase so the website, film, animation, brand kit, and sales materials can inform each other instead of becoming disconnected deliverables.</p>
+        </div>
+        <div class="table" aria-label="Recommended pricing table">
+          <div class="row row--head">
+            <span>Scope Area</span>
+            <span>Fee</span>
+            <span>Notes</span>
+          </div>
+          <div class="row">
+            <span><strong>Interactive prototype and site foundation already built</strong><br><span class="fine">Current pitch language, splash, motion, scroll story, nav, team modal, and public site foundation.</span></span>
+            <span>$14,000</span>
+            <span>Baseline value</span>
+          </div>
+          <div class="row">
+            <span><strong>Website V2 expansion</strong><br><span class="fine">Expanded narrative, sections, responsive work, proof, resources, investor and pilot paths, polish, QA, deploy.</span></span>
+            <span>$18,000</span>
+            <span>Core build</span>
+          </div>
+          <div class="row">
+            <span><strong>Field film and wearable animation</strong><br><span class="fine">Concept, script, field direction, animation, edit, sound, cutdowns, and web exports.</span></span>
+            <span>$16,500</span>
+            <span>Production</span>
+          </div>
+          <div class="row">
+            <span><strong>Brand kit and language system</strong><br><span class="fine">Positioning language, visual rules, motion rules, templates, and handoff guide.</span></span>
+            <span>$8,000</span>
+            <span>System</span>
+          </div>
+          <div class="row">
+            <span><strong>Benefits statement and investor materials</strong><br><span class="fine">Benefit sheet, pilot one-pager, investor-facing PDF structure, CTA language, and resource integration.</span></span>
+            <span>$5,000</span>
+            <span>Collateral</span>
+          </div>
+          <div class="row">
+            <span><strong>Project direction, meetings, production management</strong><br><span class="fine">Creative direction, timeline management, stakeholder reviews, vendor coordination, and approvals.</span></span>
+            <span>$4,000</span>
+            <span>Management</span>
+          </div>
+          <div class="row">
+            <span><strong>Production expense allowance</strong><br><span class="fine">Travel buffer, licensing, stock or music, compression tools, extra hosting assets, and production incidentals.</span></span>
+            <span>$5,000</span>
+            <span>Allowance</span>
+          </div>
+          <div class="row row--total">
+            <span><strong>Recommended total</strong></span>
+            <span><strong>$56,500</strong></span>
+            <span>Plus tax</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--short">
+      <div class="frame">
+        <div class="section__head">
+          <div>
+            <div class="eyebrow">06 / Expense Detail</div>
+            <h2>Expenses stay visible.</h2>
+          </div>
+          <p>The allowance keeps the contract clean while still giving room for the real production costs around film, music, web media, and final exports.</p>
+        </div>
+        <div class="grid grid--four">
+          <article class="cell">
+            <div class="cell__num">Travel</div>
+            <h3>Field movement</h3>
+            <p>Local transport, meals, small production movement, or partial travel support if a field shoot is required.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Licensing</div>
+            <h3>Music and media</h3>
+            <p>Music, sound design elements, image references, or stock inserts if Bullfinch does not supply enough footage.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Assets</div>
+            <h3>Web and motion</h3>
+            <p>Compression, conversion, model preparation, export tooling, or small paid utilities required for launch quality.</p>
+          </article>
+          <article class="cell">
+            <div class="cell__num">Buffer</div>
+            <h3>Production margin</h3>
+            <p>A controlled reserve for reasonable unknowns. Unused allowance can be removed or redirected by agreement.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="terms">
+      <div class="frame split">
+        <aside class="sticky-note">
+          <div class="eyebrow">07 / Contract Shape</div>
+          <h2 class="accent-line">Clear phases, clear approvals.</h2>
+          <p>The contract should protect the momentum of the work and make review moments obvious.</p>
+        </aside>
+        <div class="list">
+          <article class="line-item">
+            <div class="line-item__id">Phase 01</div>
+            <div>
+              <h3>Strategy and production plan</h3>
+              <p>Finalize site map, page objectives, film outline, brand kit outline, production schedule, and source asset list.</p>
+            </div>
+            <div class="price">Week 1</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Phase 02</div>
+            <div>
+              <h3>Website and brand system build</h3>
+              <p>Develop the V2 website, refine copy, produce brand kit foundations, and prepare visual and motion patterns.</p>
+            </div>
+            <div class="price">Weeks 2-4</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Phase 03</div>
+            <div>
+              <h3>Film, animation, and collateral</h3>
+              <p>Capture or integrate footage, build animation, edit film, produce benefits statement, and align sales materials.</p>
+            </div>
+            <div class="price">Weeks 4-7</div>
+          </article>
+          <article class="line-item">
+            <div class="line-item__id">Phase 04</div>
+            <div>
+              <h3>Launch, QA, and handoff</h3>
+              <p>Final testing, deploy support, asset handoff, PDF exports, site documentation, and launch-ready review.</p>
+            </div>
+            <div class="price">Week 8</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--short">
+      <div class="frame">
+        <div class="callout">
+          <h2>Recommended approval structure: 50 percent start, 25 percent after V2 site review, 25 percent at launch handoff.</h2>
+          <div>
+            <p>Two review rounds are included for each major deliverable. Additional work, major content rewrites after approval, new page types, extra shoot days, or major animation changes can be scoped separately.</p>
+          </div>
+        </div>
+        <div class="callout">
+          <h2>Next step: approve the package, lock the production calendar, and gather source assets.</h2>
+          <div class="buttons">
+            <a href="mailto:piet@pietsuess.com?subject=Bullfinch%20Earth%20Project%20Brief">Request contract</a>
+            <a href="#pricing">Review pricing</a>
+            <a href="#film">Review film scope</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Bullfinch Earth / Project Brief</span>
+    <span>Piet Suess / Salt Spring Island / 2026</span>
+  </footer>
+</body>
+</html>
