@@ -100,12 +100,30 @@
       letter-spacing: 0.18em;
       text-transform: uppercase;
       backdrop-filter: blur(18px);
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: opacity 420ms ease, transform 420ms ease, color 180ms ease;
+    }
+
+    body.has-entered .nav {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .mark {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
+      width: 58px;
+      height: 42px;
+      display: block;
+    }
+
+    .bullfinch-mark__dark {
+      fill: var(--ink);
+    }
+
+    .bullfinch-mark__red {
+      fill: #d21a10;
     }
 
     .nav__links {
@@ -126,6 +144,96 @@
       width: min(100%, var(--max));
       margin: 0 auto;
       padding: 0 var(--pad);
+    }
+
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      color: #050505;
+      transition:
+        background-color 960ms cubic-bezier(0.2, 0.7, 0.18, 1),
+        opacity 180ms ease,
+        visibility 180ms ease;
+    }
+
+    .splash::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse 70% 55% at 50% 46%,
+          rgba(216, 201, 168, 0.22),
+          transparent 72%
+        );
+      opacity: 1;
+      transition: opacity 760ms ease;
+    }
+
+    .splash.is-sequence-done {
+      background: rgba(255, 255, 255, 0);
+      pointer-events: none;
+    }
+
+    .splash.is-sequence-done::before {
+      opacity: 0;
+    }
+
+    .splash.is-leaving {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash__button {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 24px;
+      justify-items: center;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      transition:
+        transform 820ms cubic-bezier(0.18, 0.72, 0.16, 1),
+        opacity 220ms ease 600ms;
+    }
+
+    .splash__button:hover {
+      transform: scale(1.035);
+    }
+
+    .splash__button:active {
+      transform: scale(0.99);
+    }
+
+    .splash.is-sequence-done .splash__button {
+      opacity: 0;
+      transform: translateX(58vw);
+    }
+
+    .splash__sequence {
+      width: clamp(104px, 12vw, 180px);
+      aspect-ratio: 10 / 7;
+      display: block;
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .splash__title {
+      color: #050505;
+      font-family: var(--mono);
+      font-size: clamp(12px, 1.1vw, 16px);
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      line-height: 1;
+      text-transform: uppercase;
     }
 
     .hero {
@@ -512,9 +620,19 @@
   </style>
 </head>
 <body>
+  <div class="splash" id="splash" aria-label="Begin project scope">
+    <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen project scope">
+      <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
+      <span class="splash__title">Project Scope</span>
+    </button>
+  </div>
+
   <nav class="nav" aria-label="Project brief navigation">
     <a href="#top" aria-label="Bullfinch project brief top">
-      <img class="mark" src="website/bullfinch-mark.svg" alt="Bullfinch Earth">
+      <svg class="mark bullfinch-mark" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"></path>
+        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"></path>
+      </svg>
     </a>
     <div class="nav__links" aria-hidden="true">
       <a href="#scope">Scope</a>
@@ -896,5 +1014,107 @@
     <span>Bullfinch Earth / Project Brief</span>
     <span>Piet Suess / Salt Spring Island / 2026</span>
   </footer>
+  <script>
+    (function () {
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+      window.scrollTo(0, 0);
+
+      var splash = document.getElementById("splash");
+      var button = document.getElementById("splash-button");
+      var sequence = document.getElementById("splash-sequence");
+      if (!splash || !button || !sequence) return;
+
+      var ctx = sequence.getContext("2d");
+      if (!ctx) return;
+
+      var frames = [];
+      var frameVersion = "v=3";
+      for (var i = 7; i <= 28; i++) {
+        frames.push("website/logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?" + frameVersion);
+      }
+
+      var loadedFrames = frames.map(function (src) {
+        var img = new Image();
+        img.decoding = "async";
+        img.src = src;
+        return img;
+      });
+
+      var isPlaying = false;
+
+      function drawFrame(index) {
+        var img = loadedFrames[index];
+        if (!img || !img.complete || !img.naturalWidth) return;
+        ctx.clearRect(0, 0, sequence.width, sequence.height);
+        ctx.drawImage(img, 0, 0, sequence.width, sequence.height);
+      }
+
+      loadedFrames[0].addEventListener("load", function () { drawFrame(0); }, { once: true });
+      if (loadedFrames[0].complete) drawFrame(0);
+
+      function resetSplash() {
+        isPlaying = false;
+        splash.hidden = false;
+        splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
+        document.body.classList.remove("has-entered");
+        window.scrollTo(0, 0);
+        drawFrame(0);
+      }
+
+      function enter() {
+        splash.classList.add("is-leaving");
+        window.setTimeout(function () {
+          splash.hidden = true;
+        }, 180);
+      }
+
+      function beginHandoff() {
+        document.body.classList.add("has-entered");
+        splash.classList.add("is-sequence-done");
+        window.setTimeout(enter, 860);
+      }
+
+      function playSequence() {
+        if (isPlaying) return;
+        isPlaying = true;
+        drawFrame(0);
+        splash.classList.add("is-playing");
+        var start = performance.now();
+        var frameDuration = 1000 / 12;
+        var holdLastFrame = 180;
+
+        function tick(now) {
+          var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
+          drawFrame(frameIndex);
+          if (frameIndex < frames.length - 1) {
+            requestAnimationFrame(tick);
+          } else {
+            window.setTimeout(beginHandoff, holdLastFrame);
+          }
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      window.addEventListener("pageshow", resetSplash);
+      button.addEventListener("click", function () {
+        var root = document.documentElement;
+        var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+        if (request) {
+          try {
+            var result = request.call(root);
+            if (result && result.then) result.then(playSequence).catch(playSequence);
+            else playSequence();
+          } catch (e) {
+            playSequence();
+          }
+        } else {
+          playSequence();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
