@@ -103,9 +103,9 @@
     }
 
     .mark {
-      width: 24px;
-      height: 24px;
-      color: var(--red);
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
     }
 
     .nav__links {
@@ -160,17 +160,17 @@
     }
 
     h1 {
-      max-width: 980px;
+      max-width: 840px;
       margin-top: 22px;
-      font-size: clamp(64px, 10.5vw, 168px);
+      font-size: clamp(48px, 7.2vw, 118px);
     }
 
     h2 {
-      font-size: clamp(44px, 7.2vw, 112px);
+      font-size: clamp(34px, 5.2vw, 78px);
     }
 
     h3 {
-      font-size: clamp(25px, 3vw, 44px);
+      font-size: clamp(22px, 2.35vw, 34px);
     }
 
     p {
@@ -180,10 +180,10 @@
     }
 
     .lead {
-      max-width: 560px;
+      max-width: 620px;
       color: var(--ink);
-      font-size: clamp(20px, 2vw, 30px);
-      line-height: 1.18;
+      font-size: clamp(18px, 1.65vw, 25px);
+      line-height: 1.24;
       letter-spacing: -0.01em;
     }
 
@@ -191,20 +191,6 @@
       display: grid;
       gap: 28px;
       padding-bottom: 12px;
-    }
-
-    .hero__total {
-      border-top: 1px solid var(--rule);
-      padding-top: 20px;
-    }
-
-    .total-number {
-      display: block;
-      margin-top: 8px;
-      color: var(--ink);
-      font-size: clamp(38px, 5vw, 78px);
-      line-height: 0.95;
-      letter-spacing: -0.03em;
     }
 
     .section {
@@ -379,6 +365,10 @@
       letter-spacing: -0.01em;
     }
 
+    .expense-table {
+      margin-top: clamp(28px, 4vw, 56px);
+    }
+
     .callout {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
@@ -524,10 +514,7 @@
 <body>
   <nav class="nav" aria-label="Project brief navigation">
     <a href="#top" aria-label="Bullfinch project brief top">
-      <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
-        <circle cx="32" cy="32" r="25" fill="currentColor"></circle>
-        <path d="M32 11c9.7 0 17.9 6.4 20.4 15.2C45.6 25.3 39 27.7 34 32.6c-5.7 5.6-8.1 13.3-7.2 20.7C17.7 51 11 42.6 11 32c0-11.6 9.4-21 21-21Z" fill="#050505" opacity="0.9"></path>
-      </svg>
+      <img class="mark" src="website/bullfinch-mark.svg" alt="Bullfinch Earth">
     </a>
     <div class="nav__links" aria-hidden="true">
       <a href="#scope">Scope</a>
@@ -542,15 +529,11 @@
     <header class="frame hero">
       <div>
         <div class="kicker">Bullfinch Earth / Client Brief</div>
-        <h1>Next phase project brief and investment.</h1>
+        <h1>Bullfinch Earth launch system.</h1>
       </div>
       <div class="hero__meta">
-        <p class="lead">A production plan for moving the current interactive pitch language into a client-ready website, field film, wearable animation, brand kit, and launch support system.</p>
-        <div class="hero__total">
-          <div class="eyebrow">Recommended Project Budget</div>
-          <span class="total-number">$56,500</span>
-          <p class="fine">Includes strategy, website expansion, film and animation production, brand kit, sales collateral, launch QA, and a working production expense allowance. Applicable tax not included.</p>
-        </div>
+        <p class="lead">Project brief and production investment for the public website, field film, wearable data animation, brand kit, and investor-ready launch materials.</p>
+        <p class="fine">The product being described is the Bullfinch field intelligence system: wearable sensing that turns real forest work into continuous plant-level ecological data.</p>
       </div>
     </header>
 
@@ -737,12 +720,12 @@
           </div>
           <div class="row">
             <span><strong>Interactive prototype and site foundation already built</strong><br><span class="fine">Current pitch language, splash, motion, scroll story, nav, team modal, and public site foundation.</span></span>
-            <span>$14,000</span>
-            <span>Baseline value</span>
+            <span>Previously built</span>
+            <span>Reference</span>
           </div>
           <div class="row">
             <span><strong>Website V2 expansion</strong><br><span class="fine">Expanded narrative, sections, responsive work, proof, resources, investor and pilot paths, polish, QA, deploy.</span></span>
-            <span>$18,000</span>
+            <span>$12,000</span>
             <span>Core build</span>
           </div>
           <div class="row">
@@ -772,7 +755,7 @@
           </div>
           <div class="row row--total">
             <span><strong>Recommended total</strong></span>
-            <span><strong>$56,500</strong></span>
+            <span><strong>$50,500</strong></span>
             <span>Plus tax</span>
           </div>
         </div>
@@ -809,6 +792,38 @@
             <h3>Production margin</h3>
             <p>A controlled reserve for reasonable unknowns. Unused allowance can be removed or redirected by agreement.</p>
           </article>
+        </div>
+        <div class="table expense-table" aria-label="Production expense allowance">
+          <div class="row row--head">
+            <span>Expense Item</span>
+            <span>Allowance</span>
+            <span>Notes</span>
+          </div>
+          <div class="row">
+            <span><strong>Travel and field movement</strong></span>
+            <span>$1,500</span>
+            <span>Allowance</span>
+          </div>
+          <div class="row">
+            <span><strong>Music, sound, and media licensing</strong></span>
+            <span>$1,000</span>
+            <span>Allowance</span>
+          </div>
+          <div class="row">
+            <span><strong>Web, motion, and export tooling</strong></span>
+            <span>$1,000</span>
+            <span>Allowance</span>
+          </div>
+          <div class="row">
+            <span><strong>Production buffer</strong></span>
+            <span>$1,500</span>
+            <span>Allowance</span>
+          </div>
+          <div class="row row--total">
+            <span><strong>Expense allowance total</strong></span>
+            <span><strong>$5,000</strong></span>
+            <span>Included above</span>
+          </div>
         </div>
       </div>
     </section>
