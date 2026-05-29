@@ -218,6 +218,33 @@
     }
   }
 
+  // ===== Product case: size model to the space left above the text =======
+  // The text is bottom-anchored in CSS so it is ALWAYS fully on screen. Measure
+  // the text block and size the model to fill everything above it — as large as
+  // possible without pushing the text off-screen. Mobile only; desktop keeps
+  // its own side-by-side layout.
+  var productPanel = document.getElementById("product");
+  var productInner = productPanel && productPanel.querySelector(".panel__inner");
+  var caseModel = document.querySelector(".case-fixed-layer.panel__model");
+  function layoutProductCase() {
+    if (!caseModel) return;
+    if (!mobileLike) { caseModel.style.height = ""; return; }
+    if (!productInner) return;
+    var vh = window.innerHeight;
+    var textH = productInner.offsetHeight;   // includes its 4vh padding-bottom
+    var panelPadBottom = 24;                 // .panel padding
+    var gap = Math.round(vh * 0.02);
+    var modelH = vh - panelPadBottom - textH - gap;
+    modelH = Math.max(150, Math.min(modelH, Math.round(vh * 0.72)));
+    caseModel.style.height = modelH + "px";
+  }
+  layoutProductCase();
+  window.addEventListener("resize", layoutProductCase);
+  window.addEventListener("load", layoutProductCase);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(layoutProductCase);
+  }
+
   // ===== Closing section reveal ==========================================
   var closing = document.querySelector(".closing");
   if (closing) {

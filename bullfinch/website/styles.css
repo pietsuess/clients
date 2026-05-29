@@ -991,25 +991,26 @@ body.is-file-protocol .panel__video-fallback {
     max-width: none;
     height: auto;
   }
-  /* Product panel = two proportional regions, sized by viewport height so it
-     adapts to ANY screen (not device-tuned px):
-       - case_anim fills the TOP, cropped at the top edge (model bottom at 50vh)
-       - text fills the REST below it (starts at 52vh) */
+  /* Product panel: the TEXT is bottom-anchored so it is ALWAYS fully on screen
+     (never cut off). The model fills the space ABOVE the text and is sized by
+     JS (layoutProductCase in swot.js) to be as large as possible without
+     pushing the text off-screen — it adapts to the text, not the reverse. */
   #product.panel--media {
-    align-content: start;
+    align-content: end;
   }
   #product .panel__inner {
     grid-column: 1;
     grid-row: 2;
     max-width: min(86vw, 420px);
-    padding-top: 52vh;
+    padding-top: 0;
+    padding-bottom: 4vh;
   }
   .case-fixed-layer.panel__model {
     left: 50%;
-    top: -8vh;            /* crop the model's top against the screen edge */
-    height: 58vh;         /* fills the top region proportional to screen height */
+    top: 0;
+    height: 50vh;         /* fallback until JS measures the text block */
     width: auto;
-    aspect-ratio: 0.9 / 1;
+    aspect-ratio: 1 / 1;  /* match the square 720x720 canvas — no stretch */
     max-width: none;
     transform: translate3d(-50%, 0, 0);
   }
