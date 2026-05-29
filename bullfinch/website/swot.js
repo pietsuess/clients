@@ -186,7 +186,10 @@
     var panelTrigger = ScrollTrigger.create({
       trigger: panel,
       start: "top top",
-      end: "+=200%",
+      // Halve the pin distance on mobile so a thumb scroll covers twice the
+      // choreography (less scrolling to get through each section). Wave timing
+      // references these triggers, so it scales automatically.
+      end: mobileLike ? "+=100%" : "+=200%",
       pin: true,
       pinSpacing: true,
       scrub: true,

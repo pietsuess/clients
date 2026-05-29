@@ -853,8 +853,11 @@
       lineVerts[vB + 1] = hy;
       lineVerts[vB + 2] = hz;
 
+      // No arrowheads on the final convergence (wave 7) — they pointed up/down
+      // depending on where each terminal dot fell, which read as ugly. Just
+      // draw clean lines into the final dot. Cascade waves keep their arrows.
       var arrowVisible = wave === 7
-        ? (strokeProgress > 0.001 ? 0.95 : 0.0)
+        ? 0.0
         : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
@@ -1199,6 +1202,11 @@
       // simply track wherever the motes go.
       var density = uniforms.uMoteDensity.value;
       var fallScale = lerp(1.0, 0.55, density);
+      // Freeze the field as the final convergence engages, so motes don't fall
+      // / respawn mid-convergence (which made the converging lines jump up and
+      // then snap down). The network settles into a stable final image.
+      var fallFreeze = 1 - smoothstep(0.0, 0.18, waveProgress[7] || 0);
+      fallScale *= fallFreeze;
       var finalFade = smoothstep(0.88, 1.0, waveProgress[7] || 0);
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;

@@ -35,7 +35,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-12" />
+    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-13" />
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
@@ -85,7 +85,7 @@
               <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
               <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
             </svg>
-            <span>BELOW-CANOPY GROUND TRUTH &middot; BULLFINCH EARTH</span>
+            <span>BULLFINCH EARTH</span>
           </p>
           <h1 class="hero__title">
             <span class="hero__line hero__line--1">Ground truth for</span>
@@ -275,9 +275,9 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene.js?v=closing-final-viewport-12"></script>
+    <script src="scene.js?v=closing-final-viewport-13"></script>
     <script src="case-animation.js?v=new-case-sequence-1"></script>
-    <script src="swot.js?v=closing-final-viewport-12"></script>
+    <script src="swot.js?v=closing-final-viewport-13"></script>
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
@@ -457,6 +457,18 @@
         if (!splash || !button || !sequence) return;
         var sequenceCtx = sequence.getContext("2d");
         if (!sequenceCtx) return;
+
+        // Center the splash logo against the VISIBLE viewport on every browser.
+        // CSS dvh isn't supported everywhere (e.g. some mobile browsers), which
+        // left the logo sitting low behind the address bar. Pinning the splash
+        // height to window.innerHeight works universally; update on resize so it
+        // stays centered as the address bar shows/hides.
+        function sizeSplash() {
+          splash.style.height = window.innerHeight + "px";
+        }
+        sizeSplash();
+        window.addEventListener("resize", sizeSplash);
+        window.addEventListener("orientationchange", sizeSplash);
 
         var frames = [];
         var frameVersion = "v=3";
