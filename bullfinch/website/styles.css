@@ -318,7 +318,11 @@ body.has-entered.has-scrolled .site-nav {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  height: 100svh;
+  /* Track the DYNAMIC viewport, not the small one. With 100svh, when the mobile
+     address bar hides (e.g. after waking the screen) the visible area is taller
+     than this fixed canvas, leaving a black bar at the bottom. dvh matches the
+     renderer buffer (window.innerHeight) and always covers the visible area. */
+  height: 100dvh;
   z-index: 0;
   pointer-events: none;
   transition: none;

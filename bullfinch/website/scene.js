@@ -1197,6 +1197,19 @@
   var visible = !document.hidden;
   document.addEventListener("visibilitychange", function () {
     visible = !document.hidden;
+    // Returning from a backgrounded tab / woken screen: the viewport may have
+    // changed while we were hidden, leaving the WebGL buffer, ScrollTrigger pin
+    // measurements, and Lenis stale (which shows as a black bar / broken scroll
+    // at the bottom). Re-sync them once layout settles.
+    if (visible) {
+      setTimeout(function () {
+        onResize();
+        if (window.lenis && window.lenis.resize) window.lenis.resize();
+        if (window.ScrollTrigger && window.ScrollTrigger.refresh) {
+          window.ScrollTrigger.refresh();
+        }
+      }, 150);
+    }
   });
 
   // ---- Animation loop --------------------------------------------------
