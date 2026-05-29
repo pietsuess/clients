@@ -20,22 +20,34 @@
     return Math.max(min, Math.min(max, value));
   }
 
+  function fitCanvasToBox() {
+    // Match the canvas buffer to its CSS box (which scales with the available
+    // space) so the art is never stretched when the box is non-square.
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var bw = canvas.clientWidth || 720;
+    var bh = canvas.clientHeight || 720;
+    var tw = Math.round(bw * dpr);
+    var th = Math.round(bh * dpr);
+    if (canvas.width !== tw || canvas.height !== th) {
+      canvas.width = tw;
+      canvas.height = th;
+    }
+  }
+
   function drawImageContained(img) {
+    fitCanvasToBox();
     var cw = canvas.width;
     var ch = canvas.height;
     ctx.clearRect(0, 0, cw, ch);
     if (!img || !img.naturalWidth) return;
 
-    // COVER (fill the canvas, crop the overflow) rather than contain — the
-    // portrait case art was letterboxing inside the square box and reading as
-    // too small. Cover fills the space (centered crop).
-    var scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    // CONTAIN: full aspect, whole frame, no crop, no stretch. Scales with the
+    // box (which scales with the available space).
+    var scale = Math.min(cw / img.naturalWidth, ch / img.naturalHeight);
     var width = img.naturalWidth * scale;
     var height = img.naturalHeight * scale;
     var x = (cw - width) / 2;
-    // Anchor to the BOTTOM so the crop comes off the TOP, keeping the case
-    // bottom in frame (matches the "top cropped" intent).
-    var y = ch - height;
+    var y = (ch - height) / 2;
     ctx.drawImage(img, x, y, width, height);
   }
 
@@ -68,6 +80,10 @@
   }
 
   renderFrame(0);
+  window.addEventListener("resize", function () {
+    renderedFrame = -1;            // force a redraw at the new box size
+    renderFrame(pendingFrame);
+  });
   window.bullfinchCaseAnimation = {
     setScrollProgress: setScrollProgress,
     setFrameProgress: setScrollProgress,

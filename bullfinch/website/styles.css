@@ -1030,16 +1030,15 @@ body.is-file-protocol .panel__video-fallback {
     padding-bottom: 4vh;
   }
   .case-fixed-layer.panel__model {
+    /* Box scales with the available space: 94vw wide (kept < viewport so this
+       fixed element can't create horizontal overflow), height = the region
+       above the text (set by JS). The canvas resolution tracks this box and the
+       art is drawn CONTAIN, so it always stays full-aspect (no crop/stretch). */
     left: 50%;
     top: 0;
-    height: 42vh;         /* conservative fallback until JS measures (no overlap) */
-    width: auto;
-    aspect-ratio: 1 / 1;  /* match the square 720x720 canvas — no stretch */
-    /* CAP the width to the screen. This is position:fixed, so if its square
-       width exceeds the viewport it escapes body overflow-x:hidden and creates
-       horizontal overflow (fixed nav toggle pushed off-edge, black edges,
-       pannable scroll space). 94vw keeps it inside the viewport. */
-    max-width: 94vw;
+    width: 94vw;
+    height: 42vh;         /* fallback until JS measures the region */
+    max-width: none;
     transform: translate3d(-50%, 0, 0);
   }
   .panel__eyebrow {
