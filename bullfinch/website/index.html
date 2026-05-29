@@ -35,7 +35,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-19" />
+    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-20" />
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
@@ -274,10 +274,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene.js?v=closing-final-viewport-19"></script>
+    <script src="scene.js?v=closing-final-viewport-20"></script>
     <script src="case-animation.js?v=new-case-sequence-1"></script>
-    <script src="field-film.js?v=closing-final-viewport-19"></script>
-    <script src="swot.js?v=closing-final-viewport-19"></script>
+    <script src="field-film.js?v=closing-final-viewport-20"></script>
+    <script src="swot.js?v=closing-final-viewport-20"></script>
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
@@ -316,7 +316,11 @@
         }
 
         function updateScrollIndicator() {
-          document.body.classList.toggle("has-scrolled", window.scrollY > 8);
+          // One-way: once scrolled, stay revealed. The nav (and the fullscreen
+          // toggle inside it) is gated on has-scrolled, so removing it when
+          // scroll returns to the top (or a fullscreen toggle resets scroll)
+          // made the nav + toggle vanish. resetSplash clears it on restart.
+          if (window.scrollY > 8) document.body.classList.add("has-scrolled");
         }
 
         document.addEventListener("click", function (event) {
@@ -606,6 +610,21 @@
         document.addEventListener("MSFullscreenChange", updateFullscreenToggle);
         if (fullscreenToggle) fullscreenToggle.addEventListener("click", toggleFullscreen);
         updateFullscreenToggle();
+
+        // Entering/exiting fullscreen changes the viewport. Re-sync the WebGL
+        // buffer, ScrollTrigger pin spacing, and Lenis once it settles, or the
+        // page keeps the old (taller) scroll height and leaves a black strip /
+        // dead scroll space at the bottom.
+        function refreshLayoutAfterViewportChange() {
+          window.dispatchEvent(new Event("resize"));
+          if (window.lenis && window.lenis.resize) window.lenis.resize();
+          if (window.ScrollTrigger && window.ScrollTrigger.refresh) window.ScrollTrigger.refresh();
+        }
+        ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (ev) {
+          document.addEventListener(ev, function () {
+            setTimeout(refreshLayoutAfterViewportChange, 200);
+          });
+        });
 
         button.addEventListener("click", function () {
           var root = document.documentElement;
