@@ -253,6 +253,25 @@
     document.fonts.ready.then(layoutProductCase);
   }
 
+  // ===== Nav scroll-spy ==================================================
+  // Light the nav number for the section currently in view (and clear it when
+  // you leave). Replaces the old behaviour where a tapped link stayed lit.
+  var navLinks = document.querySelectorAll(".site-nav__links a[data-scroll-target]");
+  navLinks.forEach(function (link) {
+    var sel = link.getAttribute("data-scroll-target");
+    var section = sel && document.querySelector(sel);
+    if (!section) return;
+    ScrollTrigger.create({
+      trigger: section,
+      start: "top center",
+      end: "bottom center",
+      invalidateOnRefresh: true,
+      onToggle: function (self) {
+        link.classList.toggle("is-current", self.isActive);
+      },
+    });
+  });
+
   // ===== Closing section reveal ==========================================
   var closing = document.querySelector(".closing");
   if (closing) {

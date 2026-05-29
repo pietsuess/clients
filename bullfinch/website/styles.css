@@ -233,7 +233,15 @@ body.has-entered.has-scrolled .site-nav {
   color: var(--ink-quiet);
   transition: color 200ms ease, opacity 200ms ease;
 }
-.site-nav a:hover {
+/* Real-hover devices only, so a tap on touch doesn't leave the number stuck
+   lit (sticky :hover). The lit state on touch comes from .is-current below. */
+@media (hover: hover) {
+  .site-nav a:hover {
+    color: var(--ink);
+  }
+}
+/* Scroll-spy: the link for the section currently in view stays lit. */
+.site-nav a.is-current {
   color: var(--ink);
 }
 /* ---- Splash ------------------------------------------------------------ */
