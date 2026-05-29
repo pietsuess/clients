@@ -240,6 +240,11 @@ body.has-entered .site-nav {
 .splash {
   position: fixed;
   inset: 0;
+  /* Center against the VISIBLE (dynamic) viewport, not the layout viewport.
+     Without this the logo centers behind the mobile address bar and sits too
+     low until fullscreen hides the bar. dvh tracks the visible area in both
+     states; falls back to inset:0 where dvh is unsupported. */
+  height: 100dvh;
   z-index: 100;
   display: grid;
   place-items: center;
