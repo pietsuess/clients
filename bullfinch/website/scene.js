@@ -745,7 +745,7 @@
   shockwave.frustumCulled = false;
   scene.add(shockwave);
   var shockwaveAge = -1;
-  var SHOCKWAVE_DURATION = 1.55;
+  var SHOCKWAVE_DURATION = 3.0;   // slow, deliberate bloom (time-based, not scroll-bound)
 
   var clickShockwaveMat = shockwaveMat.clone();
   clickShockwaveMat.uniforms = {
@@ -1292,21 +1292,18 @@
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
 
-      // Contact blast is driven entirely by scroll-convergence progress, so
-      // scrubbing in either direction re-shows it smoothly. No fragile
-      // one-frame age trigger. It blooms over 0.72 -> 1.0, then fades to zero
-      // by the time the closing viewport is fully settled.
-      var scrollShockT = Math.max(0, Math.min(1,
-        (previousConvergenceProgress - FINAL_CONVERGENCE_LAND) / (1.0 - FINAL_CONVERGENCE_LAND)));
-      if (previousConvergenceProgress >= FINAL_CONVERGENCE_LAND) {
-        // Linear expansion (no front-loaded ease-out) over a much wider scroll
-        // band (see FINAL_CONVERGENCE_LAND) so the wave reads slow and
-        // deliberate instead of snapping open.
-        var shockEase = scrollShockT;
+      // Contact blast: TIME-based slow bloom, armed by scroll crossing the land
+      // point (see setConvergenceProgress). Plays over SHOCKWAVE_DURATION at a
+      // fixed speed, so it can't be flicked past on a fast scroll. Eases out as
+      // it grows and fades to nothing by the end.
+      if (shockwaveAge >= 0) {
+        shockwaveAge += dt;
+        var shockT = Math.min(1, shockwaveAge / SHOCKWAVE_DURATION);
+        var shockEase = 1 - Math.pow(1 - shockT, 2.4);
         shockwave.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
         shockwave.quaternion.copy(camera.quaternion);
         shockwave.scale.setScalar(0.18 + shockEase * 7.2);
-        var shockFade = 1 - smoothstep(0.82, 1.0, scrollShockT);
+        var shockFade = 1 - smoothstep(0.7, 1.0, shockT);
         shockwaveMat.uniforms.uAlpha.value = shockFade * 0.88;
       } else {
         shockwaveMat.uniforms.uAlpha.value = 0;
@@ -1358,6 +1355,14 @@
   var FINAL_CONVERGENCE_LAND = 0.40;
   function setConvergenceProgress(p) {
     var v = Math.max(0, Math.min(1, p));
+    // Arm the slow blast when scroll first crosses the land point; disarm when
+    // scrolling back below it so it re-plays on the next pass. Plays the full
+    // SHOCKWAVE_DURATION regardless of scroll speed — can't be flicked past.
+    if (previousConvergenceProgress < FINAL_CONVERGENCE_LAND && v >= FINAL_CONVERGENCE_LAND) {
+      shockwaveAge = 0;
+    } else if (v < FINAL_CONVERGENCE_LAND) {
+      shockwaveAge = -1;
+    }
     previousConvergenceProgress = v;
     setWaveProgress(7, v);
   }

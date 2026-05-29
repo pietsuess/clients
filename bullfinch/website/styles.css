@@ -991,6 +991,10 @@ body.is-file-protocol .panel__video-fallback {
     max-width: none;
     height: auto;
   }
+  /* Product panel = two proportional regions, sized by viewport height so it
+     adapts to ANY screen (not device-tuned px):
+       - case_anim fills the TOP, cropped at the top edge (model bottom at 50vh)
+       - text fills the REST below it (starts at 52vh) */
   #product.panel--media {
     align-content: start;
   }
@@ -998,15 +1002,14 @@ body.is-file-protocol .panel__video-fallback {
     grid-column: 1;
     grid-row: 2;
     max-width: min(86vw, 420px);
-    /* Sit just under the model: model top (7vh) + model height (86vw / 0.9
-       aspect = ~95.5vw) + a small gap. Tracks the model bottom across heights
-       so the gap stays tight on tall/narrow screens (Z Flip) too. */
-    padding-top: calc(7vh + 95.5vw + 16px);
+    padding-top: 52vh;
   }
   .case-fixed-layer.panel__model {
     left: 50%;
-    top: 7vh;
-    width: min(86vw, 360px);
+    top: -8vh;            /* crop the model's top against the screen edge */
+    height: 58vh;         /* fills the top region proportional to screen height */
+    width: auto;
+    aspect-ratio: 0.9 / 1;
     max-width: none;
     transform: translate3d(-50%, 0, 0);
   }
