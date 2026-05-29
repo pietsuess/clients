@@ -808,10 +808,10 @@
       var threshold = lineThr[n * 2];
       var wave = edgeWave[n];
       var waveP = waveProgress[wave] || 0;
-      // Convergence lines (wave 7) finish drawing at progress 0.40; the
-      // remaining 0.40 -> 1.0 of convergence is the slow contact blast (see
-      // FINAL_CONVERGENCE_LAND). Same on every viewport.
-      var drawDuration = wave === 7 ? 0.40 : 1.0;
+      // Convergence lines (wave 7) finish drawing at progress 0.75, so contact
+      // with the final red dot happens late in the closing scroll. The blast is
+      // time-based (see SHOCKWAVE_DURATION), so a later land doesn't speed it up.
+      var drawDuration = wave === 7 ? 0.75 : 1.0;
 
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
@@ -1358,10 +1358,10 @@
     seedReveal = Math.max(0, Math.min(1, p));
   }
   var previousConvergenceProgress = 0;
-  // Lines draw over 0 -> 0.40; the red blast blooms slowly over 0.40 -> 1.0
-  // (60% of the convergence scroll — was 28%, so the wave is ~half the speed).
-  // Same on every viewport; the DOM trigger ends exactly at closing-settled.
-  var FINAL_CONVERGENCE_LAND = 0.40;
+  // Lines draw over 0 -> 0.75; contact (and the time-based blast) happens late
+  // in the closing scroll. Same on every viewport; the DOM trigger ends exactly
+  // at closing-settled.
+  var FINAL_CONVERGENCE_LAND = 0.75;
   function setConvergenceProgress(p) {
     var v = Math.max(0, Math.min(1, p));
     // Arm the slow blast when scroll first crosses the land point; disarm when
