@@ -35,7 +35,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-14" />
+    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-15" />
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
@@ -275,9 +275,9 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene.js?v=closing-final-viewport-14"></script>
+    <script src="scene.js?v=closing-final-viewport-15"></script>
     <script src="case-animation.js?v=new-case-sequence-1"></script>
-    <script src="swot.js?v=closing-final-viewport-14"></script>
+    <script src="swot.js?v=closing-final-viewport-15"></script>
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
@@ -458,17 +458,32 @@
         var sequenceCtx = sequence.getContext("2d");
         if (!sequenceCtx) return;
 
-        // Center the splash logo against the VISIBLE viewport on every browser.
-        // CSS dvh isn't supported everywhere (e.g. some mobile browsers), which
-        // left the logo sitting low behind the address bar. Pinning the splash
-        // height to window.innerHeight works universally; update on resize so it
-        // stays centered as the address bar shows/hides.
+        // Center the splash logo against the VISUAL viewport (what's actually
+        // visible), not the layout viewport. Before fullscreen the visual
+        // viewport is smaller than the layout one in BOTH dimensions and
+        // anchored top-left, so CSS centering put the logo low AND right; once
+        // fullscreen they match and it looked centered. Pin the splash to the
+        // visual viewport's size + offset so it's centered in every state.
         function sizeSplash() {
-          splash.style.height = window.innerHeight + "px";
+          var vv = window.visualViewport;
+          if (vv) {
+            splash.style.width = vv.width + "px";
+            splash.style.height = vv.height + "px";
+            splash.style.left = vv.offsetLeft + "px";
+            splash.style.top = vv.offsetTop + "px";
+            splash.style.right = "auto";
+            splash.style.bottom = "auto";
+          } else {
+            splash.style.height = window.innerHeight + "px";
+          }
         }
         sizeSplash();
         window.addEventListener("resize", sizeSplash);
         window.addEventListener("orientationchange", sizeSplash);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", sizeSplash);
+          window.visualViewport.addEventListener("scroll", sizeSplash);
+        }
 
         var frames = [];
         var frameVersion = "v=3";
