@@ -198,6 +198,26 @@
     panelTriggers.push(panelTrigger);
   });
 
+  // ===== Seed (first red dot) reveal =====================================
+  // Invisible while the hero headline holds; scales 0 -> full over the scroll
+  // from the hero into section 01 (the first panel reaching the top).
+  if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setSeedReveal) {
+    var firstPanel = panels[0];
+    if (firstPanel) {
+      window.bullfinchCanopy.setSeedReveal(0);
+      ScrollTrigger.create({
+        trigger: firstPanel,
+        start: "top bottom",   // panel 01 enters as the hero scrolls away
+        end: "top top",        // panel 01 pinned at top = section 01 arrived
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          window.bullfinchCanopy.setSeedReveal(self.progress);
+        },
+      });
+    }
+  }
+
   // ===== Closing section reveal ==========================================
   var closing = document.querySelector(".closing");
   if (closing) {

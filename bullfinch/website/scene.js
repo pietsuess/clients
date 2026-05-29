@@ -771,6 +771,7 @@
   // Spark decay rate — full bright → 0 over 0.4s.
   var SPARK_DECAY = 1 / 0.4;
   var waveProgress = [0, 0, 0, 0, 0, 0, 0, 0];
+  var seedReveal = 1.0;            // index-0 seed scale/visibility (0..1)
   var tmpDir = new THREE.Vector3();
   var tmpCamDir = new THREE.Vector3();
   var tmpSide = new THREE.Vector3();
@@ -1215,7 +1216,8 @@
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
         if (i === 0) {
-          alphas[i] = lerp(1.0, 0.25, finalFade);
+          // Seed fades + scales in via seedReveal (hero -> section 01).
+          alphas[i] = lerp(1.0, 0.25, finalFade) * seedReveal;
         } else if (i === 1) {
           // Final red dot is fixed at the floor. Always on — the camera
           // simply pans down to reveal it. No alpha gating.
@@ -1236,6 +1238,13 @@
       // Final red dot is FIXED at (0, -2.5, 0) — set once at startup. The
       // camera tilts down to reveal it. NO position animation here.
 
+      // Seed reveal: scale the first red dot from 0 -> full (RED_MOTE_SIZE).
+      // aSize is shared with redGeo, so one needsUpdate refreshes both draws.
+      var seedTargetSize = RED_MOTE_SIZE * seedReveal;
+      if (sizes[0] !== seedTargetSize) {
+        sizes[0] = seedTargetSize;
+        partGeo.attributes.aSize.needsUpdate = true;
+      }
 
       partGeo.attributes.position.needsUpdate = true;
       partGeo.attributes.aAlpha.needsUpdate = true;
@@ -1337,6 +1346,11 @@
     var idx = Math.max(1, Math.min(7, wave | 0));
     waveProgress[idx] = Math.max(0, Math.min(1, p));
   }
+  // Seed (index 0) reveal: 0 = invisible, 1 = full. Driven by scroll from the
+  // hero headline to section 01 so the first red dot scales into existence.
+  function setSeedReveal(p) {
+    seedReveal = Math.max(0, Math.min(1, p));
+  }
   var previousConvergenceProgress = 0;
   // Lines draw over 0 -> 0.40; the red blast blooms slowly over 0.40 -> 1.0
   // (60% of the convergence scroll — was 28%, so the wave is ~half the speed).
@@ -1352,6 +1366,7 @@
     setLayerTint: setProgress,
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
+    setSeedReveal: setSeedReveal,
     getLayerTint: function () { return uniforms.uLayerTint.value; },
   };
 })();

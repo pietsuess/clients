@@ -986,16 +986,22 @@ body.is-file-protocol .panel__video-fallback {
     max-width: none;
     height: auto;
   }
+  #product.panel--media {
+    align-content: start;
+  }
   #product .panel__inner {
     grid-column: 1;
     grid-row: 2;
     max-width: min(86vw, 420px);
-    padding-top: clamp(210px, 36vh, 286px);
+    /* Sit just under the model: model top (7vh) + model height (86vw / 0.9
+       aspect = ~95.5vw) + a small gap. Tracks the model bottom across heights
+       so the gap stays tight on tall/narrow screens (Z Flip) too. */
+    padding-top: calc(7vh + 95.5vw + 16px);
   }
   .case-fixed-layer.panel__model {
     left: 50%;
-    top: -34px;
-    width: min(72vw, 320px);
+    top: 7vh;
+    width: min(86vw, 360px);
     max-width: none;
     transform: translate3d(-50%, 0, 0);
   }
