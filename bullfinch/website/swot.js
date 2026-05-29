@@ -243,6 +243,11 @@
     var gap = Math.round(panelH * 0.02);
     var modelH = panelH - padBottom - textH - gap;
     modelH = Math.max(150, Math.min(modelH, Math.round(panelH * 0.72)));
+    // The model is a SQUARE, position:fixed element, so its width equals this
+    // height. Keep it within the viewport width or it escapes overflow-x:hidden
+    // and pushes the page wider than the screen (offscreen nav toggle / black
+    // edges / dead scroll space).
+    modelH = Math.min(modelH, Math.round(window.innerWidth * 0.94));
     caseModel.style.height = modelH + "px";
   }
   layoutProductCase();

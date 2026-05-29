@@ -30,6 +30,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 body {
   min-height: 100vh;
@@ -1034,7 +1035,11 @@ body.is-file-protocol .panel__video-fallback {
     height: 42vh;         /* conservative fallback until JS measures (no overlap) */
     width: auto;
     aspect-ratio: 1 / 1;  /* match the square 720x720 canvas — no stretch */
-    max-width: none;
+    /* CAP the width to the screen. This is position:fixed, so if its square
+       width exceeds the viewport it escapes body overflow-x:hidden and creates
+       horizontal overflow (fixed nav toggle pushed off-edge, black edges,
+       pannable scroll space). 94vw keeps it inside the viewport. */
+    max-width: 94vw;
     transform: translate3d(-50%, 0, 0);
   }
   .panel__eyebrow {
