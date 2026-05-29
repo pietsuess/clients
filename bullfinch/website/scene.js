@@ -592,6 +592,27 @@
     }
   }
 
+  // Convergence "AROUND" the final dot: lay the feeder (terminal) dots in a
+  // ring encircling the final red dot, so the lines collapse INWARD radially (a
+  // sunburst) instead of stacking into a vertical column that reaches up and
+  // back down. Ring radius is kept inside the on-screen field so it also works
+  // on narrow portrait screens. Freeze the connected network so it holds this
+  // shape — if these dots keep falling/drifting, the lines reach up to wherever
+  // they ended up (the up-then-down ugliness).
+  for (var cf = 0; cf < PARTICLE_POOL; cf++) {
+    if (connectedSet[cf]) fallSpeed[cf] = 0;
+  }
+  var convRX = Math.min(FIELD_HALF_X * 0.85, 3.0);
+  var convRY = 1.9;
+  for (var tr = 0; tr < terminalDots.length; tr++) {
+    var tIdx = terminalDots[tr];
+    var ang = (tr / Math.max(1, terminalDots.length)) * Math.PI * 2;
+    var rr = 0.6 + 0.4 * (((tr * 7) % 5) / 4);   // vary the radius a little
+    positions[tIdx * 3]     = FINAL_RED_X + Math.cos(ang) * convRX * rr;
+    positions[tIdx * 3 + 1] = FINAL_RED_Y + Math.sin(ang) * convRY * rr;
+    positions[tIdx * 3 + 2] = FINAL_RED_Z + (((tr % 3) - 1) * 0.35);
+  }
+
   var EDGE_COUNT = finalEdges.length;
   // 0.03 in uConnect units — short enough that even the last edge (threshold
   // ~0.95) finishes drawing well before scroll 1.0. Prevents partial lines
@@ -853,11 +874,8 @@
       lineVerts[vB + 1] = hy;
       lineVerts[vB + 2] = hz;
 
-      // No arrowheads on the final convergence (wave 7) — they pointed up/down
-      // depending on where each terminal dot fell, which read as ugly. Just
-      // draw clean lines into the final dot. Cascade waves keep their arrows.
       var arrowVisible = wave === 7
-        ? 0.0
+        ? (strokeProgress > 0.001 ? 0.95 : 0.0)
         : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
@@ -1202,11 +1220,8 @@
       // simply track wherever the motes go.
       var density = uniforms.uMoteDensity.value;
       var fallScale = lerp(1.0, 0.55, density);
-      // Freeze the field as the final convergence engages, so motes don't fall
-      // / respawn mid-convergence (which made the converging lines jump up and
-      // then snap down). The network settles into a stable final image.
-      var fallFreeze = 1 - smoothstep(0.0, 0.18, waveProgress[7] || 0);
-      fallScale *= fallFreeze;
+      // Connected (network) dots have fallSpeed 0, so they hold their shape and
+      // the convergence ring stays put; only ambient motes drift past.
       var finalFade = smoothstep(0.88, 1.0, waveProgress[7] || 0);
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
