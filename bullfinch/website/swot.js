@@ -227,18 +227,29 @@
   var productInner = productPanel && productPanel.querySelector(".panel__inner");
   var caseModel = document.querySelector(".case-fixed-layer.panel__model");
   function layoutProductCase() {
-    if (!caseModel) return;
+    if (!caseModel || !productInner) return;
     if (!mobileLike) { caseModel.style.height = ""; return; }
-    if (!productInner) return;
-    var vh = window.innerHeight;
-    var textH = productInner.offsetHeight;   // includes its 4vh padding-bottom
-    var panelPadBottom = 24;                 // .panel padding
-    var gap = Math.round(vh * 0.02);
-    var modelH = vh - panelPadBottom - textH - gap;
-    modelH = Math.max(150, Math.min(modelH, Math.round(vh * 0.72)));
-    caseModel.style.height = modelH + "px";
+    // Measure the text's ACTUAL on-screen top (same coordinate space as the
+    // fixed model). The model is pinned to top:0, so capping its height at the
+    // text's top minus a gap means it can NEVER overlap the text — regardless
+    // of mobile viewport-unit quirks. Only trust the value when the panel is on
+    // screen (pinned); otherwise keep the CSS fallback height.
+    var textTop = productInner.getBoundingClientRect().top;
+    if (textTop <= 1 || textTop > window.innerHeight) return;
+    var gap = Math.round(window.innerHeight * 0.02);
+    caseModel.style.height = Math.max(150, textTop - gap) + "px";
   }
-  layoutProductCase();
+  // Recompute when the product panel is on screen (text in its final pinned
+  // position) and whenever layout can shift.
+  if (productPanel) {
+    ScrollTrigger.create({
+      trigger: productPanel,
+      start: "top bottom",
+      end: "bottom top",
+      onUpdate: layoutProductCase,
+      onRefresh: layoutProductCase,
+    });
+  }
   window.addEventListener("resize", layoutProductCase);
   window.addEventListener("load", layoutProductCase);
   if (document.fonts && document.fonts.ready) {
