@@ -33,7 +33,9 @@
     var width = img.naturalWidth * scale;
     var height = img.naturalHeight * scale;
     var x = (cw - width) / 2;
-    var y = (ch - height) / 2;
+    // Anchor to the BOTTOM so the crop comes off the TOP, keeping the case
+    // bottom in frame (matches the "top cropped" intent).
+    var y = ch - height;
     ctx.drawImage(img, x, y, width, height);
   }
 
