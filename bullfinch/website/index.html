@@ -24,13 +24,7 @@
           history.scrollRestoration = "manual";
         }
         window.scrollTo(0, 0);
-        try {
-          var saved = localStorage.getItem("bullfinch-pitch-theme");
-          var theme = saved === "light" || saved === "dark" ? saved : "dark";
-          document.documentElement.setAttribute("data-theme", theme);
-        } catch (e) {
-          document.documentElement.setAttribute("data-theme", "dark");
-        }
+        document.documentElement.setAttribute("data-theme", "dark");
       })();
     </script>
 
@@ -41,7 +35,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=closing-final-viewport-3" />
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
@@ -51,26 +45,38 @@
     </div>
 
     <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+    <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
+      <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
+    </div>
+    <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
 
     <header class="site-nav" aria-label="Website navigation">
-      <a class="site-nav__brand" href="./" data-restart-splash aria-label="Restart Bullfinch Earth">
+      <a class="site-nav__brand" href="./" data-restart-splash data-nav-label="Bullfinch Earth" aria-label="Restart Bullfinch Earth">
         <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
           <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
           <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
         </svg>
       </a>
+      <div class="site-nav__hover-label" id="site-nav-hover-label" aria-hidden="true"></div>
       <nav class="site-nav__links" aria-label="Primary">
-        <a href="#problem" data-scroll-target="#problem" aria-label="01 Canopy">01</a>
-        <a href="#product" data-scroll-target="#product" aria-label="02 Sensor layer">02</a>
-        <a href="#opportunity" data-scroll-target="#opportunity" aria-label="03 Opportunity">03</a>
-        <a href="#data" data-scroll-target="#data" aria-label="04 Data layer">04</a>
-        <a href="#proof" data-scroll-target="#proof" aria-label="05 Proof">05</a>
-        <a href="#team" data-scroll-target="#team" aria-label="06 Team">06</a>
-        <a href="#decisions" data-scroll-target="#decisions" aria-label="07 Decisions">07</a>
-        <a href="#closing" data-scroll-target="#closing" aria-label="Contact">Contact</a>
+        <a href="#problem" data-scroll-target="#problem" data-nav-label="Canopy" aria-label="01 Canopy">01</a>
+        <a href="#product" data-scroll-target="#product" data-nav-label="Sensor layer" aria-label="02 Sensor layer">02</a>
+        <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Category" aria-label="03 Category">03</a>
+        <a href="#data" data-scroll-target="#data" data-nav-label="Proof" aria-label="04 Proof">04</a>
+        <a href="#proof" data-scroll-target="#proof" data-nav-label="Markets" aria-label="05 Markets">05</a>
+        <a href="#team" data-scroll-target="#team" data-nav-label="Team" aria-label="06 Team">06</a>
+        <a href="#decisions" data-scroll-target="#decisions" data-nav-label="Next steps" aria-label="07 Next steps">07</a>
+        <a href="#closing" data-scroll-target="#closing" data-nav-label="Contact" aria-label="Contact">Contact</a>
+        <button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Enter full screen">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+            <path d="M4 9V4h5" />
+            <path d="M15 4h5v5" />
+            <path d="M20 15v5h-5" />
+            <path d="M9 20H4v-5" />
+          </svg>
+        </button>
       </nav>
     </header>
-
     <main id="page">
       <section class="hero" aria-label="Hero">
         <div class="hero__inner">
@@ -96,90 +102,79 @@
       <section class="swot" id="swot" aria-label="Four observations">
         <article class="panel panel--media" id="problem" data-panel="1">
           <div class="panel__video panel__video--film" aria-label="Video placeholder">
-            <iframe
-              class="panel__video-media"
-              title="Bullfinch Earth video"
-              src="https://www.youtube.com/embed/OuesN29J-t0?si=F8MozPscvRWdcIXK&amp;rel=0&amp;origin=https%3A%2F%2Fwww.bullfinch.earth"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              loading="lazy"
-              referrerpolicy="strict-origin-when-cross-origin"
-            ></iframe>
-            <a class="panel__video-fallback" href="https://www.youtube.com/watch?v=OuesN29J-t0" target="_blank" rel="noopener" aria-label="Watch Bullfinch Earth video on YouTube">
-              <img src="https://img.youtube.com/vi/OuesN29J-t0/hqdefault.jpg" alt="" />
-              <span>Watch video</span>
-            </a>
+            <div class="panel__video-gradient" aria-hidden="true"></div>
+            <video class="panel__video-media" autoplay loop muted playsinline preload="auto">
+              <source src="assets/field-placeholder.mp4" type="video/mp4" />
+            </video>
             <div class="panel__video-inner">
               <svg class="panel__video-mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
                 <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
                 <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
               </svg>
-              <p>FIELD FILM PLACEHOLDER</p>
+              <p>FIELD FILM COMING SOON</p>
             </div>
           </div>
           <div class="panel__inner">
             <p class="panel__eyebrow">01 &middot; CANOPY</p>
-            <h2 class="panel__verdict">The forest data stack still starts with a tape measure.</h2>
+            <h2 class="panel__verdict">Your forest models still need truth from the ground.</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Canopy.</span> Satellites, drones, and LiDAR model the forest from above, but they still need field data to know what is actually there.</p>
-              <p><span class="lead">Ground.</span> Today's foundation is sparse manual plots: people walking transects, measuring trees, and entering observations by hand.</p>
-              <p><span class="lead">Bullfinch.</span> Wearable sensors turn field work already happening below the canopy into continuous, plant-level ecological data.</p>
+              <p><span class="lead">You model.</span> Satellites, drones, and LiDAR help you understand forest structure at scale.</p>
+              <p><span class="lead">You still verify.</span> Those models need field observations to know what is actually there.</p>
+              <p><span class="lead">We capture.</span> Bullfinch turns below-canopy fieldwork into repeatable ecological data.</p>
             </div>
-            <p class="panel__numeric">SATELLITES &middot; LIDAR &middot; MODELS &middot; STILL NEED GROUND TRUTH</p>
+            <p class="panel__numeric">CANOPY MODELS &middot; MANUAL PLOTS &middot; MISSING GROUND TRUTH</p>
           </div>
         </article>
 
         <article class="panel panel--media" id="product" data-panel="2">
-          <div class="panel__video panel__model" aria-label="Temporary 3D object placeholder">
-            <canvas id="block-wing-model" class="panel__model-canvas"></canvas>
-          </div>
           <div class="panel__inner">
             <p class="panel__eyebrow">02 &middot; SENSOR LAYER</p>
-            <h2 class="panel__verdict">Wearable sensing for the people already in the forest.</h2>
+            <h2 class="panel__verdict">We capture data while your team is already in the forest.</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Capture.</span> Sensors collect below-canopy observations while foresters and land teams do their regular work.</p>
-              <p><span class="lead">Classify.</span> Edge AI resolves those observations into structured signals for species, inventory, biodiversity, and forest condition.</p>
-              <p><span class="lead">Connect.</span> The output becomes a ground-truth layer for registries, insurers, certifiers, land managers, and financial institutions.</p>
+              <p><span class="lead">Small.</span> Instead of a massive LiDAR backpack, this is literally two phones in a small carrying case that is worn on the front of a surveyors kit.</p>
+              <p><span class="lead">Wear.</span> The sensors move with the person already walking real terrain. Lightweight and simple.</p>
+              <p><span class="lead">Capture.</span> Below-canopy signals are collected at plant-level resolution during normal field activity.</p>
+              <p><span class="lead">Resolve.</span> Edge AI turns those signals into structured observations for species, inventory, biodiversity, and forest condition.</p>
             </div>
-            <p class="panel__numeric">WEARABLE SENSORS &middot; EDGE AI &middot; PLANT-LEVEL RESOLUTION</p>
+            <p class="panel__numeric">PHONE-SCALE HARDWARE &middot; FIELD MOVEMENT &middot; PLANT-LEVEL SIGNALS</p>
           </div>
         </article>
 
         <article class="panel" id="opportunity" data-panel="3">
           <div class="panel__inner">
-            <p class="panel__eyebrow">03 &middot; OPPORTUNITY</p>
-            <h2 class="panel__verdict">Invest in the ground layer. Or start with a pilot.</h2>
+            <p class="panel__eyebrow">03 &middot; CATEGORY</p>
+            <h2 class="panel__verdict">We are building the ground layer other nature systems can trust.</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Investor.</span> Request materials that frame Bullfinch as below-canopy data infrastructure for the nature economy.</p>
-              <p><span class="lead">Pilot.</span> Start with a forestry, MRV, biodiversity, or land-stewardship use case where field data already matters.</p>
-              <p><span class="lead">Team.</span> Talk directly with the people building the product, validating it in the field, and taking it to market.</p>
+              <p><span class="lead">For operators.</span> We make field data denser without adding another standalone survey day.</p>
+              <p><span class="lead">For MRV.</span> We provide below-canopy observations that strengthen canopy models and biomass estimates.</p>
+              <p><span class="lead">For partners.</span> We create a repeatable data layer that other platforms can query, trust, and build on.</p>
             </div>
           </div>
         </article>
 
         <article class="panel" id="data" data-panel="4">
           <div class="panel__inner">
-            <p class="panel__eyebrow">04 &middot; DATA LAYER</p>
-            <h2 class="panel__verdict">From forester movement to nature-data infrastructure.</h2>
+            <p class="panel__eyebrow">04 &middot; PROOF</p>
+            <h2 class="panel__verdict">We are validating this in the field, not only in a lab.</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Forester.</span> The wearer moves through real terrain at the pace of work, not the pace of a separate survey day.</p>
-              <p><span class="lead">Sensor.</span> Below-canopy observations accumulate continuously, creating a denser record than isolated plots can provide.</p>
-              <p><span class="lead">API.</span> Bullfinch is building toward the API for nature data: a repeatable ground layer that other systems can trust.</p>
+              <p><span class="lead">Field.</span> Northern Hardwoods Research Institute is validating Bullfinch in real forest conditions.</p>
+              <p><span class="lead">Support.</span> NRC IRAP and Conservation X Labs have backed the work.</p>
+              <p><span class="lead">Market.</span> A peer-selected Forest Business Accelerator award points to practical forestry relevance.</p>
             </div>
-            <p class="panel__numeric">FORESTER &middot; SENSOR &middot; EDGE AI &middot; API FOR NATURE DATA</p>
+            <p class="panel__numeric">NHRI &middot; NRC IRAP &middot; CONSERVATION X LABS &middot; FOREST BUSINESS ACCELERATOR</p>
           </div>
         </article>
 
         <article class="panel" id="proof" data-panel="5">
           <div class="panel__inner">
-            <p class="panel__eyebrow">05 &middot; PROOF</p>
-            <h2 class="panel__verdict">Built in the field, not just in the lab.</h2>
+            <p class="panel__eyebrow">05 &middot; MARKETS</p>
+            <h2 class="panel__verdict">Use Bullfinch where field data changes the decision.</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Validation.</span> Northern Hardwoods Research Institute is running Bullfinch in the field to validate species classification and inventory accuracy.</p>
-              <p><span class="lead">Support.</span> NRC IRAP and Conservation X Labs give the work credible early-stage signal.</p>
-              <p><span class="lead">Market.</span> A peer-selected Forest Business Accelerator award points to real forestry relevance, not just climate-tech language.</p>
+              <p><span class="lead">Forestry teams.</span> Use denser inventory inputs to manage forests at operational scale.</p>
+              <p><span class="lead">Carbon teams.</span> Use field-validation data to strengthen MRV and biomass confidence.</p>
+              <p><span class="lead">Land stewards.</span> Use repeatable plant-level monitoring for biodiversity, restoration, invasive species, wildfire risk, and forest health.</p>
             </div>
-            <p class="panel__numeric">NHRI &middot; NRC IRAP &middot; CONSERVATION X LABS &middot; FOREST BUSINESS ACCELERATOR</p>
+            <p class="panel__numeric">FORESTRY &middot; CARBON &middot; BIODIVERSITY &middot; LAND STEWARDSHIP</p>
           </div>
         </article>
 
@@ -200,7 +195,7 @@
           </div>
           <div class="panel__inner">
             <p class="panel__eyebrow">06 &middot; TEAM</p>
-            <h2 class="panel__verdict">The technical risk is real. So is the technical team.</h2>
+            <h2 class="panel__verdict">You are working with a team that can build hard sensing products.</h2>
             <div class="panel__evidence">
               <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth.</button> CEO with AR, VR, IoT, wearables, AI, sensor-fusion depth, and hundreds of millions of shipped products.</p>
               <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham.</button> COO with BC field operations, ecologically sensitive sites, finance, and customer account fluency.</p>
@@ -214,14 +209,14 @@
 
         <article class="panel" id="decisions" data-panel="7">
           <div class="panel__inner">
-            <p class="panel__eyebrow">07 &middot; DECISIONS</p>
-            <h2 class="panel__verdict">One ground-truth layer. Many decisions.</h2>
+            <p class="panel__eyebrow">07 &middot; NEXT STEPS</p>
+            <h2 class="panel__verdict">Start with the next step that matches your role.</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Forestry.</span> Faster, denser inventory data for teams managing forests at operational scale.</p>
-              <p><span class="lead">Carbon.</span> Better biomass and field validation inputs for MRV systems that cannot rely on canopy models alone.</p>
-              <p><span class="lead">Biodiversity.</span> Repeatable plant-level monitoring for restoration, invasive species, land stewardship, wildfire risk, and forest health.</p>
+              <p><span class="lead">Investors.</span> Review the benefit statement and the infrastructure thesis behind below-canopy ground truth.</p>
+              <p><span class="lead">Pilot teams.</span> Bring us a forestry, carbon, biodiversity, or land-stewardship use case where field data already matters.</p>
+              <p><span class="lead">Partners.</span> Talk with us about where Bullfinch data could strengthen your platform, program, or field operation.</p>
             </div>
-            <p class="panel__numeric">FORESTRY &middot; CARBON &middot; BIODIVERSITY &middot; LAND STEWARDSHIP</p>
+            <p class="panel__numeric">BENEFIT STATEMENT &middot; PILOT &middot; TEAM CONTACT</p>
           </div>
         </article>
 
@@ -235,8 +230,8 @@
             <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
           </svg>
           <h2 class="closing__title">
-            <span class="closing__line closing__line--1">See the forest</span>
-            <span class="closing__line closing__line--2">from the ground up.</span>
+            <span class="closing__line closing__line--1">Bring us the forest</span>
+            <span class="closing__line closing__line--2">you need to understand.</span>
           </h2>
           <div class="contact-actions closing__actions">
             <a href="https://www.bullfinch.earth/_files/ugd/f39c20_30de8a6a942548779f0315c032564511.pdf" target="_blank" rel="noopener">Benefit statement</a>
@@ -244,17 +239,17 @@
             <a href="mailto:hello@bullfinch.earth?subject=General%20contact">Contact the team</a>
           </div>
         </div>
-      </section>
 
-      <footer class="site-footer" id="site-footer">
-        <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
-        <p class="site-footer__line">BULLFINCH EARTH &middot; SALTSPRING ISLAND &middot; BELOW-CANOPY GROUND TRUTH</p>
-        <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="m6 15 6-6 6 6" />
-          </svg>
-        </button>
-      </footer>
+        <footer class="site-footer" id="site-footer">
+          <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
+          <p class="site-footer__line">BULLFINCH EARTH &middot; SALTSPRING ISLAND &middot; BELOW-CANOPY GROUND TRUTH</p>
+          <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 15 6-6 6 6" />
+            </svg>
+          </button>
+        </footer>
+      </section>
     </main>
 
     <div class="bio-modal" id="team-bio-modal" hidden role="dialog" aria-modal="true" aria-labelledby="team-bio-title">
@@ -274,43 +269,15 @@
       </section>
     </div>
 
-    <button
-      id="theme-toggle"
-      class="theme-toggle"
-      type="button"
-      aria-label="Switch to dark theme"
-      aria-pressed="false"
-    >
-      <span class="theme-toggle__glyph theme-toggle__glyph--sun" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4" />
-          <line x1="12" y1="2" x2="12" y2="4" />
-          <line x1="12" y1="20" x2="12" y2="22" />
-          <line x1="2" y1="12" x2="4" y2="12" />
-          <line x1="20" y1="12" x2="22" y2="12" />
-          <line x1="4.6" y1="4.6" x2="6" y2="6" />
-          <line x1="18" y1="18" x2="19.4" y2="19.4" />
-          <line x1="4.6" y1="19.4" x2="6" y2="18" />
-          <line x1="18" y1="6" x2="19.4" y2="4.6" />
-        </svg>
-      </span>
-      <span class="theme-toggle__glyph theme-toggle__glyph--moon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z" />
-        </svg>
-      </span>
-    </button>
-
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <script src="assets/block-wing-obj.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene.js"></script>
-    <script src="block-wing-renderer.js"></script>
-    <script src="swot.js"></script>
+    <script src="scene.js?v=closing-final-viewport-3"></script>
+    <script src="case-animation.js?v=new-case-sequence-1"></script>
+    <script src="swot.js?v=closing-final-viewport-3"></script>
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
@@ -366,6 +333,24 @@
         });
         window.addEventListener("scroll", updateScrollIndicator, { passive: true });
         updateScrollIndicator();
+
+        var navLabel = document.getElementById("site-nav-hover-label");
+        var navItems = document.querySelectorAll("[data-nav-label]");
+        if (navLabel && navItems.length) {
+          navItems.forEach(function (item) {
+            function showLabel() {
+              navLabel.textContent = item.getAttribute("data-nav-label") || "";
+              navLabel.classList.add("is-visible");
+            }
+            function hideLabel() {
+              navLabel.classList.remove("is-visible");
+            }
+            item.addEventListener("mouseenter", showLabel);
+            item.addEventListener("focus", showLabel);
+            item.addEventListener("mouseleave", hideLabel);
+            item.addEventListener("blur", hideLabel);
+          });
+        }
       })();
     </script>
     <script>
@@ -394,11 +379,14 @@
           },
         };
         var lastTrigger = null;
+        var currentBioKey = null;
+        var bioOrder = ["seth", "graham", "tim"];
 
         function openBio(key, trigger) {
           var bio = bios[key];
           if (!bio) return;
           lastTrigger = trigger || document.activeElement;
+          currentBioKey = key;
           title.textContent = bio.title;
           body.textContent = bio.body;
           photo.src = bio.photo;
@@ -411,10 +399,19 @@
 
         function closeBio() {
           modal.hidden = true;
+          currentBioKey = null;
           document.body.classList.remove("is-bio-open");
           if (lastTrigger && typeof lastTrigger.focus === "function") {
             lastTrigger.focus();
           }
+        }
+
+        function moveBio(direction) {
+          if (!currentBioKey) return;
+          var currentIndex = bioOrder.indexOf(currentBioKey);
+          if (currentIndex === -1) return;
+          var nextIndex = (currentIndex + direction + bioOrder.length) % bioOrder.length;
+          openBio(bioOrder[nextIndex], lastTrigger);
         }
 
         document.addEventListener("click", function (event) {
@@ -437,8 +434,16 @@
             openBio(trigger.getAttribute("data-bio-person"), trigger);
             return;
           }
-          if (!modal.hidden && event.key === "Escape") {
-            closeBio();
+          if (!modal.hidden) {
+            if (event.key === "Escape") {
+              closeBio();
+            } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+              event.preventDefault();
+              moveBio(1);
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+              event.preventDefault();
+              moveBio(-1);
+            }
           }
         });
       })();
@@ -448,6 +453,7 @@
         var splash = document.getElementById("splash");
         var button = document.getElementById("splash-button");
         var sequence = document.getElementById("splash-sequence");
+        var fullscreenToggle = document.getElementById("fullscreen-toggle");
         if (!splash || !button || !sequence) return;
         var sequenceCtx = sequence.getContext("2d");
         if (!sequenceCtx) return;
@@ -522,9 +528,54 @@
           requestAnimationFrame(tick);
         }
 
+        function isFullscreen() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        }
+
+        function updateFullscreenToggle() {
+          var active = Boolean(isFullscreen());
+          document.body.classList.toggle("is-fullscreen", active);
+          if (fullscreenToggle) {
+            fullscreenToggle.setAttribute("aria-label", active ? "Exit full screen" : "Enter full screen");
+            fullscreenToggle.setAttribute("aria-pressed", active ? "true" : "false");
+          }
+        }
+
+        function exitFullscreen() {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+          if (exit) {
+            try {
+              exit.call(document);
+            } catch (e) {}
+          }
+        }
+
+        function enterFullscreen() {
+          var root = document.documentElement;
+          var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+          if (request) {
+            try {
+              request.call(root);
+            } catch (e) {}
+          }
+        }
+
+        function toggleFullscreen() {
+          if (isFullscreen()) {
+            exitFullscreen();
+          } else {
+            enterFullscreen();
+          }
+        }
+
         window.addEventListener("pageshow", function (event) {
           resetSplash();
         });
+        document.addEventListener("fullscreenchange", updateFullscreenToggle);
+        document.addEventListener("webkitfullscreenchange", updateFullscreenToggle);
+        document.addEventListener("MSFullscreenChange", updateFullscreenToggle);
+        if (fullscreenToggle) fullscreenToggle.addEventListener("click", toggleFullscreen);
+        updateFullscreenToggle();
 
         button.addEventListener("click", function () {
           var root = document.documentElement;

@@ -539,11 +539,15 @@
   fallSpeed[FINAL_RED_IDX] = 0.0;              // does not fall
   swayRate[FINAL_RED_IDX]  = 0.0;              // does not sway
   thresholds[FINAL_RED_IDX] = 0.0;
-  // FIXED POSITION at the forest floor. NEVER moves. Hidden at scroll 0 by
-  // the camera looking ABOVE it; revealed by camera tilt-down as you descend.
-  //   x = 0.0   (centered horizontally)
-  //   y = -2.5  (forest floor — well below the canopy plane)
-  //   z = 0.0   (on the central focal axis the camera looks down through)
+  // FIXED in world space — ONE value for every device (no per-device guess).
+  // The dot sits on the central focal axis at the forest floor; the camera
+  // dollies in and tilts down to ARRIVE at it. Because the camera's vertical
+  // FOV is constant, this projects to the same vertical screen anchor (~lower
+  // third) on any aspect ratio, portrait mobile included. The closing text is
+  // then composed around that landing (see .closing in styles.css).
+  //   x = 0.0   (centred horizontally)
+  //   y = -2.5  (forest floor — below the canopy plane, revealed by tilt-down)
+  //   z = 0.0   (on the focal axis the camera looks down through)
   var FINAL_RED_X = 0.0;
   var FINAL_RED_Y = -2.5;
   var FINAL_RED_Z = 0.0;
@@ -794,7 +798,10 @@
       var threshold = lineThr[n * 2];
       var wave = edgeWave[n];
       var waveP = waveProgress[wave] || 0;
-      var drawDuration = 1.0;
+      // Convergence lines (wave 7) finish drawing at progress 0.72; the
+      // remaining 0.72 -> 1.0 of convergence is the contact blast. Same on
+      // every viewport now that the trigger ends exactly at closing-settled.
+      var drawDuration = wave === 7 ? 0.72 : 1.0;
 
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
@@ -836,7 +843,9 @@
       lineVerts[vB + 1] = hy;
       lineVerts[vB + 2] = hz;
 
-      var arrowVisible = strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0;
+      var arrowVisible = wave === 7
+        ? (strokeProgress > 0.001 ? 0.95 : 0.0)
+        : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -1184,7 +1193,10 @@
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
         var yi = i * 3 + 1;
-        // Index 1 = final red dot. ABSOLUTELY STATIONARY. Skip all movement.
+        // Index 1 = final red dot. ABSOLUTELY STATIONARY in world space — the
+        // camera dollies/tilts down to arrive at it, which gives the focal
+        // point real depth and parallax. Always on; it simply starts below the
+        // gaze and is revealed as the camera lands. Skip all movement.
         if (i === 1) {
           alphas[i] = 1.0;
           continue;
@@ -1271,19 +1283,19 @@
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
 
-      if (shockwaveAge >= 0) {
-        shockwaveAge += dt;
-        var shockT = Math.min(1, shockwaveAge / SHOCKWAVE_DURATION);
-        var shockEase = 1 - Math.pow(1 - shockT, 3);
+      // Contact blast is driven entirely by scroll-convergence progress, so
+      // scrubbing in either direction re-shows it smoothly. No fragile
+      // one-frame age trigger. It blooms over 0.72 -> 1.0, then fades to zero
+      // by the time the closing viewport is fully settled.
+      var scrollShockT = Math.max(0, Math.min(1,
+        (previousConvergenceProgress - FINAL_CONVERGENCE_LAND) / (1.0 - FINAL_CONVERGENCE_LAND)));
+      if (previousConvergenceProgress >= FINAL_CONVERGENCE_LAND) {
+        var shockEase = 1 - Math.pow(1 - scrollShockT, 3);
         shockwave.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
         shockwave.quaternion.copy(camera.quaternion);
         shockwave.scale.setScalar(0.18 + shockEase * 7.2);
-        var shockFade = 1 - smoothstep(0.82, 1.0, shockT);
+        var shockFade = 1 - smoothstep(0.72, 1.0, scrollShockT);
         shockwaveMat.uniforms.uAlpha.value = shockFade * 0.88;
-        if (shockT >= 1) {
-          shockwaveAge = -1;
-          shockwaveMat.uniforms.uAlpha.value = 0;
-        }
       } else {
         shockwaveMat.uniforms.uAlpha.value = 0;
       }
@@ -1323,11 +1335,12 @@
     waveProgress[idx] = Math.max(0, Math.min(1, p));
   }
   var previousConvergenceProgress = 0;
+  // Lines draw over 0 -> 0.72; blast blooms over 0.72 -> 1.0. Same on every
+  // viewport — the DOM trigger now ends exactly when the closing viewport is
+  // settled, so there is nothing to compensate for per device.
+  var FINAL_CONVERGENCE_LAND = 0.72;
   function setConvergenceProgress(p) {
     var v = Math.max(0, Math.min(1, p));
-    if (previousConvergenceProgress < 0.999 && v >= 0.999) {
-      shockwaveAge = 0;
-    }
     previousConvergenceProgress = v;
     setWaveProgress(7, v);
   }

@@ -25,6 +25,7 @@
 */
 (function () {
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
 
   // ---- Safety: if GSAP didn't load, just reveal everything --------------
   if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
@@ -105,15 +106,16 @@
       eyebrow.style.transform = "translateX(" + (-16 * (1 - pe)) + "px)";
     }
 
-    // Optional media panels use the same read rhythm as text:
-    // enter from the left as copy starts, hold while readable, exit left.
+    // Optional media panels use the same read rhythm as text.
+    // Product case appears earlier, halfway through the line draw, while copy timing stays locked.
     if (media) {
-      var pmIn = smooth01(mapRange(p, 0.18, 0.30));
-      var pmOut = smooth01(mapRange(p, 0.88, 1.00));
+      var isProduct = panel.id === "product";
+      var pmIn = isProduct ? 1 : smooth01(mapRange(p, 0.18, 0.30));
+      var pmOut = isProduct ? 0 : smooth01(mapRange(p, 0.88, 1.00));
       var pm = pmIn * (1 - pmOut);
-      var mediaX = -72 * (1 - pmIn) - 72 * pmOut;
-      media.style.opacity = pm;
-      media.style.transform = "translateX(" + mediaX + "px)";
+      var mediaX = isProduct ? 0 : -72 * (1 - pmIn) - 72 * pmOut;
+      if (!isProduct || p > 0.001) media.style.opacity = pm;
+      media.style.transform = isProduct ? "translate3d(0, -50%, 0)" : "translateX(" + mediaX + "px)";
     }
 
     // 24%–36% verdict fades in with vertical translate ONLY.
@@ -234,6 +236,14 @@
   // lands as the next text block begins. Wave 1 intentionally waits until
   // after the "forest data stack" panel instead of running from the hero.
   if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setWaveProgress) {
+    var productMedia = document.querySelector(".case-fixed-layer");
+    function setProductCase(value, playbackProgress) {
+      if (productMedia) productMedia.style.opacity = clamp01(value);
+      if (window.bullfinchCaseAnimation && window.bullfinchCaseAnimation.setScrollProgress) {
+        window.bullfinchCaseAnimation.setScrollProgress(playbackProgress);
+      }
+    }
+
     function setWave(wave, progress) {
       window.bullfinchCanopy.setWaveProgress(wave, progress);
     }
@@ -251,22 +261,48 @@
           },
           scrub: true,
           invalidateOnRefresh: true,
-          onUpdate: function (self) { setWave(idx + 1, self.progress); },
+          onUpdate: function (self) {
+            setWave(idx + 1, self.progress);
+          },
         });
       })(wi);
     }
 
-    var finalPanelIdx = panelTriggers.length - 1;
-    if (closing && panelTriggers[finalPanelIdx] && window.bullfinchCanopy.setConvergenceProgress) {
+    if (panelTriggers[0] && panelTriggers[1] && panelTriggers[2]) {
       ScrollTrigger.create({
         trigger: document.body,
+        start: function () {
+          return panelTriggers[0].start + (panelTriggers[0].end - panelTriggers[0].start) * 0.88;
+        },
+        end: function () {
+          return panelTriggers[2].start + (panelTriggers[2].end - panelTriggers[2].start) * 0.08;
+        },
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          var p = self.progress;
+          var fadeIn = smooth01(mapRange(p, 0.25, 0.50));
+          var fadeOut = smooth01(mapRange(p, 0.75, 1.00));
+          setProductCase(fadeIn * (1 - fadeOut), mapRange(p, 0.25, 1.00));
+        },
+      });
+    }
+
+    var finalPanelIdx = panelTriggers.length - 1;
+    if (closing && panelTriggers[finalPanelIdx] && window.bullfinchCanopy.setConvergenceProgress) {
+      // Convergence runs from just after the final panel unpins to the moment
+      // the closing section is fully settled in the viewport (its bottom at the
+      // viewport bottom). Because the footer now lives INSIDE .closing, that
+      // settle point is the true end of the page on every device — no
+      // per-device maxScroll / offsetTop guesses.
+      ScrollTrigger.create({
+        trigger: closing,
         start: function () {
           var finalPanel = panelTriggers[finalPanelIdx];
           return finalPanel.start + (finalPanel.end - finalPanel.start) * 0.88;
         },
-        end: function () {
-          return ScrollTrigger.maxScroll(window) - 36;
-        },
+        endTrigger: closing,
+        end: "bottom bottom",
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
@@ -303,17 +339,20 @@
     var driver = window.bullfinchCanopy.setProgress || window.bullfinchCanopy.setLayerTint;
     if (reduced) {
       driver && driver(0);
-    } else if (footer && driver) {
-      ScrollTrigger.create({
+    } else if (closing && driver) {
+      var driverConfig = {
         trigger: document.body,
         start: "top top",
-        endTrigger: footer,
-        end: "top top",
         scrub: true,
         onUpdate: function (self) {
           driver(self.progress);
         },
-      });
+      };
+      // Global descent progress lands at 1.0 exactly when the closing section
+      // is settled — same on every viewport now that the footer is inside it.
+      driverConfig.endTrigger = closing;
+      driverConfig.end = "bottom bottom";
+      ScrollTrigger.create(driverConfig);
     }
   }
 
