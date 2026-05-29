@@ -26,7 +26,10 @@
     ctx.clearRect(0, 0, cw, ch);
     if (!img || !img.naturalWidth) return;
 
-    var scale = Math.min(cw / img.naturalWidth, ch / img.naturalHeight);
+    // COVER (fill the canvas, crop the overflow) rather than contain — the
+    // portrait case art was letterboxing inside the square box and reading as
+    // too small. Cover fills the space (centered crop).
+    var scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
     var width = img.naturalWidth * scale;
     var height = img.naturalHeight * scale;
     var x = (cw - width) / 2;
