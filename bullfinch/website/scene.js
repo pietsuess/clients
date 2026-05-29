@@ -798,10 +798,10 @@
       var threshold = lineThr[n * 2];
       var wave = edgeWave[n];
       var waveP = waveProgress[wave] || 0;
-      // Convergence lines (wave 7) finish drawing at progress 0.72; the
-      // remaining 0.72 -> 1.0 of convergence is the contact blast. Same on
-      // every viewport now that the trigger ends exactly at closing-settled.
-      var drawDuration = wave === 7 ? 0.72 : 1.0;
+      // Convergence lines (wave 7) finish drawing at progress 0.40; the
+      // remaining 0.40 -> 1.0 of convergence is the slow contact blast (see
+      // FINAL_CONVERGENCE_LAND). Same on every viewport.
+      var drawDuration = wave === 7 ? 0.40 : 1.0;
 
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
@@ -1290,11 +1290,14 @@
       var scrollShockT = Math.max(0, Math.min(1,
         (previousConvergenceProgress - FINAL_CONVERGENCE_LAND) / (1.0 - FINAL_CONVERGENCE_LAND)));
       if (previousConvergenceProgress >= FINAL_CONVERGENCE_LAND) {
-        var shockEase = 1 - Math.pow(1 - scrollShockT, 3);
+        // Linear expansion (no front-loaded ease-out) over a much wider scroll
+        // band (see FINAL_CONVERGENCE_LAND) so the wave reads slow and
+        // deliberate instead of snapping open.
+        var shockEase = scrollShockT;
         shockwave.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
         shockwave.quaternion.copy(camera.quaternion);
         shockwave.scale.setScalar(0.18 + shockEase * 7.2);
-        var shockFade = 1 - smoothstep(0.72, 1.0, scrollShockT);
+        var shockFade = 1 - smoothstep(0.82, 1.0, scrollShockT);
         shockwaveMat.uniforms.uAlpha.value = shockFade * 0.88;
       } else {
         shockwaveMat.uniforms.uAlpha.value = 0;
@@ -1335,10 +1338,10 @@
     waveProgress[idx] = Math.max(0, Math.min(1, p));
   }
   var previousConvergenceProgress = 0;
-  // Lines draw over 0 -> 0.72; blast blooms over 0.72 -> 1.0. Same on every
-  // viewport — the DOM trigger now ends exactly when the closing viewport is
-  // settled, so there is nothing to compensate for per device.
-  var FINAL_CONVERGENCE_LAND = 0.72;
+  // Lines draw over 0 -> 0.40; the red blast blooms slowly over 0.40 -> 1.0
+  // (60% of the convergence scroll — was 28%, so the wave is ~half the speed).
+  // Same on every viewport; the DOM trigger ends exactly at closing-settled.
+  var FINAL_CONVERGENCE_LAND = 0.40;
   function setConvergenceProgress(p) {
     var v = Math.max(0, Math.min(1, p));
     previousConvergenceProgress = v;
