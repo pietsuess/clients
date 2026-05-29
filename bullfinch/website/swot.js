@@ -311,6 +311,9 @@
   // after the "forest data stack" panel instead of running from the hero.
   if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setWaveProgress) {
     var productMedia = document.querySelector(".case-fixed-layer");
+    var casePlaybackFrameSlots = 72 + 34;
+    var caseFadeInEndProgress = (10 - 1) / casePlaybackFrameSlots;
+    var caseFadeOutStartProgress = (72 + 24 - 1) / casePlaybackFrameSlots;
     function setProductCase(value, playbackProgress) {
       if (productMedia) productMedia.style.opacity = clamp01(value);
       if (window.bullfinchCaseAnimation && window.bullfinchCaseAnimation.setScrollProgress) {
@@ -355,9 +358,9 @@
         invalidateOnRefresh: true,
         onUpdate: function (self) {
           var p = self.progress;
-          var fadeIn = smooth01(mapRange(p, 0.25, 0.50));
-          var fadeOut = smooth01(mapRange(p, 0.75, 1.00));
-          setProductCase(fadeIn * (1 - fadeOut), mapRange(p, 0.25, 1.00));
+          var fadeIn = smooth01(mapRange(p, 0.00, caseFadeInEndProgress));
+          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, 1.00));
+          setProductCase(fadeIn * (1 - fadeOut), p);
         },
       });
     }

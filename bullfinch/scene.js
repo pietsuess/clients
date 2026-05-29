@@ -266,9 +266,15 @@
   var isRedMote   = new Float32Array(PARTICLE_POOL);
   var sizes       = new Float32Array(PARTICLE_POOL);
 
+  // Horizontal field is scaled to the viewport aspect so the network stays
+  // within screen bounds on ANY device. The camera's vertical FOV is constant,
+  // so the visible horizontal extent tracks aspect: narrow portrait -> narrow
+  // field, wide desktop -> wider. z is kept in front of the landed camera so
+  // no dot ends up too close / behind it.
+  var viewAspect = window.innerWidth / Math.max(1, window.innerHeight);
+  var FIELD_HALF_X = Math.max(2.2, Math.min(6.5, 4.2 * viewAspect));
   for (var i = 0; i < PARTICLE_POOL; i++) {
-    // Seed roughly within x∈[-10,10], y∈[-6,6], z∈[-6,4]
-    positions[i * 3]     = (Math.random() - 0.5) * 20;
+    positions[i * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
     positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1.0;
     swayPhase[i] = Math.random() * Math.PI * 2;
@@ -290,17 +296,11 @@
   fallSpeed[0]   = 0.025;
   swayRate[0]    = 0.10;
   thresholds[0]  = 0.0;
-  // Park ABOVE the hero headline at scroll 0. Camera starts at
-  // (0, 4.0, 8.0) looking at (0, 0, 0). Headline is vertically centered.
-  // To put the seed in the upper third of screen, well clear of the text:
-  //   y = 2.6  (above lookAt origin by 2.6 world units)
-  //   z = 3.0  (between origin and camera so it renders large)
-  // Camera at scroll 0: position (0, 4, 8), looks at (0, 4, 0) — horizontal.
-  // Headline sits at screen center (gaze target). Seed needs to sit ABOVE
-  // the gaze axis but not so far up it leaves the viewport. y=4.9 places
-  // the seed just above the headline (about 30% from the top of the screen).
+  // Park the seed in the hero headline area, around the second line of type.
+  // The first line wave does not begin until after the opening data-stack
+  // panel has passed.
   positions[0]   = 0.0;
-  positions[1]   = 4.9;
+  positions[1]   = 3.45;
   positions[2]   = 4.5;
 
   // aGlow: per-mote electricity. 1.0 = full rim-glow, decays to 0 over 1.2s
@@ -412,7 +412,8 @@
   //   Wave 3: each of those 10 draws 2 lines.
   //   Wave 4: each of those 20 draws 2 lines.
   //   Wave 5: each of those 40 draws 2 lines.
-  // Total: 5 + 10 + 20 + 40 + 80 = 155 lines. 156 connected motes.
+  //   Wave 6: each of those 80 draws 1 line.
+  // Total: 5 + 10 + 20 + 40 + 80 + 80 = 235 lines.
   //
   // Each wave is scheduled across one global-scroll band. Within a wave,
   // lines stagger by parent so the cascade visibly fans outward.
@@ -444,6 +445,7 @@
     { wave: 3, start: 0.32, end: 0.37, fanout: 2 },   // panel 2 → 3
     { wave: 4, start: 0.44, end: 0.49, fanout: 2 },   // panel 3 → 4
     { wave: 5, start: 0.56, end: 0.61, fanout: 2 },   // panel 4 → 5
+    { wave: 6, start: 0.68, end: 0.73, fanout: 1 },   // panel 5 → 6
   ];
 
   // Helper: find K nearest unconnected motes to a parent, preferring motes
@@ -464,9 +466,12 @@
       var dz = pz - cz;
       var d2 = dx * dx + dy * dy + dz * dz;
       if (d2 > MAX_NEIGHBOR_DIST_SQ) continue;
-      // Downward bias: motes below parent get a small distance bonus.
-      var yBonus = cy < py ? 0.85 : 1.0;
-      candidates.push({ idx: ci, score: d2 * yBonus });
+      // Successive descent: strongly PREFER motes below the parent (4x penalty
+      // for anything not clearly lower) so the network visibly descends — but
+      // never EXCLUDE, since excluding dead-ends a branch and can leave no
+      // terminal dots for the final convergence to the red dot.
+      var yPenalty = cy < py - 0.2 ? 1.0 : 4.0;
+      candidates.push({ idx: ci, score: d2 * yPenalty });
     }
     candidates.sort(function (a, b) { return a.score - b.score; });
     var out = [];
@@ -532,7 +537,7 @@
   }
 
   // ====== CONVERGENCE WAVE: terminal dots → second red center dot =======
-  // After all 5 cascade waves, the wave-5 children (the "terminal dots" at
+  // After all 6 cascade waves, the wave-6 children (the "terminal dots" at
   // the end of every chain) draw one more line each — to a SECOND red mote
   // placed at world origin (0, 0, 0). This pulls the whole network into a
   // visible focal resolution at the very end of scroll.
@@ -543,11 +548,15 @@
   fallSpeed[FINAL_RED_IDX] = 0.0;              // does not fall
   swayRate[FINAL_RED_IDX]  = 0.0;              // does not sway
   thresholds[FINAL_RED_IDX] = 0.0;
-  // FIXED POSITION at the forest floor. NEVER moves. Hidden at scroll 0 by
-  // the camera looking ABOVE it; revealed by camera tilt-down as you descend.
-  //   x = 0.0   (centered horizontally)
-  //   y = -2.5  (forest floor — well below the canopy plane)
-  //   z = 0.0   (on the central focal axis the camera looks down through)
+  // FIXED in world space — ONE value for every device (no per-device guess).
+  // The dot sits on the central focal axis at the forest floor; the camera
+  // dollies in and tilts down to ARRIVE at it. Because the camera's vertical
+  // FOV is constant, this projects to the same vertical screen anchor (~lower
+  // third) on any aspect ratio, portrait mobile included. The closing text is
+  // then composed around that landing (see .closing in styles.css).
+  //   x = 0.0   (centred horizontally)
+  //   y = -2.5  (forest floor — below the canopy plane, revealed by tilt-down)
+  //   z = 0.0   (on the focal axis the camera looks down through)
   var FINAL_RED_X = 0.0;
   var FINAL_RED_Y = -2.5;
   var FINAL_RED_Z = 0.0;
@@ -577,10 +586,31 @@
       finalEdges.push({
         a: terminalDots[ti],
         b: FINAL_RED_IDX,
-        wave: 6,
+        wave: 7,
         threshold: 0,
       });
     }
+  }
+
+  // Convergence "AROUND" the final dot: lay the feeder (terminal) dots in a
+  // ring encircling the final red dot, so the lines collapse INWARD radially (a
+  // sunburst) instead of stacking into a vertical column that reaches up and
+  // back down. Ring radius is kept inside the on-screen field so it also works
+  // on narrow portrait screens. Freeze the connected network so it holds this
+  // shape — if these dots keep falling/drifting, the lines reach up to wherever
+  // they ended up (the up-then-down ugliness).
+  for (var cf = 0; cf < PARTICLE_POOL; cf++) {
+    if (connectedSet[cf]) fallSpeed[cf] = 0;
+  }
+  var convRX = Math.min(FIELD_HALF_X * 0.85, 3.0);
+  var convRY = 1.9;
+  for (var tr = 0; tr < terminalDots.length; tr++) {
+    var tIdx = terminalDots[tr];
+    var ang = (tr / Math.max(1, terminalDots.length)) * Math.PI * 2;
+    var rr = 0.6 + 0.4 * (((tr * 7) % 5) / 4);   // vary the radius a little
+    positions[tIdx * 3]     = FINAL_RED_X + Math.cos(ang) * convRX * rr;
+    positions[tIdx * 3 + 1] = FINAL_RED_Y + Math.sin(ang) * convRY * rr;
+    positions[tIdx * 3 + 2] = FINAL_RED_Z + (((tr % 3) - 1) * 0.35);
   }
 
   var EDGE_COUNT = finalEdges.length;
@@ -745,7 +775,7 @@
   shockwave.frustumCulled = false;
   scene.add(shockwave);
   var shockwaveAge = -1;
-  var SHOCKWAVE_DURATION = 1.55;
+  var SHOCKWAVE_DURATION = 3.0;   // slow, deliberate bloom (time-based, not scroll-bound)
 
   var clickShockwaveMat = shockwaveMat.clone();
   clickShockwaveMat.uniforms = {
@@ -770,7 +800,8 @@
 
   // Spark decay rate — full bright → 0 over 0.4s.
   var SPARK_DECAY = 1 / 0.4;
-  var waveProgress = [0, 0, 0, 0, 0, 0, 0];
+  var waveProgress = [0, 0, 0, 0, 0, 0, 0, 0];
+  var seedReveal = 1.0;            // index-0 seed scale/visibility (0..1)
   var tmpDir = new THREE.Vector3();
   var tmpCamDir = new THREE.Vector3();
   var tmpSide = new THREE.Vector3();
@@ -798,7 +829,10 @@
       var threshold = lineThr[n * 2];
       var wave = edgeWave[n];
       var waveP = waveProgress[wave] || 0;
-      var drawDuration = 1.0;
+      // Convergence lines (wave 7) finish drawing at progress 0.75, so contact
+      // with the final red dot happens late in the closing scroll. The blast is
+      // time-based (see SHOCKWAVE_DURATION), so a later land doesn't speed it up.
+      var drawDuration = wave === 7 ? 0.75 : 1.0;
 
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
@@ -840,7 +874,9 @@
       lineVerts[vB + 1] = hy;
       lineVerts[vB + 2] = hz;
 
-      var arrowVisible = strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0;
+      var arrowVisible = wave === 7
+        ? (strokeProgress > 0.001 ? 0.95 : 0.0)
+        : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -870,8 +906,8 @@
 
       // Geometry does the drawing. Alpha is simply on while the segment has
       // length, avoiding the previous fade-in behavior.
-      var finalFadeForLines = smoothstep(0.88, 1.0, waveProgress[6] || 0);
-      var lineFloor = wave === 6 ? 1.0 : lerp(1.0, 0.25, finalFadeForLines);
+      var finalFadeForLines = smoothstep(0.88, 1.0, waveProgress[7] || 0);
+      var lineFloor = wave === 7 ? 1.0 : lerp(1.0, 0.25, finalFadeForLines);
       var visible = strokeProgress > 0.001 ? lineFloor : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
@@ -1161,6 +1197,19 @@
   var visible = !document.hidden;
   document.addEventListener("visibilitychange", function () {
     visible = !document.hidden;
+    // Returning from a backgrounded tab / woken screen: the viewport may have
+    // changed while we were hidden, leaving the WebGL buffer, ScrollTrigger pin
+    // measurements, and Lenis stale (which shows as a black bar / broken scroll
+    // at the bottom). Re-sync them once layout settles.
+    if (visible) {
+      setTimeout(function () {
+        onResize();
+        if (window.lenis && window.lenis.resize) window.lenis.resize();
+        if (window.ScrollTrigger && window.ScrollTrigger.refresh) {
+          window.ScrollTrigger.refresh();
+        }
+      }, 150);
+    }
   });
 
   // ---- Animation loop --------------------------------------------------
@@ -1184,11 +1233,16 @@
       // simply track wherever the motes go.
       var density = uniforms.uMoteDensity.value;
       var fallScale = lerp(1.0, 0.55, density);
-      var finalFade = smoothstep(0.88, 1.0, waveProgress[6] || 0);
+      // Connected (network) dots have fallSpeed 0, so they hold their shape and
+      // the convergence ring stays put; only ambient motes drift past.
+      var finalFade = smoothstep(0.88, 1.0, waveProgress[7] || 0);
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
         var yi = i * 3 + 1;
-        // Index 1 = final red dot. ABSOLUTELY STATIONARY. Skip all movement.
+        // Index 1 = final red dot. ABSOLUTELY STATIONARY in world space — the
+        // camera dollies/tilts down to arrive at it, which gives the focal
+        // point real depth and parallax. Always on; it simply starts below the
+        // gaze and is revealed as the camera lands. Skip all movement.
         if (i === 1) {
           alphas[i] = 1.0;
           continue;
@@ -1201,13 +1255,14 @@
         }
         if (positions[yi] < -7.0) {
           positions[yi] = 7.0;
-          positions[xi] = (Math.random() - 0.5) * 20;
+          positions[xi] = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
         }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
         if (i === 0) {
-          alphas[i] = lerp(1.0, 0.25, finalFade);
+          // Seed fades + scales in via seedReveal (hero -> section 01).
+          alphas[i] = lerp(1.0, 0.25, finalFade) * seedReveal;
         } else if (i === 1) {
           // Final red dot is fixed at the floor. Always on — the camera
           // simply pans down to reveal it. No alpha gating.
@@ -1228,6 +1283,13 @@
       // Final red dot is FIXED at (0, -2.5, 0) — set once at startup. The
       // camera tilts down to reveal it. NO position animation here.
 
+      // Seed reveal: scale the first red dot from 0 -> full (RED_MOTE_SIZE).
+      // aSize is shared with redGeo, so one needsUpdate refreshes both draws.
+      var seedTargetSize = RED_MOTE_SIZE * seedReveal;
+      if (sizes[0] !== seedTargetSize) {
+        sizes[0] = seedTargetSize;
+        partGeo.attributes.aSize.needsUpdate = true;
+      }
 
       partGeo.attributes.position.needsUpdate = true;
       partGeo.attributes.aAlpha.needsUpdate = true;
@@ -1275,19 +1337,19 @@
       var lookY = lerp(CAM_START.y, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
 
+      // Contact blast: TIME-based slow bloom, armed by scroll crossing the land
+      // point (see setConvergenceProgress). Plays over SHOCKWAVE_DURATION at a
+      // fixed speed, so it can't be flicked past on a fast scroll. Eases out as
+      // it grows and fades to nothing by the end.
       if (shockwaveAge >= 0) {
         shockwaveAge += dt;
         var shockT = Math.min(1, shockwaveAge / SHOCKWAVE_DURATION);
-        var shockEase = 1 - Math.pow(1 - shockT, 3);
+        var shockEase = 1 - Math.pow(1 - shockT, 2.4);
         shockwave.position.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
         shockwave.quaternion.copy(camera.quaternion);
         shockwave.scale.setScalar(0.18 + shockEase * 7.2);
-        var shockFade = 1 - smoothstep(0.82, 1.0, shockT);
+        var shockFade = 1 - smoothstep(0.7, 1.0, shockT);
         shockwaveMat.uniforms.uAlpha.value = shockFade * 0.88;
-        if (shockT >= 1) {
-          shockwaveAge = -1;
-          shockwaveMat.uniforms.uAlpha.value = 0;
-        }
       } else {
         shockwaveMat.uniforms.uAlpha.value = 0;
       }
@@ -1323,23 +1385,38 @@
     uniforms.uConnect.value     = v;
   }
   function setWaveProgress(wave, p) {
-    var idx = Math.max(1, Math.min(6, wave | 0));
+    var idx = Math.max(1, Math.min(7, wave | 0));
     waveProgress[idx] = Math.max(0, Math.min(1, p));
   }
+  // Seed (index 0) reveal: 0 = invisible, 1 = full. Driven by scroll from the
+  // hero headline to section 01 so the first red dot scales into existence.
+  function setSeedReveal(p) {
+    seedReveal = Math.max(0, Math.min(1, p));
+  }
   var previousConvergenceProgress = 0;
+  // Lines draw over 0 -> 0.75; contact (and the time-based blast) happens late
+  // in the closing scroll. Same on every viewport; the DOM trigger ends exactly
+  // at closing-settled.
+  var FINAL_CONVERGENCE_LAND = 0.75;
   function setConvergenceProgress(p) {
     var v = Math.max(0, Math.min(1, p));
-    if (previousConvergenceProgress < 0.999 && v >= 0.999) {
+    // Arm the slow blast when scroll first crosses the land point; disarm when
+    // scrolling back below it so it re-plays on the next pass. Plays the full
+    // SHOCKWAVE_DURATION regardless of scroll speed — can't be flicked past.
+    if (previousConvergenceProgress < FINAL_CONVERGENCE_LAND && v >= FINAL_CONVERGENCE_LAND) {
       shockwaveAge = 0;
+    } else if (v < FINAL_CONVERGENCE_LAND) {
+      shockwaveAge = -1;
     }
     previousConvergenceProgress = v;
-    setWaveProgress(6, v);
+    setWaveProgress(7, v);
   }
   window.bullfinchCanopy = {
     setProgress: setProgress,
     setLayerTint: setProgress,
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
+    setSeedReveal: setSeedReveal,
     getLayerTint: function () { return uniforms.uLayerTint.value; },
   };
 })();

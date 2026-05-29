@@ -30,6 +30,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 body {
   min-height: 100vh;
@@ -64,27 +65,6 @@ button {
 
 /* ---- Theme tokens ------------------------------------------------------- */
 :root,
-[data-theme="light"] {
-  --bg: #FFFFFF;
-  --bg-elev: #FAFAFA;
-  --ink: #0A0A0A;
-  --ink-soft: #6B6B6B;
-  --ink-quiet: #A8A8A8;
-  --accent: #E63946;
-  --rule: rgba(10, 10, 10, 0.08);
-  /* WebGL only. Warmer tan-tinted gradients. Mote pushed toward mid-gray. */
-  --gl-canopy: #7D6E58;       /* warm tan-gray (was cool #5A5C58) */
-  --gl-understory: #3A2E22;   /* deeper tan, replaces near-black */
-  --gl-light-shaft: #D8C9A8;  /* sandier light, more warmth */
-  --gl-mote: #9A9A9A;         /* half gray, no longer too dark */
-  --gl-line: rgba(10, 10, 10, 0.55);
-  --gl-accent: #E63946;
-  --text-veil-bg-strong: 24%;
-  --text-veil-bg-soft: 12%;
-  --text-veil-blur: 14px;
-  --text-veil-saturate: 0.92;
-}
-
 [data-theme="dark"] {
   --bg: #050505;
   --bg-elev: #0E0E0E;
@@ -120,7 +100,7 @@ body {
 .panel__evidence p,
 .lead,
 .site-footer__line,
-.theme-toggle {
+.fullscreen-toggle {
   transition:
     background-color 400ms ease,
     border-color 400ms ease,
@@ -183,10 +163,97 @@ p {
   z-index: 1;
 }
 
+/* ---- Website nav ------------------------------------------------------- */
+.site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 24px var(--pad-x);
+  color: var(--ink-quiet);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition:
+    color 400ms ease,
+    opacity 420ms ease,
+    transform 420ms ease;
+}
+/* Nav stays hidden on the hero until the first scroll, then fades in. */
+body.has-entered.has-scrolled .site-nav {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.site-nav__brand,
+.site-nav__links {
+  display: inline-flex;
+  align-items: center;
+}
+.site-nav__brand {
+  gap: 12px;
+}
+.site-nav__mark {
+  width: 26px;
+  height: auto;
+  flex: 0 0 auto;
+  opacity: 0.72;
+}
+.site-nav__hover-label {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  color: var(--ink-quiet);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -2px);
+  transition:
+    color 200ms ease,
+    opacity 200ms ease,
+    transform 200ms ease;
+  white-space: nowrap;
+}
+.site-nav__hover-label.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.site-nav__links {
+  gap: 24px;
+}
+.site-nav a {
+  color: var(--ink-quiet);
+  transition: color 200ms ease, opacity 200ms ease;
+}
+/* Real-hover devices only, so a tap on touch doesn't leave the number stuck
+   lit (sticky :hover). The lit state on touch comes from .is-current below. */
+@media (hover: hover) {
+  .site-nav a:hover {
+    color: var(--ink);
+  }
+}
+/* Scroll-spy: the link for the section currently in view stays lit. */
+.site-nav a.is-current {
+  color: var(--ink);
+}
 /* ---- Splash ------------------------------------------------------------ */
 .splash {
   position: fixed;
   inset: 0;
+  /* Center against the VISIBLE (dynamic) viewport, not the layout viewport.
+     Without this the logo centers behind the mobile address bar and sits too
+     low until fullscreen hides the bar. dvh tracks the visible area in both
+     states; falls back to inset:0 where dvh is unsupported. */
+  height: 100dvh;
   z-index: 100;
   display: grid;
   place-items: center;
@@ -225,7 +292,9 @@ p {
   position: relative;
   z-index: 1;
   width: clamp(104px, 12vw, 180px);
-  aspect-ratio: 10 / 7;
+  /* Square: the logo sequence canvas is 360x360. A 10/7 box squished the
+     square mark, distorting it and pushing it off visual centre. */
+  aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
   color: var(--ink);
@@ -258,7 +327,11 @@ p {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  height: 100svh;
+  /* Track the DYNAMIC viewport, not the small one. With 100svh, when the mobile
+     address bar hides (e.g. after waking the screen) the visible area is taller
+     than this fixed canvas, leaving a black bar at the bottom. dvh matches the
+     renderer buffer (window.innerHeight) and always covers the visible area. */
+  height: 100dvh;
   z-index: 0;
   pointer-events: none;
   transition: none;
@@ -438,6 +511,300 @@ body.has-entered .hero__scroll-cue:hover {
   isolation: isolate;
   --text-veil-opacity: 0;
 }
+.panel--media {
+  grid-template-columns: minmax(240px, min(38vw, 520px)) minmax(0, var(--col-narrow));
+  gap: clamp(48px, 7vw, 112px);
+  place-items: center;
+}
+#problem.panel--media {
+  grid-template-columns: minmax(160px, min(24vw, 300px)) minmax(0, var(--col-narrow));
+  gap: clamp(40px, 6vw, 92px);
+}
+#product.panel--media {
+  grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
+  gap: clamp(18px, 3vw, 48px);
+}
+.case-fixed-layer {
+  position: fixed;
+  left: var(--pad-x);
+  top: 0;
+  width: min(40vw, 560px);
+  max-width: calc(50vw - var(--pad-x) - 32px);
+  transform: translate3d(0, 0, 0);
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+}
+#product .panel__inner {
+  grid-column: 2;
+}
+.panel__video {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  aspect-ratio: 1.2 / 1;
+  justify-self: end;
+  border: 1px solid var(--rule);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(8px) saturate(0.94);
+  backdrop-filter: blur(8px) saturate(0.94);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-72px);
+  will-change: opacity, transform;
+}
+.panel__video::before,
+.panel__video::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 0;
+  opacity: 1;
+  pointer-events: none;
+}
+.panel__video::before {
+  background:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size: 25% 25%;
+  opacity: 0.42;
+}
+.panel__video::after {
+  inset: 50% auto auto 50%;
+  width: 48px;
+  height: 48px;
+  border-left: 1px solid var(--ink-soft);
+  border-top: 1px solid var(--ink-soft);
+  opacity: 0.45;
+  transform: translate(-50%, -50%) rotate(135deg);
+}
+.panel__video-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+}
+.panel__video-mark {
+  width: clamp(64px, 8vw, 116px);
+  height: auto;
+  opacity: 0.72;
+}
+.panel__video p {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.panel__video-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.62;
+  z-index: 2;
+}
+.panel__video-gradient {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 18% 48%, rgba(230, 57, 70, 0.58), transparent 28%),
+    radial-gradient(circle at 78% 54%, rgba(216, 201, 168, 0.22), transparent 32%),
+    linear-gradient(135deg, #1d1d1a 0%, #14120f 48%, #050505 100%);
+  animation: videoGradientDrift 8s ease-in-out infinite alternate;
+}
+@keyframes videoGradientDrift {
+  0% {
+    transform: scale(1.08) translate3d(-4%, -2%, 0);
+    filter: saturate(0.88) brightness(0.84);
+  }
+  100% {
+    transform: scale(1.16) translate3d(4%, 3%, 0);
+    filter: saturate(1.08) brightness(0.98);
+  }
+}
+.panel__video-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  color: #FFFFFF;
+  text-decoration: none;
+}
+.panel__video-fallback img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.25) contrast(1.05) brightness(0.74);
+}
+.panel__video-fallback span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+body.is-file-protocol .panel__video-media {
+  display: none;
+}
+body.is-file-protocol .panel__video-fallback {
+  display: block;
+}
+.panel__video--film::before {
+  opacity: 0.16;
+  z-index: 2;
+}
+.panel__video--film {
+  max-width: 300px;
+  opacity: 0;
+}
+.panel__video--film::after {
+  display: none;
+}
+.panel__video--film .panel__video-inner {
+  pointer-events: none;
+  z-index: 3;
+}
+.panel__video--film .panel__video-mark {
+  width: clamp(38px, 5vw, 62px);
+  opacity: 0.14;
+}
+.panel__video--film p {
+  font-size: 9px;
+  color: #FFFFFF;
+  opacity: 0.56;
+}
+/* The film is now a procedural canvas (no video), so show it at full opacity
+   over the brand gradient — its shafts/motes are already subtle. */
+.panel__video--film .panel__video-media {
+  opacity: 1;
+}
+.panel__model {
+  width: min(42vw, 560px);
+  aspect-ratio: 0.9 / 1;
+  align-self: center;
+  transform: translate(-72px, -5vh);
+  background: transparent;
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+.panel__model::before,
+.panel__model::after {
+  display: none;
+}
+.panel__model-canvas {
+  width: 100%;
+  height: 100%;
+}
+.case-fixed-layer.panel__model {
+  position: fixed;
+  left: var(--pad-x);
+  top: 0;
+  width: min(40vw, 560px);
+  max-width: calc(50vw - var(--pad-x) - 32px);
+  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  z-index: 3;
+}
+#product .panel__inner {
+  padding-top: clamp(28px, 6vh, 76px);
+}
+.panel__people {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--rule);
+}
+.panel__people::before,
+.panel__people::after {
+  display: none;
+}
+.person {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  cursor: pointer;
+  border-radius: 0;
+}
+.person img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0.82;
+  border-radius: 0;
+}
+.panel__people,
+.panel__people *,
+.person,
+.person img,
+.person picture {
+  border-radius: 0 !important;
+  clip-path: none !important;
+}
+.person::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 52%, color-mix(in srgb, var(--bg) 82%, transparent));
+  pointer-events: none;
+}
+.person figcaption {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.person:hover img,
+.person:focus-visible img {
+  filter: grayscale(0.7) contrast(1.08);
+  opacity: 1;
+}
+.person:hover figcaption,
+.person:focus-visible figcaption {
+  color: var(--accent);
+}
+.team-bio-link {
+  display: inline;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  vertical-align: baseline;
+}
+.team-bio-link:hover,
+.team-bio-link:focus-visible {
+  color: var(--accent);
+}
+.panel--media .panel__inner {
+  justify-self: start;
+  max-width: min(44vw, var(--col-narrow));
+}
 
 /* Inner is a FLEX COLUMN. Children stack with NO slack rows between them.
    The block centers vertically as a whole. Bullets sit tight under verdict. */
@@ -584,31 +951,118 @@ body.has-entered .hero__scroll-cue:hover {
 }
 
 @media (max-width: 720px) {
+  .site-nav {
+    padding: calc(20px + env(safe-area-inset-top)) var(--pad-x) 18px;
+    gap: 16px;
+  }
+  .site-nav__links {
+    display: inline-flex;
+    gap: clamp(10px, 3vw, 16px);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    margin-left: auto;
+  }
+  .site-nav__links a[href="#closing"] {
+    display: none;
+  }
+  .site-nav__mark {
+    width: 22px;
+  }
+  .site-nav__hover-label {
+    display: none;
+  }
   .panel {
     padding: 24px var(--pad-x);
   }
+  .panel--media {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 24px;
+    place-items: center;
+  }
+  #problem.panel--media,
+  #product.panel--media,
+  #team.panel--media {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-content: center;
+  }
+  .panel__video {
+    grid-column: 1;
+    grid-row: 1;
+    width: min(42vh, 100%);
+    max-width: 320px;
+    justify-self: center;
+  }
+  .panel__video--film {
+    /* Full-bleed to the screen edges, keep the current height. */
+    width: 100vw;
+    max-width: none;
+    height: min(23vh, 200px);
+    aspect-ratio: auto;
+    margin-left: calc(50% - 50vw);
+    border-left: none;
+    border-right: none;
+  }
+  .panel__people {
+    width: min(48vh, 100%);
+    max-width: 360px;
+  }
+  .panel--media .panel__inner {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: center;
+    max-width: none;
+    height: auto;
+  }
+  /* Product panel: the TEXT is bottom-anchored so it is ALWAYS fully on screen
+     (never cut off). The model fills the space ABOVE the text and is sized by
+     JS (layoutProductCase in swot.js) to be as large as possible without
+     pushing the text off-screen — it adapts to the text, not the reverse. */
+  #product.panel--media {
+    align-content: end;
+  }
+  #product .panel__inner {
+    grid-column: 1;
+    grid-row: 2;
+    max-width: min(86vw, 420px);
+    padding-top: 0;
+    padding-bottom: 4vh;
+  }
+  .case-fixed-layer.panel__model {
+    /* Box scales with the available space: 94vw wide (kept < viewport so this
+       fixed element can't create horizontal overflow), height = the region
+       above the text (set by JS). The canvas resolution tracks this box and the
+       art is drawn CONTAIN, so it always stays full-aspect (no crop/stretch). */
+    left: 50%;
+    top: 0;
+    width: 94vw;
+    height: 42vh;         /* fallback until JS measures the region */
+    max-width: none;
+    transform: translate3d(-50%, 0, 0);
+  }
   .panel__eyebrow {
-    font-size: 10px;
-    margin-bottom: 14px;
+    font-size: 11px;
+    margin-bottom: 10px;
   }
   .panel__verdict {
-    font-size: min(8.2vw, 4.4vh, 34px);
-    line-height: 1.08;
+    font-size: min(8.2vw, 4.4vh, 33px);
+    line-height: 1.04;
     letter-spacing: -0.012em;
   }
   .panel__evidence {
-    gap: 11px;
-    margin-top: 18px;
+    gap: 8px;
+    margin-top: 14px;
     max-width: none;
   }
   .panel__evidence p {
-    font-size: 12.5px;
-    line-height: 1.42;
+    font-size: 13.4px;
+    line-height: 1.34;
   }
   .panel__numeric {
-    margin-top: 18px;
-    font-size: 10px;
-    line-height: 1.35;
+    margin-top: 12px;
+    font-size: 10.5px;
+    line-height: 1.25;
   }
 }
 
@@ -618,10 +1072,15 @@ body.has-entered .hero__scroll-cue:hover {
   z-index: 1;
   min-height: 100vh;
   min-height: 100svh;
-  padding: 32px var(--pad-x);
+  /* Content sits in the upper portion; the footer is pushed to the bottom
+     (margin-top: auto). The open space between them is the lower-centre zone
+     the network converges into — see updateFinalRedAnchor in scene.js. */
+  padding: clamp(72px, 15vh, 150px) var(--pad-x) 0;
   overflow: hidden;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   isolation: isolate;
 }
 .closing__inner {
@@ -630,12 +1089,12 @@ body.has-entered .hero__scroll-cue:hover {
   max-width: var(--col-narrow);
   text-align: center;
   z-index: 2;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: clamp(28px, 5vh, 56px);
-  transform: translateY(clamp(56px, 10vh, 120px));
 }
 /* Subtle radial scrim so the headline reads cleanly over the live network. */
 .closing__title {
@@ -664,16 +1123,72 @@ body.has-entered .hero__scroll-cue:hover {
   display: block;
   will-change: transform, opacity;
 }
-
-/* ---- Footer ------------------------------------------------------------- */
+.contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 40px;
+}
+.contact-actions a {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  color: var(--ink-soft);
+  font-size: 14px;
+  transition:
+    border-color 220ms ease,
+    color 220ms ease,
+  transform 220ms ease;
+}
+.contact-actions a:hover {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--rule));
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+.closing__actions {
+  position: relative;
+  justify-content: center;
+  gap: clamp(32px, 7vw, 96px);
+  margin-top: 0;
+}
+.closing__actions a {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #FFFFFF;
+  text-decoration: none;
+}
+.closing__actions a:hover {
+  border-color: transparent;
+  color: #FFFFFF;
+  transform: none;
+}
+/* ---- Footer (lives INSIDE .closing — last band of the final viewport) --- */
 .site-footer {
   position: relative;
-  z-index: 1;
-  min-height: 112px;
-  padding: 56px var(--pad-x) max(10px, env(safe-area-inset-bottom));
+  z-index: 2;
+  flex: 0 0 auto;
+  margin-top: auto;
+  width: 100%;
+  padding: 24px var(--pad-x) max(104px, calc(env(safe-area-inset-bottom) + 104px));
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+}
+.site-footer__wordmark {
+  width: min(44vw, 440px);
+  height: auto;
+  pointer-events: none;
 }
 .site-footer__line {
   font-family: var(--font-mono);
@@ -702,58 +1217,147 @@ body.has-entered .hero__scroll-cue:hover {
   transform: translate(-50%, 0);
 }
 
-@media (max-width: 720px) {
-  .site-footer {
-    min-height: 124px;
-    padding: 56px var(--pad-x) max(10px, env(safe-area-inset-bottom));
-  }
-  .site-footer__top {
-    bottom: calc(max(10px, env(safe-area-inset-bottom)) + 34px);
-  }
+/* ---- Team bio modal ---------------------------------------------------- */
+.bio-modal[hidden] {
+  display: none;
 }
-
-/* ---- Theme toggle ------------------------------------------------------- */
-.theme-toggle {
+.bio-modal {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 40px;
-  height: 40px;
+  inset: 0;
+  z-index: 80;
   display: grid;
   place-items: center;
-  background-color: var(--bg-elev);
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  z-index: 50;
-  transition:
-    background-color 400ms ease,
-    border-color 400ms ease,
-    color 200ms ease,
-    transform 200ms ease;
+  padding: 24px;
 }
-.theme-toggle:hover {
-  transform: translateY(-1px);
-}
-.theme-toggle:active {
-  transform: translateY(0);
-  transition-duration: 100ms;
-}
-.theme-toggle__glyph {
+.bio-modal__backdrop {
   position: absolute;
   inset: 0;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(0.86);
+  backdrop-filter: blur(16px) saturate(0.86);
+}
+.bio-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(860px, calc(100vw - 48px));
+  padding: clamp(24px, 4vw, 44px);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  color: var(--ink);
+  display: grid;
+  grid-template-columns: minmax(180px, 0.78fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 44px);
+  align-items: center;
+}
+.bio-modal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  transition: opacity 200ms ease;
+  color: var(--ink-soft);
 }
-[data-theme="light"] .theme-toggle__glyph--sun { opacity: 1; }
-[data-theme="light"] .theme-toggle__glyph--moon { opacity: 0; }
-[data-theme="dark"]  .theme-toggle__glyph--sun { opacity: 0; }
-[data-theme="dark"]  .theme-toggle__glyph--moon { opacity: 1; }
+.bio-modal__close:hover {
+  color: var(--accent);
+}
+.bio-modal__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  margin-bottom: 22px;
+}
+.bio-modal__photo {
+  width: 100%;
+  aspect-ratio: 0.82 / 1;
+  object-fit: cover;
+  object-position: center top;
+  filter: none;
+  margin: 0;
+  border-radius: 0;
+  clip-path: none;
+}
+.bio-modal__panel,
+.bio-modal__photo,
+.bio-modal__panel img {
+  border-radius: 0 !important;
+  clip-path: none !important;
+  overflow: visible;
+}
+.bio-modal__content {
+  min-width: 0;
+}
+.bio-modal__title {
+  max-width: 24ch;
+  font-size: clamp(17px, 1.45vw, 22px);
+  line-height: 1.18;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.bio-modal__body {
+  max-width: 62ch;
+  margin-top: 18px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: justify;
+  text-align-last: left;
+}
 
 @media (max-width: 720px) {
-  .theme-toggle {
-    right: 16px;
-    bottom: 16px;
+  .bio-modal__panel {
+    grid-template-columns: 1fr;
   }
+  .bio-modal__photo {
+    width: min(54vw, 220px);
+  }
+  .site-footer {
+    padding: 20px var(--pad-x) max(92px, calc(env(safe-area-inset-bottom) + 92px));
+  }
+  .site-footer__top {
+    bottom: calc(max(10px, env(safe-area-inset-bottom)) + 18px);
+  }
+  .corner-wordmark {
+    display: none;
+  }
+}
+
+/* ---- Fullscreen toggle -------------------------------------------------- */
+.fullscreen-toggle {
+  width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ink-quiet);
+  transition:
+    color 200ms ease,
+    opacity 200ms ease;
+}
+.fullscreen-toggle:hover,
+.fullscreen-toggle:focus-visible {
+  color: var(--ink);
+}
+.fullscreen-toggle svg {
+  display: block;
+}
+
+.corner-wordmark {
+  position: fixed;
+  right: var(--pad-x);
+  bottom: max(58px, calc(env(safe-area-inset-bottom) + 58px));
+  z-index: 45;
+  color: var(--ink-quiet);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  pointer-events: none;
+  text-transform: uppercase;
 }

@@ -25,6 +25,7 @@
 */
 (function () {
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
 
   // ---- Safety: if GSAP didn't load, just reveal everything --------------
   if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
@@ -95,6 +96,7 @@
     var evidence = panel.querySelectorAll(".panel__evidence p");
     var numeric  = panel.querySelector(".panel__numeric");
     var inner    = panel.querySelector(".panel__inner");
+    var media    = panel.querySelector(".panel__video");
 
     // First beat is visual: arrows land, dots pulse, then copy appears.
     // 18%–24% eyebrow slides in
@@ -102,6 +104,18 @@
     if (eyebrow) {
       eyebrow.style.opacity = pe;
       eyebrow.style.transform = "translateX(" + (-16 * (1 - pe)) + "px)";
+    }
+
+    // Optional media panels use the same read rhythm as text.
+    // Product case appears earlier, halfway through the line draw, while copy timing stays locked.
+    if (media) {
+      var isProduct = panel.id === "product";
+      var pmIn = isProduct ? 1 : smooth01(mapRange(p, 0.18, 0.30));
+      var pmOut = isProduct ? 0 : smooth01(mapRange(p, 0.88, 1.00));
+      var pm = pmIn * (1 - pmOut);
+      var mediaX = isProduct ? 0 : -72 * (1 - pmIn) - 72 * pmOut;
+      if (!isProduct || p > 0.001) media.style.opacity = pm;
+      media.style.transform = isProduct ? "translate3d(0, -50%, 0)" : "translateX(" + mediaX + "px)";
     }
 
     // 24%–36% verdict fades in with vertical translate ONLY.
@@ -151,6 +165,7 @@
     if (reduced) {
       gsap.set(panel.querySelectorAll(".panel__eyebrow, .panel__verdict, .panel__evidence p, .panel__numeric"),
                { opacity: 0, y: 16 });
+      gsap.set(panel.querySelectorAll(".panel__video"), { opacity: 0, x: -72 });
       ScrollTrigger.create({
         trigger: panel,
         start: "top 75%",
@@ -158,6 +173,8 @@
         onEnter: function () {
           gsap.to(panel.querySelectorAll(".panel__eyebrow, .panel__verdict, .panel__evidence p, .panel__numeric"),
                   { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.08 });
+          gsap.to(panel.querySelectorAll(".panel__video"),
+                  { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
         },
       });
       return;
@@ -169,7 +186,10 @@
     var panelTrigger = ScrollTrigger.create({
       trigger: panel,
       start: "top top",
-      end: "+=200%",
+      // Halve the pin distance on mobile so a thumb scroll covers twice the
+      // choreography (less scrolling to get through each section). Wave timing
+      // references these triggers, so it scales automatically.
+      end: mobileLike ? "+=100%" : "+=200%",
       pin: true,
       pinSpacing: true,
       scrub: true,
@@ -181,8 +201,79 @@
     panelTriggers.push(panelTrigger);
   });
 
+  // ===== Seed (first red dot) reveal =====================================
+  // Invisible while the hero headline holds; scales 0 -> full over the scroll
+  // from the hero into section 01 (the first panel reaching the top).
+  if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setSeedReveal) {
+    var firstPanel = panels[0];
+    if (firstPanel) {
+      window.bullfinchCanopy.setSeedReveal(0);
+      ScrollTrigger.create({
+        trigger: firstPanel,
+        start: "top bottom",   // panel 01 enters as the hero scrolls away
+        end: "top top",        // panel 01 pinned at top = section 01 arrived
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          window.bullfinchCanopy.setSeedReveal(self.progress);
+        },
+      });
+    }
+  }
+
+  // ===== Product case: size model to the space left above the text =======
+  // The text is bottom-anchored in CSS so it is ALWAYS fully on screen. Measure
+  // the text block and size the model to fill everything above it — as large as
+  // possible without pushing the text off-screen. Mobile only; desktop keeps
+  // its own side-by-side layout.
+  var productPanel = document.getElementById("product");
+  var productInner = productPanel && productPanel.querySelector(".panel__inner");
+  var caseModel = document.querySelector(".case-fixed-layer.panel__model");
+  function layoutProductCase() {
+    if (!caseModel || !productPanel || !productInner) return;
+    if (!mobileLike) { caseModel.style.height = ""; return; }
+    // Size from STABLE, scroll-independent values: the panel is 100svh and the
+    // text is bottom-anchored within it, so model height = panel height minus
+    // (text + padding + gap). This stays constant regardless of scroll
+    // position, so the model holds a FIXED spot (no "rising into place"), while
+    // still leaving the full text on screen. Recompute only on layout changes.
+    var panelH = productPanel.offsetHeight;     // 100svh, stable
+    var textH = productInner.offsetHeight;      // stable
+    var padBottom = 24;                         // mobile .panel padding-bottom
+    var gap = Math.round(panelH * 0.02);
+    var modelH = panelH - padBottom - textH - gap;
+    modelH = Math.max(150, Math.min(modelH, Math.round(panelH * 0.72)));
+    caseModel.style.height = modelH + "px";
+  }
+  layoutProductCase();
+  window.addEventListener("resize", layoutProductCase);
+  window.addEventListener("orientationchange", layoutProductCase);
+  window.addEventListener("load", layoutProductCase);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(layoutProductCase);
+  }
+
+  // ===== Nav scroll-spy ==================================================
+  // Light the nav number for the section currently in view (and clear it when
+  // you leave). Replaces the old behaviour where a tapped link stayed lit.
+  var navLinks = document.querySelectorAll(".site-nav__links a[data-scroll-target]");
+  navLinks.forEach(function (link) {
+    var sel = link.getAttribute("data-scroll-target");
+    var section = sel && document.querySelector(sel);
+    if (!section) return;
+    ScrollTrigger.create({
+      trigger: section,
+      start: "top center",
+      end: "bottom center",
+      invalidateOnRefresh: true,
+      onToggle: function (self) {
+        link.classList.toggle("is-current", self.isActive);
+      },
+    });
+  });
+
   // ===== Closing section reveal ==========================================
-  var closing = document.getElementById("closing");
+  var closing = document.querySelector(".closing");
   if (closing) {
     var cLine1 = closing.querySelector(".closing__line--1");
     var cLine2 = closing.querySelector(".closing__line--2");
@@ -215,29 +306,28 @@
   }
 
   // ===== Canopy wave timing =============================================
-  // Each wave now finishes before the next text appears:
-  // outgoing block starts leaving at 88%, arrows land at 8%, then the new
-  // copy waits a beat before resolving.
+  // Each wave starts only after the current text has had time to sit, then
+  // lands as the next text block begins. Wave 1 intentionally waits until
+  // after the "forest data stack" panel instead of running from the hero.
   if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setWaveProgress) {
+    var productMedia = document.querySelector(".case-fixed-layer");
+    var casePlaybackFrameSlots = 72 + 34;
+    var caseFadeInEndProgress = (10 - 1) / casePlaybackFrameSlots;
+    var caseFadeOutStartProgress = (72 + 24 - 1) / casePlaybackFrameSlots;
+    function setProductCase(value, playbackProgress) {
+      if (productMedia) productMedia.style.opacity = clamp01(value);
+      if (window.bullfinchCaseAnimation && window.bullfinchCaseAnimation.setScrollProgress) {
+        window.bullfinchCaseAnimation.setScrollProgress(playbackProgress);
+      }
+    }
+
     function setWave(wave, progress) {
       window.bullfinchCanopy.setWaveProgress(wave, progress);
     }
 
-    if (hero && panelTriggers[0]) {
-      ScrollTrigger.create({
-        trigger: document.body,
-        start: function () { return hero.offsetTop + hero.offsetHeight * 0.35; },
-        end: function () {
-          return panelTriggers[0].start + (panelTriggers[0].end - panelTriggers[0].start) * 0.08;
-        },
-        scrub: true,
-        invalidateOnRefresh: true,
-        onUpdate: function (self) { setWave(1, self.progress); },
-      });
-    }
-
-    for (var wi = 0; wi < 4; wi++) {
+    for (var wi = 0; wi < 6; wi++) {
       (function (idx) {
+        if (!panelTriggers[idx] || !panelTriggers[idx + 1]) return;
         ScrollTrigger.create({
           trigger: document.body,
           start: function () {
@@ -248,20 +338,48 @@
           },
           scrub: true,
           invalidateOnRefresh: true,
-          onUpdate: function (self) { setWave(idx + 2, self.progress); },
+          onUpdate: function (self) {
+            setWave(idx + 1, self.progress);
+          },
         });
       })(wi);
     }
 
-    if (closing && panelTriggers[4] && window.bullfinchCanopy.setConvergenceProgress) {
+    if (panelTriggers[0] && panelTriggers[1] && panelTriggers[2]) {
       ScrollTrigger.create({
         trigger: document.body,
         start: function () {
-          return panelTriggers[4].start + (panelTriggers[4].end - panelTriggers[4].start) * 0.88;
+          return panelTriggers[0].start + (panelTriggers[0].end - panelTriggers[0].start) * 0.88;
         },
         end: function () {
-          return ScrollTrigger.maxScroll(window) - 36;
+          return panelTriggers[2].start + (panelTriggers[2].end - panelTriggers[2].start) * 0.08;
         },
+        scrub: true,
+        invalidateOnRefresh: true,
+        onUpdate: function (self) {
+          var p = self.progress;
+          var fadeIn = smooth01(mapRange(p, 0.00, caseFadeInEndProgress));
+          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, 1.00));
+          setProductCase(fadeIn * (1 - fadeOut), p);
+        },
+      });
+    }
+
+    var finalPanelIdx = panelTriggers.length - 1;
+    if (closing && panelTriggers[finalPanelIdx] && window.bullfinchCanopy.setConvergenceProgress) {
+      // Convergence runs from just after the final panel unpins to the moment
+      // the closing section is fully settled in the viewport (its bottom at the
+      // viewport bottom). Because the footer now lives INSIDE .closing, that
+      // settle point is the true end of the page on every device — no
+      // per-device maxScroll / offsetTop guesses.
+      ScrollTrigger.create({
+        trigger: closing,
+        start: function () {
+          var finalPanel = panelTriggers[finalPanelIdx];
+          return finalPanel.start + (finalPanel.end - finalPanel.start) * 0.88;
+        },
+        endTrigger: closing,
+        end: "bottom bottom",
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
@@ -298,17 +416,20 @@
     var driver = window.bullfinchCanopy.setProgress || window.bullfinchCanopy.setLayerTint;
     if (reduced) {
       driver && driver(0);
-    } else if (footer && driver) {
-      ScrollTrigger.create({
+    } else if (closing && driver) {
+      var driverConfig = {
         trigger: document.body,
         start: "top top",
-        endTrigger: footer,
-        end: "top top",
         scrub: true,
         onUpdate: function (self) {
           driver(self.progress);
         },
-      });
+      };
+      // Global descent progress lands at 1.0 exactly when the closing section
+      // is settled — same on every viewport now that the footer is inside it.
+      driverConfig.endTrigger = closing;
+      driverConfig.end = "bottom bottom";
+      ScrollTrigger.create(driverConfig);
     }
   }
 
