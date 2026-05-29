@@ -276,7 +276,7 @@
   for (var i = 0; i < PARTICLE_POOL; i++) {
     positions[i * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 7 - 3.5;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1.0;
     swayPhase[i] = Math.random() * Math.PI * 2;
     swayRate[i]  = 0.2 + Math.random() * 0.35;
     fallSpeed[i] = 0.06 + Math.random() * 0.10;
@@ -466,10 +466,12 @@
       var dz = pz - cz;
       var d2 = dx * dx + dy * dy + dz * dz;
       if (d2 > MAX_NEIGHBOR_DIST_SQ) continue;
-      // Successive descent: ONLY connect to motes strictly below the parent, so
-      // every line we draw lands on a dot lower than the previous one.
-      if (cy >= py - 0.2) continue;
-      candidates.push({ idx: ci, score: d2 });
+      // Successive descent: strongly PREFER motes below the parent (4x penalty
+      // for anything not clearly lower) so the network visibly descends — but
+      // never EXCLUDE, since excluding dead-ends a branch and can leave no
+      // terminal dots for the final convergence to the red dot.
+      var yPenalty = cy < py - 0.2 ? 1.0 : 4.0;
+      candidates.push({ idx: ci, score: d2 * yPenalty });
     }
     candidates.sort(function (a, b) { return a.score - b.score; });
     var out = [];
