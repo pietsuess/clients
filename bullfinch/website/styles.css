@@ -188,11 +188,11 @@ p {
     opacity 420ms ease,
     transform 420ms ease;
 }
-body.has-entered .site-nav {
+/* Nav stays hidden on the hero until the first scroll, then fades in. */
+body.has-entered.has-scrolled .site-nav {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
-  transition-delay: 420ms;
 }
 .site-nav__brand,
 .site-nav__links {
