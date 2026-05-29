@@ -230,30 +230,24 @@
   var productInner = productPanel && productPanel.querySelector(".panel__inner");
   var caseModel = document.querySelector(".case-fixed-layer.panel__model");
   function layoutProductCase() {
-    if (!caseModel || !productInner) return;
+    if (!caseModel || !productPanel || !productInner) return;
     if (!mobileLike) { caseModel.style.height = ""; return; }
-    // Measure the text's ACTUAL on-screen top (same coordinate space as the
-    // fixed model). The model is pinned to top:0, so capping its height at the
-    // text's top minus a gap means it can NEVER overlap the text — regardless
-    // of mobile viewport-unit quirks. Only trust the value when the panel is on
-    // screen (pinned); otherwise keep the CSS fallback height.
-    var textTop = productInner.getBoundingClientRect().top;
-    if (textTop <= 1 || textTop > window.innerHeight) return;
-    var gap = Math.round(window.innerHeight * 0.02);
-    caseModel.style.height = Math.max(150, textTop - gap) + "px";
+    // Size from STABLE, scroll-independent values: the panel is 100svh and the
+    // text is bottom-anchored within it, so model height = panel height minus
+    // (text + padding + gap). This stays constant regardless of scroll
+    // position, so the model holds a FIXED spot (no "rising into place"), while
+    // still leaving the full text on screen. Recompute only on layout changes.
+    var panelH = productPanel.offsetHeight;     // 100svh, stable
+    var textH = productInner.offsetHeight;      // stable
+    var padBottom = 24;                         // mobile .panel padding-bottom
+    var gap = Math.round(panelH * 0.02);
+    var modelH = panelH - padBottom - textH - gap;
+    modelH = Math.max(150, Math.min(modelH, Math.round(panelH * 0.72)));
+    caseModel.style.height = modelH + "px";
   }
-  // Recompute when the product panel is on screen (text in its final pinned
-  // position) and whenever layout can shift.
-  if (productPanel) {
-    ScrollTrigger.create({
-      trigger: productPanel,
-      start: "top bottom",
-      end: "bottom top",
-      onUpdate: layoutProductCase,
-      onRefresh: layoutProductCase,
-    });
-  }
+  layoutProductCase();
   window.addEventListener("resize", layoutProductCase);
+  window.addEventListener("orientationchange", layoutProductCase);
   window.addEventListener("load", layoutProductCase);
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(layoutProductCase);

@@ -674,6 +674,11 @@ body.is-file-protocol .panel__video-fallback {
   color: #FFFFFF;
   opacity: 0.56;
 }
+/* The film is now a procedural canvas (no video), so show it at full opacity
+   over the brand gradient — its shafts/motes are already subtle. */
+.panel__video--film .panel__video-media {
+  opacity: 1;
+}
 .panel__model {
   width: min(42vw, 560px);
   aspect-ratio: 0.9 / 1;
@@ -977,8 +982,14 @@ body.is-file-protocol .panel__video-fallback {
     justify-self: center;
   }
   .panel__video--film {
-    width: min(28vh, 72vw);
-    max-width: 240px;
+    /* Full-bleed to the screen edges, keep the current height. */
+    width: 100vw;
+    max-width: none;
+    height: min(23vh, 200px);
+    aspect-ratio: auto;
+    margin-left: calc(50% - 50vw);
+    border-left: none;
+    border-right: none;
   }
   .panel__people {
     width: min(48vh, 100%);
