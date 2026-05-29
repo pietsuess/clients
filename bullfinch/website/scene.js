@@ -266,11 +266,17 @@
   var isRedMote   = new Float32Array(PARTICLE_POOL);
   var sizes       = new Float32Array(PARTICLE_POOL);
 
+  // Horizontal field is scaled to the viewport aspect so the network stays
+  // within screen bounds on ANY device. The camera's vertical FOV is constant,
+  // so the visible horizontal extent tracks aspect: narrow portrait -> narrow
+  // field, wide desktop -> wider. z is kept in front of the landed camera so
+  // no dot ends up too close / behind it.
+  var viewAspect = window.innerWidth / Math.max(1, window.innerHeight);
+  var FIELD_HALF_X = Math.max(2.2, Math.min(6.5, 4.2 * viewAspect));
   for (var i = 0; i < PARTICLE_POOL; i++) {
-    // Seed roughly within x∈[-10,10], y∈[-6,6], z∈[-6,4]
-    positions[i * 3]     = (Math.random() - 0.5) * 20;
+    positions[i * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
     positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1.0;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 7 - 3.5;
     swayPhase[i] = Math.random() * Math.PI * 2;
     swayRate[i]  = 0.2 + Math.random() * 0.35;
     fallSpeed[i] = 0.06 + Math.random() * 0.10;
@@ -460,9 +466,10 @@
       var dz = pz - cz;
       var d2 = dx * dx + dy * dy + dz * dz;
       if (d2 > MAX_NEIGHBOR_DIST_SQ) continue;
-      // Downward bias: motes below parent get a small distance bonus.
-      var yBonus = cy < py ? 0.85 : 1.0;
-      candidates.push({ idx: ci, score: d2 * yBonus });
+      // Successive descent: ONLY connect to motes strictly below the parent, so
+      // every line we draw lands on a dot lower than the previous one.
+      if (cy >= py - 0.2) continue;
+      candidates.push({ idx: ci, score: d2 });
     }
     candidates.sort(function (a, b) { return a.score - b.score; });
     var out = [];
@@ -1210,7 +1217,7 @@
         }
         if (positions[yi] < -7.0) {
           positions[yi] = 7.0;
-          positions[xi] = (Math.random() - 0.5) * 20;
+          positions[xi] = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
         }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
