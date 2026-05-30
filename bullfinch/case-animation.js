@@ -14,7 +14,32 @@
   var renderedFrame = -1;
 
   function framePath(index) {
-    return "case-anim/Case_anim" + String(index).padStart(4, "0") + ".png";
+    return "case-anim-webp/Case_anim" + String(index).padStart(4, "0") + ".webp";
+  }
+
+  // Defer fetching the sequence until the #product panel is within ~1.5
+  // viewports, so the ~1.2MB of frames don't load before the user reaches
+  // section 02. Falls back to immediate load where IntersectionObserver is
+  // unavailable.
+  function whenNear(targetSelector, cb) {
+    var el = document.querySelector(targetSelector);
+    if (!el || !("IntersectionObserver" in window)) {
+      cb();
+      return;
+    }
+    var io = new IntersectionObserver(
+      function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            io.disconnect();
+            cb();
+            return;
+          }
+        }
+      },
+      { rootMargin: "150% 0px" }
+    );
+    io.observe(el);
   }
 
   function clamp(value, min, max) {
@@ -65,21 +90,24 @@
     renderFrame(slot < frameCount ? slot : slot - frameCount);
   }
 
-  for (var i = 1; i <= frameCount; i++) {
-    var img = new Image();
-    var frameIndex = i - 1;
-    loaded[frameIndex] = false;
-    img.decoding = "async";
-    img.onload = (function (index) {
-      return function () {
-        loaded[index] = true;
-        if (index === pendingFrame) renderFrame(index);
-      };
-    })(frameIndex);
-    img.src = framePath(i);
-    frames.push(img);
+  function loadFrames() {
+    for (var i = 1; i <= frameCount; i++) {
+      var img = new Image();
+      var frameIndex = i - 1;
+      loaded[frameIndex] = false;
+      img.decoding = "async";
+      img.onload = (function (index) {
+        return function () {
+          loaded[index] = true;
+          if (index === pendingFrame) renderFrame(index);
+        };
+      })(frameIndex);
+      img.src = framePath(i);
+      frames.push(img);
+    }
   }
 
+  whenNear("#product", loadFrames);
   renderFrame(0);
   window.addEventListener("resize", function () {
     renderedFrame = -1;            // force a redraw at the new box size
