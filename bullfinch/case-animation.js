@@ -5,8 +5,8 @@
   var ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  var frameCount = 72;
-  var tailFrameCount = 34;
+  var frameCount = 288;
+  var tailFrameCount = 136;
   var playbackFrameSlots = frameCount + tailFrameCount;
   var frames = [];
   var loaded = [];
@@ -14,7 +14,7 @@
   var renderedFrame = -1;
 
   function framePath(index) {
-    return "case-anim-webp/Case_anim" + String(index).padStart(4, "0") + ".webp";
+    return "case-anim-webp/Case_anim" + String(index).padStart(4, "0") + ".webp?v=v4-3";
   }
 
   // Defer fetching the sequence until the #product panel is within ~1.5
