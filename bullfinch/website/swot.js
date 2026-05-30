@@ -77,7 +77,7 @@
         if (eb) eb.style.opacity = pe;
         if (l1) l1.style.opacity = p1;
         if (l2) l2.style.opacity = p2;
-        hero.style.setProperty("--text-veil-opacity", (smooth01(Math.max(p1, p2)) * 0.58).toFixed(3));
+        setTextVeilOpacity(smooth01(Math.max(p1, p2)) * 0.84);
       },
     });
   }
@@ -88,6 +88,9 @@
   function smooth01(x) {
     var t = clamp01(x);
     return t * t * (3 - 2 * t);
+  }
+  function setTextVeilOpacity(value) {
+    document.documentElement.style.setProperty("--text-veil-opacity", clamp01(value).toFixed(3));
   }
 
   function applyPanelProgress(panel, p) {
@@ -116,6 +119,9 @@
       var mediaX = isProduct ? 0 : -72 * (1 - pmIn) - 72 * pmOut;
       if (!isProduct || p > 0.001) media.style.opacity = pm;
       media.style.transform = isProduct ? "translate3d(0, -50%, 0)" : "translateX(" + mediaX + "px)";
+    }
+    if (panel.id === "opportunity" && window.bullfinchUiAnimation && window.bullfinchUiAnimation.setScrollProgress) {
+      window.bullfinchUiAnimation.setScrollProgress(p);
     }
 
     // 24%–36% verdict fades in with vertical translate ONLY.
@@ -155,7 +161,7 @@
       inner.style.transform = "translateY(" + (-24 * px) + "px)";
       var veilIn = smooth01(mapRange(p, 0.22, 0.44));
       var veilOut = smooth01(1 - mapRange(p, 0.78, 0.90));
-      panel.style.setProperty("--text-veil-opacity", (veilIn * veilOut * 0.58).toFixed(3));
+      setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
   }
 
@@ -254,23 +260,55 @@
   }
 
   // ===== Nav scroll-spy ==================================================
-  // Light the nav number for the section currently in view (and clear it when
-  // you leave). Replaces the old behaviour where a tapped link stayed lit.
+  // Always keep one section lit. Pinned panels use their full pin range, and
+  // each item remains active until the next section takes over.
   var navLinks = document.querySelectorAll(".site-nav__links a[data-scroll-target]");
-  navLinks.forEach(function (link) {
+  var navItems = Array.prototype.slice.call(navLinks).map(function (link) {
     var sel = link.getAttribute("data-scroll-target");
-    var section = sel && document.querySelector(sel);
-    if (!section) return;
-    ScrollTrigger.create({
-      trigger: section,
-      start: "top center",
-      end: "bottom center",
-      invalidateOnRefresh: true,
-      onToggle: function (self) {
-        link.classList.toggle("is-current", self.isActive);
-      },
-    });
+    return {
+      link: link,
+      section: sel && document.querySelector(sel),
+    };
+  }).filter(function (item) {
+    return item.section;
   });
+  function panelTriggerFor(section) {
+    for (var i = 0; i < panelTriggers.length; i++) {
+      if (panelTriggers[i].trigger === section) return panelTriggers[i];
+    }
+    return null;
+  }
+  function navStartFor(item) {
+    var panelTrigger = panelTriggerFor(item.section);
+    if (panelTrigger) return panelTrigger.start;
+    if (item.section.id === "closing" && panelTriggers.length) {
+      return panelTriggers[panelTriggers.length - 1].end;
+    }
+    return Math.max(0, item.section.getBoundingClientRect().top + window.pageYOffset - window.innerHeight * 0.5);
+  }
+  function updateCurrentNavLink() {
+    if (!navItems.length) return;
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    var current = navItems[0];
+    navItems.forEach(function (item) {
+      if (scrollY + 2 >= navStartFor(item)) current = item;
+    });
+    navItems.forEach(function (item) {
+      item.link.classList.toggle("is-current", item === current);
+    });
+  }
+  if (navItems.length) {
+    ScrollTrigger.create({
+      trigger: document.body,
+      start: "top top",
+      end: function () { return ScrollTrigger.maxScroll(window); },
+      scrub: true,
+      invalidateOnRefresh: true,
+      onUpdate: updateCurrentNavLink,
+      onRefresh: updateCurrentNavLink,
+    });
+    updateCurrentNavLink();
+  }
 
   // ===== Closing section reveal ==========================================
   var closing = document.querySelector(".closing");
@@ -288,6 +326,7 @@
         scrub: true,
         onUpdate: function (self) {
           var p = self.progress;
+          setTextVeilOpacity(smooth01(mapRange(p, 0.35, 0.75)) * 0.42);
           // Line 1: reveal 0.00–0.30
           var p1 = mapRange(p, 0.00, 0.30);
           if (cLine1) {

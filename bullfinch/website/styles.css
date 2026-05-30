@@ -79,10 +79,11 @@ button {
   --gl-mote: #C8C2B5;          /* warm light gray, no longer cream-white */
   --gl-line: rgba(250, 250, 250, 0.55);
   --gl-accent: #FF5560;
-  --text-veil-bg-strong: 18%;
-  --text-veil-bg-soft: 8%;
-  --text-veil-blur: 10px;
-  --text-veil-saturate: 0.94;
+  --text-veil-bg-strong: 34%;
+  --text-veil-bg-soft: 18%;
+  --text-veil-blur: 24px;
+  --text-veil-saturate: 0.88;
+  --text-veil-opacity: 0.84;
 }
 
 /* ---- Theme transitions -------------------------------------------------- */
@@ -160,7 +161,7 @@ p {
 
 #page {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* ---- Website nav ------------------------------------------------------- */
@@ -336,6 +337,18 @@ body.has-entered.has-scrolled .site-nav {
   pointer-events: none;
   transition: none;
 }
+.text-veil {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  z-index: 1;
+  pointer-events: none;
+  opacity: var(--text-veil-opacity, 0.84);
+  background: color-mix(in srgb, var(--bg) var(--text-veil-bg-strong), transparent);
+  -webkit-backdrop-filter: blur(var(--text-veil-blur)) saturate(var(--text-veil-saturate));
+  backdrop-filter: blur(var(--text-veil-blur)) saturate(var(--text-veil-saturate));
+  transition: opacity 320ms ease;
+}
 
 /* Canvas hidden on mobile or reduced-motion. UI shows solid --bg. */
 body.is-fallback .canopy-canvas {
@@ -355,7 +368,6 @@ body.is-mote-hovering {
   place-items: center;
   padding: 96px var(--pad-x);
   isolation: isolate;
-  --text-veil-opacity: 1;
 }
 
 .hero__inner {
@@ -402,8 +414,7 @@ body.is-mote-hovering {
   fill: #FAFAFA;
 }
 
-/* Hero headline: hard-broken two lines. NO text-wrap: balance — the lines
-   are authored as separate block children. text-wrap MUST stay off so the
+/* Hero headline: authored as a block child. text-wrap MUST stay off so the
    browser does not re-break the headline. */
 .hero__title {
   font-family: var(--font-display);
@@ -420,6 +431,15 @@ body.is-mote-hovering {
 .hero__line {
   display: block;
   will-change: transform, opacity;
+}
+.hero__subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2vw, 34px);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+  margin: 18px 0 0;
 }
 .hero__scroll-cue,
 .site-footer__top {
@@ -509,7 +529,6 @@ body.has-entered .hero__scroll-cue:hover {
   display: grid;
   place-items: center;
   isolation: isolate;
-  --text-veil-opacity: 0;
 }
 .panel--media {
   grid-template-columns: minmax(240px, min(38vw, 520px)) minmax(0, var(--col-narrow));
@@ -521,6 +540,10 @@ body.has-entered .hero__scroll-cue:hover {
   gap: clamp(40px, 6vw, 92px);
 }
 #product.panel--media {
+  grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
+  gap: clamp(18px, 3vw, 48px);
+}
+#opportunity.panel--media {
   grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
   gap: clamp(18px, 3vw, 48px);
 }
@@ -686,6 +709,8 @@ body.is-file-protocol .panel__video-fallback {
   font-size: 9px;
   color: #FFFFFF;
   opacity: 0.56;
+  line-height: 1.5;
+  text-transform: none;
 }
 /* The film is now a procedural canvas (no video), so show it at full opacity
    over the brand gradient — its shafts/motes are already subtle. */
@@ -720,6 +745,9 @@ body.is-file-protocol .panel__video-fallback {
   transform: translate3d(0, 0, 0);
   opacity: 0;
   z-index: 3;
+}
+.ui-preview-slot {
+  display: block;
 }
 #product .panel__inner {
   padding-top: clamp(28px, 6vh, 76px);
@@ -818,28 +846,6 @@ body.is-file-protocol .panel__video-fallback {
   flex-direction: column;
   justify-content: center;
   align-items: stretch;
-}
-
-.hero::before,
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: -18vh -10vw;
-  z-index: 0;
-  opacity: var(--text-veil-opacity, 0);
-  background:
-    radial-gradient(
-      ellipse 72% 58% at 50% 50%,
-      color-mix(in srgb, var(--bg) var(--text-veil-bg-strong), transparent),
-      color-mix(in srgb, var(--bg) var(--text-veil-bg-soft), transparent) 52%,
-      transparent 100%
-    );
-  -webkit-backdrop-filter: blur(var(--text-veil-blur)) saturate(var(--text-veil-saturate));
-  backdrop-filter: blur(var(--text-veil-blur)) saturate(var(--text-veil-saturate));
-  -webkit-mask-image: radial-gradient(ellipse 62% 50% at 50% 50%, #000 0%, #000 44%, transparent 78%);
-  mask-image: radial-gradient(ellipse 62% 50% at 50% 50%, #000 0%, #000 44%, transparent 78%);
-  pointer-events: none;
-  transition: opacity 320ms ease;
 }
 
 .panel__eyebrow {
@@ -962,9 +968,6 @@ body.is-file-protocol .panel__video-fallback {
     letter-spacing: 0.14em;
     margin-left: auto;
   }
-  .site-nav__links a[href="#closing"] {
-    display: none;
-  }
   .site-nav__mark {
     width: 22px;
   }
@@ -982,6 +985,7 @@ body.is-file-protocol .panel__video-fallback {
   }
   #problem.panel--media,
   #product.panel--media,
+  #opportunity.panel--media,
   #team.panel--media {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
