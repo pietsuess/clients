@@ -36,6 +36,94 @@
     />
 
     <link rel="stylesheet" href="styles.css?v=v4-4" />
+
+    <style>
+      /* Section marks — one per section, sitting just right of each verdict
+         heading. Assemble / disassemble is driven by scroll position (--build),
+         not a timer. Ported from the Bullfinch Earth Marks set. */
+      @property --build { syntax: "<number>"; inherits: true; initial-value: 0; }
+      @property --glow  { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+      /* The eyebrow keeps its ORIGINAL flow, size and spacing untouched. It is
+         only made a positioning context and shrunk to its text width so the
+         mark can be anchored to the end of the label. */
+      .panel__eyebrow {
+        position: relative;
+        width: -moz-fit-content;
+        width: fit-content;
+      }
+
+      /* The mark is taken OUT OF FLOW (absolute), so it adds no layout height
+         and cannot shift the verdict or the section's vertical rhythm. It sits
+         centred on the eyebrow line, just to its right. --mark-box is the SVG's
+         real rendered size (the glyph fills only the middle ~40% of its 0..100
+         viewBox, and .panel clips overflow, so the box itself must be large). */
+      .section-mark {
+        --mark-box: 128px;
+        --mo: 2;
+        --spin: 2;
+        --glowk: 1;
+        --build: 0;
+        --glow: 0;
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: calc(var(--mark-box) * -0.13); /* seat ink ~14px off the label */
+        width: var(--mark-box);
+        height: var(--mark-box);
+        pointer-events: none;
+      }
+      .section-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+      }
+      .section-mark .mw { fill: var(--ink); }
+      .section-mark .rfill { fill: var(--accent); }
+      .section-mark .red {
+        filter: drop-shadow(0 0 calc(var(--glow, 0) * var(--glowk, 1) * 3px) var(--accent));
+      }
+      .section-mark .a-move {
+        transform-box: fill-box;
+        transform: translate(calc(var(--ox, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)),
+                             calc(var(--oy, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)));
+      }
+      .section-mark .a-grow {
+        transform-box: fill-box;
+        transform: scale(var(--p, var(--build, 1)));
+      }
+      .section-mark .a-rot {
+        transform-box: fill-box;
+        transform: rotate(calc(var(--rot, 0deg) * (1 - var(--p, var(--build, 1))) * var(--spin, 1)));
+      }
+      .section-mark .fade {
+        opacity: clamp(0, calc(var(--p, var(--build, 1)) * 1.6), 1);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .section-mark { --build: 1; --glow: 0.7; }
+      }
+
+      /* Mobile: the mark is moved out of the eyebrow (see script) and parked in
+         the panel's bottom-right corner. Its containing block is .panel__inner
+         (full-height, no transform), so bottom/right track the screen corner
+         while the panel is the one on screen. */
+      @media (max-width: 720px) {
+        .section-mark--corner {
+          --mark-box: 104px;
+          left: auto;
+          top: auto;
+          /* negative offsets cancel the glyph's transparent padding so the ink
+             tucks into the corner rather than floating ~30px in from it */
+          right: calc(var(--mark-box) * -0.16);
+          bottom: calc(var(--mark-box) * -0.16);
+          transform: none;
+          margin-left: 0;
+          z-index: 5; /* sit above .panel__inner (z-index:2) and panel media */
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
@@ -115,7 +203,7 @@
             </div>
           </div>
           <div class="panel__inner">
-            <p class="panel__eyebrow">01 &middot; THE GAP</p>
+            <p class="panel__eyebrow">01 &middot; THE GAP<span class="section-mark" data-mark="people" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">Forest inventory is still built on tape measures and small samples.</h2>
             <div class="panel__evidence">
               <p><span class="lead">Field reality.</span> Professional foresters still measure trees by hand across small plots, using the same core workflow that has shaped inventory for generations.</p>
@@ -128,7 +216,7 @@
 
         <article class="panel panel--media" id="product" data-panel="2">
           <div class="panel__inner">
-            <p class="panel__eyebrow">02 &middot; THE WEARABLE</p>
+            <p class="panel__eyebrow">02 &middot; THE WEARABLE<span class="section-mark" data-mark="tech" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">Mount lightweight sensors, walk, and the data flows.</h2>
             <div class="panel__evidence">
               <p><span class="lead">Zero training.</span> Bullfinch uses phone-scale, off-the-shelf sensors plus proprietary edge AI and sensor fusion.</p>
@@ -142,7 +230,7 @@
 
         <article class="panel" id="opportunity" data-panel="3">
           <div class="panel__inner">
-            <p class="panel__eyebrow">03 &middot; DATA LAYER</p>
+            <p class="panel__eyebrow">03 &middot; DATA LAYER<span class="section-mark" data-mark="nature" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">Bullfinch is the ground-truth layer for forestry, finance, and carbon.</h2>
             <div class="panel__evidence">
               <p><span class="lead">For foresters.</span> Denser operational inventory without adding more field burden to an already shrinking workforce.</p>
@@ -155,7 +243,7 @@
 
         <article class="panel" id="data" data-panel="4">
           <div class="panel__inner">
-            <p class="panel__eyebrow">04 &middot; TRACTION</p>
+            <p class="panel__eyebrow">04 &middot; TRACTION<span class="section-mark" data-mark="tech" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">Paid deployments and a $39M pipeline, before general availability.</h2>
             <div class="panel__evidence">
               <p><span class="lead">Paid pilots.</span> Weyerhaeuser, the #1 US timberland owner, and Long View Forest are signed Design Partners.</p>
@@ -170,7 +258,7 @@
 
         <article class="panel" id="proof" data-panel="5">
           <div class="panel__inner">
-            <p class="panel__eyebrow">05 &middot; BUSINESS</p>
+            <p class="panel__eyebrow">05 &middot; BUSINESS<span class="section-mark" data-mark="tech" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">A subscription product for the people who already walk the forest.</h2>
             <div class="panel__evidence">
               <p><span class="lead">Beachhead.</span> Professional foresters and forest managers pay for better inventory where accuracy, labor, and risk already carry budget.</p>
@@ -188,17 +276,17 @@
               <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
               <figcaption>Seth Sternberg &middot; CEO</figcaption>
             </figure>
-            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
-              <img src="assets/graham-headshot.png" alt="Graham Smith" />
-              <figcaption>Graham Smith &middot; CCO</figcaption>
-            </figure>
             <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
               <img src="assets/tim-headshot.gif" alt="Tim Goodsall, PhD" />
               <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
             </figure>
+            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+              <img src="assets/graham-headshot.png" alt="Graham Smith" />
+              <figcaption>Graham Smith &middot; CCO</figcaption>
+            </figure>
           </div>
           <div class="panel__inner">
-            <p class="panel__eyebrow">06 &middot; TEAM</p>
+            <p class="panel__eyebrow">06 &middot; TEAM<span class="section-mark" data-mark="people" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
             <div class="panel__evidence">
               <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
@@ -213,7 +301,7 @@
 
         <article class="panel" id="decisions" data-panel="7">
           <div class="panel__inner">
-            <p class="panel__eyebrow">07 &middot; NEXT STEPS</p>
+            <p class="panel__eyebrow">07 &middot; NEXT STEPS<span class="section-mark" data-mark="people" aria-hidden="true"></span></p>
             <h2 class="panel__verdict">Choose the conversation that matches your role.</h2>
             <div class="panel__evidence">
               <p><span class="lead">Design partners.</span> Bring a real inventory, wildfire, carbon, biodiversity, or forest-health workflow to stress-test Bullfinch in the field.</p>
@@ -284,6 +372,155 @@
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=v4-4"></script>
+    <script>
+      // Section marks: build the SVG for each .section-mark, then drive its
+      // assemble/disassemble with scroll position. One mark per section (the
+      // hero and the closing section deliberately have none).
+      (function () {
+        "use strict";
+        function f(n) { return Math.round(n * 100) / 100; }
+        function sailPath(x, y, w, h) {
+          return "M" + f(x) + "," + f(y + 0.4427 * h) +
+                 " C" + f(x) + "," + f(y + 0.1412 * h) + " " + f(x + 0.595 * w) + "," + f(y) + " " + f(x + w) + "," + f(y) +
+                 " L" + f(x + w) + "," + f(y + h) + " L" + f(x) + "," + f(y + h) + " Z";
+        }
+        function shapeEl(s) {
+          var cls = s.k === "r" ? "rfill red" : "mw";
+          if (s.t === "c") return '<circle class="' + cls + '" cx="' + s.cx + '" cy="' + s.cy + '" r="' + s.r + '"/>';
+          if (s.t === "q") return '<rect class="' + cls + '" x="' + f(s.x) + '" y="' + f(s.y) + '" width="' + f(s.w) + '" height="' + f(s.h) + '" rx="' + (s.rx != null ? s.rx : 2.5) + '" ry="' + (s.rx != null ? s.rx : 2.5) + '"/>';
+          return '<path class="' + cls + '" d="' + sailPath(s.x, s.y, s.w, s.h) + '"/>';
+        }
+        function ctr(s) { return s.t === "c" ? [s.cx, s.cy] : [s.x + s.w / 2, s.y + s.h / 2]; }
+
+        var SRC = {
+          people: function () { return [
+            { t: "c", cx: 40.22, cy: 40.76, r: 8.35, k: "w", o: 0 },
+            { t: "c", cx: 47.22, cy: 59.24, r: 8.35, k: "w", o: 1 },
+            { t: "c", cx: 59.78, cy: 43.93, r: 8.35, k: "r", o: 2 }]; },
+          nature: function () { return [
+            { t: "s", x: 24.518, y: 34.74, w: 18.41, h: 30.521, k: "w", o: 0 },
+            { t: "s", x: 46.77, y: 41.152, w: 14.542, h: 24.182, k: "r", o: 1 },
+            { t: "s", x: 65.155, y: 48.14, w: 10.327, h: 17.121, k: "w", o: 2 }]; },
+          tech: function () { return [
+            { t: "q", x: 25.158, y: 30.174, w: 14, h: 15, rx: 1.453, k: "w", o: 0 },
+            { t: "q", x: 43.0, y: 45.174, w: 14, h: 24.651, rx: 1.453, k: "w", o: 1 },
+            { t: "q", x: 60.842, y: 36.948, w: 14, h: 32.878, rx: 1.453, k: "r", o: 2 }]; }
+        };
+        var SIG = {
+          people: { type: "move", dir: "radial" },
+          nature: { type: "grow", origin: "bottom center" },
+          tech: { type: "rot", origin: "center", angle: "auto" }
+        };
+        function P(o) { return "clamp(0,calc((var(--build,1) - " + (o * 0.13).toFixed(2) + ") * 2.0),1)"; }
+
+        function animShape(cat, s) {
+          var inner = shapeEl(s), p = P(s.o), m = SIG[cat];
+          if (m.type === "move") {
+            var c = ctr(s), dx = c[0] - s._cx, dy = c[1] - s._cy, mag = Math.hypot(dx, dy);
+            if (mag < 5) { dx = 0; dy = -1; mag = 1; }
+            return '<g class="fade" style="--p:' + p + '"><g class="a-move" style="--ox:' + f(dx / mag * 22) + "px;--oy:" + f(dy / mag * 22) + "px;--p:" + p + '">' + inner + "</g></g>";
+          }
+          if (m.type === "grow") {
+            return '<g class="a-grow" style="transform-origin:' + m.origin + ";--p:" + p + '">' + inner + "</g>";
+          }
+          var ang = (m.angle === "auto") ? (s.o % 2 ? 90 : -90) : m.angle;
+          return '<g class="fade" style="--p:' + p + '"><g class="a-rot" style="transform-origin:' + m.origin + ";--rot:" + ang + "deg;--p:" + p + '">' + inner + "</g></g>";
+        }
+        function mark(cat) {
+          var shapes = SRC[cat]();
+          var cx = 0, cy = 0;
+          shapes.forEach(function (s) { var c = ctr(s); cx += c[0]; cy += c[1]; });
+          cx /= shapes.length; cy /= shapes.length;
+          shapes.forEach(function (s) { s._cx = cx; s._cy = cy; });
+          return '<svg viewBox="0 0 100 100" aria-hidden="true">' + shapes.map(function (s) { return animShape(cat, s); }).join("") + "</svg>";
+        }
+
+        var marks = Array.prototype.slice.call(document.querySelectorAll(".section-mark"));
+        if (!marks.length) return;
+        marks.forEach(function (el) {
+          var cat = el.getAttribute("data-mark");
+          if (SRC[cat]) el.innerHTML = mark(cat);
+        });
+
+        // On mobile the mark leaves the eyebrow and parks in the panel's
+        // bottom-right corner. It has to move out of the eyebrow in the DOM
+        // because the eyebrow carries a scroll transform, which would otherwise
+        // trap the mark's positioning context inside the label.
+        var isMobile = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        if (isMobile) {
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel");
+            if (!panel) return;
+            // Anchor to the PANEL (always exactly one viewport tall with the
+            // same padding), not .panel__inner — on media panels the inner
+            // column stops short of the bottom, which would raise the mark.
+            el.classList.add("section-mark--corner");
+            panel.appendChild(el);
+          });
+        }
+
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) {
+          marks.forEach(function (el) { el.style.setProperty("--build", "1"); el.style.setProperty("--glow", "0.7"); });
+          return;
+        }
+
+        // Map a panel's pinned scroll progress (0..1) to build: assemble over
+        // the first stretch, hold assembled while the panel is read, take apart
+        // at the end. Because this runs off the PIN progress (panel stationary
+        // on screen during the pin), the shapes assemble in place — the mark
+        // does not travel up the screen while building.
+        function buildFromProgress(p) {
+          // Assemble only after the heading has settled, hold, then take apart.
+          var inStart = 0.35, inEnd = 0.58, outStart = 0.86;
+          if (p <= inStart) return 0;
+          if (p < inEnd) return clamp01((p - inStart) / (inEnd - inStart));
+          if (p < outStart) return 1;
+          return clamp01(1 - (p - outStart) / (1 - outStart));
+        }
+        function apply(el, p) {
+          var v = buildFromProgress(p).toFixed(3);
+          el.style.setProperty("--build", v);
+          el.style.setProperty("--glow", v);
+        }
+
+        if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
+          // Mirror swot.js's panel pin range so progress lines up with the pin.
+          var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel");
+            if (!panel) return;
+            ScrollTrigger.create({
+              trigger: panel,
+              start: "top top",
+              end: mobileLike ? "+=100%" : "+=200%",
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: function (self) { apply(el, self.progress); },
+              onRefresh: function (self) { apply(el, self.progress || 0); }
+            });
+            apply(el, 0);
+          });
+        } else {
+          // Fallback only when GSAP is absent (so panels aren't pinned either):
+          // drive build from the mark's position relative to the viewport.
+          var loop = function () {
+            var vh = window.innerHeight || document.documentElement.clientHeight;
+            for (var i = 0; i < marks.length; i++) {
+              var r = marks[i].getBoundingClientRect();
+              var c = r.top + r.height / 2;
+              var d = Math.abs((c - vh / 2) / vh);
+              var b = clamp01(1 - (d - 0.12) / 0.3).toFixed(3);
+              marks[i].style.setProperty("--build", b);
+              marks[i].style.setProperty("--glow", b);
+            }
+            requestAnimationFrame(loop);
+          };
+          requestAnimationFrame(loop);
+        }
+      })();
+    </script>
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
@@ -390,7 +627,7 @@
         };
         var lastTrigger = null;
         var currentBioKey = null;
-        var bioOrder = ["seth", "graham", "tim"];
+        var bioOrder = ["seth", "tim", "graham"];
 
         function openBio(key, trigger) {
           var bio = bios[key];
