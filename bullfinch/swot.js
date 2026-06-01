@@ -32,6 +32,8 @@
     document
       .querySelectorAll(".panel__eyebrow, .panel__verdict, .panel__evidence p, .panel__numeric, .hero__eyebrow, .hero__line")
       .forEach(function (el) { el.style.opacity = 1; el.style.transform = "none"; });
+    // No scroll choreography here, so don't leave the cue bouncing forever.
+    document.body.classList.add("has-reached-01");
     return;
   }
 
@@ -227,7 +229,8 @@
 
   var panels = document.querySelectorAll(".panel");
   var panelTriggers = [];
-  panels.forEach(function (panel) {
+  panels.forEach(function (panel, panelIndex) {
+    var isFirstPanel = panelIndex === 0;
     if (reduced) {
       gsap.set(panel.querySelectorAll(".panel__eyebrow, .panel__verdict, .panel__evidence p, .panel__numeric"),
                { opacity: 0, y: 16 });
@@ -241,6 +244,9 @@
                   { opacity: 1, y: 0, duration: 0.7, ease: "power3.out", stagger: 0.08 });
           gsap.to(panel.querySelectorAll(".panel__video"),
                   { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" });
+          // No pin scrub in reduced mode, so retire the scroll cue the moment
+          // section 01 is reached and its copy settles.
+          if (isFirstPanel) document.body.classList.add("has-reached-01");
         },
       });
       return;
@@ -262,6 +268,12 @@
       anticipatePin: 1,
       onUpdate: function (self) {
         applyPanelProgress(panel, self.progress);
+        // Retire the bouncing scroll cue once section 01 is fully settled:
+        // all copy up, veil at full blur, sitting in the 0.66-0.94 HOLD just
+        // before the panel begins to leave. One-way (resetSplash clears it).
+        if (isFirstPanel && self.progress >= 0.66) {
+          document.body.classList.add("has-reached-01");
+        }
       },
     });
     panelTriggers.push(panelTrigger);

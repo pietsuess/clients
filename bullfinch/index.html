@@ -35,7 +35,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=v4-3" />
+    <link rel="stylesheet" href="styles.css?v=v4-4" />
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
@@ -94,6 +94,7 @@
           <p class="hero__subtitle hero__line hero__line--2">Ground truth every market can trust.</p>
         </div>
         <div class="hero__scroll-cue" aria-hidden="true">
+          <span class="hero__scroll-cue-label">Scroll</span>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
             <path d="m6 9 6 6 6-6" />
           </svg>
@@ -279,10 +280,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene.js?v=v4-3"></script>
-    <script src="case-animation.js?v=v4-3"></script>
-    <script src="field-film.js?v=v4-3"></script>
-    <script src="swot.js?v=v4-3"></script>
+    <script src="scene.js?v=v4-4"></script>
+    <script src="case-animation.js?v=v4-4"></script>
+    <script src="field-film.js?v=v4-4"></script>
+    <script src="swot.js?v=v4-4"></script>
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
@@ -521,7 +522,7 @@
           isPlaying = false;
           splash.hidden = false;
           splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
-          document.body.classList.remove("has-entered", "has-scrolled");
+          document.body.classList.remove("has-entered", "has-scrolled", "has-reached-01");
           if (window.lenis && typeof window.lenis.scrollTo === "function") {
             window.lenis.scrollTo(0, { immediate: true });
           } else {
