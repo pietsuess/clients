@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fulford Elementary — Photo Review</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --gold: #f4c542;
+  --coral: #e8735a;
+  --cream: #fef9f0;
+  --ink: #1a0e2e;
+  --ink-soft: #2d1640;
+  --nav-h: 76px;
+}
+html { font-size: 16px; }
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  color: var(--ink);
+  background: linear-gradient(135deg,
+    #1a0e2e 0%, #2d1640 22%, #4a1942 38%, #7a2848 54%,
+    #b8475a 68%, #d4766a 80%, #e8a555 91%, #f4c542 100%);
+  background-size: 400% 400%;
+  background-attachment: fixed;
+  animation: gradientShift 20s ease infinite;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Password gate ---------- */
+.gate {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  background: linear-gradient(135deg,
+    #1a0e2e 0%, #2d1640 22%, #4a1942 38%, #7a2848 54%,
+    #b8475a 68%, #d4766a 80%, #e8a555 91%, #f4c542 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+  text-align: center; padding: 24px;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gate img { width: 64px; height: auto; margin-bottom: 28px; filter: drop-shadow(0 4px 16px rgba(0,0,0,.35)); }
+.gate h1 {
+  font-family: 'Urbanist', sans-serif; font-weight: 700;
+  color: var(--cream); font-size: clamp(2rem, 5vw, 3.4rem);
+  margin: 0 0 8px; letter-spacing: .01em;
+}
+.gate p { color: rgba(254,249,240,.82); font-weight: 300; letter-spacing: .08em; margin: 0 0 32px; }
+.gate-form { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.gate input {
+  font-family: 'Poppins', sans-serif; font-size: 1.05rem;
+  padding: 14px 20px; border: none; border-radius: 2px; width: 260px;
+  background: rgba(254,249,240,.95); color: var(--ink); outline: none;
+}
+.gate button {
+  font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 1.05rem;
+  padding: 14px 30px; border: none; border-radius: 2px; cursor: pointer;
+  background: var(--ink); color: var(--cream); letter-spacing: .04em;
+  transition: transform .15s ease, background .2s ease;
+}
+.gate button:hover { transform: translateY(-2px); background: var(--ink-soft); }
+.gate-error { color: var(--cream); margin-top: 16px; min-height: 1.2em; font-weight: 300; opacity: 0; transition: opacity .2s; }
+.gate-error.show { opacity: 1; }
+
+/* ---------- Nav bar ---------- */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h);
+  display: flex; align-items: center; gap: 24px;
+  padding: 0 32px;
+  background: rgba(26,14,46,.96);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 24px rgba(26,14,46,.25);
+}
+.nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; flex: 0 0 auto; }
+.nav-brand img { width: 38px; height: auto; display: block; }
+.nav-brand .name {
+  font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 1.15rem;
+  color: var(--cream); letter-spacing: .02em; white-space: nowrap;
+}
+.nav-title {
+  flex: 1 1 auto; text-align: center;
+  font-family: 'Urbanist', sans-serif; font-weight: 600;
+  font-size: clamp(1.1rem, 2.2vw, 1.7rem);
+  color: var(--gold); letter-spacing: .04em; white-space: nowrap;
+}
+.nav-submit {
+  flex: 0 0 auto;
+  font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 1rem;
+  padding: 12px 28px; border: none; border-radius: 2px; cursor: pointer;
+  background: var(--coral); color: var(--cream); letter-spacing: .04em;
+  transition: transform .15s ease, background .2s ease;
+}
+.nav-submit:hover { transform: translateY(-2px); background: #f0856e; }
+.nav-submit:disabled { opacity: .55; cursor: default; transform: none; }
+
+/* ---------- Layout ---------- */
+.app { display: none; }
+.app.unlocked { display: block; }
+.intro {
+  padding: calc(var(--nav-h) + 48px) 32px 8px;
+  max-width: none;
+}
+.intro h2 {
+  font-family: 'Urbanist', sans-serif; font-weight: 800;
+  font-size: clamp(2rem, 4.5vw, 3.4rem); margin: 0 0 12px; color: var(--cream);
+  letter-spacing: -.01em; text-shadow: 0 2px 16px rgba(26,14,46,.35);
+}
+.intro p {
+  font-weight: 300; font-size: 1.1rem; color: rgba(254,249,240,.92); max-width: none;
+  text-align: justify; text-align-last: left; line-height: 1.6;
+  text-shadow: 0 1px 10px rgba(26,14,46,.3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 32px;
+  padding: 32px;
+}
+.card {
+  background: #fff; border-radius: 2px; overflow: hidden;
+  box-shadow: 0 6px 28px rgba(26,14,46,.10);
+  display: flex; flex-direction: column;
+  transition: box-shadow .25s ease, transform .25s ease;
+}
+.card:hover { box-shadow: 0 14px 44px rgba(26,14,46,.18); transform: translateY(-3px); }
+.card img {
+  width: 100%; aspect-ratio: 3 / 2; height: auto; object-fit: cover; display: block;
+  background: #efe7da; cursor: zoom-in;
+}
+.card .body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.card .fname {
+  font-family: 'Poppins', sans-serif; font-size: .78rem; font-weight: 500;
+  color: #9486a0; letter-spacing: .03em;
+}
+.card textarea {
+  font-family: 'Poppins', sans-serif; font-size: .98rem; color: var(--ink);
+  width: 100%; min-height: 72px; resize: vertical;
+  padding: 12px 14px; border: 1.5px solid #e7ddcd; border-radius: 2px;
+  background: var(--cream); outline: none; line-height: 1.5;
+  transition: border-color .2s ease, background .2s ease;
+}
+.card textarea::placeholder { color: #b6a9c0; }
+.card textarea:focus { border-color: var(--coral); background: #fff; }
+.card textarea.has-note { border-color: var(--gold); background: #fffdf6; }
+
+footer {
+  text-align: center; padding: 48px 32px 64px; color: rgba(254,249,240,.8);
+  font-weight: 300; font-size: .9rem; text-shadow: 0 1px 10px rgba(26,14,46,.3);
+}
+
+/* ---------- Lightbox ---------- */
+.lightbox {
+  position: fixed; inset: 0; z-index: 500; display: none;
+  align-items: center; justify-content: center; padding: 32px;
+  background: rgba(26,14,46,.94); cursor: zoom-out;
+}
+.lightbox.show { display: flex; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 2px; box-shadow: 0 20px 80px rgba(0,0,0,.6); cursor: default; }
+.lb-nav {
+  position: fixed; top: 50%; transform: translateY(-50%); z-index: 510;
+  width: 60px; height: 60px; border-radius: 2px; border: none; cursor: pointer;
+  background: rgba(254,249,240,.12); color: var(--cream);
+  font-size: 2.2rem; line-height: 1; font-family: 'Urbanist', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s ease, transform .15s ease;
+}
+.lb-nav:hover { background: var(--coral); }
+.lb-prev { left: 28px; }
+.lb-next { right: 28px; }
+.lb-counter {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 510;
+  color: rgba(254,249,240,.85); font-weight: 300; letter-spacing: .08em; font-size: .95rem;
+}
+
+/* ---------- Toast / submit overlay ---------- */
+.submitting {
+  position: fixed; inset: 0; z-index: 800; display: none;
+  align-items: center; justify-content: center; flex-direction: column;
+  background: rgba(26,14,46,.97); color: var(--cream); text-align: center; padding: 24px;
+}
+.submitting.show { display: flex; }
+.submitting h3 { font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 2rem; margin: 0 0 12px; }
+.submitting p { font-weight: 300; max-width: 460px; line-height: 1.6; color: rgba(254,249,240,.85); }
+.submitting button {
+  margin-top: 28px; font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: 1rem;
+  padding: 13px 30px; border: none; border-radius: 2px; cursor: pointer;
+  background: var(--gold); color: var(--ink); letter-spacing: .03em;
+}
+.spinner {
+  width: 46px; height: 46px; border: 4px solid rgba(254,249,240,.25);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin .8s linear infinite; margin-bottom: 26px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- ============ PASSWORD GATE ============ -->
+<div class="gate" id="gate">
+  <img src="assets/PS_Icon.png" alt="Piet Suess">
+  <h1>Fulford Elementary</h1>
+  <p>Enter the password to view the gallery</p>
+  <form class="gate-form" id="gateForm" autocomplete="off">
+    <input type="password" id="gatePass" placeholder="Password" aria-label="Password" autofocus>
+    <button type="submit">Enter</button>
+  </form>
+  <div class="gate-error" id="gateError">Incorrect password. Please try again.</div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app">
+
+  <nav class="nav">
+    <a class="nav-brand" href="https://pietsuess.com" target="_blank" rel="noopener">
+      <img src="assets/PS_Icon.png" alt="PS">
+      <span class="name">Piet Suess</span>
+    </a>
+    <div class="nav-title">Fulford Elementary</div>
+    <button class="nav-submit" id="submitBtn" type="button">Submit Notes</button>
+  </nav>
+
+  <section class="intro">
+    <h2>Photo Review</h2>
+    <p>Browse the full set below. Add a comment in the box beneath any photo, then press
+       <strong>Submit Notes</strong> in the top bar when you are finished. Only the photos you
+       comment on will be included, and everything is sent to Piet in a single email. Click any
+       image to view it larger.</p>
+  </section>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>Fulford Elementary &middot; Photography by Piet Suess</footer>
+</div>
+
+<!-- ============ LIGHTBOX ============ -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="Previous photo">&#8249;</button>
+  <img id="lightboxImg" src="" alt="">
+  <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="Next photo">&#8250;</button>
+  <div class="lb-counter" id="lbCounter"></div>
+</div>
+
+<!-- ============ SUBMIT OVERLAY ============ -->
+<div class="submitting" id="submitOverlay">
+  <div id="submitInner"></div>
+</div>
+
+<script>
+const PASSWORD = "Fulford";
+const FORM_ENDPOINT = "https://api.web3forms.com/submit";
+const WEB3FORMS_KEY = "0f45da86-7dcf-4c66-8881-d7597d02d720";
+const PHOTO_DIR = "photos/";
+
+const PHOTOS = [
+  "FulfordElem_May27_DSC05835.jpg",
+  "FulfordElem_May27_DSC05852.jpg",
+  "FulfordElem_May27_DSC05875.jpg",
+  "FulfordElem_May27_DSC05889.jpg",
+  "FulfordElem_May27_DSC05895.jpg",
+  "FulfordElem_May27_DSC05912.jpg",
+  "FulfordElem_May27_DSC05929.jpg",
+  "FulfordElem_May27_DSC05933.jpg",
+  "FulfordElem_May27_DSC05959.jpg",
+  "FulfordElem_May27_DSC05961.jpg",
+  "FulfordElem_May27_DSC05994.jpg",
+  "FulfordElem_May27_DSC06013.jpg",
+  "FulfordElem_May27_DSC06063.jpg",
+  "FulfordElem_May27_DSC06067.jpg",
+  "FulfordElem_May27_DSC06090.jpg",
+  "FulfordElem_May27_DSC06119.jpg",
+  "FulfordElem_May27_DSC06130.jpg",
+  "FulfordElem_May27_DSC06138.jpg",
+  "FulfordElem_May27_DSC06142.jpg",
+  "FulfordElem_May27_DSC06150.jpg",
+  "FulfordElem_May27_DSC06160.jpg",
+  "FulfordElem_May27_DSC06165.jpg",
+  "FulfordElem_May27_DSC06173.jpg",
+  "FulfordElem_May27_DSC06174.jpg",
+  "FulfordElem_May27_DSC06181.jpg",
+  "FulfordElem_May27_DSC06182.jpg",
+  "FulfordElem_May27_DSC06189.jpg",
+  "FulfordElem_May27_DSC06190.jpg",
+  "FulfordElem_May27_DSC06201.jpg",
+  "FulfordElem_May27_DSC06226.jpg",
+  "FulfordElem_May27_DSC06261.jpg",
+  "FulfordElem_May27_DSC06279.jpg",
+  "FulfordElem_May27_DSC06287.jpg",
+  "FulfordElem_May27_DSC06304.jpg",
+  "FulfordElem_May27_DSC06341.jpg",
+  "FulfordElem_May27_DSC06356.jpg",
+  "FulfordElem_May27_DSC06360.jpg",
+  "FulfordElem_May27_DSC06389.jpg",
+  "FulfordElem_May27_DSC06407.jpg",
+  "FulfordElem_May27_DSC06409.jpg",
+  "FulfordElem_May27_DSC06410.jpg",
+  "FulfordElem_May27_DSC06432.jpg",
+  "FulfordElem_May27_DSC06441.jpg",
+  "FulfordElem_May27_DSC06462.jpg",
+  "FulfordElem_May27_DSC06468.jpg",
+  "FulfordElem_May27_DSC06470.jpg",
+  "FulfordElem_May27_DSC06485.jpg",
+  "FulfordElem_May27_DSC06494.jpg",
+  "FulfordElem_May27_DSC06495.jpg",
+  "FulfordElem_May27_DSC06508.jpg",
+  "FulfordElem_May27_DSC06519.jpg",
+  "FulfordElem_May27_DSC06526.jpg",
+  "FulfordElem_May27_DSC06540.jpg",
+  "FulfordElem_May27_DSC06685.jpg",
+  "FulfordElem_May27_DSC06692.jpg",
+  "FulfordElem_May27_DSC06702.jpg",
+  "FulfordElem_May27_DSC06711.jpg",
+  "FulfordElem_May27_DSC06726.jpg",
+  "FulfordElem_May27_DSC06755.jpg",
+  "FulfordElem_May27_DSC06822.jpg",
+  "FulfordElem_May27_DSC06838.jpg",
+  "FulfordElem_May27_DSC06849.jpg",
+  "FulfordElem_May27_DSC06858.jpg",
+  "FulfordElem_May27_DSC06863.jpg",
+  "FulfordElem_May27_DSC06874.jpg",
+  "FulfordElem_May27_DSC06881.jpg",
+  "FulfordElem_May27_DSC06944.jpg",
+  "FulfordElem_May27_DSC06950.jpg",
+  "FulfordElem_May27_DSC06976.jpg",
+  "FulfordElem_May27_DSC06979.jpg",
+  "FulfordElem_May27_DSC06990.jpg",
+  "FulfordElem_May27_DSC06992.jpg",
+  "FulfordElem_May27_DSC07052.jpg",
+  "FulfordElem_May27_DSC07068.jpg",
+  "FulfordElem_May27_DSC07108.jpg",
+  "FulfordElem_May27_DSC07112.jpg",
+  "FulfordElem_May27_DSC07137.jpg",
+  "FulfordElem_May27_DSC07146.jpg",
+  "FulfordElem_May27_DSC07150.jpg",
+  "FulfordElem_May27_DSC07159.jpg",
+  "FulfordElem_May27_DSC07162.jpg",
+  "FulfordElem_May27_DSC07164.jpg",
+  "FulfordElem_May27_DSC07168.jpg",
+  "FulfordElem_May27_DSC07175.jpg",
+  "FulfordElem_May27_DSC07190.jpg",
+  "FulfordElem_May27_DSC07194.jpg",
+  "FulfordElem_May27_DSC07215.jpg",
+  "FulfordElem_May27_DSC07225.jpg",
+  "FulfordElem_May27_DSC07236.jpg",
+  "FulfordElem_May27_DSC07249.jpg",
+  "FulfordElem_May27_DSC07255.jpg",
+  "FulfordElem_May27_DSC07317.jpg",
+  "FulfordElem_May27_DSC07319.jpg",
+  "FulfordElem_May27_DSC07324.jpg",
+  "FulfordElem_May27_DSC07336.jpg",
+  "FulfordElem_May27_DSC07341.jpg",
+  "FulfordElem_May27_DSC07346.jpg",
+  "FulfordElem_May27_DSC07348.jpg",
+  "FulfordElem_May27_DSC07350.jpg",
+  "FulfordElem_May27_DSC07364.jpg",
+  "FulfordElem_May27_DSC07385.jpg",
+  "FulfordElem_May27_DSC07388.jpg",
+  "FulfordElem_May27_DSC07420.jpg",
+  "FulfordElem_May27_DSC07440.jpg",
+  "FulfordElem_May27_DSC07458.jpg",
+  "FulfordElem_May27_DSC07465.jpg",
+  "FulfordElem_May27_DSC07472.jpg",
+  "FulfordElem_May27_DSC07486.jpg"
+];
+
+/* ---------- Password gate ---------- */
+const gate = document.getElementById('gate');
+const app = document.getElementById('app');
+const gateForm = document.getElementById('gateForm');
+const gateError = document.getElementById('gateError');
+
+function unlock() {
+  gate.style.display = 'none';
+  app.classList.add('unlocked');
+  try { sessionStorage.setItem('fulford_ok', '1'); } catch (e) {}
+}
+
+gateForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const val = document.getElementById('gatePass').value;
+  if (val === PASSWORD) {
+    unlock();
+  } else {
+    gateError.classList.add('show');
+    document.getElementById('gatePass').value = '';
+  }
+});
+
+try { if (sessionStorage.getItem('fulford_ok') === '1') unlock(); } catch (e) {}
+
+/* ---------- Build gallery ---------- */
+const grid = document.getElementById('grid');
+const frag = document.createDocumentFragment();
+PHOTOS.forEach((file, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const img = document.createElement('img');
+  img.src = PHOTO_DIR + file;
+  img.alt = file;
+  img.loading = 'lazy';
+  img.decoding = 'async';
+  img.dataset.index = i;
+
+  const body = document.createElement('div');
+  body.className = 'body';
+
+  const fname = document.createElement('div');
+  fname.className = 'fname';
+  fname.textContent = '#' + (i + 1) + ' — ' + file;
+
+  const ta = document.createElement('textarea');
+  ta.placeholder = 'Add a comment about this photo…';
+  ta.dataset.file = file;
+  ta.addEventListener('input', () => {
+    ta.classList.toggle('has-note', ta.value.trim().length > 0);
+  });
+
+  body.appendChild(fname);
+  body.appendChild(ta);
+  card.appendChild(img);
+  card.appendChild(body);
+  frag.appendChild(card);
+});
+grid.appendChild(frag);
+
+/* ---------- Lightbox ---------- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lbCounter = document.getElementById('lbCounter');
+let lbIndex = -1;
+
+function showPhoto(i) {
+  lbIndex = (i + PHOTOS.length) % PHOTOS.length;
+  lightboxImg.src = PHOTO_DIR + PHOTOS[lbIndex];
+  lightboxImg.alt = PHOTOS[lbIndex];
+  lbCounter.textContent = (lbIndex + 1) + ' / ' + PHOTOS.length;
+}
+function openLightbox(i) { showPhoto(i); lightbox.classList.add('show'); }
+function closeLightbox() { lightbox.classList.remove('show'); lbIndex = -1; }
+function step(delta) { if (lbIndex !== -1) showPhoto(lbIndex + delta); }
+
+grid.addEventListener('click', (e) => {
+  if (e.target.tagName === 'IMG') openLightbox(parseInt(e.target.dataset.index, 10));
+});
+
+document.getElementById('lbPrev').addEventListener('click', (e) => { e.stopPropagation(); step(-1); });
+document.getElementById('lbNext').addEventListener('click', (e) => { e.stopPropagation(); step(1); });
+
+// Click the backdrop (not the image or arrows) to close
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('show')) return;
+  if (e.key === 'Escape') closeLightbox();
+  else if (e.key === 'ArrowLeft') step(-1);
+  else if (e.key === 'ArrowRight') step(1);
+});
+
+/* ---------- Submit ---------- */
+const submitBtn = document.getElementById('submitBtn');
+const overlay = document.getElementById('submitOverlay');
+const overlayInner = document.getElementById('submitInner');
+
+function showOverlay(html) { overlayInner.innerHTML = html; overlay.classList.add('show'); }
+function hideOverlay() { overlay.classList.remove('show'); }
+
+submitBtn.addEventListener('click', async () => {
+  const notes = [];
+  document.querySelectorAll('#grid textarea').forEach((ta) => {
+    const v = ta.value.trim();
+    if (v) notes.push({ file: ta.dataset.file, note: v });
+  });
+
+  if (notes.length === 0) {
+    showOverlay(
+      '<h3>No comments yet</h3>' +
+      '<p>Add a comment beneath at least one photo before submitting.</p>' +
+      '<button type="button" id="closeOv">Got it</button>'
+    );
+    document.getElementById('closeOv').onclick = hideOverlay;
+    return;
+  }
+
+  const lines = notes.map((n, idx) => (idx + 1) + '. ' + n.file + '\n   ' + n.note).join('\n\n');
+  const payload = {
+    access_key: WEB3FORMS_KEY,
+    subject: 'Fulford Elementary — Photo Review Notes (' + notes.length + ')',
+    from_name: 'Fulford Photo Review',
+    'Total comments': String(notes.length),
+    Source: 'clients.pietsuess.com/TheCircle/Fulford.html',
+    message: lines
+  };
+
+  submitBtn.disabled = true;
+  showOverlay('<div class="spinner"></div><h3>Sending…</h3><p>Submitting your notes.</p>');
+
+  try {
+    const res = await fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || ('HTTP ' + res.status));
+    showOverlay(
+      '<h3>Thank you!</h3>' +
+      '<p>Your ' + notes.length + ' comment' + (notes.length === 1 ? '' : 's') +
+      ' ' + (notes.length === 1 ? 'has' : 'have') + ' been sent to Piet.</p>' +
+      '<button type="button" id="closeOv">Close</button>'
+    );
+    document.getElementById('closeOv').onclick = hideOverlay;
+  } catch (err) {
+    showOverlay(
+      '<h3>Something went wrong</h3>' +
+      '<p>Your notes could not be sent (' + err.message + '). Please try again, or email Piet directly at psuess@gmail.com.</p>' +
+      '<button type="button" id="closeOv">Close</button>'
+    );
+    document.getElementById('closeOv').onclick = hideOverlay;
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
