@@ -66,8 +66,9 @@
     width:min(1180px, 88vw); margin:0 auto; padding:14vh 0;
     color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); pointer-events:auto; }
 
-  .panel__icon { display:block; width:42px; height:42px; margin-bottom:18px; color:rgba(244,238,228,.82); }
-  .panel__icon svg { width:100%; height:100%; display:block; }
+  .panel__icon { display:none; }   /* source only; rendered on the right with the detail lines */
+  #sideList .sl-icon { width:46px; height:46px; margin:0 0 20px auto; color:rgba(244,238,228,.85); opacity:0; }
+  #sideList .sl-icon svg { width:100%; height:100%; display:block; }
   .panel__eyebrow { display:block; margin-bottom:14px; color:rgba(244,238,228,.66);
     font:700 .76rem/1 var(--condensed); letter-spacing:.26em; text-transform:uppercase; }
   .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
@@ -255,7 +256,7 @@
   <main id="content">
     <section class="panel" id="p-hero" data-e="0.018">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3 L25 9 L14 15 L3 9 Z"/><path d="M3 14 L14 20 L25 14"/><path d="M3 19 L14 25 L25 19"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22v-5l5-5 5 5-5 5z"/><path d="M9.5 14.5 16 8"/><path d="m17 2 5 5-.5.5a3.53 3.53 0 0 1-5 0 3.53 3.53 0 0 1 0-5z"/></svg></span>
         <span class="panel__eyebrow">Salt Spring Island &middot; Cumberland</span>
         <h1 class="panel__verdict">Elsser Excavation</h1>
         <p class="panel__lede">Building your dreams, from the ground down.</p>
@@ -268,7 +269,7 @@
 
     <section class="panel" id="p-humus" data-e="0.075">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13 L14 4 L24 13"/><path d="M7 12 V24 H21 V12"/><path d="M12 24 V17 H16 V24"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
         <span class="panel__eyebrow">Humus &middot; The surface layer</span>
         <h2 class="panel__verdict">Built to hold.</h2>
         <div class="panel__evidence"><p>Philip and Michael Elsser are brothers and owner operators. Philip grew up on Salt Spring running equipment; Michael brings Red Seal carpentry and years of construction. Every job starts with the care people notice later: clean access, organized sites, finished ground ready for the next phase.</p></div>
@@ -280,7 +281,7 @@
 
     <section class="panel" id="p-topsoil" data-e="0.12">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 23 H24"/><path d="M4 23 L24 8"/><path d="M24 8 V23"/><path d="M9 18 H13"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/></svg></span>
         <span class="panel__eyebrow">Topsoil &middot; Shaping the surface</span>
         <h2 class="panel__verdict">Control the grade.</h2>
         <div class="panel__evidence"><p>Site preparation, land clearing, landscaping, and grading happen in the top working layers, where early decisions set the slope, the drainage, and the shape of everything built on top.</p></div>
@@ -293,7 +294,7 @@
 
     <section class="panel panel--tall" id="p-subsoil" data-e="0.19">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 C14 4 6 13 6 18 A8 8 0 0 0 22 18 C22 13 14 4 14 4 Z"/><path d="M11 18 A3 3 0 0 0 14 21"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 4.8 7 3.7c-.29 1.1-1.14 2.43-2.29 3.36S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg></span>
         <span class="panel__eyebrow">Subsoil &middot; Below the surface</span>
         <h2 class="panel__verdict">Water solved early.</h2>
         <div class="panel__evidence"><p>Drainage, utilities and servicing, water storage, and ponds sit under the surface, where buried work has to perform for years. Get the water moving right and the rest of the site holds.</p></div>
@@ -306,7 +307,7 @@
 
     <section class="panel panel--tall" id="p-clay" data-e="0.28">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="20" height="14" rx="1"/><path d="M4 14 H24"/><path d="M11 7 V14"/><path d="M18 7 V14"/><path d="M8 14 V21"/><path d="M15 14 V21"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="1"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M12 3v6"/><path d="M8 9v6"/><path d="M16 9v6"/><path d="M12 15v6"/></svg></span>
         <span class="panel__eyebrow">Marine clay &middot; Structural ground</span>
         <h2 class="panel__verdict">Hold the line.</h2>
         <div class="panel__evidence"><p>Rock walls and terraforming are structural shaping, not surface decoration. We build retaining and grade changes that take the load of the slope and the weather behind them.</p></div>
@@ -319,7 +320,7 @@
 
     <section class="panel panel--tall" id="p-till" data-e="0.39">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 24 L12 4"/><path d="M19 24 L16 4"/><path d="M14 22 V19"/><path d="M14 15 V12"/><path d="M14 8 V5"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/><path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><path d="M15 18H9"/><circle cx="17" cy="18" r="2"/></svg></span>
         <span class="panel__eyebrow">Glacial till &middot; The hard base</span>
         <h2 class="panel__verdict">Make the entry work.</h2>
         <div class="panel__evidence"><p>Driveways and access routes have to survive water, slope, weight, and repeated use. They need base logic underneath before any finished surface goes down.</p></div>
@@ -332,7 +333,7 @@
 
     <section class="panel panel--tall" id="p-limestone" data-e="0.50">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 L23 7 V13 C23 19 14 24 14 24 C14 24 5 19 5 13 V7 Z"/><path d="M10 13 L13 16 L18 10"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
         <span class="panel__eyebrow">Limestone &middot; What we stand on</span>
         <h2 class="panel__verdict">Done right, once.</h2>
         <div class="panel__evidence"><p>Safety, quality, teamwork, and sustainability run through every job, from the first clearing to the last load out. When something has to come down, demolition is handled clean and disposed of responsibly.</p></div>
@@ -346,7 +347,7 @@
 
     <section class="panel panel--end" id="p-bedrock" data-e="0.90">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="20" height="14" rx="1.5"/><path d="M5 9 L14 16 L23 9"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
         <span class="panel__eyebrow">Bedrock &middot; Building a legacy of excellence</span>
         <h2 class="panel__verdict">Break ground.</h2>
         <div class="panel__evidence"><p>Tell us about the site. For drainage, access, site preparation, walls, clearing, utilities, water, ponds, or demolition, we will follow up with a practical conversation and a free estimate.</p></div>
@@ -751,7 +752,7 @@
     const descent = window.elsserDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
-    let sideLines = [], sideCurrent = null;
+    let sideLines = [], sideCurrent = null, sideIconEl = null;
     const keepDig = document.getElementById('keepDig');
     const deepStretch = document.getElementById('deepStretch');
     let kdTop = 0, kdH = 1;
@@ -802,7 +803,7 @@
       return {
         el: panel,
         inner: panel.querySelector('.panel__inner'),
-        icon: panel.querySelector('.panel__icon'),
+        iconHTML: (panel.querySelector('.panel__icon') || {}).innerHTML || '',
         eyebrow: panel.querySelector('.panel__eyebrow'),
         words: head ? splitWords(head) : [],
         blocks: blocks,
@@ -819,7 +820,6 @@
       // Hero is shown at rest (it's the landing) and only animates OUT as you scroll away.
       if (m.isHero) {
         const ex = smooth01(mapRange(p, 0.04, 0.55));
-        if (m.icon) { m.icon.style.opacity = (1 - ex); m.icon.style.transform = 'translateY(' + (-ex * 16).toFixed(1) + 'px)'; }
         if (m.eyebrow) { m.eyebrow.style.opacity = (1 - ex); m.eyebrow.style.transform = 'translateX(0)'; }
         m.words.forEach(function (w) { w.style.opacity = (1 - ex); w.style.transform = 'translateY(' + (-ex * 38).toFixed(1) + '%)'; });
         m.blocks.forEach(function (b) { b.style.opacity = (1 - ex); b.style.transform = 'translateY(' + (-ex * 18).toFixed(1) + 'px)'; });
@@ -828,9 +828,7 @@
       }
       // Reveals are front-loaded (all up by ~p=0.5) so the rest of the panel is a
       // long HOLD where the text sits fully up, then a late exit.
-      // icon, then eyebrow slide in
-      const pic = mapRange(p, 0.02, 0.09);
-      if (m.icon) { m.icon.style.opacity = pic; m.icon.style.transform = 'translateY(' + (14 * (1 - pic)).toFixed(1) + 'px)'; }
+      // eyebrow slides in
       const pe = mapRange(p, 0.04, 0.10);
       if (m.eyebrow) { m.eyebrow.style.opacity = pe; m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe)) + 'px)'; }
       // headline words rise out of their mask, staggered ("text up")
@@ -857,7 +855,6 @@
 
     function revealAll () {
       models.forEach(function (m) {
-        if (m.icon) { m.icon.style.opacity = 1; m.icon.style.transform = 'none'; }
         if (m.eyebrow) { m.eyebrow.style.opacity = 1; m.eyebrow.style.transform = 'none'; }
         m.words.forEach(function (w) { w.style.transform = 'none'; w.style.opacity = 1; });
         m.blocks.forEach(function (b) { b.style.opacity = 1; b.style.transform = 'none'; });
@@ -1002,8 +999,9 @@
           if (m.sideItems.length && m.sideEnd > m.sideStart && y >= m.sideStart && y < m.sideEnd) { sec = m; break; }
         }
         if (sec !== sideCurrent) {
-          sideCurrent = sec; sideList.innerHTML = ''; sideLines = [];
+          sideCurrent = sec; sideList.innerHTML = ''; sideLines = []; sideIconEl = null;
           if (sec) {
+            if (sec.iconHTML) { const ic = document.createElement('div'); ic.className = 'sl-icon'; ic.innerHTML = sec.iconHTML; sideList.appendChild(ic); sideIconEl = ic; }
             sec.sideItems.forEach(function (t) {
               const line = document.createElement('div'); line.className = 'sl-line';
               const rule = document.createElement('span'); rule.className = 'sl-rule';
@@ -1016,6 +1014,7 @@
           sideList.style.visibility = 'visible';
           const N = sideLines.length, step = 1 / N;
           const localT = clamp01((y - sec.sideStart) / Math.max(1, sec.sideBuildEnd - sec.sideStart));
+          if (sideIconEl) sideIconEl.style.opacity = smooth01(clamp01(localT / 0.12)).toFixed(3);
           for (let i = 0; i < N; i++) {
             const pi = smooth01(clamp01((localT - i * step) / (step * 0.85)));
             sideLines[i].style.opacity = pi.toFixed(3);
