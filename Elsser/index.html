@@ -184,6 +184,14 @@
     border-radius:2px; background:rgba(233,226,214,.85); transform:translateX(-50%); animation:wheel 1.6s ease-in-out infinite; }
   @keyframes wheel { 0%{opacity:0; transform:translate(-50%,0)} 30%{opacity:1} 70%{opacity:1; transform:translate(-50%,9px)} 100%{opacity:0; transform:translate(-50%,9px)} }
   #hint .arr { display:block; text-align:center; margin-top:8px; animation:bob 1.8s ease-in-out infinite; }
+
+  /* descent spacer + centered "keep diggin'" cue (no pin, no veil) */
+  .deep-stretch { height:230vh; pointer-events:none; }
+  #keepDig { position:fixed; left:50%; top:50%; transform:translate(-50%, -50%); z-index:6;
+    text-align:center; pointer-events:none; opacity:0; visibility:hidden; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.78); }
+  #keepDig .kd-text { display:block; font:700 clamp(1.3rem, 2.4vw, 2.2rem)/1.1 var(--condensed);
+    letter-spacing:.16em; text-transform:uppercase; }
+  #keepDig .kd-arr { display:block; margin-top:14px; font-size:26px; animation:bob 1.8s ease-in-out infinite; }
   @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
 
   /* strata name, right side */
@@ -208,6 +216,7 @@
     .panel--tall { height:300vh; }
     .panel--end { height:auto; }
     .panel--end .panel__inner { padding:14vh 0 10vh; }
+    .deep-stretch { height:160vh; }
     .panel__inner { width:90vw; padding:16vh 0; }
     .gap { height:44vh; }
     h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
@@ -336,15 +345,7 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel" id="p-deeper" data-e="0.72">
-      <div class="panel__inner">
-        <span class="panel__eyebrow">Down to the foundation</span>
-        <h2 class="panel__verdict">Keep diggin&rsquo;.</h2>
-        <div class="panel__evidence"><p>A few more metres to solid ground.</p></div>
-      </div>
-    </section>
-
-    <div class="gap" aria-hidden="true"></div>
+    <div class="deep-stretch" id="deepStretch" aria-hidden="true"></div>
 
     <section class="panel panel--end" id="p-bedrock" data-e="0.90">
       <div class="panel__inner">
@@ -408,6 +409,7 @@
   <div id="depth"><b id="depthN">0.0</b><span>metres of earth</span></div>
   <div id="strata"><span class="lab"><span class="name" id="strataName"></span><span class="sub" id="strataSub"></span></span></div>
   <div id="sideList" aria-hidden="true"></div>
+  <div id="keepDig" aria-hidden="true"><span class="kd-text">Keep diggin&rsquo;</span><span class="kd-arr">&#9662;</span></div>
   <div id="hint"><span class="mouse"></span>scroll to descend<span class="arr">&#9662;</span></div>
   <div id="lightbox" aria-hidden="true">
     <button class="lb-close" type="button" aria-label="Close">&times;</button>
@@ -752,6 +754,9 @@
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
     let sideLines = [], sideCurrent = null;
+    const keepDig = document.getElementById('keepDig');
+    const deepStretch = document.getElementById('deepStretch');
+    let kdTop = 0, kdH = 1;
 
     function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
     function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
@@ -914,6 +919,7 @@
         // the list finishes stacking partway through, then the full list sticks until the window ends
         m.sideBuildEnd = m.sideStart + (m.sideEnd - m.sideStart) * 0.62;
       }
+      if (deepStretch) { kdTop = deepStretch.offsetTop; kdH = Math.max(1, deepStretch.offsetHeight); }
     }
 
     // nav: smooth-scroll to a section + scroll-spy
@@ -1001,6 +1007,14 @@
         } else {
           sideList.style.visibility = 'hidden';
         }
+      }
+      // centered "keep diggin'" cue during the deep descent stretch (no pin, no veil)
+      if (keepDig) {
+        const localT = (y - (kdTop - vh * 0.5)) / kdH;
+        const op = (localT > -0.15 && localT < 1.15)
+          ? smooth01(clamp01(localT / 0.22)) * smooth01(clamp01((1 - localT) / 0.22)) : 0;
+        keepDig.style.opacity = op.toFixed(3);
+        keepDig.style.visibility = op > 0.01 ? 'visible' : 'hidden';
       }
       spy(y);
       requestAnimationFrame(tick);
