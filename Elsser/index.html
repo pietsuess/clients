@@ -54,10 +54,11 @@
 
   /* ===================== pinned content panels ===================== */
   #content { position:relative; z-index:5; }
-  .panel { position:relative; min-height:100vh; display:grid; align-items:center; }
+  .panel { position:relative; height:200vh; }
   /* breathing room between sections: pure descending earth, no text */
   .gap { height:64vh; pointer-events:none; }
-  .panel__inner { width:min(1180px, 88vw); margin:0 auto; padding:14vh 0;
+  .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
+    width:min(1180px, 88vw); margin:0 auto; padding:14vh 0;
     color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); pointer-events:auto; }
 
   .panel__eyebrow { display:block; margin-bottom:14px; color:rgba(244,238,228,.66);
@@ -133,6 +134,7 @@
   @media (max-width: 900px) {
     #siteNav { grid-template-columns:auto auto; min-height:74px; }
     .site-links { display:none; }
+    .panel { height:170vh; }
     .panel__inner { width:90vw; padding:16vh 0; }
     .gap { height:44vh; }
     h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
@@ -278,8 +280,6 @@
   <div id="hint">scroll to descend<span class="arr">&#9662;</span></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script>
   // ============================================================ 3D descent scene
   (function () {
@@ -621,65 +621,68 @@
       return wis;
     }
 
-    // build the animation model for one panel
-    panels.forEach(function (panel, idx) {
-      const inner = panel.querySelector('.panel__inner');
-      const eyebrow = panel.querySelector('.panel__eyebrow');
+    // build the animation model for each panel
+    const models = panels.map(function (panel, idx) {
       const head = panel.querySelector('.panel__verdict');
-      panel._inner = inner;
-      panel._eyebrow = eyebrow;
-      panel._words = head ? splitWords(head) : [];
       const blocks = [];
       const lede = panel.querySelector('.panel__lede'); if (lede) blocks.push(lede);
       panel.querySelectorAll('.panel__evidence p').forEach(function (p) { blocks.push(p); });
       panel.querySelectorAll('.panel__list li').forEach(function (li) { blocks.push(li); });
       const fig = panel.querySelector('.panel__photo'); if (fig) blocks.push(fig);
       const cta = panel.querySelector('.panel__contact'); if (cta) blocks.push(cta);
-      panel._blocks = blocks;
-      panel._e = parseFloat(panel.getAttribute('data-e')) || 0;
-      panel._prevE = idx > 0 ? (parseFloat(panels[idx-1].getAttribute('data-e')) || 0) : 0;
+      return {
+        el: panel,
+        inner: panel.querySelector('.panel__inner'),
+        eyebrow: panel.querySelector('.panel__eyebrow'),
+        words: head ? splitWords(head) : [],
+        blocks: blocks,
+        e: parseFloat(panel.getAttribute('data-e')) || 0,
+        isHero: idx === 0,
+        start: 0, end: 1,
+      };
     });
 
-    // choreography: camera travel -> eyebrow -> headline text-up -> evidence stagger -> HOLD -> lift
-    function applyPanel (panel, p) {
-      // camera HOLDS on this layer for the whole read; the travel between layers
-      // happens in the gaps between panels (see gap triggers below).
-      descent.setTargetE(panel._e);
-
+    // choreography for one panel given its scroll progress p (0..1)
+    function applyPanel (m, p) {
+      // Hero is shown at rest (it's the landing) and only animates OUT as you scroll away.
+      if (m.isHero) {
+        const ex = smooth01(mapRange(p, 0.04, 0.55));
+        if (m.eyebrow) { m.eyebrow.style.opacity = (1 - ex); m.eyebrow.style.transform = 'translateX(0)'; }
+        m.words.forEach(function (w) { w.style.opacity = (1 - ex); w.style.transform = 'translateY(' + (-ex * 38).toFixed(1) + '%)'; });
+        m.blocks.forEach(function (b) { b.style.opacity = (1 - ex); b.style.transform = 'translateY(' + (-ex * 18).toFixed(1) + 'px)'; });
+        if (m.inner) { m.inner.style.opacity = (1 - ex); m.inner.style.transform = 'translateY(' + (-ex * 26).toFixed(1) + 'px)'; }
+        return;
+      }
       // eyebrow slides in
       const pe = mapRange(p, 0.05, 0.13);
-      if (panel._eyebrow) { panel._eyebrow.style.opacity = pe; panel._eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe)) + 'px)'; }
-
+      if (m.eyebrow) { m.eyebrow.style.opacity = pe; m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe)) + 'px)'; }
       // headline words rise out of their mask, staggered ("text up")
-      const words = panel._words, nw = words.length;
-      for (let i = 0; i < nw; i++) {
+      const words = m.words;
+      for (let i = 0; i < words.length; i++) {
         const s = 0.12 + i * 0.05;
         const pw = smooth01(mapRange(p, s, s + 0.17));
         words[i].style.transform = 'translateY(' + ((1 - pw) * 112).toFixed(2) + '%)';
         words[i].style.opacity = pw.toFixed(3);
       }
-
       // supporting blocks reveal sequentially (translateY 26 -> 0)
-      const blocks = panel._blocks, nb = blocks.length;
-      const bStart = 0.34, bStep = 0.05, bSeg = 0.12;
-      for (let i = 0; i < nb; i++) {
+      const blocks = m.blocks, bStart = 0.34, bStep = 0.05, bSeg = 0.12;
+      for (let i = 0; i < blocks.length; i++) {
         const s = bStart + i * bStep;
         const pb = smooth01(mapRange(p, s, s + bSeg));
         blocks[i].style.opacity = pb.toFixed(3);
         blocks[i].style.transform = 'translateY(' + (26 * (1 - pb)).toFixed(1) + 'px)';
       }
-
       // HOLD through ~90%, then the whole block lifts + fades away
       const px = mapRange(p, 0.90, 1.00);
-      if (panel._inner) { panel._inner.style.opacity = (1 - px).toFixed(3); panel._inner.style.transform = 'translateY(' + (-28 * px).toFixed(1) + 'px)'; }
+      if (m.inner) { m.inner.style.opacity = (1 - px).toFixed(3); m.inner.style.transform = 'translateY(' + (-28 * px).toFixed(1) + 'px)'; }
     }
 
     function revealAll () {
-      panels.forEach(function (panel) {
-        if (panel._eyebrow) { panel._eyebrow.style.opacity = 1; panel._eyebrow.style.transform = 'none'; }
-        panel._words.forEach(function (w) { w.style.transform = 'none'; w.style.opacity = 1; });
-        panel._blocks.forEach(function (b) { b.style.opacity = 1; b.style.transform = 'none'; });
-        if (panel._inner) { panel._inner.style.opacity = 1; panel._inner.style.transform = 'none'; }
+      models.forEach(function (m) {
+        if (m.eyebrow) { m.eyebrow.style.opacity = 1; m.eyebrow.style.transform = 'none'; }
+        m.words.forEach(function (w) { w.style.transform = 'none'; w.style.opacity = 1; });
+        m.blocks.forEach(function (b) { b.style.opacity = 1; b.style.transform = 'none'; });
+        if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
       });
     }
 
@@ -692,68 +695,70 @@
       if (y > 12) { const h = document.getElementById('hint'); if (h) h.style.opacity = '0'; }
     }, { passive: true });
 
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || reduced) {
-      revealAll();
-      if (panels[0]) descent.setTargetE(0);
-      // still allow a basic depth response on native scroll if GSAP is missing
-      const maxS = function () { return document.documentElement.scrollHeight - innerHeight; };
+    if (reduced) {
+      revealAll(); descent.setTargetE(0);
       addEventListener('scroll', function () {
-        const f = clamp01((window.scrollY || 0) / (maxS() || 1));
-        const last = panels.length ? (panels[panels.length-1]._e || 1) : 1;
-        descent.setTargetE(f * last);
+        const maxS = document.documentElement.scrollHeight - innerHeight;
+        const last = models.length ? models[models.length-1].e : 1;
+        descent.setTargetE(clamp01((window.scrollY || 0) / (maxS || 1)) * last);
       }, { passive: true });
       return;
     }
 
-    gsap.registerPlugin(ScrollTrigger);
-    ScrollTrigger.config({ ignoreMobileResize: true });
+    // measure each panel's sticky scroll window (the range over which it is held in view)
+    let vh = innerHeight;
+    function measure () {
+      vh = innerHeight;
+      for (const m of models) {
+        const innerH = m.inner ? m.inner.offsetHeight : vh;
+        m.start = m.el.offsetTop;
+        m.end = m.start + Math.max(1, m.el.offsetHeight - innerH);
+      }
+    }
 
-    panels.forEach(function (panel) {
-      applyPanel(panel, 0);   // hide on first paint to match the entry choreography
-      ScrollTrigger.create({
-        trigger: panel,
-        start: 'top top',
-        end: mobileLike ? '+=110%' : '+=185%',
-        pin: true, pinSpacing: true, scrub: true, anticipatePin: 1,
-        onUpdate: function (self) { applyPanel(panel, self.progress); },
-      });
-    });
-
-    // gaps: pure descending earth between sections. The camera travels from the
-    // section it just left to the next one while the gap scrolls through.
-    Array.prototype.slice.call(document.querySelectorAll('.gap')).forEach(function (gap) {
-      const prev = gap.previousElementSibling, next = gap.nextElementSibling;
-      if (!prev || !next) return;
-      const eA = parseFloat(prev.getAttribute('data-e')) || 0;
-      const eB = parseFloat(next.getAttribute('data-e')) || 0;
-      ScrollTrigger.create({
-        trigger: gap, start: 'top top', end: 'bottom top', scrub: true,
-        onUpdate: function (self) { descent.setTargetE(eA + (eB - eA) * smooth01(self.progress)); },
-      });
-    });
-
-    // nav scroll-spy + smooth jumps
+    // nav: smooth-scroll to a section + scroll-spy
     const navLinks = Array.prototype.slice.call(document.querySelectorAll('.site-links a[data-scroll-target]'));
-    navLinks.forEach(function (link) {
+    const allNav = Array.prototype.slice.call(document.querySelectorAll('#siteNav a[data-scroll-target]'));
+    allNav.forEach(function (link) {
       link.addEventListener('click', function (ev) {
         const sel = link.getAttribute('data-scroll-target'); const target = sel && document.querySelector(sel);
         if (!target) return; ev.preventDefault();
         target.scrollIntoView({ behavior: 'smooth' });
       });
     });
-    const allNav = Array.prototype.slice.call(document.querySelectorAll('#siteNav a[data-scroll-target]'));
-    function spy () {
-      const y = window.scrollY || 0; let current = null;
-      allNav.forEach(function (link) {
-        const sel = link.getAttribute('data-scroll-target'); const el = sel && document.querySelector(sel);
-        if (el && y + 2 >= el.offsetTop) current = link;
-      });
-      navLinks.forEach(function (link) { link.classList.toggle('is-current', link === current); });
+    function spy (y) {
+      let current = null;
+      for (const link of allNav) { const sel = link.getAttribute('data-scroll-target'); const el = sel && document.querySelector(sel); if (el && y + 2 >= el.offsetTop) current = link; }
+      for (const link of navLinks) link.classList.toggle('is-current', link === current);
     }
-    ScrollTrigger.create({ trigger: document.body, start: 'top top', end: function () { return ScrollTrigger.maxScroll(window); }, scrub: true, onUpdate: spy, onRefresh: spy });
 
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
-    window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+    // main scrubbed loop: progress comes straight from native scroll position.
+    // Sticky CSS holds each section in view; the camera holds on the active layer
+    // and travels to the next layer across the gap between sections.
+    function tick () {
+      const y = window.scrollY || 0;
+      let active = models[0], ai = 0;
+      for (let i = 0; i < models.length; i++) {
+        const m = models[i];
+        applyPanel(m, clamp01((y - m.start) / (m.end - m.start)));
+        if (y >= m.start) { active = m; ai = i; }
+      }
+      let te = active.e;
+      if (y > active.end && models[ai + 1]) {
+        const next = models[ai + 1];
+        te = active.e + (next.e - active.e) * smooth01(clamp01((y - active.end) / Math.max(1, next.start - active.end)));
+      }
+      descent.setTargetE(te);
+      spy(y);
+      requestAnimationFrame(tick);
+    }
+
+    measure();
+    addEventListener('resize', measure, { passive: true });
+    addEventListener('load', measure);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    Array.prototype.slice.call(document.querySelectorAll('.panel__photo img')).forEach(function (img) { if (!img.complete) img.addEventListener('load', measure); });
+    requestAnimationFrame(tick);
   })();
   </script>
 </body>
