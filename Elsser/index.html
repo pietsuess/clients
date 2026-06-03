@@ -80,20 +80,40 @@
     font-size:clamp(.98rem, 1.05vw, 1.2rem); line-height:1.6; text-wrap:pretty; }
   /* per-section detail lines are stored here (hidden) and played one-by-one on the right (#sideList) */
   .panel__list { display:none; }
-  #sideList { position:fixed; right:clamp(22px, 5vw, 84px); top:50%; transform:translateY(-50%);
-    z-index:5; width:min(28vw, 360px); text-align:right; pointer-events:none; opacity:0; visibility:hidden;
-    will-change:opacity, transform; }
-  #sideList .sl-rule { display:block; width:56px; height:1px; background:rgba(244,238,228,.6); margin:0 0 13px auto; }
-  #sideList .sl-text { display:block; font:700 clamp(1.15rem, 1.8vw, 2rem)/1.12 var(--condensed);
+  #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
+    z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
+    display:grid; gap:15px; }
+  #sideList .sl-line { opacity:0; will-change:opacity, transform; }
+  #sideList .sl-rule { display:block; width:48px; height:1px; background:rgba(244,238,228,.5); margin:0 0 9px auto; }
+  #sideList .sl-text { display:block; font:700 clamp(1.05rem, 1.55vw, 1.7rem)/1.12 var(--condensed);
     letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.72); text-wrap:balance; }
   .panel__list li { min-height:40px; display:flex; align-items:center;
     border-top:1px solid rgba(244,238,228,.24); color:rgba(244,238,228,.76);
     font:700 .72rem/1.15 var(--condensed); letter-spacing:.14em; text-transform:uppercase; }
-  .panel__photo { display:grid; grid-template-columns:104px 1fr; align-items:end; gap:14px; margin-top:22px; }
-  .panel__photo img { width:104px; height:74px; object-fit:cover;
-    border:1px solid rgba(244,238,228,.30); box-shadow:0 14px 30px rgba(0,0,0,.36); }
-  .panel__photo figcaption { color:rgba(244,238,228,.58);
-    font:700 .68rem/1.18 var(--condensed); letter-spacing:.15em; text-transform:uppercase; }
+  /* clickable photo gallery (opens the lightbox) */
+  .panel__gallery { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+  .panel__gallery .g-thumb { padding:0; margin:0; line-height:0; cursor:pointer; overflow:hidden; border-radius:3px;
+    border:1px solid rgba(244,238,228,.30); background:none; box-shadow:0 14px 30px rgba(0,0,0,.36);
+    transition:border-color .2s; }
+  .panel__gallery .g-thumb img { width:128px; height:88px; object-fit:cover; display:block; transition:transform .4s ease; }
+  .panel__gallery .g-thumb:hover { border-color:rgba(244,238,228,.72); }
+  .panel__gallery .g-thumb:hover img { transform:scale(1.07); }
+  .panel__gallery .g-thumb:focus-visible { outline:2px solid rgba(244,238,228,.8); outline-offset:2px; }
+
+  /* lightbox */
+  #lightbox { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
+    background:rgba(6,5,4,.93); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  #lightbox.open { display:flex; }
+  #lightbox .lb-img { max-width:88vw; max-height:80vh; object-fit:contain; box-shadow:0 30px 90px rgba(0,0,0,.65); }
+  #lightbox .lb-cap { position:absolute; bottom:4.5vh; left:0; right:0; text-align:center;
+    color:rgba(244,238,228,.82); font:700 .74rem/1.3 var(--condensed); letter-spacing:.16em; text-transform:uppercase; }
+  #lightbox button { position:absolute; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.32); color:#fff; cursor:pointer;
+    border-radius:999px; transition:background .2s; line-height:1; }
+  #lightbox button:hover { background:rgba(255,255,255,.18); }
+  #lightbox .lb-close { top:22px; right:22px; width:46px; height:46px; font-size:26px; }
+  #lightbox .lb-prev, #lightbox .lb-next { top:50%; transform:translateY(-50%); width:52px; height:52px; font-size:28px; }
+  #lightbox .lb-prev { left:22px; } #lightbox .lb-next { right:22px; }
   .panel__contact { display:inline-flex; align-items:center; gap:10px; margin-top:22px;
     text-decoration:none; color:#11100d; background:rgba(233,226,214,.92);
     font:700 .84rem/1 var(--condensed); letter-spacing:.12em; text-transform:uppercase;
@@ -251,10 +271,10 @@
         <h2 class="panel__verdict">Control the grade.</h2>
         <div class="panel__evidence"><p>Site preparation, land clearing, landscaping, and grading happen in the top working layers, where early decisions set the slope, the drainage, and the shape of everything built on top.</p></div>
         <ul class="panel__list"><li>Site Preparation</li><li>Land Clearing</li><li>Landscaping</li><li>Grading</li></ul>
-        <figure class="panel__photo">
-          <img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/c7b9be44-b002-4cfa-8429-652caa9d2e34" alt="Cleared and graded excavation site">
-          <figcaption>Land clearing / graded ground</figcaption>
-        </figure>
+        <div class="panel__gallery">
+          <button class="g-thumb" type="button" data-cap="Land clearing / graded ground" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/c7b9be44-b002-4cfa-8429-652caa9d2e34"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/c7b9be44-b002-4cfa-8429-652caa9d2e34" alt="Cleared and graded excavation site" loading="lazy"></button>
+          <button class="g-thumb" type="button" data-cap="Site preparation / graded slope" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/466028dc-44d3-4355-bc7c-b96bedb92510"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/466028dc-44d3-4355-bc7c-b96bedb92510" alt="Graded slope in fog" loading="lazy"></button>
+        </div>
       </div>
     </section>
 
@@ -266,10 +286,10 @@
         <h2 class="panel__verdict">Water solved early.</h2>
         <div class="panel__evidence"><p>Drainage, utilities and servicing, water storage, and ponds sit under the surface, where buried work has to perform for years. Get the water moving right and the rest of the site holds.</p></div>
         <ul class="panel__list"><li>Drainage</li><li>Utilities &amp; Servicing</li><li>Water Storage</li><li>Ponds</li></ul>
-        <figure class="panel__photo">
-          <img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/80897a1a-dbba-492d-a9a6-10e1187cd7d9" alt="Drainage and servicing work beside a building">
-          <figcaption>Drainage / utilities</figcaption>
-        </figure>
+        <div class="panel__gallery">
+          <button class="g-thumb" type="button" data-cap="Drainage / utilities" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/80897a1a-dbba-492d-a9a6-10e1187cd7d9"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/80897a1a-dbba-492d-a9a6-10e1187cd7d9" alt="Drainage and servicing work beside a building" loading="lazy"></button>
+          <button class="g-thumb" type="button" data-cap="Foundation pad above the water" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/c9bd6960-00ae-4098-9c7a-99c4f155331e_2x"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/c9bd6960-00ae-4098-9c7a-99c4f155331e_2x" alt="Foundation pad overlooking the water" loading="lazy"></button>
+        </div>
       </div>
     </section>
 
@@ -281,10 +301,10 @@
         <h2 class="panel__verdict">Hold the line.</h2>
         <div class="panel__evidence"><p>Rock walls and terraforming are structural shaping, not surface decoration. We build retaining and grade changes that take the load of the slope and the weather behind them.</p></div>
         <ul class="panel__list"><li>Rock Walls</li><li>Terraforming</li><li>Retaining</li><li>Grade Changes</li></ul>
-        <figure class="panel__photo">
-          <img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/f511a3af-efd6-4f2b-918a-46cc682cf120" alt="Rock wall and earth shaping work">
-          <figcaption>Rock walls / held grade</figcaption>
-        </figure>
+        <div class="panel__gallery">
+          <button class="g-thumb" type="button" data-cap="Rock walls / held grade" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/f511a3af-efd6-4f2b-918a-46cc682cf120"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/f511a3af-efd6-4f2b-918a-46cc682cf120" alt="Rock wall and earth shaping work" loading="lazy"></button>
+          <button class="g-thumb" type="button" data-cap="Terraforming / shaped ground" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/232d69f5-7ddc-4a00-81ce-81bfae642180"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/232d69f5-7ddc-4a00-81ce-81bfae642180" alt="Terraformed and shaped site" loading="lazy"></button>
+        </div>
       </div>
     </section>
 
@@ -296,10 +316,10 @@
         <h2 class="panel__verdict">Make the entry work.</h2>
         <div class="panel__evidence"><p>Driveways and access routes have to survive water, slope, weight, and repeated use. They need base logic underneath before any finished surface goes down.</p></div>
         <ul class="panel__list"><li>Driveways</li><li>Access Routes</li><li>Machine Moves</li><li>Material Delivery</li></ul>
-        <figure class="panel__photo">
-          <img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/27afc650-4781-42ae-9990-5af999974618" alt="Excavator building a driveway access route">
-          <figcaption>Driveways / access</figcaption>
-        </figure>
+        <div class="panel__gallery">
+          <button class="g-thumb" type="button" data-cap="Driveways / access" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/27afc650-4781-42ae-9990-5af999974618"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/27afc650-4781-42ae-9990-5af999974618" alt="Excavator building a driveway access route" loading="lazy"></button>
+          <button class="g-thumb" type="button" data-cap="Excavation above the Gulf Islands" data-full="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/1dd65900-4776-432d-a9de-52a0b443c01b_2x"><img src="https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/1dd65900-4776-432d-a9de-52a0b443c01b_2x" alt="Orange excavator with ocean and islands behind" loading="lazy"></button>
+        </div>
       </div>
     </section>
 
@@ -316,7 +336,17 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel panel--end" id="p-bedrock" data-e="0.72">
+    <section class="panel" id="p-deeper" data-e="0.72">
+      <div class="panel__inner">
+        <span class="panel__eyebrow">Down to the foundation</span>
+        <h2 class="panel__verdict">Keep diggin&rsquo;.</h2>
+        <div class="panel__evidence"><p>A few more metres to solid ground.</p></div>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel panel--end" id="p-bedrock" data-e="0.90">
       <div class="panel__inner">
         <span class="panel__eyebrow">Bedrock &middot; Building a legacy of excellence</span>
         <h2 class="panel__verdict">Break ground.</h2>
@@ -377,8 +407,15 @@
   <div id="grain"></div>
   <div id="depth"><b id="depthN">0.0</b><span>metres of earth</span></div>
   <div id="strata"><span class="lab"><span class="name" id="strataName"></span><span class="sub" id="strataSub"></span></span></div>
-  <div id="sideList" aria-hidden="true"><span class="sl-rule"></span><span class="sl-text"></span></div>
+  <div id="sideList" aria-hidden="true"></div>
   <div id="hint"><span class="mouse"></span>scroll to descend<span class="arr">&#9662;</span></div>
+  <div id="lightbox" aria-hidden="true">
+    <button class="lb-close" type="button" aria-label="Close">&times;</button>
+    <button class="lb-prev" type="button" aria-label="Previous photo">&#8249;</button>
+    <img class="lb-img" alt="">
+    <button class="lb-next" type="button" aria-label="Next photo">&#8250;</button>
+    <div class="lb-cap"></div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
@@ -714,7 +751,7 @@
     const descent = window.elsserDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
-    const slText = sideList && sideList.querySelector('.sl-text');
+    let sideLines = [], sideCurrent = null;
 
     function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
     function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
@@ -740,7 +777,7 @@
       const blocks = [];
       const lede = panel.querySelector('.panel__lede'); if (lede) blocks.push(lede);
       panel.querySelectorAll('.panel__evidence p').forEach(function (p) { blocks.push(p); });
-      const fig = panel.querySelector('.panel__photo'); if (fig) blocks.push(fig);
+      const fig = panel.querySelector('.panel__gallery'); if (fig) blocks.push(fig);
       const cta = panel.querySelector('.panel__contact'); if (cta) blocks.push(cta);
       const frm = panel.querySelector('.panel__form'); if (frm) blocks.push(frm);
       // detail lines play one-by-one on the right (#sideList), not in the left stack
@@ -872,8 +909,10 @@
           m.sideStart = 0; m.sideEnd = -1;            // form section has no detail lines
         } else {
           m.sideStart = m.start + travel * 0.30;       // within the hold (after the main text is up)
-          m.sideEnd = m.start + travel * 0.94;
+          m.sideEnd = m.start + travel * 0.93;
         }
+        // the list finishes stacking partway through, then the full list sticks until the window ends
+        m.sideBuildEnd = m.sideStart + (m.sideEnd - m.sideStart) * 0.62;
       }
     }
 
@@ -924,7 +963,7 @@
       // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
       let up;
       if (active.isEnd) {
-        up = smooth01(mapRange(endProgress(active, y), 0.05, 0.50));
+        up = smooth01(mapRange(endProgress(active, y), 0.60, 0.95));
       } else {
         const ap = clamp01((y - active.start) / (active.end - active.start));
         up = active.isHero
@@ -932,29 +971,36 @@
           : smooth01(mapRange(ap, 0.06, 0.30)) * (1 - smooth01(mapRange(ap, 0.92, 1.00)));
       }
       if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
-      // right-side detail lines: one at a time, fully scroll-scrubbed (pause/reverse with scroll)
+      // right-side detail lines: stack in one-by-one (scroll-scrubbed), hold the full list, then bypass
       if (sideList) {
-        let shown = false;
+        let sec = null;
         for (let i = 0; i < models.length; i++) {
           const m = models[i];
-          if (!m.sideItems.length || m.sideEnd <= m.sideStart) continue;
-          if (y >= m.sideStart && y < m.sideEnd) {
-            const N = m.sideItems.length;
-            const f = ((y - m.sideStart) / (m.sideEnd - m.sideStart)) * N;
-            let idx = Math.floor(f); if (idx >= N) idx = N - 1; if (idx < 0) idx = 0;
-            const phase = clamp01(f - idx);
-            const inP = smooth01(mapRange(phase, 0, 0.28));
-            const outP = smooth01(mapRange(phase, 0.72, 1.0));
-            const op = inP * (1 - outP);
-            const ty = (1 - inP) * 44 - outP * 44;
-            if (slText && slText.textContent !== m.sideItems[idx]) slText.textContent = m.sideItems[idx];
-            sideList.style.opacity = op.toFixed(3);
-            sideList.style.transform = 'translateY(calc(-50% + ' + ty.toFixed(1) + 'px))';
-            sideList.style.visibility = op > 0.01 ? 'visible' : 'hidden';
-            shown = true; break;
+          if (m.sideItems.length && m.sideEnd > m.sideStart && y >= m.sideStart && y < m.sideEnd) { sec = m; break; }
+        }
+        if (sec !== sideCurrent) {
+          sideCurrent = sec; sideList.innerHTML = ''; sideLines = [];
+          if (sec) {
+            sec.sideItems.forEach(function (t) {
+              const line = document.createElement('div'); line.className = 'sl-line';
+              const rule = document.createElement('span'); rule.className = 'sl-rule';
+              const tx = document.createElement('span'); tx.className = 'sl-text'; tx.textContent = t;
+              line.appendChild(rule); line.appendChild(tx); sideList.appendChild(line); sideLines.push(line);
+            });
           }
         }
-        if (!shown) { sideList.style.opacity = '0'; sideList.style.visibility = 'hidden'; }
+        if (sec && sideLines.length) {
+          sideList.style.visibility = 'visible';
+          const N = sideLines.length, step = 1 / N;
+          const localT = clamp01((y - sec.sideStart) / Math.max(1, sec.sideBuildEnd - sec.sideStart));
+          for (let i = 0; i < N; i++) {
+            const pi = smooth01(clamp01((localT - i * step) / (step * 0.85)));
+            sideLines[i].style.opacity = pi.toFixed(3);
+            sideLines[i].style.transform = 'translateY(' + ((1 - pi) * 30).toFixed(1) + 'px)';
+          }
+        } else {
+          sideList.style.visibility = 'hidden';
+        }
       }
       spy(y);
       requestAnimationFrame(tick);
@@ -964,8 +1010,40 @@
     addEventListener('resize', measure, { passive: true });
     addEventListener('load', measure);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
-    Array.prototype.slice.call(document.querySelectorAll('.panel__photo img')).forEach(function (img) { if (!img.complete) img.addEventListener('load', measure); });
+    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery img')).forEach(function (img) { if (!img.complete) img.addEventListener('load', measure); });
     requestAnimationFrame(tick);
+  })();
+
+  // ============================================================ photo lightbox
+  (function () {
+    const lightbox = document.getElementById('lightbox');
+    if (!lightbox) return;
+    const lbImg = lightbox.querySelector('.lb-img');
+    const lbCap = lightbox.querySelector('.lb-cap');
+    let group = [], index = 0;
+    function show () {
+      const t = group[index]; if (!t) return;
+      lbImg.src = t.getAttribute('data-full');
+      lbImg.alt = (t.querySelector('img') || {}).alt || '';
+      lbCap.textContent = t.getAttribute('data-cap') || '';
+    }
+    function open (thumbs, i) { group = thumbs; index = i; show(); lightbox.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function close () { lightbox.classList.remove('open'); document.body.style.overflow = ''; lbImg.removeAttribute('src'); }
+    function step (d) { if (!group.length) return; index = (index + d + group.length) % group.length; show(); }
+    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery')).forEach(function (g) {
+      const thumbs = Array.prototype.slice.call(g.querySelectorAll('.g-thumb'));
+      thumbs.forEach(function (t, i) { t.addEventListener('click', function () { open(thumbs, i); }); });
+    });
+    lightbox.querySelector('.lb-close').addEventListener('click', close);
+    lightbox.querySelector('.lb-prev').addEventListener('click', function () { step(-1); });
+    lightbox.querySelector('.lb-next').addEventListener('click', function () { step(1); });
+    lightbox.addEventListener('click', function (e) { if (e.target === lightbox) close(); });
+    addEventListener('keydown', function (e) {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') step(-1);
+      else if (e.key === 'ArrowRight') step(1);
+    });
   })();
   </script>
 </body>
