@@ -16,9 +16,9 @@
     --condensed:"Titillium Web","Avenir Next Condensed","Barlow Condensed","Helvetica Neue",Helvetica,sans-serif;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  html, body { height:100%; background:#0b0907; color:var(--ink);
+  html, body { background:#0b0907; color:var(--ink);
     font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-  body { overflow-x:hidden; }
+  body { overflow-x:clip; }
 
   #stage { position:fixed; inset:0; z-index:1; }
   canvas { display:block; }
@@ -278,7 +278,6 @@
   <div id="hint">scroll to descend<span class="arr">&#9662;</span></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
   <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script>
@@ -684,17 +683,14 @@
       });
     }
 
-    // ----- smooth scrolling (Lenis) + GSAP ScrollTrigger pinning -----
-    let lenis = null;
-    if (typeof Lenis !== 'undefined' && !reduced) {
-      lenis = new Lenis({ duration: 1.1, smoothWheel: true });
-      window.lenis = lenis;
-      lenis.on('scroll', function (e) {
-        if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.update();
-        if (e && typeof e.velocity === 'number') descent.addDig(Math.min(0.5, Math.abs(e.velocity) * 0.0016));
-        if ((window.scrollY || 0) > 12) { const h = document.getElementById('hint'); if (h) h.style.opacity = '0'; }
-      });
-    }
+    // ----- native scroll (no smooth-scroll hijack) drives the dust + hint -----
+    let lastScroll = window.scrollY || 0;
+    addEventListener('scroll', function () {
+      const y = window.scrollY || 0;
+      descent.addDig(Math.min(0.5, Math.abs(y - lastScroll) * 0.012));
+      lastScroll = y;
+      if (y > 12) { const h = document.getElementById('hint'); if (h) h.style.opacity = '0'; }
+    }, { passive: true });
 
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined' || reduced) {
       revealAll();
@@ -710,7 +706,7 @@
     }
 
     gsap.registerPlugin(ScrollTrigger);
-    if (lenis) { gsap.ticker.add(function (time) { lenis.raf(time * 1000); }); gsap.ticker.lagSmoothing(0); }
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     panels.forEach(function (panel) {
       applyPanel(panel, 0);   // hide on first paint to match the entry choreography
@@ -742,7 +738,7 @@
       link.addEventListener('click', function (ev) {
         const sel = link.getAttribute('data-scroll-target'); const target = sel && document.querySelector(sel);
         if (!target) return; ev.preventDefault();
-        if (lenis) lenis.scrollTo(target, { offset: 0 }); else target.scrollIntoView({ behavior: 'smooth' });
+        target.scrollIntoView({ behavior: 'smooth' });
       });
     });
     const allNav = Array.prototype.slice.call(document.querySelectorAll('#siteNav a[data-scroll-target]'));
