@@ -78,8 +78,14 @@
     font:700 clamp(1.05rem, 1.5vw, 1.7rem)/1.25 var(--condensed); letter-spacing:.01em; text-wrap:balance; }
   .panel__evidence p { margin-top:16px; max-width:58ch; color:rgba(244,238,228,.80);
     font-size:clamp(.98rem, 1.05vw, 1.2rem); line-height:1.6; text-wrap:pretty; }
-  .panel__list { list-style:none; display:grid; grid-template-columns:repeat(4, minmax(0, 1fr));
-    gap:0 24px; margin-top:24px; max-width:920px; }
+  /* per-section detail lines are stored here (hidden) and played one-by-one on the right (#sideList) */
+  .panel__list { display:none; }
+  #sideList { position:fixed; right:clamp(22px, 5vw, 84px); top:50%; transform:translateY(-50%);
+    z-index:5; width:min(28vw, 360px); text-align:right; pointer-events:none; opacity:0; visibility:hidden;
+    will-change:opacity, transform; }
+  #sideList .sl-rule { display:block; width:56px; height:1px; background:rgba(244,238,228,.6); margin:0 0 13px auto; }
+  #sideList .sl-text { display:block; font:700 clamp(1.15rem, 1.8vw, 2rem)/1.12 var(--condensed);
+    letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.72); text-wrap:balance; }
   .panel__list li { min-height:40px; display:flex; align-items:center;
     border-top:1px solid rgba(244,238,228,.24); color:rgba(244,238,228,.76);
     font:700 .72rem/1.15 var(--condensed); letter-spacing:.14em; text-transform:uppercase; }
@@ -189,7 +195,7 @@
     .panel__evidence p { max-width:none; }
     .panel__list { grid-template-columns:1fr 1fr; max-width:none; }
     .panel__form .f-row { grid-template-columns:1fr; }
-    #strata { display:none; }
+    #strata, #sideList { display:none; }
   }
   @media (prefers-reduced-motion: reduce) {
     #grain, #hint .arr { animation:none; }
@@ -371,6 +377,7 @@
   <div id="grain"></div>
   <div id="depth"><b id="depthN">0.0</b><span>metres of earth</span></div>
   <div id="strata"><span class="lab"><span class="name" id="strataName"></span><span class="sub" id="strataSub"></span></span></div>
+  <div id="sideList" aria-hidden="true"><span class="sl-rule"></span><span class="sl-text"></span></div>
   <div id="hint"><span class="mouse"></span>scroll to descend<span class="arr">&#9662;</span></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -706,6 +713,8 @@
     const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
     const descent = window.elsserDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
+    const sideList = document.getElementById('sideList');
+    const slText = sideList && sideList.querySelector('.sl-text');
 
     function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
     function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
@@ -731,20 +740,22 @@
       const blocks = [];
       const lede = panel.querySelector('.panel__lede'); if (lede) blocks.push(lede);
       panel.querySelectorAll('.panel__evidence p').forEach(function (p) { blocks.push(p); });
-      panel.querySelectorAll('.panel__list li').forEach(function (li) { blocks.push(li); });
       const fig = panel.querySelector('.panel__photo'); if (fig) blocks.push(fig);
       const cta = panel.querySelector('.panel__contact'); if (cta) blocks.push(cta);
       const frm = panel.querySelector('.panel__form'); if (frm) blocks.push(frm);
+      // detail lines play one-by-one on the right (#sideList), not in the left stack
+      const sideItems = Array.prototype.slice.call(panel.querySelectorAll('.panel__list li')).map(function (li) { return li.textContent.trim(); });
       return {
         el: panel,
         inner: panel.querySelector('.panel__inner'),
         eyebrow: panel.querySelector('.panel__eyebrow'),
         words: head ? splitWords(head) : [],
         blocks: blocks,
+        sideItems: sideItems,
         e: parseFloat(panel.getAttribute('data-e')) || 0,
         isHero: idx === 0,
         isEnd: panel.classList.contains('panel--end'),
-        start: 0, end: 1,
+        start: 0, end: 1, sideStart: 0, sideEnd: -1,
       };
     });
 
@@ -849,6 +860,21 @@
         m.start = m.el.offsetTop;
         m.end = m.start + Math.max(1, m.el.offsetHeight - innerH);
       }
+      // scroll window over which each section's right-side detail lines play
+      for (let i = 0; i < models.length; i++) {
+        const m = models[i];
+        const travel = Math.max(1, m.end - m.start);
+        if (m.isHero) {
+          // hero's lines play in the space between the hero and the next section's text-up
+          m.sideStart = m.start + travel * 0.5;
+          m.sideEnd = models[i + 1] ? models[i + 1].start : m.end;
+        } else if (m.isEnd) {
+          m.sideStart = 0; m.sideEnd = -1;            // form section has no detail lines
+        } else {
+          m.sideStart = m.start + travel * 0.30;       // within the hold (after the main text is up)
+          m.sideEnd = m.start + travel * 0.94;
+        }
+      }
     }
 
     // nav: smooth-scroll to a section + scroll-spy
@@ -906,6 +932,30 @@
           : smooth01(mapRange(ap, 0.06, 0.30)) * (1 - smooth01(mapRange(ap, 0.92, 1.00)));
       }
       if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
+      // right-side detail lines: one at a time, fully scroll-scrubbed (pause/reverse with scroll)
+      if (sideList) {
+        let shown = false;
+        for (let i = 0; i < models.length; i++) {
+          const m = models[i];
+          if (!m.sideItems.length || m.sideEnd <= m.sideStart) continue;
+          if (y >= m.sideStart && y < m.sideEnd) {
+            const N = m.sideItems.length;
+            const f = ((y - m.sideStart) / (m.sideEnd - m.sideStart)) * N;
+            let idx = Math.floor(f); if (idx >= N) idx = N - 1; if (idx < 0) idx = 0;
+            const phase = clamp01(f - idx);
+            const inP = smooth01(mapRange(phase, 0, 0.28));
+            const outP = smooth01(mapRange(phase, 0.72, 1.0));
+            const op = inP * (1 - outP);
+            const ty = (1 - inP) * 44 - outP * 44;
+            if (slText && slText.textContent !== m.sideItems[idx]) slText.textContent = m.sideItems[idx];
+            sideList.style.opacity = op.toFixed(3);
+            sideList.style.transform = 'translateY(calc(-50% + ' + ty.toFixed(1) + 'px))';
+            sideList.style.visibility = op > 0.01 ? 'visible' : 'hidden';
+            shown = true; break;
+          }
+        }
+        if (!shown) { sideList.style.opacity = '0'; sideList.style.visibility = 'hidden'; }
+      }
       spy(y);
       requestAnimationFrame(tick);
     }
