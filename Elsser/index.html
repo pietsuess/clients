@@ -57,7 +57,9 @@
   .panel--tall { height:380vh; }
   /* the final section ends the page: a real form, sized to its content, nothing past it */
   .panel--end { height:auto; }
-  .panel--end .panel__inner { position:static; min-height:auto; padding:16vh 0 12vh; }
+  .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 4vh; }
+  .panel--end h2.panel__verdict { font-size:clamp(1.9rem, 3.4vw, 3.4rem); }
+  .panel--end .panel__evidence p { margin-top:9px; max-width:70ch; font-size:clamp(.95rem,.95vw,1.08rem); }
   /* breathing room between sections: pure descending earth, no text */
   .gap { height:64vh; pointer-events:none; }
   .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
@@ -92,36 +94,37 @@
     padding:14px 24px; border-radius:999px; transition:background .25s; }
   .panel__contact:hover { background:#fff; }
 
-  /* contact form (final section) */
-  .panel__form { margin-top:24px; max-width:780px; display:grid; gap:16px; }
-  .panel__form .f-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .panel__form label { display:grid; gap:7px; font:700 .68rem/1.2 var(--condensed);
-    letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.62); }
+  /* contact form (final section) — compact, fits one screen */
+  .panel__form { margin-top:16px; max-width:980px; display:grid; gap:12px; }
+  .panel__form .f-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:13px; }
+  .panel__form label { display:grid; gap:5px; font:700 .64rem/1.2 var(--condensed);
+    letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.6); }
   .panel__form input, .panel__form select, .panel__form textarea {
-    font:400 1rem/1.4 var(--body); color:#fff; background:rgba(255,255,255,.06);
-    border:1px solid rgba(244,238,228,.26); border-radius:8px; padding:11px 13px; width:100%; }
+    font:400 .95rem/1.35 var(--body); color:#fff; background:rgba(255,255,255,.06);
+    border:1px solid rgba(244,238,228,.26); border-radius:8px; padding:9px 12px; width:100%; }
   .panel__form select option { color:#11100d; }
-  .panel__form textarea { resize:vertical; }
+  .panel__form textarea { resize:none; }
   .panel__form input:focus, .panel__form select:focus, .panel__form textarea:focus {
     outline:none; border-color:rgba(244,238,228,.72); background:rgba(255,255,255,.11); }
-  .panel__form .f-chips { border:0; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:9px; }
-  .panel__form .f-chips legend { float:left; width:100%; margin-bottom:9px;
-    font:700 .68rem/1.2 var(--condensed); letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.62); }
-  .panel__form .f-chips label { display:inline-flex; gap:0; }
+  .panel__form .f-chips { border:0; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:7px; }
+  .panel__form .f-chips legend { float:left; width:100%; margin-bottom:7px;
+    font:700 .64rem/1.2 var(--condensed); letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.6); }
+  .panel__form .f-chips label { display:inline-flex; }
   .panel__form .f-chips input { position:absolute; opacity:0; width:0; height:0; }
-  .panel__form .f-chips span { display:inline-block; padding:9px 15px; cursor:pointer;
+  .panel__form .f-chips span { display:inline-block; padding:6px 12px; cursor:pointer;
     border:1px solid rgba(244,238,228,.28); border-radius:999px;
-    font:700 .7rem/1 var(--condensed); letter-spacing:.1em; text-transform:uppercase;
+    font:700 .66rem/1 var(--condensed); letter-spacing:.08em; text-transform:uppercase;
     color:rgba(244,238,228,.72); transition:background .2s, color .2s, border-color .2s; }
   .panel__form .f-chips input:checked + span { background:rgba(233,226,214,.92); color:#11100d; border-color:rgba(233,226,214,.92); }
   .panel__form .f-chips input:focus-visible + span { border-color:rgba(244,238,228,.85); }
   .panel__form .hp { position:absolute !important; left:-9999px; opacity:0; }
-  .f-submit { justify-self:start; cursor:pointer; color:#11100d; background:rgba(233,226,214,.92);
-    border:0; border-radius:999px; padding:14px 28px; font:700 .82rem/1 var(--condensed);
+  .f-foot { display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:2px; }
+  .f-submit { cursor:pointer; color:#11100d; background:rgba(233,226,214,.92);
+    border:0; border-radius:999px; padding:12px 26px; font:700 .8rem/1 var(--condensed);
     letter-spacing:.12em; text-transform:uppercase; transition:background .2s; }
   .f-submit:hover { background:#fff; }
   .f-submit[disabled] { opacity:.6; cursor:default; }
-  .f-status { min-height:1.2em; margin:0; font:700 .76rem/1.4 var(--condensed); letter-spacing:.08em; color:rgba(244,238,228,.72); }
+  .f-status { min-height:1.2em; margin:0; font:700 .74rem/1.35 var(--condensed); letter-spacing:.08em; color:rgba(244,238,228,.72); }
   .f-status.ok { color:#9fd9a0; }
   .f-status.err { color:#e6a3a3; }
 
@@ -146,9 +149,14 @@
   #depth b { font-size:30px; font-weight:600; color:rgba(233,226,214,.92); display:block; line-height:1; letter-spacing:0; }
   #depth span { opacity:.55; }
 
-  #hint { position:fixed; left:50%; bottom:34px; transform:translateX(-50%); z-index:6;
-    font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:rgba(233,226,214,.65);
-    transition:opacity .6s; pointer-events:none; text-shadow:0 1px 8px rgba(0,0,0,.7); }
+  #hint { position:fixed; left:50%; bottom:30px; transform:translateX(-50%); z-index:6;
+    font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:rgba(233,226,214,.72);
+    pointer-events:none; text-shadow:0 1px 8px rgba(0,0,0,.7); text-align:center; }
+  #hint .mouse { display:block; width:22px; height:34px; margin:0 auto 10px;
+    border:1.5px solid rgba(233,226,214,.6); border-radius:12px; position:relative; }
+  #hint .mouse::after { content:""; position:absolute; left:50%; top:6px; width:3px; height:6px;
+    border-radius:2px; background:rgba(233,226,214,.85); transform:translateX(-50%); animation:wheel 1.6s ease-in-out infinite; }
+  @keyframes wheel { 0%{opacity:0; transform:translate(-50%,0)} 30%{opacity:1} 70%{opacity:1; transform:translate(-50%,9px)} 100%{opacity:0; transform:translate(-50%,9px)} }
   #hint .arr { display:block; text-align:center; margin-top:8px; animation:bob 1.8s ease-in-out infinite; }
   @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
 
@@ -315,9 +323,9 @@
           <div class="f-row">
             <label>Name<input type="text" name="name" required></label>
             <label>Email<input type="email" name="email" required></label>
+            <label>Phone<input type="tel" name="phone"></label>
           </div>
           <div class="f-row">
-            <label>Phone<input type="tel" name="phone"></label>
             <label>Location
               <select name="location">
                 <option>Salt Spring Island</option>
@@ -326,6 +334,15 @@
                 <option>Other</option>
               </select>
             </label>
+            <label>Timeline
+              <select name="timeline">
+                <option>As soon as possible</option>
+                <option>1&ndash;3 months</option>
+                <option>3&ndash;6 months</option>
+                <option>Just planning</option>
+              </select>
+            </label>
+            <label>How did you hear?<input type="text" name="referral"></label>
           </div>
           <fieldset class="f-chips">
             <legend>What do you need?</legend>
@@ -340,20 +357,11 @@
             <label><input type="checkbox" name="services" value="Ponds"><span>Ponds</span></label>
             <label><input type="checkbox" name="services" value="Demolition"><span>Demolition</span></label>
           </fieldset>
-          <div class="f-row">
-            <label>Timeline
-              <select name="timeline">
-                <option>As soon as possible</option>
-                <option>1&ndash;3 months</option>
-                <option>3&ndash;6 months</option>
-                <option>Just planning</option>
-              </select>
-            </label>
-            <label>How did you hear about us?<input type="text" name="referral"></label>
+          <label>Project details<textarea name="message" rows="2"></textarea></label>
+          <div class="f-foot">
+            <button type="submit" class="f-submit">Request a free estimate</button>
+            <p class="f-status" role="status" aria-live="polite"></p>
           </div>
-          <label>Project details<textarea name="message" rows="4"></textarea></label>
-          <button type="submit" class="f-submit">Request a free estimate</button>
-          <p class="f-status" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
@@ -363,7 +371,7 @@
   <div id="grain"></div>
   <div id="depth"><b id="depthN">0.0</b><span>metres of earth</span></div>
   <div id="strata"><span class="lab"><span class="name" id="strataName"></span><span class="sub" id="strataSub"></span></span></div>
-  <div id="hint">scroll to descend<span class="arr">&#9662;</span></div>
+  <div id="hint"><span class="mouse"></span>scroll to descend<span class="arr">&#9662;</span></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
@@ -524,6 +532,7 @@
     window.elsserDescent = { setTargetE: (e) => { state.targetE = Math.max(0, Math.min(1, e)); }, addDig: (v) => { state.digEnergy = Math.min(1.6, state.digEnergy + v); } };
 
     const depthN = document.getElementById('depthN');
+    const hintEl = document.getElementById('hint');
     const fogTop = new T.Color(0x9aa6ae), fogDeep = new T.Color(0x070504);
     const strataEl = document.getElementById('strata'), strataName = document.getElementById('strataName'), strataSub = document.getElementById('strataSub');
     const STRATA = [
@@ -568,6 +577,8 @@
       grass.update(now, camera.position.y);
       dirt.update(dt, camera.position.y, state.digEnergy); state.digEnergy *= 0.90;
       depthN.textContent = (Math.max(0, -centerY) * METRES_PER_WORLD).toFixed(1);
+      // scroll indicator: visible on the flat grass, fades as the descent tilts in
+      if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
       updateStrata(centerY);
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
@@ -788,7 +799,6 @@
       const y = window.scrollY || 0;
       descent.addDig(Math.min(0.5, Math.abs(y - lastScroll) * 0.012));
       lastScroll = y;
-      if (y > 12) { const h = document.getElementById('hint'); if (h) h.style.opacity = '0'; }
     }, { passive: true });
 
     // ----- contact form (Web3Forms, AJAX) -----
