@@ -52,9 +52,12 @@
 
   /* ===================== pinned content panels ===================== */
   #content { position:relative; z-index:5; }
-  .panel { position:relative; height:200vh; }
+  .panel { position:relative; height:260vh; }
   /* deeper layers (subsoil and down) get more scroll room per section */
-  .panel--tall { height:300vh; }
+  .panel--tall { height:380vh; }
+  /* the final section ends the page: a real form, sized to its content, nothing past it */
+  .panel--end { height:auto; }
+  .panel--end .panel__inner { position:static; min-height:auto; padding:16vh 0 12vh; }
   /* breathing room between sections: pure descending earth, no text */
   .gap { height:64vh; pointer-events:none; }
   .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
@@ -89,6 +92,39 @@
     padding:14px 24px; border-radius:999px; transition:background .25s; }
   .panel__contact:hover { background:#fff; }
 
+  /* contact form (final section) */
+  .panel__form { margin-top:24px; max-width:780px; display:grid; gap:16px; }
+  .panel__form .f-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .panel__form label { display:grid; gap:7px; font:700 .68rem/1.2 var(--condensed);
+    letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.62); }
+  .panel__form input, .panel__form select, .panel__form textarea {
+    font:400 1rem/1.4 var(--body); color:#fff; background:rgba(255,255,255,.06);
+    border:1px solid rgba(244,238,228,.26); border-radius:8px; padding:11px 13px; width:100%; }
+  .panel__form select option { color:#11100d; }
+  .panel__form textarea { resize:vertical; }
+  .panel__form input:focus, .panel__form select:focus, .panel__form textarea:focus {
+    outline:none; border-color:rgba(244,238,228,.72); background:rgba(255,255,255,.11); }
+  .panel__form .f-chips { border:0; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:9px; }
+  .panel__form .f-chips legend { float:left; width:100%; margin-bottom:9px;
+    font:700 .68rem/1.2 var(--condensed); letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.62); }
+  .panel__form .f-chips label { display:inline-flex; gap:0; }
+  .panel__form .f-chips input { position:absolute; opacity:0; width:0; height:0; }
+  .panel__form .f-chips span { display:inline-block; padding:9px 15px; cursor:pointer;
+    border:1px solid rgba(244,238,228,.28); border-radius:999px;
+    font:700 .7rem/1 var(--condensed); letter-spacing:.1em; text-transform:uppercase;
+    color:rgba(244,238,228,.72); transition:background .2s, color .2s, border-color .2s; }
+  .panel__form .f-chips input:checked + span { background:rgba(233,226,214,.92); color:#11100d; border-color:rgba(233,226,214,.92); }
+  .panel__form .f-chips input:focus-visible + span { border-color:rgba(244,238,228,.85); }
+  .panel__form .hp { position:absolute !important; left:-9999px; opacity:0; }
+  .f-submit { justify-self:start; cursor:pointer; color:#11100d; background:rgba(233,226,214,.92);
+    border:0; border-radius:999px; padding:14px 28px; font:700 .82rem/1 var(--condensed);
+    letter-spacing:.12em; text-transform:uppercase; transition:background .2s; }
+  .f-submit:hover { background:#fff; }
+  .f-submit[disabled] { opacity:.6; cursor:default; }
+  .f-status { min-height:1.2em; margin:0; font:700 .76rem/1.4 var(--condensed); letter-spacing:.08em; color:rgba(244,238,228,.72); }
+  .f-status.ok { color:#9fd9a0; }
+  .f-status.err { color:#e6a3a3; }
+
   /* "text up": each headline word rides inside a mask and rises into place */
   .word { display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:.14em; margin-bottom:-.14em; }
   .wi { display:inline-block; will-change:transform; }
@@ -117,7 +153,7 @@
   @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
 
   /* strata name, right side */
-  #strata { position:fixed; right:34px; top:50%; z-index:6; pointer-events:none; text-align:right; transform:translateY(-50%); }
+  #strata { position:fixed; right:22px; bottom:20px; z-index:6; pointer-events:none; text-align:right; }
   #strata .lab { display:inline-block; opacity:0; transform:translateX(46px);
     transition:opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
   #strata.show .lab { opacity:1; transform:translateX(0); }
@@ -134,14 +170,17 @@
   @media (max-width: 900px) {
     #siteNav { grid-template-columns:auto auto; min-height:74px; }
     .site-links { display:none; }
-    .panel { height:170vh; }
-    .panel--tall { height:240vh; }
+    .panel { height:210vh; }
+    .panel--tall { height:300vh; }
+    .panel--end { height:auto; }
+    .panel--end .panel__inner { padding:14vh 0 10vh; }
     .panel__inner { width:90vw; padding:16vh 0; }
     .gap { height:44vh; }
     h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
     h2.panel__verdict { font-size:clamp(2.2rem, 11vw, 4rem); }
     .panel__evidence p { max-width:none; }
     .panel__list { grid-template-columns:1fr 1fr; max-width:none; }
+    .panel__form .f-row { grid-template-columns:1fr; }
     #strata { display:none; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -263,13 +302,59 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel panel--tall" id="p-bedrock" data-e="0.72">
+    <section class="panel panel--end" id="p-bedrock" data-e="0.72">
       <div class="panel__inner">
         <span class="panel__eyebrow">Bedrock &middot; Building a legacy of excellence</span>
         <h2 class="panel__verdict">Break ground.</h2>
-        <div class="panel__evidence"><p>For drainage, access, site preparation, walls, clearing, utilities, water, ponds, or demolition, start with a practical site conversation and a free estimate.</p></div>
-        <a class="panel__contact" href="mailto:elsserexssi@gmail.com">elsserexssi@gmail.com</a>
-        <ul class="panel__list"><li>Salt Spring Island</li><li>Cumberland</li><li>Owner Operated</li><li>Fully Insured</li></ul>
+        <div class="panel__evidence"><p>Tell us about the site. For drainage, access, site preparation, walls, clearing, utilities, water, ponds, or demolition, we will follow up with a practical conversation and a free estimate.</p></div>
+        <form class="panel__form" action="https://api.web3forms.com/submit" method="POST" novalidate>
+          <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
+          <input type="hidden" name="subject" value="New estimate request — Elsser Excavation">
+          <input type="hidden" name="from_name" value="Elsser Excavation Website">
+          <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="f-row">
+            <label>Name<input type="text" name="name" required></label>
+            <label>Email<input type="email" name="email" required></label>
+          </div>
+          <div class="f-row">
+            <label>Phone<input type="tel" name="phone"></label>
+            <label>Location
+              <select name="location">
+                <option>Salt Spring Island</option>
+                <option>Cumberland</option>
+                <option>Comox Valley</option>
+                <option>Other</option>
+              </select>
+            </label>
+          </div>
+          <fieldset class="f-chips">
+            <legend>What do you need?</legend>
+            <label><input type="checkbox" name="services" value="Site Preparation"><span>Site Preparation</span></label>
+            <label><input type="checkbox" name="services" value="Drainage"><span>Drainage</span></label>
+            <label><input type="checkbox" name="services" value="Driveways"><span>Driveways</span></label>
+            <label><input type="checkbox" name="services" value="Utilities & Servicing"><span>Utilities</span></label>
+            <label><input type="checkbox" name="services" value="Rock Walls & Terraforming"><span>Rock Walls</span></label>
+            <label><input type="checkbox" name="services" value="Land Clearing"><span>Land Clearing</span></label>
+            <label><input type="checkbox" name="services" value="Landscaping"><span>Landscaping</span></label>
+            <label><input type="checkbox" name="services" value="Water Storage"><span>Water Storage</span></label>
+            <label><input type="checkbox" name="services" value="Ponds"><span>Ponds</span></label>
+            <label><input type="checkbox" name="services" value="Demolition"><span>Demolition</span></label>
+          </fieldset>
+          <div class="f-row">
+            <label>Timeline
+              <select name="timeline">
+                <option>As soon as possible</option>
+                <option>1&ndash;3 months</option>
+                <option>3&ndash;6 months</option>
+                <option>Just planning</option>
+              </select>
+            </label>
+            <label>How did you hear about us?<input type="text" name="referral"></label>
+          </div>
+          <label>Project details<textarea name="message" rows="4"></textarea></label>
+          <button type="submit" class="f-submit">Request a free estimate</button>
+          <p class="f-status" role="status" aria-live="polite"></p>
+        </form>
       </div>
     </section>
   </main>
@@ -638,6 +723,7 @@
       panel.querySelectorAll('.panel__list li').forEach(function (li) { blocks.push(li); });
       const fig = panel.querySelector('.panel__photo'); if (fig) blocks.push(fig);
       const cta = panel.querySelector('.panel__contact'); if (cta) blocks.push(cta);
+      const frm = panel.querySelector('.panel__form'); if (frm) blocks.push(frm);
       return {
         el: panel,
         inner: panel.querySelector('.panel__inner'),
@@ -646,6 +732,7 @@
         blocks: blocks,
         e: parseFloat(panel.getAttribute('data-e')) || 0,
         isHero: idx === 0,
+        isEnd: panel.classList.contains('panel--end'),
         start: 0, end: 1,
       };
     });
@@ -680,7 +767,8 @@
         blocks[i].style.opacity = pb.toFixed(3);
         blocks[i].style.transform = 'translateY(' + (26 * (1 - pb)).toFixed(1) + 'px)';
       }
-      // HOLD through ~90%, then the whole block lifts + fades away
+      // HOLD; then the block lifts + fades away — except the final form section, which stays put
+      if (m.isEnd) { if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; } return; }
       const px = mapRange(p, 0.90, 1.00);
       if (m.inner) { m.inner.style.opacity = (1 - px).toFixed(3); m.inner.style.transform = 'translateY(' + (-28 * px).toFixed(1) + 'px)'; }
     }
@@ -702,6 +790,33 @@
       lastScroll = y;
       if (y > 12) { const h = document.getElementById('hint'); if (h) h.style.opacity = '0'; }
     }, { passive: true });
+
+    // ----- contact form (Web3Forms, AJAX) -----
+    const form = document.querySelector('.panel__form');
+    if (form) {
+      const status = form.querySelector('.f-status');
+      const submitBtn = form.querySelector('.f-submit');
+      const hp = form.querySelector('.hp');
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        if (hp && hp.checked) return;                                  // honeypot tripped: silently drop
+        const nameV = (form.elements['name'].value || '').trim();
+        const emailV = (form.elements['email'].value || '').trim();
+        if (!nameV || !emailV) { status.textContent = 'Please add your name and email.'; status.className = 'f-status err'; return; }
+        const data = new FormData(form);
+        const services = Array.prototype.slice.call(form.querySelectorAll('input[name="services"]:checked')).map(function (c) { return c.value; });
+        data.delete('services'); data.set('services', services.join(', '));
+        status.textContent = 'Sending…'; status.className = 'f-status'; if (submitBtn) submitBtn.disabled = true;
+        fetch('https://api.web3forms.com/submit', { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (j.success) { form.reset(); status.textContent = 'Thank you. We will be in touch shortly.'; status.className = 'f-status ok'; }
+            else { status.textContent = (j.message || 'Something went wrong.') + ' You can also email elsserexssi@gmail.com.'; status.className = 'f-status err'; }
+          })
+          .catch(function () { status.textContent = 'Network error. Please email elsserexssi@gmail.com.'; status.className = 'f-status err'; })
+          .then(function () { if (submitBtn) submitBtn.disabled = false; });
+      });
+    }
 
     if (reduced) {
       revealAll(); descent.setTargetE(0);
@@ -743,25 +858,33 @@
     // main scrubbed loop: progress comes straight from native scroll position.
     // Sticky CSS holds each section in view; the camera holds on the active layer
     // and travels to the next layer across the gap between sections.
+    function endProgress (m, y) { return clamp01((y + vh * 0.90 - m.start) / (vh * 0.55)); }
+
     function tick () {
       const y = window.scrollY || 0;
       let active = models[0], ai = 0;
       for (let i = 0; i < models.length; i++) {
         const m = models[i];
-        applyPanel(m, clamp01((y - m.start) / (m.end - m.start)));
-        if (y >= m.start) { active = m; ai = i; }
+        const p = m.isEnd ? endProgress(m, y) : clamp01((y - m.start) / (m.end - m.start));
+        applyPanel(m, p);
+        if (m.isEnd ? p > 0.02 : y >= m.start) { active = m; ai = i; }
       }
       let te = active.e;
-      if (y > active.end && models[ai + 1]) {
+      if (!active.isEnd && y > active.end && models[ai + 1]) {
         const next = models[ai + 1];
         te = active.e + (next.e - active.e) * smooth01(clamp01((y - active.end) / Math.max(1, next.start - active.end)));
       }
       descent.setTargetE(te);
       // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
-      const ap = clamp01((y - active.start) / (active.end - active.start));
-      const up = active.isHero
-        ? (1 - smooth01(mapRange(ap, 0.04, 0.55)))
-        : smooth01(mapRange(ap, 0.10, 0.36)) * (1 - smooth01(mapRange(ap, 0.88, 1.00)));
+      let up;
+      if (active.isEnd) {
+        up = smooth01(mapRange(endProgress(active, y), 0.05, 0.50));
+      } else {
+        const ap = clamp01((y - active.start) / (active.end - active.start));
+        up = active.isHero
+          ? (1 - smooth01(mapRange(ap, 0.04, 0.55)))
+          : smooth01(mapRange(ap, 0.10, 0.36)) * (1 - smooth01(mapRange(ap, 0.88, 1.00)));
+      }
       if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
       spy(y);
       requestAnimationFrame(tick);
