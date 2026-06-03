@@ -23,12 +23,10 @@
   #stage { position:fixed; inset:0; z-index:1; }
   canvas { display:block; }
 
-  /* landing backdrop: real photo (sky + Gulf Islands + water), fades as we drop underground */
-  #mountainPhoto { position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:
-      linear-gradient(180deg, rgba(12,16,22,.10) 0%, rgba(12,16,22,.05) 40%, rgba(11,9,7,.55) 100%),
-      url("https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/1dd65900-4776-432d-a9de-52a0b443c01b_2x");
-    background-size:cover; background-position:center 42%; opacity:1; will-change:opacity; }
+  /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
+  #textVeil { position:fixed; inset:0; z-index:4; pointer-events:none; opacity:0; visibility:hidden;
+    background:radial-gradient(135% 115% at 42% 46%, rgba(6,5,4,.30) 18%, rgba(6,5,4,.62) 100%);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); will-change:opacity; }
 
   /* ===================== nav ===================== */
   #siteNav { position:fixed; left:0; right:0; top:0; z-index:8;
@@ -153,7 +151,7 @@
 </head>
 <body>
   <div id="stage"></div>
-  <div id="mountainPhoto" aria-hidden="true"></div>
+  <div id="textVeil" aria-hidden="true"></div>
   <div id="fallback"><p>Elsser Excavation</p></div>
 
   <header id="siteNav" aria-label="Elsser Excavation">
@@ -308,7 +306,6 @@
     };
     const layerMeshes = [];
     const centerDir = new T.Vector3();
-    const mountainPhoto = document.getElementById('mountainPhoto');
 
     const stage = document.getElementById('stage');
     const scene = new T.Scene();
@@ -458,10 +455,18 @@
       strataName.textContent = STRATA[idx].name; strataSub.textContent = STRATA[idx].sub; strataEl.classList.add('show');
     }
     function positionCamera (e) {
+      // FLAT START: at the top we look almost straight down at the grass (flat screen);
+      // as the descent begins the camera pulls back, tilts, and dives into the strata.
+      const morph = (function (t) { t = Math.max(0, Math.min(1, t / 0.10)); return t*t*(3 - 2*t); })(e);
       const dive = Math.min(1, e/0.13);
       const camY = SURFACE_Y + (DEEP_Y - SURFACE_Y) * e;
-      camera.position.set(0, camY, 27 - 12*dive);
-      camera.lookAt(0, -3 + (camY - 8 - (-3)) * dive, -30 + 30*dive);
+      // flat keyframe (near top-down over the lawn)
+      const fpy = 16, fpz = -6, fty = 0.0, ftz = -11;
+      // dive keyframe (the plunge toward the cross-section wall)
+      const dpy = camY, dpz = 27 - 12*dive;
+      const dty = -3 + (camY - 8 - (-3)) * dive, dtz = -30 + 30*dive;
+      camera.position.set(0, fpy + (dpy - fpy)*morph, fpz + (dpz - fpz)*morph);
+      camera.lookAt(0, fty + (dty - fty)*morph, ftz + (dtz - ftz)*morph);
       return getCenterCutY(camY);
     }
     function frame (now) {
@@ -469,7 +474,6 @@
       state.curE += (state.targetE - state.curE) * 0.07;
       const e = state.curE;
       const centerY = positionCamera(e);
-      if (mountainPhoto) mountainPhoto.style.opacity = String(Math.max(0, 1 - e*2.6));
       skyMesh.material.opacity = Math.max(0, 0.34 - e*1.1);
       scene.fog.color.copy(fogTop.clone().lerp(fogDeep, e));
       scene.fog.near = 30 - 16*e; scene.fog.far = 150 - 70*e;
@@ -605,6 +609,7 @@
     const mobileLike = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
     const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
     const descent = window.elsserDescent || { setTargetE:function(){}, addDig:function(){} };
+    const textVeil = document.getElementById('textVeil');
 
     function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
     function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
@@ -752,6 +757,12 @@
         te = active.e + (next.e - active.e) * smooth01(clamp01((y - active.end) / Math.max(1, next.start - active.end)));
       }
       descent.setTargetE(te);
+      // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
+      const ap = clamp01((y - active.start) / (active.end - active.start));
+      const up = active.isHero
+        ? (1 - smooth01(mapRange(ap, 0.04, 0.55)))
+        : smooth01(mapRange(ap, 0.10, 0.36)) * (1 - smooth01(mapRange(ap, 0.88, 1.00)));
+      if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
       spy(y);
       requestAnimationFrame(tick);
     }
