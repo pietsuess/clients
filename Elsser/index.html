@@ -58,16 +58,14 @@
     background:rgba(255,255,255,.04); transition:background .25s, border-color .25s; }
   .site-cta:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.75); }
 
-  /* ===================== content layer (2D, screen-anchored, scroll driven) ===================== */
+  /* ===================== content layer (2D screen space, spans the page) ===================== */
   #layerNotes { position:fixed; inset:0; z-index:5; pointer-events:none; }
-  .layer-note { position:fixed; top:50%; width:min(40vw, 540px);
-    opacity:0; transform:translateY(-50%); will-change:opacity, transform;
+  .layer-note { position:fixed; left:50%; top:50%; width:min(1180px, 88vw);
+    opacity:0; transform:translate(-50%, -50%); will-change:opacity, transform;
     color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); }
-  .layer-note[data-side="left"]  { left: clamp(22px, 6vw, 108px); }
-  .layer-note[data-side="right"] { right: clamp(22px, 6vw, 108px); }
   .layer-note.is-on { pointer-events:auto; }
-  .note-kicker::before { content:""; display:inline-block; width:26px; height:1px;
-    background:rgba(244,238,228,.62); vertical-align:middle; margin:-3px 12px 0 0; }
+  .note-kicker::before { content:""; display:inline-block; width:32px; height:1px;
+    background:rgba(244,238,228,.62); vertical-align:middle; margin:-3px 14px 0 0; }
 
   .note-kicker { display:block; margin-bottom:10px; color:rgba(244,238,228,.62);
     font:700 .72rem/1 var(--condensed); letter-spacing:.26em; text-transform:uppercase; }
@@ -77,9 +75,9 @@
   .layer-note h2 { font-size:clamp(2.2rem, 4.6vw, 5.6rem); }
   .layer-note .lede { margin-top:8px; color:rgba(244,238,228,.80);
     font:700 clamp(1rem, 1.3vw, 1.5rem)/1.25 var(--condensed); letter-spacing:.02em; text-wrap:balance; }
-  .layer-note p { margin-top:14px; max-width:42ch; color:rgba(244,238,228,.78);
-    font-size:clamp(.96rem, 1vw, 1.14rem); line-height:1.58; text-wrap:pretty; }
-  .note-list { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0 18px; margin-top:18px; }
+  .layer-note p { margin-top:14px; max-width:58ch; color:rgba(244,238,228,.80);
+    font-size:clamp(.98rem, 1.05vw, 1.2rem); line-height:1.6; text-wrap:pretty; }
+  .note-list { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:0 24px; margin-top:22px; max-width:880px; }
   .note-list span { min-height:38px; display:flex; align-items:center;
     border-top:1px solid rgba(244,238,228,.24);
     color:rgba(244,238,228,.74); font:700 .70rem/1.15 var(--condensed);
@@ -139,11 +137,11 @@
   @media (max-width: 900px) {
     #siteNav { grid-template-columns:auto auto; min-height:74px; }
     .site-links { display:none; }
-    .layer-note { width:min(82vw, 440px); }
+    .layer-note { width:88vw; }
     .layer-note h1 { font-size:clamp(3rem, 15vw, 5.4rem); }
     .layer-note h2 { font-size:clamp(2rem, 11vw, 4rem); }
     .layer-note p { max-width:none; }
-    .note-list { grid-template-columns:1fr 1fr; }
+    .note-list { grid-template-columns:1fr 1fr; max-width:none; }
     #strata { display:none; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -583,7 +581,7 @@
         const opacity = closeness * closeness * (3 - 2*closeness);  // smoothstep in/out
         const rise = Math.max(-90, Math.min(90, dist * 2.6));       // enters from below, exits up the screen
         note.style.opacity = opacity.toFixed(3);
-        note.style.transform = 'translateY(calc(-50% + ' + rise.toFixed(1) + 'px))';
+        note.style.transform = 'translate(-50%, calc(-50% + ' + rise.toFixed(1) + 'px))';
         if (opacity > topValue) { topValue = opacity; topNote = note; }
       }
       for (const note of layerNotes) note.classList.toggle('is-on', note === topNote && topValue > 0.30);
