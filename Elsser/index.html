@@ -21,7 +21,7 @@
   body { overflow-x:hidden; }
 
   /* tall scroll track that drives the descent */
-  #track { height:820vh; }
+  #track { height:720vh; }
   #stage { position:fixed; inset:0; z-index:1; }
   canvas { display:block; }
 
@@ -58,24 +58,16 @@
     background:rgba(255,255,255,.04); transition:background .25s, border-color .25s; }
   .site-cta:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.75); }
 
-  /* ===================== content layer (2D, scroll driven) ===================== */
+  /* ===================== content layer (2D, screen-anchored, scroll driven) ===================== */
   #layerNotes { position:fixed; inset:0; z-index:5; pointer-events:none; }
-  .layer-note { position:absolute; left:0; top:0; width:min(36vw, 500px);
-    opacity:0; transform:translate3d(-50%, calc(-50% + 26px), 0);
-    will-change:opacity, transform; color:rgba(244,238,228,.92);
-    text-shadow:0 2px 18px rgba(0,0,0,.78); }
+  .layer-note { position:fixed; top:50%; width:min(40vw, 540px);
+    opacity:0; transform:translateY(-50%); will-change:opacity, transform;
+    color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); }
+  .layer-note[data-side="left"]  { left: clamp(22px, 6vw, 108px); }
+  .layer-note[data-side="right"] { right: clamp(22px, 6vw, 108px); }
   .layer-note.is-on { pointer-events:auto; }
-  /* connector line out to the pin in the earth */
-  .layer-note::before { content:""; position:absolute; top:50%; width:60px; height:1px;
-    background:linear-gradient(90deg, rgba(244,238,228,.7), rgba(244,238,228,0));
-    transform:translateY(-50%); opacity:.0; transition:opacity .3s; }
-  .layer-note.is-on::before { opacity:.7; }
-  .layer-note[data-side="right"] { transform:translate3d(0, calc(-50% + 26px), 0); }
-  .layer-note[data-side="left"]  { transform:translate3d(-100%, calc(-50% + 26px), 0); }
-  .layer-note[data-side="right"]::before { left:-70px; transform:translateY(-50%) scaleX(-1); }
-  .layer-note[data-side="left"]::before  { right:-70px; }
-  .layer-note.is-on[data-side="right"] { transform:translate3d(0, -50%, 0); }
-  .layer-note.is-on[data-side="left"]  { transform:translate3d(-100%, -50%, 0); }
+  .note-kicker::before { content:""; display:inline-block; width:26px; height:1px;
+    background:rgba(244,238,228,.62); vertical-align:middle; margin:-3px 12px 0 0; }
 
   .note-kicker { display:block; margin-bottom:10px; color:rgba(244,238,228,.62);
     font:700 .72rem/1 var(--condensed); letter-spacing:.26em; text-transform:uppercase; }
@@ -102,11 +94,6 @@
     font:700 .82rem/1 var(--condensed); letter-spacing:.12em; text-transform:uppercase;
     padding:13px 22px; border-radius:999px; transition:background .25s; }
   .note-contact:hover { background:#fff; }
-
-  /* glowing pin set into the earth that each note points to */
-  .layer-pin { position:absolute; width:9px; height:9px; border-radius:999px;
-    background:#e9e2d6; box-shadow:0 0 0 6px rgba(233,226,214,.16), 0 0 22px rgba(233,226,214,.55);
-    opacity:0; transform:translate(-50%, -50%); will-change:opacity; }
 
   /* grain + vignette: unifies layers into one photographed thing */
   #grade { position:fixed; inset:0; z-index:2; pointer-events:none;
@@ -175,11 +162,11 @@
       <img src="assets/elsser-logo.svg" alt="Elsser Excavation">
     </a>
     <nav class="site-links" aria-label="Site sections">
-      <a href="#track" data-jump="0.14">Surface</a>
-      <a href="#track" data-jump="0.34">Services</a>
-      <a href="#track" data-jump="0.62">Work</a>
-      <a href="#track" data-jump="0.80">Values</a>
-      <a href="#track" data-jump="0.97">Estimate</a>
+      <a href="#track" data-jump="0.05">Surface</a>
+      <a href="#track" data-jump="0.27">Services</a>
+      <a href="#track" data-jump="0.42">Work</a>
+      <a href="#track" data-jump="0.55">Values</a>
+      <a href="#track" data-jump="0.86">Estimate</a>
     </nav>
     <a class="site-cta" href="mailto:elsserexssi@gmail.com">Free Estimate</a>
   </header>
@@ -189,7 +176,7 @@
   <div id="layerNotes" aria-label="Elsser content">
 
     <!-- SKY / landing -->
-    <article class="layer-note" data-y="11" data-x="-40" data-side="right" data-range="20">
+    <article class="layer-note" data-y="10" data-side="right" data-range="18">
       <span class="note-kicker">Salt Spring Island &middot; Cumberland</span>
       <h1>Elsser Excavation</h1>
       <p class="lede">Building your dreams, from the ground down.</p>
@@ -203,7 +190,7 @@
     </article>
 
     <!-- HUMUS / the brothers -->
-    <article class="layer-note" data-y="-1.8" data-x="40" data-side="left" data-range="7">
+    <article class="layer-note" data-y="-2" data-side="left" data-range="10">
       <span class="note-kicker">Humus &middot; The surface layer</span>
       <h2>Built to hold.</h2>
       <p>Philip and Michael Elsser are brothers and owner operators. Philip grew up on Salt Spring running equipment; Michael brings Red Seal carpentry and years of construction. Every job starts with the care people notice later: clean access, organized sites, finished ground ready for the next phase.</p>
@@ -216,7 +203,7 @@
     </article>
 
     <!-- TOPSOIL / shaping the surface -->
-    <article class="layer-note" data-y="-10" data-x="-40" data-side="right" data-range="8">
+    <article class="layer-note" data-y="-10" data-side="right" data-range="11">
       <span class="note-kicker">Topsoil &middot; Shaping the surface</span>
       <h2>Control the grade.</h2>
       <p>Site preparation, land clearing, landscaping, and grading happen in the top working layers, where early decisions set the slope, the drainage, and the shape of everything built on top.</p>
@@ -233,7 +220,7 @@
     </article>
 
     <!-- SUBSOIL / water -->
-    <article class="layer-note" data-y="-24" data-x="40" data-side="left" data-range="11">
+    <article class="layer-note" data-y="-24" data-side="left" data-range="13">
       <span class="note-kicker">Subsoil &middot; Below the surface</span>
       <h2>Water solved early.</h2>
       <p>Drainage, utilities and servicing, water storage, and ponds sit under the surface, where buried work has to perform for years. Get the water moving right and the rest of the site holds.</p>
@@ -250,7 +237,7 @@
     </article>
 
     <!-- CLAY / structural shaping -->
-    <article class="layer-note" data-y="-42" data-x="-40" data-side="right" data-range="12">
+    <article class="layer-note" data-y="-42" data-side="right" data-range="14">
       <span class="note-kicker">Marine clay &middot; Structural ground</span>
       <h2>Hold the line.</h2>
       <p>Rock walls and terraforming are structural shaping, not surface decoration. We build retaining and grade changes that take the load of the slope and the weather behind them.</p>
@@ -267,7 +254,7 @@
     </article>
 
     <!-- TILL / driveways and access -->
-    <article class="layer-note" data-y="-63" data-x="40" data-side="left" data-range="13">
+    <article class="layer-note" data-y="-64" data-side="left" data-range="16">
       <span class="note-kicker">Glacial till &middot; The hard base</span>
       <h2>Make the entry work.</h2>
       <p>Driveways and access routes have to survive water, slope, weight, and repeated use. They need base logic underneath before any finished surface goes down.</p>
@@ -284,7 +271,7 @@
     </article>
 
     <!-- LIMESTONE / values + demolition -->
-    <article class="layer-note" data-y="-87" data-x="-40" data-side="right" data-range="14">
+    <article class="layer-note" data-y="-88" data-side="right" data-range="18">
       <span class="note-kicker">Limestone &middot; What we stand on</span>
       <h2>Done right, once.</h2>
       <p>Safety, quality, teamwork, and sustainability run through every job, from the first clearing to the last load out. When something has to come down, demolition is handled clean and disposed of responsibly.</p>
@@ -299,7 +286,7 @@
     </article>
 
     <!-- BEDROCK / contact -->
-    <article class="layer-note" data-y="-118" data-x="40" data-side="left" data-range="26">
+    <article class="layer-note" data-y="-178" data-side="left" data-range="42">
       <span class="note-kicker">Bedrock &middot; Building a legacy of excellence</span>
       <h2>Break ground.</h2>
       <p>For drainage, access, site preparation, walls, clearing, utilities, water, ponds, or demolition, start with a practical site conversation and a free estimate.</p>
@@ -359,15 +346,8 @@
     const layerMeshes = [];
     const tuning = cloneTuningState(SITE_TUNING);
     const centerDir = new T.Vector3();
-    const notePoint = new T.Vector3();
     const layerNotes = Array.from(document.querySelectorAll('.layer-note'));
     const mountainPhoto = document.getElementById('mountainPhoto');
-    for (const note of layerNotes) {
-      const pin = document.createElement('span');
-      pin.className = 'layer-pin';
-      note._pin = pin;
-      document.getElementById('layerNotes').appendChild(pin);
-    }
 
     const stage = document.getElementById('stage');
     const scene = new T.Scene();
@@ -590,31 +570,21 @@
       strataEl.classList.add('show');
     }
 
-    // content sections: position + fade/rise purely from scroll-derived camera depth
+    // content sections live in 2D SCREEN SPACE (fixed left/right columns).
+    // Scroll-derived camera depth only drives their fade + vertical drift in/out.
     function updateLayerNotes (centerY, e) {
       if (mountainPhoto) mountainPhoto.style.opacity = String(Math.max(0, 1 - e*2.35));
       let topNote = null, topValue = 0;
       for (const note of layerNotes) {
         const y = Number(note.dataset.y || 0);
-        const x = Number(note.dataset.x || 0);
-        const range = Number(note.dataset.range || 10);
-        const side = note.dataset.side === 'left' ? 'left' : 'right';
-        const closeness = Math.max(0, 1 - Math.abs(centerY - y) / range);
-        const opacity = closeness * closeness * (3 - 2*closeness);   // smoothstep in/out
-        notePoint.set(x, y, 0.28).project(camera);
-        const inFront = notePoint.z > -1 && notePoint.z < 1;
-        const sx = (notePoint.x * 0.5 + 0.5) * innerWidth;
-        const sy = (-notePoint.y * 0.5 + 0.5) * innerHeight;
-        const anchoredX = sx + (side === 'right' ? 70 : -70);
-        note.style.left = anchoredX.toFixed(1) + 'px';
-        note.style.top = sy.toFixed(1) + 'px';
-        note.style.opacity = inFront ? opacity.toFixed(3) : '0';
-        if (note._pin) {
-          note._pin.style.left = sx.toFixed(1) + 'px';
-          note._pin.style.top = sy.toFixed(1) + 'px';
-          note._pin.style.opacity = inFront ? Math.min(1, opacity*1.45).toFixed(3) : '0';
-        }
-        if (opacity > topValue && inFront) { topValue = opacity; topNote = note; }
+        const range = Number(note.dataset.range || 12);
+        const dist = centerY - y;                                  // >0 approaching from above, <0 once passed
+        const closeness = Math.max(0, 1 - Math.abs(dist) / range);
+        const opacity = closeness * closeness * (3 - 2*closeness);  // smoothstep in/out
+        const rise = Math.max(-90, Math.min(90, dist * 2.6));       // enters from below, exits up the screen
+        note.style.opacity = opacity.toFixed(3);
+        note.style.transform = 'translateY(calc(-50% + ' + rise.toFixed(1) + 'px))';
+        if (opacity > topValue) { topValue = opacity; topNote = note; }
       }
       for (const note of layerNotes) note.classList.toggle('is-on', note === topNote && topValue > 0.30);
     }
