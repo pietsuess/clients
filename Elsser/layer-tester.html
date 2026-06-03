@@ -216,9 +216,11 @@
 
     // texture sets
     const loader = new T.TextureLoader();
+    // bump ASSET_V whenever textures are re-exported so browsers fetch fresh copies
+    const ASSET_V = '3';
     function loadSet (dir, prefix, files) {
       const overrides = files && typeof files === 'object' ? files : {};
-      const mk = (f, srgb) => ({ url: dir + (overrides[f] || prefix + f + '.jpg'), srgb });
+      const mk = (f, srgb) => ({ url: dir + (overrides[f] || prefix + f + '.jpg') + '?v=' + ASSET_V, srgb });
       return { diff: mk('diffuse', true), norm: mk('normal', false),
                rough: mk('rough', false), disp: mk('disp', false) };
     }
