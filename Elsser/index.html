@@ -759,28 +759,30 @@
         if (m.inner) { m.inner.style.opacity = (1 - ex); m.inner.style.transform = 'translateY(' + (-ex * 26).toFixed(1) + 'px)'; }
         return;
       }
+      // Reveals are front-loaded (all up by ~p=0.5) so the rest of the panel is a
+      // long HOLD where the text sits fully up, then a late exit.
       // eyebrow slides in
-      const pe = mapRange(p, 0.05, 0.13);
+      const pe = mapRange(p, 0.04, 0.10);
       if (m.eyebrow) { m.eyebrow.style.opacity = pe; m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe)) + 'px)'; }
       // headline words rise out of their mask, staggered ("text up")
       const words = m.words;
       for (let i = 0; i < words.length; i++) {
-        const s = 0.12 + i * 0.05;
-        const pw = smooth01(mapRange(p, s, s + 0.17));
+        const s = 0.09 + i * 0.04;
+        const pw = smooth01(mapRange(p, s, s + 0.14));
         words[i].style.transform = 'translateY(' + ((1 - pw) * 112).toFixed(2) + '%)';
         words[i].style.opacity = pw.toFixed(3);
       }
       // supporting blocks reveal sequentially (translateY 26 -> 0)
-      const blocks = m.blocks, bStart = 0.34, bStep = 0.05, bSeg = 0.12;
+      const blocks = m.blocks, bStart = 0.24, bStep = 0.035, bSeg = 0.10;
       for (let i = 0; i < blocks.length; i++) {
         const s = bStart + i * bStep;
         const pb = smooth01(mapRange(p, s, s + bSeg));
         blocks[i].style.opacity = pb.toFixed(3);
         blocks[i].style.transform = 'translateY(' + (26 * (1 - pb)).toFixed(1) + 'px)';
       }
-      // HOLD; then the block lifts + fades away — except the final form section, which stays put
+      // long HOLD (~p 0.5 -> 0.93), then a late lift + fade — except the final form, which stays put
       if (m.isEnd) { if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; } return; }
-      const px = mapRange(p, 0.90, 1.00);
+      const px = mapRange(p, 0.93, 1.00);
       if (m.inner) { m.inner.style.opacity = (1 - px).toFixed(3); m.inner.style.transform = 'translateY(' + (-28 * px).toFixed(1) + 'px)'; }
     }
 
@@ -852,11 +854,19 @@
     // nav: smooth-scroll to a section + scroll-spy
     const navLinks = Array.prototype.slice.call(document.querySelectorAll('.site-links a[data-scroll-target]'));
     const allNav = Array.prototype.slice.call(document.querySelectorAll('#siteNav a[data-scroll-target]'));
+    // jump to the scroll position where the target section is fully "text up" (its hold zone)
+    function navTargetY (m) {
+      if (m.isHero) return 0;
+      if (m.isEnd) return Math.max(0, m.start);          // form is centered + fully revealed at its top
+      return m.start + (m.end - m.start) * 0.66;          // mid-hold = full text up
+    }
     allNav.forEach(function (link) {
       link.addEventListener('click', function (ev) {
-        const sel = link.getAttribute('data-scroll-target'); const target = sel && document.querySelector(sel);
-        if (!target) return; ev.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
+        const sel = link.getAttribute('data-scroll-target'); if (!sel) return;
+        const m = models.find(function (mm) { return '#' + mm.el.id === sel; });
+        if (!m) return; ev.preventDefault();
+        measure();
+        window.scrollTo({ top: Math.round(navTargetY(m)), behavior: 'smooth' });
       });
     });
     function spy (y) {
@@ -893,7 +903,7 @@
         const ap = clamp01((y - active.start) / (active.end - active.start));
         up = active.isHero
           ? (1 - smooth01(mapRange(ap, 0.04, 0.55)))
-          : smooth01(mapRange(ap, 0.10, 0.36)) * (1 - smooth01(mapRange(ap, 0.88, 1.00)));
+          : smooth01(mapRange(ap, 0.06, 0.30)) * (1 - smooth01(mapRange(ap, 0.92, 1.00)));
       }
       if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
       spy(y);
