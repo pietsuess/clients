@@ -55,6 +55,8 @@
   /* ===================== pinned content panels ===================== */
   #content { position:relative; z-index:5; }
   .panel { position:relative; height:200vh; }
+  /* deeper layers (subsoil and down) get more scroll room per section */
+  .panel--tall { height:300vh; }
   /* breathing room between sections: pure descending earth, no text */
   .gap { height:64vh; pointer-events:none; }
   .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
@@ -135,6 +137,7 @@
     #siteNav { grid-template-columns:auto auto; min-height:74px; }
     .site-links { display:none; }
     .panel { height:170vh; }
+    .panel--tall { height:240vh; }
     .panel__inner { width:90vw; padding:16vh 0; }
     .gap { height:44vh; }
     h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
@@ -206,7 +209,7 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel" id="p-subsoil" data-e="0.19">
+    <section class="panel panel--tall" id="p-subsoil" data-e="0.19">
       <div class="panel__inner">
         <span class="panel__eyebrow">Subsoil &middot; Below the surface</span>
         <h2 class="panel__verdict">Water solved early.</h2>
@@ -221,7 +224,7 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel" id="p-clay" data-e="0.28">
+    <section class="panel panel--tall" id="p-clay" data-e="0.28">
       <div class="panel__inner">
         <span class="panel__eyebrow">Marine clay &middot; Structural ground</span>
         <h2 class="panel__verdict">Hold the line.</h2>
@@ -236,7 +239,7 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel" id="p-till" data-e="0.39">
+    <section class="panel panel--tall" id="p-till" data-e="0.39">
       <div class="panel__inner">
         <span class="panel__eyebrow">Glacial till &middot; The hard base</span>
         <h2 class="panel__verdict">Make the entry work.</h2>
@@ -251,7 +254,7 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel" id="p-limestone" data-e="0.50">
+    <section class="panel panel--tall" id="p-limestone" data-e="0.50">
       <div class="panel__inner">
         <span class="panel__eyebrow">Limestone &middot; What we stand on</span>
         <h2 class="panel__verdict">Done right, once.</h2>
@@ -262,7 +265,7 @@
 
     <div class="gap" aria-hidden="true"></div>
 
-    <section class="panel" id="p-bedrock" data-e="0.72">
+    <section class="panel panel--tall" id="p-bedrock" data-e="0.72">
       <div class="panel__inner">
         <span class="panel__eyebrow">Bedrock &middot; Building a legacy of excellence</span>
         <h2 class="panel__verdict">Break ground.</h2>
