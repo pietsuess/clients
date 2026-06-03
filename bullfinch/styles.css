@@ -258,6 +258,7 @@ body.has-entered.has-scrolled .site-nav {
   z-index: 100;
   display: grid;
   place-items: center;
+  cursor: pointer; /* whole splash advances on click */
   background: #FFFFFF;
   transition:
     background-color 960ms cubic-bezier(0.2, 0.7, 0.18, 1),
@@ -559,6 +560,10 @@ body.has-reached-01 .hero__scroll-cue {
 #opportunity.panel--media {
   grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
   gap: clamp(18px, 3vw, 48px);
+}
+#proof.panel--media {
+  grid-template-columns: minmax(300px, min(42vw, 560px)) minmax(0, var(--col-narrow));
+  gap: clamp(32px, 5vw, 88px);
 }
 .case-fixed-layer {
   position: fixed;
@@ -962,6 +967,95 @@ body.is-file-protocol .panel__video-fallback {
   color: var(--ink-quiet);
 }
 
+/* ---- Market bullseye (section 05) --------------------------------------
+   Nested TAM / SAM / SOM / Beachhead rings drawn from the deck's market chart.
+   Radii scale with market value, so the $188M beachhead is a small focused
+   centre inside the $6B opportunity. The chart is FULLY SCROLL-DRIVEN: a
+   growing circular clip reveals the rings outward as the panel is scrolled (and
+   retracts on the way out), a red band fills whichever region is being drawn,
+   and one label + one leader name that region. No-JS / reduced-motion shows it
+   static and complete, red on the TAM. */
+.panel__chart {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.bullseye-fig {
+  margin: 0;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.bullseye {
+  width: 100%;
+  height: auto;
+  max-height: 72vh;
+  overflow: visible;
+  display: block;
+}
+/* Faint neutral scaffold: the four nested market tiers. The growing clip
+   (#be-reveal) reveals them outward as the panel scrolls. */
+.be-ring {
+  fill: color-mix(in srgb, var(--ink) 6%, transparent);
+  stroke: color-mix(in srgb, var(--ink) 24%, transparent);
+  stroke-width: 1;
+}
+.be-tam { fill: color-mix(in srgb, var(--ink) 4%, transparent); }
+.be-sam { fill: color-mix(in srgb, var(--ink) 6%, transparent); }
+.be-som { fill: color-mix(in srgb, var(--ink) 9%, transparent); }
+.be-beach { fill: color-mix(in srgb, var(--ink) 12%, transparent); }
+
+/* Red band. fill:none + a thick stroke at a region's mid-radius fills that
+   whole annular region red; JS sets r + stroke-width per region (clipped by the
+   reveal so it grows with scroll). Default = TAM band for the no-JS fallback. */
+.be-sweep {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 50;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 45%, transparent));
+}
+
+/* One leader line; JS points its outer end at the current frontier. */
+.be-leader {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+/* One label, swapped per region. Dark halo (paint-order) keeps it legible over
+   either the dark scaffold or the red band; it "comes up" on each region change
+   in step with the section copy. */
+.be-cap {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  paint-order: stroke;
+  stroke: color-mix(in srgb, var(--bg) 76%, transparent);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+}
+.be-cap-name { fill: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: 0.12em; }
+.be-cap-val { fill: var(--ink); font-size: 12px; }
+.be-cap.is-step { animation: beCapIn 0.34s ease-out; }
+@keyframes beCapIn {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.bullseye-cap {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-quiet);
+  text-align: center;
+}
+
 .panel__eyebrow,
 .panel__verdict,
 .panel__evidence p,
@@ -984,6 +1078,12 @@ body.is-file-protocol .panel__video-fallback {
   }
   .panel__eyebrow {
     margin-bottom: 24px;
+  }
+  .bullseye {
+    max-height: 62vh;
+  }
+  .bullseye-fig {
+    gap: 12px;
   }
 }
 
@@ -1104,6 +1204,35 @@ body.is-file-protocol .panel__video-fallback {
     margin-top: 12px;
     font-size: 10.5px;
     line-height: 1.25;
+  }
+  #proof.panel--media {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-content: center;
+    /* Keep the whole block clear of the fixed nav up top and give the long copy
+       room below, so nothing is cut off. */
+    padding-top: calc(60px + env(safe-area-inset-top));
+    row-gap: 12px;
+  }
+  .panel__chart {
+    grid-column: 1;
+    grid-row: 1;
+    /* Scale the bullseye DOWN to fit the available space on small screens. */
+    width: min(30vh, 62vw);
+    max-width: 230px;
+    justify-self: center;
+  }
+  .bullseye {
+    width: 100%;
+    height: auto;
+    max-height: 28vh;
+  }
+  .bullseye-fig {
+    gap: 8px;
+  }
+  .bullseye-cap {
+    font-size: 9px;
+    letter-spacing: 0.02em;
   }
 }
 

@@ -444,8 +444,8 @@
     { wave: 2, start: 0.20, end: 0.25, fanout: 2 },   // panel 1 → 2
     { wave: 3, start: 0.32, end: 0.37, fanout: 2 },   // panel 2 → 3
     { wave: 4, start: 0.44, end: 0.49, fanout: 2 },   // panel 3 → 4
-    { wave: 5, start: 0.56, end: 0.61, fanout: 2 },   // panel 4 → 5
-    { wave: 6, start: 0.68, end: 0.73, fanout: 1 },   // panel 5 → 6
+    { wave: 5, start: 0.56, end: 0.61, fanout: 1 },   // panel 4 → 5 (single line, no split)
+    { wave: 6, start: 0.68, end: 0.73, fanout: 1 },   // panel 5 → 6 (single line, no split)
   ];
 
   // Helper: find K nearest unconnected motes to a parent, preferring motes

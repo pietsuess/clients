@@ -35,7 +35,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=v4-4" />
+    <link rel="stylesheet" href="styles.css?v=v4-5" />
 
     <style>
       /* Section marks — one per section, beside each eyebrow (bottom-right
@@ -299,7 +299,41 @@
           </div>
         </article>
 
-        <article class="panel" id="proof" data-panel="5">
+        <article class="panel panel--media" id="proof" data-panel="5">
+          <div class="panel__chart" aria-label="Market opportunity">
+            <figure class="bullseye-fig">
+              <svg class="bullseye" viewBox="0 0 360 380" role="img" aria-label="Market opportunity bullseye: a $188M forester beachhead nested inside a $1.05B obtainable market, a $2.7B serviceable market, and a $3.4B to $6B total addressable market by 2030.">
+                <defs>
+                  <!-- Phase 1: this radius grows 0..150 first, revealing all the
+                       faint circles outward from the centre. -->
+                  <clipPath id="be-clip-s"><circle id="be-clip-s-c" cx="180" cy="190" r="150"></circle></clipPath>
+                  <!-- Phase 2: AFTER the circles are complete, this radius grows
+                       with sticky holds so the red fills region by region. -->
+                  <clipPath id="be-clip-r"><circle id="be-clip-r-c" cx="180" cy="190" r="150"></circle></clipPath>
+                </defs>
+                <g class="be-scene" clip-path="url(#be-clip-s)">
+                  <circle class="be-ring be-tam" cx="180" cy="190" r="150"></circle>
+                  <circle class="be-ring be-sam" cx="180" cy="190" r="100"></circle>
+                  <circle class="be-ring be-som" cx="180" cy="190" r="63"></circle>
+                  <circle class="be-ring be-beach" cx="180" cy="190" r="26"></circle>
+                </g>
+                <g clip-path="url(#be-clip-r)">
+                  <!-- Red band filling the CURRENT region. JS sets its radius +
+                       width per region; the red clip reveals it region by region.
+                       Defaults to the TAM band for the static fallback. -->
+                  <circle class="be-sweep" cx="180" cy="190" r="125"></circle>
+                </g>
+                <!-- ONE leader + ONE label, outside the clips. JS parks the line
+                     on a FIXED spot for each region and swaps the label to the
+                     ring being filled. -->
+                <line class="be-leader" x1="180" y1="40" x2="180" y2="65"></line>
+                <text class="be-cap" text-anchor="middle">
+                  <tspan class="be-cap-name" x="180" y="28">TAM</tspan><tspan class="be-cap-val" dx="8">$6B</tspan>
+                </text>
+              </svg>
+              <figcaption class="bullseye-cap">$20K per unit / year &#183; area scales with market size</figcaption>
+            </figure>
+          </div>
           <div class="panel__inner">
             <div class="eyebrow-anchor"><p class="panel__eyebrow">05 &middot; BUSINESS</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
             <h2 class="panel__verdict">A subscription product for the people who already walk the forest.</h2>
@@ -309,7 +343,6 @@
               <p><span class="lead">Expansion.</span> Enterprise software adoption creates a data stream; data customers then pull more inventory through the network.</p>
               <p><span class="lead">Why now.</span> Forestry labor is shrinking while wildfire, carbon, insurance, and biodiversity markets need verifiable ground truth.</p>
             </div>
-            <p class="panel__numeric">BEACHHEAD &middot; SUBSCRIPTION &middot; DATA API</p>
           </div>
         </article>
 
@@ -411,10 +444,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene.js?v=v4-4"></script>
+    <script src="scene.js?v=v4-5"></script>
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot.js?v=v4-4"></script>
+    <script src="swot.js?v=v4-5"></script>
     <script>
       // Section marks: build the SVG for each .section-mark, then drive its
       // assemble/disassemble with scroll position. One mark per section (the
@@ -572,7 +605,13 @@
             ScrollTrigger.create({
               trigger: panel,
               start: "top top",
-              end: mobileLike ? "+=100%" : "+=200%",
+              // Match each panel's actual pin length so the eyebrow mark's
+              // assemble/hold/release lines up with the pin. #proof has a longer
+              // pin (see swot.js), so its mark must animate across that range
+              // instead of finishing (leaving) early.
+              end: panel.id === "proof"
+                ? (mobileLike ? "+=220%" : "+=380%")
+                : (mobileLike ? "+=100%" : "+=200%"),
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) { scrub(self.progress); },
@@ -595,6 +634,143 @@
           };
           requestAnimationFrame(loop);
         }
+      })();
+    </script>
+    <script>
+      // Market bullseye (section 05): FULLY SCROLL-DRIVEN, in two phases. Phase
+      // 1: a growing clip reveals the complete faint circles outward from the
+      // centre. Phase 2 (only once the circles are whole): a second clip grows
+      // with STICKY HOLDS so the red fills the chart region by region, dwelling
+      // on each completed market so none slips past. One label + one leader sit
+      // on a FIXED spot per region (they don't chase the growing edge). The TAM
+      // is the stickiest hold; then the whole bullseye SHRINKS back in as you
+      // scroll away (an animation, not a passive scroll-off), and scrolling back
+      // up reverses it. Safe by default: no motion / no GSAP leaves the chart
+      // static and complete, red on the TAM.
+      (function () {
+        var svg = document.querySelector("#proof .bullseye");
+        var panel = document.getElementById("proof");
+        if (!svg || !panel) return;
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced || typeof ScrollTrigger === "undefined" || typeof gsap === "undefined") return;
+
+        var clipS = svg.querySelector("#be-clip-s-c");
+        var clipR = svg.querySelector("#be-clip-r-c");
+        var sweep = svg.querySelector(".be-sweep");
+        var leader = svg.querySelector(".be-leader");
+        var cap = svg.querySelector(".be-cap");
+        var capName = svg.querySelector(".be-cap-name");
+        var capVal = svg.querySelector(".be-cap-val");
+        var bcap = document.querySelector("#proof .bullseye-cap");
+        if (!clipS || !clipR || !sweep || !leader || !cap) return;
+
+        var CX = 180, CY = 190;
+        // Each region: the red band that fills it (mid-radius + thickness), its
+        // outer boundary, and the label shown while it is being filled. The
+        // leader parks at the top of the band (fixed per region).
+        var REGIONS = [
+          { band: { r: 13,   w: 26 }, outer: 26,  name: "BEACHHEAD", num: 188,  dec: 0, suf: "M" },
+          { band: { r: 44.5, w: 37 }, outer: 63,  name: "SOM",       num: 1.05, dec: 2, suf: "B" },
+          { band: { r: 81.5, w: 37 }, outer: 100, name: "SAM",       num: 2.7,  dec: 1, suf: "B" },
+          { band: { r: 125,  w: 50 }, outer: 150, name: "TAM",       num: 6,    dec: 0, suf: "B" }
+        ];
+
+        // Phase 1 — the circles build (scaffold reveal radius), then hold full
+        // to the end (they only retract if you scroll back up).
+        var SKF = [
+          { p: 0.08, f: 0 }, { p: 0.20, f: 150 }, { p: 1.00, f: 150 }
+        ];
+        // Phase 2 — red reveal radius. The build runs in the FIRST part of the
+        // (long) pin; the TAM then fills and holds full across the entire back
+        // half, so the finished $6B sits there for a long stretch and is hard to
+        // scroll past. (Scrolling back up retracts everything.)
+        var RKF = [
+          { p: 0.22, f: 0 },
+          { p: 0.27, f: 26 },  { p: 0.33, f: 26 },   // beachhead fills, brief hold
+          { p: 0.37, f: 63 },  { p: 0.43, f: 63 },   // SOM, brief hold
+          { p: 0.47, f: 100 }, { p: 0.52, f: 100 },  // SAM, brief hold
+          { p: 0.56, f: 150 }, { p: 1.00, f: 150 }   // TAM fills (~0.56), then holds full to the end
+        ];
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        function interp(KF, p) {
+          if (p <= KF[0].p) return KF[0].f;
+          for (var i = 0; i < KF.length - 1; i++) {
+            var a = KF[i], b = KF[i + 1];
+            if (p <= b.p) return a.f + (b.f - a.f) * ((p - a.p) / (b.p - a.p));
+          }
+          return KF[KF.length - 1].f;
+        }
+        function regionFor(f) {
+          if (f <= 0) return -1;
+          for (var i = 0; i < REGIONS.length; i++) if (f <= REGIONS[i].outer + 0.001) return i;
+          return REGIONS.length - 1;
+        }
+
+        var lastRegion = -2;
+        var countRAF = null;
+        function fmt(n, dec, suf) { return "$" + n.toFixed(dec) + suf; }
+        function countUp(target, dec, suf) {
+          // Tick the value up to its number when a region becomes active.
+          if (countRAF) cancelAnimationFrame(countRAF);
+          var dur = 700, start = null;
+          function step(ts) {
+            if (start === null) start = ts;
+            var t = Math.min(1, (ts - start) / dur);
+            var e = 1 - Math.pow(1 - t, 3);
+            if (capVal) capVal.textContent = fmt(target * e, dec, suf);
+            if (t < 1) { countRAF = requestAnimationFrame(step); }
+            else { countRAF = null; if (capVal) capVal.textContent = fmt(target, dec, suf); }
+          }
+          countRAF = requestAnimationFrame(step);
+        }
+        function setRegion(idx) {
+          if (idx < 0) return;
+          var r = REGIONS[idx];
+          sweep.setAttribute("r", r.band.r);
+          sweep.style.strokeWidth = r.band.w;
+          if (capName) capName.textContent = r.name;
+          countUp(r.num, r.dec, r.suf);     // value counts up to its number
+          // park the leader on a FIXED spot for this region (top of its band)
+          leader.setAttribute("x2", CX);
+          leader.setAttribute("y2", (CY - r.band.r).toFixed(2));
+          // re-trigger the "comes up" nudge as each region begins
+          cap.classList.remove("is-step");
+          void cap.getBoundingClientRect();
+          cap.classList.add("is-step");
+        }
+        function drive(p) {
+          var sBuilt = interp(SKF, p);
+          var rBuilt = interp(RKF, p);
+          var reg = regionFor(rBuilt);
+          if (reg !== lastRegion) {
+            if (reg >= 0) setRegion(reg);
+            lastRegion = reg;
+          }
+          // ANIMATED EXIT: over the last stretch the whole bullseye SHRINKS back
+          // in (the reverse of the build) as you scroll away — it never just
+          // scrolls off full. The label/region stay on the TAM while it
+          // collapses; scrolling back up grows it again.
+          var exitT = clamp01((p - 0.94) / 0.06);
+          var k = 1 - exitT;
+          clipS.setAttribute("r", (sBuilt * k).toFixed(2));
+          clipR.setAttribute("r", (rBuilt * k).toFixed(2));
+          var vis = clamp01((rBuilt - 1) / 10) * k; // label + line appear with the red, shrink out on exit
+          leader.style.opacity = (0.9 * vis).toFixed(3);
+          cap.style.opacity = vis.toFixed(3);
+          if (bcap) bcap.style.opacity = vis.toFixed(3); // the "$20K / area" caption rides the same fade (no persisting)
+        }
+
+        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        ScrollTrigger.create({
+          trigger: panel,
+          start: "top top",
+          end: mobileLike ? "+=220%" : "+=380%", // MUST match #proof's pin length in swot.js
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { drive(self.progress); },
+          onRefresh: function (self) { drive(self.progress || 0); }
+        });
+        drive(0);
       })();
     </script>
     <script>
@@ -945,7 +1121,9 @@
           });
         });
 
-        button.addEventListener("click", function () {
+        // Advance on a click ANYWHERE on the splash, not just the logo button.
+        // (The button still bubbles here, so a single listener covers both.)
+        splash.addEventListener("click", function () {
           var root = document.documentElement;
           var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
           if (request) {

@@ -260,8 +260,12 @@
       start: "top top",
       // Halve the pin distance on mobile so a thumb scroll covers twice the
       // choreography (less scrolling to get through each section). Wave timing
-      // references these triggers, so it scales automatically.
-      end: mobileLike ? "+=100%" : "+=200%",
+      // references these triggers, so it scales automatically. The market
+      // bullseye (#proof) gets a much longer pin so the finished $6B TAM holds
+      // for a long stretch and is genuinely hard to scroll past.
+      end: panel.id === "proof"
+        ? (mobileLike ? "+=220%" : "+=380%")
+        : (mobileLike ? "+=100%" : "+=200%"),
       pin: true,
       pinSpacing: true,
       scrub: true,
