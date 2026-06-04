@@ -550,9 +550,40 @@ body.has-reached-01 .hero__scroll-cue {
   place-items: center;
 }
 #problem.panel--media {
-  grid-template-columns: minmax(160px, min(24vw, 300px)) minmax(0, var(--col-narrow));
-  gap: clamp(40px, 6vw, 92px);
+  grid-template-columns: auto minmax(0, var(--col-narrow));
+  gap: clamp(18px, 2.2vw, 44px);
 }
+
+/* ===== Section 01 stat: 1% dot-field + seven-segment readout ===== */
+.panel__stat { position: relative; z-index: 2; width: auto;
+  display: flex; align-items: center; gap: clamp(20px, 2.6vw, 44px); flex-wrap: wrap; }
+.stat-grid { display: grid; gap: 4px; --dot: clamp(11px, 1.15vw, 15px); flex: none;
+  grid-template-columns: repeat(10, var(--dot)); }
+.stat-dot { width: var(--dot); height: var(--dot); border-radius: 50%;
+  background: color-mix(in srgb, var(--ink-soft) 16%, transparent);
+  transform: scale(.5); opacity: .42; will-change: transform, opacity, background; }
+.stat-dot.is-on { background: var(--ink); transform: scale(1); opacity: 1; }
+.stat-dot.is-one { background: var(--accent); transform: scale(1); opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.stat-read { min-width: 180px; }
+.stat-label { position: relative; font-size: clamp(18px, 1.9vw, 26px); height: 1.3em; }
+.stat-line { position: absolute; top: 0; left: 0; margin: 0; font-family: var(--font-display);
+  font-weight: 600; font-size: 1em; letter-spacing: 0.02em; text-transform: uppercase;
+  color: var(--accent); line-height: 1.2; will-change: transform, opacity, filter; }
+.stat-num { margin: 10px 0 0 0; display: flex; align-items: flex-end; gap: 10px; }
+.stat-readout { display: inline-flex; gap: 9px; }
+.stat-digit { height: clamp(40px, 4.8vw, 66px); width: auto; display: block; }
+.stat-seg { fill: color-mix(in srgb, var(--ink-soft) 13%, transparent); transition: fill 110ms linear; }
+.stat-seg.on { fill: var(--ink); }
+.stat-unit { font-family: var(--font-mono); font-weight: 500; line-height: 1;
+  font-size: clamp(18px, 2vw, 30px); color: var(--ink-soft); margin-bottom: 0.1em; }
+.stat-rest { font-family: var(--font-display); font-weight: 500; font-size: clamp(14px, 1.5vw, 19px);
+  line-height: 1.25; color: var(--ink); margin: 10px 0 0 0; max-width: 22ch; }
+
+/* inline headline count-up ($39M) — fixed-width tabular digits so the headline
+   never reflows (and the $ / M stay put) as the number counts. */
+.count-up { display: inline-block; min-width: 2ch; text-align: right;
+  font-variant-numeric: tabular-nums; }
 #product.panel--media {
   grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
   gap: clamp(18px, 3vw, 48px);
@@ -1135,6 +1166,19 @@ body.is-file-protocol .panel__video-fallback {
     max-width: 320px;
     justify-self: center;
   }
+  /* Section 01 stat: stack + center the whole composition on mobile. */
+  .panel__stat {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    justify-content: center;
+    gap: clamp(16px, 5vw, 32px);
+  }
+  .stat-read { text-align: center; min-width: 0; }
+  .stat-label { width: 100%; }
+  .stat-line { left: 0; right: 0; text-align: center; }
+  .stat-num { justify-content: center; }
+  .stat-rest { margin: 10px auto 0; }
   .panel__video--film {
     /* Full-bleed to the screen edges, keep the current height. */
     width: 100vw;
