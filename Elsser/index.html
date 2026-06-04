@@ -225,7 +225,8 @@
     h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
     h2.panel__verdict { font-size:clamp(2.2rem, 11vw, 4rem); }
     .panel__evidence p { max-width:none; }
-    .panel__list { grid-template-columns:1fr 1fr; max-width:none; }
+    .panel__list { display:grid; grid-template-columns:1fr; max-width:none; margin-top:18px; }  /* #sideList is hidden on mobile, so stack the detail lines in-flow here */
+    .panel__list li { min-height:46px; font-size:.82rem; letter-spacing:.13em; }
     .panel__gallery { max-width:none; }   /* side list is hidden on mobile, so use full width */
     .panel__form .f-row { grid-template-columns:1fr; }
     #strata, #sideList { display:none; }
