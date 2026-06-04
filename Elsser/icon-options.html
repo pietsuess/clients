@@ -116,15 +116,23 @@
   var picksRow = document.getElementById('picks');
   var focused = SECTIONS[0][1];  // which section a global-search click assigns to
 
+  // drop brand logos, country flags, full-colour emoji, and Android app-icon sets — not usable, restyleable icons
+  var BLOCK = {'logos':1,'simple-icons':1,'skill-icons':1,'devicon':1,'devicon-plain':1,'cib':1,'fa-brands':1,'fa6-brands':1,'fa7-brands':1,'brandico':1,'entypo-social':1,
+    'twemoji':1,'noto':1,'noto-v1':1,'openmoji':1,'emojione':1,'emojione-monotone':1,'emojione-v1':1,'fxemoji':1,'streamline-emojis':1,
+    'fluent-emoji':1,'fluent-emoji-flat':1,'fluent-emoji-high-contrast':1,'flat-color-icons':1,
+    'circle-flags':1,'flag':1,'cif':1,'flagpack':1,'twemoji-flags':1,'arcticons':1,'arcticons-flat':1};
   function api(kw){
     var terms = kw.split(',').map(function(s){return s.trim();}).filter(Boolean);
     return Promise.all(terms.map(function(t){
-      return fetch('https://api.iconify.design/search?query='+encodeURIComponent(t)+'&limit=60')
+      return fetch('https://api.iconify.design/search?query='+encodeURIComponent(t)+'&limit=80')
         .then(function(r){return r.json();}).then(function(d){return d.icons||[];})
         .catch(function(){return [];});
     })).then(function(lists){
       var seen={}, out=[];
-      lists.forEach(function(l){ l.forEach(function(id){ if(!seen[id]){seen[id]=1; out.push(id);} }); });
+      lists.forEach(function(l){ l.forEach(function(id){
+        if(seen[id]) return; if(BLOCK[id.split(':')[0]]) return;
+        seen[id]=1; out.push(id);
+      }); });
       return out;
     });
   }
