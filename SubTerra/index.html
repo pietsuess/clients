@@ -41,10 +41,10 @@
   .hero-lockup .hl-icon { flex:none; width:clamp(62px,7vw,94px); height:auto;
     filter:drop-shadow(0 4px 16px rgba(0,0,0,.6)); }
   .hero-lockup .hl-words { display:flex; flex-direction:column; }
-  .hero-lockup .hl-name { font:700 clamp(2.1rem,5.2vw,3.7rem)/.88 var(--display);
-    letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.85); }
-  .hero-lockup .hl-sub { font:600 clamp(.66rem,1.1vw,1rem)/1 var(--condensed); letter-spacing:.4em;
-    text-transform:uppercase; color:#fff; margin-top:9px; padding-left:.12em; text-shadow:0 2px 14px rgba(0,0,0,.9); }
+  .hero-lockup .hl-name { font:800 clamp(2.1rem,5.4vw,3.8rem)/.86 var(--display);
+    letter-spacing:.005em; text-transform:uppercase; color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.85); }
+  .hero-lockup .hl-sub { font:400 clamp(.74rem,1.42vw,1.18rem)/1 var(--display); letter-spacing:.34em;
+    text-transform:uppercase; color:#fff; margin-top:7px; padding-left:.04em; text-shadow:0 2px 14px rgba(0,0,0,.9); }
   .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
     filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
   .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
@@ -63,6 +63,9 @@
     letter-spacing:.16em; text-transform:uppercase; padding:11px 18px; border:1px solid rgba(255,255,255,.40);
     border-radius:999px; background:rgba(255,255,255,.04); transition:background .25s, border-color .25s; }
   .site-cta:hover { background:rgba(47,122,191,.20); border-color:var(--accent); }
+  .nav-toggle { display:none; flex-direction:column; justify-content:center; gap:5px;
+    width:44px; height:44px; padding:10px; background:none; border:0; cursor:pointer; }
+  .nav-toggle span { display:block; height:2px; width:100%; background:#fff; border-radius:2px; transition:transform .25s, opacity .2s; }
 
   /* ===================== pinned content panels ===================== */
   #content { position:relative; z-index:5; }
@@ -251,6 +254,20 @@
     .panel__icon { display:block; width:52px; height:52px; margin:0 0 16px; }
     .panel__icon svg { width:100%; height:100%; display:block; }
     #p-hero .panel__icon { display:none; }   /* hero already shows the brand lockup */
+    /* mobile nav: hamburger toggles a dropdown of the section links */
+    #siteNav { display:flex; align-items:center; justify-content:space-between; gap:12px;
+      min-height:64px; background:rgba(6,7,9,.92); }
+    .nav-toggle { display:flex; order:3; }
+    .site-cta { order:2; padding:9px 14px; font-size:.68rem; }
+    .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
+      align-items:stretch; background:rgba(6,7,9,.97); border-top:1px solid rgba(255,255,255,.12);
+      padding:6px 0 10px; display:none; }
+    #siteNav.nav-open .site-links { display:flex; }
+    .site-links a { padding:14px clamp(22px,6vw,40px); color:rgba(255,255,255,.86); }
+    .site-links a::after { display:none; }
+    #siteNav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    #siteNav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
+    #siteNav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
   }
   @media (prefers-reduced-motion: reduce) {
     #grain, #hint .arr { animation:none; }
@@ -274,12 +291,13 @@
       <a href="#p-bedrock" data-scroll-target="#p-bedrock">Estimate</a>
     </nav>
     <a class="site-cta" href="#p-bedrock" data-scroll-target="#p-bedrock">Free Estimate</a>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </header>
 
   <main id="content">
     <section class="panel" id="p-hero" data-e="0.018">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#cadeef" d="M48 17 L74 30 L48 43 L22 30 Z"/><path fill="#7badd7" d="M22 30 L48 43 L48 51.7 L22 38.7 Z"/><path fill="#4f93cf" d="M22 38.7 L48 51.7 L48 60.3 L22 47.3 Z"/><path fill="#2f7abf" d="M22 47.3 L48 60.3 L48 69 L22 56 Z"/><path fill="#1f66ab" d="M74 30 L48 43 L48 51.7 L74 38.7 Z"/><path fill="#0a64bf" d="M74 38.7 L48 51.7 L48 60.3 L74 47.3 Z"/><path fill="#0a4a82" d="M74 47.3 L48 60.3 L48 69 L74 56 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M48 17 L74 30 L48 43 L22 30 Z"/><path fill="#7badd7" d="M22 30 L48 43 L48 51.7 L22 38.7 Z"/><path fill="#4f93cf" d="M22 38.7 L48 51.7 L48 60.3 L22 47.3 Z"/><path fill="#2f7abf" d="M22 47.3 L48 60.3 L48 69 L22 56 Z"/><path fill="#1f66ab" d="M74 30 L48 43 L48 51.7 L74 38.7 Z"/><path fill="#0a64bf" d="M74 38.7 L48 51.7 L48 60.3 L74 47.3 Z"/><path fill="#0a4a82" d="M74 47.3 L48 60.3 L48 69 L74 56 Z"/></svg></span>
         <span class="panel__eyebrow">Salt Spring Island</span>
         <h1 class="hero-lockup"><img class="hl-icon" src="https://subterraearthworks.ca/wp-content/uploads/2024/04/subterrarev1-favi.png" alt=""><span class="hl-words"><span class="hl-name">Subterra</span><span class="hl-sub">Earthworks</span></span></h1>
         <p class="panel__lede">Top-notch excavation, tailored to your site.</p>
@@ -292,7 +310,7 @@
 
     <section class="panel" id="p-humus" data-e="0.075">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#cadeef" d="M48 20 L76 34 L48 48 L20 34 Z"/><path fill="#2f7abf" d="M20 34 L48 48 L48 56 L20 42 Z"/><path fill="#0a4a82" d="M76 34 L48 48 L48 56 L76 42 Z"/><path fill="none" stroke="#1f66ab" stroke-width="1.4" d="M29.3 29.3 L57.3 43.3 M38.7 24.7 L66.7 38.7 M57.3 24.7 L29.3 38.7 M66.7 29.3 L38.7 43.3"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M48 20 L76 34 L48 48 L20 34 Z"/><path fill="#2f7abf" d="M20 34 L48 48 L48 56 L20 42 Z"/><path fill="#0a4a82" d="M76 34 L48 48 L48 56 L76 42 Z"/><path fill="none" stroke="#1f66ab" stroke-width="1.4" d="M29.3 29.3 L57.3 43.3 M38.7 24.7 L66.7 38.7 M57.3 24.7 L29.3 38.7 M66.7 29.3 L38.7 43.3"/></svg></span>
         <span class="panel__eyebrow">Humus &middot; How we work</span>
         <h2 class="panel__verdict">Tailored to the site.</h2>
         <div class="panel__evidence"><p>Every property is different. We plan around your ground, your access, and your budget, with cost-effective solutions and the attention to detail that shows up in the finished work.</p></div>
@@ -304,7 +322,7 @@
 
     <section class="panel" id="p-topsoil" data-e="0.12">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#9dc4e4" d="M38 18.5 L53 26 L38 33.5 L23 26 Z"/><path fill="#2f7abf" d="M23 26 L38 33.5 L38 48.5 L23 41 Z"/><path fill="#0a4a82" d="M53 26 L38 33.5 L38 48.5 L53 41 Z"/><path fill="#9dc4e4" d="M50 26.5 L65 34 L50 41.5 L35 34 Z"/><path fill="#2f7abf" d="M35 34 L50 41.5 L50 56.5 L35 49 Z"/><path fill="#0a4a82" d="M65 34 L50 41.5 L50 56.5 L65 49 Z"/><path fill="#9dc4e4" d="M62 34.5 L77 42 L62 49.5 L47 42 Z"/><path fill="#2f7abf" d="M47 42 L62 49.5 L62 64.5 L47 57 Z"/><path fill="#0a4a82" d="M77 42 L62 49.5 L62 64.5 L77 57 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#9dc4e4" d="M38 18.5 L53 26 L38 33.5 L23 26 Z"/><path fill="#2f7abf" d="M23 26 L38 33.5 L38 48.5 L23 41 Z"/><path fill="#0a4a82" d="M53 26 L38 33.5 L38 48.5 L53 41 Z"/><path fill="#9dc4e4" d="M50 26.5 L65 34 L50 41.5 L35 34 Z"/><path fill="#2f7abf" d="M35 34 L50 41.5 L50 56.5 L35 49 Z"/><path fill="#0a4a82" d="M65 34 L50 41.5 L50 56.5 L65 49 Z"/><path fill="#9dc4e4" d="M62 34.5 L77 42 L62 49.5 L47 42 Z"/><path fill="#2f7abf" d="M47 42 L62 49.5 L62 64.5 L47 57 Z"/><path fill="#0a4a82" d="M77 42 L62 49.5 L62 64.5 L77 57 Z"/></svg></span>
         <span class="panel__eyebrow">Topsoil &middot; Excavation</span>
         <h2 class="panel__verdict">Move the ground.</h2>
         <div class="panel__evidence"><p>A full suite of excavation services for new construction and renovations. Our team handles everything from land clearing and foundation digging to backfilling and final grading.</p></div>
@@ -317,7 +335,7 @@
 
     <section class="panel panel--tall" id="p-subsoil" data-e="0.19">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#2f7abf" d="M48 61.5 L53 64 L48 66.5 L43 64 Z"/><path fill="#1f66ab" d="M43 64 L48 66.5 L48 74.5 L43 72 Z"/><path fill="#08365f" d="M53 64 L48 66.5 L48 74.5 L53 72 Z"/><path fill="#7badd7" d="M48 40 L30 58 L48 66 Z"/><path fill="#0a64bf" d="M48 40 L66 58 L48 66 Z"/><path fill="#cadeef" d="M48 26 L34 42 L48 49 Z"/><path fill="#2f7abf" d="M48 26 L62 42 L48 49 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#2f7abf" d="M48 61.5 L53 64 L48 66.5 L43 64 Z"/><path fill="#1f66ab" d="M43 64 L48 66.5 L48 74.5 L43 72 Z"/><path fill="#08365f" d="M53 64 L48 66.5 L48 74.5 L53 72 Z"/><path fill="#7badd7" d="M48 40 L30 58 L48 66 Z"/><path fill="#0a64bf" d="M48 40 L66 58 L48 66 Z"/><path fill="#cadeef" d="M48 26 L34 42 L48 49 Z"/><path fill="#2f7abf" d="M48 26 L62 42 L48 49 Z"/></svg></span>
         <span class="panel__eyebrow">Subsoil &middot; Land Clearing</span>
         <h2 class="panel__verdict">Clear the way.</h2>
         <div class="panel__evidence"><p>Making way for new development. We handle the removal of trees, brush, and any other obstacles that might impede construction, leaving the site ready to build.</p></div>
@@ -330,7 +348,7 @@
 
     <section class="panel panel--tall" id="p-clay" data-e="0.28">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#9dc4e4" d="M47.2 16 L61.82 21.51 L61.82 29.31 L78 35.23 L48 53.39 L31.45 45.6 L31.45 37.35 L18 30.6 Z"/><path fill="#2f7abf" d="M18 30.6 L31.45 37.35 L31.45 45.6 L48 53.39 L48 67.6 L18 52.6 Z"/><path fill="#0a4a82" d="M78 35.23 L48 53.39 L48 67.6 L78 47.8 Z"/><path fill="#0e3252" d="M61.82 21.51 L31.45 37.35 L31.45 45.6 L61.82 29.31 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#9dc4e4" d="M47.2 16 L61.82 21.51 L61.82 29.31 L78 35.23 L48 53.39 L31.45 45.6 L31.45 37.35 L18 30.6 Z"/><path fill="#2f7abf" d="M18 30.6 L31.45 37.35 L31.45 45.6 L48 53.39 L48 67.6 L18 52.6 Z"/><path fill="#0a4a82" d="M78 35.23 L48 53.39 L48 67.6 L78 47.8 Z"/><path fill="#0e3252" d="M61.82 21.51 L31.45 37.35 L31.45 45.6 L61.82 29.31 Z"/></svg></span>
         <span class="panel__eyebrow">Marine clay &middot; Trenching &amp; Site Services</span>
         <h2 class="panel__verdict">Service the site.</h2>
         <div class="panel__evidence"><p>For clients developing their property, we offer meticulous planning and execution of site plans, handling every aspect from laying down infrastructure to grading lots.</p></div>
@@ -343,7 +361,7 @@
 
     <section class="panel panel--tall" id="p-till" data-e="0.39">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#9dc4e4" d="M50 35 L72 46 L50 57 L28 46 Z"/><path fill="#2f7abf" d="M28 46 L50 57 L50 63 L28 52 Z"/><path fill="#0a4a82" d="M72 46 L50 57 L50 63 L72 52 Z"/><path fill="#2f7abf" d="M48.5 16.5 L50 17 L50 49 L48.5 48.5 Z"/><path fill="#0a4a82" d="M50 17 L51.5 16.5 L51.5 48.5 L50 49 Z"/><path fill="#7badd7" d="M50 15 L66 20 L50 25 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#9dc4e4" d="M50 35 L72 46 L50 57 L28 46 Z"/><path fill="#2f7abf" d="M28 46 L50 57 L50 63 L28 52 Z"/><path fill="#0a4a82" d="M72 46 L50 57 L50 63 L72 52 Z"/><path fill="#2f7abf" d="M48.5 16.5 L50 17 L50 49 L48.5 48.5 Z"/><path fill="#0a4a82" d="M50 17 L51.5 16.5 L51.5 48.5 L50 49 Z"/><path fill="#7badd7" d="M50 15 L66 20 L50 25 Z"/></svg></span>
         <span class="panel__eyebrow">Glacial till &middot; On the ground</span>
         <h2 class="panel__verdict">Every stage, handled.</h2>
         <div class="panel__evidence"><p>From the first cut to the final grade, we manage each phase on site so the work stays on schedule and the ground is left ready for whatever comes next.</p></div>
@@ -356,7 +374,7 @@
 
     <section class="panel panel--tall" id="p-limestone" data-e="0.50">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#cadeef" d="M48 16 L30 38 L48 46 Z"/><path fill="#7badd7" d="M48 16 L66 38 L48 46 Z"/><path fill="#2f7abf" d="M48 64 L30 38 L48 46 Z"/><path fill="#0a64bf" d="M48 64 L66 38 L48 46 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M48 16 L30 38 L48 46 Z"/><path fill="#7badd7" d="M48 16 L66 38 L48 46 Z"/><path fill="#2f7abf" d="M48 64 L30 38 L48 46 Z"/><path fill="#0a64bf" d="M48 64 L66 38 L48 46 Z"/></svg></span>
         <span class="panel__eyebrow">Limestone &middot; Why Subterra</span>
         <h2 class="panel__verdict">Peace of mind.</h2>
         <div class="panel__evidence"><p>Our customer-centric approach means satisfaction and peace of mind throughout every stage of the project. Local to Salt Spring Island and fully committed to getting the details right.</p></div>
@@ -370,7 +388,7 @@
 
     <section class="panel panel--end" id="p-bedrock" data-e="0.90">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96" stroke="#14222e" stroke-width="1" stroke-linejoin="round"><path fill="#cadeef" d="M22 33 L48 20 L74 33 L48 33.5 Z"/><path fill="#9dc4e4" d="M22 33 L74 33 L48 46 Z"/><path fill="#2f7abf" d="M22 33 L48 46 L48 54 L22 41 Z"/><path fill="#0a4a82" d="M74 33 L48 46 L48 54 L74 41 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M22 33 L48 20 L74 33 L48 33.5 Z"/><path fill="#9dc4e4" d="M22 33 L74 33 L48 46 Z"/><path fill="#2f7abf" d="M22 33 L48 46 L48 54 L22 41 Z"/><path fill="#0a4a82" d="M74 33 L48 46 L48 54 L74 41 Z"/></svg></span>
         <span class="panel__eyebrow">Bedrock &middot; Start your project</span>
         <h2 class="panel__verdict">Break ground.</h2>
         <div class="panel__evidence"><p>Tell us about your site and what you are planning. For excavation, land clearing, trenching, or site servicing, we will follow up with a practical conversation and a free estimate.</p></div>
@@ -987,7 +1005,15 @@
         if (!m) return; ev.preventDefault();
         measure();
         window.scrollTo({ top: Math.round(navTargetY(m)), behavior: 'smooth' });
+        navHost.classList.remove('nav-open'); if (navTgl) navTgl.setAttribute('aria-expanded', 'false');
       });
+    });
+    // mobile hamburger toggle
+    const navHost = document.getElementById('siteNav');
+    const navTgl = document.querySelector('.nav-toggle');
+    if (navTgl) navTgl.addEventListener('click', function () {
+      const open = navHost.classList.toggle('nav-open');
+      navTgl.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     function spy (y) {
       let current = null;
