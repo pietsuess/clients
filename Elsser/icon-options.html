@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Elsser — icon options</title>
+
+<!-- icon families (CDN, render in your browser) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Titillium+Web:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,300,0,0&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,500,1,0&display=block">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+
+<style>
+  :root{ --ink:#e9e2d6; --dim:rgba(233,226,214,.62); --line:rgba(233,226,214,.16);
+         --earth:#171206; --earth2:#1f1709; --hl:#3a2c12; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:
+        radial-gradient(120vw 80vh at 50% -10%, #241a09 0%, var(--earth) 60%) fixed, var(--earth);
+        color:var(--ink); font-family:"Titillium Web",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  header{ padding:48px 6vw 18px; max-width:1500px; margin:0 auto; }
+  h1{ font-family:"Archivo",sans-serif; font-weight:800; letter-spacing:-.01em; font-size:clamp(1.8rem,3.6vw,2.8rem); margin:0 0 8px; }
+  .sub{ color:var(--dim); max-width:70ch; line-height:1.55; font-size:1.02rem; }
+  .sub b{ color:var(--ink); font-weight:700; }
+  .wrap{ max-width:1500px; margin:0 auto; padding:0 6vw 80px; }
+
+  /* current strip */
+  .now{ margin:26px 0 8px; border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,.22); padding:18px 20px; }
+  .now h2{ font:700 .74rem/1 "Titillium Web"; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); margin:0 0 14px; }
+  .nowrow{ display:flex; gap:26px; flex-wrap:wrap; }
+  .nowcell{ display:flex; flex-direction:column; align-items:center; gap:8px; width:88px; }
+  .nowcell .cap{ font:700 .62rem/1.1 "Titillium Web"; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); text-align:center; }
+  .nowcell svg{ width:38px; height:38px; }
+
+  /* the big grid */
+  .scroller{ overflow-x:auto; margin-top:30px; border:1px solid var(--line); border-radius:14px; }
+  table{ border-collapse:collapse; width:100%; min-width:980px; }
+  th,td{ padding:18px 10px; text-align:center; border-bottom:1px solid var(--line); }
+  thead th{ position:sticky; top:0; background:var(--earth2); z-index:2;
+            font:700 .72rem/1.25 "Titillium Web"; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); }
+  thead th .fam{ display:block; color:var(--dim); font-weight:600; letter-spacing:.06em; font-size:.64rem; margin-top:4px; text-transform:none; }
+  tbody tr:nth-child(odd){ background:rgba(0,0,0,.16); }
+  tbody tr:hover{ background:var(--hl); }
+  .rowlbl{ text-align:left; min-width:190px; padding-left:22px; }
+  .rowlbl .eyebrow{ font:700 .64rem/1 "Titillium Web"; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); }
+  .rowlbl .name{ font-family:"Archivo",sans-serif; font-weight:800; font-size:1.18rem; margin-top:5px; }
+  .rowlbl .concept{ color:var(--dim); font-size:.82rem; margin-top:3px; }
+
+  /* icon sizing — actual on-site size is ~46px */
+  td.ic{ min-width:118px; color:var(--ink); }
+  td.ic i, td.ic span.ms{ font-size:46px; line-height:1; display:inline-block; }
+  td.ic svg{ width:46px; height:46px; }
+  span.material-symbols-outlined, span.material-symbols-rounded{ font-size:46px; line-height:1; }
+  .colcur{ background:rgba(120,30,30,.10); }
+
+  /* weight ramp */
+  .ramp{ margin-top:40px; border:1px solid var(--line); border-radius:12px; padding:22px 24px; background:rgba(0,0,0,.2); }
+  .ramp h2{ font:700 .74rem/1 "Titillium Web"; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); margin:0 0 16px; }
+  .rampline{ display:flex; align-items:center; gap:34px; flex-wrap:wrap; }
+  .rampcell{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .rampcell .cap{ font:600 .66rem/1 "Titillium Web"; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; }
+  .rampcell i{ font-size:48px; }
+
+  .note{ margin-top:38px; color:var(--dim); line-height:1.6; max-width:75ch; font-size:1rem; }
+  .note b{ color:var(--ink); }
+  .pill{ display:inline-block; border:1px solid var(--line); border-radius:999px; padding:3px 11px; margin:0 4px 6px 0; font-size:.82rem; color:var(--ink); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Elsser — pick an icon direction</h1>
+  <p class="sub">Same eight section concepts, shown across real icon families and styles, on the site's dark-earth background at the actual on-site size (46px). The red-tinted column is what's live now. Tell me a <b>column</b> (or mix families per row), and whether you'd rather have <b>literal tools</b> (shovel, excavator, dump truck, hard hat) or these <b>material / nature</b> concepts. I can also draw <b>custom strata marks</b> if none of these land.</p>
+</header>
+
+<div class="wrap">
+
+  <!-- what's live now -->
+  <div class="now">
+    <h2>On the site now &mdash; Lucide line, mixed concepts</h2>
+    <div class="nowrow" id="nowrow"></div>
+  </div>
+
+  <!-- comparison grid -->
+  <div class="scroller">
+  <table>
+    <thead>
+      <tr>
+        <th class="rowlbl">Section</th>
+        <th class="colcur">Current<span class="fam">Lucide &middot; line</span></th>
+        <th>A<span class="fam">Phosphor &middot; line</span></th>
+        <th>B<span class="fam">Phosphor &middot; duotone</span></th>
+        <th>C<span class="fam">Phosphor &middot; fill</span></th>
+        <th>D<span class="fam">Tabler &middot; line</span></th>
+        <th>E<span class="fam">Material &middot; outlined</span></th>
+        <th>F<span class="fam">Material &middot; filled</span></th>
+      </tr>
+    </thead>
+    <tbody id="grid"></tbody>
+  </table>
+  </div>
+
+  <!-- weight ramp -->
+  <div class="ramp">
+    <h2>Stroke weight is dial-able (Phosphor, the truck glyph)</h2>
+    <div class="rampline">
+      <div class="rampcell"><i class="ph-thin ph-truck"></i><span class="cap">Thin</span></div>
+      <div class="rampcell"><i class="ph-light ph-truck"></i><span class="cap">Light</span></div>
+      <div class="rampcell"><i class="ph ph-truck"></i><span class="cap">Regular</span></div>
+      <div class="rampcell"><i class="ph-bold ph-truck"></i><span class="cap">Bold</span></div>
+      <div class="rampcell"><i class="ph-duotone ph-truck"></i><span class="cap">Duotone</span></div>
+      <div class="rampcell"><i class="ph-fill ph-truck"></i><span class="cap">Fill</span></div>
+    </div>
+  </div>
+
+  <p class="note">
+    <b>How to tell me:</b> reply with something like &ldquo;column C&rdquo;, or &ldquo;Tabler but heavier&rdquo;, or
+    &ldquo;Phosphor duotone, and swap Surface to a sun and Limestone to a hard hat.&rdquo;
+    <br><br>
+    <b>Concept ideas per section if you want to go more literal/excavation:</b>
+    <span class="pill">Surface &rarr; sun / landscape / layers</span>
+    <span class="pill">Humus &rarr; leaf / sprout / worm</span>
+    <span class="pill">Topsoil &rarr; shovel / rake / grass</span>
+    <span class="pill">Subsoil &rarr; water drop / pipe / pump</span>
+    <span class="pill">Clay &rarr; brick wall / trowel / terrace</span>
+    <span class="pill">Till &rarr; dump truck / excavator / road</span>
+    <span class="pill">Limestone &rarr; hard hat / shield / award</span>
+    <span class="pill">Bedrock &rarr; envelope / phone / pin</span>
+  </p>
+
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+  // ----- what's live now: exact current glyphs -----
+  var current = [
+    ["Surface","shovel"],["Humus","users"],["Topsoil","trees"],["Subsoil","droplets"],
+    ["Clay","brick-wall"],["Till","truck"],["Limestone","shield-check"],["Bedrock","mail"]
+  ];
+  var nowrow = document.getElementById('nowrow');
+  current.forEach(function(c){
+    var d=document.createElement('div'); d.className='nowcell';
+    d.innerHTML='<i data-lucide="'+c[1]+'"></i><span class="cap">'+c[0]+'</span>';
+    nowrow.appendChild(d);
+  });
+
+  // ----- proposed concepts, one row per section -----
+  // [eyebrow, layer name, concept blurb, lucide, phosphor, tabler, material]
+  var rows = [
+    ["Surface","The surface","ground level / terrain","mountain","mountains","mountain","landscape"],
+    ["Humus","Organic layer","living topsoil / organic","leaf","leaf","leaf","eco"],
+    ["Topsoil","Topsoil","planting / grading","sprout","plant","plant-2","grass"],
+    ["Subsoil","Subsoil","drainage / water","droplets","drop","droplet","water_drop"],
+    ["Clay","Marine clay","walls / terracing","brick-wall","bricks","wall","foundation"],
+    ["Till","Glacial till","haul / access / delivery","truck","truck","truck","local_shipping"],
+    ["Limestone","Limestone","safety / integrity","shield-check","shield-check","shield-check","verified_user"],
+    ["Bedrock","Bedrock","contact","mail","envelope","mail","mail"]
+  ];
+  var grid = document.getElementById('grid');
+  rows.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.innerHTML =
+      '<td class="rowlbl"><div class="eyebrow">'+r[0]+'</div><div class="name">'+r[1]+'</div><div class="concept">'+r[2]+'</div></td>'+
+      '<td class="ic colcur"><i data-lucide="'+r[3]+'"></i></td>'+
+      '<td class="ic"><i class="ph '+'ph-'+r[4]+'"></i></td>'+
+      '<td class="ic"><i class="ph-duotone ph-'+r[4]+'"></i></td>'+
+      '<td class="ic"><i class="ph-fill ph-'+r[4]+'"></i></td>'+
+      '<td class="ic"><i class="ti ti-'+r[5]+'"></i></td>'+
+      '<td class="ic"><span class="ms material-symbols-outlined">'+r[6]+'</span></td>'+
+      '<td class="ic"><span class="ms material-symbols-rounded">'+r[6]+'</span></td>';
+    grid.appendChild(tr);
+  });
+
+  if (window.lucide) lucide.createIcons();
+</script>
+</body>
+</html>
