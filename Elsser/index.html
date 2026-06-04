@@ -94,7 +94,7 @@
     border-top:1px solid rgba(244,238,228,.24); color:rgba(244,238,228,.76);
     font:700 .72rem/1.15 var(--condensed); letter-spacing:.14em; text-transform:uppercase; }
   /* clickable photo gallery (opens the lightbox) */
-  .panel__gallery { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+  .panel__gallery { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; max-width:min(50vw, 720px); }  /* stay in the left column, clear of the fixed #sideList */
   .panel__gallery .g-thumb { padding:0; margin:0; line-height:0; cursor:pointer; overflow:hidden; border-radius:3px;
     border:1px solid rgba(244,238,228,.30); background:none; box-shadow:0 14px 30px rgba(0,0,0,.36);
     transition:border-color .2s; }
@@ -226,6 +226,7 @@
     h2.panel__verdict { font-size:clamp(2.2rem, 11vw, 4rem); }
     .panel__evidence p { max-width:none; }
     .panel__list { grid-template-columns:1fr 1fr; max-width:none; }
+    .panel__gallery { max-width:none; }   /* side list is hidden on mobile, so use full width */
     .panel__form .f-row { grid-template-columns:1fr; }
     #strata, #sideList { display:none; }
   }
@@ -927,7 +928,7 @@
         } else if (m.isEnd) {
           m.sideStart = 0; m.sideEnd = -1;            // form section has no detail lines
         } else {
-          m.sideStart = m.start + travel * 0.56;       // clear beat AFTER the photo gallery has landed (gallery block ends ~0.375) and sat alone
+          m.sideStart = m.start + travel * 0.30;       // within the hold (after the main text is up)
           m.sideEnd = m.start + travel * 0.93;
         }
         // the list finishes stacking partway through, then the full list sticks until the window ends
