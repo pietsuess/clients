@@ -23,6 +23,9 @@
 
   #stage { position:fixed; inset:0; z-index:1; }
   canvas { display:block; }
+  /* brand-blue wash at the surface; dissolves to the green grass as the descent begins */
+  #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
+    background:linear-gradient(180deg, #3a9bdb 0%, #0a64bf 52%, #0a4a82 100%); }
 
   /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
   #textVeil { position:fixed; inset:0; z-index:4; pointer-events:none; opacity:0; visibility:hidden;
@@ -279,6 +282,7 @@
 </head>
 <body>
   <div id="stage"></div>
+  <div id="brandWash" aria-hidden="true"></div>
   <div id="textVeil" aria-hidden="true"></div>
   <div id="fallback"><p>Subterra Earthworks</p></div>
 
@@ -618,6 +622,7 @@
 
     const depthN = document.getElementById('depthN');
     const hintEl = document.getElementById('hint');
+    const brandWash = document.getElementById('brandWash');
     const fogTop = new T.Color(0x9aa6ae), fogDeep = new T.Color(0x070504);
     const strataEl = document.getElementById('strata'), strataName = document.getElementById('strataName'), strataSub = document.getElementById('strataSub');
     const STRATA = [
@@ -664,6 +669,8 @@
       depthN.textContent = (Math.max(0, -centerY) * METRES_PER_WORLD).toFixed(1);
       // scroll indicator: visible on the flat grass, fades as the descent tilts in
       if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
+      // brand-blue surface wash dissolves to the green grass as the dive begins
+      if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.085 - e) / 0.06)).toFixed(3);
       updateStrata(centerY);
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
