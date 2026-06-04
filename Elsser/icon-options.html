@@ -68,6 +68,20 @@
   .opt iconify-icon{ font-size:46px; color:var(--ink); }
   .opt .nm{ font:600 .62rem/1.15 "Titillium Web"; color:var(--dim); text-align:center; word-break:break-word; }
   .opt .set{ color:var(--accent); }
+
+  /* full-collection browser (the two sets you liked) */
+  .cbwrap{ margin:18px 0 10px; }
+  .cbwrap .lead{ font:700 .72rem/1 "Titillium Web"; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+  .cbwrap .note2{ color:var(--dim); font-size:.92rem; line-height:1.5; max-width:80ch; margin-bottom:14px; }
+  .cb{ margin:12px 0; border:1px solid var(--line); border-radius:14px; background:rgba(0,0,0,.18); padding:18px; }
+  .cb-head{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .cb-head h2{ font-family:"Archivo",sans-serif; font-weight:800; font-size:1.2rem; margin:0; }
+  .cb-n{ color:var(--accent); font:700 .8rem "Titillium Web"; }
+  .cb-filter{ margin-left:auto; min-width:220px; }
+  .cb-grid{ display:flex; flex-wrap:wrap; gap:10px; }
+  .cb .opt{ width:96px; }
+  .cb .opt iconify-icon{ font-size:40px; }
+  .cb-foot{ margin-top:14px; display:flex; gap:12px; align-items:center; color:var(--dim); font-size:.84rem; }
 </style>
 </head>
 <body>
@@ -78,6 +92,13 @@
 </header>
 
 <div class="wrap">
+
+  <div class="cbwrap">
+    <div class="lead">The two sets you liked &mdash; full browse</div>
+    <div class="note2">Heads up: both are <b>brand / company logo</b> libraries (so they&rsquo;re marks like Adobe, GitHub, etc. &mdash; the &ldquo;Blueprint&rdquo; ones are a software product&rsquo;s logo, not a drafting blueprint). Here&rsquo;s every icon in each. Type in the filter to narrow; click any icon to copy its <code>collection:name</code>.</div>
+    <section class="cb" data-prefix="logos" data-title="SVG Logos (full colour)"></section>
+    <section class="cb" data-prefix="simple-icons" data-title="Simple Icons (monochrome)"></section>
+  </div>
 
   <div class="tray" id="tray">
     <h2>Your picks</h2>
@@ -116,11 +137,7 @@
   var picksRow = document.getElementById('picks');
   var focused = SECTIONS[0][1];  // which section a global-search click assigns to
 
-  // drop brand logos, country flags, full-colour emoji, and Android app-icon sets — not usable, restyleable icons
-  var BLOCK = {'logos':1,'simple-icons':1,'skill-icons':1,'devicon':1,'devicon-plain':1,'cib':1,'fa-brands':1,'fa6-brands':1,'fa7-brands':1,'brandico':1,'entypo-social':1,
-    'twemoji':1,'noto':1,'noto-v1':1,'openmoji':1,'emojione':1,'emojione-monotone':1,'emojione-v1':1,'fxemoji':1,'streamline-emojis':1,
-    'fluent-emoji':1,'fluent-emoji-flat':1,'fluent-emoji-high-contrast':1,'flat-color-icons':1,
-    'circle-flags':1,'flag':1,'cif':1,'flagpack':1,'twemoji-flags':1,'arcticons':1,'arcticons-flat':1};
+  var BLOCK = {};  // show every collection — nothing filtered out
   function api(kw){
     var terms = kw.split(',').map(function(s){return s.trim();}).filter(Boolean);
     return Promise.all(terms.map(function(t){
@@ -217,6 +234,59 @@
   });
 
   drawPicks();
+
+  // ---- full-collection browsers (logos + simple-icons) ----
+  function buildCollection(sec){
+    var prefix = sec.getAttribute('data-prefix'), title = sec.getAttribute('data-title');
+    var names = [], shown = 0, PAGE = 120, filtered = [];
+    sec.innerHTML =
+      '<div class="cb-head"><h2>'+title+'</h2><span class="cb-n">loading…</span>'+
+      '<input type="text" class="cb-filter" placeholder="filter '+prefix+'…"></div>'+
+      '<div class="cb-grid"></div>'+
+      '<div class="cb-foot"><button class="btn ghost cb-more">Load more</button><span class="cb-status"></span></div>';
+    var grid = sec.querySelector('.cb-grid'), more = sec.querySelector('.cb-more'),
+        nEl = sec.querySelector('.cb-n'), statusEl = sec.querySelector('.cb-status'),
+        filter = sec.querySelector('.cb-filter');
+
+    function cell(name){
+      var id = prefix+':'+name;
+      var b = document.createElement('button'); b.className='opt'; b.setAttribute('data-id', id);
+      b.innerHTML = '<iconify-icon icon="'+id+'"></iconify-icon><span class="nm">'+name+'</span>';
+      b.addEventListener('click', function(){
+        if (navigator.clipboard) navigator.clipboard.writeText(id);
+        Array.prototype.forEach.call(sec.querySelectorAll('.opt.sel'), function(o){o.classList.remove('sel');});
+        b.classList.add('sel'); statusEl.textContent = 'copied: '+id;
+      });
+      return b;
+    }
+    function renderPage(){
+      var slice = filtered.slice(shown, shown+PAGE);
+      slice.forEach(function(n){ grid.appendChild(cell(n)); });
+      shown += slice.length;
+      more.style.display = shown < filtered.length ? '' : 'none';
+      statusEl.textContent = 'showing '+shown+' of '+filtered.length;
+    }
+    function reset(){ grid.innerHTML=''; shown=0; renderPage(); }
+    more.addEventListener('click', renderPage);
+    filter.addEventListener('input', function(){
+      var q = filter.value.trim().toLowerCase();
+      filtered = q ? names.filter(function(n){return n.indexOf(q)>-1;}) : names;
+      reset();
+    });
+
+    fetch('https://api.iconify.design/collection?prefix='+prefix)
+      .then(function(r){return r.json();})
+      .then(function(d){
+        names = d.icons ? d.icons.slice() : [];
+        var cats = d.categories || {}; Object.keys(cats).forEach(function(k){ names = names.concat(cats[k]); });
+        if (d.uncategorized) names = names.concat(d.uncategorized);
+        names.sort();
+        filtered = names; nEl.textContent = names.length.toLocaleString()+' icons';
+        reset();
+      })
+      .catch(function(){ nEl.textContent='failed to load'; });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.cb'), buildCollection);
 </script>
 </body>
 </html>
