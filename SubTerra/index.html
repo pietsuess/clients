@@ -97,6 +97,7 @@
   /* breathing room between sections: pure descending earth, no text */
   .gap { height:64vh; pointer-events:none; }
   .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
+    align-content:center;   /* pack the content as one tight centered block (no row-stretch gaps) */
     width:min(1180px, 88vw); margin:0 auto; padding:14vh 0;
     color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); pointer-events:auto; }
 
@@ -135,7 +136,7 @@
   .panel__gallery .g-thumb { padding:0; margin:0; line-height:0; cursor:pointer; overflow:hidden; border-radius:3px;
     border:1px solid rgba(244,238,228,.30); background:none; box-shadow:0 14px 30px rgba(0,0,0,.36);
     transition:border-color .2s; }
-  .panel__gallery .g-thumb img { width:128px; height:88px; object-fit:cover; display:block; transition:transform .4s ease; }
+  .panel__gallery .g-thumb img { width:clamp(220px, 25vw, 320px); height:auto; aspect-ratio:3/2; object-fit:cover; display:block; transition:transform .4s ease; }
   .panel__gallery .g-thumb:hover { border-color:rgba(244,238,228,.72); }
   .panel__gallery .g-thumb:hover img { transform:scale(1.07); }
   .panel__gallery .g-thumb:focus-visible { outline:2px solid rgba(244,238,228,.8); outline-offset:2px; }
