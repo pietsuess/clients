@@ -11,6 +11,7 @@
 <style>
   :root {
     --ink:#e9e2d6;
+    --accent:#7ea6c8;
     --display:"Archivo",Impact,"Helvetica Neue",sans-serif;
     --body:"Lato",Helvetica,Arial,sans-serif;
     --condensed:"Titillium Web","Avenir Next Condensed","Barlow Condensed","Helvetica Neue",Helvetica,sans-serif;
@@ -23,19 +24,42 @@
   #stage { position:fixed; inset:0; z-index:1; }
   canvas { display:block; }
 
-  /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
+  /* sky wash on the first screen; dissolves into the green grass as the descent begins */
+  #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
+    background:linear-gradient(180deg, #bcd6ea 0%, #87aece 54%, #6b93b6 100%); }
+  /* warm earth-light wash at the very bottom of the descent; fades in as the dig opens into light */
+  #deepWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
+    background:linear-gradient(180deg, #c9a36d 0%, #e6cfa6 56%, #f3e7d0 100%); }
+
+  /* fade-blur veil behind the text: dims the 3D earth while a section is up */
   #textVeil { position:fixed; inset:0; z-index:4; pointer-events:none; opacity:0; visibility:hidden;
-    background:radial-gradient(135% 115% at 42% 46%, rgba(6,5,4,.30) 18%, rgba(6,5,4,.62) 100%);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); will-change:opacity; }
+    background:radial-gradient(135% 115% at 42% 46%, rgba(6,5,4,.38) 18%, rgba(6,5,4,.70) 100%);
+    will-change:opacity; }   /* no backdrop-blur: it cropped into boxes behind each word */
 
   /* ===================== nav ===================== */
   #siteNav { position:fixed; left:0; right:0; top:0; z-index:8;
-    display:grid; grid-template-columns:auto 1fr auto; align-items:center;
-    gap:clamp(18px, 3vw, 48px); min-height:84px;
+    display:grid; grid-template-columns:auto 1fr auto auto; align-items:center;
+    gap:clamp(14px, 2.4vw, 40px); min-height:84px;
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
     background:linear-gradient(180deg, rgba(6,7,9,.58), rgba(6,7,9,0)); }
   #siteNav img { display:block; width:clamp(150px, 13vw, 224px); height:auto;
     filter:drop-shadow(0 10px 20px rgba(0,0,0,.34)); }
+  /* persistent fullscreen toggle (right of the CTA / hamburger) */
+  .fs-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; padding:9px;
+    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 4px 12px rgba(0,0,0,.4)); }
+  .fs-btn svg { width:100%; height:100%; display:block; }
+  .fs-btn:hover { color:var(--accent); }
+  .nav-toggle { display:none; flex-direction:column; justify-content:center; gap:5px;
+    width:44px; height:44px; padding:10px; background:none; border:0; cursor:pointer; }
+  .nav-toggle span { display:block; height:2px; width:100%; background:#fff; border-radius:2px; transition:transform .25s, opacity .2s; }
+  /* click-to-enter splash: Elsser logo on dark earth, fades to the site (and into fullscreen) */
+  #splash { position:fixed; inset:0; z-index:60; cursor:pointer;
+    background:radial-gradient(120% 100% at 50% 40%, #1b130c 0%, #0b0907 70%);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(22px,3vw,40px);
+    transition:opacity .7s ease; }
+  #splash.gone { opacity:0; pointer-events:none; }
+  #splash .sp-logo { width:clamp(220px, 34vw, 460px); height:auto; filter:drop-shadow(0 14px 34px rgba(0,0,0,.5)); }
+  .splash-hint { font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
   .site-links { display:flex; justify-content:center; gap:clamp(16px, 3vw, 44px);
     font:700 clamp(.72rem, .72vw, .86rem)/1 var(--condensed);
     letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.62); }
@@ -57,54 +81,93 @@
   .panel--tall { height:380vh; }
   /* the final section ends the page: a real form, sized to its content, nothing past it */
   .panel--end { height:auto; }
-  .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 4vh; }
+  .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 6vh; }
+  /* the end form is a solid dark card on the earth-light deep wash (no backdrop-blur: it cropped at the edges) */
+  .end-card { position:relative; background:rgba(20,13,7,.84); max-width:1040px; margin-inline:auto;
+    border:1px solid rgba(233,226,214,.24); border-radius:22px;
+    padding:clamp(30px,4vw,58px) clamp(24px,4.2vw,62px);
+    box-shadow:0 38px 92px rgba(0,0,0,.46); }
   .panel--end h2.panel__verdict { font-size:clamp(1.9rem, 3.4vw, 3.4rem); }
   .panel--end .panel__evidence p { margin-top:9px; max-width:70ch; font-size:clamp(.95rem,.95vw,1.08rem); }
   /* breathing room between sections: pure descending earth, no text */
   .gap { height:64vh; pointer-events:none; }
-  .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
+  .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center; align-content:center;
     width:min(1180px, 88vw); margin:0 auto; padding:14vh 0;
     color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); pointer-events:auto; }
 
-  .panel__icon { display:none; }   /* source only; rendered on the right with the detail lines */
-  /* the form section has no side list, so show its icon inline above the headline */
-  .panel--end .panel__icon { display:block; width:58px; height:58px; margin:0 0 22px; }
-  .panel--end .panel__icon svg { width:100%; height:100%; display:block; }
-  #sideList .sl-icon { width:46px; height:46px; margin:0 0 20px auto; color:rgba(244,238,228,.85); opacity:0; }
-  #sideList .sl-icon svg { width:100%; height:100%; display:block; }
+  .panel__icon { display:none; }   /* source only; rendered inline beside the headline */
+  /* the form section has no side list, so its icon sits top-right of the card, in line with the heading */
+  .panel--end .panel__icon { display:block; position:absolute; top:clamp(26px,3.4vw,52px); right:clamp(24px,4.2vw,62px);
+    width:clamp(92px,9vw,128px); height:auto; margin:0; overflow:visible; }
+  .panel--end .panel__icon svg { width:100%; height:auto; display:block; overflow:visible; }
+  .panel--end .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
+  #sideList .sl-icon { width:clamp(84px,9vw,112px); height:auto; margin:0 0 22px auto; color:rgba(244,238,228,.85); opacity:0; overflow:visible; }
+  #sideList .sl-icon svg { width:100%; height:auto; display:block; overflow:visible; }
+  #sideList .sl-icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
   .panel__eyebrow { display:block; margin-bottom:14px; color:rgba(244,238,228,.66);
-    font:700 .76rem/1 var(--condensed); letter-spacing:.26em; text-transform:uppercase; }
+    font:700 .76rem/1.25 var(--condensed); letter-spacing:.26em; text-transform:uppercase; text-wrap:balance; }
   .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
     background:rgba(244,238,228,.6); vertical-align:middle; margin:-3px 14px 0 0; }
   .panel__verdict { margin:0; color:#fff; font-family:var(--display); font-weight:800;
-    line-height:.9; letter-spacing:-.01em; text-wrap:balance; }
+    line-height:.9; letter-spacing:-.01em; text-wrap:balance;
+    text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
   h1.panel__verdict { font-size:clamp(3.6rem, 8.4vw, 9.6rem); }
   h2.panel__verdict { font-size:clamp(2.4rem, 5.4vw, 6.4rem); }
   .panel__lede { margin-top:14px; color:rgba(244,238,228,.84);
     font:700 clamp(1.05rem, 1.5vw, 1.7rem)/1.25 var(--condensed); letter-spacing:.01em; text-wrap:balance; }
   .panel__evidence p { margin-top:16px; max-width:58ch; color:rgba(244,238,228,.80);
-    font-size:clamp(.98rem, 1.05vw, 1.2rem); line-height:1.6; text-wrap:pretty; }
-  /* per-section detail lines are stored here (hidden) and played one-by-one on the right (#sideList) */
+    font-size:clamp(.98rem, 1.05vw, 1.2rem); line-height:1.6; text-align:justify; text-align-last:left; }
+  /* detail list: hidden on the hero (plays centered in #sideList) + the end form; shown inline under the text everywhere else */
   .panel__list { display:none; }
+  .panel:not(#p-hero):not(.panel--end) .panel__list { display:block; margin:clamp(12px,1.5vw,20px) 0 0; }
+  /* icon sits in line with the headline, on its right (JS wraps headline + icon in .hl-row) */
+  .panel:not(#p-hero):not(.panel--end) .panel__icon { display:block; flex:0 0 auto; width:clamp(92px,9.2vw,132px); height:auto; margin:0; overflow:visible; }
+  /* facets start hidden + scale from their own centre; JS pops them in, scroll-scrubbed */
+  .panel:not(#p-hero):not(.panel--end) .panel__icon svg { overflow:visible; display:block; width:100%; height:auto; }
+  .panel:not(#p-hero):not(.panel--end) .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
+  .hl-row { display:flex; align-items:center; justify-content:space-between; gap:clamp(18px,2.4vw,40px); }
+  .hl-row .panel__verdict { margin:0; }
+  /* photo panels: big photo on the LEFT, text + list on the RIGHT (text stays left-aligned, so they agree) */
+  @media (min-width:901px) {
+    .panel:has(.panel__gallery) .panel__inner {
+      grid-template-columns: clamp(320px,40vw,560px) minmax(0,1fr); column-gap:clamp(40px,5vw,88px); }
+    .panel:has(.panel__gallery) .panel__inner > .hl-row,
+    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow,
+    .panel:has(.panel__gallery) .panel__inner > .panel__lede,
+    .panel:has(.panel__gallery) .panel__inner > .panel__evidence,
+    .panel:has(.panel__gallery) .panel__inner > .panel__list { grid-column:2; }
+    .panel:has(.panel__gallery) .panel__inner > .panel__gallery {
+      grid-column:1; grid-row:1 / span 99; align-self:center; justify-self:stretch; }
+  }
   #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
     z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
     display:grid; gap:15px; }
+  /* the first (hero) list plays centered on screen, not pinned to the right */
+  #sideList.side-centered { right:auto; left:50%; transform:translate(-50%, -50%); text-align:center; width:min(82vw, 540px); }
+  #sideList.side-centered .sl-rule { margin:0 auto 9px; }
+  #sideList.side-centered .sl-icon { margin:0 auto 20px; }
   #sideList .sl-line { opacity:0; will-change:opacity, transform; }
   #sideList .sl-rule { display:block; width:48px; height:1px; background:rgba(244,238,228,.5); margin:0 0 9px auto; }
   #sideList .sl-text { display:block; font:700 clamp(1.05rem, 1.55vw, 1.7rem)/1.12 var(--condensed);
     letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.72); text-wrap:balance; }
-  .panel__list li { min-height:40px; display:flex; align-items:center;
+  .panel__list li { min-height:30px; padding:5px 0; display:flex; align-items:center;
     border-top:1px solid rgba(244,238,228,.24); color:rgba(244,238,228,.76);
-    font:700 .72rem/1.15 var(--condensed); letter-spacing:.14em; text-transform:uppercase; }
+    font:700 .72rem/1.1 var(--condensed); letter-spacing:.14em; text-transform:uppercase; }
   /* clickable photo gallery (opens the lightbox) */
   .panel__gallery { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; max-width:min(50vw, 720px); }  /* stay in the left column, clear of the fixed #sideList */
   .panel__gallery .g-thumb { padding:0; margin:0; line-height:0; cursor:pointer; overflow:hidden; border-radius:3px;
     border:1px solid rgba(244,238,228,.30); background:none; box-shadow:0 14px 30px rgba(0,0,0,.36);
     transition:border-color .2s; }
-  .panel__gallery .g-thumb img { width:128px; height:88px; object-fit:cover; display:block; transition:transform .4s ease; }
+  .panel__gallery .g-thumb img { width:clamp(220px, 25vw, 320px); height:auto; aspect-ratio:3/2; object-fit:cover; display:block; transition:transform .4s ease; }
   .panel__gallery .g-thumb:hover { border-color:rgba(244,238,228,.72); }
   .panel__gallery .g-thumb:hover img { transform:scale(1.07); }
   .panel__gallery .g-thumb:focus-visible { outline:2px solid rgba(244,238,228,.8); outline-offset:2px; }
+  /* in the split layout the photo fills the photo column (big); multiple shots share the column */
+  @media (min-width:901px) {
+    .panel:has(.panel__gallery) .panel__gallery { margin-top:0; max-width:none;
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; align-content:center; }
+    .panel:has(.panel__gallery) .panel__gallery .g-thumb img { width:100%; height:auto; aspect-ratio:3/2; }
+  }
 
   /* lightbox */
   #lightbox { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
@@ -127,8 +190,9 @@
   .panel__contact:hover { background:#fff; }
 
   /* contact form (final section) — compact, fits one screen */
-  .panel__form { margin-top:16px; max-width:980px; display:grid; gap:12px; }
+  .panel__form { margin-top:16px; max-width:none; display:grid; gap:12px; }
   .panel__form .f-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:13px; }
+  .panel__form .f-row-2 { grid-template-columns:repeat(2, 1fr); }
   .panel__form label { display:grid; gap:5px; font:700 .64rem/1.2 var(--condensed);
     letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.6); }
   .panel__form input, .panel__form select, .panel__form textarea {
@@ -167,7 +231,7 @@
     will-change:transform, opacity; }
 
   /* grain + vignette */
-  #grade { position:fixed; inset:0; z-index:2; pointer-events:none;
+  #grade { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0;   /* off on the first screen; the scene fades it in on the descent (keeps the sky wash clean at rest) */
     background:radial-gradient(122% 92% at 50% 40%, rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 100%); mix-blend-mode:multiply; }
   #grain { position:fixed; inset:-50%; z-index:3; pointer-events:none; opacity:.07;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -230,9 +294,29 @@
     .panel__evidence p { max-width:none; }
     .panel__list { display:grid; grid-template-columns:1fr; max-width:none; margin-top:18px; }  /* #sideList is hidden on mobile, so stack the detail lines in-flow here */
     .panel__list li { min-height:46px; font-size:.82rem; letter-spacing:.13em; opacity:0; will-change:opacity, transform; }  /* JS stacks these in on scroll */
-    .panel__gallery { max-width:none; }   /* side list is hidden on mobile, so use full width */
+    .panel__gallery { max-width:none; justify-content:flex-end; }   /* images sit to the right on mobile */
     .panel__form .f-row { grid-template-columns:1fr; }
-    #strata, #sideList { display:none; }
+    #p-hero .panel__list { display:none; }   /* hero's first list plays centered in #sideList, not inline */
+    /* each section's icon shows inline above its content on mobile */
+    .panel__icon { display:block; width:52px; height:52px; margin:0 0 16px; }
+    .panel__icon svg { width:100%; height:100%; display:block; }
+    #p-hero .panel__icon { display:none; }   /* hero shows the logo, not an icon */
+    /* mobile nav: hamburger toggles a dropdown of the section links */
+    #siteNav { display:flex; align-items:center; justify-content:space-between; gap:10px;
+      min-height:64px; background:linear-gradient(180deg, rgba(6,7,9,.72), rgba(6,7,9,0)); }
+    #siteNav img { width:clamp(118px, 30vw, 168px); }
+    .nav-toggle { display:flex; order:3; }
+    .fs-btn { order:4; width:36px; height:36px; }
+    .site-cta { order:2; padding:9px 13px; font-size:.66rem; }
+    .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
+      align-items:stretch; background:rgba(6,7,9,.97); border-top:1px solid rgba(255,255,255,.12);
+      padding:6px 0 10px; display:none; }
+    #siteNav.nav-open .site-links { display:flex; }
+    .site-links a { padding:14px clamp(22px,6vw,40px); color:rgba(255,255,255,.86); }
+    .site-links a::after { display:none; }
+    #siteNav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    #siteNav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
+    #siteNav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
   }
   @media (prefers-reduced-motion: reduce) {
     #grain, #hint .arr { animation:none; }
@@ -240,7 +324,13 @@
 </style>
 </head>
 <body>
+  <div id="splash" role="button" tabindex="0" aria-label="Enter site">
+    <img class="sp-logo" src="assets/elsser-logo.svg" alt="Elsser Excavation">
+    <div class="splash-hint">Click to enter</div>
+  </div>
   <div id="stage"></div>
+  <div id="brandWash" aria-hidden="true"></div>
+  <div id="deepWash" aria-hidden="true"></div>
   <div id="textVeil" aria-hidden="true"></div>
   <div id="fallback"><p>Elsser Excavation</p></div>
 
@@ -256,6 +346,8 @@
       <a href="#p-bedrock" data-scroll-target="#p-bedrock">Estimate</a>
     </nav>
     <a class="site-cta" href="#p-bedrock" data-scroll-target="#p-bedrock">Free Estimate</a>
+    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
   </header>
 
   <main id="content">
@@ -350,8 +442,9 @@
 
     <div class="deep-stretch" id="deepStretch" aria-hidden="true"></div>
 
-    <section class="panel panel--end" id="p-bedrock" data-e="0.90">
+    <section class="panel panel--end" id="p-bedrock" data-e="0.96">
       <div class="panel__inner">
+        <div class="end-card">
         <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M22 33 L48 20 L74 33 L48 33.5 Z"/><path fill="#9dc4e4" d="M22 33 L74 33 L48 46 Z"/><path fill="#2f7abf" d="M22 33 L48 46 L48 54 L22 41 Z"/><path fill="#0a4a82" d="M74 33 L48 46 L48 54 L74 41 Z"/></svg></span>
         <span class="panel__eyebrow">Bedrock &middot; Building a legacy of excellence</span>
         <h2 class="panel__verdict">Break ground.</h2>
@@ -404,6 +497,7 @@
             <p class="f-status" role="status" aria-live="polite"></p>
           </div>
         </form>
+        </div>
       </div>
     </section>
   </main>
@@ -580,6 +674,9 @@
     // ===== shared descent state (driven by the panel choreography) =====
     const state = { targetE:0, curE:0, digEnergy:0 };
     window.elsserDescent = { setTargetE: (e) => { state.targetE = Math.max(0, Math.min(1, e)); }, addDig: (v) => { state.digEnergy = Math.min(1.6, state.digEnergy + v); } };
+    const brandWash = document.getElementById('brandWash');
+    const deepWash = document.getElementById('deepWash');
+    const gradeEl = document.getElementById('grade');
 
     const depthN = document.getElementById('depthN');
     const hintEl = document.getElementById('hint');
@@ -626,10 +723,20 @@
       rake.intensity = 2.15 - (0.62 - 0.20*SITE_TUNING.light)*e;
       grass.update(now, camera.position.y);
       dirt.update(dt, camera.position.y, state.digEnergy); state.digEnergy *= 0.90;
-      depthN.textContent = (Math.max(0, -centerY) * METRES_PER_WORLD).toFixed(1);
+      const depthVal = Math.max(0, -centerY) * METRES_PER_WORLD;
+      depthN.textContent = depthVal.toFixed(1);
+      window.elsserDescent.depthM = depthVal;   // shared with the scroll choreography
       // scroll indicator: visible on the flat grass, fades as the descent tilts in
       if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
-      updateStrata(centerY);
+      // sky surface wash dissolves to the green grass as the dive begins (fades early/fast)
+      if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.05 - e) / 0.03)).toFixed(3);
+      // earth-light wash fades in at the very bottom (the dig opens back into light)
+      if (deepWash) deepWash.style.opacity = Math.max(0, Math.min(1, (e - 0.80) / 0.12)).toFixed(3);
+      // vignette is off on the flat first screen; fades in as the descent begins
+      if (gradeEl) gradeEl.style.opacity = Math.max(0, Math.min(1, (e - 0.03) / 0.06)).toFixed(3);
+      // layer name stays hidden on the first page; comes in as the sky wash clears
+      if (e < 0.05) { if (curStrata !== -1) { curStrata = -1; strataEl.classList.remove('show'); } }
+      else updateStrata(centerY);
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
     }
@@ -754,6 +861,17 @@
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mobileLike = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
     const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+    // content panels: put the icon in line with the headline, on its right (wrap them in a row)
+    panels.forEach(function (panel, idx) {
+      if (idx === 0 || panel.classList.contains('panel--end')) return;
+      const icon = panel.querySelector('.panel__icon');
+      const head = panel.querySelector('.panel__verdict');
+      if (icon && head && head.parentNode) {
+        const row = document.createElement('div'); row.className = 'hl-row';
+        head.parentNode.insertBefore(row, head);
+        row.appendChild(head); row.appendChild(icon);
+      }
+    });
     const descent = window.elsserDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
@@ -764,11 +882,13 @@
 
     // build photo galleries from compact data-ids lists (one CDN base, lazy thumbs)
     const PHOTO_BASE = 'https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/';
-    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery[data-ids]')).forEach(function (g) {
+    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery[data-ids], .panel__gallery[data-urls]')).forEach(function (g) {
       const cap = g.getAttribute('data-cap') || '';
-      g.getAttribute('data-ids').split(',').forEach(function (id) {
-        id = id.trim(); if (!id) return;
-        const url = PHOTO_BASE + id;
+      const urls = g.hasAttribute('data-urls')
+        ? g.getAttribute('data-urls').split(',').map(function (s) { return s.trim(); })
+        : g.getAttribute('data-ids').split(',').map(function (id) { id = id.trim(); return id ? PHOTO_BASE + id : ''; });
+      urls.forEach(function (url) {
+        if (!url) return;
         const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'g-thumb';
         btn.setAttribute('data-full', url); btn.setAttribute('data-cap', cap);
         const img = document.createElement('img'); img.src = url; img.alt = cap; img.loading = 'lazy';
@@ -779,6 +899,13 @@
     function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
     function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
     function smooth01 (x) { const t = clamp01(x); return t*t*(3 - 2*t); }
+    // POP a single icon facet: scale .2 -> 1.12 -> 1 on the way in (tin), reverse + fade on the way out (tout)
+    function facetPop (path, tin, tout) {
+      let s = (tin < 0.7) ? (0.2 + (1.12 - 0.2) * (tin / 0.7)) : (1.12 + (1 - 1.12) * ((tin - 0.7) / 0.3));
+      s = s * (1 - tout) + 0.2 * tout;
+      path.style.opacity = (Math.min(1, tin / 0.7) * (1 - tout)).toFixed(3);
+      path.style.transform = 'scale(' + s.toFixed(3) + ')';
+    }
 
     // split each headline into masked, individually-rising words ("text up")
     function splitWords (el) {
@@ -800,6 +927,8 @@
       const blocks = [];
       const lede = panel.querySelector('.panel__lede'); if (lede) blocks.push(lede);
       panel.querySelectorAll('.panel__evidence p').forEach(function (p) { blocks.push(p); });
+      // inline detail list reveals under the text on non-hero panels (hero's plays centered in #sideList)
+      const lst = panel.querySelector('.panel__list'); if (lst && idx !== 0) blocks.push(lst);
       const fig = panel.querySelector('.panel__gallery'); if (fig) blocks.push(fig);
       const cta = panel.querySelector('.panel__contact'); if (cta) blocks.push(cta);
       const frm = panel.querySelector('.panel__form'); if (frm) blocks.push(frm);
@@ -810,6 +939,7 @@
         el: panel,
         inner: panel.querySelector('.panel__inner'),
         iconHTML: (panel.querySelector('.panel__icon') || {}).innerHTML || '',
+        iconPaths: Array.prototype.slice.call(panel.querySelectorAll('.panel__icon path')),
         eyebrow: panel.querySelector('.panel__eyebrow'),
         words: head ? splitWords(head) : [],
         blocks: blocks,
@@ -833,42 +963,73 @@
         if (m.inner) { m.inner.style.opacity = (1 - ex); m.inner.style.transform = 'translateY(' + (-ex * 26).toFixed(1) + 'px)'; }
         return;
       }
-      // Reveals are front-loaded (all up by ~p=0.5) so the rest of the panel is a
-      // long HOLD where the text sits fully up, then a late exit.
-      // eyebrow slides in
-      const pe = mapRange(p, 0.04, 0.10);
-      if (m.eyebrow) { m.eyebrow.style.opacity = pe; m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe)) + 'px)'; }
-      // headline words rise out of their mask, staggered ("text up")
+      // ----- CONTACT (end): builds in as the panel rises to screen-centre, finishing when centred; then STAYS -----
+      if (m.isEnd) {
+        const vhh = window.innerHeight || 800;
+        const r = m.el.getBoundingClientRect();
+        const dist = (r.top + r.height / 2) - vhh / 2;   // 0 when the contact panel is centred in the viewport
+        const build = smooth01(clamp01((vhh * 0.7 - dist) / (vhh * 0.7)));   // 0 a bit before, exactly 1 when centred
+        if (m.eyebrow) { const eb = smooth01(clamp01(build / 0.5)); m.eyebrow.style.opacity = eb.toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - eb)).toFixed(1) + 'px)'; }
+        for (let i = 0; i < m.words.length; i++) {
+          const w = smooth01(clamp01((build - i * 0.09) / 0.6));
+          m.words[i].style.transform = 'translateY(' + ((1 - w) * 112).toFixed(2) + '%)';
+          m.words[i].style.opacity = w.toFixed(3);
+        }
+        if (m.iconPaths) for (let i = 0; i < m.iconPaths.length; i++) facetPop(m.iconPaths[i], smooth01(clamp01((build - i * 0.07) / 0.55)), 0);
+        for (let i = 0; i < m.blocks.length; i++) {
+          const b = smooth01(clamp01((build - 0.18 - i * 0.05) / 0.6));
+          m.blocks[i].style.opacity = b.toFixed(3);
+          m.blocks[i].style.transform = 'translateY(' + (26 * (1 - b)).toFixed(1) + 'px)';
+        }
+        if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
+        return;
+      }
+
+      // ----- content panels: every element animates IN, then animates OUT the same way -----
+      // eyebrow slides in from the left, then slides back out the same way
+      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.88, 0.97));
+      if (m.eyebrow) { m.eyebrow.style.opacity = (pe * (1 - eo)).toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe) - 20 * eo).toFixed(1) + 'px)'; }
+      // headline words rise out of their mask, then drop back into it (staggered both ways)
       const words = m.words;
       for (let i = 0; i < words.length; i++) {
-        const s = 0.09 + i * 0.04;
-        const pw = smooth01(mapRange(p, s, s + 0.14));
-        words[i].style.transform = 'translateY(' + ((1 - pw) * 112).toFixed(2) + '%)';
-        words[i].style.opacity = pw.toFixed(3);
+        const pw = smooth01(mapRange(p, 0.09 + i * 0.04, 0.09 + i * 0.04 + 0.14));
+        const wo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+        words[i].style.transform = 'translateY(' + ((1 - pw) * 112 + wo * 112).toFixed(2) + '%)';
+        words[i].style.opacity = (pw * (1 - wo)).toFixed(3);
       }
-      // supporting blocks reveal sequentially (translateY 26 -> 0)
-      const blocks = m.blocks, bStart = 0.24, bStep = 0.035, bSeg = 0.10;
+      // icon facets POP in, then POP out, scroll-scrubbed + staggered
+      if (m.iconPaths && m.iconPaths.length) {
+        for (let i = 0; i < m.iconPaths.length; i++) {
+          const tin = smooth01(mapRange(p, 0.06 + i * 0.045, 0.06 + i * 0.045 + 0.16));
+          const tout = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          facetPop(m.iconPaths[i], tin, tout);
+        }
+      }
+      // supporting blocks fade in (text rises, photos slide in from the right), then reverse out the same way
+      const blocks = m.blocks;
       for (let i = 0; i < blocks.length; i++) {
-        const s = bStart + i * bStep;
-        const pb = smooth01(mapRange(p, s, s + bSeg));
-        blocks[i].style.opacity = pb.toFixed(3);
-        blocks[i].style.transform = 'translateY(' + (26 * (1 - pb)).toFixed(1) + 'px)';
+        const pb = smooth01(mapRange(p, 0.24 + i * 0.035, 0.24 + i * 0.035 + 0.10));
+        const bo = smooth01(mapRange(p, 0.86 + i * 0.03, 0.86 + i * 0.03 + 0.12));
+        blocks[i].style.opacity = (pb * (1 - bo)).toFixed(3);
+        if (blocks[i].classList.contains('panel__gallery')) {
+          blocks[i].style.transform = 'translateX(' + (44 * (1 - pb) + 44 * bo).toFixed(1) + 'px)';   // in from the right, out to the right
+        } else {
+          blocks[i].style.transform = 'translateY(' + (26 * (1 - pb) + 26 * bo).toFixed(1) + 'px)';
+        }
       }
-      // mobile: in-flow detail lines stack in one-by-one as the panel scrolls
-      // (desktop hides .panel__list and renders these in #sideList instead, so this is harmless there)
+      // mobile: in-flow detail lines stack in, then drop back out
       if (m.listEls && m.listEls.length) {
         const lStart = 0.30, lBuildEnd = 0.62, NL = m.listEls.length, lStep = 1 / NL;
         const lt = clamp01((p - lStart) / Math.max(0.0001, lBuildEnd - lStart));
         for (let i = 0; i < NL; i++) {
           const pl = smooth01(clamp01((lt - i * lStep) / (lStep * 0.85)));
-          m.listEls[i].style.opacity = pl.toFixed(3);
-          m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16).toFixed(1) + 'px)';
+          const lo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          m.listEls[i].style.opacity = (pl * (1 - lo)).toFixed(3);
+          m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16 + lo * 16).toFixed(1) + 'px)';
         }
       }
-      // long HOLD (~p 0.5 -> 0.93), then a late lift + fade — except the final form, which stays put
-      if (m.isEnd) { if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; } return; }
-      const px = mapRange(p, 0.93, 1.00);
-      if (m.inner) { m.inner.style.opacity = (1 - px).toFixed(3); m.inner.style.transform = 'translateY(' + (-28 * px).toFixed(1) + 'px)'; }
+      // the inner stays put; each element handles its own exit in place (no blanket scroll/lift)
+      if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
     }
 
     function revealAll () {
@@ -971,7 +1132,15 @@
         if (!m) return; ev.preventDefault();
         measure();
         window.scrollTo({ top: Math.round(navTargetY(m)), behavior: 'smooth' });
+        navHost.classList.remove('nav-open'); if (navTgl) navTgl.setAttribute('aria-expanded', 'false');
       });
+    });
+    // mobile hamburger toggle
+    const navHost = document.getElementById('siteNav');
+    const navTgl = document.querySelector('.nav-toggle');
+    if (navTgl) navTgl.addEventListener('click', function () {
+      const open = navHost.classList.toggle('nav-open');
+      navTgl.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     function spy (y) {
       let current = null;
@@ -997,16 +1166,23 @@
       if (!active.isEnd && y > active.end && models[ai + 1]) {
         const next = models[ai + 1];
         te = active.e + (next.e - active.e) * smooth01(clamp01((y - active.end) / Math.max(1, next.start - active.end)));
+      } else if (active.isEnd && models[ai - 1]) {
+        // keep the descent continuous into/out of the contact (same ramp as the gap) so the
+        // depth count tracks scroll both ways instead of snapping to the contact depth
+        const prev = models[ai - 1];
+        te = prev.e + (active.e - prev.e) * smooth01(clamp01((y - prev.end) / Math.max(1, active.start - prev.end)));
       }
       descent.setTargetE(te);
       // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
       let up;
       if (active.isEnd) {
-        up = smooth01(mapRange(endProgress(active, y), 0.60, 0.95));
+        // the end sits on the earth-light deep wash; its own frosted card carries text
+        // readability, so keep the full-screen dark veil off here
+        up = 0;
       } else {
         const ap = clamp01((y - active.start) / (active.end - active.start));
         up = active.isHero
-          ? (1 - smooth01(mapRange(ap, 0.04, 0.55)))
+          ? 0   /* first screen stays clean: no dark veil/gradient over the sky wash */
           : smooth01(mapRange(ap, 0.06, 0.30)) * (1 - smooth01(mapRange(ap, 0.92, 1.00)));
       }
       if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
@@ -1015,10 +1191,11 @@
         let sec = null;
         for (let i = 0; i < models.length; i++) {
           const m = models[i];
-          if (m.sideItems.length && m.sideEnd > m.sideStart && y >= m.sideStart && y < m.sideEnd) { sec = m; break; }
+          if (m.isHero && m.sideItems.length && m.sideEnd > m.sideStart && y >= m.sideStart && y < m.sideEnd) { sec = m; break; }
         }
         if (sec !== sideCurrent) {
           sideCurrent = sec; sideList.innerHTML = ''; sideLines = []; sideIconEl = null;
+          sideList.classList.toggle('side-centered', !!(sec && sec.isHero));   // first list plays centered
           if (sec) {
             if (sec.iconHTML) { const ic = document.createElement('div'); ic.className = 'sl-icon'; ic.innerHTML = sec.iconHTML; sideList.appendChild(ic); sideIconEl = ic; }
             sec.sideItems.forEach(function (t) {
@@ -1033,11 +1210,22 @@
           sideList.style.visibility = 'visible';
           const N = sideLines.length, step = 1 / N;
           const localT = clamp01((y - sec.sideStart) / Math.max(1, sec.sideBuildEnd - sec.sideStart));
-          if (sideIconEl) sideIconEl.style.opacity = smooth01(clamp01(localT / 0.12)).toFixed(3);
+          const span = Math.max(1, sec.sideEnd - sec.sideStart);
+          const outT = clamp01((y - (sec.sideStart + span * 0.74)) / (span * 0.24));   // animate out over the last stretch
+          if (sideIconEl) {
+            sideIconEl.style.opacity = 1;   // facets carry their own opacity
+            const ip = sideIconEl.querySelectorAll('path'); const NF = ip.length || 1;
+            for (let k = 0; k < ip.length; k++) {
+              const tin = smooth01(clamp01((localT - k * (0.6 / NF)) / 0.5));
+              const tout = smooth01(clamp01((outT - k * 0.04) / 0.5));
+              facetPop(ip[k], tin, tout);
+            }
+          }
           for (let i = 0; i < N; i++) {
             const pi = smooth01(clamp01((localT - i * step) / (step * 0.85)));
-            sideLines[i].style.opacity = pi.toFixed(3);
-            sideLines[i].style.transform = 'translateY(' + ((1 - pi) * 30).toFixed(1) + 'px)';
+            const po = smooth01(clamp01((outT - i * 0.04) / 0.5));
+            sideLines[i].style.opacity = (pi * (1 - po)).toFixed(3);
+            sideLines[i].style.transform = 'translateY(' + ((1 - pi) * 30 + po * 22).toFixed(1) + 'px)';
           }
         } else {
           sideList.style.visibility = 'hidden';
@@ -1093,6 +1281,24 @@
       else if (e.key === 'ArrowLeft') step(-1);
       else if (e.key === 'ArrowRight') step(1);
     });
+  })();
+  </script>
+
+  <script>
+  // click-to-enter splash + persistent fullscreen toggle
+  (function () {
+    const splash = document.getElementById('splash');
+    const fsBtn = document.getElementById('fsBtn');
+    const docEl = document.documentElement;
+    function enterFS () { const r = docEl.requestFullscreen || docEl.webkitRequestFullscreen; if (r) { try { const p = r.call(docEl); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+    function exitFS () { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { try { x.call(document); } catch (e) {} } }
+    function isFS () { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    if (splash) {
+      splash.addEventListener('click', enterSite);
+      splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
+    }
+    if (fsBtn) fsBtn.addEventListener('click', function () { isFS() ? exitFS() : enterFS(); });
   })();
   </script>
 </body>
