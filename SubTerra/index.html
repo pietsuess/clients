@@ -19,10 +19,15 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { background:#0b0907; color:var(--ink);
     font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-  body { overflow-x:clip; }
+  /* no horizontal overflow on either element (mobile side-scroll guard) */
+  html { overflow-x:hidden; }
+  body { overflow-x:hidden; overscroll-behavior:none; }
 
   #stage { position:fixed; inset:0; height:100dvh; z-index:1; }
-  canvas { display:block; }
+  /* canvas display size is driven by CSS (renderer.setSize(...,false) skips inline px),
+     so it always fills the visible dvh box even as the mobile address bar toggles */
+  #stage canvas { width:100%; height:100%; }
+  canvas { display:block; max-width:100%; }
   /* brand-blue wash at the surface; dissolves to the green grass as the descent begins (flat, no gradient) */
   /* 100dvh (not inset:0) so the wash always covers the VISIBLE area — otherwise the mobile address bar toggling
      leaves a non-blue strip at the bottom and the surface "blue looks wrong" */
@@ -584,7 +589,7 @@
 
     const renderer = new T.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
+    renderer.setSize(innerWidth, innerHeight, false);   // false = don't write inline px size; CSS sizes the canvas (mobile address-bar safe)
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.02;
@@ -770,7 +775,7 @@
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-    addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+    addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); });
 
     // ===== helpers =====
     function getCenterCutY (fallbackY) {
@@ -1365,8 +1370,10 @@
     const ICON_EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg>';
     const ICON_COMPRESS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4a1 1 0 0 1-1 1H4"/><path d="M15 4v4a1 1 0 0 0 1 1h4"/><path d="M9 20v-4a1 1 0 0 0-1-1H4"/><path d="M15 20v-4a1 1 0 0 1 1-1h4"/></svg>';
     function syncIcon () { if (fsBtn) fsBtn.innerHTML = isFS() ? ICON_COMPRESS : ICON_EXPAND; }   // button always stays; only its glyph changes
-    document.addEventListener('fullscreenchange', syncIcon);
-    document.addEventListener('webkitfullscreenchange', syncIcon);
+    // Entering/exiting fullscreen changes the viewport; re-sync the WebGL buffer + scroll math once it settles.
+    function afterViewportChange () { setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 200); }
+    document.addEventListener('fullscreenchange', function () { syncIcon(); afterViewportChange(); });
+    document.addEventListener('webkitfullscreenchange', function () { syncIcon(); afterViewportChange(); });
     function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
     if (splash) {
       splash.addEventListener('click', enterSite);
