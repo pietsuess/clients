@@ -40,17 +40,12 @@
     background:linear-gradient(180deg, rgba(6,7,9,.82) 30%, rgba(6,7,9,0)); }
   #siteNav img { display:block; width:clamp(40px, 4.2vw, 52px); height:auto;
     filter:drop-shadow(0 6px 14px rgba(0,0,0,.4)); }   /* icon-only mark (blue), reads on the dark nav scrim */
-  .hero-lockup { display:flex; align-items:center; gap:clamp(14px,1.7vw,24px); margin:0; }
-  .hero-lockup .hl-icon { flex:none; width:clamp(62px,7vw,94px); height:auto;
-    filter:drop-shadow(0 4px 16px rgba(0,0,0,.6)); }
-  .hero-lockup .hl-words { display:flex; flex-direction:column; }
-  .hero-lockup .hl-name { font:900 clamp(2.1rem,5.4vw,3.8rem)/.84 var(--display);
-    letter-spacing:-.012em; text-transform:uppercase; color:#fff; text-shadow:0 2px 18px rgba(0,0,0,.85); }
-  /* EARTHWORKS tracked out to span the exact width of SUBTERRA (matches the wordmark) */
-  .hero-lockup .hl-sub { display:flex; justify-content:space-between; width:100%;
-    font:400 clamp(.78rem,1.55vw,1.26rem)/1 var(--display);
-    text-transform:uppercase; color:#fff; margin-top:.34em; text-shadow:0 2px 14px rgba(0,0,0,.9); }
-  .hero-lockup .hl-sub i { font-style:normal; }
+  /* exact-vector logo lockup: blue scoop icon + white wordmark, sized by matched height */
+  .hero-lockup { display:flex; align-items:center; gap:clamp(16px,1.9vw,28px); margin:0; }
+  .hero-lockup .hl-icon { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
+    filter:drop-shadow(0 4px 18px rgba(0,0,0,.6)); }
+  .hero-lockup .hl-wordmark { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
+    filter:brightness(0) invert(1) drop-shadow(0 3px 16px rgba(0,0,0,.85)); }
   .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
     filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
   .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
@@ -288,7 +283,7 @@
 
   <header id="siteNav" aria-label="Subterra Earthworks">
     <a href="#p-hero" data-scroll-target="#p-hero" aria-label="Subterra Earthworks home">
-      <img src="https://subterraearthworks.ca/wp-content/uploads/2024/04/subterrarev1-favi.png" alt="Subterra Earthworks">
+      <img src="assets/SubterraLogo-01.svg" alt="Subterra Earthworks">
     </a>
     <nav class="site-links" aria-label="Site sections">
       <a href="#p-hero" data-scroll-target="#p-hero">Surface</a>
@@ -306,7 +301,7 @@
       <div class="panel__inner">
         <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M48 17 L74 30 L48 43 L22 30 Z"/><path fill="#7badd7" d="M22 30 L48 43 L48 51.7 L22 38.7 Z"/><path fill="#4f93cf" d="M22 38.7 L48 51.7 L48 60.3 L22 47.3 Z"/><path fill="#2f7abf" d="M22 47.3 L48 60.3 L48 69 L22 56 Z"/><path fill="#1f66ab" d="M74 30 L48 43 L48 51.7 L74 38.7 Z"/><path fill="#0a64bf" d="M74 38.7 L48 51.7 L48 60.3 L74 47.3 Z"/><path fill="#0a4a82" d="M74 47.3 L48 60.3 L48 69 L74 56 Z"/></svg></span>
         <span class="panel__eyebrow">Salt Spring Island</span>
-        <h1 class="hero-lockup"><img class="hl-icon" src="https://subterraearthworks.ca/wp-content/uploads/2024/04/subterrarev1-favi.png" alt=""><span class="hl-words"><span class="hl-name">Subterra</span><span class="hl-sub" aria-label="Earthworks"><i>E</i><i>A</i><i>R</i><i>T</i><i>H</i><i>W</i><i>O</i><i>R</i><i>K</i><i>S</i></span></span></h1>
+        <h1 class="hero-lockup" aria-label="Subterra Earthworks"><img class="hl-icon" src="assets/SubterraLogo-01.svg" alt=""><img class="hl-wordmark" src="assets/SubterraLogo-02.svg" alt=""></h1>
         <p class="panel__lede">Top-notch excavation, tailored to your site.</p>
         <div class="panel__evidence"><p>We provide top-notch excavation with cost-effective solutions tailored to your needs. Attention to detail and a customer-centric approach mean satisfaction and peace of mind at every stage of the project.</p></div>
         <ul class="panel__list"><li>Excavation</li><li>Land Clearing</li><li>Trenching &amp; Site Services</li><li>Free Estimates</li></ul>
