@@ -19,9 +19,9 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { background:#0b0907; color:var(--ink);
     font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-  /* no horizontal overflow on either element (mobile side-scroll guard) */
-  html { overflow-x:hidden; }
-  body { overflow-x:hidden; overscroll-behavior:none; }
+  /* clip (NOT hidden) so neither element becomes a scroll container — hidden on html+body kills native vertical scroll on mobile.
+     The real horizontal-overflow source was the canvas; it's fixed via renderer.setSize(...,false) + CSS-sized #stage canvas. */
+  body { overflow-x:clip; overscroll-behavior:none; }
 
   #stage { position:fixed; inset:0; height:100dvh; z-index:1; }
   /* canvas display size is driven by CSS (renderer.setSize(...,false) skips inline px),
