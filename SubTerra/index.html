@@ -26,6 +26,9 @@
   /* brand-blue wash at the surface; dissolves to the green grass as the descent begins */
   #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
     background:linear-gradient(180deg, #3a9bdb 0%, #0a64bf 52%, #0a4a82 100%); }
+  /* light-blue wash at the very bottom of the descent; fades in as the dig opens into light */
+  #deepWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
+    background:linear-gradient(180deg, #5a9fd4 0%, #9fcbeb 56%, #d2e8f8 100%); }
 
   /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
   #textVeil { position:fixed; inset:0; z-index:4; pointer-events:none; opacity:0; visibility:hidden;
@@ -75,7 +78,12 @@
   .panel--tall { height:380vh; }
   /* the final section ends the page: a real form, sized to its content, nothing past it */
   .panel--end { height:auto; }
-  .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 4vh; }
+  .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 6vh; }
+  /* the end form floats as a frosted dark card on the light-blue deep wash, so its text stays readable */
+  .end-card { background:rgba(8,12,18,.66); -webkit-backdrop-filter:blur(13px); backdrop-filter:blur(13px);
+    border:1px solid rgba(202,222,239,.24); border-radius:22px;
+    padding:clamp(30px,4vw,58px) clamp(24px,4.2vw,62px);
+    box-shadow:0 38px 92px rgba(0,0,0,.46); }
   .panel--end h2.panel__verdict { font-size:clamp(1.9rem, 3.4vw, 3.4rem); }
   .panel--end .panel__evidence p { margin-top:9px; max-width:70ch; font-size:clamp(.95rem,.95vw,1.08rem); }
   /* breathing room between sections: pure descending earth, no text */
@@ -278,6 +286,7 @@
 <body>
   <div id="stage"></div>
   <div id="brandWash" aria-hidden="true"></div>
+  <div id="deepWash" aria-hidden="true"></div>
   <div id="textVeil" aria-hidden="true"></div>
   <div id="fallback"><p>Subterra Earthworks</p></div>
 
@@ -390,6 +399,7 @@
 
     <section class="panel panel--end" id="p-bedrock" data-e="0.90">
       <div class="panel__inner">
+        <div class="end-card">
         <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M22 33 L48 20 L74 33 L48 33.5 Z"/><path fill="#9dc4e4" d="M22 33 L74 33 L48 46 Z"/><path fill="#2f7abf" d="M22 33 L48 46 L48 54 L22 41 Z"/><path fill="#0a4a82" d="M74 33 L48 46 L48 54 L74 41 Z"/></svg></span>
         <span class="panel__eyebrow">Bedrock &middot; Start your project</span>
         <h2 class="panel__verdict">Break ground.</h2>
@@ -438,6 +448,7 @@
             <p class="f-status" role="status" aria-live="polite"></p>
           </div>
         </form>
+        </div>
       </div>
     </section>
   </main>
@@ -618,6 +629,7 @@
     const depthN = document.getElementById('depthN');
     const hintEl = document.getElementById('hint');
     const brandWash = document.getElementById('brandWash');
+    const deepWash = document.getElementById('deepWash');
     const fogTop = new T.Color(0x9aa6ae), fogDeep = new T.Color(0x070504);
     const strataEl = document.getElementById('strata'), strataName = document.getElementById('strataName'), strataSub = document.getElementById('strataSub');
     const STRATA = [
@@ -666,6 +678,8 @@
       if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
       // brand-blue surface wash dissolves to the green grass as the dive begins
       if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.085 - e) / 0.06)).toFixed(3);
+      // light-blue wash fades in at the very bottom (the dig opens back into light)
+      if (deepWash) deepWash.style.opacity = Math.max(0, Math.min(1, (e - 0.80) / 0.12)).toFixed(3);
       updateStrata(centerY);
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
@@ -1049,7 +1063,9 @@
       // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
       let up;
       if (active.isEnd) {
-        up = smooth01(mapRange(endProgress(active, y), 0.60, 0.95));
+        // the end sits on the light-blue deep wash; its own frosted card carries text
+        // readability, so keep the full-screen dark veil off here
+        up = 0;
       } else {
         const ap = clamp01((y - active.start) / (active.end - active.start));
         up = active.isHero
