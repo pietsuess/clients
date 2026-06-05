@@ -21,13 +21,15 @@
     font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
   body { overflow-x:clip; }
 
-  #stage { position:fixed; inset:0; z-index:1; }
+  #stage { position:fixed; inset:0; height:100dvh; z-index:1; }
   canvas { display:block; }
   /* brand-blue wash at the surface; dissolves to the green grass as the descent begins (flat, no gradient) */
-  #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
+  /* 100dvh (not inset:0) so the wash always covers the VISIBLE area — otherwise the mobile address bar toggling
+     leaves a non-blue strip at the bottom and the surface "blue looks wrong" */
+  #brandWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
     background:#2f7abf; }
   /* light-blue wash at the very bottom of the descent; fades in as the dig opens into light */
-  #deepWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
+  #deepWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
     background:linear-gradient(180deg, #5a9fd4 0%, #9fcbeb 56%, #d2e8f8 100%); }
 
   /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
@@ -50,7 +52,9 @@
   .fs-btn svg { width:100%; height:100%; display:block; }
   .fs-btn:hover { color:var(--accent); }
   /* click-to-enter splash: Subterra logo on white, fades to the site (and into fullscreen) */
-  #splash { position:fixed; inset:0; z-index:60; background:#fff; cursor:pointer;
+  /* 100dvh + JS visualViewport pinning so the logo centres in the VISIBLE area on mobile
+     (plain inset:0 centres against the layout viewport, dropping the logo low-and-right behind the address bar) */
+  #splash { position:fixed; inset:0; height:100dvh; z-index:60; background:#fff; cursor:pointer;
     display:flex; align-items:center; justify-content:center; transition:opacity .7s ease; }
   #splash.gone { opacity:0; pointer-events:none; }
   #splash .sp-icon { height:clamp(96px,15vw,200px); width:auto; }
@@ -254,7 +258,7 @@
     will-change:transform, opacity; }
 
   /* grain + vignette */
-  #grade { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0;   /* off on the first screen; the scene fades it in on the descent (keeps the brand blue flat everywhere, incl. if 3D never inits) */
+  #grade { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0;   /* off on the first screen; the scene fades it in on the descent (keeps the brand blue flat everywhere, incl. if 3D never inits) */
     background:radial-gradient(122% 92% at 50% 40%, rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 100%); mix-blend-mode:multiply; }
   #grain { position:fixed; inset:-50%; z-index:3; pointer-events:none; opacity:.07;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -305,6 +309,8 @@
   @media (max-width: 900px) {
     #siteNav { grid-template-columns:auto auto; min-height:74px; }
     .site-links { display:none; }
+    /* lift the scroll cue well clear of the mobile browser toolbar (52px sat behind it) */
+    #hint { bottom:clamp(96px, 18vh, 150px); }
     .panel { height:210vh; }
     .panel--tall { height:300vh; }
     .panel--end { height:auto; }
@@ -333,7 +339,7 @@
     .site-cta { order:2; margin-inline:auto; padding:9px 14px; font-size:.68rem; }
     .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
       align-items:stretch; background:#fff; border-top:1px solid rgba(10,74,130,.18);
-      box-shadow:0 18px 40px rgba(0,0,0,.18); padding:6px 0 10px; display:none; }
+      box-shadow:0 18px 40px rgba(0,0,0,.18); padding:0 0 10px; display:none; }   /* no top padding: the white gap above the first link read as a dead space */
     #siteNav.nav-open .site-links { display:flex; }
     .site-links a { padding:14px clamp(22px,6vw,40px); color:#0a4a82; }
     .site-links a::after { display:none; }
@@ -1328,6 +1334,28 @@
     const splash = document.getElementById('splash');
     const fsBtn = document.getElementById('fsBtn');
     const docEl = document.documentElement;
+    // Centre the splash against the VISUAL viewport (what's actually visible). Before fullscreen the
+    // visual viewport is smaller than the layout one and anchored top-left, so CSS centring put the
+    // logo low-and-right; pin the splash to the visual viewport's size + offset so it's centred in every state.
+    function sizeSplash () {
+      if (!splash) return;
+      const vv = window.visualViewport;
+      if (vv) {
+        splash.style.width = vv.width + 'px';
+        splash.style.height = vv.height + 'px';
+        splash.style.left = vv.offsetLeft + 'px';
+        splash.style.top = vv.offsetTop + 'px';
+        splash.style.right = 'auto';
+        splash.style.bottom = 'auto';
+      }
+    }
+    sizeSplash();
+    window.addEventListener('resize', sizeSplash);
+    window.addEventListener('orientationchange', sizeSplash);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', sizeSplash);
+      window.visualViewport.addEventListener('scroll', sizeSplash);
+    }
     function enterFS () { const r = docEl.requestFullscreen || docEl.webkitRequestFullscreen; if (r) { try { const p = r.call(docEl); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
     function exitFS () { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { try { x.call(document); } catch (e) {} } }
     function isFS () { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
