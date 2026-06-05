@@ -19,8 +19,11 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { background:#0b0907; color:var(--ink);
     font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-  /* clip (NOT hidden) so neither element becomes a scroll container — hidden on html+body kills native vertical scroll on mobile.
-     The real horizontal-overflow source was the canvas; it's fixed via renderer.setSize(...,false) + CSS-sized #stage canvas. */
+  /* clip (NOT hidden) on BOTH so neither becomes a scroll container: clip clips horizontal overflow
+     while leaving overflow-y:visible (native vertical scroll intact). hidden would force overflow-y:auto
+     and kill mobile scrolling. clip must be on html too — body-only clip doesn't catch overflow that
+     propagates to the root. */
+  html { overflow-x:clip; }
   body { overflow-x:clip; overscroll-behavior:none; }
 
   #stage { position:fixed; inset:0; height:100dvh; z-index:1; }
