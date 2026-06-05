@@ -1334,6 +1334,9 @@
     const splash = document.getElementById('splash');
     const fsBtn = document.getElementById('fsBtn');
     const docEl = document.documentElement;
+    // Always start the descent at the very top — never a cached/restored scroll position.
+    if ('scrollRestoration' in history) { try { history.scrollRestoration = 'manual'; } catch (e) {} }
+    window.scrollTo(0, 0);
     // Centre the splash against the VISUAL viewport (what's actually visible). Before fullscreen the
     // visual viewport is smaller than the layout one and anchored top-left, so CSS centring put the
     // logo low-and-right; pin the splash to the visual viewport's size + offset so it's centred in every state.
@@ -1364,12 +1367,18 @@
     function syncIcon () { if (fsBtn) fsBtn.innerHTML = isFS() ? ICON_COMPRESS : ICON_EXPAND; }   // button always stays; only its glyph changes
     document.addEventListener('fullscreenchange', syncIcon);
     document.addEventListener('webkitfullscreenchange', syncIcon);
-    function enterSite () { if (!splash || splash.classList.contains('gone')) return; enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
     if (splash) {
       splash.addEventListener('click', enterSite);
       splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
     }
     if (fsBtn) fsBtn.addEventListener('click', function () { isFS() ? exitFS() : enterFS(); });
+    // bfcache restore (mobile back/forward) re-shows the splash and snaps back to top.
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      window.scrollTo(0, 0);
+      if (splash) { splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
+    });
     syncIcon();
   })();
   </script>
