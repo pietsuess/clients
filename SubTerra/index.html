@@ -42,19 +42,20 @@
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
     background:none; }
   #siteNav img { display:block; width:clamp(40px, 4.2vw, 52px); height:auto; }   /* icon-only mark, no shadow */
+  /* hamburger + fullscreen grouped at the right (so Free Estimate can centre on mobile) */
+  .nav-right { display:flex; align-items:center; gap:8px; justify-self:end; }
   /* persistent fullscreen toggle (right of the hamburger on mobile) */
   .fs-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; padding:9px;
-    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 4px 12px rgba(0,0,0,.4)); }
+    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 2px 8px rgba(0,0,0,.45)); }
   .fs-btn svg { width:100%; height:100%; display:block; }
   .fs-btn:hover { color:var(--accent); }
   /* click-to-enter splash: Subterra logo on white, fades to the site (and into fullscreen) */
   #splash { position:fixed; inset:0; z-index:60; background:#fff; cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(22px,3vw,40px);
-    transition:opacity .7s ease; }
+    display:flex; align-items:center; justify-content:center; transition:opacity .7s ease; }
   #splash.gone { opacity:0; pointer-events:none; }
-  .splash-lockup { display:flex; align-items:center; gap:clamp(16px,2vw,30px); }
-  .splash-lockup .sp-icon, .splash-lockup .sp-word { height:clamp(60px,9vw,124px); width:auto; }
-  .splash-hint { font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
+  #splash .sp-icon { height:clamp(96px,15vw,200px); width:auto; }
+  .splash-hint { position:absolute; left:50%; bottom:clamp(34px,6vh,72px); transform:translateX(-50%);
+    font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
   /* exact-vector logo lockup: blue scoop icon + white wordmark, sized by matched height */
   .hero-lockup { display:flex; align-items:center; gap:clamp(16px,1.9vw,28px); margin:0; }
   .hero-lockup .hl-icon { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
@@ -204,8 +205,7 @@
     border-radius:999px; transition:background .2s; line-height:1; }
   #lightbox button:hover { background:rgba(255,255,255,.18); }
   #lightbox .lb-close { top:22px; right:22px; width:46px; height:46px; font-size:26px; }
-  #lightbox .lb-prev, #lightbox .lb-next { top:50%; transform:translateY(-50%); width:52px; height:52px; font-size:28px; }
-  #lightbox .lb-prev { left:22px; } #lightbox .lb-next { right:22px; }
+  #lightbox .lb-prev, #lightbox .lb-next { display:none; }   /* single photo per section, no next/prev */
   .panel__contact { display:inline-flex; align-items:center; gap:10px; margin-top:22px;
     text-decoration:none; color:#11100d; background:rgba(233,226,214,.92);
     font:700 .84rem/1 var(--condensed); letter-spacing:.12em; text-transform:uppercase;
@@ -268,7 +268,7 @@
   #depth b { font-size:30px; font-weight:600; color:rgba(233,226,214,.92); display:block; line-height:1; letter-spacing:0; }
   #depth span { opacity:.55; }
 
-  #hint { position:fixed; left:50%; bottom:30px; transform:translateX(-50%); z-index:6;
+  #hint { position:fixed; left:50%; bottom:52px; transform:translateX(-50%); z-index:6;
     font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:rgba(233,226,214,.72);
     pointer-events:none; text-shadow:0 1px 8px rgba(0,0,0,.7); text-align:center; }
   #hint .mouse { display:block; width:22px; height:34px; margin:0 auto 10px;
@@ -276,7 +276,7 @@
   #hint .mouse::after { content:""; position:absolute; left:50%; top:6px; width:3px; height:6px;
     border-radius:2px; background:rgba(233,226,214,.85); transform:translateX(-50%); animation:wheel 1.6s ease-in-out infinite; }
   @keyframes wheel { 0%{opacity:0; transform:translate(-50%,0)} 30%{opacity:1} 70%{opacity:1; transform:translate(-50%,9px)} 100%{opacity:0; transform:translate(-50%,9px)} }
-  #hint .arr { display:block; text-align:center; margin-top:8px; animation:bob 1.8s ease-in-out infinite; }
+  #hint .arr { display:block; text-align:center; margin-top:4px; animation:bob 1.8s ease-in-out infinite; }
 
   /* descent spacer + centered "keep diggin'" cue (no pin, no veil) */
   .deep-stretch { height:110vh; pointer-events:none; }
@@ -324,17 +324,18 @@
     .panel__icon { display:block; width:52px; height:52px; margin:0 0 16px; }
     .panel__icon svg { width:100%; height:100%; display:block; }
     #p-hero .panel__icon { display:none; }   /* hero already shows the brand lockup */
-    /* mobile nav: hamburger toggles a dropdown of the section links */
-    #siteNav { display:flex; align-items:center; justify-content:space-between; gap:12px;
+    /* mobile nav: logo left, Free Estimate centred, hamburger + fullscreen tight on the right */
+    #siteNav { display:flex; align-items:center; gap:10px;
       min-height:64px; background:none; }   /* no black bar; white content like desktop */
-    .nav-toggle { display:flex; order:3; }
-    .fs-btn { order:4; width:38px; height:38px; }
-    .site-cta { order:2; padding:9px 14px; font-size:.68rem; }
+    .nav-toggle { display:flex; }
+    .nav-right { order:3; gap:4px; }
+    .fs-btn { width:38px; height:38px; }
+    .site-cta { order:2; margin-inline:auto; padding:9px 14px; font-size:.68rem; }
     .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
-      align-items:stretch; background:rgba(6,7,9,.97); border-top:1px solid rgba(255,255,255,.12);
-      padding:6px 0 10px; display:none; }
+      align-items:stretch; background:#fff; border-top:1px solid rgba(10,74,130,.18);
+      box-shadow:0 18px 40px rgba(0,0,0,.18); padding:6px 0 10px; display:none; }
     #siteNav.nav-open .site-links { display:flex; }
-    .site-links a { padding:14px clamp(22px,6vw,40px); color:rgba(255,255,255,.86); }
+    .site-links a { padding:14px clamp(22px,6vw,40px); color:#0a4a82; }
     .site-links a::after { display:none; }
     #siteNav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
     #siteNav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
@@ -347,10 +348,7 @@
 </head>
 <body>
   <div id="splash" role="button" tabindex="0" aria-label="Enter site">
-    <div class="splash-lockup">
-      <img class="sp-icon" src="assets/SubterraLogo-01.svg" alt="">
-      <img class="sp-word" src="assets/SubterraLogo-02.svg" alt="Subterra Earthworks">
-    </div>
+    <img class="sp-icon" src="assets/SubterraLogo-01.svg" alt="Subterra Earthworks">
     <div class="splash-hint">Click to enter</div>
   </div>
   <div id="stage"></div>
@@ -371,8 +369,10 @@
       <a href="#p-bedrock" data-scroll-target="#p-bedrock">Contact</a>
     </nav>
     <a class="site-cta" href="#p-bedrock" data-scroll-target="#p-bedrock">Free Estimate</a>
-    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
+    <div class="nav-right">
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
+    </div>
   </header>
 
   <main id="content">
@@ -1010,13 +1010,13 @@
 
       // ----- content panels: every element animates IN, then animates OUT the same way -----
       // eyebrow slides in from the left, then slides back out the same way
-      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.88, 0.97));
+      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.80, 0.89));
       if (m.eyebrow) { m.eyebrow.style.opacity = (pe * (1 - eo)).toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe) - 20 * eo).toFixed(1) + 'px)'; }
       // headline words rise out of their mask, then drop back into it (staggered both ways)
       const words = m.words;
       for (let i = 0; i < words.length; i++) {
         const pw = smooth01(mapRange(p, 0.09 + i * 0.04, 0.09 + i * 0.04 + 0.14));
-        const wo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+        const wo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
         words[i].style.transform = 'translateY(' + ((1 - pw) * 112 + wo * 112).toFixed(2) + '%)';
         words[i].style.opacity = (pw * (1 - wo)).toFixed(3);
       }
@@ -1024,7 +1024,7 @@
       if (m.iconPaths && m.iconPaths.length) {
         for (let i = 0; i < m.iconPaths.length; i++) {
           const tin = smooth01(mapRange(p, 0.06 + i * 0.045, 0.06 + i * 0.045 + 0.16));
-          const tout = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          const tout = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
           facetPop(m.iconPaths[i], tin, tout);
         }
       }
@@ -1032,7 +1032,7 @@
       const blocks = m.blocks;
       for (let i = 0; i < blocks.length; i++) {
         const pb = smooth01(mapRange(p, 0.24 + i * 0.035, 0.24 + i * 0.035 + 0.10));
-        const bo = smooth01(mapRange(p, 0.86 + i * 0.03, 0.86 + i * 0.03 + 0.12));
+        const bo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
         blocks[i].style.opacity = (pb * (1 - bo)).toFixed(3);
         if (blocks[i].classList.contains('panel__gallery')) {
           blocks[i].style.transform = 'translateX(' + (44 * (1 - pb) + 44 * bo).toFixed(1) + 'px)';   // in from the right, out to the right
@@ -1046,7 +1046,7 @@
         const lt = clamp01((p - lStart) / Math.max(0.0001, lBuildEnd - lStart));
         for (let i = 0; i < NL; i++) {
           const pl = smooth01(clamp01((lt - i * lStep) / (lStep * 0.85)));
-          const lo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          const lo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
           m.listEls[i].style.opacity = (pl * (1 - lo)).toFixed(3);
           m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16 + lo * 16).toFixed(1) + 'px)';
         }
@@ -1148,13 +1148,29 @@
       if (m.isEnd) return Math.max(0, m.start);          // form is centered + fully revealed at its top
       return m.start + (m.end - m.start) * 0.66;          // mid-hold = full text up
     }
+    // custom eased scroll: ramps out of a stop and eases into the stop (ease-in-out), not flat-out fast
+    let scrollRAF = null;
+    function easeInOutCubic (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function easedScrollTo (targetY) {
+      if (scrollRAF) cancelAnimationFrame(scrollRAF);
+      const startY = window.scrollY || 0, dist = targetY - startY;
+      const dur = Math.min(1800, Math.max(800, Math.abs(dist) * 0.42));
+      const t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+      function frame (now) {
+        const t = Math.min(1, (((now || Date.now())) - t0) / dur);
+        window.scrollTo(0, Math.round(startY + dist * easeInOutCubic(t)));
+        scrollRAF = t < 1 ? requestAnimationFrame(frame) : null;
+      }
+      scrollRAF = requestAnimationFrame(frame);
+    }
+    ['wheel', 'touchstart'].forEach(function (ev) { addEventListener(ev, function () { if (scrollRAF) { cancelAnimationFrame(scrollRAF); scrollRAF = null; } }, { passive: true }); });
     allNav.forEach(function (link) {
       link.addEventListener('click', function (ev) {
         const sel = link.getAttribute('data-scroll-target'); if (!sel) return;
         const m = models.find(function (mm) { return '#' + mm.el.id === sel; });
         if (!m) return; ev.preventDefault();
         measure();
-        window.scrollTo({ top: Math.round(navTargetY(m)), behavior: 'smooth' });
+        easedScrollTo(Math.round(navTargetY(m)));
         navHost.classList.remove('nav-open'); if (navTgl) navTgl.setAttribute('aria-expanded', 'false');
       });
     });
@@ -1315,12 +1331,18 @@
     function enterFS () { const r = docEl.requestFullscreen || docEl.webkitRequestFullscreen; if (r) { try { const p = r.call(docEl); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
     function exitFS () { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { try { x.call(document); } catch (e) {} } }
     function isFS () { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    const ICON_EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg>';
+    const ICON_COMPRESS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4a1 1 0 0 1-1 1H4"/><path d="M15 4v4a1 1 0 0 0 1 1h4"/><path d="M9 20v-4a1 1 0 0 0-1-1H4"/><path d="M15 20v-4a1 1 0 0 1 1-1h4"/></svg>';
+    function syncIcon () { if (fsBtn) fsBtn.innerHTML = isFS() ? ICON_COMPRESS : ICON_EXPAND; }   // button always stays; only its glyph changes
+    document.addEventListener('fullscreenchange', syncIcon);
+    document.addEventListener('webkitfullscreenchange', syncIcon);
     function enterSite () { if (!splash || splash.classList.contains('gone')) return; enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
     if (splash) {
       splash.addEventListener('click', enterSite);
       splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
     }
     if (fsBtn) fsBtn.addEventListener('click', function () { isFS() ? exitFS() : enterFS(); });
+    syncIcon();
   })();
   </script>
 </body>
