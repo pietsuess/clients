@@ -19,16 +19,21 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { background:#0b0907; color:var(--ink);
     font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
-  body { overflow-x:clip; }
+  html { overflow-x:clip; }
+  body { overflow-x:clip; overscroll-behavior:none; }
 
-  #stage { position:fixed; inset:0; z-index:1; }
-  canvas { display:block; }
+  #stage { position:fixed; inset:0; height:100dvh; z-index:1; }
+  /* canvas display size is driven by CSS (renderer.setSize(...,false) skips inline px),
+     so it always fills the visible dvh box even as the mobile address bar toggles */
+  #stage canvas { width:100%; height:100%; }
+  canvas { display:block; max-width:100%; }
 
   /* sky wash on the first screen; dissolves into the green grass as the descent begins */
-  #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
+  /* 100dvh (not inset:0 alone) so each wash always covers the VISIBLE area as the mobile address bar toggles */
+  #brandWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
     background:linear-gradient(180deg, #bcd6ea 0%, #87aece 54%, #6b93b6 100%); }
   /* warm earth-light wash at the very bottom of the descent; fades in as the dig opens into light */
-  #deepWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
+  #deepWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
     background:linear-gradient(180deg, #c9a36d 0%, #e6cfa6 56%, #f3e7d0 100%); }
 
   /* fade-blur veil behind the text: dims the 3D earth while a section is up */
@@ -44,16 +49,19 @@
     background:linear-gradient(180deg, rgba(6,7,9,.58), rgba(6,7,9,0)); }
   #siteNav img { display:block; width:clamp(150px, 13vw, 224px); height:auto;
     filter:drop-shadow(0 10px 20px rgba(0,0,0,.34)); }
-  /* persistent fullscreen toggle (right of the CTA / hamburger) */
+  /* hamburger + fullscreen grouped at the right (so Free Estimate can centre on mobile) */
+  .nav-right { display:flex; align-items:center; gap:8px; justify-self:end; }
+  /* persistent fullscreen toggle (right of the hamburger on mobile) */
   .fs-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; padding:9px;
-    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 4px 12px rgba(0,0,0,.4)); }
+    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 2px 8px rgba(0,0,0,.45)); }
   .fs-btn svg { width:100%; height:100%; display:block; }
   .fs-btn:hover { color:var(--accent); }
   .nav-toggle { display:none; flex-direction:column; justify-content:center; gap:5px;
     width:44px; height:44px; padding:10px; background:none; border:0; cursor:pointer; }
   .nav-toggle span { display:block; height:2px; width:100%; background:#fff; border-radius:2px; transition:transform .25s, opacity .2s; }
   /* click-to-enter splash: Elsser logo on dark earth, fades to the site (and into fullscreen) */
-  #splash { position:fixed; inset:0; z-index:60; cursor:pointer;
+  /* 100dvh + JS visualViewport pinning so the logo centres in the VISIBLE area on mobile */
+  #splash { position:fixed; inset:0; height:100dvh; z-index:60; cursor:pointer;
     background:radial-gradient(120% 100% at 50% 40%, #1b130c 0%, #0b0907 70%);
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(22px,3vw,40px);
     transition:opacity .7s ease; }
@@ -231,7 +239,7 @@
     will-change:transform, opacity; }
 
   /* grain + vignette */
-  #grade { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0;   /* off on the first screen; the scene fades it in on the descent (keeps the sky wash clean at rest) */
+  #grade { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0;   /* off on the first screen; the scene fades it in on the descent (keeps the sky wash clean at rest) */
     background:radial-gradient(122% 92% at 50% 40%, rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 100%); mix-blend-mode:multiply; }
   #grain { position:fixed; inset:-50%; z-index:3; pointer-events:none; opacity:.07;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -245,7 +253,7 @@
   #depth b { font-size:30px; font-weight:600; color:rgba(233,226,214,.92); display:block; line-height:1; letter-spacing:0; }
   #depth span { opacity:.55; }
 
-  #hint { position:fixed; left:50%; bottom:30px; transform:translateX(-50%); z-index:6;
+  #hint { position:fixed; left:50%; bottom:52px; transform:translateX(-50%); z-index:6;
     font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:rgba(233,226,214,.72);
     pointer-events:none; text-shadow:0 1px 8px rgba(0,0,0,.7); text-align:center; }
   #hint .mouse { display:block; width:22px; height:34px; margin:0 auto 10px;
@@ -253,7 +261,7 @@
   #hint .mouse::after { content:""; position:absolute; left:50%; top:6px; width:3px; height:6px;
     border-radius:2px; background:rgba(233,226,214,.85); transform:translateX(-50%); animation:wheel 1.6s ease-in-out infinite; }
   @keyframes wheel { 0%{opacity:0; transform:translate(-50%,0)} 30%{opacity:1} 70%{opacity:1; transform:translate(-50%,9px)} 100%{opacity:0; transform:translate(-50%,9px)} }
-  #hint .arr { display:block; text-align:center; margin-top:8px; animation:bob 1.8s ease-in-out infinite; }
+  #hint .arr { display:block; text-align:center; margin-top:4px; animation:bob 1.8s ease-in-out infinite; }
 
   /* descent spacer + centered "keep diggin'" cue (no pin, no veil) */
   .deep-stretch { height:110vh; pointer-events:none; }
@@ -290,27 +298,36 @@
     .panel__inner { width:90vw; padding:16vh 0; }
     .gap { height:44vh; }
     h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
-    h2.panel__verdict { font-size:clamp(2.2rem, 11vw, 4rem); }
+    /* content headlines: one line, JS fits each to span the full content width (fitHeadlines). Value here is fallback. */
+    h2.panel__verdict { font-size:clamp(1.8rem, 8.4vw, 3rem); white-space:nowrap; }
+    .hl-row { display:block; }   /* headline spans the full width on its own line (icon rides the eyebrow row) */
+    #hint { bottom:clamp(96px, 18vh, 150px); }   /* clear of the mobile browser toolbar */
     .panel__evidence p { max-width:none; }
     .panel__list { display:grid; grid-template-columns:1fr; max-width:none; margin-top:18px; }  /* #sideList is hidden on mobile, so stack the detail lines in-flow here */
     .panel__list li { min-height:46px; font-size:.82rem; letter-spacing:.13em; opacity:0; will-change:opacity, transform; }  /* JS stacks these in on scroll */
     .panel__gallery { max-width:none; justify-content:flex-end; }   /* images sit to the right on mobile */
     .panel__form .f-row { grid-template-columns:1fr; }
     #p-hero .panel__list { display:none; }   /* hero's first list plays centered in #sideList, not inline */
-    /* each section's icon shows inline above its content on mobile */
-    .panel__icon { display:block; width:52px; height:52px; margin:0 0 16px; }
-    .panel__icon svg { width:100%; height:100%; display:block; }
-    #p-hero .panel__icon { display:none; }   /* hero shows the logo, not an icon */
-    /* mobile nav: hamburger toggles a dropdown of the section links */
+    /* mobile: section icon rides the eyebrow line, on the RIGHT (JS moves it into .eb-row) */
+    .eb-row { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .eb-row .panel__eyebrow { margin-bottom:0; }
+    .panel:not(#p-hero):not(.panel--end) .eb-row .panel__icon { display:block; width:clamp(72px,18vw,96px); height:auto; margin:0; flex:0 0 auto; }
+    .eb-row .panel__icon svg { width:100%; height:auto; display:block; }
+    #p-hero .panel__icon { display:none; }   /* hero already shows the logo */
+    /* mobile nav: logo left, Free Estimate centred, hamburger + fullscreen tight on the right */
     #siteNav { display:flex; align-items:center; justify-content:space-between; gap:10px;
       min-height:64px; background:linear-gradient(180deg, rgba(6,7,9,.72), rgba(6,7,9,0)); }
     #siteNav img { width:clamp(118px, 30vw, 168px); }
-    .nav-toggle { display:flex; order:3; }
-    .fs-btn { order:4; width:36px; height:36px; }
-    .site-cta { order:2; padding:9px 13px; font-size:.66rem; }
+    .nav-toggle { display:flex; }
+    .nav-right { order:3; gap:4px; }
+    .fs-btn { width:38px; height:38px; }
+    /* absolute-centre the CTA to the true viewport middle (logo/right group have unequal widths,
+       so margin:auto between them lands off-centre); logo + nav-right pin to the edges via space-between */
+    .site-cta { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      margin:0; padding:9px 14px; font-size:.68rem; }
     .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
       align-items:stretch; background:rgba(6,7,9,.97); border-top:1px solid rgba(255,255,255,.12);
-      padding:6px 0 10px; display:none; }
+      box-shadow:0 18px 40px rgba(0,0,0,.28); padding:0 0 10px; display:none; }
     #siteNav.nav-open .site-links { display:flex; }
     .site-links a { padding:14px clamp(22px,6vw,40px); color:rgba(255,255,255,.86); }
     .site-links a::after { display:none; }
@@ -346,8 +363,10 @@
       <a href="#p-bedrock" data-scroll-target="#p-bedrock">Estimate</a>
     </nav>
     <a class="site-cta" href="#p-bedrock" data-scroll-target="#p-bedrock">Free Estimate</a>
-    <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
+    <div class="nav-right">
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
+    </div>
   </header>
 
   <main id="content">
@@ -557,7 +576,7 @@
 
     const renderer = new T.WebGLRenderer({ antialias:true, alpha:true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
+    renderer.setSize(innerWidth, innerHeight, false);   // false = don't write inline px size; CSS sizes the canvas (mobile address-bar safe)
     renderer.outputEncoding = T.sRGBEncoding;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.02;
@@ -743,7 +762,7 @@
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-    addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+    addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); });
 
     // ===== helpers =====
     function getCenterCutY (fallbackY) {
@@ -863,17 +882,57 @@
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mobileLike = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
     const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
-    // content panels: put the icon in line with the headline, on its right (wrap them in a row)
+    // content panels: desktop = icon in line with the headline (.hl-row, icon on the right);
+    // mobile = icon rides on the eyebrow line (.eb-row). Reparent the icon responsively.
+    const iconLayout = [];
     panels.forEach(function (panel, idx) {
       if (idx === 0 || panel.classList.contains('panel--end')) return;
+      const inner = panel.querySelector('.panel__inner');
       const icon = panel.querySelector('.panel__icon');
       const head = panel.querySelector('.panel__verdict');
-      if (icon && head && head.parentNode) {
-        const row = document.createElement('div'); row.className = 'hl-row';
-        head.parentNode.insertBefore(row, head);
-        row.appendChild(head); row.appendChild(icon);
-      }
+      const eb = panel.querySelector('.panel__eyebrow');
+      if (!inner || !icon || !head || !eb) return;
+      const hlRow = document.createElement('div'); hlRow.className = 'hl-row';
+      inner.insertBefore(hlRow, head); hlRow.appendChild(head);
+      const ebRow = document.createElement('div'); ebRow.className = 'eb-row';
+      iconLayout.push({ inner: inner, icon: icon, eb: eb, hlRow: hlRow, ebRow: ebRow });
     });
+    const mqMob = window.matchMedia('(max-width: 900px)');
+    function placeIcons () {
+      const mob = mqMob.matches;
+      iconLayout.forEach(function (o) {
+        if (mob) {
+          if (o.ebRow.parentNode !== o.inner) o.inner.insertBefore(o.ebRow, o.hlRow);
+          o.ebRow.appendChild(o.eb); o.ebRow.appendChild(o.icon);   // eyebrow label LEFT, icon RIGHT
+        } else {
+          o.inner.insertBefore(o.eb, o.hlRow);   // eyebrow back as a direct child (desktop grid relies on this)
+          o.hlRow.appendChild(o.icon);           // icon back beside the headline
+          if (o.ebRow.parentNode) o.ebRow.remove();
+        }
+      });
+    }
+    // mobile: scale each headline so it spans the full content width on one line
+    function fitHeadlines () {
+      const mob = mqMob.matches;
+      iconLayout.forEach(function (o) {
+        const h = o.hlRow.querySelector('.panel__verdict');
+        if (!h) return;
+        if (!mob) { h.style.fontSize = ''; return; }
+        const avail = o.hlRow.clientWidth;
+        if (!avail) return;
+        const BASE = 80;
+        h.style.fontSize = BASE + 'px';
+        const w = h.scrollWidth;
+        if (w > 0) h.style.fontSize = Math.min(BASE * (avail / w), 56) + 'px';   // cap so the shortest headline isn't absurd
+      });
+    }
+    function relayoutHeads () { placeIcons(); fitHeadlines(); }
+    relayoutHeads();
+    if (mqMob.addEventListener) mqMob.addEventListener('change', relayoutHeads);
+    else if (mqMob.addListener) mqMob.addListener(relayoutHeads);
+    addEventListener('resize', fitHeadlines);
+    addEventListener('orientationchange', fitHeadlines);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadlines);
     const descent = window.elsserDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
@@ -989,13 +1048,13 @@
 
       // ----- content panels: every element animates IN, then animates OUT the same way -----
       // eyebrow slides in from the left, then slides back out the same way
-      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.88, 0.97));
+      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.80, 0.89));
       if (m.eyebrow) { m.eyebrow.style.opacity = (pe * (1 - eo)).toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe) - 20 * eo).toFixed(1) + 'px)'; }
       // headline words rise out of their mask, then drop back into it (staggered both ways)
       const words = m.words;
       for (let i = 0; i < words.length; i++) {
         const pw = smooth01(mapRange(p, 0.09 + i * 0.04, 0.09 + i * 0.04 + 0.14));
-        const wo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+        const wo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
         words[i].style.transform = 'translateY(' + ((1 - pw) * 112 + wo * 112).toFixed(2) + '%)';
         words[i].style.opacity = (pw * (1 - wo)).toFixed(3);
       }
@@ -1003,7 +1062,7 @@
       if (m.iconPaths && m.iconPaths.length) {
         for (let i = 0; i < m.iconPaths.length; i++) {
           const tin = smooth01(mapRange(p, 0.06 + i * 0.045, 0.06 + i * 0.045 + 0.16));
-          const tout = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          const tout = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
           facetPop(m.iconPaths[i], tin, tout);
         }
       }
@@ -1011,7 +1070,7 @@
       const blocks = m.blocks;
       for (let i = 0; i < blocks.length; i++) {
         const pb = smooth01(mapRange(p, 0.24 + i * 0.035, 0.24 + i * 0.035 + 0.10));
-        const bo = smooth01(mapRange(p, 0.86 + i * 0.03, 0.86 + i * 0.03 + 0.12));
+        const bo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
         blocks[i].style.opacity = (pb * (1 - bo)).toFixed(3);
         if (blocks[i].classList.contains('panel__gallery')) {
           blocks[i].style.transform = 'translateX(' + (44 * (1 - pb) + 44 * bo).toFixed(1) + 'px)';   // in from the right, out to the right
@@ -1025,7 +1084,7 @@
         const lt = clamp01((p - lStart) / Math.max(0.0001, lBuildEnd - lStart));
         for (let i = 0; i < NL; i++) {
           const pl = smooth01(clamp01((lt - i * lStep) / (lStep * 0.85)));
-          const lo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          const lo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
           m.listEls[i].style.opacity = (pl * (1 - lo)).toFixed(3);
           m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16 + lo * 16).toFixed(1) + 'px)';
         }
@@ -1118,6 +1177,22 @@
       if (deepStretch) { kdTop = deepStretch.offsetTop; kdH = Math.max(1, deepStretch.offsetHeight); }
     }
 
+    // custom eased scroll: ramps out of a stop and eases into the stop (ease-in-out), not flat-out fast
+    let scrollRAF = null;
+    function easeInOutCubic (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function easedScrollTo (targetY) {
+      if (scrollRAF) cancelAnimationFrame(scrollRAF);
+      const startY = window.scrollY || 0, dist = targetY - startY;
+      const dur = Math.min(1800, Math.max(800, Math.abs(dist) * 0.42));
+      const t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+      function frame (now) {
+        const t = Math.min(1, (((now || Date.now())) - t0) / dur);
+        window.scrollTo(0, Math.round(startY + dist * easeInOutCubic(t)));
+        scrollRAF = t < 1 ? requestAnimationFrame(frame) : null;
+      }
+      scrollRAF = requestAnimationFrame(frame);
+    }
+    ['wheel', 'touchstart'].forEach(function (ev) { addEventListener(ev, function () { if (scrollRAF) { cancelAnimationFrame(scrollRAF); scrollRAF = null; } }, { passive: true }); });
     // nav: smooth-scroll to a section + scroll-spy
     const navLinks = Array.prototype.slice.call(document.querySelectorAll('.site-links a[data-scroll-target]'));
     const allNav = Array.prototype.slice.call(document.querySelectorAll('#siteNav a[data-scroll-target]'));
@@ -1133,7 +1208,7 @@
         const m = models.find(function (mm) { return '#' + mm.el.id === sel; });
         if (!m) return; ev.preventDefault();
         measure();
-        window.scrollTo({ top: Math.round(navTargetY(m)), behavior: 'smooth' });
+        easedScrollTo(Math.round(navTargetY(m)));
         navHost.classList.remove('nav-open'); if (navTgl) navTgl.setAttribute('aria-expanded', 'false');
       });
     });
@@ -1295,12 +1370,51 @@
     function enterFS () { const r = docEl.requestFullscreen || docEl.webkitRequestFullscreen; if (r) { try { const p = r.call(docEl); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
     function exitFS () { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { try { x.call(document); } catch (e) {} } }
     function isFS () { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
-    function enterSite () { if (!splash || splash.classList.contains('gone')) return; enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    // Always start the descent at the very top — never a cached/restored scroll position.
+    if ('scrollRestoration' in history) { try { history.scrollRestoration = 'manual'; } catch (e) {} }
+    window.scrollTo(0, 0);
+    // Centre the splash against the VISUAL viewport (what's actually visible). Before fullscreen the
+    // visual viewport is smaller than the layout one and anchored top-left, so CSS centring put the
+    // logo low-and-right; pin the splash to the visual viewport's size + offset so it's centred in every state.
+    function sizeSplash () {
+      if (!splash) return;
+      const vv = window.visualViewport;
+      if (vv) {
+        splash.style.width = vv.width + 'px';
+        splash.style.height = vv.height + 'px';
+        splash.style.left = vv.offsetLeft + 'px';
+        splash.style.top = vv.offsetTop + 'px';
+        splash.style.right = 'auto';
+        splash.style.bottom = 'auto';
+      }
+    }
+    sizeSplash();
+    window.addEventListener('resize', sizeSplash);
+    window.addEventListener('orientationchange', sizeSplash);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', sizeSplash);
+      window.visualViewport.addEventListener('scroll', sizeSplash);
+    }
+    const ICON_EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg>';
+    const ICON_COMPRESS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4a1 1 0 0 1-1 1H4"/><path d="M15 4v4a1 1 0 0 0 1 1h4"/><path d="M9 20v-4a1 1 0 0 0-1-1H4"/><path d="M15 20v-4a1 1 0 0 1 1-1h4"/></svg>';
+    function syncIcon () { if (fsBtn) fsBtn.innerHTML = isFS() ? ICON_COMPRESS : ICON_EXPAND; }   // button always stays; only its glyph changes
+    // Entering/exiting fullscreen changes the viewport; re-sync the WebGL buffer + scroll math once it settles.
+    function afterViewportChange () { setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 200); }
+    document.addEventListener('fullscreenchange', function () { syncIcon(); afterViewportChange(); });
+    document.addEventListener('webkitfullscreenchange', function () { syncIcon(); afterViewportChange(); });
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
     if (splash) {
       splash.addEventListener('click', enterSite);
       splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
     }
     if (fsBtn) fsBtn.addEventListener('click', function () { isFS() ? exitFS() : enterFS(); });
+    // bfcache restore (mobile back/forward) re-shows the splash and snaps back to top.
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      window.scrollTo(0, 0);
+      if (splash) { splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
+    });
+    syncIcon();
   })();
   </script>
 </body>
