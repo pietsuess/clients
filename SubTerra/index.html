@@ -339,12 +339,15 @@
     .panel__icon svg { width:100%; height:100%; display:block; }
     #p-hero .panel__icon { display:none; }   /* hero already shows the brand lockup */
     /* mobile nav: logo left, Free Estimate centred, hamburger + fullscreen tight on the right */
-    #siteNav { display:flex; align-items:center; gap:10px;
+    #siteNav { display:flex; align-items:center; justify-content:space-between; gap:10px;
       min-height:64px; background:none; }   /* no black bar; white content like desktop */
     .nav-toggle { display:flex; }
     .nav-right { order:3; gap:4px; }
     .fs-btn { width:38px; height:38px; }
-    .site-cta { order:2; margin-inline:auto; padding:9px 14px; font-size:.68rem; }
+    /* absolute-centre the CTA to the true viewport middle (logo/right group have unequal widths,
+       so margin:auto between them lands off-centre); logo + nav-right pin to the edges via space-between */
+    .site-cta { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      margin:0; padding:9px 14px; font-size:.68rem; }
     .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
       align-items:stretch; background:#fff; border-top:1px solid rgba(10,74,130,.18);
       box-shadow:0 18px 40px rgba(0,0,0,.18); padding:0 0 10px; display:none; }   /* no top padding: the white gap above the first link read as a dead space */
