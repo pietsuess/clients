@@ -108,9 +108,10 @@
 
   .panel__icon { display:none; }   /* source only; rendered on the right with the detail lines */
   /* the form section has no side list, so its icon sits top-right of the card, in line with the heading */
-  .panel--end .panel__icon { display:block; position:absolute; top:clamp(30px,4vw,58px); right:clamp(24px,4.2vw,62px);
-    width:66px; height:66px; margin:0; }
-  .panel--end .panel__icon svg { width:100%; height:100%; display:block; }
+  .panel--end .panel__icon { display:block; position:absolute; top:clamp(26px,3.4vw,52px); right:clamp(24px,4.2vw,62px);
+    width:clamp(92px,9vw,128px); height:auto; margin:0; overflow:visible; }
+  .panel--end .panel__icon svg { width:100%; height:auto; display:block; overflow:visible; }
+  .panel--end .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
   #sideList .sl-icon { width:clamp(84px,9vw,112px); height:auto; margin:0 0 22px auto; color:rgba(244,238,228,.85); opacity:0; overflow:visible; }
   #sideList .sl-icon svg { width:100%; height:auto; display:block; overflow:visible; }
   #sideList .sl-icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
@@ -976,11 +977,20 @@
       }
       // icon facets POP in (with the headline) and POP out as the panel exits, scroll-scrubbed + staggered
       if (m.iconPaths && m.iconPaths.length) {
-        const NI = m.iconPaths.length, iStart = 0.06, iStag = 0.045, iSeg = 0.16, oStart = 0.88, oStag = 0.02, oSeg = 0.11;
-        for (let i = 0; i < NI; i++) {
-          const tin = smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg));
-          const tout = smooth01(mapRange(p, oStart + i * oStag, oStart + i * oStag + oSeg));
-          facetPop(m.iconPaths[i], tin, tout);
+        const NI = m.iconPaths.length;
+        if (m.isEnd) {
+          // contact icon: build in and FINISH as we reach the bottom — it stays, never pops back out
+          const iStart = 0.06, iStag = 0.07, iSeg = 0.26;
+          for (let i = 0; i < NI; i++) {
+            facetPop(m.iconPaths[i], smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg)), 0);
+          }
+        } else {
+          const iStart = 0.06, iStag = 0.045, iSeg = 0.16, oStart = 0.88, oStag = 0.02, oSeg = 0.11;
+          for (let i = 0; i < NI; i++) {
+            const tin = smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg));
+            const tout = smooth01(mapRange(p, oStart + i * oStag, oStart + i * oStag + oSeg));
+            facetPop(m.iconPaths[i], tin, tout);
+          }
         }
       }
       // supporting blocks reveal sequentially (translateY 26 -> 0)
