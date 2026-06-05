@@ -56,7 +56,7 @@
   #p-hero .panel__eyebrow { margin-bottom:22px; }
   #p-hero .panel__eyebrow::before { display:none; }
   #p-hero .panel__lede { margin-top:24px; }
-  #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; text-align:justify; text-align-last:justify; }
+  #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; text-align:justify; text-align-last:left; }
   .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
     filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
   .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
@@ -113,7 +113,8 @@
   .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
     background:rgba(244,238,228,.6); vertical-align:middle; margin:-3px 14px 0 0; }
   .panel__verdict { margin:0; color:#fff; font-family:var(--display); font-weight:800;
-    line-height:.9; letter-spacing:-.01em; text-wrap:balance; }
+    line-height:.9; letter-spacing:-.01em; text-wrap:balance;
+    text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
   h1.panel__verdict { font-size:clamp(3.6rem, 8.4vw, 9.6rem); }
   h2.panel__verdict { font-size:clamp(2.4rem, 5.4vw, 6.4rem); }
   .panel__lede { margin-top:14px; color:rgba(244,238,228,.84);
