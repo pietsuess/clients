@@ -1163,6 +1163,11 @@
       if (!active.isEnd && y > active.end && models[ai + 1]) {
         const next = models[ai + 1];
         te = active.e + (next.e - active.e) * smooth01(clamp01((y - active.end) / Math.max(1, next.start - active.end)));
+      } else if (active.isEnd && models[ai - 1]) {
+        // keep the descent continuous into/out of the contact (same ramp as the gap) so the
+        // depth count tracks scroll both ways instead of snapping to the contact depth
+        const prev = models[ai - 1];
+        te = prev.e + (active.e - prev.e) * smooth01(clamp01((y - prev.end) / Math.max(1, active.start - prev.end)));
       }
       descent.setTargetE(te);
       // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
