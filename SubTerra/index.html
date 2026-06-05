@@ -326,17 +326,21 @@
     .deep-stretch { height:90vh; }
     .panel__inner { width:90vw; padding:16vh 0; }
     .gap { height:44vh; }
-    h1.panel__verdict { font-size:clamp(3rem, 14vw, 5.4rem); }
-    h2.panel__verdict { font-size:clamp(2.2rem, 11vw, 4rem); }
+    /* headlines fit on a single line on mobile (sized for the longest, ~21 chars) */
+    h1.panel__verdict { font-size:clamp(1.6rem, 7.4vw, 3rem); white-space:nowrap; }
+    h2.panel__verdict { font-size:clamp(1.4rem, 6.6vw, 2.6rem); white-space:nowrap; }
     .panel__evidence p { max-width:none; }
     .panel__list { display:grid; grid-template-columns:1fr; max-width:none; margin-top:18px; }  /* #sideList is hidden on mobile, so stack the detail lines in-flow here */
     .panel__list li { min-height:46px; font-size:.82rem; letter-spacing:.13em; opacity:0; will-change:opacity, transform; }  /* JS stacks these in on scroll */
     .panel__gallery { max-width:none; justify-content:flex-end; }   /* images sit to the right on mobile */
     .panel__form .f-row { grid-template-columns:1fr; }
     #p-hero .panel__list { display:none; }   /* hero's first list plays centered in #sideList, not inline */
-    /* each section's icon shows inline above its content on mobile */
-    .panel__icon { display:block; width:52px; height:52px; margin:0 0 16px; }
-    .panel__icon svg { width:100%; height:100%; display:block; }
+    /* mobile: the section icon rides on the eyebrow line (JS moves it into .eb-row) */
+    .eb-row { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .eb-row .panel__eyebrow { margin-bottom:0; }
+    .eb-row .panel__eyebrow::before { display:none; }   /* the icon replaces the little rule */
+    .panel:not(#p-hero):not(.panel--end) .eb-row .panel__icon { display:block; width:44px; height:44px; margin:0; flex:0 0 auto; }
+    .eb-row .panel__icon svg { width:100%; height:100%; display:block; }
     #p-hero .panel__icon { display:none; }   /* hero already shows the brand lockup */
     /* mobile nav: logo left, Free Estimate centred, hamburger + fullscreen tight on the right */
     #siteNav { display:flex; align-items:center; justify-content:space-between; gap:10px;
@@ -901,17 +905,38 @@
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mobileLike = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
     const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
-    // content panels: put the icon in line with the headline, on its right (wrap them in a row)
+    // content panels: desktop = icon in line with the headline (.hl-row, icon on the right);
+    // mobile = icon rides on the eyebrow line (.eb-row). Reparent the icon responsively.
+    const iconLayout = [];
     panels.forEach(function (panel, idx) {
       if (idx === 0 || panel.classList.contains('panel--end')) return;
+      const inner = panel.querySelector('.panel__inner');
       const icon = panel.querySelector('.panel__icon');
       const head = panel.querySelector('.panel__verdict');
-      if (icon && head && head.parentNode) {
-        const row = document.createElement('div'); row.className = 'hl-row';
-        head.parentNode.insertBefore(row, head);
-        row.appendChild(head); row.appendChild(icon);
-      }
+      const eb = panel.querySelector('.panel__eyebrow');
+      if (!inner || !icon || !head || !eb) return;
+      const hlRow = document.createElement('div'); hlRow.className = 'hl-row';
+      inner.insertBefore(hlRow, head); hlRow.appendChild(head);
+      const ebRow = document.createElement('div'); ebRow.className = 'eb-row';
+      iconLayout.push({ inner: inner, icon: icon, eb: eb, hlRow: hlRow, ebRow: ebRow });
     });
+    const mqMob = window.matchMedia('(max-width: 900px)');
+    function placeIcons () {
+      const mob = mqMob.matches;
+      iconLayout.forEach(function (o) {
+        if (mob) {
+          if (o.ebRow.parentNode !== o.inner) o.inner.insertBefore(o.ebRow, o.hlRow);
+          o.ebRow.appendChild(o.icon); o.ebRow.appendChild(o.eb);   // icon, then eyebrow label
+        } else {
+          o.inner.insertBefore(o.eb, o.hlRow);   // eyebrow back as a direct child (desktop grid relies on this)
+          o.hlRow.appendChild(o.icon);           // icon back beside the headline
+          if (o.ebRow.parentNode) o.ebRow.remove();
+        }
+      });
+    }
+    placeIcons();
+    if (mqMob.addEventListener) mqMob.addEventListener('change', placeIcons);
+    else if (mqMob.addListener) mqMob.addListener(placeIcons);
     const descent = window.subterraDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
