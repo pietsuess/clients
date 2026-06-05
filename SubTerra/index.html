@@ -724,7 +724,9 @@
       rake.intensity = 2.15 - (0.62 - 0.20*SITE_TUNING.light)*e;
       grass.update(now, camera.position.y);
       dirt.update(dt, camera.position.y, state.digEnergy); state.digEnergy *= 0.90;
-      depthN.textContent = (Math.max(0, -centerY) * METRES_PER_WORLD).toFixed(1);
+      const depthVal = Math.max(0, -centerY) * METRES_PER_WORLD;
+      depthN.textContent = depthVal.toFixed(1);
+      window.subterraDescent.depthM = depthVal;   // shared with the scroll choreography (depth-gated reveals)
       // scroll indicator: visible on the flat grass, fades as the descent tilts in
       if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
       // brand-blue surface wash dissolves to the green grass as the dive begins (fades early/fast)
@@ -962,60 +964,67 @@
         if (m.inner) { m.inner.style.opacity = (1 - ex); m.inner.style.transform = 'translateY(' + (-ex * 26).toFixed(1) + 'px)'; }
         return;
       }
-      // Reveals are front-loaded (all up by ~p=0.5) so the rest of the panel is a
-      // long HOLD where the text sits fully up, then a late exit.
-      // eyebrow slides in
-      const pe = mapRange(p, 0.04, 0.10);
-      if (m.eyebrow) { m.eyebrow.style.opacity = pe; m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe)) + 'px)'; }
-      // headline words rise out of their mask, staggered ("text up")
+      // ----- CONTACT (end): builds in on the final descent, gated on real depth, then STAYS put -----
+      if (m.isEnd) {
+        const depthM = descent.depthM || 0;
+        const build = smooth01(clamp01((depthM - 20.8) / 0.6));   // nothing until ~20.8 m; fully built by ~21.4 m (the bottom)
+        if (m.eyebrow) { const eb = smooth01(clamp01(build / 0.5)); m.eyebrow.style.opacity = eb.toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - eb)).toFixed(1) + 'px)'; }
+        for (let i = 0; i < m.words.length; i++) {
+          const w = smooth01(clamp01((build - i * 0.09) / 0.6));
+          m.words[i].style.transform = 'translateY(' + ((1 - w) * 112).toFixed(2) + '%)';
+          m.words[i].style.opacity = w.toFixed(3);
+        }
+        if (m.iconPaths) for (let i = 0; i < m.iconPaths.length; i++) facetPop(m.iconPaths[i], smooth01(clamp01((build - i * 0.07) / 0.55)), 0);
+        for (let i = 0; i < m.blocks.length; i++) {
+          const b = smooth01(clamp01((build - 0.18 - i * 0.05) / 0.6));
+          m.blocks[i].style.opacity = b.toFixed(3);
+          m.blocks[i].style.transform = 'translateY(' + (26 * (1 - b)).toFixed(1) + 'px)';
+        }
+        if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
+        return;
+      }
+
+      // ----- content panels: every element animates IN, then animates OUT the same way -----
+      // eyebrow slides in from the left, then slides back out the same way
+      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.88, 0.97));
+      if (m.eyebrow) { m.eyebrow.style.opacity = (pe * (1 - eo)).toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe) - 20 * eo).toFixed(1) + 'px)'; }
+      // headline words rise out of their mask, then drop back into it (staggered both ways)
       const words = m.words;
       for (let i = 0; i < words.length; i++) {
-        const s = 0.09 + i * 0.04;
-        const pw = smooth01(mapRange(p, s, s + 0.14));
-        words[i].style.transform = 'translateY(' + ((1 - pw) * 112).toFixed(2) + '%)';
-        words[i].style.opacity = pw.toFixed(3);
+        const pw = smooth01(mapRange(p, 0.09 + i * 0.04, 0.09 + i * 0.04 + 0.14));
+        const wo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+        words[i].style.transform = 'translateY(' + ((1 - pw) * 112 + wo * 112).toFixed(2) + '%)';
+        words[i].style.opacity = (pw * (1 - wo)).toFixed(3);
       }
-      // icon facets POP in (with the headline) and POP out as the panel exits, scroll-scrubbed + staggered
+      // icon facets POP in, then POP out, scroll-scrubbed + staggered
       if (m.iconPaths && m.iconPaths.length) {
-        const NI = m.iconPaths.length;
-        if (m.isEnd) {
-          // contact icon: build in and FINISH as we reach the bottom — it stays, never pops back out
-          const iStart = 0.06, iStag = 0.07, iSeg = 0.26;
-          for (let i = 0; i < NI; i++) {
-            facetPop(m.iconPaths[i], smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg)), 0);
-          }
-        } else {
-          const iStart = 0.06, iStag = 0.045, iSeg = 0.16, oStart = 0.88, oStag = 0.02, oSeg = 0.11;
-          for (let i = 0; i < NI; i++) {
-            const tin = smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg));
-            const tout = smooth01(mapRange(p, oStart + i * oStag, oStart + i * oStag + oSeg));
-            facetPop(m.iconPaths[i], tin, tout);
-          }
+        for (let i = 0; i < m.iconPaths.length; i++) {
+          const tin = smooth01(mapRange(p, 0.06 + i * 0.045, 0.06 + i * 0.045 + 0.16));
+          const tout = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          facetPop(m.iconPaths[i], tin, tout);
         }
       }
-      // supporting blocks reveal sequentially (translateY 26 -> 0)
-      const blocks = m.blocks, bStart = 0.24, bStep = 0.035, bSeg = 0.10;
+      // supporting blocks rise + fade in, then drop + fade out the same way
+      const blocks = m.blocks;
       for (let i = 0; i < blocks.length; i++) {
-        const s = bStart + i * bStep;
-        const pb = smooth01(mapRange(p, s, s + bSeg));
-        blocks[i].style.opacity = pb.toFixed(3);
-        blocks[i].style.transform = 'translateY(' + (26 * (1 - pb)).toFixed(1) + 'px)';
+        const pb = smooth01(mapRange(p, 0.24 + i * 0.035, 0.24 + i * 0.035 + 0.10));
+        const bo = smooth01(mapRange(p, 0.86 + i * 0.03, 0.86 + i * 0.03 + 0.12));
+        blocks[i].style.opacity = (pb * (1 - bo)).toFixed(3);
+        blocks[i].style.transform = 'translateY(' + (26 * (1 - pb) + 26 * bo).toFixed(1) + 'px)';
       }
-      // mobile: in-flow detail lines stack in one-by-one as the panel scrolls
-      // (desktop hides .panel__list and renders these in #sideList instead, so this is harmless there)
+      // mobile: in-flow detail lines stack in, then drop back out
       if (m.listEls && m.listEls.length) {
         const lStart = 0.30, lBuildEnd = 0.62, NL = m.listEls.length, lStep = 1 / NL;
         const lt = clamp01((p - lStart) / Math.max(0.0001, lBuildEnd - lStart));
         for (let i = 0; i < NL; i++) {
           const pl = smooth01(clamp01((lt - i * lStep) / (lStep * 0.85)));
-          m.listEls[i].style.opacity = pl.toFixed(3);
-          m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16).toFixed(1) + 'px)';
+          const lo = smooth01(mapRange(p, 0.86 + i * 0.02, 0.86 + i * 0.02 + 0.12));
+          m.listEls[i].style.opacity = (pl * (1 - lo)).toFixed(3);
+          m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16 + lo * 16).toFixed(1) + 'px)';
         }
       }
-      // long HOLD (~p 0.5 -> 0.93), then a late lift + fade — except the final form, which stays put
-      if (m.isEnd) { if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; } return; }
-      const px = mapRange(p, 0.93, 1.00);
-      if (m.inner) { m.inner.style.opacity = (1 - px).toFixed(3); m.inner.style.transform = 'translateY(' + (-28 * px).toFixed(1) + 'px)'; }
+      // the inner stays put; each element handles its own exit in place (no blanket scroll/lift)
+      if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
     }
 
     function revealAll () {
