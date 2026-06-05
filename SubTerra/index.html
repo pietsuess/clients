@@ -111,8 +111,9 @@
   .panel--end .panel__icon { display:block; position:absolute; top:clamp(30px,4vw,58px); right:clamp(24px,4.2vw,62px);
     width:66px; height:66px; margin:0; }
   .panel--end .panel__icon svg { width:100%; height:100%; display:block; }
-  #sideList .sl-icon { width:46px; height:46px; margin:0 0 20px auto; color:rgba(244,238,228,.85); opacity:0; }
-  #sideList .sl-icon svg { width:100%; height:100%; display:block; }
+  #sideList .sl-icon { width:clamp(84px,9vw,112px); height:auto; margin:0 0 22px auto; color:rgba(244,238,228,.85); opacity:0; overflow:visible; }
+  #sideList .sl-icon svg { width:100%; height:auto; display:block; overflow:visible; }
+  #sideList .sl-icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
   .panel__eyebrow { display:block; margin-bottom:14px; color:rgba(244,238,228,.66);
     font:700 .76rem/1 var(--condensed); letter-spacing:.26em; text-transform:uppercase; }
   .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
@@ -896,6 +897,13 @@
     function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
     function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
     function smooth01 (x) { const t = clamp01(x); return t*t*(3 - 2*t); }
+    // POP a single icon facet: scale .2 -> 1.12 -> 1 on the way in (tin), reverse + fade on the way out (tout)
+    function facetPop (path, tin, tout) {
+      let s = (tin < 0.7) ? (0.2 + (1.12 - 0.2) * (tin / 0.7)) : (1.12 + (1 - 1.12) * ((tin - 0.7) / 0.3));
+      s = s * (1 - tout) + 0.2 * tout;
+      path.style.opacity = (Math.min(1, tin / 0.7) * (1 - tout)).toFixed(3);
+      path.style.transform = 'scale(' + s.toFixed(3) + ')';
+    }
 
     // split each headline into masked, individually-rising words ("text up")
     function splitWords (el) {
@@ -966,14 +974,13 @@
         words[i].style.transform = 'translateY(' + ((1 - pw) * 112).toFixed(2) + '%)';
         words[i].style.opacity = pw.toFixed(3);
       }
-      // icon facets POP in, scroll-scrubbed + staggered (builds alongside the headline)
+      // icon facets POP in (with the headline) and POP out as the panel exits, scroll-scrubbed + staggered
       if (m.iconPaths && m.iconPaths.length) {
-        const NI = m.iconPaths.length, iStart = 0.06, iStag = 0.045, iSeg = 0.16;
+        const NI = m.iconPaths.length, iStart = 0.06, iStag = 0.045, iSeg = 0.16, oStart = 0.88, oStag = 0.02, oSeg = 0.11;
         for (let i = 0; i < NI; i++) {
-          const t = smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg));
-          const s = (t < 0.7) ? (0.2 + (1.12 - 0.2) * (t / 0.7)) : (1.12 + (1 - 1.12) * ((t - 0.7) / 0.3));
-          m.iconPaths[i].style.opacity = Math.min(1, t / 0.7).toFixed(3);
-          m.iconPaths[i].style.transform = 'scale(' + s.toFixed(3) + ')';
+          const tin = smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg));
+          const tout = smooth01(mapRange(p, oStart + i * oStag, oStart + i * oStag + oSeg));
+          facetPop(m.iconPaths[i], tin, tout);
         }
       }
       // supporting blocks reveal sequentially (translateY 26 -> 0)
@@ -1173,12 +1180,23 @@
         if (sec && sideLines.length) {
           sideList.style.visibility = 'visible';
           const N = sideLines.length, step = 1 / N;
+          const span = Math.max(1, sec.sideEnd - sec.sideStart);
           const localT = clamp01((y - sec.sideStart) / Math.max(1, sec.sideBuildEnd - sec.sideStart));
-          if (sideIconEl) sideIconEl.style.opacity = smooth01(clamp01(localT / 0.12)).toFixed(3);
+          const outT = clamp01((y - (sec.sideStart + span * 0.74)) / (span * 0.24));   // animate out over the last stretch
+          if (sideIconEl) {
+            sideIconEl.style.opacity = 1;   // facets carry their own opacity
+            const ip = sideIconEl.querySelectorAll('path'); const NF = ip.length || 1;
+            for (let k = 0; k < ip.length; k++) {
+              const tin = smooth01(clamp01((localT - k * (0.6 / NF)) / 0.5));
+              const tout = smooth01(clamp01((outT - k * 0.04) / 0.5));
+              facetPop(ip[k], tin, tout);
+            }
+          }
           for (let i = 0; i < N; i++) {
             const pi = smooth01(clamp01((localT - i * step) / (step * 0.85)));
-            sideLines[i].style.opacity = pi.toFixed(3);
-            sideLines[i].style.transform = 'translateY(' + ((1 - pi) * 30).toFixed(1) + 'px)';
+            const po = smooth01(clamp01((outT - i * 0.04) / 0.5));
+            sideLines[i].style.opacity = (pi * (1 - po)).toFixed(3);
+            sideLines[i].style.transform = 'translateY(' + ((1 - pi) * 30 + po * 22).toFixed(1) + 'px)';
           }
         } else {
           sideList.style.visibility = 'hidden';
