@@ -129,14 +129,16 @@
   /* detail list: hidden on the hero (plays centered in #sideList) + the end form; shown inline under the text everywhere else */
   .panel__list { display:none; }
   .panel:not(#p-hero):not(.panel--end) .panel__list { display:block; margin:clamp(18px,2.2vw,30px) 0 0; }
-  .panel:not(#p-hero):not(.panel--end) .panel__icon { display:block; width:clamp(46px,4vw,58px); height:auto; margin:0 0 18px; }
+  /* icon sits in line with the headline, on its right (JS wraps headline + icon in .hl-row) */
+  .panel:not(#p-hero):not(.panel--end) .panel__icon { display:block; flex:0 0 auto; width:clamp(46px,4.6vw,66px); height:auto; margin:0; }
+  .hl-row { display:flex; align-items:center; justify-content:space-between; gap:clamp(18px,2.4vw,40px); }
+  .hl-row .panel__verdict { margin:0; }
   /* photo panels: text + list on the LEFT, big photo on the RIGHT */
   @media (min-width:901px) {
     .panel:has(.panel__gallery) .panel__inner {
       grid-template-columns: minmax(0,1fr) clamp(320px,40vw,560px); column-gap:clamp(40px,5vw,88px); }
-    .panel:has(.panel__gallery) .panel__inner > .panel__icon,
+    .panel:has(.panel__gallery) .panel__inner > .hl-row,
     .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow,
-    .panel:has(.panel__gallery) .panel__inner > .panel__verdict,
     .panel:has(.panel__gallery) .panel__inner > .panel__lede,
     .panel:has(.panel__gallery) .panel__inner > .panel__evidence,
     .panel:has(.panel__gallery) .panel__inner > .panel__list { grid-column:1; }
@@ -367,6 +369,7 @@
         <h2 class="panel__verdict">What we do.</h2>
         <div class="panel__evidence"><p>A full suite of services for both new construction and renovations: excavation, land clearing, and trenching and site services. Our expert team handles every aspect, with attention to detail at every stage of the project.</p></div>
         <ul class="panel__list"><li>Cost-Effective</li><li>Tailored Plans</li><li>Attention to Detail</li><li>Customer-Centric</li></ul>
+        <div class="panel__gallery" data-cap="What we do" data-urls="https://subterraearthworks.ca/wp-content/uploads/2024/04/excavation-edited.jpg"></div>
       </div>
     </section>
 
@@ -379,7 +382,7 @@
         <h2 class="panel__verdict">Move the ground.</h2>
         <div class="panel__evidence"><p>Offering a full suite of excavation services for both new construction and renovations, our expert team handles everything from land clearing and foundation digging to backfilling and final grading. This service is critical in ensuring a stable and level base for any project, with precise attention to soil management and site preparation.</p></div>
         <ul class="panel__list"><li>New Construction</li><li>Renovations</li><li>Foundation Digging</li><li>Backfilling</li><li>Final Grading</li></ul>
-        <div class="panel__gallery" data-cap="Excavation" data-urls="https://subterraearthworks.ca/wp-content/uploads/2024/04/excavation-edited.jpg,https://subterraearthworks.ca/wp-content/uploads/2024/04/home.jpg"></div>
+        <div class="panel__gallery" data-cap="Excavation" data-urls="https://subterraearthworks.ca/wp-content/uploads/2024/04/home.jpg"></div>
       </div>
     </section>
 
@@ -852,6 +855,17 @@
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mobileLike = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
     const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+    // content panels: put the icon in line with the headline, on its right (wrap them in a row)
+    panels.forEach(function (panel, idx) {
+      if (idx === 0 || panel.classList.contains('panel--end')) return;
+      const icon = panel.querySelector('.panel__icon');
+      const head = panel.querySelector('.panel__verdict');
+      if (icon && head && head.parentNode) {
+        const row = document.createElement('div'); row.className = 'hl-row';
+        head.parentNode.insertBefore(row, head);
+        row.appendChild(head); row.appendChild(icon);
+      }
+    });
     const descent = window.subterraDescent || { setTargetE:function(){}, addDig:function(){} };
     const textVeil = document.getElementById('textVeil');
     const sideList = document.getElementById('sideList');
