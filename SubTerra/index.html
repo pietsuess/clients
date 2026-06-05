@@ -130,7 +130,10 @@
   .panel__list { display:none; }
   .panel:not(#p-hero):not(.panel--end) .panel__list { display:block; margin:clamp(12px,1.5vw,20px) 0 0; }
   /* icon sits in line with the headline, on its right (JS wraps headline + icon in .hl-row) */
-  .panel:not(#p-hero):not(.panel--end) .panel__icon { display:block; flex:0 0 auto; width:clamp(46px,4.6vw,66px); height:auto; margin:0; }
+  .panel:not(#p-hero):not(.panel--end) .panel__icon { display:block; flex:0 0 auto; width:clamp(92px,9.2vw,132px); height:auto; margin:0; overflow:visible; }
+  /* facets start hidden + scale from their own centre; JS pops them in, scroll-scrubbed */
+  .panel:not(#p-hero):not(.panel--end) .panel__icon svg { overflow:visible; display:block; width:100%; height:auto; }
+  .panel:not(#p-hero):not(.panel--end) .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
   .hl-row { display:flex; align-items:center; justify-content:space-between; gap:clamp(18px,2.4vw,40px); }
   .hl-row .panel__verdict { margin:0; }
   /* photo panels: big photo on the LEFT, text + list on the RIGHT (text stays left-aligned, so they agree) */
@@ -926,6 +929,7 @@
         el: panel,
         inner: panel.querySelector('.panel__inner'),
         iconHTML: (panel.querySelector('.panel__icon') || {}).innerHTML || '',
+        iconPaths: Array.prototype.slice.call(panel.querySelectorAll('.panel__icon path')),
         eyebrow: panel.querySelector('.panel__eyebrow'),
         words: head ? splitWords(head) : [],
         blocks: blocks,
@@ -961,6 +965,16 @@
         const pw = smooth01(mapRange(p, s, s + 0.14));
         words[i].style.transform = 'translateY(' + ((1 - pw) * 112).toFixed(2) + '%)';
         words[i].style.opacity = pw.toFixed(3);
+      }
+      // icon facets POP in, scroll-scrubbed + staggered (builds alongside the headline)
+      if (m.iconPaths && m.iconPaths.length) {
+        const NI = m.iconPaths.length, iStart = 0.06, iStag = 0.045, iSeg = 0.16;
+        for (let i = 0; i < NI; i++) {
+          const t = smooth01(mapRange(p, iStart + i * iStag, iStart + i * iStag + iSeg));
+          const s = (t < 0.7) ? (0.2 + (1.12 - 0.2) * (t / 0.7)) : (1.12 + (1 - 1.12) * ((t - 0.7) / 0.3));
+          m.iconPaths[i].style.opacity = Math.min(1, t / 0.7).toFixed(3);
+          m.iconPaths[i].style.transform = 'scale(' + s.toFixed(3) + ')';
+        }
       }
       // supporting blocks reveal sequentially (translateY 26 -> 0)
       const blocks = m.blocks, bStart = 0.24, bStep = 0.035, bSeg = 0.10;
