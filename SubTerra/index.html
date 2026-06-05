@@ -447,7 +447,7 @@
 
     <div class="deep-stretch" id="deepStretch" aria-hidden="true"></div>
 
-    <section class="panel panel--end" id="p-bedrock" data-e="0.90">
+    <section class="panel panel--end" id="p-bedrock" data-e="0.96">
       <div class="panel__inner">
         <div class="end-card">
         <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M22 33 L48 20 L74 33 L48 33.5 Z"/><path fill="#9dc4e4" d="M22 33 L74 33 L48 46 Z"/><path fill="#2f7abf" d="M22 33 L48 46 L48 54 L22 41 Z"/><path fill="#0a4a82" d="M74 33 L48 46 L48 54 L74 41 Z"/></svg></span>
@@ -964,10 +964,12 @@
         if (m.inner) { m.inner.style.opacity = (1 - ex); m.inner.style.transform = 'translateY(' + (-ex * 26).toFixed(1) + 'px)'; }
         return;
       }
-      // ----- CONTACT (end): builds in on the final descent, gated on real depth, then STAYS put -----
+      // ----- CONTACT (end): builds in as the panel rises to screen-centre, finishing when centred; then STAYS -----
       if (m.isEnd) {
-        const depthM = descent.depthM || 0;
-        const build = smooth01(clamp01((depthM - 20.8) / 0.6));   // nothing until ~20.8 m; fully built by ~21.4 m (the bottom)
+        const vhh = window.innerHeight || 800;
+        const r = m.el.getBoundingClientRect();
+        const dist = (r.top + r.height / 2) - vhh / 2;   // 0 when the contact panel is centred in the viewport
+        const build = smooth01(clamp01((vhh * 0.7 - dist) / (vhh * 0.7)));   // 0 a bit before, exactly 1 when centred
         if (m.eyebrow) { const eb = smooth01(clamp01(build / 0.5)); m.eyebrow.style.opacity = eb.toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - eb)).toFixed(1) + 'px)'; }
         for (let i = 0; i < m.words.length; i++) {
           const w = smooth01(clamp01((build - i * 0.09) / 0.6));
