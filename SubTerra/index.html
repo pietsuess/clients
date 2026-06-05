@@ -32,17 +32,17 @@
 
   /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
   #textVeil { position:fixed; inset:0; z-index:4; pointer-events:none; opacity:0; visibility:hidden;
-    background:radial-gradient(135% 115% at 42% 46%, rgba(6,5,4,.30) 18%, rgba(6,5,4,.62) 100%);
-    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); will-change:opacity; }
+    background:radial-gradient(135% 115% at 42% 46%, rgba(6,5,4,.38) 18%, rgba(6,5,4,.70) 100%);
+    will-change:opacity; }   /* no backdrop-blur: it cropped into boxes behind each word */
 
   /* ===================== nav ===================== */
   #siteNav { position:fixed; left:0; right:0; top:0; z-index:8;
     display:grid; grid-template-columns:auto 1fr auto; align-items:center;
     gap:clamp(18px, 3vw, 48px); min-height:84px;
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
-    background:linear-gradient(180deg, rgba(6,7,9,.82) 30%, rgba(6,7,9,0)); }
+    background:none; }
   #siteNav img { display:block; width:clamp(40px, 4.2vw, 52px); height:auto;
-    filter:drop-shadow(0 6px 14px rgba(0,0,0,.4)); }   /* icon-only mark (blue), reads on the dark nav scrim */
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.4)); }   /* icon-only mark; drop-shadow keeps it legible without a scrim */
   /* exact-vector logo lockup: blue scoop icon + white wordmark, sized by matched height */
   .hero-lockup { display:flex; align-items:center; gap:clamp(16px,1.9vw,28px); margin:0; }
   .hero-lockup .hl-icon { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
@@ -56,7 +56,7 @@
   #p-hero .panel__eyebrow { margin-bottom:22px; }
   #p-hero .panel__eyebrow::before { display:none; }
   #p-hero .panel__lede { margin-top:24px; }
-  #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; }
+  #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; text-align:justify; text-align-last:center; }
   .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
     filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
   .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
@@ -688,8 +688,8 @@
       depthN.textContent = (Math.max(0, -centerY) * METRES_PER_WORLD).toFixed(1);
       // scroll indicator: visible on the flat grass, fades as the descent tilts in
       if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
-      // brand-blue surface wash dissolves to the green grass as the dive begins
-      if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.085 - e) / 0.06)).toFixed(3);
+      // brand-blue surface wash dissolves to the green grass as the dive begins (fades early/fast)
+      if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.05 - e) / 0.03)).toFixed(3);
       // light-blue wash fades in at the very bottom (the dig opens back into light)
       if (deepWash) deepWash.style.opacity = Math.max(0, Math.min(1, (e - 0.80) / 0.12)).toFixed(3);
       // vignette is off on the flat-blue first screen; fades in as the descent begins
