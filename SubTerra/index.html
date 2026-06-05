@@ -25,7 +25,7 @@
   canvas { display:block; }
   /* brand-blue wash at the surface; dissolves to the green grass as the descent begins (flat, no gradient) */
   #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
-    background:#0a64bf; }
+    background:#2f7abf; }
   /* light-blue wash at the very bottom of the descent; fades in as the dig opens into light */
   #deepWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
     background:linear-gradient(180deg, #5a9fd4 0%, #9fcbeb 56%, #d2e8f8 100%); }
@@ -57,6 +57,10 @@
   #p-hero .panel__eyebrow::before { display:none; }
   #p-hero .panel__lede { margin-top:24px; }
   #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; text-align:justify; text-align-last:left; }
+  /* no shadow/blur behind the first-screen text or icon (clean on the lighter blue) */
+  #p-hero .panel__inner { text-shadow:none; }
+  #p-hero .hero-lockup .hl-icon { filter:none; }
+  #p-hero .hero-lockup .hl-wordmark { filter:brightness(0) invert(1); }
   .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
     filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
   .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
@@ -126,6 +130,10 @@
   #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
     z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
     display:grid; gap:15px; }
+  /* the first (hero) list plays centered on screen, not pinned to the right */
+  #sideList.side-centered { right:auto; left:50%; transform:translate(-50%, -50%); text-align:center; width:min(82vw, 540px); }
+  #sideList.side-centered .sl-rule { margin:0 auto 9px; }
+  #sideList.side-centered .sl-icon { margin:0 auto 20px; }
   #sideList .sl-line { opacity:0; will-change:opacity, transform; }
   #sideList .sl-rule { display:block; width:48px; height:1px; background:rgba(244,238,228,.5); margin:0 0 9px auto; }
   #sideList .sl-text { display:block; font:700 clamp(1.05rem, 1.55vw, 1.7rem)/1.12 var(--condensed);
@@ -695,7 +703,9 @@
       if (deepWash) deepWash.style.opacity = Math.max(0, Math.min(1, (e - 0.80) / 0.12)).toFixed(3);
       // vignette is off on the flat-blue first screen; fades in as the descent begins
       if (gradeEl) gradeEl.style.opacity = Math.max(0, Math.min(1, (e - 0.03) / 0.06)).toFixed(3);
-      updateStrata(centerY);
+      // layer name stays hidden on the first page; comes in as the brand-blue clears (scrolling off)
+      if (e < 0.05) { if (curStrata !== -1) { curStrata = -1; strataEl.classList.remove('show'); } }
+      else updateStrata(centerY);
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
     }
@@ -1097,6 +1107,7 @@
         }
         if (sec !== sideCurrent) {
           sideCurrent = sec; sideList.innerHTML = ''; sideLines = []; sideIconEl = null;
+          sideList.classList.toggle('side-centered', !!(sec && sec.isHero));   // first list plays centered
           if (sec) {
             if (sec.iconHTML) { const ic = document.createElement('div'); ic.className = 'sl-icon'; ic.innerHTML = sec.iconHTML; sideList.appendChild(ic); sideIconEl = ic; }
             sec.sideItems.forEach(function (t) {
