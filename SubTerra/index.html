@@ -23,9 +23,9 @@
 
   #stage { position:fixed; inset:0; z-index:1; }
   canvas { display:block; }
-  /* brand-blue wash at the surface; dissolves to the green grass as the descent begins */
+  /* brand-blue wash at the surface; dissolves to the green grass as the descent begins (flat, no gradient) */
   #brandWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
-    background:linear-gradient(180deg, #3a9bdb 0%, #0a64bf 52%, #0a4a82 100%); }
+    background:#0a64bf; }
   /* light-blue wash at the very bottom of the descent; fades in as the dig opens into light */
   #deepWash { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
     background:linear-gradient(180deg, #5a9fd4 0%, #9fcbeb 56%, #d2e8f8 100%); }
@@ -87,8 +87,8 @@
   /* the final section ends the page: a real form, sized to its content, nothing past it */
   .panel--end { height:auto; }
   .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 6vh; }
-  /* the end form floats as a frosted dark card on the light-blue deep wash, so its text stays readable */
-  .end-card { background:rgba(8,12,18,.66); -webkit-backdrop-filter:blur(13px); backdrop-filter:blur(13px);
+  /* the end form is a solid dark card on the light-blue deep wash (no backdrop-blur: it cropped at the edges) */
+  .end-card { position:relative; background:rgba(8,12,18,.82);
     border:1px solid rgba(202,222,239,.24); border-radius:22px;
     padding:clamp(30px,4vw,58px) clamp(24px,4.2vw,62px);
     box-shadow:0 38px 92px rgba(0,0,0,.46); }
@@ -102,8 +102,9 @@
     color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); pointer-events:auto; }
 
   .panel__icon { display:none; }   /* source only; rendered on the right with the detail lines */
-  /* the form section has no side list, so show its icon inline above the headline */
-  .panel--end .panel__icon { display:block; width:58px; height:58px; margin:0 0 22px; }
+  /* the form section has no side list, so its icon sits top-right of the card, in line with the heading */
+  .panel--end .panel__icon { display:block; position:absolute; top:clamp(30px,4vw,58px); right:clamp(24px,4.2vw,62px);
+    width:66px; height:66px; margin:0; }
   .panel--end .panel__icon svg { width:100%; height:100%; display:block; }
   #sideList .sl-icon { width:46px; height:46px; margin:0 0 20px auto; color:rgba(244,238,228,.85); opacity:0; }
   #sideList .sl-icon svg { width:100%; height:100%; display:block; }
@@ -386,7 +387,7 @@
         <h2 class="panel__verdict">Every stage, handled.</h2>
         <div class="panel__evidence"><p>From the first cut to the final grade, we manage each phase on site so the work stays on schedule and the ground is left ready for whatever comes next.</p></div>
         <ul class="panel__list"><li>Site Prep</li><li>Grading</li><li>Backfill</li><li>Clean Closeout</li></ul>
-        <div class="panel__gallery" data-cap="On-site work" data-urls="https://subterraearthworks.ca/wp-content/uploads/2024/04/pexels-photo-2101137.jpeg,https://subterraearthworks.ca/wp-content/uploads/2024/04/lxlvmwi0m08vds8k3bucsmiugid9kyz0rq.jpg"></div>
+        <div class="panel__gallery" data-cap="On-site work" data-urls="https://subterraearthworks.ca/wp-content/uploads/2024/04/pexels-photo-2101137.jpeg"></div>
       </div>
     </section>
 
@@ -398,6 +399,7 @@
         <span class="panel__eyebrow">Limestone &middot; Why Subterra</span>
         <h2 class="panel__verdict">Peace of mind.</h2>
         <div class="panel__evidence"><p>Our customer-centric approach means satisfaction and peace of mind throughout every stage of the project. Local to Salt Spring Island and fully committed to getting the details right.</p></div>
+        <div class="panel__gallery" data-cap="Why Subterra" data-urls="https://subterraearthworks.ca/wp-content/uploads/2024/04/lxlvmwi0m08vds8k3bucsmiugid9kyz0rq.jpg"></div>
         <ul class="panel__list"><li>Satisfaction Guaranteed</li><li>Customer-Centric</li><li>Locally Operated</li><li>Done Right</li></ul>
       </div>
     </section>
@@ -639,6 +641,7 @@
     const hintEl = document.getElementById('hint');
     const brandWash = document.getElementById('brandWash');
     const deepWash = document.getElementById('deepWash');
+    const gradeEl = document.getElementById('grade');
     const fogTop = new T.Color(0x9aa6ae), fogDeep = new T.Color(0x070504);
     const strataEl = document.getElementById('strata'), strataName = document.getElementById('strataName'), strataSub = document.getElementById('strataSub');
     const STRATA = [
@@ -689,6 +692,8 @@
       if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.085 - e) / 0.06)).toFixed(3);
       // light-blue wash fades in at the very bottom (the dig opens back into light)
       if (deepWash) deepWash.style.opacity = Math.max(0, Math.min(1, (e - 0.80) / 0.12)).toFixed(3);
+      // vignette is off on the flat-blue first screen; fades in as the descent begins
+      if (gradeEl) gradeEl.style.opacity = Math.max(0, Math.min(1, (e - 0.03) / 0.06)).toFixed(3);
       updateStrata(centerY);
       renderer.render(scene, camera);
       requestAnimationFrame(frame);
@@ -1078,7 +1083,7 @@
       } else {
         const ap = clamp01((y - active.start) / (active.end - active.start));
         up = active.isHero
-          ? (1 - smooth01(mapRange(ap, 0.04, 0.55)))
+          ? 0   /* first screen stays clean: no dark veil/gradient over the flat brand blue */
           : smooth01(mapRange(ap, 0.06, 0.30)) * (1 - smooth01(mapRange(ap, 0.92, 1.00)));
       }
       if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
