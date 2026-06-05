@@ -37,12 +37,25 @@
 
   /* ===================== nav ===================== */
   #siteNav { position:fixed; left:0; right:0; top:0; z-index:8;
-    display:grid; grid-template-columns:auto 1fr auto; align-items:center;
-    gap:clamp(18px, 3vw, 48px); min-height:84px;
+    display:grid; grid-template-columns:auto 1fr auto auto; align-items:center;
+    gap:clamp(14px, 2.4vw, 36px); min-height:84px;
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
     background:none; }
   #siteNav img { display:block; width:clamp(40px, 4.2vw, 52px); height:auto;
     filter:drop-shadow(0 6px 14px rgba(0,0,0,.4)); }   /* icon-only mark; drop-shadow keeps it legible without a scrim */
+  /* persistent fullscreen toggle (right of the hamburger on mobile) */
+  .fs-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; padding:9px;
+    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 4px 12px rgba(0,0,0,.4)); }
+  .fs-btn svg { width:100%; height:100%; display:block; }
+  .fs-btn:hover { color:var(--accent); }
+  /* click-to-enter splash: Subterra logo on white, fades to the site (and into fullscreen) */
+  #splash { position:fixed; inset:0; z-index:60; background:#fff; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(22px,3vw,40px);
+    transition:opacity .7s ease; }
+  #splash.gone { opacity:0; pointer-events:none; }
+  .splash-lockup { display:flex; align-items:center; gap:clamp(16px,2vw,30px); }
+  .splash-lockup .sp-icon, .splash-lockup .sp-word { height:clamp(60px,9vw,124px); width:auto; }
+  .splash-hint { font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
   /* exact-vector logo lockup: blue scoop icon + white wordmark, sized by matched height */
   .hero-lockup { display:flex; align-items:center; gap:clamp(16px,1.9vw,28px); margin:0; }
   .hero-lockup .hl-icon { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
@@ -316,6 +329,7 @@
     #siteNav { display:flex; align-items:center; justify-content:space-between; gap:12px;
       min-height:64px; background:none; }   /* no black bar; white content like desktop */
     .nav-toggle { display:flex; order:3; }
+    .fs-btn { order:4; width:38px; height:38px; }
     .site-cta { order:2; padding:9px 14px; font-size:.68rem; }
     .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
       align-items:stretch; background:rgba(6,7,9,.97); border-top:1px solid rgba(255,255,255,.12);
@@ -333,6 +347,13 @@
 </style>
 </head>
 <body>
+  <div id="splash" role="button" tabindex="0" aria-label="Enter site">
+    <div class="splash-lockup">
+      <img class="sp-icon" src="assets/SubterraLogo-01.svg" alt="">
+      <img class="sp-word" src="assets/SubterraLogo-02.svg" alt="Subterra Earthworks">
+    </div>
+    <div class="splash-hint">Click to enter</div>
+  </div>
   <div id="stage"></div>
   <div id="brandWash" aria-hidden="true"></div>
   <div id="deepWash" aria-hidden="true"></div>
@@ -352,6 +373,7 @@
     </nav>
     <a class="site-cta" href="#p-bedrock" data-scroll-target="#p-bedrock">Free Estimate</a>
     <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
   </header>
 
   <main id="content">
@@ -1007,13 +1029,17 @@
           facetPop(m.iconPaths[i], tin, tout);
         }
       }
-      // supporting blocks rise + fade in, then drop + fade out the same way
+      // supporting blocks fade in (text rises, photos slide in from the right), then reverse out the same way
       const blocks = m.blocks;
       for (let i = 0; i < blocks.length; i++) {
         const pb = smooth01(mapRange(p, 0.24 + i * 0.035, 0.24 + i * 0.035 + 0.10));
         const bo = smooth01(mapRange(p, 0.86 + i * 0.03, 0.86 + i * 0.03 + 0.12));
         blocks[i].style.opacity = (pb * (1 - bo)).toFixed(3);
-        blocks[i].style.transform = 'translateY(' + (26 * (1 - pb) + 26 * bo).toFixed(1) + 'px)';
+        if (blocks[i].classList.contains('panel__gallery')) {
+          blocks[i].style.transform = 'translateX(' + (44 * (1 - pb) + 44 * bo).toFixed(1) + 'px)';   // in from the right, out to the right
+        } else {
+          blocks[i].style.transform = 'translateY(' + (26 * (1 - pb) + 26 * bo).toFixed(1) + 'px)';
+        }
       }
       // mobile: in-flow detail lines stack in, then drop back out
       if (m.listEls && m.listEls.length) {
@@ -1279,6 +1305,23 @@
       else if (e.key === 'ArrowLeft') step(-1);
       else if (e.key === 'ArrowRight') step(1);
     });
+  })();
+  </script>
+  <script>
+  // click-to-enter splash + persistent fullscreen toggle
+  (function () {
+    const splash = document.getElementById('splash');
+    const fsBtn = document.getElementById('fsBtn');
+    const docEl = document.documentElement;
+    function enterFS () { const r = docEl.requestFullscreen || docEl.webkitRequestFullscreen; if (r) { try { const p = r.call(docEl); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+    function exitFS () { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { try { x.call(document); } catch (e) {} } }
+    function isFS () { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    if (splash) {
+      splash.addEventListener('click', enterSite);
+      splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
+    }
+    if (fsBtn) fsBtn.addEventListener('click', function () { isFS() ? exitFS() : enterFS(); });
   })();
   </script>
 </body>
