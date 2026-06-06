@@ -1,0 +1,1450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>K &amp; L Island Excavating | Your local island digging service</title>
+<meta name="description" content="K & L Island Excavating — your local island digging service on Salt Spring Island, BC. Driveways, septic fields, land clearing, trucking and transport, and site preparation. Free estimates.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#ece7df;
+    --accent:#2c8a92;
+    --display:"Archivo",Impact,"Helvetica Neue",sans-serif;
+    --body:"Lato",Helvetica,Arial,sans-serif;
+    --condensed:"Titillium Web","Avenir Next Condensed","Barlow Condensed","Helvetica Neue",Helvetica,sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:#0b0907; color:var(--ink);
+    font-family:var(--body); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  /* clip (NOT hidden) on BOTH so neither becomes a scroll container: clip clips horizontal overflow
+     while leaving overflow-y:visible (native vertical scroll intact). hidden would force overflow-y:auto
+     and kill mobile scrolling. clip must be on html too — body-only clip doesn't catch overflow that
+     propagates to the root. */
+  html { overflow-x:clip; }
+  body { overflow-x:clip; overscroll-behavior:none; }
+
+  #stage { position:fixed; inset:0; height:100dvh; z-index:1; }
+  /* canvas display size is driven by CSS (renderer.setSize(...,false) skips inline px),
+     so it always fills the visible dvh box even as the mobile address bar toggles */
+  #stage canvas { width:100%; height:100%; }
+  canvas { display:block; max-width:100%; }
+  /* brand-blue wash at the surface; dissolves to the green grass as the descent begins (flat, no gradient) */
+  /* 100dvh (not inset:0) so the wash always covers the VISIBLE area — otherwise the mobile address bar toggling
+     leaves a non-blue strip at the bottom and the surface "blue looks wrong" */
+  #brandWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
+    background:#2f8790; }
+  /* light wash at the very bottom of the descent; fades in as the dig opens into light */
+  #deepWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
+    background:linear-gradient(180deg, #5aa6b0 0%, #9fd0d4 56%, #d6f0f0 100%); }
+
+  /* fade-blur veil behind the text: dims + blurs the 3D earth while a section is up */
+  #textVeil { position:fixed; inset:0; z-index:4; pointer-events:none; opacity:0; visibility:hidden;
+    background:radial-gradient(135% 115% at 42% 46%, rgba(6,5,4,.38) 18%, rgba(6,5,4,.70) 100%);
+    will-change:opacity; }   /* no backdrop-blur: it cropped into boxes behind each word */
+
+  /* ===================== nav ===================== */
+  #siteNav { position:fixed; left:0; right:0; top:0; z-index:8;
+    display:grid; grid-template-columns:auto 1fr auto auto; align-items:center;
+    gap:clamp(14px, 2.4vw, 36px); min-height:84px;
+    padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
+    background:none; }
+  #siteNav img { display:block; height:clamp(26px, 3.2vw, 40px); width:auto;
+    filter:drop-shadow(0 2px 10px rgba(0,0,0,.45)); }   /* white lockup, sized by height; shadow keeps it off the bright surface */
+  /* hamburger + fullscreen grouped at the right (so Free Estimate can centre on mobile) */
+  .nav-right { display:flex; align-items:center; gap:8px; justify-self:end; }
+  /* persistent fullscreen toggle (right of the hamburger on mobile) */
+  .fs-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; padding:9px;
+    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 2px 8px rgba(0,0,0,.45)); }
+  .fs-btn svg { width:100%; height:100%; display:block; }
+  .fs-btn:hover { color:var(--accent); }
+  /* click-to-enter splash: K & L white logo on dark earth, fades to the site (and into fullscreen) */
+  /* 100dvh + JS visualViewport pinning so the logo centres in the VISIBLE area on mobile
+     (plain inset:0 centres against the layout viewport, dropping the logo low-and-right behind the address bar) */
+  #splash { position:fixed; inset:0; height:100dvh; z-index:60; cursor:pointer;
+    background:radial-gradient(125% 125% at 50% 38%, #1a444c 0%, #0d2227 62%, #08171b 100%);
+    display:flex; align-items:center; justify-content:center; transition:opacity .7s ease; }
+  #splash.gone { opacity:0; pointer-events:none; }
+  #splash .sp-icon { height:auto; width:min(72vw,440px); max-width:90%;
+    filter:drop-shadow(0 6px 30px rgba(0,0,0,.5)); }
+  .splash-hint { position:absolute; left:50%; bottom:clamp(34px,6vh,72px); transform:translateX(-50%);
+    font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
+  /* hero logo lockup: single white K & L logo PNG, sized by width */
+  .hero-lockup { display:flex; align-items:center; justify-content:center; gap:clamp(16px,1.9vw,28px); margin:0; }
+  .hero-lockup .hl-logo { flex:none; display:block; width:min(82vw,560px); max-width:100%; height:auto;
+    filter:drop-shadow(0 6px 28px rgba(0,0,0,.55)); }
+  .hero-lockup .hl-icon { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
+    filter:drop-shadow(0 4px 18px rgba(0,0,0,.6)); }
+  .hero-lockup .hl-wordmark { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
+    filter:brightness(0) invert(1) drop-shadow(0 3px 16px rgba(0,0,0,.85)); }
+  /* first screen = a centered logo splash; everything centered (no left-justify, nothing on the right) */
+  #p-hero .panel__inner { justify-items:center; text-align:center; }
+  #p-hero .hero-lockup { justify-content:center; flex-wrap:wrap; gap:clamp(18px,2.2vw,34px); }
+  #p-hero .hero-lockup .hl-logo { width:min(86vw,600px); }
+  #p-hero .panel__eyebrow { margin-bottom:22px; }
+  #p-hero .panel__eyebrow::before { display:none; }
+  #p-hero .panel__lede { margin-top:24px; }
+  #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; text-align:justify; text-align-last:left; }
+  /* no text-shadow behind the first-screen text; the logo keeps its own drop-shadow */
+  #p-hero .panel__inner { text-shadow:none; }
+  .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
+    filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
+  .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
+  .wordmark .wm-sub { font:700 clamp(.54rem, .68vw, .72rem)/1 var(--condensed); letter-spacing:.4em;
+    text-transform:uppercase; color:var(--accent); margin-top:6px; padding-left:.14em; }
+  .site-links { display:flex; justify-content:center; gap:clamp(16px, 3vw, 44px);
+    font:700 clamp(.72rem, .72vw, .86rem)/1 var(--condensed);
+    letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.62); }
+  .site-links a { color:inherit; text-decoration:none; position:relative; padding-bottom:4px; transition:color .25s; }
+  .site-links a::after { content:""; position:absolute; left:0; right:100%; bottom:0; height:1px;
+    background:currentColor; transition:right .3s ease; }
+  .site-links a:hover, .site-links a.is-current { color:#fff; }
+  .site-links a.is-current::after, .site-links a:hover::after { right:0; }
+  .site-cta { justify-self:end; display:inline-flex; align-items:center; gap:9px;
+    text-decoration:none; color:#fff; font:700 clamp(.7rem, .72vw, .84rem)/1 var(--condensed);
+    letter-spacing:.16em; text-transform:uppercase; padding:11px 18px; border:1px solid rgba(255,255,255,.40);
+    border-radius:999px; background:rgba(255,255,255,.04); transition:background .25s, border-color .25s; }
+  .site-cta:hover { background:rgba(44,138,146,.20); border-color:var(--accent); }
+  .nav-toggle { display:none; flex-direction:column; justify-content:center; gap:5px;
+    width:44px; height:44px; padding:10px; background:none; border:0; cursor:pointer; }
+  .nav-toggle span { display:block; height:2px; width:100%; background:#fff; border-radius:2px; transition:transform .25s, opacity .2s; }
+
+  /* ===================== pinned content panels ===================== */
+  #content { position:relative; z-index:5; }
+  .panel { position:relative; height:260vh; }
+  /* deeper layers (subsoil and down) get more scroll room per section */
+  .panel--tall { height:380vh; }
+  /* the final section ends the page: a real form, sized to its content, nothing past it */
+  .panel--end { height:auto; }
+  .panel--end .panel__inner { position:static; min-height:100vh; align-content:center; padding:11vh 0 6vh; }
+  /* the end form is a solid dark card on the light-blue deep wash (no backdrop-blur: it cropped at the edges) */
+  .end-card { position:relative; background:rgba(8,12,18,.82); max-width:1040px; margin-inline:auto;
+    border:1px solid rgba(202,222,239,.24); border-radius:22px;
+    padding:clamp(30px,4vw,58px) clamp(24px,4.2vw,62px);
+    box-shadow:0 38px 92px rgba(0,0,0,.46); }
+  .panel--end h2.panel__verdict { font-size:clamp(1.9rem, 3.4vw, 3.4rem); }
+  .panel--end .panel__evidence p { margin-top:9px; max-width:70ch; font-size:clamp(.95rem,.95vw,1.08rem); }
+  /* breathing room between sections: pure descending earth, no text */
+  .gap { height:64vh; pointer-events:none; }
+  .panel__inner { position:sticky; top:0; min-height:100vh; display:grid; align-items:center;
+    align-content:center;   /* pack the content as one tight centered block (no row-stretch gaps) */
+    width:min(1180px, 88vw); margin:0 auto; padding:14vh 0;
+    color:rgba(244,238,228,.92); text-shadow:0 2px 18px rgba(0,0,0,.78); pointer-events:auto; }
+
+  .panel__icon { display:none; }   /* source only; rendered on the right with the detail lines */
+  /* the form section has no side list, so its icon sits top-right of the card, in line with the heading */
+  .panel--end .panel__icon { display:block; position:absolute; top:clamp(26px,3.4vw,52px); right:clamp(24px,4.2vw,62px);
+    width:clamp(92px,9vw,128px); height:auto; margin:0; overflow:visible; }
+  .panel--end .panel__icon svg { width:100%; height:auto; display:block; overflow:visible; }
+  .panel--end .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
+  #sideList .sl-icon { width:clamp(84px,9vw,112px); height:auto; margin:0 0 22px auto; color:rgba(244,238,228,.85); opacity:0; overflow:visible; }
+  #sideList .sl-icon svg { width:100%; height:auto; display:block; overflow:visible; }
+  #sideList .sl-icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
+  .panel__eyebrow { display:block; margin-bottom:14px; color:rgba(244,238,228,.66);
+    font:700 .76rem/1.25 var(--condensed); letter-spacing:.26em; text-transform:uppercase; text-wrap:balance; }
+  .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
+    background:rgba(244,238,228,.6); vertical-align:middle; margin:-3px 14px 0 0; }
+  .panel__verdict { margin:0; color:#fff; font-family:var(--display); font-weight:800;
+    line-height:.9; letter-spacing:-.01em; text-wrap:balance;
+    text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
+  h1.panel__verdict { font-size:clamp(3.6rem, 8.4vw, 9.6rem); }
+  h2.panel__verdict { font-size:clamp(2.4rem, 5.4vw, 6.4rem); }
+  .panel__lede { margin-top:14px; color:rgba(244,238,228,.84);
+    font:700 clamp(1.05rem, 1.5vw, 1.7rem)/1.25 var(--condensed); letter-spacing:.01em; text-wrap:balance; }
+  .panel__evidence p { margin-top:16px; max-width:58ch; color:rgba(244,238,228,.80);
+    font-size:clamp(.98rem, 1.05vw, 1.2rem); line-height:1.6; text-align:justify; text-align-last:left; }
+  /* testimonial attribution: small uppercase teal tag after the quote (no em dash) */
+  .panel__evidence .cite { display:inline-block; margin-left:.45em; color:#7fd0d4;
+    font:700 .74em/1 var(--condensed); letter-spacing:.16em; text-transform:uppercase; }
+  /* detail list: hidden on the hero (plays centered in #sideList) + the end form; shown inline under the text everywhere else */
+  .panel__list { display:none; }
+  .panel:not(#p-hero):not(.panel--end) .panel__list { display:block; margin:clamp(12px,1.5vw,20px) 0 0; }
+  /* icon sits in line with the headline, on its right (JS wraps headline + icon in .hl-row) */
+  .panel:not(#p-hero):not(.panel--end) .panel__icon { display:block; flex:0 0 auto; width:clamp(92px,9.2vw,132px); height:auto; margin:0; overflow:visible; }
+  /* facets start hidden + scale from their own centre; JS pops them in, scroll-scrubbed */
+  .panel:not(#p-hero):not(.panel--end) .panel__icon svg { overflow:visible; display:block; width:100%; height:auto; }
+  .panel:not(#p-hero):not(.panel--end) .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
+  .hl-row { display:flex; align-items:center; justify-content:space-between; gap:clamp(18px,2.4vw,40px); }
+  .hl-row .panel__verdict { margin:0; }
+  /* photo panels: big photo on the LEFT, text + list on the RIGHT (text stays left-aligned, so they agree) */
+  @media (min-width:901px) {
+    .panel:has(.panel__gallery) .panel__inner {
+      grid-template-columns: clamp(320px,40vw,560px) minmax(0,1fr); column-gap:clamp(40px,5vw,88px); }
+    .panel:has(.panel__gallery) .panel__inner > .hl-row,
+    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow,
+    .panel:has(.panel__gallery) .panel__inner > .panel__lede,
+    .panel:has(.panel__gallery) .panel__inner > .panel__evidence,
+    .panel:has(.panel__gallery) .panel__inner > .panel__list { grid-column:2; }
+    .panel:has(.panel__gallery) .panel__inner > .panel__gallery {
+      grid-column:1; grid-row:1 / span 99; align-self:center; justify-self:stretch; }
+  }
+  #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
+    z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
+    display:grid; gap:15px; }
+  /* the first (hero) list plays centered on screen, not pinned to the right */
+  #sideList.side-centered { right:auto; left:50%; transform:translate(-50%, -50%); text-align:center; width:min(82vw, 540px); }
+  #sideList.side-centered .sl-rule { margin:0 auto 9px; }
+  #sideList.side-centered .sl-icon { margin:0 auto 20px; }
+  #sideList .sl-line { opacity:0; will-change:opacity, transform; }
+  #sideList .sl-rule { display:block; width:48px; height:1px; background:rgba(244,238,228,.5); margin:0 0 9px auto; }
+  #sideList .sl-text { display:block; font:700 clamp(1.05rem, 1.55vw, 1.7rem)/1.12 var(--condensed);
+    letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.72); text-wrap:balance; }
+  .panel__list li { min-height:30px; padding:5px 0; display:flex; align-items:center;
+    border-top:1px solid rgba(244,238,228,.24); color:rgba(244,238,228,.76);
+    font:700 .72rem/1.1 var(--condensed); letter-spacing:.14em; text-transform:uppercase; }
+  /* clickable photo gallery (opens the lightbox) */
+  .panel__gallery { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; max-width:min(50vw, 720px); }  /* stay in the left column, clear of the fixed #sideList */
+  .panel__gallery .g-thumb { padding:0; margin:0; line-height:0; cursor:pointer; overflow:hidden; border-radius:3px;
+    border:1px solid rgba(244,238,228,.30); background:none; box-shadow:0 14px 30px rgba(0,0,0,.36);
+    transition:border-color .2s; }
+  .panel__gallery .g-thumb img { width:clamp(220px, 25vw, 320px); height:auto; aspect-ratio:3/2; object-fit:cover; display:block; transition:transform .4s ease; }
+  .panel__gallery .g-thumb:hover { border-color:rgba(244,238,228,.72); }
+  .panel__gallery .g-thumb:hover img { transform:scale(1.07); }
+  .panel__gallery .g-thumb:focus-visible { outline:2px solid rgba(244,238,228,.8); outline-offset:2px; }
+  /* in the split layout the photo fills the right column (big); multiple shots share the column */
+  @media (min-width:901px) {
+    .panel:has(.panel__gallery) .panel__gallery { margin-top:0; max-width:none;
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; align-content:center; }
+    .panel:has(.panel__gallery) .panel__gallery .g-thumb img { width:100%; height:auto; aspect-ratio:3/2; }
+  }
+
+  /* lightbox */
+  #lightbox { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
+    background:rgba(6,5,4,.93); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  #lightbox.open { display:flex; }
+  #lightbox .lb-img { max-width:88vw; max-height:80vh; object-fit:contain; box-shadow:0 30px 90px rgba(0,0,0,.65); }
+  #lightbox .lb-cap { position:absolute; bottom:4.5vh; left:0; right:0; text-align:center;
+    color:rgba(244,238,228,.82); font:700 .74rem/1.3 var(--condensed); letter-spacing:.16em; text-transform:uppercase; }
+  #lightbox button { position:absolute; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.32); color:#fff; cursor:pointer;
+    border-radius:999px; transition:background .2s; line-height:1; }
+  #lightbox button:hover { background:rgba(255,255,255,.18); }
+  #lightbox .lb-close { top:22px; right:22px; width:46px; height:46px; font-size:26px; }
+  #lightbox .lb-prev, #lightbox .lb-next { display:none; }   /* single photo per section, no next/prev */
+  .panel__contact { display:inline-flex; align-items:center; gap:10px; margin-top:22px;
+    text-decoration:none; color:#11100d; background:rgba(233,226,214,.92);
+    font:700 .84rem/1 var(--condensed); letter-spacing:.12em; text-transform:uppercase;
+    padding:14px 24px; border-radius:999px; transition:background .25s; }
+  .panel__contact:hover { background:#fff; }
+
+  /* contact form (final section) — compact, fits one screen */
+  .panel__form { margin-top:16px; max-width:none; display:grid; gap:12px; }
+  .panel__form .f-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:13px; }
+  .panel__form .f-row-2 { grid-template-columns:repeat(2, 1fr); }
+  .panel__form label { display:grid; gap:5px; font:700 .64rem/1.2 var(--condensed);
+    letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.6); }
+  .panel__form input, .panel__form select, .panel__form textarea {
+    font:400 .95rem/1.35 var(--body); color:#fff; background:rgba(255,255,255,.06);
+    border:1px solid rgba(244,238,228,.26); border-radius:8px; padding:9px 12px; width:100%; }
+  .panel__form select option { color:#11100d; }
+  .panel__form textarea { resize:none; }
+  .panel__form input:focus, .panel__form select:focus, .panel__form textarea:focus {
+    outline:none; border-color:rgba(244,238,228,.72); background:rgba(255,255,255,.11); }
+  .panel__form .f-chips { border:0; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:7px; }
+  .panel__form .f-chips legend { float:left; width:100%; margin-bottom:7px;
+    font:700 .64rem/1.2 var(--condensed); letter-spacing:.16em; text-transform:uppercase; color:rgba(244,238,228,.6); }
+  .panel__form .f-chips label { display:inline-flex; }
+  .panel__form .f-chips input { position:absolute; opacity:0; width:0; height:0; }
+  .panel__form .f-chips span { display:inline-block; padding:6px 12px; cursor:pointer;
+    border:1px solid rgba(244,238,228,.28); border-radius:999px;
+    font:700 .66rem/1 var(--condensed); letter-spacing:.08em; text-transform:uppercase;
+    color:rgba(244,238,228,.72); transition:background .2s, color .2s, border-color .2s; }
+  .panel__form .f-chips input:checked + span { background:rgba(233,226,214,.92); color:#11100d; border-color:rgba(233,226,214,.92); }
+  .panel__form .f-chips input:focus-visible + span { border-color:rgba(244,238,228,.85); }
+  .panel__form .hp { position:absolute !important; left:-9999px; opacity:0; }
+  .f-foot { display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:2px; }
+  .f-submit { cursor:pointer; color:#11100d; background:rgba(233,226,214,.92);
+    border:0; border-radius:999px; padding:12px 26px; font:700 .8rem/1 var(--condensed);
+    letter-spacing:.12em; text-transform:uppercase; transition:background .2s; }
+  .f-submit:hover { background:#fff; }
+  .f-submit[disabled] { opacity:.6; cursor:default; }
+  .f-status { min-height:1.2em; margin:0; font:700 .74rem/1.35 var(--condensed); letter-spacing:.08em; color:rgba(244,238,228,.72); }
+  .f-status.ok { color:#9fd9a0; }
+  .f-status.err { color:#e6a3a3; }
+
+  /* "text up": each headline word rides inside a mask and rises into place */
+  .word { display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:.14em; margin-bottom:-.14em; }
+  .wi { display:inline-block; will-change:transform; }
+  .panel__eyebrow, .panel__lede, .panel__evidence p, .panel__list li, .panel__photo, .panel__contact {
+    will-change:transform, opacity; }
+
+  /* grain + vignette */
+  #grade { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0;   /* off on the first screen; the scene fades it in on the descent (keeps the brand blue flat everywhere, incl. if 3D never inits) */
+    background:radial-gradient(122% 92% at 50% 40%, rgba(0,0,0,0) 44%, rgba(0,0,0,0.55) 100%); mix-blend-mode:multiply; }
+  #grain { position:fixed; inset:-50%; z-index:3; pointer-events:none; opacity:.07;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size:300px 300px; animation:grain 1.1s steps(3) infinite; }
+  @keyframes grain { 0%{transform:translate(0,0)} 33%{transform:translate(-4%,3%)} 66%{transform:translate(3%,-2%)} 100%{transform:translate(0,0)} }
+
+  /* depth readout */
+  #depth { position:fixed; left:22px; bottom:20px; z-index:6;
+    font-family:var(--condensed); letter-spacing:.06em; text-transform:uppercase;
+    font-size:13px; color:rgba(233,226,214,.62); pointer-events:none; text-shadow:0 1px 6px rgba(0,0,0,.6); }
+  #depth b { font-size:30px; font-weight:600; color:rgba(233,226,214,.92); display:block; line-height:1; letter-spacing:0; }
+  #depth span { opacity:.55; }
+
+  #hint { position:fixed; left:50%; bottom:52px; transform:translateX(-50%); z-index:6;
+    font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:rgba(233,226,214,.72);
+    pointer-events:none; text-shadow:0 1px 8px rgba(0,0,0,.7); text-align:center; }
+  #hint .mouse { display:block; width:22px; height:34px; margin:0 auto 10px;
+    border:1.5px solid rgba(233,226,214,.6); border-radius:12px; position:relative; }
+  #hint .mouse::after { content:""; position:absolute; left:50%; top:6px; width:3px; height:6px;
+    border-radius:2px; background:rgba(233,226,214,.85); transform:translateX(-50%); animation:wheel 1.6s ease-in-out infinite; }
+  @keyframes wheel { 0%{opacity:0; transform:translate(-50%,0)} 30%{opacity:1} 70%{opacity:1; transform:translate(-50%,9px)} 100%{opacity:0; transform:translate(-50%,9px)} }
+  #hint .arr { display:block; text-align:center; margin-top:4px; animation:bob 1.8s ease-in-out infinite; }
+
+  /* descent spacer + centered "keep diggin'" cue (no pin, no veil) */
+  .deep-stretch { height:110vh; pointer-events:none; }
+  #keepDig { position:fixed; left:50%; top:50%; transform:translate(-50%, -50%); z-index:6;
+    text-align:center; pointer-events:none; opacity:0; visibility:hidden; color:#fff; text-shadow:0 2px 16px rgba(0,0,0,.78); }
+  #keepDig .kd-text { display:block; font:700 clamp(1.3rem, 2.4vw, 2.2rem)/1.1 var(--condensed);
+    letter-spacing:.16em; text-transform:uppercase; }
+  #keepDig .kd-arr { display:block; margin-top:14px; font-size:26px; animation:bob 1.8s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+
+  /* strata name, right side */
+  #strata { position:fixed; right:22px; bottom:20px; z-index:6; pointer-events:none; text-align:right; }
+  #strata .lab { display:inline-block; opacity:0; transform:translateX(46px);
+    transition:opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); }
+  #strata.show .lab { opacity:1; transform:translateX(0); }
+  #strata .name { font-family:var(--condensed); font-weight:600; font-size:30px; letter-spacing:.02em;
+    color:rgba(244,238,228,.95); text-shadow:0 2px 14px rgba(0,0,0,.7); display:block; line-height:1.05; }
+  #strata .sub { font-size:11px; letter-spacing:.26em; text-transform:uppercase;
+    color:rgba(244,238,228,.55); display:block; margin-top:7px; }
+
+  #fallback { position:fixed; inset:0; z-index:1; display:none;
+    background:linear-gradient(#9fa6ad, #6e5a44 22%, #3c2c1d 55%, #120c08);
+    align-items:center; justify-content:center; }
+  #fallback p { font-size:13px; letter-spacing:.2em; text-transform:uppercase; color:#e9e2d6; opacity:.7; }
+
+  @media (max-width: 900px) {
+    #siteNav { grid-template-columns:auto auto; min-height:74px; }
+    .site-links { display:none; }
+    /* lift the scroll cue well clear of the mobile browser toolbar (52px sat behind it) */
+    #hint { bottom:clamp(96px, 18vh, 150px); }
+    .panel { height:210vh; }
+    .panel--tall { height:300vh; }
+    .panel--end { height:auto; }
+    .panel--end .panel__inner { padding:14vh 0 10vh; }
+    .deep-stretch { height:90vh; }
+    .panel__inner { width:90vw; padding:16vh 0; }
+    .gap { height:44vh; }
+    /* headlines: one line, JS fits each to span the full content width (fitHeadlines). Values here are fallback. */
+    h1.panel__verdict { font-size:clamp(2rem, 9vw, 3.4rem); white-space:nowrap; }
+    h2.panel__verdict { font-size:clamp(1.8rem, 8.4vw, 3rem); white-space:nowrap; }
+    .hl-row { display:block; }   /* headline spans the full width on its own line (icon is on the eyebrow row) */
+    .panel__evidence p { max-width:none; }
+    .panel__list { display:grid; grid-template-columns:1fr; max-width:none; margin-top:18px; }  /* #sideList is hidden on mobile, so stack the detail lines in-flow here */
+    .panel__list li { min-height:46px; font-size:.82rem; letter-spacing:.13em; opacity:0; will-change:opacity, transform; }  /* JS stacks these in on scroll */
+    .panel__gallery { max-width:none; justify-content:flex-end; }   /* images sit to the right on mobile */
+    .panel__form .f-row { grid-template-columns:1fr; }
+    #p-hero .panel__list { display:none; }   /* hero's first list plays centered in #sideList, not inline */
+    /* mobile: section icon rides the eyebrow line, on the RIGHT (JS moves it into .eb-row) */
+    .eb-row { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .eb-row .panel__eyebrow { margin-bottom:0; }
+    .panel:not(#p-hero):not(.panel--end) .eb-row .panel__icon { display:block; width:clamp(72px,18vw,96px); height:auto; margin:0; flex:0 0 auto; }
+    .eb-row .panel__icon svg { width:100%; height:auto; display:block; }
+    #p-hero .panel__icon { display:none; }   /* hero already shows the brand lockup */
+    /* mobile nav: logo left, Free Estimate centred, hamburger + fullscreen tight on the right */
+    #siteNav { display:flex; align-items:center; justify-content:space-between; gap:10px;
+      min-height:64px; background:none; }   /* no black bar; white content like desktop */
+    .nav-toggle { display:flex; }
+    .nav-right { order:3; gap:4px; }
+    .fs-btn { width:38px; height:38px; }
+    /* absolute-centre the CTA to the true viewport middle (logo/right group have unequal widths,
+       so margin:auto between them lands off-centre); logo + nav-right pin to the edges via space-between */
+    .site-cta { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      margin:0; padding:9px 14px; font-size:.68rem; }
+    .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
+      align-items:stretch; background:#fff; border-top:1px solid rgba(18,74,82,.18);
+      box-shadow:0 18px 40px rgba(0,0,0,.18); padding:0 0 10px; display:none; }   /* no top padding: the white gap above the first link read as a dead space */
+    #siteNav.nav-open .site-links { display:flex; }
+    .site-links a { padding:14px clamp(22px,6vw,40px); color:#124a52; }
+    .site-links a::after { display:none; }
+    #siteNav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    #siteNav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
+    #siteNav.nav-open .nav-toggle span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #grain, #hint .arr { animation:none; }
+  }
+</style>
+</head>
+<body>
+  <div id="splash" role="button" tabindex="0" aria-label="Enter site">
+    <img class="sp-icon" src="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/b8bacc8a-0edd-4c51-9229-b6df92d8572e/Island+Excavating+-+White+Logo.png?format=1500w" alt="K & L Island Excavating">
+    <div class="splash-hint">Click to enter</div>
+  </div>
+  <div id="stage"></div>
+  <div id="brandWash" aria-hidden="true"></div>
+  <div id="deepWash" aria-hidden="true"></div>
+  <div id="textVeil" aria-hidden="true"></div>
+  <div id="fallback"><p>K &amp; L Island Excavating</p></div>
+
+  <header id="siteNav" aria-label="K & L Island Excavating">
+    <a href="#p-hero" data-scroll-target="#p-hero" aria-label="K & L Island Excavating home">
+      <img src="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/b8bacc8a-0edd-4c51-9229-b6df92d8572e/Island+Excavating+-+White+Logo.png?format=1500w" alt="K & L Island Excavating">
+    </a>
+    <nav class="site-links" aria-label="Site sections">
+      <a href="#p-hero" data-scroll-target="#p-hero">Surface</a>
+      <a href="#p-topsoil" data-scroll-target="#p-topsoil">Services</a>
+      <a href="#p-till" data-scroll-target="#p-till">Work</a>
+      <a href="#p-limestone" data-scroll-target="#p-limestone">Why us</a>
+      <a href="#p-bedrock" data-scroll-target="#p-bedrock">Contact</a>
+    </nav>
+    <a class="site-cta" href="#p-bedrock" data-scroll-target="#p-bedrock">Free Estimate</a>
+    <div class="nav-right">
+      <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <button id="fsBtn" class="fs-btn" type="button" aria-label="Toggle fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg></button>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="panel" id="p-hero" data-e="0.018">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cfe9ec" d="M48 17 L74 30 L48 43 L22 30 Z"/><path fill="#9ed3da" d="M22 30 L48 43 L48 51.7 L22 38.7 Z"/><path fill="#5fb0bb" d="M22 38.7 L48 51.7 L48 60.3 L22 47.3 Z"/><path fill="#2f8f99" d="M22 47.3 L48 60.3 L48 69 L22 56 Z"/><path fill="#1f6e78" d="M74 30 L48 43 L48 51.7 L74 38.7 Z"/><path fill="#176069" d="M74 38.7 L48 51.7 L48 60.3 L74 47.3 Z"/><path fill="#124a52" d="M74 47.3 L48 60.3 L48 69 L74 56 Z"/></svg></span>
+        <span class="panel__eyebrow">Driveways &middot; Septic &middot; Land Clearing &middot; Trucking &middot; Site Prep</span>
+        <h1 class="hero-lockup" aria-label="K & L Island Excavating"><img class="hl-logo" src="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/b8bacc8a-0edd-4c51-9229-b6df92d8572e/Island+Excavating+-+White+Logo.png?format=1500w" alt="K & L Island Excavating"></h1>
+        <p class="panel__lede">Your local island digging service.</p>
+        <div class="panel__evidence"><p>K &amp; L Island Excavating is dedicated to providing top-tier excavation services on Salt Spring Island. Our mission is to deliver high-quality, efficient, innovative work on every project.</p></div>
+        <ul class="panel__list"><li>Driveways</li><li>Septic Fields</li><li>Land Clearing</li><li>Free Estimates</li></ul>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel" id="p-humus" data-e="0.075">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cfe9ec" d="M48 20 L76 34 L48 48 L20 34 Z"/><path fill="#2f8f99" d="M20 34 L48 48 L48 56 L20 42 Z"/><path fill="#124a52" d="M76 34 L48 48 L48 56 L76 42 Z"/><path fill="none" stroke="#1f6e78" stroke-width="1.4" d="M29.3 29.3 L57.3 43.3 M38.7 24.7 L66.7 38.7 M57.3 24.7 L29.3 38.7 M66.7 29.3 L38.7 43.3"/></svg></span>
+        <span class="panel__eyebrow">Humus &middot; What we do</span>
+        <h2 class="panel__verdict">Top-tier excavation.</h2>
+        <div class="panel__evidence"><p>From driveways and site preparation to septic fields, land clearing, and trucking and transport, we handle the full range of excavation work on Salt Spring Island, with attention to detail and precision on every job.</p></div>
+        <ul class="panel__list"><li>Driveways</li><li>Septic Fields</li><li>Land Clearing</li><li>Trucking &amp; Transport</li><li>Site Preparation</li></ul>
+        <div class="panel__gallery" data-cap="On the job" data-urls="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/5a04af2d-a2ee-4377-9ab5-d76e180bd6ba/IMG_8313.jpeg?format=1500w, https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/1bb395db-c14c-4738-92fe-f31f5c0d10cf/Island+Excavating.jpeg?format=1500w"></div>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel" id="p-topsoil" data-e="0.12">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#5fb0bb" d="M40 28 L56 28 L74 80 L22 80 Z"/><path fill="#124a52" d="M22 80 L40 28 L37 28 L18 80 Z"/><path fill="#1f6e78" d="M74 80 L56 28 L59 28 L78 80 Z"/><path fill="#cfe9ec" d="M46 64 L50 64 L51 72 L45 72 Z"/><path fill="#cfe9ec" d="M46.8 51 L49.2 51 L49.8 58 L46.2 58 Z"/><path fill="#cfe9ec" d="M47.4 40 L48.6 40 L49 46 L47 46 Z"/></svg></span>
+        <span class="panel__eyebrow">Topsoil &middot; Driveways</span>
+        <h2 class="panel__verdict">Driveways.</h2>
+        <div class="panel__evidence"><p>Transform your property with our expert driveway services, creating smooth and aesthetically pleasing driveways tailored to your specifications. From the first cut to the final grade, the surface is built to last on island terrain.</p></div>
+        <ul class="panel__list"><li>New Driveways</li><li>Grading &amp; Leveling</li><li>Resurfacing</li><li>Custom Finishes</li></ul>
+        <div class="panel__gallery" data-cap="Driveways" data-urls="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/6aac8f7b-a038-4766-9304-d46a41783a33/IMG_6950.jpeg?format=1500w"></div>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel panel--tall" id="p-subsoil" data-e="0.19">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#2f8f99" d="M48 61.5 L53 64 L48 66.5 L43 64 Z"/><path fill="#1f6e78" d="M43 64 L48 66.5 L48 74.5 L43 72 Z"/><path fill="#0e3b42" d="M53 64 L48 66.5 L48 74.5 L53 72 Z"/><path fill="#9ed3da" d="M48 40 L30 58 L48 66 Z"/><path fill="#2f8f99" d="M48 40 L66 58 L48 66 Z"/><path fill="#cfe9ec" d="M48 26 L34 42 L48 49 Z"/><path fill="#5fb0bb" d="M48 26 L62 42 L48 49 Z"/></svg></span>
+        <span class="panel__eyebrow">Subsoil &middot; Land Clearing</span>
+        <h2 class="panel__verdict">Land clearing.</h2>
+        <div class="panel__evidence"><p>Clearing land for development is one of our specialties. We utilize the right equipment and techniques to efficiently clear and prepare your land, removing trees, brush, and obstacles so the site is ready for whatever comes next.</p></div>
+        <ul class="panel__list"><li>Tree Removal</li><li>Brush Removal</li><li>Development Prep</li><li>Site Clearing</li></ul>
+        <div class="panel__gallery" data-cap="Land clearing" data-urls="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/38d1e7e0-6d73-465a-a827-6112e6ca472e/IMG_6990.jpeg?format=1500w"></div>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel panel--tall" id="p-clay" data-e="0.28">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#5fb0bb" d="M44 20 L52 20 L52 36 L44 36 Z"/><path fill="#cfe9ec" d="M43 17 L53 17 L53 22 L43 22 Z"/><path fill="#9ed3da" d="M30 42 L48 33 L66 42 L48 51 Z"/><path fill="#2f8f99" d="M30 42 L48 51 L48 70 L30 61 Z"/><path fill="#1f6e78" d="M66 42 L48 51 L48 70 L66 61 Z"/></svg></span>
+        <span class="panel__eyebrow">Marine clay &middot; Septic Field</span>
+        <h2 class="panel__verdict">Septic fields.</h2>
+        <div class="panel__evidence"><p>Efficient and reliable septic field installations, carried out with environmentally conscious practices and full compliance with local regulations. We plan and place each system so it performs for the long term and protects the land around it.</p></div>
+        <ul class="panel__list"><li>Septic Field Installs</li><li>Code Compliance</li><li>Environmentally Conscious</li><li>Long-Term Performance</li></ul>
+        <div class="panel__gallery" data-cap="Septic field work" data-urls="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/5112fbc4-9876-4842-b061-a48ac5626d28/IMG_6179.jpeg?format=1500w"></div>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel panel--tall" id="p-till" data-e="0.39">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#124a52" d="M30 64 L35 61 L40 64 L35 67 Z"/><path fill="#124a52" d="M56 62 L61 59 L66 62 L61 65 Z"/><path fill="#5fb0bb" d="M20 54 L60 46 L78 54 L38 62 Z"/><path fill="#1f6e78" d="M20 54 L38 62 L38 68 L20 60 Z"/><path fill="#2f8f99" d="M78 54 L38 62 L38 68 L78 60 Z"/><path fill="#9ed3da" d="M26 44 L58 38 L72 44 L40 50 Z"/><path fill="#2f8f99" d="M26 44 L40 50 L40 58 L26 52 Z"/><path fill="#1f6e78" d="M72 44 L40 50 L40 58 L72 52 Z"/><path fill="#cfe9ec" d="M62 48 L72 45 L78 49 L68 52 Z"/><path fill="#5fb0bb" d="M68 52 L78 49 L78 57 L68 60 Z"/></svg></span>
+        <span class="panel__eyebrow">Glacial till &middot; Site Preparation &amp; Trucking</span>
+        <h2 class="panel__verdict">Site preparation.</h2>
+        <div class="panel__evidence"><p>From tree removal to excavation, our team meticulously prepares your site. We back it up with dependable trucking and transport, handling material delivery and removal so the job keeps moving from start to finish.</p></div>
+        <ul class="panel__list"><li>Site Preparation</li><li>Tree Removal</li><li>Excavation</li><li>Material Delivery &amp; Removal</li></ul>
+        <div class="panel__gallery" data-cap="On the ground" data-urls="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/c767b551-2068-4e2f-9bce-47218b0e29c3/IMG_6635.jpeg?format=1500w, https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/9bc12c4b-723f-4a96-8a74-28211cc2f6d7/IMG_6211.jpeg?format=1500w"></div>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <section class="panel panel--tall" id="p-limestone" data-e="0.50">
+      <div class="panel__inner">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cfe9ec" d="M48 16 L30 38 L48 46 Z"/><path fill="#9ed3da" d="M48 16 L66 38 L48 46 Z"/><path fill="#2f8f99" d="M48 64 L30 38 L48 46 Z"/><path fill="#1f6e78" d="M48 64 L66 38 L48 46 Z"/></svg></span>
+        <span class="panel__eyebrow">Limestone &middot; Why K &amp; L</span>
+        <h2 class="panel__verdict">Above and beyond.</h2>
+        <div class="panel__evidence">
+          <p>&ldquo;Noah&rsquo;s attention to detail and precision in excavation transformed our backyard into a masterpiece. K &amp; L Island Excavating exceeded our expectations.&rdquo; <span class="cite">Tracy</span></p>
+          <p>&ldquo;No job is too big or small for K &amp; L Island Excavating. Liam&rsquo;s skillful handling of our site preparation showcased their commitment to quality.&rdquo; <span class="cite">Jeff</span></p>
+          <p>&ldquo;Both Liam and Noah were able to clearly understand what we wanted and went above and beyond getting the job done.&rdquo; <span class="cite">Kate</span></p>
+        </div>
+        <div class="panel__gallery" data-cap="On Salt Spring Island" data-urls="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/f239dce4-a57d-4c0d-9d89-0a20d069153e/IMG_5487.jpeg?format=1500w"></div>
+        <ul class="panel__list"><li>Locally Owned</li><li>Owner-Operated</li><li>Salt Spring Island</li><li>No Job Too Big or Small</li></ul>
+      </div>
+    </section>
+
+    <div class="gap" aria-hidden="true"></div>
+
+    <div class="deep-stretch" id="deepStretch" aria-hidden="true"></div>
+
+    <section class="panel panel--end" id="p-bedrock" data-e="0.96">
+      <div class="panel__inner">
+        <div class="end-card">
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cfe9ec" d="M22 33 L48 20 L74 33 L48 33.5 Z"/><path fill="#9ed3da" d="M22 33 L74 33 L48 46 Z"/><path fill="#2f8f99" d="M22 33 L48 46 L48 54 L22 41 Z"/><path fill="#124a52" d="M74 33 L48 46 L48 54 L74 41 Z"/></svg></span>
+        <span class="panel__eyebrow">Bedrock &middot; Get in touch</span>
+        <h2 class="panel__verdict">Start your project.</h2>
+        <div class="panel__evidence"><p>Tell us about your site and what you are planning. For driveways, septic fields, land clearing, trucking, or site preparation, we will follow up with a practical conversation and a free estimate. Call (250) 537-6600 or send a note below.</p></div>
+        <form class="panel__form" action="https://api.web3forms.com/submit" method="POST" novalidate>
+          <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
+          <input type="hidden" name="subject" value="New estimate request from the K & L Island Excavating website">
+          <input type="hidden" name="from_name" value="K & L Island Excavating Website">
+          <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="f-row">
+            <label>Name<input type="text" name="name" required></label>
+            <label>Email<input type="email" name="email" required></label>
+            <label>Phone<input type="tel" name="phone"></label>
+          </div>
+          <div class="f-row f-row-2">
+            <label>Location
+              <select name="location">
+                <option>Salt Spring Island</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <label>Timeline
+              <select name="timeline">
+                <option>As soon as possible</option>
+                <option>Within 2 weeks</option>
+                <option>1&ndash;3 months</option>
+                <option>3&ndash;6 months</option>
+                <option>Just planning</option>
+              </select>
+            </label>
+          </div>
+          <fieldset class="f-chips">
+            <legend>What do you need?</legend>
+            <label><input type="checkbox" name="services" value="Driveways"><span>Driveways</span></label>
+            <label><input type="checkbox" name="services" value="Septic Field"><span>Septic Field</span></label>
+            <label><input type="checkbox" name="services" value="Land Clearing"><span>Land Clearing</span></label>
+            <label><input type="checkbox" name="services" value="Trucking & Transport"><span>Trucking</span></label>
+            <label><input type="checkbox" name="services" value="Site Preparation"><span>Site Prep</span></label>
+            <label><input type="checkbox" name="services" value="Not sure yet"><span>Not sure yet</span></label>
+          </fieldset>
+          <label>Project details<textarea name="message" rows="2"></textarea></label>
+          <div class="f-foot">
+            <button type="submit" class="f-submit">Request a free estimate</button>
+            <p class="f-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="grade"></div>
+  <div id="grain"></div>
+  <div id="depth"><b id="depthN">0.0</b><span>metres of earth</span></div>
+  <div id="strata"><span class="lab"><span class="name" id="strataName"></span><span class="sub" id="strataSub"></span></span></div>
+  <div id="sideList" aria-hidden="true"></div>
+  <div id="keepDig" aria-hidden="true"><span class="kd-text">Keep diggin&rsquo;</span><span class="kd-arr">&#9662;</span></div>
+  <div id="hint">scroll to descend<span class="arr">&#9662;</span></div>
+  <div id="lightbox" aria-hidden="true">
+    <button class="lb-close" type="button" aria-label="Close">&times;</button>
+    <button class="lb-prev" type="button" aria-label="Previous photo">&#8249;</button>
+    <img class="lb-img" alt="">
+    <button class="lb-next" type="button" aria-label="Next photo">&#8250;</button>
+    <div class="lb-cap"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+  // ============================================================ 3D descent scene
+  (function () {
+    if (!window.THREE) { document.getElementById('fallback').style.display='flex'; return; }
+    const T = THREE;
+
+    const SURFACE_Y = 22, DEEP_Y = -196, GROUND_Y = 0, WALLW = 220;
+    const METRES_AT_BOTTOM = 24, METRES_PER_WORLD = METRES_AT_BOTTOM / Math.abs(DEEP_Y - 8);
+    const LAYERS = ['humus','topsoil1','topsoil2','topsoil3','subsoil','clay','till','limestone','bedrock'];
+    const SITE_TUNING = {
+      light:1.14,
+      layers:{
+        humus:{ seams:0.35, lamina:2.2, relief:1.9, tile:0.81, tone:1.12, edge:0.75, seamTone:1 },
+        topsoil1:{ seams:0.62, lamina:0.52, relief:0.74, tile:1.12, tone:0, edge:0.75, seamTone:1 },
+        topsoil2:{ seams:0.62, lamina:0.52, relief:0.74, tile:1.12, tone:0.2, edge:0.75, seamTone:1 },
+        topsoil3:{ seams:0.62, lamina:0.52, relief:0.74, tile:1.12, tone:1.78, edge:0.75, seamTone:1 },
+        subsoil:{ seams:0.62, lamina:0.52, relief:0.25, tile:0.9, tone:1.79, edge:0.75, seamTone:1 },
+        clay:{ seams:0.62, lamina:0.52, relief:0.74, tile:0.86, tone:0.55, edge:0.75, seamTone:1 },
+        till:{ seams:0.62, lamina:0.52, relief:0.74, tile:2.03, tone:0.92, edge:0.75, seamTone:1 },
+        limestone:{ seams:1.04, lamina:2.2, relief:1.84, tile:0.71, tone:1.8, edge:0.75, seamTone:1 },
+        bedrock:{ seams:0.62, lamina:0.52, relief:0.74, tile:1.93, tone:0.92, edge:0.75, seamTone:1 },
+      },
+    };
+    const layerMeshes = [];
+    const centerDir = new T.Vector3();
+
+    const stage = document.getElementById('stage');
+    const scene = new T.Scene();
+    scene.background = null;
+    scene.fog = new T.Fog(0x0a0705, 30, 150);
+
+    const camera = new T.PerspectiveCamera(46, innerWidth/innerHeight, 0.1, 400);
+    camera.position.set(0, SURFACE_Y, 18);
+    scene.add(camera);
+
+    const renderer = new T.WebGLRenderer({ antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight, false);   // false = don't write inline px size; CSS sizes the canvas (mobile address-bar safe)
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.toneMapping = T.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.02;
+    stage.appendChild(renderer.domElement);
+
+    const hemi = new T.HemisphereLight(0xcfd6dc, 0x2a1d12, 0.55); scene.add(hemi);
+    const rake = new T.DirectionalLight(0xffe7c4, 2.15); rake.position.set(-9, 4, 7); scene.add(rake);
+    const fill = new T.DirectionalLight(0x6d7e8c, 0.35); fill.position.set(8, 2, 6); scene.add(fill);
+    const surfaceGlow = new T.PointLight(0xfff1d8, 1.1, 60, 2); surfaceGlow.position.set(0, 6, 14); scene.add(surfaceGlow);
+    const skyMesh = makeSky(); camera.add(skyMesh);
+
+    const loader = new T.TextureLoader();
+    const ASSET_V = '4';
+    function loadSet (dir, prefix, files) {
+      const overrides = files && typeof files === 'object' ? files : {};
+      const mk = (f, srgb) => ({ url: dir + (overrides[f] || prefix + f + '.jpg') + '?v=' + ASSET_V, srgb });
+      return { diff: mk('diffuse', true), norm: mk('normal', false), rough: mk('rough', false), disp: mk('disp', false) };
+    }
+    const SETS = {
+      humus:loadSet('assets/textures/humus/','humus_'),
+      topsoil1:loadSet('assets/textures/topsoil/','topsoil_',{ diffuse:'topsoil3_diffuse.jpg' }),
+      topsoil2:loadSet('assets/textures/topsoil/','topsoil_',{ diffuse:'topsoil2_diffuse.jpg' }),
+      topsoil3:loadSet('assets/textures/topsoil/','topsoil_'),
+      subsoil:loadSet('assets/textures/subsoil/','subsoil_'),
+      clay:loadSet('assets/textures/clay/','clay_'),
+      gravel:loadSet('assets/textures/gravel/','gravel_'),
+      limestone:loadSet('assets/textures/limestone/','limestone_'),
+      rock:loadSet('assets/textures/rock/','rock_'),
+    };
+    const SEAMS = {
+      surface:{ y:0, amp:0.00, seed:0.20, warp:0.22 }, humus:{ y:-3.2, amp:0.56, seed:1.35, warp:0.50 },
+      topsoil1:{ y:-7.4, amp:0.92, seed:2.20, warp:0.82 }, topsoil2:{ y:-11.7, amp:1.08, seed:2.85, warp:0.96 },
+      topsoil3:{ y:-16.2, amp:1.20, seed:3.42, warp:1.04 }, subsoil:{ y:-32.0, amp:1.45, seed:4.10, warp:1.25 },
+      clay:{ y:-53.0, amp:0.95, seed:5.65, warp:0.70 }, till:{ y:-73.0, amp:1.65, seed:7.10, warp:1.35 },
+      limestone:{ y:-101.0, amp:0.85, seed:8.35, warp:0.62 },
+    };
+    function layerTexture (source) {
+      if (!source) return null;
+      const tex = loader.load(source.url);
+      tex.wrapS = tex.wrapT = T.RepeatWrapping; tex.anisotropy = 8; tex.repeat.set(1, 1);
+      if (source.srgb) tex.encoding = T.sRGBEncoding;
+      return tex;
+    }
+    function makeLayer (opts) {
+      const set = SETS[opts.set];
+      const top = opts.top, bot = opts.bot || { y:-1e4, amp:0.18, seed:0, warp:0.5 };
+      const m = new T.MeshStandardMaterial({
+        map:layerTexture(set.diff), normalMap:layerTexture(set.norm), roughnessMap:layerTexture(set.rough),
+        displacementMap:layerTexture(set.disp), displacementScale:opts.disp||1.4, displacementBias:-(opts.disp||1.4)*0.5,
+        roughness:1.0, metalness:0.0,
+      });
+      const maps = [m.map, m.normalMap, m.roughnessMap, m.displacementMap].filter(Boolean);
+      m.normalScale = new T.Vector2(opts.normal||1.3, opts.normal||1.3);
+      m.polygonOffset = true; m.polygonOffsetFactor = (opts.order||0)*1.2; m.polygonOffsetUnits = (opts.order||0)*1.2;
+      const U = {
+        uTopY:{ value: top.y }, uBotY:{ value: bot.y }, uAmpTop:{ value: top.amp }, uAmpBot:{ value: bot.amp },
+        uSeedTop:{ value: top.seed||0 }, uSeedBot:{ value: bot.seed||0 }, uWarpTop:{ value: top.warp||0.5 }, uWarpBot:{ value: bot.warp||0.5 },
+        uTintCol:{ value: new T.Color(opts.tint||0xffffff) }, uTintAmt:{ value: opts.tintAmt||0 },
+        uLaminaAmt:{ value: opts.lamina||0 }, uLaminaFreq:{ value: opts.laminaFreq||0.55 },
+        uLaminaSeed:{ value: opts.laminaSeed || ((opts.order||0)+1.0)*1.73 },
+        uSeamShade:{ value: opts.seamShade==null ? 0.18 : opts.seamShade }, uSeamTone:{ value: 1.0 },
+      };
+      const base = { disp:opts.disp||1.4, topAmp:U.uAmpTop.value, botAmp:U.uAmpBot.value,
+        lamina:U.uLaminaAmt.value, seamShade:U.uSeamShade.value, tintAmt:U.uTintAmt.value };
+      m.onBeforeCompile = (sh) => {
+        Object.assign(sh.uniforms, U);
+        sh.vertexShader = 'varying float vWy; varying float vWx;\n' + sh.vertexShader.replace(
+          '#include <begin_vertex>', '#include <begin_vertex>\n vec4 wp = modelMatrix*vec4(position,1.0); vWy=wp.y; vWx=wp.x;');
+        sh.fragmentShader =
+          'varying float vWy; varying float vWx;\n' +
+          'uniform float uTopY; uniform float uBotY; uniform float uAmpTop; uniform float uAmpBot;\n' +
+          'uniform float uSeedTop; uniform float uSeedBot; uniform float uWarpTop; uniform float uWarpBot;\n' +
+          'uniform vec3 uTintCol; uniform float uTintAmt; uniform float uLaminaAmt; uniform float uLaminaFreq;\n' +
+          'uniform float uLaminaSeed; uniform float uSeamShade; uniform float uSeamTone;\n' +
+          'float horizon(float x, float seed, float warp){ float drift = sin(x*0.035 + seed*2.1)*warp; return sin(x*(0.115 + seed*0.007) + seed*1.7)*1.15 + sin(x*(0.315 + seed*0.011) + seed*3.4 + drift)*0.72 + sin(x*(0.91 + seed*0.017) + seed*5.9)*0.18; }\n' +
+          sh.fragmentShader
+            .replace('void main() {',
+              'void main() {\n float topLine = uTopY + horizon(vWx, uSeedTop, uWarpTop)*uAmpTop;\n float botLine = uBotY + horizon(vWx, uSeedBot, uWarpBot)*uAmpBot;\n if (vWy > topLine) discard;\n if (vWy < botLine) discard;\n float cutDist = min(abs(vWy - topLine), abs(vWy - botLine));')
+            .replace('#include <dithering_fragment>',
+              '#include <dithering_fragment>\n float lum = dot(gl_FragColor.rgb, vec3(0.299,0.587,0.114));\n gl_FragColor.rgb = mix(gl_FragColor.rgb, lum*uTintCol, uTintAmt);\n float bedWave = horizon(vWx*0.24, uLaminaSeed, 0.45);\n float bed = sin((vWy + bedWave*0.85) * uLaminaFreq + uLaminaSeed);\n float fine = sin((vWy*3.2 + vWx*0.18) * uLaminaFreq + uLaminaSeed*2.0);\n float lam = (smoothstep(0.78, 1.0, bed*0.5+0.5)*0.70 + smoothstep(0.96, 1.0, fine*0.5+0.5)*0.30) * uLaminaAmt;\n gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb*vec3(1.20,1.15,1.06), lam);\n float edgeShade = 1.0 - smoothstep(0.0, 2.15, cutDist);\n gl_FragColor.rgb *= 1.0 - edgeShade*uSeamShade*uSeamTone;\n float dm = clamp((-vWy)/195.0, 0.0, 1.0);\n gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb*vec3(0.34,0.30,0.33), dm);');
+      };
+      const h = opts.geoTop - opts.geoBot;
+      const geo = new T.PlaneGeometry(WALLW, h, Math.round(WALLW*1.4), Math.max(90, Math.round(h*4)));
+      const TILE = 20, uv = geo.attributes.uv;
+      for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*(WALLW/TILE), uv.getY(k)*(h/TILE));
+      uv.needsUpdate = true;
+      const mesh = new T.Mesh(geo, m);
+      mesh.position.set(0, (opts.geoTop + opts.geoBot)/2, opts.z||0);
+      mesh.userData = { layerId:opts.id||opts.set, base, maps, U };
+      layerMeshes.push(mesh); scene.add(mesh); return mesh;
+    }
+    (function () {
+      const back = new T.Mesh(new T.PlaneGeometry(WALLW+60, 300), new T.MeshBasicMaterial({ color: 0x140d07 }));
+      back.position.set(0, -150, -2); scene.add(back);
+    })();
+    makeLayer({ id:'humus', set:'humus', order:0, geoTop:4, geoBot:-8, top:SEAMS.surface, bot:SEAMS.humus, disp:0.90, normal:1.7, tint:0x130b05, tintAmt:0.78, lamina:0.08, laminaFreq:1.10, seamShade:0.24 });
+    makeLayer({ id:'topsoil1', set:'topsoil1', order:1, geoTop:0, geoBot:-12, top:SEAMS.humus, bot:SEAMS.topsoil1, disp:1.45, normal:1.70, tint:0x241408, tintAmt:0.38, lamina:0.14, laminaFreq:0.76, seamShade:0.18 });
+    makeLayer({ id:'topsoil2', set:'topsoil2', order:2, geoTop:-4, geoBot:-16, top:SEAMS.topsoil1, bot:SEAMS.topsoil2, disp:1.62, normal:1.72, tint:0x241408, tintAmt:0.34, lamina:0.16, laminaFreq:0.70, seamShade:0.18 });
+    makeLayer({ id:'topsoil3', set:'topsoil3', order:3, geoTop:-8, geoBot:-24, top:SEAMS.topsoil2, bot:SEAMS.topsoil3, disp:1.82, normal:1.78, tint:0x241408, tintAmt:0.30, lamina:0.18, laminaFreq:0.66, seamShade:0.18 });
+    makeLayer({ id:'subsoil', set:'subsoil', order:4, geoTop:-11, geoBot:-42, top:SEAMS.topsoil3, bot:SEAMS.subsoil, disp:2.15, normal:1.65, tint:0x7b5230, tintAmt:0.16, lamina:0.26, laminaFreq:0.48, seamShade:0.20 });
+    makeLayer({ id:'clay', set:'clay', order:5, geoTop:-25, geoBot:-64, top:SEAMS.subsoil, bot:SEAMS.clay, disp:1.55, normal:1.18, tint:0x9fb4c8, tintAmt:0.74, lamina:0.62, laminaFreq:0.86, laminaSeed:8.40, seamShade:0.14 });
+    makeLayer({ id:'till', set:'gravel', order:6, geoTop:-45, geoBot:-86, top:SEAMS.clay, bot:SEAMS.till, disp:2.65, normal:1.72, tint:0xb9b3a6, tintAmt:0.30, lamina:0.18, laminaFreq:0.40, seamShade:0.24 });
+    makeLayer({ id:'limestone', set:'limestone', order:7, geoTop:-64, geoBot:-116, top:SEAMS.till, bot:SEAMS.limestone, disp:1.95, normal:1.24, tint:0xdfe0db, tintAmt:0.48, lamina:0.48, laminaFreq:0.64, laminaSeed:3.10, seamShade:0.16 });
+    makeLayer({ id:'bedrock', set:'rock', order:8, geoTop:-92, geoBot:-260, top:SEAMS.limestone, disp:3.05, normal:1.45, tint:0x69717b, tintAmt:0.58, lamina:0.22, laminaFreq:0.30, seamShade:0.26 });
+    (function () {
+      const cap = new T.Mesh(new T.PlaneGeometry(900, 300), new T.MeshStandardMaterial({ map:makeLawnTexture(), roughness:0.96, metalness:0, color:0xffffff }));
+      const uv = cap.geometry.attributes.uv;
+      for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*(900/16), uv.getY(k)*(300/16));
+      uv.needsUpdate = true; cap.rotation.x = -Math.PI/2; cap.position.set(0, 0.02, -150); scene.add(cap);
+    })();
+    scene.add(makeRootMatEdge());
+    applyTuning();
+    const dirt = makeDirt(800); scene.add(dirt.points);
+    const grass = makeGrass(); scene.add(grass.mesh);
+
+    // ===== shared descent state (driven by the panel choreography) =====
+    const state = { targetE:0, curE:0, digEnergy:0 };
+    window.subterraDescent = { setTargetE: (e) => { state.targetE = Math.max(0, Math.min(1, e)); }, addDig: (v) => { state.digEnergy = Math.min(1.6, state.digEnergy + v); } };
+
+    const depthN = document.getElementById('depthN');
+    const hintEl = document.getElementById('hint');
+    const brandWash = document.getElementById('brandWash');
+    const deepWash = document.getElementById('deepWash');
+    const gradeEl = document.getElementById('grade');
+    const fogTop = new T.Color(0x9aa6ae), fogDeep = new T.Color(0x070504);
+    const strataEl = document.getElementById('strata'), strataName = document.getElementById('strataName'), strataSub = document.getElementById('strataSub');
+    const STRATA = [
+      { y:0, name:'Humus', sub:'Organic surface layer' }, { y:-3.2, name:'Topsoil', sub:'Root horizon' },
+      { y:-16.2, name:'Subsoil', sub:'Brown forest soil' }, { y:-32, name:'Marine Clay', sub:'Glaciomarine blue-grey' },
+      { y:-53, name:'Glacial Till', sub:'Compact stony hardpan' }, { y:-73, name:'Limestone', sub:'Pale fractured band' },
+      { y:-101, name:'Bedrock', sub:'Basalt and granodiorite' },
+    ];
+    let curStrata = -2;
+    function updateStrata (centerY) {
+      if (centerY > 0.8) { if (curStrata !== -1) { curStrata = -1; strataEl.classList.remove('show'); } return; }
+      let idx = 0; for (let i=0;i<STRATA.length;i++) if (centerY <= STRATA[i].y) idx = i;
+      if (idx === curStrata) return; curStrata = idx;
+      strataName.textContent = STRATA[idx].name; strataSub.textContent = STRATA[idx].sub; strataEl.classList.add('show');
+    }
+    function positionCamera (e) {
+      // FLAT START: at the top we look almost straight down at the grass (flat screen);
+      // as the descent begins the camera pulls back, tilts, and dives into the strata.
+      const morph = (function (t) { t = Math.max(0, Math.min(1, t / 0.10)); return t*t*(3 - 2*t); })(e);
+      const dive = Math.min(1, e/0.13);
+      const camY = SURFACE_Y + (DEEP_Y - SURFACE_Y) * e;
+      // flat keyframe (near top-down over the lawn)
+      const fpy = 16, fpz = -6, fty = 0.0, ftz = -11;
+      // dive keyframe (the plunge toward the cross-section wall)
+      const dpy = camY, dpz = 27 - 12*dive;
+      const dty = -3 + (camY - 8 - (-3)) * dive, dtz = -30 + 30*dive;
+      camera.position.set(0, fpy + (dpy - fpy)*morph, fpz + (dpz - fpz)*morph);
+      camera.lookAt(0, fty + (dty - fty)*morph, ftz + (dtz - ftz)*morph);
+      return getCenterCutY(camY);
+    }
+    function frame (now) {
+      const dt = Math.min(0.05, ((now - (frame._t||now))/1000) || 0.016); frame._t = now;
+      state.curE += (state.targetE - state.curE) * 0.07;
+      const e = state.curE;
+      const centerY = positionCamera(e);
+      skyMesh.material.opacity = Math.max(0, 0.34 - e*1.1);
+      scene.fog.color.copy(fogTop.clone().lerp(fogDeep, e));
+      scene.fog.near = 30 - 16*e; scene.fog.far = 150 - 70*e;
+      renderer.toneMappingExposure = 1.02 - (0.42 - 0.10*SITE_TUNING.light)*e;
+      surfaceGlow.intensity = 1.1 * (1 - e);
+      rake.intensity = 2.15 - (0.62 - 0.20*SITE_TUNING.light)*e;
+      grass.update(now, camera.position.y);
+      dirt.update(dt, camera.position.y, state.digEnergy); state.digEnergy *= 0.90;
+      const depthVal = Math.max(0, -centerY) * METRES_PER_WORLD;
+      depthN.textContent = depthVal.toFixed(1);
+      window.subterraDescent.depthM = depthVal;   // shared with the scroll choreography (depth-gated reveals)
+      // scroll indicator: visible on the flat grass, fades as the descent tilts in
+      if (hintEl) hintEl.style.opacity = Math.max(0, Math.min(1, (0.075 - e) / 0.05)).toFixed(3);
+      // brand-blue surface wash dissolves to the green grass as the dive begins (fades early/fast)
+      if (brandWash) brandWash.style.opacity = Math.max(0, Math.min(1, (0.05 - e) / 0.03)).toFixed(3);
+      // light-blue wash fades in at the very bottom (the dig opens back into light)
+      if (deepWash) deepWash.style.opacity = Math.max(0, Math.min(1, (e - 0.80) / 0.12)).toFixed(3);
+      // vignette is off on the flat-blue first screen; fades in as the descent begins
+      if (gradeEl) gradeEl.style.opacity = Math.max(0, Math.min(1, (e - 0.03) / 0.06)).toFixed(3);
+      // layer name stays hidden on the first page; comes in as the brand-blue clears (scrolling off)
+      if (e < 0.05) { if (curStrata !== -1) { curStrata = -1; strataEl.classList.remove('show'); } }
+      else updateStrata(centerY);
+      renderer.render(scene, camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight, false); });
+
+    // ===== helpers =====
+    function getCenterCutY (fallbackY) {
+      camera.getWorldDirection(centerDir);
+      if (Math.abs(centerDir.z) < 0.0001) return fallbackY;
+      const t = (0 - camera.position.z) / centerDir.z;
+      if (t < 0) return fallbackY;
+      return camera.position.y + centerDir.y * t;
+    }
+    function applyTuning () {
+      for (const mesh of layerMeshes) {
+        const U = mesh.userData.U, base = mesh.userData.base, maps = mesh.userData.maps || [];
+        const layer = SITE_TUNING.layers[mesh.userData.layerId]; if (!U || !base || !layer) continue;
+        const tileScale = Math.max(0.2, layer.tile);
+        U.uAmpTop.value = base.topAmp * Math.max(0.2, layer.seams);
+        U.uAmpBot.value = base.botAmp * Math.max(0.2, layer.seams);
+        U.uLaminaAmt.value = base.lamina * Math.max(0, layer.lamina);
+        U.uTintAmt.value = base.tintAmt * Math.max(0, layer.tone);
+        U.uSeamShade.value = base.seamShade * (0.55 + Math.max(0, layer.edge)*0.45);
+        U.uSeamTone.value = Math.max(0, layer.seamTone);
+        mesh.material.displacementScale = base.disp * Math.max(0.2, layer.relief);
+        mesh.material.displacementBias = -mesh.material.displacementScale * 0.5;
+        for (const map of maps) { map.repeat.set(1/tileScale, 1/tileScale); if (map.image) map.needsUpdate = true; }
+      }
+    }
+    function makeLawnTexture () {
+      const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
+      x.fillStyle = '#5d9132'; x.fillRect(0, 0, c.width, c.height);
+      for (let i=0;i<2600;i++) { const px = rnd(i*2)*512, py = rnd(i*3)*512, len = 4 + rnd(i*5)*12, hue = rnd(i*7);
+        x.strokeStyle = hue < 0.33 ? 'rgba(70,123,35,.32)' : hue < 0.70 ? 'rgba(112,170,61,.30)' : 'rgba(46,92,28,.20)';
+        x.lineWidth = 0.7 + rnd(i*11)*1.2; x.beginPath(); x.moveTo(px, py); x.lineTo(px + (rnd(i*13)-0.5)*4, py - len); x.stroke(); }
+      x.fillStyle = 'rgba(142,190,82,.10)';
+      for (let i=0;i<70;i++) { const px = rnd(i*17)*512, py = rnd(i*19)*512;
+        x.beginPath(); x.ellipse(px, py, 16 + rnd(i*23)*30, 5 + rnd(i*29)*13, rnd(i*31)*6.28, 0, 6.28); x.fill(); }
+      const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 8; return t;
+    }
+    function makeRootMatEdge () {
+      const c = document.createElement('canvas'); c.width = 1024; c.height = 96; const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height);
+      const g = x.createLinearGradient(0, 0, 0, c.height);
+      g.addColorStop(0.00, 'rgba(95,150,54,.46)'); g.addColorStop(0.22, 'rgba(76,123,45,.26)'); g.addColorStop(0.48, 'rgba(47,53,31,.10)'); g.addColorStop(1.00, 'rgba(27,18,11,0)');
+      x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+      for (let i=0;i<680;i++) { const px = rnd(i*5)*c.width, top = rnd(i*7)*18, len = 18 + rnd(i*11)*56;
+        x.strokeStyle = rnd(i*13) < 0.45 ? 'rgba(100,154,57,.60)' : 'rgba(40,66,25,.34)';
+        x.lineWidth = 0.5 + rnd(i*17)*1.2; x.beginPath(); x.moveTo(px, top); x.lineTo(px + (rnd(i*19)-0.5)*7, Math.min(c.height, top + len)); x.stroke(); }
+      const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding; tex.wrapS = T.RepeatWrapping; tex.wrapT = T.ClampToEdgeWrapping;
+      const mesh = new T.Mesh(new T.PlaneGeometry(WALLW, 1.05, 220, 1), new T.MeshStandardMaterial({ map:tex, transparent:true, alphaTest:0.02, depthWrite:false, roughness:1, metalness:0, side:T.DoubleSide }));
+      const uv = mesh.geometry.attributes.uv; for (let k=0;k<uv.count;k++) uv.setX(k, uv.getX(k)*(WALLW/22));
+      uv.needsUpdate = true; mesh.position.set(0, -0.5, 0.16); mesh.renderOrder = 1; return mesh;
+    }
+    function makeSky () {
+      const c = document.createElement('canvas'); c.width = 4; c.height = 512; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 0, 512);
+      g.addColorStop(0.00, '#1d6b86'); g.addColorStop(0.42, '#3f93a8'); g.addColorStop(0.74, '#93c6cf'); g.addColorStop(1.00, '#dcf0f2');
+      x.fillStyle = g; x.fillRect(0, 0, 4, 512);
+      const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding;
+      const mat = new T.MeshBasicMaterial({ map: tex, fog: false, depthWrite: false, transparent: true, opacity: 0.34 });
+      const mesh = new T.Mesh(new T.PlaneGeometry(1800, 1000), mat); mesh.position.set(0, 0, -320); mesh.renderOrder = -10; return mesh;
+    }
+    function crossGeo (W, H) {
+      const g = new T.BufferGeometry(); const hw = W/2;
+      const pos = [ -hw,0,0, hw,0,0, hw,H,0, -hw,0,0, hw,H,0, -hw,H,0,  0,0,-hw, 0,0,hw, 0,H,hw, 0,0,-hw, 0,H,hw, 0,H,-hw ];
+      const uv = [0,0, 1,0, 1,1, 0,0, 1,1, 0,1,  0,0, 1,0, 1,1, 0,0, 1,1, 0,1];
+      const nor = [0,0,1,0,0,1,0,0,1, 0,0,1,0,0,1,0,0,1, 1,0,0,1,0,0,1,0,0, 1,0,0,1,0,0,1,0,0];
+      g.setAttribute('position', new T.Float32BufferAttribute(pos,3)); g.setAttribute('uv', new T.Float32BufferAttribute(uv,2)); g.setAttribute('normal', new T.Float32BufferAttribute(nor,3)); return g;
+    }
+    function makeGrassCard () {
+      const c = document.createElement('canvas'); c.width=128; c.height=128; const x = c.getContext('2d');
+      for (let b=0;b<6;b++){ const bx = 12 + b*19 + (rnd(b)*8-4), tipX = bx + (rnd(b*3)*12-6), tipY = 18 + rnd(b*5)*34, baseY = 128, w = 1.4 + rnd(b*7)*0.7;
+        const grad = x.createLinearGradient(0, baseY, 0, tipY); grad.addColorStop(0,'#558b31'); grad.addColorStop(0.55,'#659d3a'); grad.addColorStop(1,'#82b94e');
+        x.fillStyle = grad; x.beginPath(); x.moveTo(bx-w, baseY); x.quadraticCurveTo(bx-w*0.2, (baseY+tipY)/2, tipX, tipY); x.quadraticCurveTo(bx+w*0.2, (baseY+tipY)/2, bx+w, baseY); x.closePath(); x.fill(); }
+      const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; return t;
+    }
+    function makeGrass () {
+      const N = 17000, geo = crossGeo(0.16, 0.78);
+      const mat = new T.MeshStandardMaterial({ map: makeGrassCard(), color:0xffffff, transparent:true, alphaTest:0.3, side:T.DoubleSide, roughness:0.9, metalness:0 });
+      const mesh = new T.InstancedMesh(geo, mat, N); const base = [], phase = [], d = new T.Object3D();
+      for (let i=0;i<N;i++){ const px = (rnd(i)*2-1)*120, pz = -2.35 - Math.pow(rnd(i*5),1.45)*123, py = GROUND_Y + 0.06 + rnd(i*9)*0.05;
+        const s = 0.86 + rnd(i*13)*0.18, lean = (rnd(i*7)*2-1)*0.06, yaw = rnd(i*11)*3.14;
+        base.push([px,py,pz,s,lean,yaw]); phase.push(rnd(i*3)*6.28);
+        d.position.set(px,py,pz); d.rotation.set(0,yaw,lean); d.scale.set(s, s, s); d.updateMatrix(); mesh.setMatrixAt(i, d.matrix); }
+      mesh.instanceMatrix.needsUpdate = true;
+      function update (now, camY) { mesh.visible = camY > GROUND_Y - 6; if (!mesh.visible) return; const t = now*0.001;
+        for (let i=0;i<N;i++){ const b = base[i]; d.position.set(b[0],b[1],b[2]); d.rotation.set(0, b[5], b[4] + Math.sin(t*1.1 + phase[i])*0.06); d.scale.set(b[3], b[3], b[3]); d.updateMatrix(); mesh.setMatrixAt(i, d.matrix); }
+        mesh.instanceMatrix.needsUpdate = true; }
+      return { mesh, update };
+    }
+    function makeDirt (N) {
+      const pos = new Float32Array(N*3), col = new Float32Array(N*3), vel = new Float32Array(N*3), settled = new Uint8Array(N);
+      const browns = [[0.24,0.17,0.10],[0.18,0.13,0.08],[0.30,0.22,0.13],[0.15,0.10,0.06]];
+      function spawn (i, camY, top) {
+        pos[i*3] = (rnd(i*2)*2-1)*34; pos[i*3+1] = Math.min(GROUND_Y - 1, top ? camY + 6 + rnd(i*5)*6 : camY + (rnd(i*5)*2-1)*22); pos[i*3+2] = 5 + rnd(i*7)*11;
+        vel[i*3]=0; vel[i*3+1]=0; vel[i*3+2]=0; settled[i]=0; const b = browns[i % browns.length]; col[i*3]=b[0]; col[i*3+1]=b[1]; col[i*3+2]=b[2];
+      }
+      for (let i=0;i<N;i++) spawn(i, SURFACE_Y, false);
+      const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos,3)); geo.setAttribute('color', new T.BufferAttribute(col,3));
+      const mat = new T.PointsMaterial({ size:0.4, map:makeDirtSprite(), vertexColors:true, transparent:true, opacity:0.0, depthWrite:false, sizeAttenuation:true });
+      const points = new T.Points(geo, mat);
+      function update (dt, camY, energy) {
+        mat.opacity = Math.min(0.75, energy * 1.1); points.visible = camY < GROUND_Y + 4 && mat.opacity > 0.02; if (!points.visible) return; const G = 22;
+        for (let i=0;i<N;i++){ const ix=i*3;
+          if (energy > 0.05 && rnd(i + Math.floor(camY)) < energy*0.5) { vel[ix] += (rnd(i*3)*2-1) * energy * 9; vel[ix+1] += (3.5 + rnd(i*5)*5) * energy; vel[ix+2] += (rnd(i*9)*2-1) * energy * 3; settled[i]=0; }
+          if (!settled[i]) { vel[ix+1] -= G*dt; vel[ix] *= 0.96; vel[ix+2] *= 0.96; pos[ix] += vel[ix]*dt; pos[ix+1] += vel[ix+1]*dt; pos[ix+2] += vel[ix+2]*dt; if (Math.abs(vel[ix+1]) < 0.4 && Math.abs(vel[ix]) < 0.3) settled[i]=1; }
+          if (pos[ix+1] < camY - 30) spawn(i, camY, true); }
+        geo.attributes.position.needsUpdate = true;
+      }
+      return { points, update };
+    }
+    function makeDirtSprite () {
+      const c = document.createElement('canvas'); c.width=c.height=48; const x = c.getContext('2d'); const g = x.createRadialGradient(24,24,1,24,24,23);
+      g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.5,'rgba(255,255,255,0.7)'); g.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=g; x.beginPath(); x.arc(24,24,23,0,6.3); x.fill(); return new T.CanvasTexture(c);
+    }
+    function rnd (n) { const s = Math.sin((n+1)*12.9898)*43758.5453; return s - Math.floor(s); }
+  })();
+
+  // ============================================================ pinned panel choreography (Bullfinch model)
+  (function () {
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mobileLike = window.matchMedia && window.matchMedia('(max-width: 720px)').matches;
+    const panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+    // content panels: desktop = icon in line with the headline (.hl-row, icon on the right);
+    // mobile = icon rides on the eyebrow line (.eb-row). Reparent the icon responsively.
+    const iconLayout = [];
+    panels.forEach(function (panel, idx) {
+      if (idx === 0 || panel.classList.contains('panel--end')) return;
+      const inner = panel.querySelector('.panel__inner');
+      const icon = panel.querySelector('.panel__icon');
+      const head = panel.querySelector('.panel__verdict');
+      const eb = panel.querySelector('.panel__eyebrow');
+      if (!inner || !icon || !head || !eb) return;
+      const hlRow = document.createElement('div'); hlRow.className = 'hl-row';
+      inner.insertBefore(hlRow, head); hlRow.appendChild(head);
+      const ebRow = document.createElement('div'); ebRow.className = 'eb-row';
+      iconLayout.push({ inner: inner, icon: icon, eb: eb, hlRow: hlRow, ebRow: ebRow });
+    });
+    const mqMob = window.matchMedia('(max-width: 900px)');
+    function placeIcons () {
+      const mob = mqMob.matches;
+      iconLayout.forEach(function (o) {
+        if (mob) {
+          if (o.ebRow.parentNode !== o.inner) o.inner.insertBefore(o.ebRow, o.hlRow);
+          o.ebRow.appendChild(o.eb); o.ebRow.appendChild(o.icon);   // eyebrow label LEFT, icon RIGHT
+        } else {
+          o.inner.insertBefore(o.eb, o.hlRow);   // eyebrow back as a direct child (desktop grid relies on this)
+          o.hlRow.appendChild(o.icon);           // icon back beside the headline
+          if (o.ebRow.parentNode) o.ebRow.remove();
+        }
+      });
+    }
+    // mobile: scale each headline so it spans the full content width on one line
+    function fitHeadlines () {
+      const mob = mqMob.matches;
+      iconLayout.forEach(function (o) {
+        const h = o.hlRow.querySelector('.panel__verdict');
+        if (!h) return;
+        if (!mob) { h.style.fontSize = ''; return; }
+        const avail = o.hlRow.clientWidth;
+        if (!avail) return;
+        const BASE = 80;
+        h.style.fontSize = BASE + 'px';
+        const w = h.scrollWidth;
+        if (w > 0) h.style.fontSize = Math.min(BASE * (avail / w), 56) + 'px';   // cap so the shortest headline isn't absurd
+      });
+    }
+    function relayoutHeads () { placeIcons(); fitHeadlines(); }
+    relayoutHeads();
+    if (mqMob.addEventListener) mqMob.addEventListener('change', relayoutHeads);
+    else if (mqMob.addListener) mqMob.addListener(relayoutHeads);
+    addEventListener('resize', fitHeadlines);
+    addEventListener('orientationchange', fitHeadlines);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadlines);
+    const descent = window.subterraDescent || { setTargetE:function(){}, addDig:function(){} };
+    const textVeil = document.getElementById('textVeil');
+    const sideList = document.getElementById('sideList');
+    let sideLines = [], sideCurrent = null, sideIconEl = null;
+    const keepDig = document.getElementById('keepDig');
+    const deepStretch = document.getElementById('deepStretch');
+    let kdTop = 0, kdH = 1;
+
+    // build photo galleries from compact data-ids lists (one CDN base, lazy thumbs)
+    const PHOTO_BASE = 'https://bc-user-uploads.brandcrowd.com/public/media-Production/9c7e0aad-9394-40b8-ba85-b1a106269afc/';
+    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery[data-ids], .panel__gallery[data-urls]')).forEach(function (g) {
+      const cap = g.getAttribute('data-cap') || '';
+      const urls = g.hasAttribute('data-urls')
+        ? g.getAttribute('data-urls').split(',').map(function (s) { return s.trim(); })
+        : g.getAttribute('data-ids').split(',').map(function (id) { id = id.trim(); return id ? PHOTO_BASE + id : ''; });
+      urls.forEach(function (url) {
+        if (!url) return;
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'g-thumb';
+        btn.setAttribute('data-full', url); btn.setAttribute('data-cap', cap);
+        const img = document.createElement('img'); img.src = url; img.alt = cap; img.loading = 'lazy';
+        btn.appendChild(img); g.appendChild(btn);
+      });
+    });
+
+    function clamp01 (x) { return Math.max(0, Math.min(1, x)); }
+    function mapRange (x, a, b) { return clamp01((x - a) / (b - a)); }
+    function smooth01 (x) { const t = clamp01(x); return t*t*(3 - 2*t); }
+    // POP a single icon facet: scale .2 -> 1.12 -> 1 on the way in (tin), reverse + fade on the way out (tout)
+    function facetPop (path, tin, tout) {
+      let s = (tin < 0.7) ? (0.2 + (1.12 - 0.2) * (tin / 0.7)) : (1.12 + (1 - 1.12) * ((tin - 0.7) / 0.3));
+      s = s * (1 - tout) + 0.2 * tout;
+      path.style.opacity = (Math.min(1, tin / 0.7) * (1 - tout)).toFixed(3);
+      path.style.transform = 'scale(' + s.toFixed(3) + ')';
+    }
+
+    // split each headline into masked, individually-rising words ("text up")
+    function splitWords (el) {
+      const text = (el.textContent || '').trim(); el.textContent = ''; const wis = [];
+      const parts = text.split(/\s+/);
+      parts.forEach(function (w, i) {
+        const outer = document.createElement('span'); outer.className = 'word';
+        const inner = document.createElement('span'); inner.className = 'wi'; inner.textContent = w;
+        outer.appendChild(inner); el.appendChild(outer);
+        if (i < parts.length - 1) el.appendChild(document.createTextNode(' '));
+        wis.push(inner);
+      });
+      return wis;
+    }
+
+    // build the animation model for each panel
+    const models = panels.map(function (panel, idx) {
+      const head = panel.querySelector('.panel__verdict');
+      const blocks = [];
+      const lede = panel.querySelector('.panel__lede'); if (lede) blocks.push(lede);
+      panel.querySelectorAll('.panel__evidence p').forEach(function (p) { blocks.push(p); });
+      // inline detail list reveals under the text on non-hero panels (hero's plays centered in #sideList)
+      const lst = panel.querySelector('.panel__list'); if (lst && idx !== 0) blocks.push(lst);
+      const fig = panel.querySelector('.panel__gallery'); if (fig) blocks.push(fig);
+      const cta = panel.querySelector('.panel__contact'); if (cta) blocks.push(cta);
+      const frm = panel.querySelector('.panel__form'); if (frm) blocks.push(frm);
+      // detail lines play one-by-one on the right (#sideList), not in the left stack
+      const listEls = Array.prototype.slice.call(panel.querySelectorAll('.panel__list li'));
+      const sideItems = listEls.map(function (li) { return li.textContent.trim(); });
+      return {
+        el: panel,
+        inner: panel.querySelector('.panel__inner'),
+        iconHTML: (panel.querySelector('.panel__icon') || {}).innerHTML || '',
+        iconPaths: Array.prototype.slice.call(panel.querySelectorAll('.panel__icon path')),
+        eyebrow: panel.querySelector('.panel__eyebrow'),
+        words: head ? splitWords(head) : [],
+        blocks: blocks,
+        sideItems: sideItems,
+        listEls: listEls,
+        e: parseFloat(panel.getAttribute('data-e')) || 0,
+        isHero: idx === 0,
+        isEnd: panel.classList.contains('panel--end'),
+        start: 0, end: 1, sideStart: 0, sideEnd: -1,
+      };
+    });
+
+    // choreography for one panel given its scroll progress p (0..1)
+    function applyPanel (m, p) {
+      // Hero is shown at rest (it's the landing) and only animates OUT as you scroll away.
+      if (m.isHero) {
+        const ex = smooth01(mapRange(p, 0.04, 0.55));
+        if (m.eyebrow) { m.eyebrow.style.opacity = (1 - ex); m.eyebrow.style.transform = 'translateX(0)'; }
+        m.words.forEach(function (w) { w.style.opacity = (1 - ex); w.style.transform = 'translateY(' + (-ex * 38).toFixed(1) + '%)'; });
+        m.blocks.forEach(function (b) { b.style.opacity = (1 - ex); b.style.transform = 'translateY(' + (-ex * 18).toFixed(1) + 'px)'; });
+        if (m.inner) { m.inner.style.opacity = (1 - ex); m.inner.style.transform = 'translateY(' + (-ex * 26).toFixed(1) + 'px)'; }
+        return;
+      }
+      // ----- CONTACT (end): builds in as the panel rises to screen-centre, finishing when centred; then STAYS -----
+      if (m.isEnd) {
+        const vhh = window.innerHeight || 800;
+        const r = m.el.getBoundingClientRect();
+        const dist = (r.top + r.height / 2) - vhh / 2;   // 0 when the contact panel is centred in the viewport
+        const build = smooth01(clamp01((vhh * 0.7 - dist) / (vhh * 0.7)));   // 0 a bit before, exactly 1 when centred
+        if (m.eyebrow) { const eb = smooth01(clamp01(build / 0.5)); m.eyebrow.style.opacity = eb.toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - eb)).toFixed(1) + 'px)'; }
+        for (let i = 0; i < m.words.length; i++) {
+          const w = smooth01(clamp01((build - i * 0.09) / 0.6));
+          m.words[i].style.transform = 'translateY(' + ((1 - w) * 112).toFixed(2) + '%)';
+          m.words[i].style.opacity = w.toFixed(3);
+        }
+        if (m.iconPaths) for (let i = 0; i < m.iconPaths.length; i++) facetPop(m.iconPaths[i], smooth01(clamp01((build - i * 0.07) / 0.55)), 0);
+        for (let i = 0; i < m.blocks.length; i++) {
+          const b = smooth01(clamp01((build - 0.18 - i * 0.05) / 0.6));
+          m.blocks[i].style.opacity = b.toFixed(3);
+          m.blocks[i].style.transform = 'translateY(' + (26 * (1 - b)).toFixed(1) + 'px)';
+        }
+        if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
+        return;
+      }
+
+      // ----- content panels: every element animates IN, then animates OUT the same way -----
+      // eyebrow slides in from the left, then slides back out the same way
+      const pe = mapRange(p, 0.04, 0.10), eo = smooth01(mapRange(p, 0.80, 0.89));
+      if (m.eyebrow) { m.eyebrow.style.opacity = (pe * (1 - eo)).toFixed(3); m.eyebrow.style.transform = 'translateX(' + (-20 * (1 - pe) - 20 * eo).toFixed(1) + 'px)'; }
+      // headline words rise out of their mask, then drop back into it (staggered both ways)
+      const words = m.words;
+      for (let i = 0; i < words.length; i++) {
+        const pw = smooth01(mapRange(p, 0.09 + i * 0.04, 0.09 + i * 0.04 + 0.14));
+        const wo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
+        words[i].style.transform = 'translateY(' + ((1 - pw) * 112 + wo * 112).toFixed(2) + '%)';
+        words[i].style.opacity = (pw * (1 - wo)).toFixed(3);
+      }
+      // icon facets POP in, then POP out, scroll-scrubbed + staggered
+      if (m.iconPaths && m.iconPaths.length) {
+        for (let i = 0; i < m.iconPaths.length; i++) {
+          const tin = smooth01(mapRange(p, 0.06 + i * 0.045, 0.06 + i * 0.045 + 0.16));
+          const tout = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
+          facetPop(m.iconPaths[i], tin, tout);
+        }
+      }
+      // supporting blocks fade in (text rises, photos slide in from the right), then reverse out the same way
+      const blocks = m.blocks;
+      for (let i = 0; i < blocks.length; i++) {
+        const pb = smooth01(mapRange(p, 0.24 + i * 0.035, 0.24 + i * 0.035 + 0.10));
+        const bo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
+        blocks[i].style.opacity = (pb * (1 - bo)).toFixed(3);
+        if (blocks[i].classList.contains('panel__gallery')) {
+          blocks[i].style.transform = 'translateX(' + (44 * (1 - pb) + 44 * bo).toFixed(1) + 'px)';   // in from the right, out to the right
+        } else {
+          blocks[i].style.transform = 'translateY(' + (26 * (1 - pb) + 26 * bo).toFixed(1) + 'px)';
+        }
+      }
+      // mobile: in-flow detail lines stack in, then drop back out
+      if (m.listEls && m.listEls.length) {
+        const lStart = 0.30, lBuildEnd = 0.62, NL = m.listEls.length, lStep = 1 / NL;
+        const lt = clamp01((p - lStart) / Math.max(0.0001, lBuildEnd - lStart));
+        for (let i = 0; i < NL; i++) {
+          const pl = smooth01(clamp01((lt - i * lStep) / (lStep * 0.85)));
+          const lo = smooth01(mapRange(p, 0.80 + i * 0.012, 0.80 + i * 0.012 + 0.09));
+          m.listEls[i].style.opacity = (pl * (1 - lo)).toFixed(3);
+          m.listEls[i].style.transform = 'translateY(' + ((1 - pl) * 16 + lo * 16).toFixed(1) + 'px)';
+        }
+      }
+      // the inner stays put; each element handles its own exit in place (no blanket scroll/lift)
+      if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
+    }
+
+    function revealAll () {
+      models.forEach(function (m) {
+        if (m.eyebrow) { m.eyebrow.style.opacity = 1; m.eyebrow.style.transform = 'none'; }
+        m.words.forEach(function (w) { w.style.transform = 'none'; w.style.opacity = 1; });
+        m.blocks.forEach(function (b) { b.style.opacity = 1; b.style.transform = 'none'; });
+        m.listEls.forEach(function (li) { li.style.opacity = 1; li.style.transform = 'none'; });
+        if (m.inner) { m.inner.style.opacity = 1; m.inner.style.transform = 'none'; }
+      });
+    }
+
+    // ----- native scroll (no smooth-scroll hijack) drives the dust + hint -----
+    let lastScroll = window.scrollY || 0;
+    addEventListener('scroll', function () {
+      const y = window.scrollY || 0;
+      descent.addDig(Math.min(0.5, Math.abs(y - lastScroll) * 0.012));
+      lastScroll = y;
+    }, { passive: true });
+
+    // ----- contact form (Web3Forms, AJAX) -----
+    const form = document.querySelector('.panel__form');
+    if (form) {
+      const status = form.querySelector('.f-status');
+      const submitBtn = form.querySelector('.f-submit');
+      const hp = form.querySelector('.hp');
+      form.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        if (hp && hp.checked) return;                                  // honeypot tripped: silently drop
+        const nameV = (form.elements['name'].value || '').trim();
+        const emailV = (form.elements['email'].value || '').trim();
+        if (!nameV || !emailV) { status.textContent = 'Please add your name and email.'; status.className = 'f-status err'; return; }
+        const data = new FormData(form);
+        const services = Array.prototype.slice.call(form.querySelectorAll('input[name="services"]:checked')).map(function (c) { return c.value; });
+        data.delete('services'); data.set('services', services.join(', '));
+        status.textContent = 'Sending…'; status.className = 'f-status'; if (submitBtn) submitBtn.disabled = true;
+        fetch('https://api.web3forms.com/submit', { method: 'POST', body: data, headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (j.success) { form.reset(); status.textContent = 'Thank you. We will be in touch shortly.'; status.className = 'f-status ok'; }
+            else { status.textContent = (j.message || 'Something went wrong. Please try again.'); status.className = 'f-status err'; }
+          })
+          .catch(function () { status.textContent = 'Network error. Please try again in a moment.'; status.className = 'f-status err'; })
+          .then(function () { if (submitBtn) submitBtn.disabled = false; });
+      });
+    }
+
+    if (reduced) {
+      revealAll(); descent.setTargetE(0);
+      addEventListener('scroll', function () {
+        const maxS = document.documentElement.scrollHeight - innerHeight;
+        const last = models.length ? models[models.length-1].e : 1;
+        descent.setTargetE(clamp01((window.scrollY || 0) / (maxS || 1)) * last);
+      }, { passive: true });
+      return;
+    }
+
+    // measure each panel's sticky scroll window (the range over which it is held in view)
+    let vh = innerHeight;
+    function measure () {
+      vh = innerHeight;
+      for (const m of models) {
+        const innerH = m.inner ? m.inner.offsetHeight : vh;
+        m.start = m.el.offsetTop;
+        m.end = m.start + Math.max(1, m.el.offsetHeight - innerH);
+      }
+      // scroll window over which each section's right-side detail lines play
+      for (let i = 0; i < models.length; i++) {
+        const m = models[i];
+        const travel = Math.max(1, m.end - m.start);
+        if (m.isHero) {
+          // hero's lines play in the space between the hero and the next section's text-up
+          m.sideStart = m.start + travel * 0.5;
+          m.sideEnd = models[i + 1] ? models[i + 1].start : m.end;
+        } else if (m.isEnd) {
+          m.sideStart = 0; m.sideEnd = -1;            // form section has no detail lines
+        } else {
+          m.sideStart = m.start + travel * 0.30;       // within the hold (after the main text is up)
+          m.sideEnd = m.start + travel * 0.93;
+        }
+        // the list finishes stacking partway through, then the full list sticks until the window ends
+        m.sideBuildEnd = m.sideStart + (m.sideEnd - m.sideStart) * 0.62;
+      }
+      if (deepStretch) { kdTop = deepStretch.offsetTop; kdH = Math.max(1, deepStretch.offsetHeight); }
+    }
+
+    // nav: smooth-scroll to a section + scroll-spy
+    const navLinks = Array.prototype.slice.call(document.querySelectorAll('.site-links a[data-scroll-target]'));
+    const allNav = Array.prototype.slice.call(document.querySelectorAll('#siteNav a[data-scroll-target]'));
+    // jump to the scroll position where the target section is fully "text up" (its hold zone)
+    function navTargetY (m) {
+      if (m.isHero) return 0;
+      if (m.isEnd) return Math.max(0, m.start);          // form is centered + fully revealed at its top
+      return m.start + (m.end - m.start) * 0.66;          // mid-hold = full text up
+    }
+    // custom eased scroll: ramps out of a stop and eases into the stop (ease-in-out), not flat-out fast
+    let scrollRAF = null;
+    function easeInOutCubic (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function easedScrollTo (targetY) {
+      if (scrollRAF) cancelAnimationFrame(scrollRAF);
+      const startY = window.scrollY || 0, dist = targetY - startY;
+      const dur = Math.min(1800, Math.max(800, Math.abs(dist) * 0.42));
+      const t0 = (window.performance && performance.now) ? performance.now() : Date.now();
+      function frame (now) {
+        const t = Math.min(1, (((now || Date.now())) - t0) / dur);
+        window.scrollTo(0, Math.round(startY + dist * easeInOutCubic(t)));
+        scrollRAF = t < 1 ? requestAnimationFrame(frame) : null;
+      }
+      scrollRAF = requestAnimationFrame(frame);
+    }
+    ['wheel', 'touchstart'].forEach(function (ev) { addEventListener(ev, function () { if (scrollRAF) { cancelAnimationFrame(scrollRAF); scrollRAF = null; } }, { passive: true }); });
+    allNav.forEach(function (link) {
+      link.addEventListener('click', function (ev) {
+        const sel = link.getAttribute('data-scroll-target'); if (!sel) return;
+        const m = models.find(function (mm) { return '#' + mm.el.id === sel; });
+        if (!m) return; ev.preventDefault();
+        measure();
+        easedScrollTo(Math.round(navTargetY(m)));
+        navHost.classList.remove('nav-open'); if (navTgl) navTgl.setAttribute('aria-expanded', 'false');
+      });
+    });
+    // mobile hamburger toggle
+    const navHost = document.getElementById('siteNav');
+    const navTgl = document.querySelector('.nav-toggle');
+    if (navTgl) navTgl.addEventListener('click', function () {
+      const open = navHost.classList.toggle('nav-open');
+      navTgl.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    function spy (y) {
+      let current = null;
+      for (const link of allNav) { const sel = link.getAttribute('data-scroll-target'); const el = sel && document.querySelector(sel); if (el && y + 2 >= el.offsetTop) current = link; }
+      for (const link of navLinks) link.classList.toggle('is-current', link === current);
+    }
+
+    // main scrubbed loop: progress comes straight from native scroll position.
+    // Sticky CSS holds each section in view; the camera holds on the active layer
+    // and travels to the next layer across the gap between sections.
+    function endProgress (m, y) { return clamp01((y + vh * 0.90 - m.start) / (vh * 0.55)); }
+
+    function tick () {
+      const y = window.scrollY || 0;
+      let active = models[0], ai = 0;
+      for (let i = 0; i < models.length; i++) {
+        const m = models[i];
+        const p = m.isEnd ? endProgress(m, y) : clamp01((y - m.start) / (m.end - m.start));
+        applyPanel(m, p);
+        if (m.isEnd ? p > 0.02 : y >= m.start) { active = m; ai = i; }
+      }
+      let te = active.e;
+      if (!active.isEnd && y > active.end && models[ai + 1]) {
+        const next = models[ai + 1];
+        te = active.e + (next.e - active.e) * smooth01(clamp01((y - active.end) / Math.max(1, next.start - active.end)));
+      } else if (active.isEnd && models[ai - 1]) {
+        // keep the descent continuous into/out of the contact (same ramp as the gap) so the
+        // depth count tracks scroll both ways instead of snapping to the contact depth
+        const prev = models[ai - 1];
+        te = prev.e + (active.e - prev.e) * smooth01(clamp01((y - prev.end) / Math.max(1, active.start - prev.end)));
+      }
+      descent.setTargetE(te);
+      // fade-blur veil tracks how "up" the active section's text is (0 in the gaps)
+      let up;
+      if (active.isEnd) {
+        // the end sits on the light-blue deep wash; its own frosted card carries text
+        // readability, so keep the full-screen dark veil off here
+        up = 0;
+      } else {
+        const ap = clamp01((y - active.start) / (active.end - active.start));
+        up = active.isHero
+          ? 0   /* first screen stays clean: no dark veil/gradient over the flat brand blue */
+          : smooth01(mapRange(ap, 0.06, 0.30)) * (1 - smooth01(mapRange(ap, 0.92, 1.00)));
+      }
+      if (textVeil) { textVeil.style.opacity = up.toFixed(3); textVeil.style.visibility = up > 0.015 ? 'visible' : 'hidden'; }
+      // right-side detail lines: stack in one-by-one (scroll-scrubbed), hold the full list, then bypass
+      if (sideList) {
+        let sec = null;
+        for (let i = 0; i < models.length; i++) {
+          const m = models[i];
+          if (m.isHero && m.sideItems.length && m.sideEnd > m.sideStart && y >= m.sideStart && y < m.sideEnd) { sec = m; break; }
+        }
+        if (sec !== sideCurrent) {
+          sideCurrent = sec; sideList.innerHTML = ''; sideLines = []; sideIconEl = null;
+          sideList.classList.toggle('side-centered', !!(sec && sec.isHero));   // first list plays centered
+          if (sec) {
+            if (sec.iconHTML) { const ic = document.createElement('div'); ic.className = 'sl-icon'; ic.innerHTML = sec.iconHTML; sideList.appendChild(ic); sideIconEl = ic; }
+            sec.sideItems.forEach(function (t) {
+              const line = document.createElement('div'); line.className = 'sl-line';
+              const rule = document.createElement('span'); rule.className = 'sl-rule';
+              const tx = document.createElement('span'); tx.className = 'sl-text'; tx.textContent = t;
+              line.appendChild(rule); line.appendChild(tx); sideList.appendChild(line); sideLines.push(line);
+            });
+          }
+        }
+        if (sec && sideLines.length) {
+          sideList.style.visibility = 'visible';
+          const N = sideLines.length, step = 1 / N;
+          const span = Math.max(1, sec.sideEnd - sec.sideStart);
+          const localT = clamp01((y - sec.sideStart) / Math.max(1, sec.sideBuildEnd - sec.sideStart));
+          const outT = clamp01((y - (sec.sideStart + span * 0.74)) / (span * 0.24));   // animate out over the last stretch
+          if (sideIconEl) {
+            sideIconEl.style.opacity = 1;   // facets carry their own opacity
+            const ip = sideIconEl.querySelectorAll('path'); const NF = ip.length || 1;
+            for (let k = 0; k < ip.length; k++) {
+              const tin = smooth01(clamp01((localT - k * (0.6 / NF)) / 0.5));
+              const tout = smooth01(clamp01((outT - k * 0.04) / 0.5));
+              facetPop(ip[k], tin, tout);
+            }
+          }
+          for (let i = 0; i < N; i++) {
+            const pi = smooth01(clamp01((localT - i * step) / (step * 0.85)));
+            const po = smooth01(clamp01((outT - i * 0.04) / 0.5));
+            sideLines[i].style.opacity = (pi * (1 - po)).toFixed(3);
+            sideLines[i].style.transform = 'translateY(' + ((1 - pi) * 30 + po * 22).toFixed(1) + 'px)';
+          }
+        } else {
+          sideList.style.visibility = 'hidden';
+        }
+      }
+      // centered "keep diggin'" cue during the deep descent stretch (no pin, no veil)
+      if (keepDig) {
+        const localT = (y - (kdTop - vh * 0.5)) / kdH;
+        const op = (localT > 0 && localT < 1)
+          ? smooth01(clamp01((localT - 0.18) / 0.18)) * smooth01(clamp01((0.82 - localT) / 0.18)) : 0;
+        keepDig.style.opacity = op.toFixed(3);
+        keepDig.style.visibility = op > 0.01 ? 'visible' : 'hidden';
+      }
+      spy(y);
+      requestAnimationFrame(tick);
+    }
+
+    measure();
+    addEventListener('resize', measure, { passive: true });
+    addEventListener('load', measure);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery img')).forEach(function (img) { if (!img.complete) img.addEventListener('load', measure); });
+    requestAnimationFrame(tick);
+  })();
+
+  // ============================================================ photo lightbox
+  (function () {
+    const lightbox = document.getElementById('lightbox');
+    if (!lightbox) return;
+    const lbImg = lightbox.querySelector('.lb-img');
+    const lbCap = lightbox.querySelector('.lb-cap');
+    let group = [], index = 0;
+    function show () {
+      const t = group[index]; if (!t) return;
+      lbImg.src = t.getAttribute('data-full');
+      lbImg.alt = (t.querySelector('img') || {}).alt || '';
+      lbCap.textContent = t.getAttribute('data-cap') || '';
+    }
+    function open (thumbs, i) { group = thumbs; index = i; show(); lightbox.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function close () { lightbox.classList.remove('open'); document.body.style.overflow = ''; lbImg.removeAttribute('src'); }
+    function step (d) { if (!group.length) return; index = (index + d + group.length) % group.length; show(); }
+    Array.prototype.slice.call(document.querySelectorAll('.panel__gallery')).forEach(function (g) {
+      const thumbs = Array.prototype.slice.call(g.querySelectorAll('.g-thumb'));
+      thumbs.forEach(function (t, i) { t.addEventListener('click', function () { open(thumbs, i); }); });
+    });
+    lightbox.querySelector('.lb-close').addEventListener('click', close);
+    lightbox.querySelector('.lb-prev').addEventListener('click', function () { step(-1); });
+    lightbox.querySelector('.lb-next').addEventListener('click', function () { step(1); });
+    lightbox.addEventListener('click', function (e) { if (e.target === lightbox) close(); });
+    addEventListener('keydown', function (e) {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') step(-1);
+      else if (e.key === 'ArrowRight') step(1);
+    });
+  })();
+  </script>
+  <script>
+  // click-to-enter splash + persistent fullscreen toggle
+  (function () {
+    const splash = document.getElementById('splash');
+    const fsBtn = document.getElementById('fsBtn');
+    const docEl = document.documentElement;
+    // Always start the descent at the very top — never a cached/restored scroll position.
+    if ('scrollRestoration' in history) { try { history.scrollRestoration = 'manual'; } catch (e) {} }
+    window.scrollTo(0, 0);
+    // Centre the splash against the VISUAL viewport (what's actually visible). Before fullscreen the
+    // visual viewport is smaller than the layout one and anchored top-left, so CSS centring put the
+    // logo low-and-right; pin the splash to the visual viewport's size + offset so it's centred in every state.
+    function sizeSplash () {
+      if (!splash) return;
+      const vv = window.visualViewport;
+      if (vv) {
+        splash.style.width = vv.width + 'px';
+        splash.style.height = vv.height + 'px';
+        splash.style.left = vv.offsetLeft + 'px';
+        splash.style.top = vv.offsetTop + 'px';
+        splash.style.right = 'auto';
+        splash.style.bottom = 'auto';
+      }
+    }
+    sizeSplash();
+    window.addEventListener('resize', sizeSplash);
+    window.addEventListener('orientationchange', sizeSplash);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', sizeSplash);
+      window.visualViewport.addEventListener('scroll', sizeSplash);
+    }
+    function enterFS () { const r = docEl.requestFullscreen || docEl.webkitRequestFullscreen; if (r) { try { const p = r.call(docEl); if (p && p.catch) p.catch(function () {}); } catch (e) {} } }
+    function exitFS () { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { try { x.call(document); } catch (e) {} } }
+    function isFS () { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    const ICON_EXPAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/><path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/></svg>';
+    const ICON_COMPRESS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v4a1 1 0 0 1-1 1H4"/><path d="M15 4v4a1 1 0 0 0 1 1h4"/><path d="M9 20v-4a1 1 0 0 0-1-1H4"/><path d="M15 20v-4a1 1 0 0 1 1-1h4"/></svg>';
+    function syncIcon () { if (fsBtn) fsBtn.innerHTML = isFS() ? ICON_COMPRESS : ICON_EXPAND; }   // button always stays; only its glyph changes
+    // Entering/exiting fullscreen changes the viewport; re-sync the WebGL buffer + scroll math once it settles.
+    function afterViewportChange () { setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 200); }
+    document.addEventListener('fullscreenchange', function () { syncIcon(); afterViewportChange(); });
+    document.addEventListener('webkitfullscreenchange', function () { syncIcon(); afterViewportChange(); });
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    if (splash) {
+      splash.addEventListener('click', enterSite);
+      splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
+    }
+    if (fsBtn) fsBtn.addEventListener('click', function () { isFS() ? exitFS() : enterFS(); });
+    // bfcache restore (mobile back/forward) re-shows the splash and snaps back to top.
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted) return;
+      window.scrollTo(0, 0);
+      if (splash) { splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
+    });
+    syncIcon();
+  })();
+  </script>
+</body>
+</html>
