@@ -66,6 +66,9 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(22px,3vw,40px);
     transition:opacity .7s ease; }
   #splash.gone { opacity:0; pointer-events:none; }
+  /* lock all scrolling while the splash is up (nothing scrolls behind it) */
+  html.splash-open, html.splash-open body { overflow:hidden !important; height:100%; touch-action:none; overscroll-behavior:none; }
+  #splash { touch-action:none; }
   #splash .sp-logo { width:clamp(220px, 34vw, 460px); height:auto; filter:drop-shadow(0 14px 34px rgba(0,0,0,.5)); }
   .splash-hint { font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
   .site-links { display:flex; justify-content:center; gap:clamp(16px, 3vw, 44px);
@@ -1406,8 +1409,9 @@
     function afterViewportChange () { setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 200); }
     document.addEventListener('fullscreenchange', function () { syncIcon(); afterViewportChange(); });
     document.addEventListener('webkitfullscreenchange', function () { syncIcon(); afterViewportChange(); });
-    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); document.documentElement.classList.remove('splash-open'); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
     if (splash) {
+      document.documentElement.classList.add('splash-open');
       splash.addEventListener('click', enterSite);
       splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
     }
@@ -1416,7 +1420,7 @@
     window.addEventListener('pageshow', function (e) {
       if (!e.persisted) return;
       window.scrollTo(0, 0);
-      if (splash) { splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
+      if (splash) { document.documentElement.classList.add('splash-open'); splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
     });
     syncIcon();
   })();

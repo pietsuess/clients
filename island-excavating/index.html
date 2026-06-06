@@ -67,6 +67,9 @@
     background:radial-gradient(125% 125% at 50% 38%, #1a444c 0%, #0d2227 62%, #08171b 100%);
     display:flex; align-items:center; justify-content:center; transition:opacity .7s ease; }
   #splash.gone { opacity:0; pointer-events:none; }
+  /* lock all scrolling while the splash is up (nothing scrolls behind it) */
+  html.splash-open, html.splash-open body { overflow:hidden !important; height:100%; touch-action:none; overscroll-behavior:none; }
+  #splash { touch-action:none; }
   #splash .sp-icon { height:auto; width:min(72vw,440px); max-width:90%;
     filter:drop-shadow(0 6px 30px rgba(0,0,0,.5)); }
   .splash-hint { position:absolute; left:50%; bottom:clamp(34px,6vh,72px); transform:translateX(-50%);
@@ -430,7 +433,7 @@
 
     <section class="panel" id="p-topsoil" data-e="0.12">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#5fb0bb" d="M40 28 L56 28 L74 80 L22 80 Z"/><path fill="#124a52" d="M22 80 L40 28 L37 28 L18 80 Z"/><path fill="#1f6e78" d="M74 80 L56 28 L59 28 L78 80 Z"/><path fill="#cfe9ec" d="M46 64 L50 64 L51 72 L45 72 Z"/><path fill="#cfe9ec" d="M46.8 51 L49.2 51 L49.8 58 L46.2 58 Z"/><path fill="#cfe9ec" d="M47.4 40 L48.6 40 L49 46 L47 46 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#9ed3da" d="M38 18.5 L53 26 L38 33.5 L23 26 Z"/><path fill="#2f8f99" d="M23 26 L38 33.5 L38 48.5 L23 41 Z"/><path fill="#124a52" d="M53 26 L38 33.5 L38 48.5 L53 41 Z"/><path fill="#9ed3da" d="M50 26.5 L65 34 L50 41.5 L35 34 Z"/><path fill="#2f8f99" d="M35 34 L50 41.5 L50 56.5 L35 49 Z"/><path fill="#124a52" d="M65 34 L50 41.5 L50 56.5 L65 49 Z"/><path fill="#9ed3da" d="M62 34.5 L77 42 L62 49.5 L47 42 Z"/><path fill="#2f8f99" d="M47 42 L62 49.5 L62 64.5 L47 57 Z"/><path fill="#124a52" d="M77 42 L62 49.5 L62 64.5 L77 57 Z"/></svg></span>
         <span class="panel__eyebrow">Topsoil &middot; Driveways</span>
         <h2 class="panel__verdict">Driveways.</h2>
         <div class="panel__evidence"><p>Transform your property with our expert driveway services, creating smooth and aesthetically pleasing driveways tailored to your specifications. From the first cut to the final grade, the surface is built to last on island terrain.</p></div>
@@ -456,7 +459,7 @@
 
     <section class="panel panel--tall" id="p-clay" data-e="0.28">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#5fb0bb" d="M44 20 L52 20 L52 36 L44 36 Z"/><path fill="#cfe9ec" d="M43 17 L53 17 L53 22 L43 22 Z"/><path fill="#9ed3da" d="M30 42 L48 33 L66 42 L48 51 Z"/><path fill="#2f8f99" d="M30 42 L48 51 L48 70 L30 61 Z"/><path fill="#1f6e78" d="M66 42 L48 51 L48 70 L66 61 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#9ed3da" d="M47.2 16 L61.82 21.51 L61.82 29.31 L78 35.23 L48 53.39 L31.45 45.6 L31.45 37.35 L18 30.6 Z"/><path fill="#2f8f99" d="M18 30.6 L31.45 37.35 L31.45 45.6 L48 53.39 L48 67.6 L18 52.6 Z"/><path fill="#124a52" d="M78 35.23 L48 53.39 L48 67.6 L78 47.8 Z"/><path fill="#103840" d="M61.82 21.51 L31.45 37.35 L31.45 45.6 L61.82 29.31 Z"/></svg></span>
         <span class="panel__eyebrow">Marine clay &middot; Septic Field</span>
         <h2 class="panel__verdict">Septic fields.</h2>
         <div class="panel__evidence"><p>Efficient and reliable septic field installations, carried out with environmentally conscious practices and full compliance with local regulations. We plan and place each system so it performs for the long term and protects the land around it.</p></div>
@@ -469,7 +472,7 @@
 
     <section class="panel panel--tall" id="p-till" data-e="0.39">
       <div class="panel__inner">
-        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#124a52" d="M30 64 L35 61 L40 64 L35 67 Z"/><path fill="#124a52" d="M56 62 L61 59 L66 62 L61 65 Z"/><path fill="#5fb0bb" d="M20 54 L60 46 L78 54 L38 62 Z"/><path fill="#1f6e78" d="M20 54 L38 62 L38 68 L20 60 Z"/><path fill="#2f8f99" d="M78 54 L38 62 L38 68 L78 60 Z"/><path fill="#9ed3da" d="M26 44 L58 38 L72 44 L40 50 Z"/><path fill="#2f8f99" d="M26 44 L40 50 L40 58 L26 52 Z"/><path fill="#1f6e78" d="M72 44 L40 50 L40 58 L72 52 Z"/><path fill="#cfe9ec" d="M62 48 L72 45 L78 49 L68 52 Z"/><path fill="#5fb0bb" d="M68 52 L78 49 L78 57 L68 60 Z"/></svg></span>
+        <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#9ed3da" d="M50 35 L72 46 L50 57 L28 46 Z"/><path fill="#2f8f99" d="M28 46 L50 57 L50 63 L28 52 Z"/><path fill="#124a52" d="M72 46 L50 57 L50 63 L72 52 Z"/><path fill="#2f8f99" d="M48.5 16.5 L50 17 L50 49 L48.5 48.5 Z"/><path fill="#124a52" d="M50 17 L51.5 16.5 L51.5 48.5 L50 49 Z"/><path fill="#9ed3da" d="M50 15 L66 20 L50 25 Z"/></svg></span>
         <span class="panel__eyebrow">Glacial till &middot; Site Preparation &amp; Trucking</span>
         <h2 class="panel__verdict">Site preparation.</h2>
         <div class="panel__evidence"><p>From tree removal to excavation, our team meticulously prepares your site. We back it up with dependable trucking and transport, handling material delivery and removal so the job keeps moving from start to finish.</p></div>
@@ -1431,8 +1434,9 @@
     function afterViewportChange () { setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 200); }
     document.addEventListener('fullscreenchange', function () { syncIcon(); afterViewportChange(); });
     document.addEventListener('webkitfullscreenchange', function () { syncIcon(); afterViewportChange(); });
-    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
+    function enterSite () { if (!splash || splash.classList.contains('gone')) return; window.scrollTo(0, 0); document.documentElement.classList.remove('splash-open'); enterFS(); splash.classList.add('gone'); setTimeout(function () { splash.style.display = 'none'; }, 750); }
     if (splash) {
+      document.documentElement.classList.add('splash-open');
       splash.addEventListener('click', enterSite);
       splash.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enterSite(); } });
     }
@@ -1441,7 +1445,7 @@
     window.addEventListener('pageshow', function (e) {
       if (!e.persisted) return;
       window.scrollTo(0, 0);
-      if (splash) { splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
+      if (splash) { document.documentElement.classList.add('splash-open'); splash.classList.remove('gone'); splash.style.display = ''; sizeSplash(); }
     });
     syncIcon();
   })();
