@@ -44,9 +44,9 @@
   /* ===================== nav ===================== */
   #siteNav { position:fixed; left:0; right:0; top:0; z-index:8;
     display:grid; grid-template-columns:auto 1fr auto auto; align-items:center;
-    gap:clamp(14px, 2.4vw, 40px); min-height:84px;
+    gap:clamp(14px, 2.4vw, 36px); min-height:84px;
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
-    background:linear-gradient(180deg, rgba(6,7,9,.58), rgba(6,7,9,0)); }
+    background:none; }
   #siteNav img { display:block; width:clamp(150px, 13vw, 224px); height:auto;
     filter:drop-shadow(0 10px 20px rgba(0,0,0,.34)); }
   /* hamburger + fullscreen grouped at the right (so Free Estimate can centre on mobile) */
@@ -80,7 +80,7 @@
     text-decoration:none; color:#fff; font:700 clamp(.7rem, .72vw, .84rem)/1 var(--condensed);
     letter-spacing:.16em; text-transform:uppercase; padding:11px 18px; border:1px solid rgba(255,255,255,.40);
     border-radius:999px; background:rgba(255,255,255,.04); transition:background .25s, border-color .25s; }
-  .site-cta:hover { background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.75); }
+  .site-cta:hover { background:rgba(126,166,200,.20); border-color:var(--accent); }
 
   /* ===================== pinned content panels ===================== */
   #content { position:relative; z-index:5; }
@@ -316,7 +316,7 @@
     #p-hero .panel__icon { display:none; }   /* hero already shows the logo */
     /* mobile nav: logo left, Free Estimate centred, hamburger + fullscreen tight on the right */
     #siteNav { display:flex; align-items:center; justify-content:space-between; gap:10px;
-      min-height:64px; background:linear-gradient(180deg, rgba(6,7,9,.72), rgba(6,7,9,0)); }
+      min-height:64px; background:none; }   /* no black bar; transparent like desktop */
     #siteNav img { width:clamp(118px, 30vw, 168px); }
     .nav-toggle { display:flex; }
     .nav-right { order:3; gap:4px; }
@@ -326,10 +326,10 @@
     .site-cta { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
       margin:0; padding:9px 14px; font-size:.68rem; }
     .site-links { position:absolute; top:100%; left:0; right:0; flex-direction:column; gap:0;
-      align-items:stretch; background:rgba(6,7,9,.97); border-top:1px solid rgba(255,255,255,.12);
-      box-shadow:0 18px 40px rgba(0,0,0,.28); padding:0 0 10px; display:none; }
+      align-items:stretch; background:#fff; border-top:1px solid rgba(10,74,130,.18);
+      box-shadow:0 18px 40px rgba(0,0,0,.18); padding:0 0 10px; display:none; }   /* no top padding: the white gap above the first link read as dead space */
     #siteNav.nav-open .site-links { display:flex; }
-    .site-links a { padding:14px clamp(22px,6vw,40px); color:rgba(255,255,255,.86); }
+    .site-links a { padding:14px clamp(22px,6vw,40px); color:#0a4a82; }
     .site-links a::after { display:none; }
     #siteNav.nav-open .nav-toggle span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
     #siteNav.nav-open .nav-toggle span:nth-child(2) { opacity:0; }
@@ -529,7 +529,7 @@
   <div id="strata"><span class="lab"><span class="name" id="strataName"></span><span class="sub" id="strataSub"></span></span></div>
   <div id="sideList" aria-hidden="true"></div>
   <div id="keepDig" aria-hidden="true"><span class="kd-text">Keep diggin&rsquo;</span><span class="kd-arr">&#9662;</span></div>
-  <div id="hint"><span class="mouse"></span>scroll to descend<span class="arr">&#9662;</span></div>
+  <div id="hint">scroll to descend<span class="arr">&#9662;</span></div>
   <div id="lightbox" aria-hidden="true">
     <button class="lb-close" type="button" aria-label="Close">&times;</button>
     <button class="lb-prev" type="button" aria-label="Previous photo">&#8249;</button>
