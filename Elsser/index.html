@@ -31,7 +31,7 @@
   /* sky wash on the first screen; dissolves into the green grass as the descent begins */
   /* 100dvh (not inset:0 alone) so each wash always covers the VISIBLE area as the mobile address bar toggles */
   #brandWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:1; will-change:opacity;
-    background:linear-gradient(180deg, #bcd6ea 0%, #87aece 54%, #6b93b6 100%); }
+    background:#6b93b6; }   /* flat sky-blue (no gradient), like Subterra's flat wash; medium so the white wordmark reads */
   /* warm earth-light wash at the very bottom of the descent; fades in as the dig opens into light */
   #deepWash { position:fixed; inset:0; height:100dvh; z-index:2; pointer-events:none; opacity:0; will-change:opacity;
     background:linear-gradient(180deg, #c9a36d 0%, #e6cfa6 56%, #f3e7d0 100%); }
@@ -47,8 +47,7 @@
     gap:clamp(14px, 2.4vw, 36px); min-height:84px;
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
     background:none; }
-  #siteNav img { display:block; width:clamp(150px, 13vw, 224px); height:auto;
-    filter:drop-shadow(0 10px 20px rgba(0,0,0,.34)); }
+  #siteNav img { display:block; width:clamp(150px, 13vw, 224px); height:auto; }   /* no shadow/blur, like Subterra */
   /* hamburger + fullscreen grouped at the right (so Free Estimate can centre on mobile) */
   .nav-right { display:flex; align-items:center; gap:8px; justify-self:end; }
   /* persistent fullscreen toggle (right of the hamburger on mobile) */
@@ -62,7 +61,7 @@
   /* click-to-enter splash: Elsser logo on dark earth, fades to the site (and into fullscreen) */
   /* 100dvh + JS visualViewport pinning so the logo centres in the VISIBLE area on mobile */
   #splash { position:fixed; inset:0; height:100dvh; z-index:60; cursor:pointer;
-    background:radial-gradient(120% 100% at 50% 40%, #1b130c 0%, #0b0907 70%);
+    background:#0b0907;   /* flat (no gradient), like Subterra's flat splash; dark because the Elsser logo is light */
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(22px,3vw,40px);
     transition:opacity .7s ease; }
   #splash.gone { opacity:0; pointer-events:none; }
