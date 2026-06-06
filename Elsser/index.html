@@ -124,10 +124,21 @@
     text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
   h1.panel__verdict { font-size:clamp(3.6rem, 8.4vw, 9.6rem); }
   h2.panel__verdict { font-size:clamp(2.4rem, 5.4vw, 6.4rem); }
-  /* hero wordmark: the real Elsser logo lettering replaces the display-font heading (left-aligned like the rest of the hero) */
-  .hero-lockup { display:block; margin:0; }
-  .hero-lockup .hl-wordmark { display:block; width:clamp(300px, 52vw, 720px); max-width:100%; height:auto;
-    filter:brightness(0) invert(1) drop-shadow(0 3px 16px rgba(0,0,0,.55)); }   /* recolor wordmark white + shadow, consistent with the hero's other light text */
+  /* hero wordmark lockup (Subterra parity): the real Elsser logo lettering replaces the display-font heading */
+  .hero-lockup { display:flex; align-items:center; gap:clamp(16px,1.9vw,28px); margin:0; }
+  .hero-lockup .hl-wordmark { flex:none; width:auto; max-width:100%; height:auto;
+    filter:brightness(0) invert(1) drop-shadow(0 3px 16px rgba(0,0,0,.85)); }
+  /* first screen = a centered logo splash; everything centered (no left-justify, nothing on the right) */
+  #p-hero .panel__inner { justify-items:center; text-align:center; }
+  #p-hero .hero-lockup { justify-content:center; flex-wrap:wrap; gap:clamp(18px,2.2vw,34px); }
+  #p-hero .hero-lockup .hl-wordmark { width:clamp(320px, 60vw, 820px); }   /* width-sized: the Elsser wordmark is one wide line, can't height-size like Subterra's stacked mark */
+  #p-hero .panel__eyebrow { margin-bottom:22px; }
+  #p-hero .panel__eyebrow::before { display:none; }
+  #p-hero .panel__lede { margin-top:24px; }
+  #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; }
+  /* no shadow/blur behind the first-screen text or wordmark (clean, like Subterra) */
+  #p-hero .panel__inner { text-shadow:none; }
+  #p-hero .hero-lockup .hl-wordmark { filter:brightness(0) invert(1); }
   .panel__lede { margin-top:14px; color:rgba(244,238,228,.84);
     font:700 clamp(1.05rem, 1.5vw, 1.7rem)/1.25 var(--condensed); letter-spacing:.01em; text-wrap:balance; }
   .panel__evidence p { margin-top:16px; max-width:58ch; color:rgba(244,238,228,.80);
