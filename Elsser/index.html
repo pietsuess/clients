@@ -121,6 +121,10 @@
     text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
   h1.panel__verdict { font-size:clamp(3.6rem, 8.4vw, 9.6rem); }
   h2.panel__verdict { font-size:clamp(2.4rem, 5.4vw, 6.4rem); }
+  /* hero wordmark: the real Elsser logo lettering replaces the display-font heading (left-aligned like the rest of the hero) */
+  .hero-lockup { display:block; margin:0; }
+  .hero-lockup .hl-wordmark { display:block; width:clamp(300px, 52vw, 720px); max-width:100%; height:auto;
+    filter:brightness(0) invert(1) drop-shadow(0 3px 16px rgba(0,0,0,.55)); }   /* recolor wordmark white + shadow, consistent with the hero's other light text */
   .panel__lede { margin-top:14px; color:rgba(244,238,228,.84);
     font:700 clamp(1.05rem, 1.5vw, 1.7rem)/1.25 var(--condensed); letter-spacing:.01em; text-wrap:balance; }
   .panel__evidence p { margin-top:16px; max-width:58ch; color:rgba(244,238,228,.80);
@@ -374,7 +378,7 @@
       <div class="panel__inner">
         <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cadeef" d="M48 17 L74 30 L48 43 L22 30 Z"/><path fill="#7badd7" d="M22 30 L48 43 L48 51.7 L22 38.7 Z"/><path fill="#4f93cf" d="M22 38.7 L48 51.7 L48 60.3 L22 47.3 Z"/><path fill="#2f7abf" d="M22 47.3 L48 60.3 L48 69 L22 56 Z"/><path fill="#1f66ab" d="M74 30 L48 43 L48 51.7 L74 38.7 Z"/><path fill="#0a64bf" d="M74 38.7 L48 51.7 L48 60.3 L74 47.3 Z"/><path fill="#0a4a82" d="M74 47.3 L48 60.3 L48 69 L74 56 Z"/></svg></span>
         <span class="panel__eyebrow">Salt Spring Island &middot; Cumberland</span>
-        <h1 class="panel__verdict">Elsser Excavation</h1>
+        <h1 class="hero-lockup" aria-label="Elsser Excavation"><img class="hl-wordmark" src="assets/elsser-wordmark.svg" alt="Elsser Excavation"></h1>
         <p class="panel__lede">Building your dreams, from the ground down.</p>
         <div class="panel__evidence"><p>Owner-operated excavation for the Gulf Islands and the Comox Valley. Clean worksites, measured grading, real construction experience, fully insured, and free estimates.</p></div>
         <ul class="panel__list"><li>Owner Operated</li><li>Red Seal Certified</li><li>Fully Insured</li><li>Free Estimates</li></ul>
