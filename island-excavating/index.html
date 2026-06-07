@@ -166,17 +166,19 @@
   .panel:not(#p-hero):not(.panel--end) .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
   .hl-row { display:flex; align-items:center; justify-content:space-between; gap:clamp(18px,2.4vw,40px); }
   .hl-row .panel__verdict { margin:0; }
-  /* photo panels: big photo on the LEFT, text + list on the RIGHT (known-good split) */
+  /* photo panels: eyebrow + headline CENTERED on top (full width); two columns below — picture LEFT, body text RIGHT.
+     Every item is explicitly placed so nothing auto-drops: eyebrow=row1, headline=row2, picture pinned to row3 col1
+     (spanning the body so it centres beside it), body text flows down col2 from row3. */
   @media (min-width:901px) {
     .panel:has(.panel__gallery) .panel__inner {
-      grid-template-columns: clamp(320px,40vw,560px) minmax(0,1fr); column-gap:clamp(40px,5vw,88px); }
-    .panel:has(.panel__gallery) .panel__inner > .hl-row,
-    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow,
+      grid-template-columns: clamp(320px,40vw,560px) minmax(0,1fr);
+      column-gap:clamp(40px,5vw,88px); row-gap:clamp(14px,2vw,26px); justify-items:start; }
+    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow { grid-column:1 / -1; grid-row:1; justify-self:center; text-align:center; }
+    .panel:has(.panel__gallery) .panel__inner > .hl-row { grid-column:1 / -1; grid-row:2; justify-self:stretch; justify-content:center; }
+    .panel:has(.panel__gallery) .panel__inner > .panel__gallery { grid-column:1; grid-row:3 / span 4; align-self:center; justify-self:stretch; }
     .panel:has(.panel__gallery) .panel__inner > .panel__lede,
     .panel:has(.panel__gallery) .panel__inner > .panel__evidence,
     .panel:has(.panel__gallery) .panel__inner > .panel__list { grid-column:2; }
-    .panel:has(.panel__gallery) .panel__inner > .panel__gallery {
-      grid-column:1; grid-row:1 / span 99; align-self:center; justify-self:stretch; }
   }
   #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
     z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
