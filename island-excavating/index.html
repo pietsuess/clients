@@ -166,17 +166,20 @@
   .panel:not(#p-hero):not(.panel--end) .panel__icon path { transform-box:fill-box; transform-origin:center; opacity:0; will-change:transform, opacity; }
   .hl-row { display:flex; align-items:center; justify-content:space-between; gap:clamp(18px,2.4vw,40px); }
   .hl-row .panel__verdict { margin:0; }
-  /* photo panels: big photo on the LEFT, text + list on the RIGHT (text stays left-aligned, so they agree) */
+  /* photo panels: a centered single column — eyebrow + headline ABOVE the image, body + list below.
+     eyebrow and headline share the same left edge (align-items:flex-start); image is full column width. */
+  .panel:has(.panel__gallery) .panel__inner {
+    display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+    text-align:left; padding:8vh 0; }
+  .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow,
+  .panel:has(.panel__gallery) .panel__inner > .eb-row         { order:1; }
+  .panel:has(.panel__gallery) .panel__inner > .hl-row         { order:2; align-self:stretch; }
+  .panel:has(.panel__gallery) .panel__inner > .panel__gallery { order:3; align-self:stretch; }
+  .panel:has(.panel__gallery) .panel__inner > .panel__lede    { order:4; }
+  .panel:has(.panel__gallery) .panel__inner > .panel__evidence{ order:5; }
+  .panel:has(.panel__gallery) .panel__inner > .panel__list    { order:6; align-self:stretch; }
   @media (min-width:901px) {
-    .panel:has(.panel__gallery) .panel__inner {
-      grid-template-columns: clamp(320px,40vw,560px) minmax(0,1fr); column-gap:clamp(40px,5vw,88px); }
-    .panel:has(.panel__gallery) .panel__inner > .hl-row,
-    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow,
-    .panel:has(.panel__gallery) .panel__inner > .panel__lede,
-    .panel:has(.panel__gallery) .panel__inner > .panel__evidence,
-    .panel:has(.panel__gallery) .panel__inner > .panel__list { grid-column:2; }
-    .panel:has(.panel__gallery) .panel__inner > .panel__gallery {
-      grid-column:1; grid-row:1 / span 99; align-self:center; justify-self:stretch; }
+    .panel:has(.panel__gallery) .panel__inner { width:min(900px, 90vw); }
   }
   #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
     z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
@@ -201,12 +204,12 @@
   .panel__gallery .g-thumb:hover { border-color:rgba(244,238,228,.72); }
   .panel__gallery .g-thumb:hover img { transform:scale(1.07); }
   .panel__gallery .g-thumb:focus-visible { outline:2px solid rgba(244,238,228,.8); outline-offset:2px; }
-  /* in the split layout the photo fills the right column (big); multiple shots share the column */
-  @media (min-width:901px) {
-    .panel:has(.panel__gallery) .panel__gallery { margin-top:0; max-width:none;
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; align-content:center; }
-    .panel:has(.panel__gallery) .panel__gallery .g-thumb img { width:100%; height:auto; aspect-ratio:3/2; }
-  }
+  /* one big image, full column width, centered on screen between the headline and the body */
+  .panel:has(.panel__gallery) .panel__gallery { display:block; width:100%; max-width:none;
+    margin:clamp(16px,2.4vw,30px) 0 clamp(4px,1vw,10px); }
+  .panel:has(.panel__gallery) .panel__gallery .g-thumb { display:block; width:100%; }
+  .panel:has(.panel__gallery) .panel__gallery .g-thumb img { width:100%; height:auto;
+    aspect-ratio:3/2; object-fit:cover; max-height:40vh; }
 
   /* lightbox */
   #lightbox { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
