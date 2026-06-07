@@ -52,36 +52,32 @@
     padding:16px clamp(22px, 4vw, 76px); color:#fff; pointer-events:auto;
     background:none; }
   #siteNav img { display:block; height:clamp(26px, 3.2vw, 40px); width:auto;
-    filter:drop-shadow(0 2px 10px rgba(0,0,0,.45)); }   /* white lockup, sized by height; shadow keeps it off the bright surface */
+    filter:brightness(0) invert(1); }   /* vector mark knocked out to white; no shadow */
   /* hamburger + fullscreen grouped at the right (so Free Estimate can centre on mobile) */
   .nav-right { display:flex; align-items:center; gap:8px; justify-self:end; }
   /* persistent fullscreen toggle (right of the hamburger on mobile) */
   .fs-btn { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; padding:9px;
-    background:none; border:0; cursor:pointer; color:#fff; filter:drop-shadow(0 2px 8px rgba(0,0,0,.45)); }
+    background:none; border:0; cursor:pointer; color:#fff; }
   .fs-btn svg { width:100%; height:100%; display:block; }
   .fs-btn:hover { color:var(--accent); }
   /* click-to-enter splash: K & L white logo on dark earth, fades to the site (and into fullscreen) */
   /* 100dvh + JS visualViewport pinning so the logo centres in the VISIBLE area on mobile
      (plain inset:0 centres against the layout viewport, dropping the logo low-and-right behind the address bar) */
   #splash { position:fixed; inset:0; height:100dvh; z-index:60; cursor:pointer;
-    background:radial-gradient(125% 125% at 50% 38%, #1a444c 0%, #0d2227 62%, #08171b 100%);
+    background:#0f2a30;
     display:flex; align-items:center; justify-content:center; transition:opacity .7s ease; }
   #splash.gone { opacity:0; pointer-events:none; }
   /* lock all scrolling while the splash is up (nothing scrolls behind it) */
   html.splash-open, html.splash-open body { overflow:hidden !important; height:100%; touch-action:none; overscroll-behavior:none; }
   #splash { touch-action:none; }
   #splash .sp-icon { height:auto; width:min(72vw,440px); max-width:90%;
-    filter:drop-shadow(0 6px 30px rgba(0,0,0,.5)); }
+    filter:brightness(0) invert(1); }
   .splash-hint { position:absolute; left:50%; bottom:clamp(34px,6vh,72px); transform:translateX(-50%);
     font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
   /* hero logo lockup: single white K & L logo PNG, sized by width */
   .hero-lockup { display:flex; align-items:center; justify-content:center; gap:clamp(16px,1.9vw,28px); margin:0; }
   .hero-lockup .hl-logo { flex:none; display:block; width:min(82vw,560px); max-width:100%; height:auto;
-    filter:drop-shadow(0 6px 28px rgba(0,0,0,.55)); }
-  .hero-lockup .hl-icon { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
-    filter:drop-shadow(0 4px 18px rgba(0,0,0,.6)); }
-  .hero-lockup .hl-wordmark { flex:none; height:clamp(60px,8.6vw,108px); width:auto;
-    filter:brightness(0) invert(1) drop-shadow(0 3px 16px rgba(0,0,0,.85)); }
+    filter:brightness(0) invert(1); }
   /* first screen = a centered logo splash; everything centered (no left-justify, nothing on the right) */
   #p-hero .panel__inner { justify-items:center; text-align:center; }
   #p-hero .hero-lockup { justify-content:center; flex-wrap:wrap; gap:clamp(18px,2.2vw,34px); }
@@ -90,10 +86,9 @@
   #p-hero .panel__eyebrow::before { display:none; }
   #p-hero .panel__lede { margin-top:24px; }
   #p-hero .panel__evidence p { margin-left:auto; margin-right:auto; text-align:justify; text-align-last:left; }
-  /* no text-shadow behind the first-screen text; the logo keeps its own drop-shadow */
+  /* no text-shadow behind the first-screen text; the logo is a flat white knockout (no shadow) */
   #p-hero .panel__inner { text-shadow:none; }
-  .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff;
-    filter:drop-shadow(0 8px 18px rgba(0,0,0,.42)); }
+  .wordmark { display:flex; flex-direction:column; line-height:.92; text-decoration:none; color:#fff; }
   .wordmark .wm-name { font:800 clamp(1.15rem, 1.85vw, 1.62rem)/.92 var(--display); letter-spacing:.015em; }
   .wordmark .wm-sub { font:700 clamp(.54rem, .68vw, .72rem)/1 var(--condensed); letter-spacing:.4em;
     text-transform:uppercase; color:var(--accent); margin-top:6px; padding-left:.14em; }
@@ -377,7 +372,7 @@
 </head>
 <body>
   <div id="splash" role="button" tabindex="0" aria-label="Enter site">
-    <img class="sp-icon" src="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/b8bacc8a-0edd-4c51-9229-b6df92d8572e/Island+Excavating+-+White+Logo.png?format=1500w" alt="K & L Island Excavating">
+    <img class="sp-icon" src="assets/Island_Excavating-01.svg" alt="K & L Island Excavating">
     <div class="splash-hint">Click to enter</div>
   </div>
   <div id="stage"></div>
@@ -388,7 +383,7 @@
 
   <header id="siteNav" aria-label="K & L Island Excavating">
     <a href="#p-hero" data-scroll-target="#p-hero" aria-label="K & L Island Excavating home">
-      <img src="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/b8bacc8a-0edd-4c51-9229-b6df92d8572e/Island+Excavating+-+White+Logo.png?format=1500w" alt="K & L Island Excavating">
+      <img src="assets/Island_Excavating-03.svg" alt="K & L Island Excavating">
     </a>
     <nav class="site-links" aria-label="Site sections">
       <a href="#p-hero" data-scroll-target="#p-hero">Surface</a>
@@ -409,7 +404,7 @@
       <div class="panel__inner">
         <span class="panel__icon"><svg viewBox="0 0 96 96"><path fill="#cfe9ec" d="M48 17 L74 30 L48 43 L22 30 Z"/><path fill="#9ed3da" d="M22 30 L48 43 L48 51.7 L22 38.7 Z"/><path fill="#5fb0bb" d="M22 38.7 L48 51.7 L48 60.3 L22 47.3 Z"/><path fill="#2f8f99" d="M22 47.3 L48 60.3 L48 69 L22 56 Z"/><path fill="#1f6e78" d="M74 30 L48 43 L48 51.7 L74 38.7 Z"/><path fill="#176069" d="M74 38.7 L48 51.7 L48 60.3 L74 47.3 Z"/><path fill="#124a52" d="M74 47.3 L48 60.3 L48 69 L74 56 Z"/></svg></span>
         <span class="panel__eyebrow">Driveways &middot; Septic &middot; Land Clearing &middot; Trucking &middot; Site Prep</span>
-        <h1 class="hero-lockup" aria-label="K & L Island Excavating"><img class="hl-logo" src="https://images.squarespace-cdn.com/content/v1/65ae9bf0b87681563b099460/b8bacc8a-0edd-4c51-9229-b6df92d8572e/Island+Excavating+-+White+Logo.png?format=1500w" alt="K & L Island Excavating"></h1>
+        <h1 class="hero-lockup" aria-label="K & L Island Excavating"><img class="hl-logo" src="assets/Island_Excavating-01.svg" alt="K & L Island Excavating"></h1>
         <p class="panel__lede">Your local island digging service.</p>
         <div class="panel__evidence"><p>K &amp; L Island Excavating is dedicated to providing top-tier excavation services on Salt Spring Island. Our mission is to deliver high-quality, efficient, innovative work on every project.</p></div>
         <ul class="panel__list"><li>Driveways</li><li>Septic Fields</li><li>Land Clearing</li><li>Free Estimates</li></ul>
