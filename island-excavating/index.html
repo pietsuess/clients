@@ -70,7 +70,7 @@
   /* lock all scrolling while the splash is up (nothing scrolls behind it) */
   html.splash-open, html.splash-open body { overflow:hidden !important; height:100%; touch-action:none; overscroll-behavior:none; }
   #splash { touch-action:none; }
-  #splash .sp-icon { height:auto; width:min(72vw,440px); max-width:90%;
+  #splash .sp-icon { height:auto; width:min(36vw,220px); max-width:45%;
     filter:brightness(0) invert(1); }
   .splash-hint { position:absolute; left:50%; bottom:clamp(34px,6vh,72px); transform:translateX(-50%);
     font:700 .76rem/1 var(--condensed); letter-spacing:.34em; text-transform:uppercase; color:var(--accent); }
@@ -144,6 +144,9 @@
     font:700 .76rem/1.25 var(--condensed); letter-spacing:.26em; text-transform:uppercase; text-wrap:balance; }
   .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
     background:rgba(244,238,228,.6); vertical-align:middle; margin:-3px 14px 0 0; }
+  /* centered content-panel eyebrow: frame it with a matching rule on the RIGHT too (both sides) */
+  .panel:has(.panel__gallery) .panel__eyebrow::after { content:""; display:inline-block; width:34px; height:1px;
+    background:rgba(244,238,228,.6); vertical-align:middle; margin:-3px 0 0 14px; }
   .panel__verdict { margin:0; color:#fff; font-family:var(--display); font-weight:700;
     line-height:.95; letter-spacing:-.005em; white-space:nowrap;
     text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
@@ -173,12 +176,14 @@
     .panel:has(.panel__gallery) .panel__inner {
       grid-template-columns: clamp(320px,40vw,560px) minmax(0,1fr);
       column-gap:clamp(40px,5vw,88px); row-gap:clamp(14px,2vw,26px); justify-items:start; }
-    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow { grid-column:1 / -1; grid-row:1; justify-self:center; text-align:center; }
-    .panel:has(.panel__gallery) .panel__inner > .hl-row { grid-column:1 / -1; grid-row:2; justify-self:stretch; justify-content:center; }
+    .panel:has(.panel__gallery) .panel__inner > .panel__eyebrow { grid-column:1 / -1; grid-row:1; justify-self:center; text-align:center; margin-bottom:0; }
+    .panel:has(.panel__gallery) .panel__inner > .hl-row { grid-column:1 / -1; grid-row:2; justify-self:stretch; justify-content:center; position:relative; margin-top:clamp(-20px,-1.3vw,-10px); }
     .panel:has(.panel__gallery) .panel__inner > .panel__gallery { grid-column:1; grid-row:3 / span 4; align-self:center; justify-self:stretch; }
     .panel:has(.panel__gallery) .panel__inner > .panel__lede,
     .panel:has(.panel__gallery) .panel__inner > .panel__evidence,
     .panel:has(.panel__gallery) .panel__inner > .panel__list { grid-column:2; }
+    /* icon out of the centered headline, pinned to the right edge (same right justification as the body text) */
+    .panel:has(.panel__gallery) .hl-row .panel__icon { position:absolute; right:0; top:50%; transform:translateY(-50%); margin:0; }
   }
   #sideList { position:fixed; right:clamp(40px, 12vw, 200px); top:50%; transform:translateY(-50%);
     z-index:5; width:min(26vw, 340px); text-align:right; pointer-events:none; visibility:hidden;
