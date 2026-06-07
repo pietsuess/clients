@@ -7,12 +7,12 @@
 <meta name="description" content="K & L Island Excavating — your local island digging service on Salt Spring Island, BC. Driveways, septic fields, land clearing, trucking and transport, and site preparation. Free estimates.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Lato:wght@300;400;700&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Titillium+Web:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink:#ece7df;
     --accent:#2c8a92;
-    --display:"Archivo",Impact,"Helvetica Neue",sans-serif;
+    --display:"Tinos","Times New Roman",Georgia,serif;   /* serif that supports the logo wordmark */
     --body:"Lato",Helvetica,Arial,sans-serif;
     --condensed:"Titillium Web","Avenir Next Condensed","Barlow Condensed","Helvetica Neue",Helvetica,sans-serif;
   }
@@ -144,8 +144,8 @@
     font:700 .76rem/1.25 var(--condensed); letter-spacing:.26em; text-transform:uppercase; text-wrap:balance; }
   .panel__eyebrow::before { content:""; display:inline-block; width:34px; height:1px;
     background:rgba(244,238,228,.6); vertical-align:middle; margin:-3px 14px 0 0; }
-  .panel__verdict { margin:0; color:#fff; font-family:var(--display); font-weight:800;
-    line-height:.9; letter-spacing:-.01em; text-wrap:balance;
+  .panel__verdict { margin:0; color:#fff; font-family:var(--display); font-weight:700;
+    line-height:.95; letter-spacing:-.005em; white-space:nowrap;
     text-shadow:none; filter:drop-shadow(0 3px 12px rgba(0,0,0,.5)); }   /* drop-shadow (not text-shadow): the word masks were clipping the blurred shadow into boxes */
   h1.panel__verdict { font-size:clamp(3.6rem, 8.4vw, 9.6rem); }
   h2.panel__verdict { font-size:clamp(2.4rem, 5.4vw, 6.4rem); }
@@ -941,18 +941,24 @@
     }
     // mobile: scale each headline so it spans the full content width on one line
     function fitHeadlines () {
-      const mob = mqMob.matches;
-      iconLayout.forEach(function (o) {
-        const h = o.hlRow.querySelector('.panel__verdict');
-        if (!h) return;
-        if (!mob) { h.style.fontSize = ''; return; }
-        const avail = o.hlRow.clientWidth;
-        if (!avail) return;
-        const BASE = 80;
-        h.style.fontSize = BASE + 'px';
-        const w = h.scrollWidth;
-        if (w > 0) h.style.fontSize = Math.min(BASE * (avail / w), 56) + 'px';   // cap so the shortest headline isn't absurd
-      });
+      // every headline sits on ONE line (white-space:nowrap); if it overflows its row, scale the font down to fit
+      const heads = document.querySelectorAll('.panel__verdict');
+      for (let i = 0; i < heads.length; i++) {
+        const h = heads[i];
+        h.style.fontSize = '';                       // reset to the CSS clamp size first
+        const row = h.parentElement;
+        if (!row) continue;
+        let avail = row.clientWidth;
+        const icon = row.querySelector('.panel__icon');   // desktop .hl-row (and the contact card) hold the icon beside/above the headline
+        if (icon && icon.parentElement === row) {
+          const cs = getComputedStyle(row);
+          const gap = parseFloat(cs.columnGap || cs.gap || '0') || 0;
+          avail -= icon.getBoundingClientRect().width + gap;
+        }
+        if (avail <= 0) continue;
+        const natural = h.scrollWidth;               // single-line width at the current size
+        if (natural > avail) h.style.fontSize = Math.floor(parseFloat(getComputedStyle(h).fontSize) * (avail / natural)) + 'px';
+      }
     }
     function relayoutHeads () { placeIcons(); fitHeadlines(); }
     relayoutHeads();
