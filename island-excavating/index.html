@@ -727,6 +727,15 @@
         roughness:1.0, metalness:0.0, color:0xffffff,
       });
       capMat.normalScale = new T.Vector2(1.25, 1.25);
+      // far-edge dissolve: fade the lawn's colour to black and its alpha to 0 toward the back
+      // of the plane (keyed to local depth, so it never shows a hard geometry line).
+      capMat.transparent = true;
+      capMat.onBeforeCompile = (sh) => {
+        sh.vertexShader = 'varying float vBack;\n' + sh.vertexShader.replace(
+          '#include <begin_vertex>', '#include <begin_vertex>\n vBack = clamp((position.y + 150.0)/300.0, 0.0, 1.0);');
+        sh.fragmentShader = 'varying float vBack;\n' + sh.fragmentShader.replace(
+          '#include <dithering_fragment>', '#include <dithering_fragment>\n float bf = smoothstep(0.5, 0.97, vBack);\n gl_FragColor.rgb *= (1.0 - bf);\n gl_FragColor.a *= (1.0 - bf);');
+      };
       const cap = new T.Mesh(new T.PlaneGeometry(900, 300, 360, 120), capMat);
       const uv = cap.geometry.attributes.uv;
       for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*(900/16), uv.getY(k)*(300/16));
