@@ -870,15 +870,42 @@
       const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 8; return t;
     }
     function makeRootMatEdge () {
-      const c = document.createElement('canvas'); c.width = 1024; c.height = 96; const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height);
-      const g = x.createLinearGradient(0, 0, 0, c.height);
-      g.addColorStop(0.00, 'rgba(95,150,54,.46)'); g.addColorStop(0.22, 'rgba(76,123,45,.26)'); g.addColorStop(0.48, 'rgba(47,53,31,.10)'); g.addColorStop(1.00, 'rgba(27,18,11,0)');
-      x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
-      for (let i=0;i<680;i++) { const px = rnd(i*5)*c.width, top = rnd(i*7)*18, len = 18 + rnd(i*11)*56;
-        x.strokeStyle = rnd(i*13) < 0.45 ? 'rgba(100,154,57,.60)' : 'rgba(40,66,25,.34)';
-        x.lineWidth = 0.5 + rnd(i*17)*1.2; x.beginPath(); x.moveTo(px, top); x.lineTo(px + (rnd(i*19)-0.5)*7, Math.min(c.height, top + len)); x.stroke(); }
+      const c = document.createElement('canvas'); c.width = 1024; c.height = 160; const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height);
+      const H = c.height;
+      // thin organic humus line at the turf base, dissolving down into the soil
+      const g = x.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0.00, 'rgba(40,29,17,.55)'); g.addColorStop(0.16, 'rgba(34,25,15,.28)'); g.addColorStop(0.50, 'rgba(28,20,12,.08)'); g.addColorStop(1.00, 'rgba(20,14,8,0)');
+      x.fillStyle = g; x.fillRect(0, 0, c.width, H);
+      x.lineCap = 'round';
+      // pale fibrous roots: emerge from the turf base, wander down, taper, branch, thin out with depth
+      function root (seed, px, py, w, life, lvl) {
+        let ang = Math.PI/2 + (rnd(seed)*2 - 1)*0.5;          // mostly downward
+        for (let s=0; s<life; s++) {
+          const t = s/life;
+          ang += (rnd(seed*7.3 + s*1.7) - 0.5)*0.6;            // wander
+          ang = ang*0.8 + (Math.PI/2)*0.2;                     // bias back to vertical
+          const step = 1.8 + rnd(seed*3.1 + s)*2.0;
+          const nx = px + Math.cos(ang)*step, ny = py + Math.sin(ang)*step;
+          const a = Math.max(0, 0.6 - (ny/H)*0.62) * (1 - t*0.35);
+          x.strokeStyle = (rnd(seed*11.7 + s) < 0.68)
+            ? 'rgba(206,189,151,' + a.toFixed(3) + ')'         // pale cream root
+            : 'rgba(150,118,78,' + (a*0.85).toFixed(3) + ')';  // darker tan root
+          x.lineWidth = Math.max(0.3, w*(1 - t*0.8));
+          x.beginPath(); x.moveTo(px, py); x.lineTo(nx, ny); x.stroke();
+          px = nx; py = ny;
+          if (py > H) break;
+          if (lvl < 3 && s > life*0.22 && w > 0.7 && rnd(seed*5.9 + s) < 0.07) {
+            root(seed*9.13 + s*2.7, px, py, w*0.55, life*0.5, lvl + 1);   // branch
+          }
+        }
+      }
+      for (let i=0; i<300; i++) {
+        const sx = rnd(i*2.31)*c.width, sy = rnd(i*1.73)*7;
+        const w = 0.7 + rnd(i*5.07)*1.5, life = 16 + rnd(i*3.71)*34;
+        root(i*1.97 + 3.0, sx, sy, w, life, 0);
+      }
       const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding; tex.wrapS = T.RepeatWrapping; tex.wrapT = T.ClampToEdgeWrapping;
-      const mesh = new T.Mesh(new T.PlaneGeometry(WALLW, 1.05, 220, 1), new T.MeshStandardMaterial({ map:tex, transparent:true, alphaTest:0.02, depthWrite:false, roughness:1, metalness:0, side:T.DoubleSide }));
+      const mesh = new T.Mesh(new T.PlaneGeometry(WALLW, 1.05, 220, 1), new T.MeshStandardMaterial({ map:tex, transparent:true, alphaTest:0.01, depthWrite:false, roughness:1, metalness:0, side:T.DoubleSide }));
       const uv = mesh.geometry.attributes.uv; for (let k=0;k<uv.count;k++) uv.setX(k, uv.getX(k)*(WALLW/22));
       uv.needsUpdate = true; mesh.position.set(0, -0.5, 0.16); mesh.renderOrder = 1; return mesh;
     }
