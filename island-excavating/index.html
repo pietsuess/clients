@@ -723,14 +723,14 @@
       const g = SETS.grass;
       const capMat = new T.MeshStandardMaterial({
         map:layerTexture(g.diff), normalMap:layerTexture(g.norm), roughnessMap:layerTexture(g.rough),
-        displacementMap:layerTexture(g.disp), displacementScale:0.55, displacementBias:-0.27,
+        displacementMap:layerTexture(g.disp), displacementScale:0.45, displacementBias:0.0,
         roughness:1.0, metalness:0.0, color:0xffffff,
       });
       capMat.normalScale = new T.Vector2(1.25, 1.25);
       const cap = new T.Mesh(new T.PlaneGeometry(900, 300, 360, 120), capMat);
       const uv = cap.geometry.attributes.uv;
       for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*(900/16), uv.getY(k)*(300/16));
-      uv.needsUpdate = true; cap.rotation.x = -Math.PI/2; cap.position.set(0, 0.02, -150); scene.add(cap);
+      uv.needsUpdate = true; cap.rotation.x = -Math.PI/2; cap.position.set(0, 0.06, -150); scene.add(cap);
     })();
     scene.add(makeRootMatEdge());
     applyTuning();
@@ -746,7 +746,7 @@
     const brandWash = document.getElementById('brandWash');
     const deepWash = document.getElementById('deepWash');
     const gradeEl = document.getElementById('grade');
-    const fogTop = new T.Color(0x9aa6ae), fogDeep = new T.Color(0x070504);
+    const fogTop = new T.Color(0x283418), fogDeep = new T.Color(0x070504);
     const strataEl = document.getElementById('strata'), strataName = document.getElementById('strataName'), strataSub = document.getElementById('strataSub');
     const STRATA = [
       { y:0, name:'Humus', sub:'Organic surface layer' }, { y:-3.2, name:'Topsoil', sub:'Root horizon' },
@@ -781,7 +781,7 @@
       state.curE += (state.targetE - state.curE) * 0.07;
       const e = state.curE;
       const centerY = positionCamera(e);
-      skyMesh.material.opacity = Math.max(0, 0.34 - e*1.1);
+      skyMesh.material.opacity = Math.max(0, 0.18 - e*0.9);
       scene.fog.color.copy(fogTop.clone().lerp(fogDeep, e));
       scene.fog.near = 30 - 16*e; scene.fog.far = 150 - 70*e;
       renderer.toneMappingExposure = 1.02 - (0.42 - 0.10*SITE_TUNING.light)*e;
@@ -859,7 +859,7 @@
     }
     function makeSky () {
       const c = document.createElement('canvas'); c.width = 4; c.height = 512; const x = c.getContext('2d'); const g = x.createLinearGradient(0, 0, 0, 512);
-      g.addColorStop(0.00, '#1d6b86'); g.addColorStop(0.42, '#3f93a8'); g.addColorStop(0.74, '#93c6cf'); g.addColorStop(1.00, '#dcf0f2');
+      g.addColorStop(0.00, '#0e1608'); g.addColorStop(0.42, '#18240e'); g.addColorStop(0.74, '#26341a'); g.addColorStop(1.00, '#36481f');
       x.fillStyle = g; x.fillRect(0, 0, 4, 512);
       const tex = new T.CanvasTexture(c); tex.encoding = T.sRGBEncoding;
       const mat = new T.MeshBasicMaterial({ map: tex, fog: false, depthWrite: false, transparent: true, opacity: 0.34 });
