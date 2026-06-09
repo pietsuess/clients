@@ -723,14 +723,14 @@
       const g = SETS.grass;
       const capMat = new T.MeshStandardMaterial({
         map:layerTexture(g.diff), normalMap:layerTexture(g.norm), roughnessMap:layerTexture(g.rough),
-        displacementMap:layerTexture(g.disp), displacementScale:0.45, displacementBias:0.0,
+        displacementMap:layerTexture(g.disp), displacementScale:0.16, displacementBias:0.0,
         roughness:1.0, metalness:0.0, color:0xffffff,
       });
       capMat.normalScale = new T.Vector2(1.25, 1.25);
       const cap = new T.Mesh(new T.PlaneGeometry(900, 300, 360, 120), capMat);
       const uv = cap.geometry.attributes.uv;
       for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*(900/16), uv.getY(k)*(300/16));
-      uv.needsUpdate = true; cap.rotation.x = -Math.PI/2; cap.position.set(0, 0.06, -150); scene.add(cap);
+      uv.needsUpdate = true; cap.rotation.x = -Math.PI/2; cap.position.set(0, 0.02, -150); scene.add(cap);
     })();
     scene.add(makeRootMatEdge());
     applyTuning();
