@@ -140,7 +140,7 @@ img { max-width: 100%; display: block; }
       <img src="images/mens-front.jpg" alt="Unisex tee">
       <div class="op-body">
         <div class="op-name">Unisex Tee</div>
-        <div class="op-detail">Bella+Canvas 3001 &middot; soft combed ringspun cotton</div>
+        <div class="op-detail">Bella+Canvas 3001 &middot; soft combed ringspun cotton &middot; $40 each</div>
         <div class="size-grid" data-product="Unisex Tee"></div>
       </div>
     </div>
@@ -149,7 +149,7 @@ img { max-width: 100%; display: block; }
       <img src="images/womens-front.jpg" alt="Women's tee">
       <div class="op-body">
         <div class="op-name">Women's Relaxed Tee</div>
-        <div class="op-detail">Bella+Canvas 6400 &middot; relaxed fit, ringspun cotton</div>
+        <div class="op-detail">Bella+Canvas 6400 &middot; relaxed fit, ringspun cotton &middot; $40 each</div>
         <div class="size-grid" data-product="Women's Tee"></div>
       </div>
     </div>
@@ -209,7 +209,7 @@ function recalc(){
     total += v;
   });
   var el = document.getElementById('orderTotal');
-  el.textContent = total > 0 ? ('Total: ' + total + ' shirt' + (total > 1 ? 's' : '')) : 'No shirts selected';
+  el.textContent = total > 0 ? ('Total: ' + total + ' shirt' + (total > 1 ? 's' : '') + ' · $' + (total * 40)) : 'No shirts selected';
 }
 
 async function submitOrder(){
@@ -247,7 +247,7 @@ async function submitOrder(){
                  'Name: ' + name + '\n' +
                  'Email: ' + email + '\n\n' +
                  'ORDER:\n' + lines.join('\n') + '\n\n' +
-                 'Total: ' + total + ' shirt' + (total > 1 ? 's' : '') + '\n\n' +
+                 'Total: ' + total + ' shirt' + (total > 1 ? 's' : '') + ' @ $40 = $' + (total * 40) + '\n\n' +
                  (notes ? ('Notes: ' + notes + '\n\n') : '') +
                  'Payment: with retreat registration.\n' +
                  'Sent from clients.pietsuess.com/sscy/acyr52/'
