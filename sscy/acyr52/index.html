@@ -35,7 +35,8 @@ img { max-width: 100%; display: block; }
 .shirts-section { padding: 8px 32px 48px; background: var(--white); }
 .shirts-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
 .shirts-grid > .shirt-card:nth-child(-n+4) { grid-column: span 3; grid-row: 1; }
-.shirts-grid > .shirt-card:nth-child(n+5) { grid-column: span 6; grid-row: 2; }
+.shirts-grid > .shirt-card:nth-child(5) { grid-column: 2 / span 5; grid-row: 2; }
+.shirts-grid > .shirt-card:nth-child(6) { grid-column: 7 / span 5; grid-row: 2; }
 .shirt-card { border-radius: 16px; overflow: hidden; background: var(--white); transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .shirt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.08); }
 .shirt-card img { width: 100%; height: auto; display: block; background: var(--white); }
@@ -70,7 +71,14 @@ img { max-width: 100%; display: block; }
 .order-fields input[type=text], .order-fields input[type=email], .order-fields textarea { width: 100%; padding: 12px 14px; border: 1px solid #e3ddd2; border-radius: 10px; background: #fff; font-family: inherit; font-size: 0.95rem; color: var(--charcoal); margin-bottom: 20px; }
 .order-fields input:focus, .order-fields textarea:focus { outline: none; border-color: var(--teal); }
 .order-fields textarea { min-height: 90px; resize: vertical; }
-.order-total { text-align: center; font-family: 'Cinzel', serif; font-size: 1.3rem; font-weight: 600; color: var(--teal-deep); margin: 16px 0 6px; }
+.order-summary { max-width: 440px; margin: 8px auto 4px; }
+.order-tally { font-size: 0.95rem; }
+.tally-line { display: flex; justify-content: space-between; gap: 16px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.07); }
+.tally-line span:last-child { font-weight: 600; color: var(--charcoal); white-space: nowrap; }
+.order-total { margin: 10px 0 6px; }
+.order-total.empty { text-align: center; font-family: 'Cinzel', serif; font-size: 1.1rem; color: var(--text-light); }
+.tot-row { display: flex; justify-content: space-between; gap: 16px; padding: 3px 0; font-size: 0.95rem; }
+.tot-row.grand { font-family: 'Cinzel', serif; font-size: 1.35rem; font-weight: 600; color: var(--teal-deep); border-top: 1px solid #e3ddd2; margin-top: 8px; padding-top: 12px; }
 .pay-note { text-align: center; font-size: 0.95rem; font-weight: 500; color: var(--terracotta); margin-bottom: 28px; }
 .order-submit { display: block; margin: 0 auto; padding: 14px 48px; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: var(--terracotta); color: #fff; border-radius: 50px; cursor: pointer; transition: background 0.2s ease; }
 .order-submit:hover { background: var(--teal-deep); }
@@ -134,6 +142,7 @@ img { max-width: 100%; display: block; }
 </section>
 
 <section class="order-section">
+  <h2 class="reveal">Order</h2>
   <form class="order-form reveal" onsubmit="return false;">
 
     <div class="order-product">
@@ -154,7 +163,10 @@ img { max-width: 100%; display: block; }
       </div>
     </div>
 
-    <div class="order-total" id="orderTotal">No shirts selected</div>
+    <div class="order-summary">
+      <div class="order-tally" id="orderTally"></div>
+      <div class="order-total empty" id="orderTotal">No shirts selected</div>
+    </div>
     <p class="pay-note">Pay with your registration.</p>
 
     <div class="order-fields">
@@ -194,22 +206,46 @@ document.querySelectorAll('.size-grid').forEach(function(grid){
   });
 });
 
+var PRICE = 40, TAX_RATE = 0.05;
+
 function step(btn, delta){
   var input = btn.parentElement.querySelector('.qty');
   var v = (parseInt(input.value, 10) || 0) + delta;
   input.value = Math.max(0, v);
   recalc();
 }
-function recalc(){
-  var total = 0;
-  document.querySelectorAll('.qty').forEach(function(q){
-    var v = parseInt(q.value, 10) || 0;
-    if (v < 0) { v = 0; q.value = 0; }
-    q.classList.toggle('has-qty', v > 0);
-    total += v;
+function collect(){
+  var items = [], count = 0;
+  document.querySelectorAll('.size-grid').forEach(function(grid){
+    var product = grid.dataset.product;
+    grid.querySelectorAll('.qty').forEach(function(q){
+      var v = parseInt(q.value, 10) || 0;
+      if (v < 0) { v = 0; q.value = 0; }
+      q.classList.toggle('has-qty', v > 0);
+      if (v > 0) { items.push({ label: v + ' × ' + product + ' — ' + q.dataset.size, amt: v * PRICE }); count += v; }
+    });
   });
-  var el = document.getElementById('orderTotal');
-  el.textContent = total > 0 ? ('Total: ' + total + ' shirt' + (total > 1 ? 's' : '') + ' · $' + (total * 40)) : 'No shirts selected';
+  return { items: items, count: count };
+}
+function recalc(){
+  var o = collect();
+  var tally = document.getElementById('orderTally');
+  var totalEl = document.getElementById('orderTotal');
+  if (!o.count) {
+    tally.innerHTML = '';
+    totalEl.className = 'order-total empty';
+    totalEl.textContent = 'No shirts selected';
+    return;
+  }
+  tally.innerHTML = o.items.map(function(i){
+    return '<div class="tally-line"><span>' + i.label + '</span><span>$' + i.amt.toFixed(2) + '</span></div>';
+  }).join('');
+  var sub = o.count * PRICE, tax = sub * TAX_RATE, tot = sub + tax;
+  totalEl.className = 'order-total';
+  totalEl.innerHTML =
+    '<div class="tot-row"><span>Subtotal (' + o.count + ' shirt' + (o.count > 1 ? 's' : '') + ')</span><span>$' + sub.toFixed(2) + '</span></div>' +
+    '<div class="tot-row"><span>GST (5%)</span><span>$' + tax.toFixed(2) + '</span></div>' +
+    '<div class="tot-row grand"><span>Total</span><span>$' + tot.toFixed(2) + '</span></div>';
 }
 
 async function submitOrder(){
@@ -217,18 +253,13 @@ async function submitOrder(){
   var email = document.getElementById('ordEmail').value.trim();
   var notes = document.getElementById('ordNotes').value.trim();
 
-  var lines = [], total = 0;
-  document.querySelectorAll('.size-grid').forEach(function(grid){
-    var product = grid.dataset.product;
-    grid.querySelectorAll('.qty').forEach(function(q){
-      var v = parseInt(q.value, 10) || 0;
-      if (v > 0) { lines.push(v + ' × ' + product + ' — ' + q.dataset.size); total += v; }
-    });
-  });
-
-  if (!lines.length) { alert('Please choose at least one shirt and size.'); return; }
+  var o = collect();
+  if (!o.count) { alert('Please choose at least one shirt and size.'); return; }
   if (!name)  { alert('Please enter your name.'); return; }
   if (!email) { alert('Please enter your email.'); return; }
+
+  var lines = o.items.map(function(i){ return i.label + '  ($' + i.amt.toFixed(2) + ')'; });
+  var sub = o.count * PRICE, tax = sub * TAX_RATE, tot = sub + tax;
 
   var btn = document.querySelector('.order-submit');
   btn.textContent = 'Sending…'; btn.disabled = true;
@@ -247,7 +278,9 @@ async function submitOrder(){
                  'Name: ' + name + '\n' +
                  'Email: ' + email + '\n\n' +
                  'ORDER:\n' + lines.join('\n') + '\n\n' +
-                 'Total: ' + total + ' shirt' + (total > 1 ? 's' : '') + ' @ $40 = $' + (total * 40) + '\n\n' +
+                 'Subtotal (' + o.count + ' shirt' + (o.count > 1 ? 's' : '') + '): $' + sub.toFixed(2) + '\n' +
+                 'GST (5%): $' + tax.toFixed(2) + '\n' +
+                 'Total: $' + tot.toFixed(2) + '\n\n' +
                  (notes ? ('Notes: ' + notes + '\n\n') : '') +
                  'Payment: with retreat registration.\n' +
                  'Sent from clients.pietsuess.com/sscy/acyr52/'
