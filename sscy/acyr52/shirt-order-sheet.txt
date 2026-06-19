@@ -39,7 +39,9 @@ function doPost(e) {
   try {
     var d = JSON.parse(e.postData.contents);
     var order = (d.items || []).join('\n');
-    getSheet().appendRow([
+    var sh = getSheet();
+    var sheetUrl = sh.getParent().getUrl();
+    sh.appendRow([
       new Date(),
       d.name || '',
       d.email || '',
@@ -64,7 +66,8 @@ function doPost(e) {
         'GST (5%): $' + (d.gst || '') + '\n' +
         'Total: $' + (d.total || '') + '\n' +
         (d.notes ? ('\nNotes: ' + d.notes + '\n') : '') +
-        '\nPayment: with retreat registration.'
+        '\nPayment: with retreat registration.\n\n' +
+        'Sheet: ' + sheetUrl
       );
     }
     return ContentService.createTextOutput(JSON.stringify({ ok: true }))

@@ -83,6 +83,8 @@ img { max-width: 100%; display: block; }
 .order-submit { display: block; margin: 0 auto; padding: 14px 48px; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: var(--terracotta); color: #fff; border-radius: 50px; cursor: pointer; transition: background 0.2s ease; }
 .order-submit:hover { background: var(--teal-deep); }
 .order-submit:disabled { opacity: 0.6; cursor: default; }
+.order-submit.sent { background: var(--teal-deep); color: #fff; opacity: 1; cursor: default; }
+.order-submit.sent:hover { background: var(--teal-deep); }
 .order-msg { text-align: center; font-size: 0.95rem; color: var(--teal-deep); margin-top: 16px; display: none; }
 
 /* FOOTER */
@@ -251,6 +253,13 @@ function recalc(){
     '<div class="tot-row grand"><span>Total</span><span>$' + tot.toFixed(2) + '</span></div>';
 }
 
+function lockSent(btn){
+  btn.textContent = 'Order Sent ✓';
+  btn.disabled = true;
+  btn.classList.add('sent');
+  document.getElementById('orderMsg').style.display = 'block';
+}
+
 async function submitOrder(){
   var name  = document.getElementById('ordName').value.trim();
   var email = document.getElementById('ordEmail').value.trim();
@@ -282,8 +291,7 @@ async function submitOrder(){
         })
       });
       // no-cors gives an opaque response, so we treat a completed request as sent.
-      btn.textContent = 'Order Sent';
-      document.getElementById('orderMsg').style.display = 'block';
+      lockSent(btn);
     } catch (err) {
       btn.textContent = 'Error — try again'; btn.disabled = false;
     }
@@ -315,8 +323,7 @@ async function submitOrder(){
     });
     var data = await res.json();
     if (data.success) {
-      btn.textContent = 'Order Sent';
-      document.getElementById('orderMsg').style.display = 'block';
+      lockSent(btn);
     } else {
       btn.textContent = 'Error — try again'; btn.disabled = false;
     }
