@@ -39,9 +39,9 @@ img { max-width: 100%; display: block; }
 .shirts-grid > .shirt-card:nth-child(1) { grid-column: 4 / span 2; grid-row: 1; }
 .shirts-grid > .shirt-card:nth-child(2) { grid-column: 8 / span 2; grid-row: 1; }
 .shirts-grid > .shirt-card:nth-child(n+3) { grid-column: span 3; grid-row: 2; }
-.shirt-card { border-radius: 16px; overflow: hidden; background: var(--cream); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.shirt-card { border-radius: 16px; overflow: hidden; background: var(--white); transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .shirt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.08); }
-.shirt-card img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
+.shirt-card img { width: 100%; height: auto; display: block; background: var(--white); }
 .shirt-card .shirt-label { padding: 16px 20px; font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 600; color: var(--charcoal); text-align: center; letter-spacing: 0.03em; }
 
 /* REVEAL */
@@ -77,11 +77,11 @@ img { max-width: 100%; display: block; }
   <p class="section-sub reveal">Commemorate the 52nd ACYR.</p>
   <div class="shirts-grid" data-lightbox>
     <div class="shirt-card reveal d1">
-      <img src="images/logo-01.jpg" alt="52nd ACYR front design — hands holding a sprout, faith is the ground for yoga to grow" loading="lazy">
+      <img src="images/front.png" alt="52nd ACYR front design — hands holding a sprout, faith is the ground for yoga to grow" loading="lazy">
       <div class="shirt-label">Front Design</div>
     </div>
     <div class="shirt-card reveal d2">
-      <img src="images/logo-02.jpg" alt="52nd ACYR back design — Salt Spring Centre of Yoga lotus mark" loading="lazy">
+      <img src="images/back.png" alt="52nd ACYR back design — 52 ACYR, the Salt Spring Centre of Yoga lotus mark" loading="lazy">
       <div class="shirt-label">Back Design</div>
     </div>
     <div class="shirt-card reveal d3">
@@ -102,10 +102,6 @@ img { max-width: 100%; display: block; }
     </div>
   </div>
 </section>
-
-<footer class="page-foot">
-  <a href="https://saltspringcentre.com/acyr.html">Back to the 52nd ACYR &rarr;</a>
-</footer>
 
 <script>
 var observer = new IntersectionObserver(function(entries) {
