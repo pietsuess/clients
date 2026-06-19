@@ -207,6 +207,9 @@ document.querySelectorAll('.size-grid').forEach(function(grid){
 });
 
 var PRICE = 40, TAX_RATE = 0.05;
+// Paste the deployed Apps Script web-app URL here to log orders straight to the
+// Google Sheet (marked Unpaid). Until then, orders fall back to email.
+var ORDER_SHEET_URL = '';
 
 function step(btn, delta){
   var input = btn.parentElement.querySelector('.qty');
@@ -264,6 +267,30 @@ async function submitOrder(){
   var btn = document.querySelector('.order-submit');
   btn.textContent = 'Sending…'; btn.disabled = true;
 
+  // Preferred path: log straight to the Google Sheet as an Unpaid order.
+  if (ORDER_SHEET_URL) {
+    try {
+      await fetch(ORDER_SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          name: name, email: email, notes: notes,
+          items: lines, count: o.count,
+          subtotal: sub.toFixed(2), gst: tax.toFixed(2), total: tot.toFixed(2),
+          status: 'Unpaid'
+        })
+      });
+      // no-cors gives an opaque response, so we treat a completed request as sent.
+      btn.textContent = 'Order Sent';
+      document.getElementById('orderMsg').style.display = 'block';
+    } catch (err) {
+      btn.textContent = 'Error — try again'; btn.disabled = false;
+    }
+    return;
+  }
+
+  // Fallback (until ORDER_SHEET_URL is set): email the order.
   try {
     var res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
