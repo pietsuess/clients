@@ -23,10 +23,29 @@
 var SHEET_NAME   = '52 ACYR Shirt Orders';
 var NOTIFY_EMAIL = 'info@saltspringcentre.com';  // who gets the new-order email
 
+function getSpreadsheet() {
+  var props = PropertiesService.getScriptProperties();
+  var id = props.getProperty('SHEET_ID');
+  if (id) {
+    try { return SpreadsheetApp.openById(id); } catch (e) { /* stale id, fall through */ }
+  }
+  // Look for an existing *native Google Sheet* with this name (ignore shortcuts/other types).
+  var it = DriveApp.getFilesByName(SHEET_NAME);
+  while (it.hasNext()) {
+    var f = it.next();
+    if (f.getMimeType() === MimeType.GOOGLE_SHEETS) {
+      props.setProperty('SHEET_ID', f.getId());
+      return SpreadsheetApp.openById(f.getId());
+    }
+  }
+  // None found: create one and remember it.
+  var ss = SpreadsheetApp.create(SHEET_NAME);
+  props.setProperty('SHEET_ID', ss.getId());
+  return ss;
+}
+
 function getSheet() {
-  var ss, files = DriveApp.getFilesByName(SHEET_NAME);
-  if (files.hasNext()) ss = SpreadsheetApp.open(files.next());
-  else ss = SpreadsheetApp.create(SHEET_NAME);
+  var ss = getSpreadsheet();
   var sh = ss.getSheets()[0];
   if (sh.getLastRow() === 0) {
     sh.appendRow(['Timestamp','Name','Email','Order','Shirts','Subtotal','GST','Total','Status','Notes']);
