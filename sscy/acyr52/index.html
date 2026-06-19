@@ -27,18 +27,15 @@ a { color: var(--teal-dark); text-decoration: none; }
 img { max-width: 100%; display: block; }
 
 /* PAGE HEADER */
-.page-head { text-align: center; padding: 64px 32px 0; }
-.page-head .lotus { width: 64px; height: auto; margin: 0 auto 20px; opacity: 0.9; }
-.page-head .eyebrow { font-family: 'Cinzel', serif; font-size: 0.78rem; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+.page-head { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 26px 32px; }
+.page-head .lotus { width: 42px; height: auto; opacity: 0.9; }
+.page-head .head-title { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 600; letter-spacing: 0.04em; color: var(--teal-deep); }
 
 /* SHIRTS SECTION */
-.shirts-section { padding: 48px 32px 110px; background: var(--white); margin-top: 48px; }
-.shirts-section h2 { text-align: center; font-size: 2.4rem; color: var(--teal-deep); margin-bottom: 12px; }
-.shirts-section .section-sub { text-align: center; font-size: 1rem; color: var(--text-light); max-width: 480px; margin: 0 auto 48px; line-height: 1.7; }
-.shirts-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
-.shirts-grid > .shirt-card:nth-child(1) { grid-column: 4 / span 2; grid-row: 1; }
-.shirts-grid > .shirt-card:nth-child(2) { grid-column: 8 / span 2; grid-row: 1; }
-.shirts-grid > .shirt-card:nth-child(n+3) { grid-column: span 3; grid-row: 2; }
+.shirts-section { padding: 8px 32px 48px; background: var(--white); }
+.shirts-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.shirts-grid > .shirt-card:nth-child(-n+4) { grid-column: span 3; grid-row: 1; }
+.shirts-grid > .shirt-card:nth-child(n+5) { grid-column: span 6; grid-row: 2; }
 .shirt-card { border-radius: 16px; overflow: hidden; background: var(--white); transition: transform 0.3s ease, box-shadow 0.3s ease; }
 .shirt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.08); }
 .shirt-card img { width: 100%; height: auto; display: block; background: var(--white); }
@@ -50,7 +47,7 @@ img { max-width: 100%; display: block; }
 .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
 
 /* ORDER FORM */
-.order-section { padding: 90px 32px 110px; background: var(--cream); border-top: 1px solid rgba(0,0,0,0.06); }
+.order-section { padding: 36px 32px 80px; background: var(--cream); border-top: 1px solid rgba(0,0,0,0.06); }
 .order-section h2 { text-align: center; font-size: 2.4rem; color: var(--teal-deep); margin-bottom: 12px; }
 .order-section .section-sub { text-align: center; font-size: 1rem; color: var(--text-light); max-width: 520px; margin: 0 auto 56px; line-height: 1.7; }
 .order-form { max-width: 760px; margin: 0 auto; }
@@ -103,45 +100,40 @@ img { max-width: 100%; display: block; }
 <body>
 
 <header class="page-head">
-  <img src="logo-lotus-teal.svg" alt="Salt Spring Centre of Yoga" class="lotus reveal">
-  <div class="eyebrow reveal d1">52nd Annual Community Yoga Retreat</div>
+  <img src="logo-lotus-teal.svg" alt="Salt Spring Centre of Yoga" class="lotus">
+  <span class="head-title">ACYR 52 T-Shirts</span>
 </header>
 
 <section class="shirts-section">
-  <h2 class="reveal">Retreat Apparel</h2>
-  <p class="section-sub reveal">Commemorate the 52nd ACYR.</p>
   <div class="shirts-grid" data-lightbox>
     <div class="shirt-card reveal d1">
-      <img src="images/front.png" alt="52nd ACYR front design — hands holding a sprout, faith is the ground for yoga to grow" loading="lazy">
-      <div class="shirt-label">Front Design</div>
-    </div>
-    <div class="shirt-card reveal d2">
-      <img src="images/back.png" alt="52nd ACYR back design — 52 ACYR, the Salt Spring Centre of Yoga lotus mark" loading="lazy">
-      <div class="shirt-label">Back Design</div>
-    </div>
-    <div class="shirt-card reveal d3">
       <img src="images/mens-front.jpg" alt="52nd ACYR men's tee, front" loading="lazy">
       <div class="shirt-label">Men's Tee, Front</div>
     </div>
-    <div class="shirt-card reveal d1">
+    <div class="shirt-card reveal d2">
       <img src="images/mens-back.jpg" alt="52nd ACYR men's tee, back" loading="lazy">
       <div class="shirt-label">Men's Tee, Back</div>
     </div>
-    <div class="shirt-card reveal d2">
+    <div class="shirt-card reveal d3">
       <img src="images/womens-front.jpg" alt="52nd ACYR women's tee, front" loading="lazy">
       <div class="shirt-label">Women's Tee, Front</div>
     </div>
-    <div class="shirt-card reveal d3">
+    <div class="shirt-card reveal d1">
       <img src="images/womens-back.jpg" alt="52nd ACYR women's tee, back" loading="lazy">
       <div class="shirt-label">Women's Tee, Back</div>
+    </div>
+    <div class="shirt-card reveal d2">
+      <img src="images/front.png" alt="52nd ACYR front design — hands holding a sprout, faith is the ground for yoga to grow" loading="lazy">
+      <div class="shirt-label">Front Design</div>
+    </div>
+    <div class="shirt-card reveal d3">
+      <img src="images/back.png" alt="52nd ACYR back design — 52 ACYR, the Salt Spring Centre of Yoga lotus mark" loading="lazy">
+      <div class="shirt-label">Back Design</div>
     </div>
   </div>
 </section>
 
 <section class="order-section">
-  <h2 class="reveal">Order Your Shirts</h2>
-  <p class="section-sub reveal">Choose your sizes and quantities below, then send your order. Pay with your retreat registration.</p>
-
   <form class="order-form reveal" onsubmit="return false;">
 
     <div class="order-product">
