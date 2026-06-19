@@ -57,7 +57,7 @@ img { max-width: 100%; display: block; }
 .op-body { flex: 1; }
 .op-name { font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
 .op-detail { font-size: 0.8rem; color: var(--text-light); margin-bottom: 18px; }
-.size-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .size-cell { text-align: center; }
 .size-cell .sz { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-light); margin-bottom: 6px; }
 .stepper { display: flex; align-items: center; justify-content: center; border: 1px solid #e3ddd2; border-radius: 8px; overflow: hidden; }
@@ -97,9 +97,9 @@ img { max-width: 100%; display: block; }
   .page-head { padding-top: 48px; }
   .shirts-section h2 { font-size: 2rem; }
   .shirts-grid { grid-template-columns: repeat(2, 1fr); }
-  .shirts-grid > .shirt-card:nth-child(1),
-  .shirts-grid > .shirt-card:nth-child(2),
-  .shirts-grid > .shirt-card:nth-child(n+3) { grid-column: auto; }
+  .shirts-grid > .shirt-card:nth-child(-n+4),
+  .shirts-grid > .shirt-card:nth-child(5),
+  .shirts-grid > .shirt-card:nth-child(6) { grid-column: auto; grid-row: auto; }
   .order-section h2 { font-size: 2rem; }
   .order-product { flex-direction: column; align-items: center; text-align: center; }
   .order-product > img { width: 150px; }
@@ -193,7 +193,7 @@ var observer = new IntersectionObserver(function(entries) {
 document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
 
 /* ---- Order form ---- */
-var SIZES = ['XS','S','M','L','XL','2XL'];
+var SIZES = ['XS','S','M','L','XL'];
 document.querySelectorAll('.size-grid').forEach(function(grid){
   SIZES.forEach(function(sz){
     var cell = document.createElement('div');
