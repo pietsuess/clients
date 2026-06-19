@@ -49,6 +49,37 @@ img { max-width: 100%; display: block; }
 .reveal.in-view { opacity: 1; transform: none; }
 .d1 { transition-delay: 0.08s; } .d2 { transition-delay: 0.16s; } .d3 { transition-delay: 0.24s; }
 
+/* ORDER FORM */
+.order-section { padding: 90px 32px 110px; background: var(--cream); border-top: 1px solid rgba(0,0,0,0.06); }
+.order-section h2 { text-align: center; font-size: 2.4rem; color: var(--teal-deep); margin-bottom: 12px; }
+.order-section .section-sub { text-align: center; font-size: 1rem; color: var(--text-light); max-width: 520px; margin: 0 auto 56px; line-height: 1.7; }
+.order-form { max-width: 760px; margin: 0 auto; }
+.order-product { display: flex; gap: 24px; align-items: flex-start; background: var(--white); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+.order-product > img { width: 120px; height: auto; border-radius: 10px; flex-shrink: 0; background: var(--cream); }
+.op-body { flex: 1; }
+.op-name { font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 600; color: var(--charcoal); margin-bottom: 4px; }
+.op-detail { font-size: 0.8rem; color: var(--text-light); margin-bottom: 18px; }
+.size-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.size-cell { text-align: center; }
+.size-cell .sz { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-light); margin-bottom: 6px; }
+.stepper { display: flex; align-items: center; justify-content: center; border: 1px solid #e3ddd2; border-radius: 8px; overflow: hidden; }
+.stepper button { width: 26px; height: 36px; border: none; background: var(--cream-warm); color: var(--teal-deep); font-size: 1.05rem; cursor: pointer; font-family: inherit; line-height: 1; }
+.stepper button:hover { background: var(--teal); color: #fff; }
+.stepper input { width: 34px; height: 36px; border: none; text-align: center; font-family: inherit; font-size: 0.9rem; color: var(--charcoal); background: #fff; -moz-appearance: textfield; }
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper input.has-qty { background: #e8f5e0; font-weight: 700; color: var(--teal-deep); }
+.order-fields { margin-top: 8px; }
+.order-fields label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; }
+.order-fields input[type=text], .order-fields input[type=email], .order-fields textarea { width: 100%; padding: 12px 14px; border: 1px solid #e3ddd2; border-radius: 10px; background: #fff; font-family: inherit; font-size: 0.95rem; color: var(--charcoal); margin-bottom: 20px; }
+.order-fields input:focus, .order-fields textarea:focus { outline: none; border-color: var(--teal); }
+.order-fields textarea { min-height: 90px; resize: vertical; }
+.order-total { text-align: center; font-family: 'Cinzel', serif; font-size: 1.3rem; font-weight: 600; color: var(--teal-deep); margin: 16px 0 6px; }
+.pay-note { text-align: center; font-size: 0.95rem; font-weight: 500; color: var(--terracotta); margin-bottom: 28px; }
+.order-submit { display: block; margin: 0 auto; padding: 14px 48px; font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border: none; background: var(--terracotta); color: #fff; border-radius: 50px; cursor: pointer; transition: background 0.2s ease; }
+.order-submit:hover { background: var(--teal-deep); }
+.order-submit:disabled { opacity: 0.6; cursor: default; }
+.order-msg { text-align: center; font-size: 0.95rem; color: var(--teal-deep); margin-top: 16px; display: none; }
+
 /* FOOTER */
 .page-foot { text-align: center; padding: 48px 32px 64px; }
 .page-foot a { font-family: 'Cinzel', serif; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.08em; color: var(--teal-deep); }
@@ -62,6 +93,10 @@ img { max-width: 100%; display: block; }
   .shirts-grid > .shirt-card:nth-child(1),
   .shirts-grid > .shirt-card:nth-child(2),
   .shirts-grid > .shirt-card:nth-child(n+3) { grid-column: auto; }
+  .order-section h2 { font-size: 2rem; }
+  .order-product { flex-direction: column; align-items: center; text-align: center; }
+  .order-product > img { width: 150px; }
+  .size-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
 }
 </style>
 </head>
@@ -103,11 +138,140 @@ img { max-width: 100%; display: block; }
   </div>
 </section>
 
+<section class="order-section">
+  <h2 class="reveal">Order Your Shirts</h2>
+  <p class="section-sub reveal">Choose your sizes and quantities below, then send your order. Pay with your retreat registration.</p>
+
+  <form class="order-form reveal" onsubmit="return false;">
+
+    <div class="order-product">
+      <img src="images/mens-front.jpg" alt="Unisex tee">
+      <div class="op-body">
+        <div class="op-name">Unisex Tee</div>
+        <div class="op-detail">Bella+Canvas 3001 &middot; soft combed ringspun cotton</div>
+        <div class="size-grid" data-product="Unisex Tee"></div>
+      </div>
+    </div>
+
+    <div class="order-product">
+      <img src="images/womens-front.jpg" alt="Women's tee">
+      <div class="op-body">
+        <div class="op-name">Women's Relaxed Tee</div>
+        <div class="op-detail">Bella+Canvas 6400 &middot; relaxed fit, ringspun cotton</div>
+        <div class="size-grid" data-product="Women's Tee"></div>
+      </div>
+    </div>
+
+    <div class="order-total" id="orderTotal">No shirts selected</div>
+    <p class="pay-note">Pay with your registration.</p>
+
+    <div class="order-fields">
+      <label for="ordName">Your Name</label>
+      <input type="text" id="ordName" autocomplete="name" required>
+      <label for="ordEmail">Email</label>
+      <input type="email" id="ordEmail" autocomplete="email" required>
+      <label for="ordNotes">Notes (optional)</label>
+      <textarea id="ordNotes" placeholder="Anything we should know?"></textarea>
+    </div>
+
+    <button type="button" class="order-submit" onclick="submitOrder()">Send Order</button>
+    <div class="order-msg" id="orderMsg">Order received. See you at the retreat!</div>
+
+  </form>
+</section>
+
 <script>
 var observer = new IntersectionObserver(function(entries) {
   entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('in-view'); observer.unobserve(e.target); } });
 }, { threshold: 0.12 });
 document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
+
+/* ---- Order form ---- */
+var SIZES = ['XS','S','M','L','XL','2XL'];
+document.querySelectorAll('.size-grid').forEach(function(grid){
+  SIZES.forEach(function(sz){
+    var cell = document.createElement('div');
+    cell.className = 'size-cell';
+    cell.innerHTML = '<div class="sz">' + sz + '</div>' +
+      '<div class="stepper">' +
+        '<button type="button" aria-label="Less ' + sz + '" onclick="step(this,-1)">&minus;</button>' +
+        '<input class="qty" type="number" min="0" value="0" inputmode="numeric" data-size="' + sz + '" oninput="recalc()">' +
+        '<button type="button" aria-label="More ' + sz + '" onclick="step(this,1)">+</button>' +
+      '</div>';
+    grid.appendChild(cell);
+  });
+});
+
+function step(btn, delta){
+  var input = btn.parentElement.querySelector('.qty');
+  var v = (parseInt(input.value, 10) || 0) + delta;
+  input.value = Math.max(0, v);
+  recalc();
+}
+function recalc(){
+  var total = 0;
+  document.querySelectorAll('.qty').forEach(function(q){
+    var v = parseInt(q.value, 10) || 0;
+    if (v < 0) { v = 0; q.value = 0; }
+    q.classList.toggle('has-qty', v > 0);
+    total += v;
+  });
+  var el = document.getElementById('orderTotal');
+  el.textContent = total > 0 ? ('Total: ' + total + ' shirt' + (total > 1 ? 's' : '')) : 'No shirts selected';
+}
+
+async function submitOrder(){
+  var name  = document.getElementById('ordName').value.trim();
+  var email = document.getElementById('ordEmail').value.trim();
+  var notes = document.getElementById('ordNotes').value.trim();
+
+  var lines = [], total = 0;
+  document.querySelectorAll('.size-grid').forEach(function(grid){
+    var product = grid.dataset.product;
+    grid.querySelectorAll('.qty').forEach(function(q){
+      var v = parseInt(q.value, 10) || 0;
+      if (v > 0) { lines.push(v + ' × ' + product + ' — ' + q.dataset.size); total += v; }
+    });
+  });
+
+  if (!lines.length) { alert('Please choose at least one shirt and size.'); return; }
+  if (!name)  { alert('Please enter your name.'); return; }
+  if (!email) { alert('Please enter your email.'); return; }
+
+  var btn = document.querySelector('.order-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+
+  try {
+    var res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: '0f45da86-7dcf-4c66-8881-d7597d02d720',
+        subject: '52 ACYR — T-Shirt Order from ' + name,
+        from_name: '52 ACYR Shirt Order',
+        replyto: email,
+        message: '52 ACYR T-SHIRT ORDER\n' +
+                 '=============================\n\n' +
+                 'Name: ' + name + '\n' +
+                 'Email: ' + email + '\n\n' +
+                 'ORDER:\n' + lines.join('\n') + '\n\n' +
+                 'Total: ' + total + ' shirt' + (total > 1 ? 's' : '') + '\n\n' +
+                 (notes ? ('Notes: ' + notes + '\n\n') : '') +
+                 'Payment: with retreat registration.\n' +
+                 'Sent from clients.pietsuess.com/sscy/acyr52/'
+      })
+    });
+    var data = await res.json();
+    if (data.success) {
+      btn.textContent = 'Order Sent';
+      document.getElementById('orderMsg').style.display = 'block';
+    } else {
+      btn.textContent = 'Error — try again'; btn.disabled = false;
+    }
+  } catch (err) {
+    btn.textContent = 'Error — try again'; btn.disabled = false;
+  }
+}
 </script>
 <script src="lightbox.js" defer></script>
 </body>
