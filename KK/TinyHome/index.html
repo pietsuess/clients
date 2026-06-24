@@ -195,9 +195,14 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   cursor: zoom-in;
   transition: transform .25s cubic-bezier(.16,1,.3,1);
   transform: scale(1);
+  transform-origin: center center;
   will-change: transform;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
-.lb img.zoomed { cursor: zoom-out; transition: none; }
+.lb img.zoomed { cursor: move; }
 .lb-btn {
   position: absolute; z-index: 1002;
   background: none; border: none; color: #f3ece1;
@@ -404,7 +409,7 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   <button class="lb-btn lb-nav lb-next" id="lbNext" aria-label="Next">&#8250;</button>
   <div class="lb-bar">
     <span id="lbCount"></span>
-    <span class="lb-hint">Click to zoom · scroll to zoom · move to pan</span>
+    <span class="lb-hint">Tap or scroll to zoom · pinch · drag to pan · swipe to browse</span>
     <a id="lbDownload" href="" download>Download full resolution</a>
   </div>
 </div>
@@ -418,67 +423,109 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   var lbImg = document.getElementById('lbImg');
   var lbCount = document.getElementById('lbCount');
   var lbDownload = document.getElementById('lbDownload');
-  var i = 0;
-  var zoom = 1;
-  var MAX = 5, STEP_ZOOM = 2.6;
+  var i = 0, MIN = 1, MAX = 5;
+  var scale = 1, tx = 0, ty = 0, base = null;
 
-  function applyOrigin(e) {
-    var r = lbImg.getBoundingClientRect();
-    var x = Math.min(100, Math.max(0, (e.clientX - r.left) / r.width * 100));
-    var y = Math.min(100, Math.max(0, (e.clientY - r.top) / r.height * 100));
-    lbImg.style.transformOrigin = x + '% ' + y + '%';
+  function smooth(on) { lbImg.style.transition = on ? 'transform .25s cubic-bezier(.16,1,.3,1)' : 'none'; }
+  function render() { lbImg.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; lbImg.classList.toggle('zoomed', scale > 1.01); }
+  function ensureBase() { if (!base) base = lbImg.getBoundingClientRect(); }
+  function clampPan() {
+    var mx = Math.max(0, (base.width * scale - base.width) / 2);
+    var my = Math.max(0, (base.height * scale - base.height) / 2);
+    tx = Math.max(-mx, Math.min(mx, tx));
+    ty = Math.max(-my, Math.min(my, ty));
   }
-  function setZoom(z) {
-    zoom = Math.min(MAX, Math.max(1, z));
-    if (zoom > 1) { lbImg.classList.add('zoomed'); }
-    else { lbImg.classList.remove('zoomed'); lbImg.style.transformOrigin = 'center center'; }
-    lbImg.style.transform = 'scale(' + zoom + ')';
+  // zoom to newScale, keeping the point (px,py) fixed on screen
+  function setScaleAt(px, py, ns) {
+    ensureBase();
+    ns = Math.max(MIN, Math.min(MAX, ns));
+    var cx = base.left + base.width / 2, cy = base.top + base.height / 2;
+    var P = px - cx, Q = py - cy;
+    tx = P - (ns / scale) * (P - tx);
+    ty = Q - (ns / scale) * (Q - ty);
+    scale = ns; clampPan(); render();
   }
-  function resetZoom() { lbImg.classList.remove('zoomed'); lbImg.style.transform = 'scale(1)'; lbImg.style.transformOrigin = 'center center'; zoom = 1; }
+  function reset() { scale = 1; tx = 0; ty = 0; base = null; smooth(true); render(); }
 
   function show(n) {
     i = (n + cells.length) % cells.length;
     var full = cells[i].getAttribute('data-full');
-    resetZoom();
+    reset();
     lbImg.src = full;
     lbImg.alt = cells[i].querySelector('img').alt;
     lbDownload.href = full;
     lbCount.textContent = (i + 1) + ' / ' + cells.length;
   }
   function open(n) { show(n); lb.classList.add('open'); lb.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; }
-  function close() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; resetZoom(); }
+  function close() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; reset(); }
 
-  cells.forEach(function (c, n) {
-    c.addEventListener('click', function (e) { e.preventDefault(); open(n); });
-  });
+  cells.forEach(function (c, n) { c.addEventListener('click', function (e) { e.preventDefault(); open(n); }); });
   document.getElementById('lbClose').addEventListener('click', function (e) { e.stopPropagation(); close(); });
   document.getElementById('lbNext').addEventListener('click', function (e) { e.stopPropagation(); show(i + 1); });
   document.getElementById('lbPrev').addEventListener('click', function (e) { e.stopPropagation(); show(i - 1); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+  lbImg.addEventListener('load', function () { base = lbImg.getBoundingClientRect(); });
+  window.addEventListener('resize', function () { if (lb.classList.contains('open')) reset(); });
 
-  // Click image: toggle zoom at the click point
-  lbImg.addEventListener('click', function (e) {
-    e.stopPropagation();
-    if (zoom > 1) { resetZoom(); }
-    else { applyOrigin(e); setZoom(STEP_ZOOM); }
-  });
-  // Move to pan while zoomed
-  lbImg.addEventListener('mousemove', function (e) { if (zoom > 1) applyOrigin(e); });
-  // Scroll to zoom toward the cursor
+  // Wheel to zoom toward the cursor (desktop)
   lb.addEventListener('wheel', function (e) {
     if (!lb.classList.contains('open')) return;
-    e.preventDefault();
-    applyOrigin(e);
-    setZoom(zoom + (e.deltaY < 0 ? 0.4 : -0.4));
+    e.preventDefault(); smooth(false);
+    setScaleAt(e.clientX, e.clientY, scale * (e.deltaY < 0 ? 1.18 : 1 / 1.18));
   }, { passive: false });
-  // Click backdrop to close
-  lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+
+  // Unified pointer gestures: mouse + touch (pinch zoom, drag pan, swipe, tap)
+  var pts = new Map(), panStart = null, pinch = null, moved = false, downXY = null;
+  function arr() { return Array.prototype.slice.call(pts.values()); }
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+  function mid(a, b) { return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+
+  lbImg.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    try { lbImg.setPointerCapture(e.pointerId); } catch (_) {}
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    moved = false; downXY = { x: e.clientX, y: e.clientY }; smooth(false);
+    if (pts.size === 1) { ensureBase(); panStart = { x: e.clientX, y: e.clientY, tx: tx, ty: ty }; pinch = null; }
+    else if (pts.size === 2) { var p = arr(); pinch = { d: dist(p[0], p[1]), s: scale }; panStart = null; }
+  });
+  lbImg.addEventListener('pointermove', function (e) {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    var p = arr();
+    if (pts.size >= 2 && pinch) {
+      e.preventDefault();
+      var d = dist(p[0], p[1]), m = mid(p[0], p[1]);
+      setScaleAt(m.x, m.y, pinch.s * d / pinch.d); moved = true;
+    } else if (pts.size === 1 && panStart) {
+      var dx = e.clientX - panStart.x, dy = e.clientY - panStart.y;
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+      if (scale > 1) { e.preventDefault(); ensureBase(); tx = panStart.tx + dx; ty = panStart.ty + dy; clampPan(); render(); }
+    }
+  });
+  function up(e) {
+    if (pts.has(e.pointerId)) pts.delete(e.pointerId);
+    if (pts.size === 0) {
+      if (!moved) {
+        // tap / click: toggle zoom at the point
+        if (scale > 1) reset();
+        else { smooth(true); setScaleAt(downXY.x, downXY.y, 2.6); }
+      } else if (scale <= 1.01 && downXY) {
+        // swipe to navigate when not zoomed
+        var dx = e.clientX - downXY.x, dy = e.clientY - downXY.y;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) { show(dx < 0 ? i + 1 : i - 1); }
+      }
+      panStart = null; pinch = null;
+    } else if (pts.size === 1) { var q = arr()[0]; ensureBase(); panStart = { x: q.x, y: q.y, tx: tx, ty: ty }; pinch = null; }
+  }
+  lbImg.addEventListener('pointerup', up);
+  lbImg.addEventListener('pointercancel', up);
 
   document.addEventListener('keydown', function (e) {
     if (!lb.classList.contains('open')) return;
     if (e.key === 'Escape') close();
     else if (e.key === 'ArrowRight') show(i + 1);
     else if (e.key === 'ArrowLeft') show(i - 1);
-    else if (e.key === '0') resetZoom();
+    else if (e.key === '0') reset();
   });
 })();
 </script>
