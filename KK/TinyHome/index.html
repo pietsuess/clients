@@ -50,7 +50,7 @@ a { color: inherit; }
 .hero::after {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(20,12,6,.42) 0%, rgba(20,12,6,0) 28%, rgba(20,12,6,0) 55%, rgba(20,12,6,.72) 100%);
+  background: linear-gradient(180deg, rgba(20,12,6,.45) 0%, rgba(20,12,6,0) 30%, rgba(20,12,6,.15) 52%, rgba(20,12,6,.62) 78%, rgba(20,12,6,.92) 100%);
 }
 .hero-inner {
   position: absolute; inset: auto var(--pad) clamp(28px, 6vw, 72px) var(--pad);
@@ -80,7 +80,8 @@ a { color: inherit; }
   font-weight: 300;
   font-size: clamp(1rem, 1.6vw, 1.35rem);
   max-width: 64ch;
-  color: rgba(251,244,233,.92);
+  color: rgba(251,244,233,.96);
+  text-shadow: 0 1px 16px rgba(0,0,0,.6);
   margin: 0;
 }
 .hero .sub .nb { white-space: nowrap; }
@@ -237,7 +238,9 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   .hero { height: auto; min-height: 0; aspect-ratio: 4 / 3; }
   .hero img { object-position: center center; }
   .hero h1 { font-size: clamp(2.6rem, 13vw, 4rem); }
-  .hero .sub { font-size: 1rem; }
+  .hero .sub { font-size: .95rem; max-width: none; }
+  .hero .sub .nb { white-space: normal; }   /* wrap naturally, no orphaned line */
+  .scroll-cue { display: none; }            /* avoid colliding with the banner text */
 }
 </style>
 </head>
