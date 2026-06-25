@@ -233,7 +233,11 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   .row { flex-direction: column; }
   /* stacked: let each cell size to its image instead of collapsing flex-basis:0 height */
   .row .cell { flex: none; width: 100%; }
-  .hero { height: 88vh; }
+  /* hero as a short banner showing the whole side elevation, not a tall cropped slice */
+  .hero { height: auto; min-height: 0; aspect-ratio: 4 / 3; }
+  .hero img { object-position: center center; }
+  .hero h1 { font-size: clamp(2.6rem, 13vw, 4rem); }
+  .hero .sub { font-size: 1rem; }
 }
 </style>
 </head>
