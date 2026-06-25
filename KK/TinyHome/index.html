@@ -234,13 +234,16 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   .row { flex-direction: column; }
   /* stacked: let each cell size to its image instead of collapsing flex-basis:0 height */
   .row .cell { flex: none; width: 100%; }
-  /* hero as a short banner showing the whole side elevation, not a tall cropped slice */
-  .hero { height: auto; min-height: 0; aspect-ratio: 4 / 3; }
-  .hero img { object-position: center center; }
-  .hero h1 { font-size: clamp(2.6rem, 13vw, 4rem); }
-  .hero .sub { font-size: .95rem; max-width: none; }
-  .hero .sub .nb { white-space: normal; }   /* wrap naturally, no orphaned line */
-  .scroll-cue { display: none; }            /* avoid colliding with the banner text */
+  /* mobile: clean photo banner with the title block BELOW it (no text over the image) */
+  .hero { height: auto; min-height: 0; aspect-ratio: auto; overflow: visible; display: block; background: var(--bg); }
+  .hero img { position: static; width: 100%; height: auto; aspect-ratio: 4 / 3; object-position: center center; }
+  .hero::after { display: none; }
+  .hero-inner { position: static; inset: auto; color: var(--ink); padding: clamp(22px, 6vw, 36px) var(--pad) clamp(6px, 2vw, 16px); gap: 10px; }
+  .eyebrow { color: var(--ink-soft); }
+  .hero h1 { color: var(--ink); text-shadow: none; font-size: clamp(2.6rem, 13vw, 4rem); }
+  .hero .sub { color: var(--ink-soft); text-shadow: none; font-size: 1rem; max-width: none; }
+  .hero .sub .nb { white-space: normal; }   /* wrap naturally */
+  .scroll-cue { display: none; }
 }
 </style>
 </head>
