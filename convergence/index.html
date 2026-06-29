@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convergence Festival 2026 – Poster Design Notes</title>
+<style>
+  :root{
+    --yellow:#f4ee1f;
+    --magenta:#ec1c8e;
+    --pink:#f49ac1;
+    --teal:#16a89a;
+    --ink:#111;
+    --rule:#e6e6e6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:Helvetica,Arial,sans-serif;
+    background:#fff;
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:15px 0;
+  }
+  .wrap{width:100%;padding-inline:clamp(28px,16.5vw,320px);}
+  p{
+    text-align:justify;
+    text-align-last:left;
+    font-size:clamp(16px,1.15vw,20px);
+    max-width:none;
+  }
+
+  /* ---------- splash ---------- */
+  #splash{
+    position:fixed;
+    inset:0;
+    background:#fff;
+    z-index:1000;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:opacity .6s ease;
+    padding:0 6vw;
+  }
+  #splash svg, #splash .logo{
+    width:min(72vw,920px);
+    height:auto;
+    display:block;
+  }
+  #splash .enter{
+    margin-top:clamp(28px,4vh,56px);
+    text-transform:uppercase;
+    letter-spacing:.42em;
+    font-size:clamp(11px,.9vw,14px);
+    font-weight:700;
+    color:#000;
+    opacity:.55;
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.25}50%{opacity:.75}}
+  #splash.gone{opacity:0;pointer-events:none;}
+  body.locked{overflow:hidden;}
+
+  /* ---------- header ---------- */
+  header.top{
+    border-bottom:3px solid var(--ink);
+    padding:clamp(28px,4vw,48px) 0 clamp(20px,2.5vw,32px);
+  }
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.32em;
+    font-size:clamp(11px,.85vw,14px);
+    font-weight:700;
+  }
+  h1{
+    font-size:clamp(48px,9vw,150px);
+    line-height:.92;
+    font-weight:700;
+    letter-spacing:-.02em;
+    margin:.18em 0 .12em;
+  }
+  .sub{
+    font-size:clamp(15px,1.3vw,22px);
+    font-weight:700;
+    color:#555;
+  }
+
+  /* ---------- hero: centered poster ---------- */
+  .hero{
+    padding-block:clamp(44px,6vw,96px) clamp(36px,4vw,64px);
+    border-bottom:1px solid var(--rule);
+    text-align:center;
+  }
+  .hero img.poster{
+    max-width:min(100%,560px);
+    max-height:82vh;
+    width:auto;
+    height:auto;
+    display:block;
+    margin:0 auto;
+    box-shadow:0 34px 80px rgba(0,0,0,.20);
+  }
+  .hero .statement{
+    margin:clamp(34px,4vw,60px) auto 0;
+    max-width:none;
+  }
+  .hero .statement p{
+    font-size:clamp(18px,1.5vw,26px);
+    line-height:1.55;
+  }
+  .meta-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-top:clamp(30px,3.5vw,52px);
+    border-top:1px solid var(--rule);
+    padding-top:24px;
+    text-align:left;
+  }
+  .meta-row .cell .k{text-transform:uppercase;letter-spacing:.18em;font-size:11px;font-weight:700;color:#888;}
+  .meta-row .cell .v{font-size:clamp(15px,1.1vw,19px);font-weight:700;margin-top:4px;}
+
+  /* ---------- section heading ---------- */
+  .sec-head{padding-block:clamp(48px,6vw,96px) clamp(8px,1vw,18px);}
+  .sec-head h2{font-size:clamp(30px,5vw,72px);line-height:.98;font-weight:700;letter-spacing:-.015em;}
+  .sec-head .num{font-size:clamp(13px,1vw,16px);font-weight:700;letter-spacing:.2em;color:var(--magenta);text-transform:uppercase;}
+
+  /* ---------- detail blocks ---------- */
+  .detail{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:clamp(28px,4vw,64px);
+    align-items:center;
+    padding-block:clamp(28px,3.5vw,56px);
+    border-bottom:1px solid var(--rule);
+  }
+  .detail.flip .copy{order:2;}
+  .detail.flip .loupe{order:1;}
+  .detail.v-top{align-items:start;}
+  .detail.v-bottom{align-items:end;}
+  .detail.solo{grid-template-columns:1fr;}
+  .detail h3{font-size:clamp(22px,2.4vw,38px);line-height:1.04;font-weight:700;letter-spacing:-.01em;margin-bottom:.5em;}
+  .detail .copy p + p{margin-top:1em;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:16px;color:#fff;}
+  .tag.y{background:var(--ink);}
+  .tag.m{background:var(--magenta);}
+  .tag.t{background:var(--teal);}
+  .tag.p{background:#c77fa3;}
+
+  /* loupe = pre-cropped close-up of the poster */
+  .loupe{
+    width:100%;
+    overflow:hidden;
+    border:1px solid var(--rule);
+    box-shadow:0 18px 44px rgba(0,0,0,.14);
+    background:#fff;
+  }
+  .loupe img{display:block;width:100%;height:auto;}
+  .loupe .cap{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#888;padding:10px 14px;background:#fff;border-top:1px solid var(--rule);}
+
+  /* ---------- annotated poster (illustrative callouts) ---------- */
+  .annot{padding-block:clamp(16px,2.5vw,40px) clamp(48px,6vw,96px);padding-inline:clamp(16px,2vw,48px);}
+  .stage{position:relative;width:100%;}
+  .stage .poster{display:block;margin:0 auto;width:min(60%,980px);height:auto;box-shadow:0 30px 70px rgba(0,0,0,.18);}
+  .leaders{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:2;}
+  .leaders line{stroke:var(--ink);stroke-width:1.4;}
+  .leaders circle.end{fill:var(--ink);}
+  .label{position:absolute;width:clamp(150px,14vw,230px);z-index:3;}
+  .label.left{right:82%;text-align:right;}
+  .label.right{left:82%;text-align:left;}
+  .label .tag{margin-bottom:10px;}
+  .label h3{font-size:clamp(17px,1.5vw,25px);line-height:1.06;font-weight:700;letter-spacing:-.01em;margin-bottom:.4em;}
+  .label p{font-size:clamp(13px,.95vw,16px);line-height:1.42;text-align:justify;text-align-last:left;}
+
+  /* ---------- lead line ---------- */
+  .lead{padding-block:clamp(8px,1.5vw,20px) clamp(20px,3vw,44px);}
+  .lead p{font-size:clamp(18px,1.9vw,30px);line-height:1.3;font-weight:700;letter-spacing:-.01em;}
+
+  /* ---------- hand-made note ---------- */
+  .handnote{padding-block:clamp(44px,6vw,96px);border-top:1px solid var(--rule);}
+  .handnote .num{color:var(--magenta);}
+  .handnote p{font-size:clamp(17px,1.8vw,28px);line-height:1.3;font-weight:700;letter-spacing:-.01em;margin-top:.5em;text-align:justify;text-align-last:left;}
+
+  /* ---------- footer ---------- */
+  footer{border-top:3px solid var(--ink);padding:clamp(32px,4vw,56px) 0;margin-top:clamp(40px,5vw,80px);}
+  footer .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;align-items:baseline;}
+  footer .big{font-size:clamp(24px,3vw,46px);font-weight:700;letter-spacing:-.01em;}
+  footer .muted{color:#888;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+  footer .credit{margin-top:22px;color:var(--magenta);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+
+  @media(max-width:880px){
+    body{padding:12px 0;overflow-x:hidden;}
+    h1{font-size:clamp(30px,8.5vw,54px);}
+    .sec-head h2{font-size:clamp(26px,7vw,48px);}
+    .eyebrow{letter-spacing:.2em;}
+    .detail{grid-template-columns:1fr;}
+    .detail.flip .copy,.detail.flip .loupe{order:0;}
+    .detail.v-top,.detail.v-bottom{align-items:start;}
+    .meta-row{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* annotated poster falls back to a stacked list on narrow screens */
+  @media(max-width:900px){
+    .leaders{display:none;}
+    .stage{display:flex;flex-direction:column;align-items:center;}
+    .stage .poster{width:auto;height:auto;max-width:min(100%,560px);}
+    .label{position:static;width:100%;max-width:600px;text-align:left;margin-top:32px;}
+    .label.left,.label.right{text-align:left;}
+    .label p{text-align:justify;text-align-last:left;}
+  }
+</style>
+</head>
+<body class="locked">
+
+<!-- ============ SPLASH ============ -->
+<div id="splash" role="button" tabindex="0" aria-label="Enter">
+  <img class="logo" src="convergence-logo.svg" alt="Convergence">
+  <div class="enter">Click to enter</div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Poster design - Piet Suess</div>
+    <h1>Convergence 2026</h1>
+    <div class="sub">A parking lot take-over · Sept 19 &amp; 20 · Design walkthrough</div>
+  </div>
+</header>
+
+<!-- ============ HERO: centered poster ============ -->
+<section class="hero wrap">
+  <img class="poster" src="poster-2026.jpg" alt="Convergence Festival 2026 poster">
+  <div class="statement">
+    <p>This design is a hot, vibrant, layer upon layer of translucent risograph color. This poster lets the yellow glow like backlight through paper, while magenta and pink wash over one another, slightly out of register. I wanted the color layers and type hierarchy to do the work, and be bold while drawing the viewer in closer towards the subtle detail. I've split the two days, stacked top and bottom around the central wordmark, making a clear delineation of dates.</p>
+    <div class="meta-row">
+      <div class="cell"><div class="k">Event</div><div class="v">Convergence Festival</div></div>
+      <div class="cell"><div class="k">Dates</div><div class="v">Sept 19 &amp; 20</div></div>
+      <div class="cell"><div class="k">Format</div><div class="v">Two-day, two-color</div></div>
+      <div class="cell"><div class="k">Treatment</div><div class="v">Layered risograph</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="sec-head wrap">
+  <div class="num">A closer look</div>
+  <h2>The artistry, up close</h2>
+</div>
+
+<section class="lead wrap">
+  <p>Textures and layers, giving the whole piece an organic, analog feel.</p>
+</section>
+
+<section class="annot wrap">
+  <div class="stage" id="stage">
+    <img class="poster" src="poster-2026.jpg" alt="Convergence Festival 2026 poster">
+    <svg class="leaders" id="leaders" preserveAspectRatio="none" aria-hidden="true"></svg>
+
+    <div class="label right" style="top:3%" data-fx="0.88" data-fy="0.105">
+      <span class="tag p">Atmosphere</span>
+      <h3>Dates in a softer key</h3>
+      <p>The day headers are painted in a gentle, luminous tone, a quiet layer that lets the lineup take the lead.</p>
+    </div>
+    <div class="label left" style="top:7%" data-fx="0.12" data-fy="0.31">
+      <span class="tag y">Light</span>
+      <h3>Light from within</h3>
+      <p>The yellow carries the whole image like a lamp behind paper. Every color laid over it picks up that inner glow.</p>
+    </div>
+    <div class="label right" style="top:31%" data-fx="0.87" data-fy="0.245">
+      <span class="tag m">Heat</span>
+      <h3>Headliners in full heat</h3>
+      <p>The artist names rise to the front in hot magenta on electric yellow, the first note the eye catches.</p>
+    </div>
+    <div class="label left" style="top:41%" data-fx="0.17" data-fy="0.47">
+      <span class="tag t">Anchor</span>
+      <h3>The returning wordmark</h3>
+      <p>Carried forward and set at the heart of the poster, the teal letters drift gently out of register, ink resting on ink.</p>
+    </div>
+    <div class="label right" style="top:63%" data-fx="0.885" data-fy="0.66">
+      <span class="tag m">Motion</span>
+      <h3>Layers in motion</h3>
+      <p>The streaked, slightly out-of-register layers carry a real sense of movement, echoing the festival itself: separate elements drifting together and building energy across the weekend.</p>
+    </div>
+    <div class="label left" style="top:75%" data-fx="0.14" data-fy="0.90">
+      <span class="tag t">Craft</span>
+      <h3>The maker's hand</h3>
+      <p>Translucent passes settle over one another and the partner marks nestle softly in, the warm grain of true risograph.</p>
+    </div>
+  </div>
+</section>
+
+<section class="handnote wrap">
+  <div class="num">Made by hand</div>
+  <p>Textures, Smudges, Distortion, deliberate choices, and the warmth of a design built by a person. This design feels like it was photocopied, smudged, and streaked, and layered on sheets, by a human hand.</p>
+</section>
+
+
+<footer>
+  <div class="wrap row">
+    <div class="big">Convergence Festival 2026</div>
+    <div class="muted">Sept 19 &amp; 20 · A parking lot take-over</div>
+  </div>
+  <div class="wrap"><div class="credit">Poster design by Piet Suess</div></div>
+</footer>
+
+<script>
+  // ----- splash entry -----
+  var splash = document.getElementById('splash');
+  function enter(){
+    if(splash.classList.contains('gone')) return;
+    var el = document.documentElement;
+    if(el.requestFullscreen){ el.requestFullscreen().catch(function(){}); }
+    else if(el.webkitRequestFullscreen){ el.webkitRequestFullscreen(); }
+    splash.classList.add('gone');
+    document.body.classList.remove('locked');
+    window.scrollTo(0,0);
+    setTimeout(drawLeaders, 60);
+  }
+  splash.addEventListener('click', enter);
+  splash.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' ') enter(); });
+  if(location.hash==='#enter'){ splash.classList.add('gone'); document.body.classList.remove('locked'); }
+
+  // ----- annotated poster: draw leader lines from labels to poster points -----
+  var NS = 'http://www.w3.org/2000/svg';
+  function drawLeaders(){
+    var stage = document.getElementById('stage');
+    var svg = document.getElementById('leaders');
+    if(!stage || !svg) return;
+    var poster = stage.querySelector('.poster');
+    // skip when stacked (svg hidden on narrow screens)
+    if(getComputedStyle(svg).display === 'none') return;
+    var sr = stage.getBoundingClientRect();
+    var pr = poster.getBoundingClientRect();
+    svg.setAttribute('viewBox', '0 0 ' + sr.width + ' ' + sr.height);
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    stage.querySelectorAll('.label').forEach(function(label){
+      var fx = parseFloat(label.getAttribute('data-fx'));
+      var fy = parseFloat(label.getAttribute('data-fy'));
+      var isLeft = label.classList.contains('left');
+      // start the line at the pill heading, aligned to its vertical centre
+      var pill = label.querySelector('.tag');
+      var tr = (pill || label).getBoundingClientRect();
+      var sx = (isLeft ? tr.right : tr.left) - sr.left;
+      var sy = tr.top - sr.top + tr.height / 2;
+      var ex = pr.left - sr.left + fx * pr.width;
+      var ey = pr.top - sr.top + fy * pr.height;
+      var line = document.createElementNS(NS, 'line');
+      line.setAttribute('x1', sx); line.setAttribute('y1', sy);
+      line.setAttribute('x2', ex); line.setAttribute('y2', ey);
+      svg.appendChild(line);
+      // small black dot at the poster end
+      var end = document.createElementNS(NS, 'circle');
+      end.setAttribute('cx', ex); end.setAttribute('cy', ey);
+      end.setAttribute('r', 4); end.setAttribute('class', 'end');
+      svg.appendChild(end);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(drawLeaders, 60); });
+  window.addEventListener('resize', drawLeaders);
+</script>
+
+</body>
+</html>
