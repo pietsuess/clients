@@ -87,6 +87,23 @@
   .bwlabels{display:flex;gap:4px;margin-top:6px}
   .bwlabels span{flex:1;text-align:center;font-size:10.5px;color:var(--dim)}
 
+  /* subtitle comparison */
+  .subs{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 18px 16px}
+  .subs h3{font-size:14px;font-weight:600;margin-bottom:2px}
+  .subs .cap-note{margin:2px 0 14px}
+  .subsgrid{display:grid;grid-template-columns:130px 1fr 1fr;gap:0;font-size:13.5px}
+  .subsgrid>div{padding:10px 12px;border-top:1px solid var(--line)}
+  .subsgrid .hd{border-top:none;padding-top:0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .subsgrid .m{font-weight:600;color:var(--ink)}
+  .subsgrid .st{display:flex;gap:9px;align-items:baseline}
+  .subsgrid .st .dot{position:relative;top:1px}
+  .subsgrid .st div{flex:1}
+  .subsgrid b{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:2px}
+  .subsgrid .good b{color:var(--done)} .subsgrid .bad b{color:var(--over)} .subsgrid .ours b{color:var(--next)}
+  .subsgrid .d-good{background:var(--done)} .subsgrid .d-bad{background:var(--over)} .subsgrid .d-ours{background:var(--next)}
+  .subsgrid p{font-size:13px;color:var(--dim);line-height:1.5}
+  @media(max-width:640px){.subsgrid{grid-template-columns:1fr}.subsgrid .m{border-top:2px solid var(--line);padding-top:12px}.subsgrid .hd{display:none}}
+
   /* timeline */
   .timeline{margin-top:44px}
   .timeline h2{font-size:22px;margin-bottom:14px}
@@ -238,6 +255,30 @@
       <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
     </div>
     <p class="cap-note">205 TB streamed in twelve months against a 2 TB-a-month plan. Event months run ten to eighteen times over the line, which is why Vimeo called.</p>
+  </div>
+
+  <div class="subs">
+    <h3>Subtitles on your TV: today vs after the move</h3>
+    <p class="cap-note">The number-one support headache. Every path gets equal or better after the move; none gets worse.</p>
+    <div class="subsgrid">
+      <div class="hd">How you watch</div><div class="hd">Today (Vimeo)</div><div class="hd">After (Cloudflare Stream)</div>
+
+      <div class="m">HDMI cable</div>
+      <div class="st good"><i class="dot d-good"></i><div><b>Guaranteed</b><p>The TV mirrors the laptop screen. Whatever the player shows, the TV shows.</p></div></div>
+      <div class="st good"><i class="dot d-good"></i><div><b>Guaranteed</b><p>Unchanged. Nothing to build, nothing that can break.</p></div></div>
+
+      <div class="m">AirPlay</div>
+      <div class="st good"><i class="dot d-good"></i><div><b>Native</b><p>Subtitles ride inside the stream and the Apple TV draws them itself.</p></div></div>
+      <div class="st good"><i class="dot d-good"></i><div><b>Native</b><p>Same mechanism: captions travel inside the stream. Selection carries over.</p></div></div>
+
+      <div class="m">Chromecast</div>
+      <div class="st bad"><i class="dot d-bad"></i><div><b>Black box</b><p>Vimeo's cast button decides what the TV gets. Known to drop subtitles on some models, and we can do nothing about it.</p></div></div>
+      <div class="st ours"><i class="dot d-ours"></i><div><b>Ours to control</b><p>Our own cast button hands the TV its subtitle track explicitly. Testable, fixable, on real devices before the event.</p></div></div>
+
+      <div class="m">Worst case, any TV</div>
+      <div class="st bad"><i class="dot d-bad"></i><div><b>Nothing</b><p>If casting misbehaves, the only answer is "use a different setup".</p></div></div>
+      <div class="st ours"><i class="dot d-ours"></i><div><b>Burned-in option</b><p>Storage is cheap enough to keep per-language copies with subtitles baked into the picture, about $4 a month for all eight. Works on every device ever made. Decide later.</p></div></div>
+    </div>
   </div>
 
   <ul class="tasks">
