@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>BMATS Platform Build — Plan &amp; Progress</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b23; --line:#242c38; --ink:#e8e4da; --dim:#8b93a1;
+    --accent:#d9a441; --done:#5fae6e; --active:#d9a441; --next:#5b87b8; --wait:#a06fb4; --todo:#4a5261;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:0 20px 80px}
+  .wrap{max-width:880px;margin:0 auto}
+  p,li{text-align:justify;text-align-last:left;text-wrap:pretty}
+
+  header{padding:56px 0 8px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(26px,5vw,40px);line-height:1.15;margin:10px 0 6px}
+  .sub{color:var(--dim);font-size:15px}
+  .event{display:flex;gap:28px;flex-wrap:wrap;margin:22px 0 26px}
+  .event div{font-size:14px;color:var(--dim)}
+  .event strong{display:block;font-size:20px;color:var(--ink);font-weight:600}
+
+  .overall{margin:26px 0 8px}
+  .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--done);border-radius:3px;width:0}
+  .overall .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:6px}
+
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0 0;font-size:13px;color:var(--dim)}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .d-done{background:var(--done)} .d-active{background:var(--active)}
+  .d-next{background:var(--next)} .d-wait{background:var(--wait)}
+  .d-todo{background:none;border:1.5px solid var(--todo)}
+
+  section{margin-top:44px}
+  section>h2{font-family:Georgia,serif;font-weight:400;font-size:22px;margin-bottom:4px}
+  section>.note{color:var(--dim);font-size:14px;margin-bottom:14px}
+  .secbar{height:3px;background:var(--line);border-radius:2px;margin:0 0 16px;overflow:hidden}
+  .secbar i{display:block;height:100%;background:var(--done);width:0}
+
+  ul.tasks{list-style:none}
+  ul.tasks li{display:flex;gap:12px;align-items:baseline;padding:9px 12px;border-bottom:1px solid var(--line);font-size:15px}
+  ul.tasks li:last-child{border-bottom:none}
+  ul.tasks .dot{position:relative;top:0}
+  ul.tasks li[data-s="done"]{color:var(--dim)}
+  ul.tasks li[data-s="done"] .who{opacity:.6}
+  .who{margin-left:auto;flex:none;font-size:12px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;padding-left:14px}
+  .tag{font-size:12px;color:var(--accent)}
+
+  .decisions{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px 22px;margin-top:20px}
+  .decisions h2{font-family:Georgia,serif;font-weight:400;font-size:19px;margin-bottom:10px}
+  .decisions li{list-style:none;padding:6px 0;font-size:14.5px;border-bottom:1px solid var(--line)}
+  .decisions li:last-child{border-bottom:none}
+  .decisions .d{color:var(--accent);font-size:12.5px;margin-right:8px;white-space:nowrap}
+
+  .qs li{list-style:none;padding:7px 0 7px 18px;position:relative;font-size:15px}
+  .qs li::before{content:"";position:absolute;left:0;top:15px;width:8px;height:8px;border:1.5px solid var(--wait);border-radius:50%}
+
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--dim);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Between the Mountain and the Sky</div>
+  <h1>Online Platform Build — Plan &amp; Progress</h1>
+  <p class="sub">One page for the whole build. Statuses update as work lands. Questions to Piet.</p>
+  <div class="event">
+    <div><strong id="days-left">—</strong>days to event</div>
+    <div><strong>Aug 12</strong>next screening event</div>
+    <div><strong id="pct">0%</strong>tasks complete</div>
+  </div>
+  <div class="overall">
+    <div class="lbl"><span>Overall progress</span><span id="count">0 / 0</span></div>
+    <div class="bar"><i id="overall-fill"></i></div>
+  </div>
+  <div class="legend">
+    <span><i class="dot d-done"></i>Done</span>
+    <span><i class="dot d-active"></i>In progress</span>
+    <span><i class="dot d-next"></i>Up next</span>
+    <span><i class="dot d-wait"></i>Waiting on someone</span>
+    <span><i class="dot d-todo"></i>Planned</span>
+  </div>
+</header>
+
+<div class="decisions">
+  <h2>Decisions made</h2>
+  <ul>
+    <li><span class="d">Jul 6</span>Kajabi stays as the store and email system. We build a custom watch experience around it instead of fighting its limits.</li>
+    <li><span class="d">Jul 6</span>Viewers will log in with an emailed watch link plus a 6-digit code. No more passwords for watching the film.</li>
+    <li><span class="d">Jul 6</span>Video delivery moves from Vimeo to Cloudflare Stream. Current usage (about 205 TB in the last year) is far past Vimeo's 2 TB monthly limit; Stream handles the same traffic for a few thousand dollars a year instead of an Enterprise contract, with stronger per-viewer link protection.</li>
+    <li><span class="d">Jul 6</span>The small Vimeo account stays alive only as the source of backup links for support.</li>
+    <li><span class="d">Jul 6</span>Gifting gets its own fixed-price offer. Kajabi cannot attach gifts to pay-what-you-want checkout, which is why gifting has been confusing.</li>
+  </ul>
+</div>
+
+<section data-name="Video delivery">
+  <h2>1 · Video delivery (Cloudflare Stream)</h2>
+  <p class="note">The foundation. Everything else plugs into this.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="done"><i class="dot"></i>Pull the Vimeo bandwidth report and confirm real usage<span class="who">Done · Jul 6</span></li>
+    <li data-s="wait"><i class="dot"></i>Vimeo call: find out how long before the account is restricted (sets our migration deadline)<span class="who">Jeremy</span></li>
+    <li data-s="next"><i class="dot"></i>Upload the film to Cloudflare Stream and verify picture quality end to end<span class="who">Piet</span></li>
+    <li data-s="next"><i class="dot"></i>Load existing subtitle files (EN CC, Dutch, Italian) and verify they display<span class="who">Piet</span></li>
+    <li data-s="todo"><i class="dot"></i>Turn on signed playback links (video only plays for paying viewers, links expire on their own)</li>
+    <li data-s="todo"><i class="dot"></i>Real-device TV test: AirPlay, Chromecast (with subtitles on!), HDMI, iPad, older Android</li>
+    <li data-s="todo"><i class="dot"></i>Set up the Vimeo backup-link path for support edge cases</li>
+  </ul>
+</section>
+
+<section data-name="Watch portal">
+  <h2>2 · The watch portal (passwordless viewing)</h2>
+  <p class="note">One address for everything: watch link in, film plays, no passwords. This becomes the only link we ever send people.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="wait"><i class="dot"></i>Choose the address (e.g. watch.betweenthemountainandthesky.com) and get DNS access<span class="who">Jeremy</span></li>
+    <li data-s="todo"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database</li>
+    <li data-s="todo"><i class="dot"></i>Email watch-link login, with a 6-digit code fallback for anyone whose email mangles the link</li>
+    <li data-s="todo"><i class="dot"></i>Watch page: film player, subtitle picker, big clear controls</li>
+    <li data-s="todo"><i class="dot"></i>"You have access until Aug 19 · 2 days remaining" banner</li>
+    <li data-s="todo"><i class="dot"></i>Resume where you left off, even on a different device</li>
+    <li data-s="todo"><i class="dot"></i>Friendly error panel instead of a blank screen (try Chrome, refresh, contact us, backup link)</li>
+    <li data-s="todo"><i class="dot"></i>Expired rental page: says so plainly, offers a one-click extension request</li>
+  </ul>
+</section>
+
+<section data-name="FAQ and TV">
+  <h2>3 · FAQ &amp; watching on your TV</h2>
+  <p class="note">A head start exists: the current FAQ page with player and AirPlay screenshots gets folded in and expanded.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="todo"><i class="dot"></i>Full FAQ: login, access period, devices, subtitles, gifting, payments</li>
+    <li data-s="todo"><i class="dot"></i>"Watch on your TV" page that detects the visitor's device and shows their steps first (Apple / Android / Samsung)</li>
+    <li data-s="todo"><i class="dot"></i>HDMI recommended plainly as the most reliable option, with a note on which cheap cable to buy</li>
+    <li data-s="todo"><i class="dot"></i>Chromecast subtitle warning where relevant</li>
+  </ul>
+</section>
+
+<section data-name="Support">
+  <h2>4 · Support helper &amp; ticket tracking</h2>
+  <p class="note">The chat helper solves the repetitive stuff automatically; everything else lands in one organized place instead of Jeremy's inbox.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="todo"><i class="dot"></i>Chat helper on every page: can't log in / no email / won't play / TV trouble / gift / payment</li>
+    <li data-s="todo"><i class="dot"></i>"Didn't get your watch link?" resolves itself: the helper re-sends it automatically</li>
+    <li data-s="todo"><i class="dot"></i>Helper collects email, device and an optional screenshot before a ticket is filed</li>
+    <li data-s="todo"><i class="dot"></i>Every ticket tagged by category, country, device and browser, automatically</li>
+    <li data-s="todo"><i class="dot"></i>Admin page for Jeremy: ticket list, one-click "extend access", one-click "resend gift email"</li>
+    <li data-s="todo"><i class="dot"></i>Refund-reduction ladder built into the admin page: extend first, backup link second, refund last</li>
+    <li data-s="todo"><i class="dot"></i>Nightly copy of all tickets into a Google Sheet for easy browsing</li>
+  </ul>
+</section>
+
+<section data-name="Gifting">
+  <h2>5 · Gifting, fixed</h2>
+  <p class="note">Clear separation between buying for yourself and giving. No more "I bought a gift, why can't I watch?"</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="wait"><i class="dot"></i>Confirm gift price and bulk tiers (3 / 5 / 10 packs, what discount)<span class="who">Jeremy</span></li>
+    <li data-s="todo"><i class="dot"></i>New fixed-price "Gift a Rental" offer in Kajabi with recipient name, email, message and send date</li>
+    <li data-s="todo"><i class="dot"></i>Stated twice at checkout: this purchase is for your recipient only</li>
+    <li data-s="todo"><i class="dot"></i>"Add a rental for yourself" add-on on the gift checkout</li>
+    <li data-s="todo"><i class="dot"></i>Bulk packs: buy once, then type in your recipients' emails on one simple page</li>
+    <li data-s="todo"><i class="dot"></i>Buyer gets a copy of every gift email plus a self-serve "resend gift email" link</li>
+  </ul>
+</section>
+
+<section data-name="Email">
+  <h2>6 · Email automations</h2>
+  <p class="note">All inside Kajabi, rewritten around the new watch address.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="todo"><i class="dot"></i>Purchase email: big WATCH NOW button, expiry date, device tips, FAQ link</li>
+    <li data-s="todo"><i class="dot"></i>Reminder sequence: 24 h "need help?", day 4 "don't forget", 48 h left, final day</li>
+    <li data-s="todo"><i class="dot"></i>"Haven't started watching?" emails driven by real play data from the portal, not guesses</li>
+  </ul>
+</section>
+
+<section data-name="Ambassadors">
+  <h2>7 · Ambassadors &amp; affiliates</h2>
+  <p class="note">Kajabi's built-in program: personal links and promo codes per ambassador, their own stats dashboard.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="wait"><i class="dot"></i>Confirm the Kajabi plan tier includes affiliates (needs Growth or above)<span class="who">Jeremy</span></li>
+    <li data-s="todo"><i class="dot"></i>Set up the program: commission rate, cookie window, payout cadence</li>
+    <li data-s="todo"><i class="dot"></i>Personal codes for hosts, ambassadors and NGO partners</li>
+  </ul>
+</section>
+
+<section data-name="Subtitles">
+  <h2>8 · New subtitle languages</h2>
+  <p class="note">German, Portuguese, French, Hindi, Nepali, through the same translation workflow used for Dutch and Italian.</p>
+  <div class="secbar"><i></i></div>
+  <ul class="tasks">
+    <li data-s="todo"><i class="dot"></i>Translate and review the five new languages</li>
+    <li data-s="todo"><i class="dot"></i>Load them into the player with a clear language picker</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Open questions</h2>
+  <ul class="qs">
+    <li>Vimeo call outcome: how much runway before the account is restricted?</li>
+    <li>Which Kajabi plan tier is the account on?</li>
+    <li>DNS access for the watch address: who holds the domain?</li>
+    <li>Expected audience size for the August 12 window?</li>
+    <li>Gift pricing: fixed price and bulk tiers?</li>
+    <li>Who staffs support besides Jeremy?</li>
+  </ul>
+</section>
+
+<footer>
+  <span>Between the Mountain and the Sky · platform build</span>
+  <span>Last updated July 6, 2026</span>
+</footer>
+
+</div>
+<script>
+(function(){
+  var days = Math.max(0, Math.ceil((new Date(2026,7,12) - new Date()) / 864e5));
+  document.getElementById('days-left').textContent = days;
+  var all = document.querySelectorAll('ul.tasks li'),
+      done = document.querySelectorAll('ul.tasks li[data-s="done"]').length,
+      pct = all.length ? Math.round(done / all.length * 100) : 0;
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('count').textContent = done + ' / ' + all.length;
+  document.getElementById('overall-fill').style.width = pct + '%';
+  document.querySelectorAll('section[data-name]').forEach(function(s){
+    var t = s.querySelectorAll('ul.tasks li'),
+        d = s.querySelectorAll('ul.tasks li[data-s="done"]').length,
+        f = s.querySelector('.secbar i');
+    if (f && t.length) f.style.width = Math.round(d / t.length * 100) + '%';
+  });
+})();
+</script>
+</body>
+</html>
