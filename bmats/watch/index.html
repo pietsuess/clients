@@ -251,7 +251,7 @@ footer a:hover { text-decoration: underline; }
       <li>Refresh the page and press play again.</li>
       <li>Try another browser. Chrome is the most dependable.</li>
       <li>Full screen and casting tips live in the <a href="https://clients.pietsuess.com/bmats/faq/" target="_blank" rel="noopener">FAQ</a>.</li>
-      <li>Still stuck? Reply to your watch-link email and a real person will sort it out.</li>
+      <li>Still stuck? Email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> and a real person will sort it out.</li>
     </ol>
   </div>
 
@@ -461,6 +461,7 @@ if (player) {
 const HELP = {
   ticketEndpoint: null, // future: https://watch.../api/ticket
   faqUrl: 'https://clients.pietsuess.com/bmats/faq/',
+  supportEmail: 'Hello@MPWRCHANGE.COM', // from Jeremy's FAQ - TECH SUPPORT doc
 };
 
 const TREE = {
@@ -485,12 +486,33 @@ const TREE = {
     opts: [['Leave my details', 'ticket']],
   },
   noplay: {
-    text: 'Three quick fixes solve most playback trouble: refresh the page and press play again, try Chrome if you are in another browser, and if you are on wifi try moving closer to the router. Did one of those work?',
-    opts: [['Playing now', 'solved'], ['Still stuck', 'noplay2']],
+    text: 'Three quick fixes solve most playback trouble: refresh the page and press play again, try a different browser (Chrome and Firefox are the most dependable), and if you are on wifi try moving closer to the router. Did one of those work?',
+    opts: [
+      ['Playing now', 'solved'],
+      ['It says the video cannot play due to privacy issues', 'privacy'],
+      ['It plays, but I cannot get full screen', 'fullscreen'],
+      ['Still stuck', 'noplay2'],
+    ],
   },
   noplay2: {
-    text: 'No problem. Leave your details below and we will send a backup link that plays directly, usually within a few hours.',
+    text: 'No problem, we will make sure you get to watch the film. Leave your details below and we will send a backup link that plays directly, usually within a few hours.',
     opts: [['Leave my details', 'ticket']],
+  },
+  privacy: {
+    text: 'That warning is almost always the browser blocking the player, not your account. First test: open this page in a private or incognito window. Does it play there?',
+    opts: [['Yes, it plays there', 'privacy2'], ['No, same warning', 'noplay2'], ['How do I open one of those?', 'privacy3']],
+  },
+  privacy2: {
+    text: 'Then it is a cookie setting, easy fix. In Chrome: Settings, then Privacy and security, then Third-party cookies, and allow them. In Safari: Settings, then Privacy, and uncheck "Prevent cross-site tracking". Reload this page afterwards.',
+    opts: [['That fixed it', 'solved'], ['Still stuck', 'ticket']],
+  },
+  privacy3: {
+    text: 'In Chrome: the three dots at top right, then "New Incognito window". In Safari: File menu, then "New Private Window". Then open this same page there and press play.',
+    opts: [['It plays there', 'privacy2'], ['Same warning', 'noplay2']],
+  },
+  fullscreen: {
+    text: 'Usually a browser quirk. Try Chrome or Firefox if you are in another browser. Then press the full screen button at the bottom right of the player controls. On a phone, turning it sideways helps too.',
+    opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv: {
     text: 'What are you watching with?',
@@ -506,7 +528,7 @@ const TREE = {
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_cast: {
-    text: 'Press play, then tap the cast icon in the player controls and pick your TV. One caution: some Chromecast models drop subtitles. If yours does, an HDMI cable from a laptop is the sure path. Details in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    text: 'First, make sure your phone and the TV are on the same wifi network; that is the most common snag. Then press play, tap the cast icon in the player controls and pick your TV. One caution: some Chromecast models drop subtitles. If yours does, an HDMI cable from a laptop is the sure path. Details in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_hdmi: {
@@ -603,7 +625,7 @@ const TREE = {
         const q = JSON.parse(localStorage.getItem('bmats_tickets') || '[]');
         q.push(ticket); localStorage.setItem('bmats_tickets', JSON.stringify(q));
       } catch (e) {}
-      bot('Got it, thank you. We will be in touch at <b>' + email + '</b>. If it is urgent, replying to your watch-link email reaches the same people.');
+      bot('Got it, thank you. We will be in touch at <b>' + email + '</b> and we will make sure you get to watch the film. If it is urgent, email <a href="mailto:' + HELP.supportEmail + '">' + HELP.supportEmail + '</a> directly.');
     };
   }
 })();
