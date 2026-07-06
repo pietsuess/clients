@@ -272,9 +272,10 @@ footer a:hover { text-decoration: underline; }
 // this block and the player adapter below should need touching.
 // ============================================================
 const CONFIG = {
-  // Kajabi rental video: the Vimeo file carrying all uploaded language tracks.
-  // (The review tool's video 1175010777 has none; its subs are embedded in that page.)
-  vimeoUrl: 'https://vimeo.com/1100519723',
+  // 1100519723 (Kajabi rental, has all language tracks) is domain-locked to
+  // Kajabi: privacy error here. Either allow this domain in its Vimeo embed
+  // settings, or upload the FULL_FILM SRT set to this video below.
+  vimeoUrl: 'https://vimeo.com/1074813658',
   accessEnd: new Date(2026, 7, 19, 23, 59, 59), // Aug 19 (mock; portal wires the real date)
   resumeKey: 'bmats_watch_position',
   resumeMinSeconds: 60,      // ignore positions earlier than this
