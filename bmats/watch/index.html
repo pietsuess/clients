@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Watch – Between the Mountain and the Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #1a1610; --panel: #241f18; --panel-deep: #16120d; --line: #3a3228;
+  --ink: #e8dcc8; --body: #d4c9b8; --dim: #8a7e6e; --gold: #c4a265;
+  --gold-hover: #d4b275; --error: #c45c4a;
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--body); min-height: 100vh;
+}
+p, li { text-align: justify; text-align-last: left; text-wrap: pretty; }
+
+.page { width: 100%; padding: 0 clamp(20px, 3vw, 48px) 90px; }
+
+/* HEADER */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; padding: 26px 0 22px; flex-wrap: wrap;
+}
+.film-logo { height: 74px; display: block; }
+.access-banner {
+  display: flex; align-items: baseline; gap: 14px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 22px;
+}
+.access-banner .until {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 21px; color: var(--ink); letter-spacing: 0.3px;
+}
+.access-banner .remaining {
+  font-size: 12px; color: var(--gold);
+  text-transform: uppercase; letter-spacing: 2px;
+}
+
+/* RESUME BAR */
+#resume-bar {
+  display: none; align-items: center; gap: 18px;
+  background: var(--panel); border: 1px solid var(--gold);
+  border-radius: 8px; padding: 13px 22px; margin-bottom: 14px;
+}
+#resume-bar.visible { display: flex; flex-wrap: wrap; }
+#resume-bar .msg { font-size: 15px; color: var(--ink); }
+#resume-bar .msg b { color: var(--gold); font-weight: 600; }
+#resume-bar button {
+  padding: 9px 22px; font-size: 12px; font-family: inherit; font-weight: 600;
+  border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px;
+  border: 1px solid var(--gold); background: var(--gold); color: var(--bg);
+}
+#resume-bar button.ghost { background: none; color: var(--dim); border-color: var(--line); }
+#resume-bar button:hover { background: var(--gold-hover); color: var(--bg); }
+#resume-bar button.ghost:hover { background: none; border-color: var(--gold); color: var(--ink); }
+
+/* PLAYER */
+.video-wrap {
+  position: relative; width: 100%; min-height: 200px;
+  background: #000; border-radius: 10px; overflow: hidden;
+}
+.video-wrap iframe { border: 0; }
+#player-fallback {
+  position: absolute; inset: 0; display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; text-align: center; padding: 30px;
+}
+#player-fallback.visible { display: flex; }
+#player-fallback .big { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; color: var(--ink); }
+#player-fallback .small { font-size: 14px; color: var(--dim); max-width: 460px; }
+
+/* SUBTITLE ROW */
+.subs-row {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 14px; flex-wrap: wrap;
+}
+.subs-row .lbl {
+  font-size: 12px; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 2px; flex: none;
+}
+.lang-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.lang-tab {
+  padding: 8px 16px; font-size: 13px; font-family: inherit; font-weight: 500;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  color: var(--dim); cursor: pointer; transition: all 0.15s;
+}
+.lang-tab:hover { border-color: var(--gold); color: var(--body); }
+.lang-tab.active { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+#subs-note { font-size: 13px; color: var(--dim); }
+#subs-note.warn { color: var(--error); }
+
+/* INFO GRID */
+.info-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-top: 40px;
+}
+@media (max-width: 1100px) { .info-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .info-grid { grid-template-columns: 1fr; } }
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; padding: 24px 24px 22px;
+}
+.card h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500;
+  font-size: clamp(22px, 1.8vw, 27px); color: var(--ink);
+  margin-bottom: 12px; line-height: 1.2;
+}
+.card p { font-size: 14px; line-height: 1.65; margin-bottom: 10px; }
+.card p:last-child { margin-bottom: 0; }
+.card .k { color: var(--gold); font-weight: 600; }
+.card ol { padding-left: 18px; }
+.card ol li { font-size: 14px; line-height: 1.65; padding: 3px 0; }
+.card a { color: var(--gold); text-decoration: none; }
+.card a:hover { color: var(--gold-hover); text-decoration: underline; }
+.pill {
+  display: inline-block; font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  border: 1px solid var(--gold); color: var(--gold);
+  border-radius: 20px; padding: 3px 12px; margin-bottom: 12px;
+}
+.tv-note { font-size: 12.5px; color: var(--dim); font-style: italic; }
+
+footer {
+  margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  font-size: 13px; color: var(--dim);
+}
+footer a { color: var(--gold); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* CHAT HELPER */
+#chat-btn {
+  position: fixed; right: 26px; bottom: 26px; z-index: 90;
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 22px; border-radius: 30px; border: 1px solid var(--gold);
+  background: var(--gold); color: var(--bg); cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.45);
+}
+#chat-btn:hover { background: var(--gold-hover); }
+#chat-btn svg { width: 17px; height: 17px; stroke: var(--bg); fill: none; stroke-width: 2; }
+#chat-panel {
+  position: fixed; right: 26px; bottom: 26px; z-index: 95;
+  width: 390px; max-width: calc(100vw - 40px); height: 540px; max-height: calc(100vh - 60px);
+  display: none; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+}
+#chat-panel.open { display: flex; }
+.chat-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 20px; border-bottom: 1px solid var(--line); background: var(--panel-deep);
+}
+.chat-head .t { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 20px; color: var(--ink); }
+.chat-head button {
+  background: none; border: none; color: var(--dim); cursor: pointer;
+  font-family: inherit; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px;
+}
+.chat-head button:hover { color: var(--ink); }
+#chat-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.msg-bot, .msg-user {
+  max-width: 85%; padding: 11px 15px; border-radius: 12px;
+  font-size: 14px; line-height: 1.55; text-align: left; text-align-last: left;
+}
+.msg-bot { background: var(--panel-deep); border: 1px solid var(--line); color: var(--body); align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg-bot a { color: var(--gold); }
+.msg-user { background: var(--gold); color: var(--bg); align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+.chat-opts { display: flex; flex-direction: column; gap: 6px; align-self: stretch; padding-top: 2px; }
+.chat-opts button {
+  padding: 10px 14px; text-align: left; font-family: inherit; font-size: 13.5px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  color: var(--body); cursor: pointer; transition: all 0.15s;
+}
+.chat-opts button:hover { border-color: var(--gold); color: var(--ink); }
+.chat-form { display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
+.chat-form input, .chat-form textarea {
+  width: 100%; padding: 11px 14px; font-family: inherit; font-size: 14px;
+  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink); outline: none; resize: vertical;
+}
+.chat-form input:focus, .chat-form textarea:focus { border-color: var(--gold); }
+.chat-form button {
+  align-self: flex-start; padding: 10px 24px; font-family: inherit; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.5px; border: none; border-radius: 8px;
+  background: var(--gold); color: var(--bg); cursor: pointer;
+}
+.chat-form button:hover { background: var(--gold-hover); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+  <div class="access-banner">
+    <span class="until">Access until <span id="access-date">August 19</span></span>
+    <span class="remaining" id="access-remaining"></span>
+  </div>
+</header>
+
+<div id="resume-bar">
+  <span class="msg">Welcome back. You were at <b id="resume-time"></b>.</span>
+  <button id="resume-btn">Resume</button>
+  <button class="ghost" id="startover-btn">Start over</button>
+</div>
+
+<div class="video-wrap">
+  <div id="vimeo-player"></div>
+  <div id="player-fallback">
+    <div class="big">The player did not load</div>
+    <div class="small">Refresh the page, or try a different browser such as Chrome. If it still will not play, see Having Trouble below.</div>
+  </div>
+</div>
+
+<div class="subs-row">
+  <span class="lbl">Subtitles</span>
+  <div class="lang-tabs" id="lang-tabs"></div>
+  <span id="subs-note"></span>
+</div>
+
+<div class="info-grid">
+
+  <div class="card" id="tv-card">
+    <h2>Watch on your TV</h2>
+    <div id="tv-methods"></div>
+    <p class="tv-note">An HDMI cable from your computer to the TV is the most reliable way, every time. Any inexpensive cable works.</p>
+  </div>
+
+  <div class="card">
+    <h2>Subtitles</h2>
+    <p>Pick your language in the row under the film, or use the <span class="k">CC</span> button inside the player. Your choice sticks for the whole film.</p>
+    <p>Casting to a TV with Chromecast can drop subtitles on some models. If that happens, AirPlay or an HDMI cable carries them reliably.</p>
+  </div>
+
+  <div class="card">
+    <h2>Your rental</h2>
+    <p>Your access runs until <span class="k" id="access-date-2">August 19</span>. Watch as many times as you like before then, on any device.</p>
+    <p>The film remembers where you stopped and offers to pick up there when you come back, on this device.</p>
+  </div>
+
+  <div class="card">
+    <h2>Having trouble?</h2>
+    <ol>
+      <li>Refresh the page and press play again.</li>
+      <li>Try another browser. Chrome is the most dependable.</li>
+      <li>Full screen and casting tips live in the <a href="https://clients.pietsuess.com/bmats/faq/" target="_blank" rel="noopener">FAQ</a>.</li>
+      <li>Still stuck? Reply to your watch-link email and a real person will sort it out.</li>
+    </ol>
+  </div>
+
+</div>
+
+<footer>
+  <span>Between the Mountain and the Sky</span>
+  <span>Help carry it forward: <a href="https://betweenthemountain.com/impact" target="_blank" rel="noopener">BetweenTheMountain.com/impact</a></span>
+</footer>
+
+</div>
+
+<script src="https://player.vimeo.com/api/player.js"></script>
+<script>
+// ============================================================
+// CONFIG
+// Interim: Vimeo embed. Swaps to Cloudflare Stream later; only
+// this block and the player adapter below should need touching.
+// ============================================================
+const CONFIG = {
+  vimeoUrl: 'https://vimeo.com/1074813658',
+  accessEnd: new Date(2026, 7, 19, 23, 59, 59), // Aug 19 (mock; portal wires the real date)
+  resumeKey: 'bmats_watch_position',
+  resumeMinSeconds: 60,      // ignore positions earlier than this
+  resumeEndBuffer: 120,      // ignore positions within this many seconds of the end
+};
+
+// ============================================================
+// ACCESS BANNER (portal supplies real dates later)
+// ============================================================
+(function () {
+  const days = Math.ceil((CONFIG.accessEnd - new Date()) / 864e5);
+  const el = document.getElementById('access-remaining');
+  if (days > 1) el.textContent = days + ' days remaining';
+  else if (days === 1) el.textContent = 'last day';
+  else { el.textContent = 'expired'; el.style.color = 'var(--error)'; }
+})();
+
+// ============================================================
+// DEVICE-ORDERED TV INSTRUCTIONS
+// ============================================================
+(function () {
+  const ua = navigator.userAgent;
+  const isApple = /iPhone|iPad|Macintosh/.test(ua);
+  const methods = {
+    airplay: '<p><span class="k">AirPlay</span> (iPhone, iPad, Mac + Apple TV): press play, tap the AirPlay icon in the player controls, pick your TV. Subtitles come along.</p>',
+    chromecast: '<p><span class="k">Chromecast</span> (Android + Google TV): press play, tap the cast icon in the player controls, pick your TV. If subtitles vanish on the TV, switch to HDMI.</p>',
+    hdmi: '<p><span class="k">HDMI</span> (any laptop, any TV): plug the cable in, switch the TV to that input, press play and go full screen.</p>',
+  };
+  const order = isApple ? ['airplay', 'chromecast', 'hdmi'] : ['chromecast', 'airplay', 'hdmi'];
+  document.getElementById('tv-methods').innerHTML = order.map(k => methods[k]).join('');
+})();
+
+// ============================================================
+// PLAYER (Vimeo adapter)
+// ============================================================
+let player;
+try {
+  player = new Vimeo.Player('vimeo-player', {
+    url: CONFIG.vimeoUrl,
+    responsive: true,
+    byline: false, title: false, portrait: false,
+  });
+} catch (e) {
+  document.getElementById('player-fallback').classList.add('visible');
+}
+
+const failTimer = setTimeout(() => {
+  document.getElementById('player-fallback').classList.add('visible');
+}, 12000);
+
+// ============================================================
+// SUBTITLES: native text tracks, enumerated from the video
+// ============================================================
+const LABELS = {
+  'en': 'English', 'en-ca': 'English CC', 'en-us': 'English',
+  'nl': 'Dutch', 'it': 'Italian', 'fr': 'French', 'hi': 'Hindi',
+  'es': 'Spanish', 'es-419': 'Spanish LatAm', 'es-mx': 'Spanish LatAm',
+  'pt': 'Portuguese', 'pt-br': 'Portuguese BR', 'de': 'German', 'ne': 'Nepali',
+};
+
+function buildTabs(tracks) {
+  const wrap = document.getElementById('lang-tabs');
+  const note = document.getElementById('subs-note');
+  wrap.innerHTML = '';
+  if (!tracks.length) {
+    note.textContent = 'No subtitle tracks are loaded on this video yet.';
+    note.className = 'warn';
+    return;
+  }
+  note.textContent = '';
+  const savedLang = localStorage.getItem('bmats_watch_lang');
+
+  const off = document.createElement('button');
+  off.className = 'lang-tab'; off.textContent = 'Off';
+  off.onclick = () => {
+    player.disableTextTrack();
+    setActive(off);
+    localStorage.setItem('bmats_watch_lang', 'off');
+  };
+  wrap.appendChild(off);
+
+  tracks.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'lang-tab';
+    b.textContent = LABELS[t.language.toLowerCase()] || t.label || t.language;
+    b.dataset.lang = t.language;
+    b.onclick = () => {
+      player.enableTextTrack(t.language).then(() => {
+        setActive(b);
+        localStorage.setItem('bmats_watch_lang', t.language);
+      }).catch(() => {});
+    };
+    wrap.appendChild(b);
+    if (t.mode === 'showing' && (!savedLang || savedLang === t.language)) setActive(b);
+  });
+
+  if (savedLang && savedLang !== 'off') {
+    const btn = wrap.querySelector('[data-lang="' + savedLang + '"]');
+    if (btn) btn.click();
+  } else if (savedLang === 'off') {
+    off.click();
+  } else if (!wrap.querySelector('.active')) {
+    const en = wrap.querySelector('[data-lang^="en"]');
+    if (en) en.click(); else setActive(off);
+  }
+}
+
+function setActive(btn) {
+  document.querySelectorAll('.lang-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ============================================================
+// RESUME (localStorage now; D1 server-side later)
+// ============================================================
+let duration = 0;
+let lastSaved = 0;
+
+function offerResume() {
+  const pos = parseFloat(localStorage.getItem(CONFIG.resumeKey) || '0');
+  if (pos < CONFIG.resumeMinSeconds) return;
+  if (duration && pos > duration - CONFIG.resumeEndBuffer) return;
+  const h = Math.floor(pos / 3600), m = Math.floor((pos % 3600) / 60), s = Math.floor(pos % 60);
+  document.getElementById('resume-time').textContent =
+    (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  document.getElementById('resume-bar').classList.add('visible');
+  document.getElementById('resume-btn').onclick = () => {
+    player.setCurrentTime(pos).then(() => player.play()).catch(() => {});
+    document.getElementById('resume-bar').classList.remove('visible');
+  };
+  document.getElementById('startover-btn').onclick = () => {
+    localStorage.removeItem(CONFIG.resumeKey);
+    document.getElementById('resume-bar').classList.remove('visible');
+  };
+}
+
+if (player) {
+  player.ready().then(() => {
+    clearTimeout(failTimer);
+    return Promise.all([player.getTextTracks(), player.getDuration()]);
+  }).then(([tracks, d]) => {
+    duration = d || 0;
+    buildTabs(tracks || []);
+    offerResume();
+  }).catch(() => {
+    clearTimeout(failTimer);
+    document.getElementById('player-fallback').classList.add('visible');
+  });
+
+  player.on('timeupdate', data => {
+    if (data.seconds - lastSaved >= 5 || data.seconds < lastSaved) {
+      lastSaved = data.seconds;
+      localStorage.setItem(CONFIG.resumeKey, String(data.seconds));
+    }
+  });
+
+  player.on('ended', () => localStorage.removeItem(CONFIG.resumeKey));
+}
+</script>
+
+<!-- CHAT HELPER -->
+<button id="chat-btn" aria-label="Open help">
+  <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  Need help?
+</button>
+<div id="chat-panel">
+  <div class="chat-head">
+    <span class="t">Film help</span>
+    <div>
+      <button id="chat-restart">Restart</button>
+      <button id="chat-close">Close</button>
+    </div>
+  </div>
+  <div id="chat-log"></div>
+</div>
+
+<script>
+// ============================================================
+// CHAT HELPER: pure front-end decision tree, no third parties.
+// Edit answers in TREE below. When the support Worker exists,
+// set HELP.ticketEndpoint and tickets file to the database
+// instead of the email fallback.
+// ============================================================
+const HELP = {
+  ticketEndpoint: null, // future: https://watch.../api/ticket
+  faqUrl: 'https://clients.pietsuess.com/bmats/faq/',
+};
+
+const TREE = {
+  start: {
+    text: 'Hello. What do you need a hand with?',
+    opts: [
+      ['I did not get my watch link', 'nolink'],
+      ['The film will not play', 'noplay'],
+      ['Getting it onto my TV', 'tv'],
+      ['Subtitles', 'subs'],
+      ['A gift question', 'gift'],
+      ['Payment or receipt', 'pay'],
+      ['Something else', 'ticket'],
+    ],
+  },
+  nolink: {
+    text: 'First, check your spam or promotions folder for an email from Between the Mountain and the Sky. Also try searching your inbox for "mountain". Any luck?',
+    opts: [['Found it, thanks', 'solved'], ['Still nothing', 'nolink2']],
+  },
+  nolink2: {
+    text: 'Soon this helper will re-send your link by itself. Until then, leave your details below and a real person will send it over.',
+    opts: [['Leave my details', 'ticket']],
+  },
+  noplay: {
+    text: 'Three quick fixes solve most playback trouble: refresh the page and press play again, try Chrome if you are in another browser, and if you are on wifi try moving closer to the router. Did one of those work?',
+    opts: [['Playing now', 'solved'], ['Still stuck', 'noplay2']],
+  },
+  noplay2: {
+    text: 'No problem. Leave your details below and we will send a backup link that plays directly, usually within a few hours.',
+    opts: [['Leave my details', 'ticket']],
+  },
+  tv: {
+    text: 'What are you watching with?',
+    opts: [
+      ['Apple TV, iPhone, iPad or Mac', 'tv_apple'],
+      ['Chromecast or Google TV', 'tv_cast'],
+      ['A laptop and a cable', 'tv_hdmi'],
+      ['A smart TV browser', 'tv_smart'],
+    ],
+  },
+  tv_apple: {
+    text: 'Press play on the film, then tap the AirPlay icon in the player controls and pick your TV. Subtitles come along. If the icon does not appear, make sure the phone or laptop is on the same wifi as the Apple TV. More detail with pictures is in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
+  },
+  tv_cast: {
+    text: 'Press play, then tap the cast icon in the player controls and pick your TV. One caution: some Chromecast models drop subtitles. If yours does, an HDMI cable from a laptop is the sure path. Details in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
+  },
+  tv_hdmi: {
+    text: 'The most reliable way there is. Plug the cable into the laptop and the TV, switch the TV to that HDMI input, press play and go full screen. Any inexpensive HDMI cable works; newer Macs and many laptops need a small USB-C to HDMI adapter.',
+    opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
+  },
+  tv_smart: {
+    text: 'Honest answer: TV browsers are the least reliable way to watch, and we steer people away from them. AirPlay, Chromecast or an HDMI cable from a laptop will treat you far better.',
+    opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
+  },
+  subs: {
+    text: 'Pick your language in the row just under the film, or use the CC button inside the player. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay and HDMI carry them reliably.',
+    opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
+  },
+  gift: {
+    text: 'A gift purchase gives access to the person it was sent to, not the buyer. If your recipient never got their gift email, or you meant to buy for yourself, leave your details and we will set it right.',
+    opts: [['Leave my details', 'ticket'], ['That answered it', 'solved']],
+  },
+  pay: {
+    text: 'Payments and receipts are handled at the checkout, and the receipt email comes from there too. Check spam for it first. For anything else about a charge, leave your details below.',
+    opts: [['Leave my details', 'ticket'], ['Found it', 'solved']],
+  },
+  solved: {
+    text: 'Good. Enjoy the film.',
+    opts: [['Back to the start', 'start']],
+  },
+};
+
+(function () {
+  const btn = document.getElementById('chat-btn');
+  const panel = document.getElementById('chat-panel');
+  const log = document.getElementById('chat-log');
+  let path = [];
+
+  btn.onclick = () => { panel.classList.add('open'); btn.style.display = 'none'; if (!log.children.length) go('start'); };
+  document.getElementById('chat-close').onclick = () => { panel.classList.remove('open'); btn.style.display = 'flex'; };
+  document.getElementById('chat-restart').onclick = () => { log.innerHTML = ''; path = []; go('start'); };
+
+  function bot(html) {
+    const d = document.createElement('div');
+    d.className = 'msg-bot'; d.innerHTML = html;
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+  }
+  function user(text) {
+    const d = document.createElement('div');
+    d.className = 'msg-user'; d.textContent = text;
+    log.appendChild(d);
+  }
+  function clearOpts() { log.querySelectorAll('.chat-opts, .chat-form').forEach(e => e.remove()); }
+
+  function go(key) {
+    if (key === 'ticket') return ticketForm();
+    const node = TREE[key];
+    path.push(key);
+    bot(node.text);
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-opts';
+    node.opts.forEach(([label, next]) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.onclick = () => { clearOpts(); user(label); go(next); };
+      wrap.appendChild(b);
+    });
+    log.appendChild(wrap); log.scrollTop = log.scrollHeight;
+  }
+
+  function ticketForm() {
+    bot('Leave your email and a line about what happened. A real person reads every one of these.');
+    const f = document.createElement('div');
+    f.className = 'chat-form';
+    f.innerHTML = '<input type="email" id="tk-email" placeholder="Your email">' +
+      '<textarea id="tk-msg" rows="3" placeholder="What happened?"></textarea>' +
+      '<button id="tk-send">Send</button>';
+    log.appendChild(f); log.scrollTop = log.scrollHeight;
+    f.querySelector('#tk-send').onclick = async () => {
+      const email = f.querySelector('#tk-email').value.trim();
+      const msg = f.querySelector('#tk-msg').value.trim();
+      if (!email || !msg) { bot('Both fields, please.'); return; }
+      const ticket = {
+        email, msg, path: path.join(' > '),
+        page: location.href, ua: navigator.userAgent,
+        at: new Date().toISOString(),
+      };
+      clearOpts(); user(msg);
+      if (HELP.ticketEndpoint) {
+        try {
+          await fetch(HELP.ticketEndpoint, { method: 'POST', body: JSON.stringify(ticket) });
+          bot('Got it. We will be in touch at ' + email + ', usually the same day.');
+          return;
+        } catch (e) { /* fall through */ }
+      }
+      // Demo fallback until the support database exists: keep it recoverable locally.
+      try {
+        const q = JSON.parse(localStorage.getItem('bmats_tickets') || '[]');
+        q.push(ticket); localStorage.setItem('bmats_tickets', JSON.stringify(q));
+      } catch (e) {}
+      bot('Got it, thank you. We will be in touch at <b>' + email + '</b>. If it is urgent, replying to your watch-link email reaches the same people.');
+    };
+  }
+})();
+</script>
+</body>
+</html>
