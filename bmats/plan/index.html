@@ -8,12 +8,13 @@
 <style>
   :root{
     --bg:#0e1116; --panel:#161b23; --line:#242c38; --ink:#e8e4da; --dim:#8b93a1;
-    --accent:#d9a441; --done:#5fae6e; --active:#d9a441; --next:#5b87b8; --wait:#a06fb4; --todo:#4a5261;
+    --accent:#d9a441; --done:#5fae6e; --active:#d9a441; --next:#5b87b8; --wait:#a06fb4; --todo:#4a5261; --over:#c96f5a;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:0 20px 80px}
   .wrap{max-width:880px;margin:0 auto}
   p,li{text-align:justify;text-align-last:left;text-wrap:pretty}
+  h2{font-family:Georgia,"Times New Roman",serif;font-weight:400}
 
   header{padding:56px 0 8px;border-bottom:1px solid var(--line)}
   .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
@@ -35,8 +36,71 @@
   .d-next{background:var(--next)} .d-wait{background:var(--wait)}
   .d-todo{background:none;border:1.5px solid var(--todo)}
 
+  /* viewer journey */
+  .journey{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px}
+  .journey div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 16px 14px}
+  .journey .n{font-family:Georgia,serif;font-size:26px;color:var(--accent);line-height:1;margin-bottom:8px}
+  .journey h3{font-size:15px;font-weight:600;margin-bottom:4px}
+  .journey p{font-size:13.5px;color:var(--dim);line-height:1.5}
+  @media(max-width:640px){.journey{grid-template-columns:1fr}}
+
+  .decisions{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px 22px;margin-top:28px}
+  .decisions h2{font-size:19px;margin-bottom:10px}
+  .decisions li{list-style:none;padding:6px 0;font-size:14.5px;border-bottom:1px solid var(--line)}
+  .decisions li:last-child{border-bottom:none}
+  .decisions .d{color:var(--accent);font-size:12.5px;margin-right:8px;white-space:nowrap}
+
+  /* money */
+  .money{margin-top:44px}
+  .money h2{font-size:22px;margin-bottom:4px}
+  .money .note{color:var(--dim);font-size:14px;margin-bottom:18px}
+  .hbars{display:grid;gap:14px;margin:20px 0 8px}
+  .hbar .t{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px}
+  .hbar .t b{font-weight:600}
+  .hbar .rail{height:14px;background:var(--line);border-radius:7px;overflow:hidden}
+  .hbar .rail i{display:block;height:100%;border-radius:7px}
+  .cap-note{font-size:13px;color:var(--dim);margin-top:10px}
+
+  table.spend{width:100%;border-collapse:collapse;margin-top:22px;font-size:14.5px}
+  table.spend th{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  table.spend td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.spend td:nth-child(2),table.spend td:nth-child(3),table.spend th:nth-child(2),table.spend th:nth-child(3){text-align:right;white-space:nowrap}
+  table.spend .gone{color:var(--done)}
+  table.spend .est{color:var(--dim);font-size:12px}
+  table.spend tr.total td{border-bottom:none;border-top:2px solid var(--line);font-weight:600}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .chips span{border:1px solid var(--line);border-radius:20px;padding:4px 14px;font-size:13px;color:var(--dim)}
+  .chips .keep{border-color:var(--done);color:var(--ink)}
+  .chips .add{border-color:var(--next);color:var(--ink)}
+  .chips .drop{text-decoration:line-through}
+
+  /* bandwidth chart */
+  .bw{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 18px 12px}
+  .bw h3{font-size:14px;font-weight:600;margin-bottom:2px}
+  .bw .cap-note{margin:2px 0 14px}
+  .bwchart{position:relative;height:140px;display:flex;align-items:flex-end;gap:4px;padding-bottom:2px}
+  .bwchart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+  .bwchart .col i{display:block;background:var(--over);border-radius:2px 2px 0 0;min-height:2px}
+  .bwchart .col.ok i{background:var(--todo)}
+  .capline{position:absolute;left:0;right:0;bottom:calc(5.6% + 2px);border-top:1px dashed var(--accent)}
+  .capline em{position:absolute;right:0;bottom:3px;font-style:normal;font-size:11px;color:var(--accent);background:var(--panel);padding-left:6px}
+  .bwlabels{display:flex;gap:4px;margin-top:6px}
+  .bwlabels span{flex:1;text-align:center;font-size:10.5px;color:var(--dim)}
+
+  /* timeline */
+  .timeline{margin-top:44px}
+  .timeline h2{font-size:22px;margin-bottom:14px}
+  .tl{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:6px}
+  .tl div{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 10px 9px}
+  .tl .w{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  .tl b{display:block;font-size:13px;font-weight:600;margin-top:3px;line-height:1.35}
+  .tl .ev{background:none;border:1px solid var(--accent);text-align:center;display:flex;flex-direction:column;justify-content:center;padding:10px 14px}
+  .tl .ev .w{color:var(--accent)}
+  .tl .ev b{color:var(--accent)}
+  @media(max-width:700px){.tl{grid-template-columns:1fr 1fr}.tl .ev{grid-column:span 2}}
+
   section{margin-top:44px}
-  section>h2{font-family:Georgia,serif;font-weight:400;font-size:22px;margin-bottom:4px}
+  section>h2{font-size:22px;margin-bottom:4px}
   section>.note{color:var(--dim);font-size:14px;margin-bottom:14px}
   .secbar{height:3px;background:var(--line);border-radius:2px;margin:0 0 16px;overflow:hidden}
   .secbar i{display:block;height:100%;background:var(--done);width:0}
@@ -44,17 +108,8 @@
   ul.tasks{list-style:none}
   ul.tasks li{display:flex;gap:12px;align-items:baseline;padding:9px 12px;border-bottom:1px solid var(--line);font-size:15px}
   ul.tasks li:last-child{border-bottom:none}
-  ul.tasks .dot{position:relative;top:0}
   ul.tasks li[data-s="done"]{color:var(--dim)}
-  ul.tasks li[data-s="done"] .who{opacity:.6}
   .who{margin-left:auto;flex:none;font-size:12px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;padding-left:14px}
-  .tag{font-size:12px;color:var(--accent)}
-
-  .decisions{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px 22px;margin-top:20px}
-  .decisions h2{font-family:Georgia,serif;font-weight:400;font-size:19px;margin-bottom:10px}
-  .decisions li{list-style:none;padding:6px 0;font-size:14.5px;border-bottom:1px solid var(--line)}
-  .decisions li:last-child{border-bottom:none}
-  .decisions .d{color:var(--accent);font-size:12.5px;margin-right:8px;white-space:nowrap}
 
   .qs li{list-style:none;padding:7px 0 7px 18px;position:relative;font-size:15px}
   .qs li::before{content:"";position:absolute;left:0;top:15px;width:8px;height:8px;border:1.5px solid var(--wait);border-radius:50%}
@@ -71,7 +126,7 @@
   <p class="sub">One page for the whole build. Statuses update as work lands. Questions to Piet.</p>
   <div class="event">
     <div><strong id="days-left">—</strong>days to event</div>
-    <div><strong>Aug 12</strong>next screening event</div>
+    <div><strong>Aug 12–19</strong>global screening</div>
     <div><strong id="pct">0%</strong>tasks complete</div>
   </div>
   <div class="overall">
@@ -85,23 +140,106 @@
     <span><i class="dot d-wait"></i>Waiting on someone</span>
     <span><i class="dot d-todo"></i>Planned</span>
   </div>
+
+  <div class="journey">
+    <div><div class="n">1</div><h3>Buy, or receive a gift</h3><p>Checkout as today, or a gift email with your name on it. Clear in both cases who gets to watch.</p></div>
+    <div><div class="n">2</div><h3>Click your watch link</h3><p>No password, no account setup. One emailed link, plus a 6-digit code that works anywhere the link doesn't.</p></div>
+    <div><div class="n">3</div><h3>Watch, anywhere</h3><p>Any device, pick your subtitles, pause and resume later. Clear help for getting it onto the TV.</p></div>
+  </div>
 </header>
 
 <div class="decisions">
   <h2>Decisions made</h2>
   <ul>
     <li><span class="d">Jul 6</span>Kajabi stays as the store and email system. We build a custom watch experience around it instead of fighting its limits.</li>
-    <li><span class="d">Jul 6</span>Viewers will log in with an emailed watch link plus a 6-digit code. No more passwords for watching the film.</li>
-    <li><span class="d">Jul 6</span>Video delivery moves from Vimeo to Cloudflare Stream. Current usage (about 205 TB in the last year) is far past Vimeo's 2 TB monthly limit; Stream handles the same traffic for a few thousand dollars a year instead of an Enterprise contract, with stronger per-viewer link protection.</li>
+    <li><span class="d">Jul 6</span>Viewers log in with an emailed watch link plus a 6-digit code. No more passwords for watching the film.</li>
+    <li><span class="d">Jul 6</span>Video delivery moves from Vimeo to Cloudflare Stream: pay-per-view delivery with per-viewer protected links, instead of a forced Enterprise contract.</li>
     <li><span class="d">Jul 6</span>The small Vimeo account stays alive only as the source of backup links for support.</li>
     <li><span class="d">Jul 6</span>Gifting gets its own fixed-price offer. Kajabi cannot attach gifts to pay-what-you-want checkout, which is why gifting has been confusing.</li>
+    <li><span class="d">Jul 6</span>The main website gets rebuilt custom (off Squarespace) and the mailing list moves from Mailchimp into Kajabi, once the critical path is done.</li>
   </ul>
+</div>
+
+<div class="money">
+  <h2>Where the money goes</h2>
+  <p class="note">Yearly cost of running the platform, not counting Kajabi (unchanged on both sides). The middle bar is what happens if we stay put: Vimeo's usage policy forces a custom Enterprise contract.</p>
+  <div class="hbars">
+    <div class="hbar">
+      <div class="t"><span>Staying on Vimeo (forced Enterprise contract)</span><b>~$24,000 / yr</b></div>
+      <div class="rail"><i style="width:100%;background:var(--over)"></i></div>
+    </div>
+    <div class="hbar">
+      <div class="t"><span>Today's subscriptions (over the limit, on borrowed time)</span><b>~$4,000 / yr</b></div>
+      <div class="rail"><i style="width:17%;background:var(--dim)"></i></div>
+    </div>
+    <div class="hbar">
+      <div class="t"><span>New stack</span><b>~$3,600 / yr</b></div>
+      <div class="rail"><i style="width:15%;background:var(--done)"></i></div>
+    </div>
+  </div>
+  <table class="spend">
+    <tr><th>Service</th><th>Today</th><th>After</th></tr>
+    <tr><td>Squarespace (website)</td><td>~$35 /mo <span class="est">est.</span></td><td class="gone">$0 — rebuilt custom</td></tr>
+    <tr><td>Mailchimp (mailing list)</td><td>~$250 /mo <span class="est">est.</span></td><td class="gone">$0 — folds into Kajabi</td></tr>
+    <tr><td>Vimeo (video delivery)</td><td>~$50 /mo <span class="est">est.</span></td><td>~$20 /mo — backup links only</td></tr>
+    <tr><td>Cloudflare (site, portal, support)</td><td>—</td><td>$5 /mo</td></tr>
+    <tr><td>Video delivery (Cloudflare Stream)</td><td>—</td><td>pay-per-view, ~$250 /mo averaged <span class="est">scales with viewers, near zero in quiet months</span></td></tr>
+    <tr><td>Watch-link courier (Postmark)</td><td>—</td><td>$15–50 /mo in event months</td></tr>
+    <tr><td>Kajabi (store, email, affiliates)</td><td>current plan</td><td>unchanged</td></tr>
+    <tr class="total"><td>Total besides Kajabi</td><td>~$335 /mo</td><td>~$300 /mo</td></tr>
+  </table>
+  <p class="cap-note">Lines marked est. get trued up once current plan tiers are confirmed. The real saving is the top bar: the ~$20,000-a-year contract that never gets signed.</p>
+  <div class="chips">
+    <span class="keep">Keeping — Kajabi</span>
+    <span class="keep">Keeping — Cloudflare</span>
+    <span class="add">Adding — Postmark (watch links)</span>
+    <span class="drop">Squarespace</span>
+    <span class="drop">Mailchimp</span>
+    <span class="drop">Vimeo (backup stub only)</span>
+  </div>
+</div>
+
+<div class="timeline">
+  <h2>The road to August 12</h2>
+  <div class="tl">
+    <div><span class="w">Week 1</span><b>Foundations: purchases flowing, watch links working</b></div>
+    <div><span class="w">Week 2</span><b>Watch page: countdown, resume, friendly errors</b></div>
+    <div><span class="w">Week 3</span><b>FAQ, TV instructions, chat helper, admin page</b></div>
+    <div><span class="w">Week 4</span><b>Gifting fixed, emails rewritten</b></div>
+    <div><span class="w">Week 5</span><b>Device testing, soft launch, freeze</b></div>
+    <div class="ev"><span class="w">Aug 12–19</span><b>Event</b></div>
+  </div>
 </div>
 
 <section data-name="Video delivery">
   <h2>1 · Video delivery (Cloudflare Stream)</h2>
   <p class="note">The foundation. Everything else plugs into this.</p>
   <div class="secbar"><i></i></div>
+
+  <div class="bw">
+    <h3>Why we're moving: a year of Vimeo bandwidth</h3>
+    <p class="cap-note">Each bar is one month of viewing traffic. The dashed line near the bottom is Vimeo's entire monthly allowance.</p>
+    <div class="bwchart">
+      <div class="capline"><em>2 TB limit</em></div>
+      <div class="col"><i style="height:30.1%"></i></div>
+      <div class="col ok"><i style="height:0.6%"></i></div>
+      <div class="col ok"><i style="height:2.9%"></i></div>
+      <div class="col ok"><i style="height:0.8%"></i></div>
+      <div class="col"><i style="height:62.7%"></i></div>
+      <div class="col"><i style="height:95%"></i></div>
+      <div class="col"><i style="height:100%"></i></div>
+      <div class="col ok"><i style="height:0.7%"></i></div>
+      <div class="col"><i style="height:67.8%"></i></div>
+      <div class="col"><i style="height:54.4%"></i></div>
+      <div class="col"><i style="height:98.8%"></i></div>
+      <div class="col"><i style="height:62.5%"></i></div>
+    </div>
+    <div class="bwlabels">
+      <span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+    </div>
+    <p class="cap-note">205 TB streamed in twelve months against a 2 TB-a-month plan. Event months run ten to eighteen times over the line, which is why Vimeo called.</p>
+  </div>
+
   <ul class="tasks">
     <li data-s="done"><i class="dot"></i>Pull the Vimeo bandwidth report and confirm real usage<span class="who">Done · Jul 6</span></li>
     <li data-s="wait"><i class="dot"></i>Vimeo call: find out how long before the account is restricted (sets our migration deadline)<span class="who">Jeremy</span></li>
@@ -118,7 +256,7 @@
   <p class="note">One address for everything: watch link in, film plays, no passwords. This becomes the only link we ever send people.</p>
   <div class="secbar"><i></i></div>
   <ul class="tasks">
-    <li data-s="wait"><i class="dot"></i>New Cloudflare account owned by BMATS (team email, card, invite Piet as admin)<span class="who">Jeremy</span></li>
+    <li data-s="next"><i class="dot"></i>New Cloudflare account for BMATS: Piet creates it and builds there, Jeremy invited with full access; the film's card goes on billing before video traffic starts<span class="who">Piet</span></li>
     <li data-s="wait"><i class="dot"></i>Move the domain's DNS into that account: main Squarespace site stays exactly as-is, and we gain watch.betweenthemountainandthesky.com<span class="who">Jeremy + Piet</span></li>
     <li data-s="todo"><i class="dot"></i>WATCH and SUPPORT buttons on the main site point to the portal; portal styled to match the main site</li>
     <li data-s="todo"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database</li>
@@ -148,7 +286,7 @@
   <p class="note">The chat helper solves the repetitive stuff automatically; everything else lands in one organized place instead of Jeremy's inbox.</p>
   <div class="secbar"><i></i></div>
   <ul class="tasks">
-    <li data-s="todo"><i class="dot"></i>Chat helper on every page, including the main Squarespace site: can't log in / no email / won't play / TV trouble / gift / payment</li>
+    <li data-s="todo"><i class="dot"></i>Chat helper on every page, including the main site: can't log in / no email / won't play / TV trouble / gift / payment</li>
     <li data-s="todo"><i class="dot"></i>"Didn't get your watch link?" resolves itself: the helper re-sends it automatically</li>
     <li data-s="todo"><i class="dot"></i>Helper collects email, device and an optional screenshot before a ticket is filed</li>
     <li data-s="todo"><i class="dot"></i>Every ticket tagged by category, country, device and browser, automatically</li>
