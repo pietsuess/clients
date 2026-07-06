@@ -192,6 +192,13 @@ footer a:hover { text-decoration: underline; }
   background: var(--gold); color: var(--bg); cursor: pointer;
 }
 .chat-form button:hover { background: var(--gold-hover); }
+.chat-opts button { display: flex; align-items: center; gap: 11px; }
+.chat-opts button svg, .msg-bot svg {
+  width: 17px; height: 17px; flex: none;
+  color: var(--gold); stroke: currentColor; fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.msg-bot svg { width: 15px; height: 15px; display: inline-block; vertical-align: -2px; margin: 0 2px; }
 </style>
 </head>
 <body>
@@ -465,17 +472,36 @@ const HELP = {
   supportEmail: 'Hello@MPWRCHANGE.COM', // from Jeremy's FAQ - TECH SUPPORT doc
 };
 
+// Line-art icons (stroke = currentColor). %key% inside TREE text renders inline.
+const ICONS = {
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/>',
+  play: '<circle cx="12" cy="12" r="9"/><polygon points="10 8.5 16 12 10 15.5" fill="currentColor" stroke="none"/>',
+  tv: '<rect x="2" y="7" width="20" height="13" rx="2"/><polyline points="17 2 12 7 7 2"/>',
+  cc: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 15h4M13 15h5M6 11h2M11 11h7"/>',
+  gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+  card: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
+  dots: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
+  airplay: '<path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21" fill="currentColor" stroke="none"/>',
+  cast: '<path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><line x1="2" y1="20" x2="2.01" y2="20"/>',
+  fullscreen: '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+  hdmi: '<path d="M4 9h16v4l-2 3H6l-2-3z"/><path d="M8 12.5h8"/><path d="M12 16v5"/>',
+  wifi: '<path d="M5 12.55a11 11 0 0 1 14.08 0M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
+};
+function icon(key) {
+  return ICONS[key] ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[key] + '</svg>' : '';
+}
+
 const TREE = {
   start: {
     text: 'Hello. What do you need a hand with?',
     opts: [
-      ['I did not get my watch link', 'nolink'],
-      ['The film will not play', 'noplay'],
-      ['Getting it onto my TV', 'tv'],
-      ['Subtitles', 'subs'],
-      ['A gift question', 'gift'],
-      ['Payment or receipt', 'pay'],
-      ['Something else', 'ticket'],
+      ['I did not get my watch link', 'nolink', 'mail'],
+      ['The film will not play', 'noplay', 'play'],
+      ['Getting it onto my TV', 'tv', 'tv'],
+      ['Subtitles', 'subs', 'cc'],
+      ['A gift question', 'gift', 'gift'],
+      ['Payment or receipt', 'pay', 'card'],
+      ['Something else', 'ticket', 'dots'],
     ],
   },
   nolink: {
@@ -512,36 +538,36 @@ const TREE = {
     opts: [['It plays there', 'privacy2'], ['Same warning', 'noplay2']],
   },
   fullscreen: {
-    text: 'Usually a browser quirk. Try Chrome or Firefox if you are in another browser. Then press the full screen button at the bottom right of the player controls. On a phone, turning it sideways helps too.',
+    text: 'Usually a browser quirk. Try Chrome or Firefox if you are in another browser. Then press the full screen symbol %fullscreen% at the bottom right of the player controls. On a phone, turning it sideways helps too.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv: {
     text: 'What are you watching with?',
     opts: [
-      ['Apple TV, iPhone, iPad or Mac', 'tv_apple'],
-      ['Chromecast or Google TV', 'tv_cast'],
-      ['A laptop and a cable', 'tv_hdmi'],
-      ['A smart TV browser', 'tv_smart'],
+      ['Apple TV, iPhone, iPad or Mac', 'tv_apple', 'airplay'],
+      ['Chromecast or Google TV', 'tv_cast', 'cast'],
+      ['A laptop and a cable', 'tv_hdmi', 'hdmi'],
+      ['A smart TV browser', 'tv_smart', 'tv'],
     ],
   },
   tv_apple: {
-    text: 'Press play on the film, then tap the AirPlay icon in the player controls and pick your TV. Subtitles come along. If the icon does not appear, make sure the phone or laptop is on the same wifi as the Apple TV. More detail with pictures is in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    text: 'Press play on the film, then tap the AirPlay symbol %airplay% in the player controls and pick your TV. Subtitles come along. If the symbol does not appear, make sure the phone or laptop is on the same wifi %wifi% as the Apple TV. More detail with pictures is in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_cast: {
-    text: 'First, make sure your phone and the TV are on the same wifi network; that is the most common snag. Then press play, tap the cast icon in the player controls and pick your TV. One caution: some Chromecast models drop subtitles. If yours does, an HDMI cable from a laptop is the sure path. Details in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    text: 'First, make sure your phone and the TV are on the same wifi network %wifi%; that is the most common snag. Then press play, tap the cast symbol %cast% in the player controls and pick your TV. One caution: some Chromecast models drop subtitles. If yours does, an HDMI cable from a laptop is the sure path. Details in the <a href="' + 'https://clients.pietsuess.com/bmats/faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_hdmi: {
-    text: 'The most reliable way there is. Plug the cable into the laptop and the TV, switch the TV to that HDMI input, press play and go full screen. Any inexpensive HDMI cable works; newer Macs and many laptops need a small USB-C to HDMI adapter.',
+    text: 'The most reliable way there is. Plug the cable %hdmi% into the laptop and the TV, switch the TV to that HDMI input, press play and go full screen %fullscreen%. Any inexpensive HDMI cable works; newer Macs and many laptops need a small USB-C to HDMI adapter.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_smart: {
-    text: 'Honest answer: TV browsers are the least reliable way to watch, and we steer people away from them. AirPlay, Chromecast or an HDMI cable from a laptop will treat you far better.',
+    text: 'Honest answer: TV browsers are the least reliable way to watch, and we steer people away from them. AirPlay %airplay%, Chromecast %cast% or an HDMI cable %hdmi% from a laptop will treat you far better.',
     opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
   },
   subs: {
-    text: 'Pick your language in the row just under the film, or use the CC button inside the player. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay and HDMI carry them reliably.',
+    text: 'Pick your language in the row just under the film, or use the CC button %cc% inside the player. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
     opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
   },
   gift: {
@@ -570,7 +596,8 @@ const TREE = {
 
   function bot(html) {
     const d = document.createElement('div');
-    d.className = 'msg-bot'; d.innerHTML = html;
+    d.className = 'msg-bot';
+    d.innerHTML = html.replace(/%([a-z]+)%/g, (m, k) => icon(k) || m);
     log.appendChild(d); log.scrollTop = log.scrollHeight;
   }
   function user(text) {
@@ -587,9 +614,10 @@ const TREE = {
     bot(node.text);
     const wrap = document.createElement('div');
     wrap.className = 'chat-opts';
-    node.opts.forEach(([label, next]) => {
+    node.opts.forEach(([label, next, ic]) => {
       const b = document.createElement('button');
-      b.textContent = label;
+      b.innerHTML = (ic ? icon(ic) : '') + '<span></span>';
+      b.querySelector('span').textContent = label;
       b.onclick = () => { clearOpts(); user(label); go(next); };
       wrap.appendChild(b);
     });
