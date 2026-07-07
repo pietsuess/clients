@@ -34,8 +34,28 @@ body {
   color: var(--ink); outline: none;
 }
 .field input:focus { border-color: var(--gold); }
+.field textarea {
+  width: 100%; padding: 12px 15px; font-family: inherit; font-size: 15px;
+  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink); outline: none; resize: vertical;
+}
+.field textarea:focus { border-color: var(--gold); }
 .row2 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
 .why { font-size: 12px; color: var(--dim); margin-top: 5px; }
+/* Gift mode (?gift=1): the fixed-price "Gift a Rental" offer. */
+.gift-only { display: none; }
+body.gift .gift-only { display: block; }
+.gift-note {
+  font-size: 12.5px; color: var(--body); line-height: 1.55;
+  border-left: 2px solid var(--gold); padding-left: 12px; margin-bottom: 16px;
+}
+.bump {
+  display: flex; gap: 11px; align-items: flex-start; cursor: pointer;
+  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  padding: 13px 15px; margin-bottom: 14px; font-size: 13px; line-height: 1.5; color: var(--dim);
+}
+.bump input { margin-top: 3px; accent-color: var(--gold); }
+.bump b { color: var(--ink); font-size: 13.5px; }
 #pay-btn {
   width: 100%; padding: 15px 0; margin-top: 6px; font-family: inherit;
   font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
@@ -57,13 +77,38 @@ body {
 
 <div id="form">
   <div class="film-line">
-    <span class="t">7-day rental</span>
+    <span class="t" id="offer-title">7-day rental</span>
     <span class="amt" id="amt">$35</span>
   </div>
+  <div class="gift-only">
+    <p class="gift-note">This gift gives 7 days of access to your recipient only. It does not include access for you.</p>
+    <div class="field">
+      <label for="g-name">Recipient name</label>
+      <input id="g-name" placeholder="Their name">
+    </div>
+    <div class="field">
+      <label for="g-email">Recipient email</label>
+      <input type="email" id="g-email" placeholder="them@example.com">
+      <div class="why">Their gift email and watch link go here, not to you.</div>
+    </div>
+    <div class="field">
+      <label for="g-msg">Message (optional)</label>
+      <textarea id="g-msg" rows="2" placeholder="A line from you, printed on the gift email"></textarea>
+    </div>
+    <div class="field">
+      <label for="g-date">Deliver on (optional)</label>
+      <input type="date" id="g-date">
+      <div class="why">Leave it empty to send the gift right away. Up to six months ahead.</div>
+    </div>
+    <label class="bump">
+      <input type="checkbox" id="g-bump">
+      <span><b>Add a rental for yourself · +$15</b><br>Watch it too. Your own watch link goes to your email below.</span>
+    </label>
+  </div>
   <div class="field">
-    <label for="email">Email</label>
+    <label for="email" id="email-label">Email</label>
     <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
-    <div class="why">Your watch link goes here. No password, ever.</div>
+    <div class="why" id="email-why">Your watch link goes here. No password, ever.</div>
   </div>
   <div class="field">
     <label>Card</label>
@@ -75,7 +120,7 @@ body {
     <div class="why">Demo: type anything, or nothing.</div>
   </div>
   <button id="pay-btn">Pay $35</button>
-  <p class="reassure">The film starts on the page behind this window the moment payment goes through.</p>
+  <p class="reassure" id="reassure">The film starts on the page behind this window the moment payment goes through.</p>
 </div>
 
 <div id="done">
@@ -87,35 +132,84 @@ body {
 <script>
 (function () {
   var q = new URLSearchParams(location.search);
-  var amt = parseInt(q.get('amt'), 10);
-  if (!(amt >= 5)) amt = 35;
-  document.getElementById('amt').textContent = '$' + amt;
   var btn = document.getElementById('pay-btn');
-  btn.textContent = 'Pay $' + amt;
+  var isGift = q.get('gift') === '1';
+  var GIFT_PRICE = 35, BUMP_PRICE = 15;
+  var amt = 35;
+
+  if (isGift) {
+    // Stands in for the fixed-price "Gift a Rental" Kajabi offer with the
+    // native gift toggle on and the +$15 order bump.
+    document.body.classList.add('gift');
+    document.getElementById('offer-title').textContent = 'Gift a rental · 7 days for them';
+    document.getElementById('email-label').textContent = 'Your email';
+    document.getElementById('email-why').textContent = 'Your receipt and a copy of the gift email go here, so you can always forward it yourself.';
+    document.getElementById('reassure').textContent = 'The page behind this window confirms the gift the moment payment goes through.';
+    var dateEl = document.getElementById('g-date');
+    var today = new Date();
+    dateEl.min = today.toISOString().slice(0, 10);
+    dateEl.max = new Date(today.getTime() + 183 * 86400000).toISOString().slice(0, 10);
+    var bumpEl = document.getElementById('g-bump');
+    var paintGift = function () {
+      amt = GIFT_PRICE + (bumpEl.checked ? BUMP_PRICE : 0);
+      document.getElementById('amt').textContent = '$' + amt;
+      btn.textContent = 'Send gift · $' + amt;
+    };
+    bumpEl.onchange = paintGift;
+    paintGift();
+  } else {
+    amt = parseInt(q.get('amt'), 10);
+    if (!(amt >= 5)) amt = 35;
+    document.getElementById('amt').textContent = '$' + amt;
+    btn.textContent = 'Pay $' + amt;
+  }
   var em = q.get('email');
   if (em) document.getElementById('email').value = em;
 
+  function invalid(id) {
+    var f = document.getElementById(id);
+    f.focus(); f.style.borderColor = 'var(--error)';
+  }
+
   btn.onclick = function () {
     var email = document.getElementById('email').value.trim();
-    if (!email || email.indexOf('@') < 1) {
-      var f = document.getElementById('email');
-      f.focus(); f.style.borderColor = 'var(--error)';
-      return;
+    if (isGift) {
+      if (!document.getElementById('g-name').value.trim()) return invalid('g-name');
+      var gm = document.getElementById('g-email').value.trim();
+      if (!gm || gm.indexOf('@') < 1) return invalid('g-email');
     }
+    if (!email || email.indexOf('@') < 1) return invalid('email');
     btn.disabled = true;
     btn.textContent = 'Processing…';
     setTimeout(function () {
       // Stands in for: Kajabi webhook -> Worker -> D1. Same-origin storage
       // event is the demo's "purchase landed" signal to the rental page.
       try {
-        localStorage.setItem('bmats_demo_email', email);
-        localStorage.setItem('bmats_demo_paid', String(Date.now()));
+        if (isGift) {
+          localStorage.setItem('bmats_demo_gift', JSON.stringify({
+            to: document.getElementById('g-name').value.trim(),
+            toEmail: document.getElementById('g-email').value.trim(),
+            msg: document.getElementById('g-msg').value.trim(),
+            deliver: document.getElementById('g-date').value,
+            bump: document.getElementById('g-bump').checked,
+            buyerEmail: email,
+            at: Date.now(),
+          }));
+          if (document.getElementById('g-bump').checked) {
+            localStorage.setItem('bmats_demo_email', email);
+          }
+        } else {
+          localStorage.setItem('bmats_demo_email', email);
+          localStorage.setItem('bmats_demo_paid', String(Date.now()));
+        }
       } catch (e) {}
       document.getElementById('form').style.display = 'none';
-      document.getElementById('done').classList.add('visible');
+      var done = document.getElementById('done');
+      if (isGift) done.querySelector('.big').textContent = 'Gift on its way';
+      done.classList.add('visible');
       setTimeout(function () {
         if (window.opener) window.close();
-        else location.href = '../watch/?welcome=1';
+        else location.href = isGift ? '../rent/' : '../watch/?welcome=1';
       }, 1600);
     }, 1300);
   };

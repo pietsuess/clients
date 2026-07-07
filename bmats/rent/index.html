@@ -216,7 +216,7 @@ footer {
     <button class="rent-btn" id="rent-btn">Pay $35 and start watching</button>
     <p class="reassure">Payment opens in a small secure window. The film starts right here the moment it goes through.</p>
     <p class="reassure" id="popup-fallback" style="display:none">Nothing opened? Your browser blocked the window. <a href="#" id="popup-retry" style="color:var(--gold)">Open checkout</a></p>
-    <p class="gift-line">Giving it to someone? <a href="#" onclick="alert('Gift flow comes next: its own fixed-price checkout so the recipient, not the buyer, gets the access.');return false;">Gift a rental instead</a></p>
+    <p class="gift-line">Giving it to someone? <a href="#" id="gift-link">Gift a rental instead</a></p>
   </div>
 </div>
 
@@ -298,6 +298,70 @@ footer {
   document.getElementById('popup-retry').onclick = function (e) {
     e.preventDefault(); openCheckout();
   };
+
+  // Gift checkout. Stands in for the fixed-price "Gift a Rental" Kajabi
+  // offer (recipient fields + order bump live on the checkout itself).
+  document.getElementById('gift-link').onclick = function (e) {
+    e.preventDefault();
+    try { localStorage.removeItem('bmats_demo_gift'); } catch (err) {}
+    var url = '../checkout/?gift=1';
+    var w = 440, h = 760;
+    var x = Math.max(0, (screen.width - w) / 2), y = Math.max(0, (screen.height - h) / 2);
+    var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    var pop = isMobile ? null : window.open(url, 'bmats-checkout',
+      'width=' + w + ',height=' + h + ',left=' + x + ',top=' + y + ',resizable=yes,scrollbars=yes');
+    // Mobile and blocked popups both walk through the checkout page itself;
+    // it sends them back here and the on-load check below picks the gift up.
+    if (!pop) { location.href = url; return; }
+    pop.focus();
+  };
+
+  function esc(s) { return String(s || '').replace(/</g, '&lt;'); }
+  function showGiftDone(g) {
+    var when = '';
+    if (g.deliver) {
+      try { when = new Date(g.deliver + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric' }); }
+      catch (e) { when = g.deliver; }
+    }
+    var card = document.querySelector('.buy-card');
+    card.innerHTML =
+      '<h2>Gift on its way</h2>' +
+      '<p class="terms">' + esc(g.to || 'Your recipient') + ' gets a gift email at ' +
+      '<b style="color:var(--gold)">' + esc(g.toEmail) + '</b>' +
+      (when ? ' on ' + when : ' right away') + ', with a watch link of their own.' +
+      (g.msg ? ' Your note rides along on it.' : '') +
+      ' You get the receipt and a copy of the gift email, so you can always forward it yourself.</p>' +
+      (g.bump
+        ? '<p class="terms">Your own rental came with it. The film is playing on this page, and your watch link is on its way to <b style="color:var(--gold)">' + esc(g.buyerEmail) + '</b>.</p>'
+        : '') +
+      '<p class="impact"><b>Thank you.</b> 40% of every rental goes directly to BlinkNow.</p>' +
+      (g.bump
+        ? '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>'
+        : '');
+    if (g.bump) {
+      var frame = document.querySelector('.trailer-wrap iframe');
+      frame.src = 'https://player.vimeo.com/video/1074813658?badge=0&title=0&byline=0&portrait=0&autoplay=1';
+      frame.closest('.trailer-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  // Gift landed via popup: same-origin storage event, transform in place.
+  window.addEventListener('storage', function (ev) {
+    if (ev.key !== 'bmats_demo_gift' || !ev.newValue) return;
+    var g = null;
+    try { g = JSON.parse(ev.newValue); } catch (e) {}
+    try { localStorage.removeItem('bmats_demo_gift'); } catch (e) {}
+    if (g) showGiftDone(g);
+  });
+  // Gift landed via full-page checkout (mobile, blocked popup): the
+  // checkout sends the buyer back here, flag is still in localStorage.
+  try {
+    var g0 = localStorage.getItem('bmats_demo_gift');
+    if (g0) {
+      localStorage.removeItem('bmats_demo_gift');
+      showGiftDone(JSON.parse(g0));
+    }
+  } catch (e) {}
 
   // Purchase landed: transform in place, start the film right here.
   window.addEventListener('storage', function (ev) {
@@ -382,7 +446,7 @@ const TREE = {
     opts: [['That answers it', 'solved'], ['Another question', 'start']],
   },
   gift: {
-    text: 'A gift rental gives access to the person you send it to, not to you. You will be able to add a rental for yourself at the same time. The dedicated gift checkout is coming shortly; for now, write to <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> and a real person will arrange the gift by hand.',
+    text: 'A gift rental gives access to the person you send it to, not to you. Use the "Gift a rental instead" link right under the pay button: it is a fixed $35, you add their name, email and an optional note, you can pick a send date up to six months out, and you can add a rental for yourself at the same time for $15.',
     opts: [['That answers it', 'solved'], ['Another question', 'start']],
   },
   popup: {
