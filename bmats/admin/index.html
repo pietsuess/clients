@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Support Desk – Between the Mountain and the Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #1a1610; --panel: #241f18; --panel-deep: #16120d; --line: #3a3228;
+  --ink: #e8dcc8; --body: #d4c9b8; --dim: #8a7e6e; --gold: #c4a265;
+  --gold-hover: #d4b275; --error: #c45c4a;
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--body); min-height: 100vh;
+}
+p, li { text-align: justify; text-align-last: left; text-wrap: pretty; }
+.page { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 clamp(20px, 3vw, 48px) 90px; }
+
+.demo-note {
+  background: var(--panel-deep); border-bottom: 1px solid var(--line);
+  margin: 0 calc(-1 * clamp(20px, 3vw, 48px)); padding: 9px clamp(20px, 3vw, 48px);
+  font-size: 12px; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase;
+}
+
+header { text-align: center; padding: 44px 0 10px; }
+.film-logo { height: 84px; display: inline-block; }
+.tagline {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(22px, 2.6vw, 32px); color: var(--ink);
+  margin-top: 20px; line-height: 1.3; letter-spacing: 0.4px;
+  text-align: center; text-align-last: center;
+}
+.sub { color: var(--dim); font-size: 15px; margin-top: 8px; text-align: center; text-align-last: center; }
+
+.counts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px; }
+@media (max-width: 600px) { .counts { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
+.counts div {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 20px 15px; text-align: center;
+}
+.counts .num {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 34px; color: var(--gold); line-height: 1;
+}
+.counts .lbl { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.8px; margin-top: 7px; }
+
+.ladder {
+  background: var(--panel); border: 1px solid var(--line); border-left: 2px solid var(--gold);
+  border-radius: 10px; padding: 16px 20px 14px; margin-top: 16px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.ladder svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--gold); stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ladder p { font-size: 13.5px; color: var(--body); line-height: 1.6; }
+.ladder b { color: var(--gold); font-weight: 600; }
+
+.list-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 36px 0 12px; flex-wrap: wrap; gap: 8px;
+}
+.list-head h2 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500; font-size: 26px; color: var(--ink); }
+.list-head .src { font-size: 12px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
+
+.empty {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 40px 30px; text-align: center;
+}
+.empty p { font-size: 14.5px; color: var(--dim); text-align: center; text-align-last: center; margin-bottom: 20px; }
+.seed-btn {
+  padding: 13px 28px; font-family: inherit; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+  background: var(--gold); color: var(--bg); border: none; border-radius: 8px; cursor: pointer;
+}
+.seed-btn:hover { background: var(--gold-hover); }
+
+.ticket { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+.trow {
+  display: grid; grid-template-columns: 110px 1.2fr 1.6fr 84px 92px;
+  gap: 14px; align-items: center; padding: 14px 18px; cursor: pointer;
+}
+.trow:hover { background: var(--panel-deep); }
+@media (max-width: 760px) {
+  .trow { grid-template-columns: 1fr 84px 92px; }
+  .trow .excerpt { display: none; }
+  .trow .when { grid-column: 1 / -1; }
+}
+.trow .when { font-size: 12.5px; color: var(--dim); white-space: nowrap; }
+.trow .email { font-size: 14px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trow .excerpt { font-size: 13.5px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.device {
+  font-size: 11px; color: var(--body); text-transform: uppercase; letter-spacing: 1.2px;
+  display: flex; align-items: center; gap: 6px;
+}
+.device svg { width: 15px; height: 15px; flex: none; color: var(--dim); stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.pill {
+  font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 5px 0; border-radius: 20px; text-align: center;
+}
+.pill.open { color: var(--gold); border: 1px solid var(--gold); }
+.pill.resolved { color: var(--dim); border: 1px solid var(--line); }
+
+.tdetail { display: none; border-top: 1px solid var(--line); background: var(--panel-deep); padding: 18px; }
+.ticket.expanded .tdetail { display: block; }
+.tdetail .full-msg { font-size: 14.5px; color: var(--body); line-height: 1.65; margin-bottom: 14px; }
+.tdetail .meta { font-size: 12px; color: var(--dim); line-height: 1.7; word-break: break-all; margin-bottom: 16px; }
+.tdetail .meta b { color: var(--body); font-weight: 500; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions button {
+  padding: 9px 16px; font-family: inherit; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.5px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 8px; color: var(--body); cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.actions button:hover { border-color: var(--gold); color: var(--ink); }
+.actions button svg { width: 14px; height: 14px; flex: none; color: var(--gold); stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.done-note { font-size: 12.5px; color: var(--gold); margin-top: 12px; opacity: 0; transition: opacity 0.3s; }
+.done-note.show { opacity: 1; }
+
+footer {
+  margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  font-size: 13px; color: var(--dim);
+}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="demo-note">Support desk demo. Sample data only, no action here reaches a real viewer.</div>
+
+<header>
+  <img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+  <div class="tagline">Support desk</div>
+  <p class="sub">Every ticket is a person who wants to watch the film. Get them there.</p>
+</header>
+
+<div class="counts">
+  <div><div class="num" id="count-open">0</div><div class="lbl">Open</div></div>
+  <div><div class="num" id="count-resolved">0</div><div class="lbl">Resolved</div></div>
+  <div><div class="num" id="count-total">0</div><div class="lbl">Total</div></div>
+</div>
+
+<div class="ladder">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M5 9l7-7 7 7"/></svg>
+  <p>When something goes wrong, work up this ladder: <b>extend access 48 h</b> first, <b>resend the watch link</b> second, refund last. Most problems end at step one, and the viewer still gets to see the film.</p>
+</div>
+
+<div class="list-head">
+  <h2>Tickets</h2>
+  <span class="src" id="src-label">Local demo data</span>
+</div>
+
+<div id="ticket-list"></div>
+
+<footer>
+  <span>Between the Mountain and the Sky</span>
+  <span>Demo build for the August platform</span>
+</footer>
+</div>
+
+<script>
+// Worker URL goes in `endpoint` later. While it is null,
+// tickets load from this browser's localStorage instead.
+const ADMIN = { endpoint: null };
+
+const ICONS = {
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/>',
+  gift: '<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>',
+  check: '<polyline points="20 6 9 17 4 12"/>',
+  phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18.5" x2="13" y2="18.5"/>',
+  tablet: '<rect x="4" y="2" width="16" height="20" rx="2"/><line x1="11" y1="18.5" x2="13" y2="18.5"/>',
+  laptop: '<rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M2 19h20"/>',
+  monitor: '<rect x="2" y="4" width="20" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
+};
+function icon(key) {
+  return ICONS[key] ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[key] + '</svg>' : '';
+}
+
+(function () {
+  var list = document.getElementById('ticket-list');
+  var tickets = [];
+
+  function load() {
+    // Future: fetch(ADMIN.endpoint + '/tickets') when the Worker exists.
+    if (!ADMIN.endpoint) {
+      try { tickets = JSON.parse(localStorage.getItem('bmats_tickets') || '[]'); }
+      catch (e) { tickets = []; }
+    }
+    render();
+  }
+
+  function save() {
+    try { localStorage.setItem('bmats_tickets', JSON.stringify(tickets)); } catch (e) {}
+  }
+
+  function seedSamples() {
+    var now = Date.now();
+    var H = 3600 * 1000;
+    tickets = [
+      {
+        email: 'margaret.holloway62@gmail.com',
+        msg: 'The film will not play on our Samsung smart TV. The spinner just goes round and round. It plays fine on my phone, but we bought it to watch on the big screen.',
+        path: 'start > tv > ticket', page: 'https://watch.betweenthemountainandthesky.com/',
+        ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
+        at: new Date(now - 49 * H).toISOString(), status: 'open', sample: true,
+      },
+      {
+        email: 'dpatel.home@outlook.com',
+        msg: 'I paid about an hour ago and the watch email has not arrived. I checked spam and promotions. The card was charged.',
+        path: 'start > ticket', page: 'https://watch.betweenthemountainandthesky.com/rent/',
+        ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        at: new Date(now - 41 * H).toISOString(), status: 'open', sample: true,
+      },
+      {
+        email: 'c.jensen@fastmail.com',
+        msg: 'I sent my mother a gift rental on Tuesday and she says nothing has arrived. Her address is inge.jensen1948@gmail.com. Could you check the spelling on your side or send it again?',
+        path: 'start > gift > ticket', page: 'https://watch.betweenthemountainandthesky.com/rent/',
+        ua: 'Mozilla/5.0 (iPad; CPU OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+        at: new Date(now - 30 * H).toISOString(), status: 'open', sample: true,
+      },
+      {
+        email: 'rosa.martinez.v@yahoo.com',
+        msg: 'Quick question before I buy for my parents: is the Spanish subtitle track Latin American Spanish or Spain Spanish? They are in Mexico City.',
+        path: 'start > subs > ticket', page: 'https://watch.betweenthemountainandthesky.com/rent/',
+        ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+        at: new Date(now - 21 * H).toISOString(), status: 'resolved', sample: true,
+      },
+      {
+        email: 'tom.brierley@icloud.com',
+        msg: 'I managed to buy the rental twice by mistake, two receipts a minute apart. Could you refund one of them please. Happy to keep the other, we loved the trailer.',
+        path: 'start > safe > ticket', page: 'https://watch.betweenthemountainandthesky.com/rent/',
+        ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36',
+        at: new Date(now - 8 * H).toISOString(), status: 'open', sample: true,
+      },
+      {
+        email: 'akiko.tanaka.88@gmail.com',
+        msg: 'My card was declined twice in the payment window but my bank app shows one pending charge. Did any of the payments go through on your side? I do not want to pay twice.',
+        path: 'start > popup > ticket', page: 'https://watch.betweenthemountainandthesky.com/rent/',
+        ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0',
+        at: new Date(now - 3 * H).toISOString(), status: 'open', sample: true,
+      },
+    ];
+    save();
+    render();
+  }
+
+  function device(ua) {
+    ua = ua || '';
+    if (/iPhone/i.test(ua)) return ['iPhone', 'phone'];
+    if (/iPad/i.test(ua)) return ['iPad', 'tablet'];
+    if (/Android/i.test(ua)) return ['Android', 'phone'];
+    if (/Macintosh/i.test(ua)) return ['Mac', 'laptop'];
+    if (/Windows/i.test(ua)) return ['Windows', 'monitor'];
+    return ['Other', 'monitor'];
+  }
+
+  function when(iso) {
+    try {
+      return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return iso; }
+  }
+
+  function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function firstLine(msg) {
+    var line = String(msg || '').split(/[.\n]/)[0];
+    return line.length > 90 ? line.slice(0, 87) + '...' : line;
+  }
+
+  function updateCounts() {
+    var open = 0, resolved = 0;
+    tickets.forEach(function (t) { (t.status === 'resolved' ? resolved++ : open++); });
+    document.getElementById('count-open').textContent = open;
+    document.getElementById('count-resolved').textContent = resolved;
+    document.getElementById('count-total').textContent = tickets.length;
+  }
+
+  function render() {
+    updateCounts();
+    list.innerHTML = '';
+
+    if (!tickets.length) {
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.innerHTML =
+        '<p>No tickets here yet. Tickets sent from the rent and watch pages in this browser land in this queue. Or seed the queue with sample data to try the desk.</p>' +
+        '<button class="seed-btn" id="seed-btn">Load sample tickets</button>';
+      list.appendChild(empty);
+      empty.querySelector('#seed-btn').onclick = seedSamples;
+      document.getElementById('src-label').textContent = 'Nothing loaded';
+      return;
+    }
+
+    document.getElementById('src-label').textContent =
+      tickets.some(function (t) { return t.sample; }) ? 'Sample data' : 'Local demo data';
+
+    // Newest first.
+    var order = tickets.map(function (t, i) { return i; });
+    order.sort(function (a, b) { return String(tickets[b].at).localeCompare(String(tickets[a].at)); });
+
+    order.forEach(function (i) {
+      var t = tickets[i];
+      var dev = device(t.ua);
+      var card = document.createElement('div');
+      card.className = 'ticket';
+      card.innerHTML =
+        '<div class="trow">' +
+          '<span class="when">' + esc(when(t.at)) + '</span>' +
+          '<span class="email">' + esc(t.email) + '</span>' +
+          '<span class="excerpt">' + esc(firstLine(t.msg)) + '</span>' +
+          '<span class="device">' + icon(dev[1]) + dev[0] + '</span>' +
+          '<span class="pill ' + (t.status === 'resolved' ? 'resolved' : 'open') + '">' +
+            (t.status === 'resolved' ? 'Resolved' : 'Open') + '</span>' +
+        '</div>' +
+        '<div class="tdetail">' +
+          '<p class="full-msg">' + esc(t.msg) + '</p>' +
+          '<p class="meta">' +
+            '<b>From page:</b> ' + esc(t.page || 'unknown') + '<br>' +
+            '<b>Help path:</b> ' + esc(t.path || 'none') + '<br>' +
+            '<b>Browser:</b> ' + esc(t.ua || 'unknown') +
+          '</p>' +
+          '<div class="actions">' +
+            '<button data-act="extend">' + icon('clock') + 'Extend access 48 h</button>' +
+            '<button data-act="watch">' + icon('mail') + 'Resend watch link</button>' +
+            '<button data-act="gift">' + icon('gift') + 'Resend gift email</button>' +
+            '<button data-act="resolve">' + icon('check') + 'Mark resolved</button>' +
+          '</div>' +
+          '<p class="done-note"></p>' +
+        '</div>';
+
+      card.querySelector('.trow').onclick = function () {
+        card.classList.toggle('expanded');
+      };
+
+      var note = card.querySelector('.done-note');
+      var noteTimer = null;
+      function quietDone(text) {
+        note.textContent = text;
+        note.classList.add('show');
+        clearTimeout(noteTimer);
+        noteTimer = setTimeout(function () { note.classList.remove('show'); }, 2600);
+      }
+
+      card.querySelectorAll('.actions button').forEach(function (b) {
+        b.onclick = function (ev) {
+          ev.stopPropagation();
+          var act = b.dataset.act;
+          // Demo only: updates local state. The real version calls the Worker.
+          if (act === 'extend') quietDone('Done. Access for ' + t.email + ' extended by 48 hours.');
+          if (act === 'watch') quietDone('Done. Watch link resent to ' + t.email + '.');
+          if (act === 'gift') quietDone('Done. Gift email resent.');
+          if (act === 'resolve') {
+            t.status = t.status === 'resolved' ? 'open' : 'resolved';
+            save();
+            var pill = card.querySelector('.pill');
+            pill.className = 'pill ' + (t.status === 'resolved' ? 'resolved' : 'open');
+            pill.textContent = t.status === 'resolved' ? 'Resolved' : 'Open';
+            b.innerHTML = icon('check') + (t.status === 'resolved' ? 'Reopen' : 'Mark resolved');
+            updateCounts();
+            quietDone(t.status === 'resolved' ? 'Done. Ticket marked resolved.' : 'Ticket reopened.');
+          }
+        };
+      });
+      if (t.status === 'resolved') {
+        card.querySelector('[data-act="resolve"]').innerHTML = icon('check') + 'Reopen';
+      }
+
+      list.appendChild(card);
+    });
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

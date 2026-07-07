@@ -3,677 +3,370 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>FAQ - Between the Mountain and the Sky</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+:root {
+  --bg: #1a1610; --panel: #241f18; --panel-deep: #16120d; --line: #3a3228;
+  --ink: #e8dcc8; --body: #d4c9b8; --dim: #8a7e6e; --gold: #c4a265;
+  --gold-hover: #d4b275; --error: #c45c4a;
+}
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #1a1610;
-  color: #d4c9b8;
-  min-height: 100vh;
-  line-height: 1.6;
+  background: var(--bg); color: var(--body); min-height: 100vh;
+}
+p, li { text-align: justify; text-align-last: left; text-wrap: pretty; }
+.page { width: 100%; max-width: 860px; margin: 0 auto; padding: 0 clamp(20px, 3vw, 48px) 90px; }
+
+.demo-note {
+  background: var(--panel-deep); border-bottom: 1px solid var(--line);
+  margin: 0 calc(-1 * clamp(20px, 3vw, 48px)); padding: 9px clamp(20px, 3vw, 48px);
+  font-size: 12px; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase;
 }
 
-/* HEADER */
-.header {
-  text-align: center;
-  padding: 60px 40px 40px;
-  border-bottom: 1px solid #3a3228;
-}
-.header h1 {
+header { text-align: center; padding: 54px 0 10px; }
+.film-logo { height: 100px; max-width: 100%; display: inline-block; }
+.tagline {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(32px, 5vw, 52px);
-  font-weight: 500;
-  color: #e8dcc8;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
-  margin-bottom: 8px;
+  font-size: clamp(22px, 2.6vw, 32px); color: var(--ink);
+  margin-top: 26px; line-height: 1.3; letter-spacing: 0.4px;
+  text-align: center; text-align-last: center;
 }
-.header .subtitle {
-  font-size: 14px;
-  color: #8a7e6e;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-}
+.sub { color: var(--dim); font-size: 15px; margin-top: 10px; text-align: center; text-align-last: center; }
+.sub a { color: var(--gold); text-decoration: none; }
+.sub a:hover { text-decoration: underline; }
 
-/* NAV / TOC */
+/* SECTION NAV */
 .toc {
-  width: 100%;
-  padding: 32px 40px;
-  border-bottom: 1px solid #3a3228;
-  background: #241f18;
-}
-.toc-inner {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-  max-width: 800px;
-  margin: 0 auto;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  margin: 30px 0 8px;
 }
 .toc a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  background: #1a1610;
-  border: 1px solid #3a3228;
-  border-radius: 8px;
-  color: #d4c9b8;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  display: inline-block; padding: 8px 16px; font-size: 13px; font-weight: 500;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 20px;
+  color: var(--body); text-decoration: none; transition: all 0.15s;
 }
-.toc a:hover {
-  border-color: #c4a265;
-  color: #e8dcc8;
+.toc a:hover { border-color: var(--gold); color: var(--ink); }
+
+/* SECTIONS */
+section { margin-top: 44px; scroll-margin-top: 20px; }
+section h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500;
+  font-size: clamp(26px, 2.4vw, 32px); color: var(--ink);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
 }
-.toc a .icon {
-  font-size: 20px;
-  flex-shrink: 0;
-  width: 28px;
-  text-align: center;
+section h2 svg {
+  width: 22px; height: 22px; flex: none;
+  color: var(--gold); stroke: currentColor; fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
 }
 
-/* MAIN CONTENT */
-.content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 40px 80px;
+/* ACCORDION */
+details {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 10px; margin-bottom: 10px; overflow: hidden;
 }
+summary {
+  cursor: pointer; padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  list-style: none; user-select: none;
+}
+summary::-webkit-details-marker { display: none; }
+summary:hover { color: var(--gold-hover); }
+summary .chev {
+  margin-left: auto; width: 16px; height: 16px; flex: none;
+  stroke: var(--gold); fill: none; stroke-width: 2;
+  stroke-linecap: round; transition: transform 0.2s;
+}
+details[open] .chev { transform: rotate(45deg); }
+.answer { padding: 2px 20px 18px; }
+.answer p { font-size: 14.5px; line-height: 1.65; margin-bottom: 10px; }
+.answer p:last-child { margin-bottom: 0; }
+.answer ol, .answer ul { padding-left: 20px; margin-bottom: 10px; }
+.answer li { font-size: 14.5px; line-height: 1.65; padding: 2px 0; }
+.answer a { color: var(--gold); text-decoration: none; }
+.answer a:hover { text-decoration: underline; }
+.answer .k { color: var(--gold); font-weight: 600; }
 
-/* FAQ SECTION */
-.faq-section {
-  padding: 48px 0;
-  border-bottom: 1px solid #3a3228;
+/* SCREENSHOTS */
+figure { margin: 14px 0 6px; text-align: center; }
+figure img {
+  max-width: 100%; border: 1px solid var(--line); border-radius: 8px; display: inline-block;
 }
-.faq-section:last-child {
-  border-bottom: none;
+figure.phone img { max-width: min(100%, 280px); }
+figure.wide img { max-width: min(100%, 560px); }
+figcaption {
+  font-size: 12.5px; color: var(--dim); margin-top: 8px;
+  text-align: center; text-align-last: center; text-wrap: pretty;
 }
-.section-anchor {
-  display: block;
-  position: relative;
-  top: -20px;
-  visibility: hidden;
-}
-.faq-section {
-  text-align: center;
-}
-.faq-section h2 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(24px, 3.5vw, 36px);
-  font-weight: 500;
-  color: #e8dcc8;
-  margin-bottom: 8px;
-  line-height: 1.3;
-}
-.faq-section h2 a {
-  color: inherit;
-  text-decoration: none;
-}
-.faq-section h2 a:hover {
-  color: #c4a265;
-}
-.faq-section h2 .link-icon {
-  font-size: 0.6em;
-  opacity: 0;
-  margin-left: 8px;
-  transition: opacity 0.15s ease;
-  color: #c4a265;
-}
-.faq-section h2:hover .link-icon {
-  opacity: 1;
-}
-.section-tag {
-  display: inline-block;
-  font-size: 11px;
-  color: #c4a265;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 24px;
-  font-weight: 600;
-}
+.shot-pair { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; }
+.shot-pair figure { flex: 1 1 240px; max-width: 300px; }
 
-.answer {
-  text-align: left;
+footer {
+  margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  font-size: 13px; color: var(--dim);
 }
-
-.answer p {
-  margin-bottom: 16px;
-  font-size: 15px;
-  color: #d4c9b8;
-}
-
-.answer strong {
-  color: #e8dcc8;
-  font-weight: 600;
-}
-
-.step {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-  align-items: flex-start;
-  text-align: left;
-}
-.step-number {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  background: #c4a265;
-  color: #1a1610;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 14px;
-  margin-top: 2px;
-}
-.step-content {
-  flex: 1;
-}
-.step-content p {
-  margin-bottom: 8px;
-}
-
-.callout {
-  background: #241f18;
-  border: 1px solid #3a3228;
-  border-left: 3px solid #c4a265;
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  text-align: left;
-}
-.callout.important {
-  border-left-color: #c4a265;
-}
-
-.screenshot {
-  margin: 20px 0;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #3a3228;
-  background: #000;
-}
-.screenshot img {
-  display: block;
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  margin: 0 auto;
-}
-.screenshot.desktop img {
-  max-width: 600px;
-}
-.screenshot-caption {
-  font-size: 12px;
-  color: #8a7e6e;
-  padding: 8px 12px;
-  background: #241f18;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
-}
-
-.link-btn {
-  display: inline-block;
-  padding: 12px 24px;
-  background: #c4a265;
-  color: #1a1610;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: background 0.15s ease;
-  margin: 8px 8px 8px 0;
-}
-.link-btn:hover {
-  background: #d4b275;
-}
-
-.browser-list {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin: 12px 0;
-}
-.browser-list span {
-  display: inline-block;
-  padding: 6px 14px;
-  background: #241f18;
-  border: 1px solid #3a3228;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #d4c9b8;
-}
-
-.sub-steps {
-  margin: 12px 0 12px 16px;
-  border-left: 2px solid #3a3228;
-  padding-left: 16px;
-  text-align: left;
-}
-.sub-steps p {
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-.sub-steps .browser-label {
-  color: #c4a265;
-  font-weight: 600;
-  font-size: 13px;
-}
-
-/* FOOTER */
-.footer {
-  text-align: center;
-  padding: 40px;
-  border-top: 1px solid #3a3228;
-  background: #241f18;
-}
-.footer p {
-  font-size: 13px;
-  color: #8a7e6e;
-  margin-bottom: 8px;
-}
-.footer a {
-  color: #c4a265;
-  text-decoration: none;
-}
-.footer a:hover {
-  color: #d4b275;
-}
-
-/* BACK TO TOP */
-.back-to-top {
-  display: inline-block;
-  font-size: 12px;
-  color: #8a7e6e;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-top: 24px;
-  transition: color 0.15s ease;
-}
-.back-to-top:hover {
-  color: #c4a265;
-}
+footer a { color: var(--gold); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
+<div class="page">
+<div class="demo-note">Help pages for the August rental. Part of the new platform build.</div>
 
-<div class="header" id="top">
-  <h1>Frequently Asked Questions</h1>
-  <div class="subtitle">Between the Mountain and the Sky</div>
-</div>
+<header>
+  <img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+  <div class="tagline">Everything you might wonder about, in plain language.</div>
+  <p class="sub">Not answered here? Email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a>. A real person reads and answers every message.</p>
+</header>
 
 <nav class="toc">
-  <div class="toc-inner">
-    <a href="#watching-tv">
-      <span class="icon">📡</span>
-      Watching on a TV
-    </a>
-    <a href="#casting">
-      <span class="icon">📺</span>
-      Casting to a Smart TV
-    </a>
-    <a href="#casting-subtitles">
-      <span class="icon">💬</span>
-      Subtitles Not Showing on TV
-    </a>
-    <a href="#fullscreen">
-      <span class="icon">⛶</span>
-      Playing in Full Screen
-    </a>
-    <a href="#captions">
-      <span class="icon">💬</span>
-      How to Activate Captions
-    </a>
-    <a href="#password">
-      <span class="icon">🔑</span>
-      Lost Password or Link
-    </a>
-    <a href="#privacy">
-      <span class="icon">🔒</span>
-      Privacy / Video Not Available
-    </a>
-    <a href="#contact">
-      <span class="icon">✉</span>
-      Contact Support
-    </a>
-  </div>
+  <a href="#getting-in">Getting in</a>
+  <a href="#rental">Your rental</a>
+  <a href="#watching">Watching</a>
+  <a href="#tv">On your TV</a>
+  <a href="#gifting">Gifting</a>
+  <a href="#payments">Payments</a>
+  <a href="#trouble">Trouble</a>
 </nav>
 
-<main class="content">
+<!-- GETTING IN -->
+<section id="getting-in">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/></svg>Getting in</h2>
 
-  <!-- WATCHING ON A TV -->
-  <section class="faq-section">
-    <span class="section-anchor" id="watching-tv"></span>
-    <h2><a href="#watching-tv">Watching on a TV<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Streaming &amp; Casting</span>
-
+  <details>
+    <summary>How do I get into the film?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <p>There are three ways to get the film onto your TV. If one gives you trouble, try the next one down - the HDMI cable is the most reliable.</p>
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <p><strong>AirPlay</strong> (iPhone, iPad, Mac)</p>
-          <div class="sub-steps">
-            <p>Open the film on your device.</p>
-            <p>Press play.</p>
-            <p>Tap the AirPlay icon.</p>
-            <p>Select your Apple TV or AirPlay-compatible Smart TV.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <p><strong>Chromecast</strong> (Android, Chrome Browser, Google TV)</p>
-          <div class="sub-steps">
-            <p>Open the film in Google Chrome.</p>
-            <p>Press play.</p>
-            <p>Click the Cast icon in Chrome or on your device.</p>
-            <p>Select your Chromecast or Google TV device.</p>
-          </div>
-          <div class="callout">
-            <p><strong>Note:</strong> If this causes issues with subtitles, please try watching directly on your laptop or connecting your computer to your TV with an HDMI cable.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <p><strong>HDMI Cable</strong> (Most Reliable)</p>
-          <div class="sub-steps">
-            <p>Open the film on a laptop or desktop computer.</p>
-            <p>Connect your computer to your TV using an HDMI cable.</p>
-            <p>Select the correct HDMI input on your TV.</p>
-            <p>Watch the film in full screen mode.</p>
-          </div>
-          <p style="margin-top: 12px;">This is the most reliable option for:</p>
-          <div class="browser-list">
-            <span>Subtitles</span>
-            <span>Older smart TVs</span>
-            <span>Samsung TVs</span>
-            <span>Casting issues</span>
-          </div>
-        </div>
-      </div>
+      <p>When you rent, the film starts playing right on the rental page. A watch link also lands in your email a moment later. That link is your way back in: open it on any device and the film is there. Nothing to install, nothing to remember.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
 
-  <!-- CASTING -->
-  <section class="faq-section">
-    <span class="section-anchor" id="casting"></span>
-    <h2><a href="#casting">How do I cast from my phone or iPad to my Smart TV?<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Streaming &amp; Casting</span>
-
+  <details>
+    <summary>Is there a password?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <div class="callout important">
-        <strong>First!</strong> Make sure your phone or device is on the <strong>same Wi-Fi network</strong> as your Smart TV.
-      </div>
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <p>Tap the <strong>"&gt;"</strong> button at the bottom right of the video to open the menu options.</p>
-          <div class="screenshot">
-            <img src="menu-button.jpg" alt="Arrow pointing to the menu button at the bottom right of the video player">
-            <div class="screenshot-caption">Tap the button shown to reveal player controls</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <p>Once the menu opens, tap the <strong>AirPlay button</strong> (the screen icon with a triangle).</p>
-          <div class="screenshot">
-            <img src="player-controls.jpg" alt="Player controls expanded showing the AirPlay button highlighted">
-            <div class="screenshot-caption">The AirPlay button in the expanded controls</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <p>Select your TV from the list of available devices.</p>
-          <div class="screenshot">
-            <img src="airplay-menu.png" alt="AirPlay device selection menu showing available TVs">
-            <div class="screenshot-caption">Select your TV from the AirPlay device list</div>
-          </div>
-        </div>
-      </div>
-
-      <p>That's it! The film should now be playing on your TV. If you're having trouble, make sure both devices are connected to the same Wi-Fi network and try again.</p>
+      <p>No. There is no password and there never will be one. Your watch link is the only thing you need. If yours ever goes missing, write to <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> and a fresh one will be sent.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
 
-  <!-- CASTING + SUBTITLES -->
-  <section class="faq-section">
-    <span class="section-anchor" id="casting-subtitles"></span>
-    <h2><a href="#casting-subtitles">Subtitles don't show on my TV when I cast<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Streaming &amp; Captions</span>
-
+  <details>
+    <summary>My watch link has not arrived<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <div class="callout important">
-        <p>This is a <strong>known limitation</strong> with casting web video to a TV. When you use AirPlay or Chromecast from inside a video player, the TV plays the video directly and the captions usually stay behind on your phone or laptop. It's not a problem with the film, it's how casting works with most web video players.</p>
-      </div>
-
-      <p>The reliable fix is to use <strong>Screen Mirroring</strong> instead of casting. Mirroring sends everything on your device's screen to the TV, captions included.</p>
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <p><strong>On iPhone or iPad:</strong> Swipe down from the top-right corner to open Control Center, tap <strong>Screen Mirroring</strong>, and choose your TV. Then open the film in your browser and turn captions on as usual. They'll appear on the TV.</p>
-          <div class="callout">
-            <p><strong>Tip:</strong> Don't tap the AirPlay button inside the video player itself, that's the one that drops the captions. Use Screen Mirroring from Control Center instead.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <p><strong>On Mac:</strong> Click the Control Center icon in the menu bar, choose <strong>Screen Mirroring</strong>, and select your TV. Then play the film with captions on.</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <p><strong>On Android:</strong> Open quick settings and tap <strong>Smart View</strong>, <strong>Screen Cast</strong>, or your manufacturer's mirroring option, then pick your TV.</p>
-        </div>
-      </div>
-
-      <div class="callout">
-        <p><strong>Still stuck?</strong> An HDMI cable from your laptop to your TV is the most reliable option of all. Everything you see on your screen, including captions, plays through to the TV exactly as it appears.</p>
-      </div>
+      <ol>
+        <li>Check your spam or promotions folder for an email from Between the Mountain and the Sky.</li>
+        <li>Try searching your inbox for <span class="k">mountain</span>.</li>
+        <li>Give it a few minutes. Email sometimes dawdles.</li>
+      </ol>
+      <p>A resend-it-yourself option is coming soon. Until then, email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> and a real person will send your link over.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
 
-  <!-- FULL SCREEN -->
-  <section class="faq-section">
-    <span class="section-anchor" id="fullscreen"></span>
-    <h2><a href="#fullscreen">How do I play the film in full screen?<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Playback</span>
-
+  <details>
+    <summary>Can I open the link on a different device?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <p><strong>Try a different browser.</strong> Playback issues are most often caused by the browser itself. Switch between Chrome, Firefox, Safari, or Edge to see if that resolves it.</p>
-          <div class="browser-list">
-            <span>Chrome</span>
-            <span>Firefox</span>
-            <span>Safari</span>
-            <span>Edge</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <p><strong>Use the full screen buttons.</strong> Look for the full screen controls at the bottom of the video player.</p>
-          <div class="screenshot desktop">
-            <img src="fullscreen-desktop.png" alt="Desktop view showing full screen buttons at the bottom right of the video player">
-            <div class="screenshot-caption">Full screen buttons on the desktop player</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <p><strong>Don't see the controls?</strong> Tap the <strong>"&gt;"</strong> button to reveal the hidden menu, then use the full screen button from there.</p>
-          <div class="screenshot">
-            <img src="menu-button.jpg" alt="Arrow pointing to the expand menu button">
-            <div class="screenshot-caption">Tap to reveal player controls including full screen</div>
-          </div>
-        </div>
-      </div>
+      <p>Yes. The same link works on your laptop, phone, tablet, wherever you like. Open the email on the device you want to watch on and follow the link from there.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
+</section>
 
-  <!-- CAPTIONS -->
-  <section class="faq-section">
-    <span class="section-anchor" id="captions"></span>
-    <h2><a href="#captions">How to Activate Captions<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Subtitles &amp; Captions</span>
+<!-- YOUR RENTAL -->
+<section id="rental">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polygon points="10 8.5 16 12 10 15.5" fill="currentColor" stroke="none"/></svg>Your rental</h2>
 
+  <details>
+    <summary>How long do I have, and how many viewings?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <div class="callout">
-        <p>The film is set up to begin with <strong>English subtitles for Nepali and hard-to-understand dialogue</strong>. This setting is <strong>English (Canada)</strong>. If you wish to change it, you can follow the steps below.</p>
-      </div>
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <p>Press the <strong>CC button</strong> on the bottom of the player to turn captions on or off.</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <p>Click the <strong>wrench icon</strong> and in that menu you will see <strong>"CC/Subtitles"</strong> - click it to see a list of options.</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <p>Choose the option that's right for you:</p>
-          <div class="callout">
-            <p><strong>English CC</strong> - English Closed Captions (includes descriptions of sounds, music, and speaker identification)</p>
-            <p style="margin-top: 8px;"><strong>English</strong> - Full English subtitles (dialogue only)</p>
-            <p style="margin-top: 8px;"><strong>English Canada</strong> - Only Nepali dialogue is subtitled in English</p>
-          </div>
-        </div>
-      </div>
+      <p>Seven days of access from the moment you pay, and unlimited viewings inside that week. Watch it alone, watch it again with someone, on any device. The event itself runs August 12 to 19.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
 
-  <!-- PASSWORD -->
-  <section class="faq-section">
-    <span class="section-anchor" id="password"></span>
-    <h2><a href="#password">I can't find my password or the link to watch<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Account Access</span>
-
+  <details>
+    <summary>How much does it cost?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <p>No worries - you can access the film and reset your password using the links below:</p>
-
-      <div style="margin: 24px 0;">
-        <a href="https://betweenthemountain.mykajabi.com/library" class="link-btn" target="_blank" rel="noopener">Watch the Film</a>
-        <a href="https://betweenthemountain.mykajabi.com/password/new" class="link-btn" target="_blank" rel="noopener">Reset Your Password</a>
-      </div>
-
-      <p>If you're still having trouble after resetting your password, please reach out to us and we'll make sure you can watch the film.</p>
+      <p>You choose. It is pay-what-you-want, and $35 is the suggested amount. Pick a preset on the <a href="../rent/">rental page</a> or type your own.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
 
-  <!-- PRIVACY -->
-  <section class="faq-section">
-    <span class="section-anchor" id="privacy"></span>
-    <h2><a href="#privacy">"Due to privacy issues, this video is not available"<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Troubleshooting</span>
-
+  <details>
+    <summary>Where does the money go?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <p>This error usually happens when browser cookie or privacy settings are blocking the video from playing. Here are a few ways to fix it:</p>
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <p><strong>Try a different browser.</strong> Switch between Chrome, Firefox, Safari, or Edge.</p>
-          <div class="browser-list">
-            <span>Chrome</span>
-            <span>Firefox</span>
-            <span>Safari</span>
-            <span>Edge</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <p><strong>Try Private / Incognito mode.</strong> Open the link in an incognito or private browsing window. If the video plays there, the issue is your browser's privacy settings.</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <p><strong>Adjust your browser's privacy settings:</strong></p>
-          <div class="sub-steps">
-            <p><span class="browser-label">Chrome:</span> Go to Settings &gt; Privacy and Security &gt; Third-party cookies, then select "Block third-party cookies in Incognito Mode" (allow them in normal browsing).</p>
-            <p><span class="browser-label">Safari:</span> Go to Safari &gt; Preferences &gt; Privacy and uncheck "Website tracking" and "Cookies and website data."</p>
-          </div>
-        </div>
-      </div>
-
-      <p>Don't worry - we'll make sure you get to watch the film. If none of the above works, reach out to us.</p>
+      <p>40% of every rental goes directly to BlinkNow, supporting the children and community at the heart of the film. The rest keeps the film moving through the world.</p>
     </div>
-    <a href="#top" class="back-to-top">Back to top</a>
-  </section>
+  </details>
+</section>
 
-  <!-- CONTACT -->
-  <section class="faq-section">
-    <span class="section-anchor" id="contact"></span>
-    <h2><a href="#contact">Still need help?<span class="link-icon">🔗</span></a></h2>
-    <span class="section-tag">Contact</span>
+<!-- WATCHING -->
+<section id="watching">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 15h4M13 15h5M6 11h2M11 11h7"/></svg>Watching</h2>
 
+  <details>
+    <summary>Which devices can I watch on?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
     <div class="answer">
-      <p>We're here to help. Reach out to us and we'll make sure you get to watch the film.</p>
-      <div style="margin: 24px 0;">
-        <a href="mailto:Hello@MPWRCHANGE.COM" class="link-btn">Email Support</a>
-      </div>
+      <p>Laptop, phone, tablet, or your TV. Any modern browser works; Chrome and Firefox are the most dependable. For the TV, see <a href="../tv/">Watch on your TV</a>.</p>
     </div>
-  </section>
+  </details>
 
-</main>
+  <details>
+    <summary>Which subtitle languages are there?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Eight languages: English (including full closed captions), Dutch, Italian, French, Hindi, Spanish, Latin American Spanish, and Brazilian Portuguese.</p>
+      <p>Pick your language right under the film, or use the <span class="k">CC</span> button inside the player. Your choice sticks for the whole film.</p>
+    </div>
+  </details>
 
-<footer class="footer">
-  <p><a href="https://betweenthemountain.mykajabi.com/library" target="_blank" rel="noopener">Watch the Film</a></p>
-  <p>Between the Mountain and the Sky</p>
+  <details>
+    <summary>Can I pause and come back later?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Yes. The film remembers where you stopped and offers to pick up there when you return on the same device. Pause anywhere, come back any time inside your seven days.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>How do I make it full screen?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Press the full screen symbol at the bottom right of the player controls. On a phone, turning it sideways helps too. If full screen refuses to work, try Chrome or Firefox.</p>
+    </div>
+  </details>
+</section>
+
+<!-- ON YOUR TV -->
+<section id="tv">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="13" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>Watching on your TV</h2>
+
+  <details>
+    <summary>What are my options?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Three good ways:</p>
+      <ol>
+        <li><span class="k">HDMI cable</span> from any laptop to the TV. The most reliable way, every time, and any inexpensive cable from a hardware store works. There is no need for an expensive one.</li>
+        <li><span class="k">AirPlay</span> from an iPhone, iPad, or Mac to an Apple TV or AirPlay-capable TV. Subtitles come along.</li>
+        <li><span class="k">Cast button</span> to a Chromecast or Google TV. One caution: some Chromecast models drop subtitles. If subtitles matter to you, use HDMI or watch on the device directly.</li>
+      </ol>
+      <p>AirPlay and Chromecast both need your phone or laptop and the TV on the same wifi network. That is the most common snag.</p>
+      <p>Full step-by-step instructions for each, ordered for your device, are on the <a href="../tv/">Watch on your TV</a> page.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Where are the AirPlay and cast buttons?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>They live in the player controls, next to the volume and subtitle buttons. On a phone the control bar starts collapsed: tap the small arrow at its right end to reveal the rest.</p>
+      <p>On a phone, tap the small arrow at the right end of the player bar to reveal the rest of the controls: volume, CC for subtitles, settings, AirPlay or cast, and full screen.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>What does the AirPlay menu look like?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>After you tap the AirPlay symbol, a menu of nearby devices appears. Your TV shows up in that list when both are on the same wifi. Tap it and the film moves to the big screen.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Can I use my smart TV's built-in browser?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Honest answer: TV browsers are the least reliable way to watch, and we steer people away from them. AirPlay, the cast button, or an HDMI cable from a laptop will treat you far better.</p>
+    </div>
+  </details>
+</section>
+
+<!-- GIFTING -->
+<section id="gifting">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Gifting</h2>
+
+  <details>
+    <summary>How do I give the film to someone?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Use the <span class="k">Gift a rental instead</span> link on the <a href="../rent/">rental page</a>, right under the pay button. A gift is a fixed $35. You add their name and email, write an optional note, and can pick a send date up to six months out. On the day, they get a gift email with a watch link of their own.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Does a gift give me access too?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>No. A gift gives access to the person you send it to, not to you. If you want to watch as well, there is an <span class="k">add a rental for yourself</span> option at the gift checkout for $15 more.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Can I choose when the gift arrives?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Yes. Send it right away, or pick any date up to six months out. You get the receipt and a copy of the gift email either way, so you can always forward it yourself.</p>
+    </div>
+  </details>
+</section>
+
+<!-- PAYMENTS -->
+<section id="payments">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Payments</h2>
+
+  <details>
+    <summary>Is my payment safe?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Yes. Payment happens in a dedicated secure checkout window run by our payment provider; card details never touch the film's pages.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Where is my receipt?<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>The receipt comes by email from the checkout, separately from your watch link. Check spam for it first if it has not appeared.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>I have a question about a charge<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> with a line about what happened. A real person answers billing questions, usually the same day.</p>
+    </div>
+  </details>
+</section>
+
+<!-- TROUBLE -->
+<section id="trouble">
+  <h2><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Trouble</h2>
+
+  <details>
+    <summary>It says the video cannot play due to privacy issues<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>That warning is almost always the browser blocking the player, not your account. First test: open the watch page in a private or incognito window. In Chrome that is the three dots at top right, then <span class="k">New Incognito window</span>. In Safari it is the File menu, then <span class="k">New Private Window</span>.</p>
+      <p>If it plays there, it is a cookie setting, easy fix:</p>
+      <ol>
+        <li>In Chrome: Settings, then Privacy and security, then Third-party cookies, and allow them.</li>
+        <li>In Safari: Settings, then Privacy, and uncheck <span class="k">Prevent cross-site tracking</span>.</li>
+      </ol>
+      <p>Reload the watch page afterwards. If the warning is still there, email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> and we will send a backup link that plays directly.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>The player will not load or the film stutters<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <ol>
+        <li>Refresh the page and press play again.</li>
+        <li>Try a different browser. Chrome and Firefox are the most dependable.</li>
+        <li>On wifi, try moving closer to the router.</li>
+      </ol>
+      <p>Those three fixes solve most playback trouble. If none of them do, we will make sure you get to watch the film: email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a>.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Something else entirely<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
+    <div class="answer">
+      <p>Email <a href="mailto:Hello@MPWRCHANGE.COM">Hello@MPWRCHANGE.COM</a> with your email address and a line about what happened. A real person reads every one of these and will get you sorted.</p>
+    </div>
+  </details>
+</section>
+
+<footer>
+  <span>Between the Mountain and the Sky</span>
+  <span><a href="../rent/">Rent the film</a> · <a href="../watch/">Watch page</a> · <a href="../tv/">Watch on your TV</a></span>
 </footer>
-
+</div>
 </body>
 </html>
