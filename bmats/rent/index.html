@@ -148,17 +148,9 @@ footer {
       <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
       <div class="why">Your watch link goes here. It is the only thing you ever need to get back in; there is no password.</div>
     </div>
-    <div class="field">
-      <label>Card</label>
-      <div class="row2">
-        <input inputmode="numeric" id="card" placeholder="4242 4242 4242 4242">
-        <input inputmode="numeric" id="exp" placeholder="MM / YY">
-        <input inputmode="numeric" id="cvc" placeholder="CVC">
-      </div>
-      <div class="why">Demo: type anything, or nothing.</div>
-    </div>
     <button class="rent-btn" id="rent-btn">Pay $35 and start watching</button>
-    <p class="reassure">The film starts the moment payment goes through. Nothing else to set up.</p>
+    <p class="reassure">Payment opens in a small secure window. The film starts right here the moment it goes through.</p>
+    <p class="reassure" id="popup-fallback" style="display:none">Nothing opened? Your browser blocked the window. <a href="#" id="popup-retry" style="color:var(--gold)">Open checkout</a></p>
     <p class="gift-line">Giving it to someone? <a href="#" onclick="alert('Gift flow comes next: its own fixed-price checkout so the recipient, not the buyer, gets the access.');return false;">Gift a rental instead</a></p>
   </div>
 </div>
@@ -200,18 +192,54 @@ footer {
       setAmount(v);
     }
   };
-  rent.onclick = function () {
+  // Popup checkout. Stands in for Kajabi's page on the film's own domain.
+  // Real version: rent page polls the Worker for the webhook-written purchase;
+  // demo version: same-origin storage event from the popup.
+  function openCheckout() {
     var email = document.getElementById('email').value.trim();
     if (!email || email.indexOf('@') < 1) {
       var f = document.getElementById('email');
       f.focus(); f.style.borderColor = 'var(--error)';
       return;
     }
+    try { localStorage.removeItem('bmats_demo_paid'); } catch (e) {}
+    var url = '../checkout/?amt=' + amount + '&email=' + encodeURIComponent(email);
+    var w = 440, h = 640;
+    var x = Math.max(0, (screen.width - w) / 2), y = Math.max(0, (screen.height - h) / 2);
+    var isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    var pop = isMobile ? null : window.open(url, 'bmats-checkout',
+      'width=' + w + ',height=' + h + ',left=' + x + ',top=' + y + ',resizable=yes,scrollbars=yes');
+    if (!pop) {
+      if (isMobile) { location.href = url; return; }
+      document.getElementById('popup-fallback').style.display = 'block';
+      return;
+    }
     rent.disabled = true;
-    rent.textContent = 'Processing…';
-    try { localStorage.setItem('bmats_demo_email', email); } catch (e) {}
-    setTimeout(function () { location.href = '../watch/?welcome=1'; }, 1200);
+    rent.textContent = 'Waiting for payment…';
+    pop.focus();
+  }
+  rent.onclick = openCheckout;
+  document.getElementById('popup-retry').onclick = function (e) {
+    e.preventDefault(); openCheckout();
   };
+
+  // Purchase landed: transform in place, start the film right here.
+  window.addEventListener('storage', function (ev) {
+    if (ev.key !== 'bmats_demo_paid' || !ev.newValue) return;
+    var email = '';
+    try { email = localStorage.getItem('bmats_demo_email') || ''; } catch (e) {}
+    var card = document.querySelector('.buy-card');
+    card.innerHTML =
+      '<h2>You are in</h2>' +
+      '<p class="terms">The film is playing on this page. Your watch link is on its way to ' +
+      (email ? '<b style="color:var(--gold)">' + email.replace(/</g, '&lt;') + '</b>' : 'your email') +
+      ' for later and for your other devices.</p>' +
+      '<p class="impact"><b>Thank you.</b> 40% of your rental goes directly to BlinkNow.</p>' +
+      '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>';
+    var frame = document.querySelector('.trailer-wrap iframe');
+    frame.src = 'https://player.vimeo.com/video/1074813658?badge=0&title=0&byline=0&portrait=0&autoplay=1';
+    frame.closest('.trailer-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
 })();
 </script>
 </body>

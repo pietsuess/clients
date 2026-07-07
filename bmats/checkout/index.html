@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Secure Checkout – Between the Mountain and the Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Stands in for the Kajabi checkout, skinned to the film.
+   The real one is Kajabi's page on checkout.betweenthemountainandthesky.com. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #1a1610; --panel: #241f18; --panel-deep: #16120d; --line: #3a3228;
+  --ink: #e8dcc8; --body: #d4c9b8; --dim: #8a7e6e; --gold: #c4a265;
+  --gold-hover: #d4b275; --error: #c45c4a; --ok: #7da76a;
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--body); min-height: 100vh;
+  padding: 26px 22px 40px;
+}
+.film-logo { height: 54px; display: block; margin: 0 auto 6px; }
+.demo-tag { text-align: center; font-size: 10.5px; color: var(--dim); letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 20px; }
+.film-line { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.film-line .t { font-size: 14px; color: var(--ink); font-weight: 500; padding-right: 12px; }
+.film-line .amt { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 30px; color: var(--gold); }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.8px; margin-bottom: 6px; }
+.field input {
+  width: 100%; padding: 12px 15px; font-family: inherit; font-size: 16px;
+  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink); outline: none;
+}
+.field input:focus { border-color: var(--gold); }
+.row2 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+.why { font-size: 12px; color: var(--dim); margin-top: 5px; }
+#pay-btn {
+  width: 100%; padding: 15px 0; margin-top: 6px; font-family: inherit;
+  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+  background: var(--gold); color: var(--bg); border: none; border-radius: 8px; cursor: pointer;
+}
+#pay-btn:hover { background: var(--gold-hover); }
+#pay-btn:disabled { opacity: 0.6; cursor: default; }
+.reassure { font-size: 12px; color: var(--dim); margin-top: 12px; text-align: center; text-align-last: center; }
+#done { display: none; text-align: center; padding: 40px 10px; }
+#done.visible { display: block; }
+#done svg { width: 46px; height: 46px; stroke: var(--ok); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 14px; }
+#done .big { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; color: var(--ink); margin-bottom: 8px; }
+#done .small { font-size: 13.5px; color: var(--dim); }
+</style>
+</head>
+<body>
+<img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+<div class="demo-tag">Secure checkout · demo, nothing is charged</div>
+
+<div id="form">
+  <div class="film-line">
+    <span class="t">7-day rental</span>
+    <span class="amt" id="amt">$35</span>
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+    <div class="why">Your watch link goes here. No password, ever.</div>
+  </div>
+  <div class="field">
+    <label>Card</label>
+    <div class="row2">
+      <input inputmode="numeric" id="card" placeholder="4242 4242 4242 4242">
+      <input inputmode="numeric" id="exp" placeholder="MM / YY">
+      <input inputmode="numeric" id="cvc" placeholder="CVC">
+    </div>
+    <div class="why">Demo: type anything, or nothing.</div>
+  </div>
+  <button id="pay-btn">Pay $35</button>
+  <p class="reassure">The film starts on the page behind this window the moment payment goes through.</p>
+</div>
+
+<div id="done">
+  <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <div class="big">Payment complete</div>
+  <div class="small">This window closes itself. Enjoy the film.</div>
+</div>
+
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var amt = parseInt(q.get('amt'), 10);
+  if (!(amt >= 5)) amt = 35;
+  document.getElementById('amt').textContent = '$' + amt;
+  var btn = document.getElementById('pay-btn');
+  btn.textContent = 'Pay $' + amt;
+  var em = q.get('email');
+  if (em) document.getElementById('email').value = em;
+
+  btn.onclick = function () {
+    var email = document.getElementById('email').value.trim();
+    if (!email || email.indexOf('@') < 1) {
+      var f = document.getElementById('email');
+      f.focus(); f.style.borderColor = 'var(--error)';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+    setTimeout(function () {
+      // Stands in for: Kajabi webhook -> Worker -> D1. Same-origin storage
+      // event is the demo's "purchase landed" signal to the rental page.
+      try {
+        localStorage.setItem('bmats_demo_email', email);
+        localStorage.setItem('bmats_demo_paid', String(Date.now()));
+      } catch (e) {}
+      document.getElementById('form').style.display = 'none';
+      document.getElementById('done').classList.add('visible');
+      setTimeout(function () {
+        if (window.opener) window.close();
+        else location.href = '../watch/?welcome=1';
+      }, 1600);
+    }, 1300);
+  };
+})();
+</script>
+</body>
+</html>
