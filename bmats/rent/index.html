@@ -217,6 +217,17 @@ footer {
     rent.disabled = true;
     rent.textContent = 'Waiting for payment…';
     pop.focus();
+    // Abandoned checkout: popup closed without paying -> restore the button.
+    var watcher = setInterval(function () {
+      var paid = false;
+      try { paid = !!localStorage.getItem('bmats_demo_paid'); } catch (e) {}
+      if (paid) { clearInterval(watcher); return; }
+      if (pop.closed) {
+        clearInterval(watcher);
+        rent.disabled = false;
+        setAmount(amount);
+      }
+    }, 500);
   }
   rent.onclick = openCheckout;
   document.getElementById('popup-retry').onclick = function (e) {
