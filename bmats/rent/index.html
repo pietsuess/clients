@@ -73,6 +73,17 @@ header { text-align: center; padding: 54px 0 10px; }
 }
 .custom-row input:focus { border-color: var(--gold); }
 .custom-row .hint { font-size: 12.5px; color: var(--dim); }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.8px; margin-bottom: 7px; }
+.field input {
+  width: 100%; padding: 12px 15px; font-family: inherit; font-size: 16px;
+  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  color: var(--ink); outline: none;
+}
+.field input:focus { border-color: var(--gold); }
+.field .why { font-size: 12.5px; color: var(--dim); margin-top: 6px; }
+.row2 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+.reassure { font-size: 12.5px; color: var(--dim); margin-top: 12px; text-align: center; text-align-last: center; }
 .impact { font-size: 13.5px; line-height: 1.6; border-left: 2px solid var(--gold); padding-left: 14px; margin-bottom: 24px; }
 .impact b { color: var(--gold); }
 .rent-btn {
@@ -132,14 +143,29 @@ footer {
       <span class="hint">$35 is the suggested amount</span>
     </div>
     <p class="impact"><b>40% of every rental</b> goes directly to BlinkNow, supporting the children and community at the heart of the film.</p>
-    <button class="rent-btn" id="rent-btn">Rent for $35</button>
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+      <div class="why">Your watch link goes here. It is the only thing you ever need to get back in; there is no password.</div>
+    </div>
+    <div class="field">
+      <label>Card</label>
+      <div class="row2">
+        <input inputmode="numeric" id="card" placeholder="4242 4242 4242 4242">
+        <input inputmode="numeric" id="exp" placeholder="MM / YY">
+        <input inputmode="numeric" id="cvc" placeholder="CVC">
+      </div>
+      <div class="why">Demo: type anything, or nothing.</div>
+    </div>
+    <button class="rent-btn" id="rent-btn">Pay $35 and start watching</button>
+    <p class="reassure">The film starts the moment payment goes through. Nothing else to set up.</p>
     <p class="gift-line">Giving it to someone? <a href="#" onclick="alert('Gift flow comes next: its own fixed-price checkout so the recipient, not the buyer, gets the access.');return false;">Gift a rental instead</a></p>
   </div>
 </div>
 
 <div class="how">
-  <div><div class="n">1</div><h3>Pay what you want</h3><p>Choose your amount and check out in under a minute. No account to create, no password to invent.</p></div>
-  <div><div class="n">2</div><h3>Start watching immediately</h3><p>The film starts right after checkout. A watch link also lands in your email for later and for your other devices.</p></div>
+  <div><div class="n">1</div><h3>Pay what you want</h3><p>Choose your amount and pay right here. No account to create, no password to invent, no other pages.</p></div>
+  <div><div class="n">2</div><h3>Start watching immediately</h3><p>The film starts the moment payment goes through. A watch link also lands in your email for later and for your other devices.</p></div>
   <div><div class="n">3</div><h3>Any screen, any language</h3><p>Laptop, phone, tablet or TV. Subtitles in eight languages. Pause anywhere, pick up where you left off.</p></div>
 </div>
 
@@ -157,7 +183,7 @@ footer {
   var rent = document.getElementById('rent-btn');
   function setAmount(a) {
     amount = a;
-    rent.textContent = 'Rent for $' + a;
+    rent.textContent = 'Pay $' + a + ' and start watching';
   }
   btns.forEach(function (b) {
     b.onclick = function () {
@@ -175,7 +201,16 @@ footer {
     }
   };
   rent.onclick = function () {
-    location.href = '../checkout/?amt=' + amount;
+    var email = document.getElementById('email').value.trim();
+    if (!email || email.indexOf('@') < 1) {
+      var f = document.getElementById('email');
+      f.focus(); f.style.borderColor = 'var(--error)';
+      return;
+    }
+    rent.disabled = true;
+    rent.textContent = 'Processing…';
+    try { localStorage.setItem('bmats_demo_email', email); } catch (e) {}
+    setTimeout(function () { location.href = '../watch/?welcome=1'; }, 1200);
   };
 })();
 </script>
