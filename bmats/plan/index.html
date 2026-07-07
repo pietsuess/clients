@@ -297,13 +297,13 @@
   <p class="note">One address for everything: watch link in, film plays, no passwords. This becomes the only link we ever send people. Working demo of the whole journey: <a href="https://clients.pietsuess.com/bmats/rent/" target="_blank" rel="noopener" style="color:var(--accent)">the rental page</a> (pay in the small window, the film starts in place; the gift checkout works the same way) and <a href="https://clients.pietsuess.com/bmats/watch/" target="_blank" rel="noopener" style="color:var(--accent)">the watch page</a> with the chat helper. Demo only: no real charges, front-end only for now.</p>
   <div class="secbar"><i></i></div>
   <ul class="tasks">
-    <li data-s="next"><i class="dot"></i>New Cloudflare account for BMATS: Jeremy creates it with the film's email and card, then invites Piet with full access to build there<span class="who">Jeremy</span></li>
+    <li data-s="done"><i class="dot"></i>New Cloudflare account for BMATS: Jeremy created it, Piet is building in it<span class="who">Done · Jul 7</span></li>
     <li data-s="wait"><i class="dot"></i>Move the domain's DNS into that account: main Squarespace site stays exactly as-is, and we gain watch.betweenthemountainandthesky.com<span class="who">Jeremy + Piet</span></li>
     <li data-s="todo"><i class="dot"></i>WATCH and SUPPORT buttons on the main site point to the portal; portal styled to match the main site</li>
     <li data-s="todo"><i class="dot"></i>Kajabi checkout moves onto the film's own domain (checkout.betweenthemountainandthesky.com) so buyers never land on "mykajabi.com" at the payment step</li>
     <li data-s="active"><i class="dot"></i>Checkout opens as a small payment window over the rental page; when payment lands, the page transforms and the film starts right there (demo works; needs the real-checkout test; fallback is the plain redirect)<span class="who">Piet</span></li>
-    <li data-s="active"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database (built and fully tested on this machine; goes live when the Cloudflare account exists)<span class="who">Piet</span></li>
-    <li data-s="active"><i class="dot"></i>Email watch-link login, with a 6-digit code fallback for anyone whose email mangles the link (backend built and tested locally; login page and email sending come next)<span class="who">Piet</span></li>
+    <li data-s="active"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database (database and receiver live on the film's Cloudflare account; last step is pointing Kajabi's webhook at it, needs the Kajabi login)<span class="who">Piet</span></li>
+    <li data-s="active"><i class="dot"></i>Email watch-link login, with a 6-digit code fallback for anyone whose email mangles the link (backend live; login page and email sending come next)<span class="who">Piet</span></li>
     <li data-s="done"><i class="dot"></i>Watch page: film player, subtitle picker, big clear controls<span class="who">Done · Jul 6</span></li>
     <li data-s="done"><i class="dot"></i>"You have access until Aug 19 · 2 days remaining" banner (real dates arrive with the database)<span class="who">Done · Jul 6</span></li>
     <li data-s="active"><i class="dot"></i>Resume where you left off, even on a different device (works on the same device; cross-device needs the database)<span class="who">Piet</span></li>
@@ -331,9 +331,9 @@
   <ul class="tasks">
     <li data-s="active"><i class="dot"></i>Chat helper on every page, including the main site: can't log in / no email / won't play / TV trouble / gift / payment (live on the demo watch page, answers from Jeremy's real support replies)<span class="who">Piet</span></li>
     <li data-s="todo"><i class="dot"></i>"Didn't get your watch link?" resolves itself: the helper re-sends it automatically</li>
-    <li data-s="active"><i class="dot"></i>Helper collects email, device and an optional screenshot before a ticket is filed (email + device collected; screenshot and the ticket database still to come)<span class="who">Piet</span></li>
-    <li data-s="todo"><i class="dot"></i>Every ticket tagged by category, country, device and browser, automatically</li>
-    <li data-s="active"><i class="dot"></i>Admin page for Jeremy: ticket list, one-click "extend access", one-click "resend gift email" (demo live with sample tickets; real data arrives with the database)<span class="who">Piet</span></li>
+    <li data-s="active"><i class="dot"></i>Helper collects email, device and an optional screenshot before a ticket is filed (email + device collected and tickets now land in the real database; screenshot still to come)<span class="who">Piet</span></li>
+    <li data-s="done"><i class="dot"></i>Every ticket tagged by category, country, device and browser, automatically<span class="who">Done · Jul 7</span></li>
+    <li data-s="active"><i class="dot"></i>Admin page for Jeremy: ticket list, one-click "extend access", one-click "resend gift email" (reads the real ticket queue now; extend and resend buttons go live with the email service)<span class="who">Piet</span></li>
     <li data-s="todo"><i class="dot"></i>Refund-reduction ladder built into the admin page: extend first, backup link second, refund last</li>
     <li data-s="todo"><i class="dot"></i>Nightly copy of all tickets into a Google Sheet for easy browsing</li>
   </ul>
@@ -414,7 +414,7 @@
 
 <footer>
   <span>Between the Mountain and the Sky · platform build</span>
-  <span>Last updated July 6, 2026</span>
+  <span>Last updated July 7, 2026</span>
 </footer>
 
 </div>
