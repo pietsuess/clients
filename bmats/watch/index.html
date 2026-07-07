@@ -43,11 +43,25 @@ header {
 }
 
 /* RESUME BAR */
+#welcome-bar {
+  display: none; align-items: center; gap: 14px;
+  width: min(66%, 1150px); margin: 0 auto 14px;
+  background: var(--panel); border: 1px solid var(--gold);
+  border-radius: 8px; padding: 13px 22px;
+}
+#welcome-bar.visible { display: flex; flex-wrap: wrap; }
+#welcome-bar svg { width: 20px; height: 20px; flex: none; stroke: var(--gold); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#welcome-bar .msg { font-size: 15px; color: var(--ink); }
+#welcome-bar .msg b { color: var(--gold); }
+@media (max-width: 900px) { #welcome-bar { width: 100%; } }
+
 #resume-bar {
   display: none; align-items: center; gap: 18px;
+  width: min(66%, 1150px); margin: 0 auto 14px;
   background: var(--panel); border: 1px solid var(--gold);
-  border-radius: 8px; padding: 13px 22px; margin-bottom: 14px;
+  border-radius: 8px; padding: 13px 22px;
 }
+@media (max-width: 900px) { #resume-bar { width: 100%; } }
 #resume-bar.visible { display: flex; flex-wrap: wrap; }
 #resume-bar .msg { font-size: 15px; color: var(--ink); }
 #resume-bar .msg b { color: var(--gold); font-weight: 600; }
@@ -62,10 +76,12 @@ header {
 
 /* PLAYER */
 .video-wrap {
-  position: relative; width: 100%; min-height: 200px;
+  position: relative; width: min(66%, 1150px); min-height: 200px;
+  margin: 0 auto;
   background: #000; border-radius: 10px; overflow: hidden;
 }
 .video-wrap iframe { border: 0; }
+@media (max-width: 900px) { .video-wrap { width: 100%; } }
 #player-fallback {
   position: absolute; inset: 0; display: none;
   flex-direction: column; align-items: center; justify-content: center;
@@ -77,9 +93,10 @@ header {
 
 /* SUBTITLE ROW */
 .subs-row {
-  display: flex; align-items: center; gap: 14px;
-  margin-top: 14px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  width: min(66%, 1150px); margin: 14px auto 0; flex-wrap: wrap;
 }
+@media (max-width: 900px) { .subs-row { width: 100%; justify-content: flex-start; } }
 .subs-row .lbl {
   font-size: 12px; color: var(--dim);
   text-transform: uppercase; letter-spacing: 2px; flex: none;
@@ -212,6 +229,11 @@ footer a:hover { text-decoration: underline; }
   </div>
 </header>
 
+<div id="welcome-bar">
+  <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span class="msg">You are in. Press play whenever you are ready. Your watch link is on its way to <b id="welcome-email">your email</b> for later and for your other devices.</span>
+</div>
+
 <div id="resume-bar">
   <span class="msg">Welcome back. You were at <b id="resume-time"></b>.</span>
   <button id="resume-btn">Resume</button>
@@ -288,6 +310,17 @@ const CONFIG = {
   resumeMinSeconds: 60,      // ignore positions earlier than this
   resumeEndBuffer: 120,      // ignore positions within this many seconds of the end
 };
+
+// ============================================================
+// POST-CHECKOUT WELCOME (demo: ?welcome=1 set by checkout page)
+// ============================================================
+(function () {
+  if (new URLSearchParams(location.search).get('welcome') !== '1') return;
+  let email = '';
+  try { email = localStorage.getItem('bmats_demo_email') || ''; } catch (e) {}
+  if (email) document.getElementById('welcome-email').textContent = email;
+  document.getElementById('welcome-bar').classList.add('visible');
+})();
 
 // ============================================================
 // ACCESS BANNER (portal supplies real dates later)
