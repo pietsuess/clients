@@ -164,7 +164,18 @@ footer {
 <script>
 // Worker URL goes in `endpoint` later. While it is null,
 // tickets load from this browser's localStorage instead.
-const ADMIN = { endpoint: null };
+const ADMIN = { endpoint: 'https://bmats-portal.mpwrchange.workers.dev' };
+// The admin key is asked for once and kept in this browser. Wrong key:
+// it is asked for again on the next reload.
+function adminKey() {
+  var k = null;
+  try { k = localStorage.getItem('bmats_admin_key'); } catch (e) {}
+  if (!k) {
+    k = (prompt('Support desk key:') || '').trim();
+    if (k) { try { localStorage.setItem('bmats_admin_key', k); } catch (e) {} }
+  }
+  return k;
+}
 
 const ICONS = {
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3 7 12 13 21 7"/>',
@@ -184,13 +195,35 @@ function icon(key) {
   var list = document.getElementById('ticket-list');
   var tickets = [];
 
-  function load() {
-    // Future: fetch(ADMIN.endpoint + '/tickets') when the Worker exists.
-    if (!ADMIN.endpoint) {
-      try { tickets = JSON.parse(localStorage.getItem('bmats_tickets') || '[]'); }
-      catch (e) { tickets = []; }
-    }
+  var live = false;
+  function loadLocal() {
+    live = false;
+    try { tickets = JSON.parse(localStorage.getItem('bmats_tickets') || '[]'); }
+    catch (e) { tickets = []; }
     render();
+  }
+  function load() {
+    if (!ADMIN.endpoint) return loadLocal();
+    var k = adminKey();
+    if (!k) return loadLocal();
+    fetch(ADMIN.endpoint + '/api/tickets?key=' + encodeURIComponent(k))
+      .then(function (r) {
+        if (r.status === 401) {
+          try { localStorage.removeItem('bmats_admin_key'); } catch (e) {}
+          throw new Error('bad key');
+        }
+        return r.json();
+      })
+      .then(function (data) {
+        live = true;
+        tickets = (data.tickets || []).map(function (t) {
+          t.at = t.created_at; return t;
+        });
+        render();
+        document.getElementById('src-label').textContent =
+          tickets.length ? 'Live tickets' : 'Live: no tickets yet';
+      })
+      .catch(function () { loadLocal(); });
   }
 
   function save() {
@@ -294,7 +327,7 @@ function icon(key) {
       return;
     }
 
-    document.getElementById('src-label').textContent =
+    if (!live) document.getElementById('src-label').textContent =
       tickets.some(function (t) { return t.sample; }) ? 'Sample data' : 'Local demo data';
 
     // Newest first.
@@ -321,6 +354,7 @@ function icon(key) {
             '<b>From page:</b> ' + esc(t.page || 'unknown') + '<br>' +
             '<b>Help path:</b> ' + esc(t.path || 'none') + '<br>' +
             '<b>Browser:</b> ' + esc(t.ua || 'unknown') +
+            (t.country ? '<br><b>Country:</b> ' + esc(t.country) : '') +
           '</p>' +
           '<div class="actions">' +
             '<button data-act="extend">' + icon('clock') + 'Extend access 48 h</button>' +
@@ -354,7 +388,11 @@ function icon(key) {
           if (act === 'gift') quietDone('Done. Gift email resent.');
           if (act === 'resolve') {
             t.status = t.status === 'resolved' ? 'open' : 'resolved';
-            save();
+            if (live && t.id) {
+              fetch(ADMIN.endpoint + '/api/ticket/status?key=' + encodeURIComponent(adminKey()), {
+                method: 'POST', body: JSON.stringify({ id: t.id, status: t.status }),
+              });
+            } else { save(); }
             var pill = card.querySelector('.pill');
             pill.className = 'pill ' + (t.status === 'resolved' ? 'resolved' : 'open');
             pill.textContent = t.status === 'resolved' ? 'Resolved' : 'Open';
