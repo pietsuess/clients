@@ -66,12 +66,18 @@ section { position: relative; padding: 110px 4vw; }
 iframe.video { width: min(1100px, 92vw); aspect-ratio: 16 / 9; border: 0; display: block; margin: 44px auto 0; }
 
 /* ---------- 1. hero ---------- */
-#hero { min-height: calc(100vh - 144px); display: flex; align-items: center; justify-content: center; }
+/* Live hero is a short band (~27% of viewport width); video crops top/bottom via object-fit */
+#hero {
+  height: clamp(430px, 27vw, 60vh); padding: 30px 4vw;
+  display: flex; align-items: center; justify-content: center;
+}
 #hero .inner { text-align: center; }
-#hero img.logo { width: min(600px, 58vw); display: block; margin: 0 auto 60px; }
+#hero img.logo { width: clamp(240px, 34vw, 600px); display: block; margin: 0 auto 36px; }
 #hero h4 {
-  font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 500;
-  font-size: clamp(18px, 1.45vw, 24px); max-width: 1480px; margin: 0 auto; opacity: 0.96;
+  /* Live site: h4 + strong in the heading font (Orpheus Pro), size ~0.24vw + 1rem */
+  font-family: var(--head); font-weight: 700;
+  font-size: clamp(17px, 0.24vw + 1rem, 22px); line-height: 1.5;
+  max-width: min(1200px, 78vw); margin: 0 auto;
 }
 
 /* ---------- 2. event ---------- */
