@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Between The Mountain And The Sky</title>
+<meta name="description" content="Filmed over twenty years around the world. The powerful true story of how one woman's heart opened wide enough to hold fifty children and change their lives forever.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&display=swap" rel="stylesheet">
+<style>
+/* Faithful rebuild of betweenthemountainandthesky.com (Squarespace).
+   Headings on the live site are Orpheus Pro 400 (Adobe); Marcellus is the
+   free stand-in until fonts are settled. Palette is the site's own:
+   pure black / pure white / #f6f6f6 / #d9d9d9 grayscale.
+   Dev images point at the Squarespace CDN; self-host before launch. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --black: #000; --white: #fff; --light: #f6f6f6; --accent: #d9d9d9;
+  --head: 'Marcellus', 'Times New Roman', serif;
+  --body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--body); font-weight: 400; background: var(--black); color: var(--white); }
+h1, h2, h3, h4 { font-family: var(--head); font-weight: 400; line-height: 1.12; }
+p { line-height: 1.6; text-align: justify; text-align-last: left; text-wrap: pretty; }
+
+/* ---------- header ---------- */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 4vw; transition: background 0.35s ease;
+}
+header.solid { background: rgba(0,0,0,0.92); }
+.brand { font-family: var(--head); font-size: 17px; letter-spacing: 2.5px; color: var(--white); text-decoration: none; white-space: nowrap; }
+nav { display: flex; align-items: center; gap: 2.4vw; }
+nav a { color: var(--white); text-decoration: none; font-size: 13px; letter-spacing: 2px; }
+nav a:hover { opacity: 0.65; }
+nav a.cta { border: 1px solid var(--white); padding: 10px 22px; }
+nav a.cta:hover { background: var(--white); color: var(--black); opacity: 1; }
+
+/* ---------- shared section chrome ---------- */
+section { position: relative; padding: 110px 4vw; }
+.bgimg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.bgimg.dim::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+.inner { position: relative; z-index: 1; width: 100%; }
+.s-white { background: var(--white); color: var(--black); }
+.s-light { background: var(--light); color: var(--black); }
+.s-black { background: var(--black); color: var(--white); }
+.center { text-align: center; }
+.center p { text-align: center; text-align-last: center; }
+.kicker { font-family: var(--body); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.75; }
+.btn {
+  display: inline-block; border: 1px solid currentColor; padding: 16px 34px;
+  font-family: var(--body); font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: inherit; text-decoration: none; margin: 10px 12px 0 0;
+}
+.btn:hover { background: var(--white); color: var(--black); border-color: var(--white); }
+.s-white .btn:hover, .s-light .btn:hover { background: var(--black); color: var(--white); border-color: var(--black); }
+iframe.video { width: min(1100px, 92vw); aspect-ratio: 16 / 9; border: 0; display: block; margin: 44px auto 0; }
+
+/* ---------- 1. hero ---------- */
+#hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding-top: 140px; }
+#hero .inner { text-align: center; }
+#hero img.logo { width: min(760px, 82vw); display: block; margin: 0 auto 42px; }
+#hero h4 { font-size: clamp(20px, 1.9vw, 28px); max-width: none; opacity: 0.95; }
+
+/* ---------- 2. event ---------- */
+#event h2.line1 { font-size: clamp(30px, 3.4vw, 52px); letter-spacing: 2px; }
+#event h2.line2 { font-size: clamp(40px, 5vw, 78px); letter-spacing: 3px; margin-top: 6px; }
+#event h3 { font-size: clamp(19px, 1.7vw, 26px); margin-top: 26px; opacity: 0.95; }
+#event h4 { font-size: clamp(16px, 1.3vw, 20px); margin-top: 34px; opacity: 0.85; }
+
+/* ---------- quote rows ---------- */
+.quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4vw; }
+.quotes blockquote h3 { font-size: clamp(22px, 2vw, 32px); }
+.quotes blockquote h4 { font-family: var(--body); font-size: 12.5px; letter-spacing: 2.5px; margin-top: 16px; opacity: 0.7; }
+
+/* ---------- section titles ---------- */
+.sec-title { font-size: clamp(28px, 3vw, 46px); letter-spacing: 2px; }
+
+/* ---------- 6. letterboxd marquee ---------- */
+#letterboxd { padding: 64px 0; overflow: hidden; }
+#letterboxd img { height: 30px; display: block; margin: 0 auto 34px; }
+.marquee { display: flex; width: max-content; animation: scroll 70s linear infinite; }
+.marquee span { font-family: var(--head); font-size: clamp(20px, 1.9vw, 30px); white-space: nowrap; padding-right: 3.2em; }
+.marquee span i { font-style: normal; opacity: 0.45; padding-left: 3.2em; }
+@keyframes scroll { to { transform: translateX(-50%); } }
+
+/* ---------- 9. awards ---------- */
+#awards li { list-style: none; font-size: clamp(14px, 1.15vw, 18px); letter-spacing: 1.5px; line-height: 2.15; }
+
+/* ---------- 10. reviews ---------- */
+#reviews .logos { display: flex; align-items: center; justify-content: center; gap: 60px; margin-top: 44px; flex-wrap: wrap; }
+#reviews .logos img { height: 52px; }
+
+/* ---------- 11. the film ---------- */
+#film .cols { display: grid; grid-template-columns: 1.5fr 1fr; gap: 5vw; align-items: center; }
+#film p { font-size: clamp(16px, 1.3vw, 20px); margin-top: 22px; }
+#film img { width: 100%; box-shadow: 0 22px 60px rgba(0,0,0,0.35); }
+
+/* ---------- 12. the book ---------- */
+#book .cols { display: grid; grid-template-columns: 1fr 1.6fr; gap: 5vw; align-items: center; }
+#book img.cover { width: min(340px, 100%); box-shadow: 0 22px 60px rgba(0,0,0,0.5); }
+#book h3 { font-size: clamp(22px, 2vw, 32px); margin: 18px 0 26px; }
+#book h4 { font-size: clamp(15px, 1.25vw, 19px); font-family: var(--body); line-height: 1.65; margin-top: 22px; opacity: 0.92; }
+
+/* ---------- 13. impact ---------- */
+#impact .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4vw; margin-top: 60px; }
+#impact h3 { font-size: clamp(48px, 5.5vw, 92px); }
+#impact h4 { font-family: var(--body); font-size: 13px; letter-spacing: 3px; margin-top: 14px; opacity: 0.7; }
+
+/* ---------- footer ---------- */
+footer { position: relative; padding: 120px 4vw 46px; text-align: center; }
+footer .bgimg::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.72); }
+footer .inner { position: relative; z-index: 1; }
+footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block; }
+#join input {
+  width: min(360px, 80vw); padding: 15px 18px; font-family: var(--body); font-size: 15px;
+  background: transparent; border: 1px solid rgba(255,255,255,0.5); color: var(--white); outline: none;
+}
+#join input:focus { border-color: var(--white); }
+#join button {
+  padding: 15px 30px; margin-left: 10px; font-family: var(--body); font-size: 13px;
+  letter-spacing: 2.5px; text-transform: uppercase; background: var(--white);
+  border: 1px solid var(--white); color: var(--black); cursor: pointer;
+}
+.socials { display: flex; justify-content: center; gap: 28px; margin: 54px 0 40px; }
+.socials a { color: var(--white); opacity: 0.8; }
+.socials a:hover { opacity: 1; }
+.socials svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.legal { font-size: 12px; letter-spacing: 1.5px; opacity: 0.55; text-align: center; text-align-last: center; }
+
+@media (max-width: 900px) {
+  nav { gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
+  .quotes, #film .cols, #book .cols, #impact .stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header id="hdr">
+  <a class="brand" href="./">BETWEEN THE MOUNTAIN AND THE SKY</a>
+  <nav>
+    <a href="watch/">WATCH</a>
+    <a href="impact/">SUPPORT</a>
+    <a href="screening/">HOST A SCREENING</a>
+    <a href="press/">PRESS</a>
+    <a href="share/">SHARE</a>
+    <a class="cta" href="#join">JOIN THE FAMILY</a>
+  </nav>
+</header>
+
+<!-- 1. HERO -->
+<section id="hero">
+  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/203ded15-5e57-4c57-8fb7-f760008aa750/BMS_R1_01-07-17-16-%281080p%29.jpg')"></div>
+  <div class="inner">
+    <img class="logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/ca222037-5f06-4f61-a6ee-6f778f37dc32/BTMATS_Logo_DBP%2Bfilmby.png" alt="Between the Mountain and the Sky - a film by Jeremy Power Regimbal, from the Duplass Brothers">
+    <h4>Filmed over twenty years around the world. The powerful true story of how one woman's heart opened wide enough to hold fifty children and change their lives forever.</h4>
+  </div>
+</section>
+
+<!-- 2. GLOBAL SCREENING EVENT -->
+<section id="event" class="center">
+  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/7fd8133f-43df-43b9-b0ca-c192af1b1a91/BTMATS_WEDDING_BUBBLES_KIDS0.jpg')"></div>
+  <div class="inner">
+    <h2 class="line1">JOIN OUR NEXT GLOBAL SCREENING</h2>
+    <h2 class="line2">AUGUST 12-19, 2026</h2>
+    <h3>Join audiences around the world for a special one-week screening event in celebration of International Youth Day and World Humanitarian Day.</h3>
+    <iframe class="video" src="https://player.vimeo.com/video/1125376775" title="Global screening event" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+    <h4>Thank you to our community around the world for helping this story travel to more than 20 countries.</h4>
+  </div>
+</section>
+
+<!-- 3. QUOTES -->
+<section class="s-white">
+  <div class="inner quotes">
+    <blockquote><h3>&ldquo;Huge and world changing.&rdquo;</h3><h4>CHERYL STRAYED, AUTHOR</h4></blockquote>
+    <blockquote><h3>&ldquo;Vibrates with love and meaning&rdquo;</h3><h4>BENNETT MILLER, DIRECTOR</h4></blockquote>
+    <blockquote><h3>&ldquo;One of the best films I&rsquo;ve seen in a long time.&rdquo;</h3><h4>EDWARD NORTON, ACTOR</h4></blockquote>
+  </div>
+</section>
+
+<!-- 4. TRAILER -->
+<section class="s-black center">
+  <div class="inner">
+    <h2 class="sec-title">FILM TRAILER</h2>
+    <iframe class="video" src="https://www.youtube.com/embed/MIaRuiLEABI" title="Film trailer" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+  </div>
+</section>
+
+<!-- 5. OTHER WAYS TO WATCH -->
+<section id="otherways" class="center">
+  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/410c55f4-b01d-419b-b3e2-fe05223e77fb/3J8A1527.JPG')"></div>
+  <div class="inner">
+    <h2 class="sec-title">OTHER WAYS TO WATCH THE FILM?</h2>
+    <p style="text-align:center;text-align-last:center;margin-top:22px">Gather people you care about and experience the film together.<br>We continue to share the film in theaters and special events around the world.</p>
+    <a class="btn" href="watch/">ATTEND IN PERSON SCREENING</a>
+    <a class="btn" href="screening/">HOST A SCREENING</a>
+  </div>
+</section>
+
+<!-- 6. LETTERBOXD MARQUEE -->
+<section id="letterboxd" class="s-white">
+  <img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/4750af35-f8d1-44ae-be06-5a98a3b65189/letterboxd-logo-v-pos-rgb-1000px.png" alt="Letterboxd">
+  <div class="marquee">
+    <span>Raw and immediate &ndash; David Phillips<i>&bull;</i></span>
+    <span>Cried thru the whole thing &ndash; Miagleason48<i>&bull;</i></span>
+    <span>Such a beautiful movie &ndash; graciesastre<i>&bull;</i></span>
+    <span>So remarkable &ndash; Michael<i>&bull;</i></span>
+    <span>Stunning visuals combined with an incredibly heartfelt and compelling story &ndash; Izzy<i>&bull;</i></span>
+    <span>A reminder of what love can do &ndash; bozosbeboolin<i>&bull;</i></span>
+    <span>Maybe the best documentary I have ever seen. &ndash; RedShoeBrian<i>&bull;</i></span>
+    <span>You gotta be doing some real good work to meet the Dalai Lama. Truly incredible doc. &ndash; rayray14000<i>&bull;</i></span>
+    <span>Raw and immediate &ndash; David Phillips<i>&bull;</i></span>
+    <span>Cried thru the whole thing &ndash; Miagleason48<i>&bull;</i></span>
+    <span>Such a beautiful movie &ndash; graciesastre<i>&bull;</i></span>
+    <span>So remarkable &ndash; Michael<i>&bull;</i></span>
+    <span>Stunning visuals combined with an incredibly heartfelt and compelling story &ndash; Izzy<i>&bull;</i></span>
+    <span>A reminder of what love can do &ndash; bozosbeboolin<i>&bull;</i></span>
+    <span>Maybe the best documentary I have ever seen. &ndash; RedShoeBrian<i>&bull;</i></span>
+    <span>You gotta be doing some real good work to meet the Dalai Lama. Truly incredible doc. &ndash; rayray14000<i>&bull;</i></span>
+  </div>
+</section>
+
+<!-- 7. CNN HEROES -->
+<section class="s-light center">
+  <div class="inner">
+    <h2 class="sec-title">MAGGIE DOYNE CNN HEROES</h2>
+    <iframe class="video" src="https://www.youtube.com/embed/HpXsUXj4sMA" title="Maggie Doyne CNN Heroes" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+  </div>
+</section>
+
+<!-- 8. PRESS QUOTES -->
+<section class="s-white">
+  <div class="inner quotes">
+    <blockquote><h3>&ldquo;Meta-romance&rdquo;</h3><h4>INDIEWIRE</h4></blockquote>
+    <blockquote><h3>&ldquo;Reminder of what humans are capable of.&rdquo;</h3><h4>KATHMANDU POST</h4></blockquote>
+    <blockquote><h3>&ldquo;Breathtaking&rdquo;</h3><h4>UK FILM AWARDS</h4></blockquote>
+  </div>
+</section>
+
+<!-- 9. AWARDS -->
+<section id="awards" class="center">
+  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/7a59b9a8-f773-48bf-bb50-e736b97bc1d2/MountainFilm_Awards.jpg')"></div>
+  <div class="inner">
+    <h2 class="sec-title">30+ FESTIVALS AWARDS WORLDWIDE</h2>
+    <h4 class="kicker" style="margin:26px 0 30px">INCLUDING</h4>
+    <ul>
+      <li>TELLURIDE MOUNTAINFILM FESTIVAL // AUDIENCE CHOICE &amp; STUDENT CHOICE</li>
+      <li>NAPLES INTERNATIONAL FILM FESTIVAL // JURY AWARD &amp; AUDIENCE CHOICE</li>
+      <li>PORT TOWNSEND FILM FEST // AUDIENCE CHOICE</li>
+      <li>DUBLIN INDEPENDENT FILM FESTIVAL // BEST DOCUMENTARY</li>
+      <li>PRAGUE FILM AWARDS // BEST DOCUMENTARY</li>
+      <li>SEDONA FILM FESTIVAL // AUDIENCE CHOICE</li>
+      <li>JAKARTA INDEPENDENT FILM FESTIVAL // BEST INTERNATIONAL DOCUMENTARY</li>
+      <li>CARMEL INTERNATIONAL FILM FESTIVAL // BEST DOCUMENTARY</li>
+      <li>GORGE IMPACT FESTIVAL // BEST OVERALL IMPACT FILM</li>
+      <li>UK FILM AWARDS // BEST DOCUMENTARY</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 10. REVIEWS -->
+<section id="reviews" class="s-white center">
+  <div class="inner">
+    <h2 class="sec-title">Leave us a review!</h2>
+    <div class="logos">
+      <a href="https://www.rottentomatoes.com/m/between_the_mountain_and_the_sky" target="_blank" rel="noopener"><img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/db5eb1ee-d4a1-4739-a329-282920816049/rottentomatoes_logo_40.336d6fe66ff.png" alt="Rotten Tomatoes"></a>
+      <a href="https://www.imdb.com/title/tt8721632/" target="_blank" rel="noopener"><img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/e32d34ce-cb1c-411e-9d54-c635c7c552db/IMDB_Logo_2016.svg.png" alt="IMDb"></a>
+    </div>
+  </div>
+</section>
+
+<!-- 11. THE FILM -->
+<section id="film" class="s-light">
+  <div class="inner cols">
+    <div>
+      <h2 class="sec-title">THE FILM</h2>
+      <p>From the Duplass Brothers, Between the Mountain and the Sky follows CNN Hero Maggie Doyne and Top Malla over twenty years as they build a home that becomes a family to more than fifty orphaned children in Nepal.</p>
+      <p>Through a mix of raw home videos and v&eacute;rit&eacute; footage captured through a lens of love, the film reaches a rare level of intimacy, resisting staged interviews, makeup, and talking heads to reveal something deeper.</p>
+      <p>Honest, soul-baring, and deeply human, it reminds us that healing begins the moment we stop pretending we&rsquo;re unbreakable.</p>
+    </div>
+    <img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/32abd643-64a3-414b-aba5-30ff31f2e2a4/BTMATS+27x40+FINAL+%400.25x.jpg" alt="Between the Mountain and the Sky film poster">
+  </div>
+</section>
+
+<!-- 12. THE BOOK -->
+<section id="book">
+  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/8cf85ae1-b565-4a52-a267-5eb7d94cc0f0/3J8A1724.JPG')"></div>
+  <div class="inner cols">
+    <img class="cover" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/95e1a02b-8f85-44d8-90aa-8bcd4f806161/FINAL_BOOK_COVER_lowres.png" alt="Between the Mountain and the Sky book cover">
+    <div>
+      <h2 class="sec-title">THE BOOK</h2>
+      <h3>Over 85,000 copies sold globally!</h3>
+      <h4>&ldquo;Maggie has the courage to act for good when she sees a need and the conscience to use her privilege to empower others. She is a heart warrior of the first order.&rdquo; Cheryl Strayed, #1 New York Times bestselling author</h4>
+      <h4>&ldquo;Where others look upon poverty and injustice and either turn their heads away or shut down in hopeless despair, Maggie gets to work saving lives, one child at a time. She is what I wish I could be.&rdquo;</h4>
+    </div>
+  </div>
+</section>
+
+<!-- 13. IMPACT -->
+<section id="impact" class="center">
+  <div class="inner">
+    <h2 class="sec-title">OUR IMPACT TO DATE!</h2>
+    <div class="stats">
+      <div><h3>800,000+</h3><h4>SOCIAL MEDIA FOLLOWERS</h4></div>
+      <div><h3>18 MILLION+</h3><h4>PEOPLE REACHED ONLINE</h4></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / JOIN -->
+<footer id="join">
+  <div class="bgimg" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/d72f002f-e852-43a4-800c-87dadcc70b73/BTMATS_CLIP_1-STILL_Water0.jpg')"></div>
+  <div class="inner">
+    <img class="title" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/c0bf776e-86c4-4e29-b64e-ec9547f4a0de/BTMATS+TITLE.png" alt="Between the Mountain and the Sky">
+    <h3 style="font-size:clamp(20px,1.8vw,28px);margin-bottom:26px">JOIN THE FAMILY</h3>
+    <form onsubmit="return false" title="Mailchimp signup wires in here">
+      <input type="email" placeholder="Email address" aria-label="Email address">
+      <button type="submit">SIGN UP</button>
+    </form>
+    <div class="socials">
+      <a href="https://www.instagram.com/betweenthemountain" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="0.9" fill="currentColor" stroke="none"/></svg></a>
+      <a href="https://www.facebook.com/BetweenTheMountain" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M14 8h3V4.5h-3c-2.2 0-4 1.8-4 4V11H7v3.5h3V21h3.5v-6.5h3l0.5-3.5h-3.5V8.7c0-.4.3-.7.5-.7z"/></svg></a>
+    </div>
+    <p class="legal">&copy; LLFMC PRODUCTIONS INC. All rights reserved</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var hdr = document.getElementById('hdr');
+  addEventListener('scroll', function () {
+    hdr.classList.toggle('solid', scrollY > 40);
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
