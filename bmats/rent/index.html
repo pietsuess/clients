@@ -49,14 +49,48 @@ header { text-align: center; padding: 60px 0 10px; }
 }
 .sub { color: var(--dim); font-size: 15px; margin-top: 12px; text-align: center; text-align-last: center; }
 
-.rent-grid {
-  display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px;
-  margin-top: 48px; align-items: start;
-}
-@media (max-width: 900px) { .rent-grid { grid-template-columns: 1fr; } }
+.rent-wrap { max-width: 640px; margin: 48px auto 0; }
 
-.trailer-wrap { background: #000; overflow: hidden; }
-.trailer-wrap iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+.head-row { display: flex; align-items: center; justify-content: center; gap: clamp(22px, 6vw, 70px); }
+.head-side {
+  font-family: var(--head); font-weight: 400; text-transform: uppercase;
+  font-size: clamp(24px, 4.5vw, 50px); letter-spacing: 0.08em;
+  color: var(--ink); text-decoration: none; line-height: 1;
+}
+.head-side:hover { color: var(--gold); }
+.head-side.here { color: var(--gold); }
+
+.trailer-mini {
+  display: flex; align-items: center; gap: 16px; width: 100%;
+  margin-top: 22px; padding: 10px 14px;
+  background: var(--panel); border: 1px solid var(--line); cursor: pointer;
+  font-family: var(--garamond); color: var(--ink); text-align: left;
+}
+.trailer-mini:hover { border-color: var(--gold); }
+.tm-thumb { position: relative; flex: none; width: 118px; }
+.tm-thumb img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.tm-play {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+}
+.tm-play::after {
+  content: ""; border-style: solid; border-width: 9px 0 9px 15px;
+  border-color: transparent transparent transparent #fff;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.7));
+}
+.tm-label { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
+
+.film-reveal { display: none; background: #000; margin-top: 48px; }
+.film-reveal.on { display: block; }
+.film-reveal iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+
+.tlb { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.88); }
+.tlb.on { display: flex; }
+.tlb .box { width: min(1100px, 92vw); }
+.tlb iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000; }
+.tlb .x {
+  position: absolute; top: 14px; right: 20px; background: none; border: none;
+  color: #fff; font-size: 38px; line-height: 1; cursor: pointer;
+}
 
 .buy-card {
   background: var(--panel); border: 1px solid var(--line);
@@ -106,31 +140,22 @@ header { text-align: center; padding: 60px 0 10px; }
 .gift-line a { color: var(--gold); text-decoration: none; }
 .gift-line a:hover { text-decoration: underline; }
 
-.how {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 56px;
-}
-@media (max-width: 700px) { .how { grid-template-columns: 1fr; } }
-.how div { background: var(--panel); border: 1px solid var(--line); padding: 26px 24px 22px; }
-.how .n { font-family: var(--head); font-size: 38px; color: var(--gold); line-height: 1; margin-bottom: 12px; }
-.how h3 { font-family: var(--head); font-weight: 400; font-size: 19px; color: var(--ink); margin-bottom: 7px; }
-.how p { font-size: 13.5px; color: var(--dim); line-height: 1.65; }
-
 footer {
   margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--line);
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;
   font-size: 12px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase;
 }
 /* CHAT HELPER */
 #chat-btn {
   position: fixed; right: 26px; bottom: 26px; z-index: 90;
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 24px; border: 1px solid var(--gold);
-  background: var(--gold); color: var(--bg); cursor: pointer;
+  padding: 14px 24px; border: 1px solid #FFF5CC; border-radius: 10px;
+  background: #FFF5CC; color: var(--bg); cursor: pointer;
   font-family: var(--garamond); font-size: 14px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 1.5px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.5);
 }
-#chat-btn:hover { background: var(--gold-hover); }
+#chat-btn:hover { background: #FFEFB0; border-color: #FFEFB0; }
 #chat-btn svg { width: 17px; height: 17px; stroke: var(--bg); fill: none; stroke-width: 2; }
 #chat-panel {
   position: fixed; right: 26px; bottom: 26px; z-index: 95;
@@ -190,16 +215,16 @@ footer {
 <div class="demo-note">Demo of the new rental flow. No real charges anywhere in it.</div>
 
 <header>
-  <img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+  <div class="head-row">
+    <a class="head-side here" href="../rent/">Rent</a>
+    <img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+    <a class="head-side" href="../watch/">Watch</a>
+  </div>
   <div class="tagline">A story about love, loss, and what it means to be a family.</div>
   <p class="sub">Take your time. Watch it somewhere quiet.</p>
 </header>
 
-<div class="rent-grid">
-  <div class="trailer-wrap">
-    <iframe src="https://player.vimeo.com/video/1176765781?h=85eb142609&badge=0&title=0&byline=0&portrait=0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Between the Mountain and the Sky – Trailer"></iframe>
-  </div>
-
+<div class="rent-wrap">
   <div class="buy-card">
     <h2>Rent the film</h2>
     <p class="terms">7 days of access · watch as many times as you like · subtitles in 8 languages</p>
@@ -226,17 +251,24 @@ footer {
     <p class="reassure" id="popup-fallback" style="display:none">Nothing opened? Your browser blocked the window. <a href="#" id="popup-retry" style="color:var(--gold)">Open checkout</a></p>
     <p class="gift-line">Giving it to someone? <a href="#" id="gift-link">Gift a rental instead</a></p>
   </div>
+
+  <button class="trailer-mini" id="trailer-mini" aria-label="Watch the trailer">
+    <span class="tm-thumb"><img src="https://i.vimeocdn.com/video/2140688108-0f4599aabaf8596fd1239f4b2b73ae44a59bf9171fb9d8c9a757734953f8b2fc-d_640x360?region=us" alt=""><i class="tm-play"></i></span>
+    <span class="tm-label">Watch the trailer</span>
+  </button>
 </div>
 
-<div class="how">
-  <div><div class="n">1</div><h3>Pay what you want</h3><p>Choose your amount and pay right here. No account to create, no password to invent, no other pages.</p></div>
-  <div><div class="n">2</div><h3>Start watching immediately</h3><p>The film starts the moment payment goes through. A watch link also lands in your email for later and for your other devices.</p></div>
-  <div><div class="n">3</div><h3>Any screen, any language</h3><p>Laptop, phone, tablet or TV. Subtitles in eight languages. Pause anywhere, pick up where you left off.</p></div>
+<div class="film-reveal">
+  <iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Between the Mountain and the Sky"></iframe>
+</div>
+
+<div class="tlb" id="tlb">
+  <button class="x" id="tlb-close" aria-label="Close">&times;</button>
+  <div class="box"><iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Between the Mountain and the Sky - Trailer"></iframe></div>
 </div>
 
 <footer>
   <span>Between the Mountain and the Sky</span>
-  <span>Demo build for the August platform</span>
 </footer>
 </div>
 
@@ -347,9 +379,10 @@ footer {
         ? '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>'
         : '');
     if (g.bump) {
-      var frame = document.querySelector('.trailer-wrap iframe');
-      frame.src = 'https://player.vimeo.com/video/1074813658?badge=0&title=0&byline=0&portrait=0&autoplay=1';
-      frame.closest('.trailer-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var reveal = document.querySelector('.film-reveal');
+      reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?autoplay=true';
+      reveal.classList.add('on');
+      reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 
@@ -384,10 +417,22 @@ footer {
       ' for later and for your other devices.</p>' +
       '<p class="impact"><b>Thank you.</b> 40% of your rental goes directly to BlinkNow.</p>' +
       '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>';
-    var frame = document.querySelector('.trailer-wrap iframe');
-    frame.src = 'https://player.vimeo.com/video/1074813658?badge=0&title=0&byline=0&portrait=0&autoplay=1';
-    frame.closest('.trailer-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var reveal = document.querySelector('.film-reveal');
+    reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?autoplay=true';
+    reveal.classList.add('on');
+    reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+  // Trailer lightbox
+  var tlb = document.getElementById('tlb');
+  var tlbFrame = tlb.querySelector('iframe');
+  document.getElementById('trailer-mini').addEventListener('click', function () {
+    tlbFrame.src = 'https://player.vimeo.com/video/1176765781?h=85eb142609&badge=0&title=0&byline=0&portrait=0&autoplay=1';
+    tlb.classList.add('on');
+  });
+  function closeTlb() { tlb.classList.remove('on'); tlbFrame.src = ''; }
+  document.getElementById('tlb-close').addEventListener('click', closeTlb);
+  tlb.addEventListener('click', function (ev) { if (ev.target === tlb) closeTlb(); });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && tlb.classList.contains('on')) closeTlb(); });
 })();
 </script>
 <!-- CHAT HELPER -->
