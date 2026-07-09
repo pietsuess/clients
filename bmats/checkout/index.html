@@ -5,19 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>Secure Checkout – Between the Mountain and the Sky</title>
+<link rel="preconnect" href="https://use.typekit.net" crossorigin>
+<link rel="preconnect" href="https://p.typekit.net" crossorigin>
+<script src="https://use.typekit.net/ik/X01M4aqSR570kJC_RHwm3lkTn_2_ppxFkrYQiE5kwLtfe7CgfFHN4UJLFRbh52jhWDjhFhsyFcJ3Z2JUwhwaF2MojQZRFDStjyGMJ6lzS1gGZWmDOWgkdkJPjAszjc9lZhBkjAuzdcblSY4zH6GJE_tgIMMjgfMfH6GJujXfIMMjgPMfH6GJEdtgIMMjgkMfH6GJEntgIMMj2KMfH6qJvDbbMs6IJMJ7fbR3FgMgeMS6MKG4fVJXIMIj2KMfH6qJvQbbMs6sJMHbMZczqO9e.js" async></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Stands in for the Kajabi checkout, skinned to the film.
    The real one is Kajabi's page on checkout.betweenthemountainandthesky.com. */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
-  --bg: #1a1610; --panel: #241f18; --panel-deep: #16120d; --line: #3a3228;
-  --ink: #e8dcc8; --body: #d4c9b8; --dim: #8a7e6e; --gold: #c4a265;
-  --gold-hover: #d4b275; --error: #c45c4a; --ok: #7da76a;
+  --bg: #000; --panel: #0e0e0e; --panel-deep: #000; --line: rgba(255,255,255,0.16);
+  --ink: #fff; --body: #d9d9d9; --dim: #8f8f8f; --gold: #FDC803;
+  --gold-hover: #ffd63a; --error: #c45c4a; --ok: #7da76a;
+  --head: 'orpheus-pro', 'Marcellus', 'Times New Roman', serif;
+  --sans: 'Helvetica Neue', Arial, sans-serif;
+  --garamond: 'adobe-garamond-pro', 'Cormorant Garamond', Georgia, serif;
 }
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--sans); letter-spacing: -0.01em;
   background: var(--bg); color: var(--body); min-height: 100vh;
   padding: 26px 22px 40px;
 }
@@ -25,18 +31,18 @@ body {
 .demo-tag { text-align: center; font-size: 10.5px; color: var(--dim); letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 20px; }
 .film-line { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 14px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
 .film-line .t { font-size: 14px; color: var(--ink); font-weight: 500; padding-right: 12px; }
-.film-line .amt { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 30px; color: var(--gold); }
+.film-line .amt { font-family: var(--sans); font-weight: 700; font-size: 26px; color: var(--gold); }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.8px; margin-bottom: 6px; }
 .field input {
   width: 100%; padding: 12px 15px; font-family: inherit; font-size: 16px;
-  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel-deep); border: 1px solid var(--line); 
   color: var(--ink); outline: none;
 }
 .field input:focus { border-color: var(--gold); }
 .field textarea {
   width: 100%; padding: 12px 15px; font-family: inherit; font-size: 15px;
-  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel-deep); border: 1px solid var(--line); 
   color: var(--ink); outline: none; resize: vertical;
 }
 .field textarea:focus { border-color: var(--gold); }
@@ -51,15 +57,15 @@ body.gift .gift-only { display: block; }
 }
 .bump {
   display: flex; gap: 11px; align-items: flex-start; cursor: pointer;
-  background: var(--panel-deep); border: 1px solid var(--line); border-radius: 8px;
+  background: var(--panel-deep); border: 1px solid var(--line); 
   padding: 13px 15px; margin-bottom: 14px; font-size: 13px; line-height: 1.5; color: var(--dim);
 }
 .bump input { margin-top: 3px; accent-color: var(--gold); }
 .bump b { color: var(--ink); font-size: 13.5px; }
 #pay-btn {
-  width: 100%; padding: 15px 0; margin-top: 6px; font-family: inherit;
-  font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-  background: var(--gold); color: var(--bg); border: none; border-radius: 8px; cursor: pointer;
+  width: 100%; padding: 16px 0; margin-top: 6px; font-family: var(--garamond);
+  font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+  background: var(--gold); color: var(--bg); border: none; cursor: pointer;
 }
 #pay-btn:hover { background: var(--gold-hover); }
 #pay-btn:disabled { opacity: 0.6; cursor: default; }
@@ -67,7 +73,7 @@ body.gift .gift-only { display: block; }
 #done { display: none; text-align: center; padding: 40px 10px; }
 #done.visible { display: block; }
 #done svg { width: 46px; height: 46px; stroke: var(--ok); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 14px; }
-#done .big { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; color: var(--ink); margin-bottom: 8px; }
+#done .big { font-family: var(--head); font-size: 26px; color: var(--ink); margin-bottom: 8px; }
 #done .small { font-size: 13.5px; color: var(--dim); }
 </style>
 </head>
@@ -209,6 +215,7 @@ body.gift .gift-only { display: block; }
       done.classList.add('visible');
       setTimeout(function () {
         if (window.opener) window.close();
+        else if (window !== window.top) { /* in the rent-page modal: the parent sees the storage event and closes it */ }
         else location.href = isGift ? '../rent/' : '../watch/?welcome=1';
       }, 1600);
     }, 1300);
