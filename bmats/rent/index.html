@@ -79,7 +79,7 @@ header { text-align: center; padding: 60px 0 10px; }
 }
 .tm-label { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
 
-.film-reveal { display: none; background: #000; margin-top: 48px; }
+.film-reveal { display: none; background: #000; margin: 48px auto 0; max-width: 860px; }
 .film-reveal.on { display: block; }
 .film-reveal iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
 
@@ -247,7 +247,7 @@ footer {
       <div class="why">Your watch link goes here. It is the only thing you ever need to get back in; there is no password.</div>
     </div>
     <button class="rent-btn" id="rent-btn">Pay $35 and start watching</button>
-    <p class="reassure">Payment opens in a small secure window. The film starts right here the moment it goes through.</p>
+    <p class="reassure">Payment opens in a small secure window. The film unlocks right here the moment it goes through.</p>
     <p class="reassure" id="popup-fallback" style="display:none">Nothing opened? Your browser blocked the window. <a href="#" id="popup-retry" style="color:var(--gold)">Open checkout</a></p>
     <p class="gift-line">Giving it to someone? <a href="#" id="gift-link">Gift a rental instead</a></p>
   </div>
@@ -372,7 +372,7 @@ footer {
       (g.msg ? ' Your note rides along on it.' : '') +
       ' You get the receipt and a copy of the gift email, so you can always forward it yourself.</p>' +
       (g.bump
-        ? '<p class="terms">Your own rental came with it. The film is playing on this page, and your watch link is on its way to <b style="color:var(--gold)">' + esc(g.buyerEmail) + '</b>.</p>'
+        ? '<p class="terms">Your own rental came with it. The film is ready to play on this page, and your watch link is on its way to <b style="color:var(--gold)">' + esc(g.buyerEmail) + '</b>.</p>'
         : '') +
       '<p class="impact"><b>Thank you.</b> 40% of every rental goes directly to BlinkNow.</p>' +
       (g.bump
@@ -380,7 +380,7 @@ footer {
         : '');
     if (g.bump) {
       var reveal = document.querySelector('.film-reveal');
-      reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?autoplay=true';
+      reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?preload=metadata';
       reveal.classList.add('on');
       reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -412,13 +412,13 @@ footer {
     var card = document.querySelector('.buy-card');
     card.innerHTML =
       '<h2>You are in</h2>' +
-      '<p class="terms">The film is playing on this page. Your watch link is on its way to ' +
+      '<p class="terms">The film is ready to play right here. Press play, and go fullscreen for the best picture. Your watch link is on its way to ' +
       (email ? '<b style="color:var(--gold)">' + email.replace(/</g, '&lt;') + '</b>' : 'your email') +
       ' for later and for your other devices.</p>' +
       '<p class="impact"><b>Thank you.</b> 40% of your rental goes directly to BlinkNow.</p>' +
       '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>';
     var reveal = document.querySelector('.film-reveal');
-    reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?autoplay=true';
+    reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?preload=metadata';
     reveal.classList.add('on');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
