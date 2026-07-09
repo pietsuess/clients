@@ -80,7 +80,7 @@ header {
   margin: 0 auto;
   background: #000; border-radius: 10px; overflow: hidden;
 }
-.video-wrap iframe { border: 0; }
+.video-wrap iframe { border: 0; display: block; width: 100%; aspect-ratio: 16 / 9; }
 @media (max-width: 900px) { .video-wrap { width: 100%; } }
 #player-fallback {
   position: absolute; inset: 0; display: none;
@@ -90,27 +90,6 @@ header {
 #player-fallback.visible { display: flex; }
 #player-fallback .big { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; color: var(--ink); }
 #player-fallback .small { font-size: 14px; color: var(--dim); max-width: 460px; }
-
-/* SUBTITLE ROW */
-.subs-row {
-  display: flex; align-items: center; justify-content: center; gap: 14px;
-  width: min(66%, 1150px); margin: 14px auto 0; flex-wrap: wrap;
-}
-@media (max-width: 900px) { .subs-row { width: 100%; justify-content: flex-start; } }
-.subs-row .lbl {
-  font-size: 12px; color: var(--dim);
-  text-transform: uppercase; letter-spacing: 2px; flex: none;
-}
-.lang-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-.lang-tab {
-  padding: 8px 16px; font-size: 13px; font-family: inherit; font-weight: 500;
-  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
-  color: var(--dim); cursor: pointer; transition: all 0.15s;
-}
-.lang-tab:hover { border-color: var(--gold); color: var(--body); }
-.lang-tab.active { background: var(--gold); border-color: var(--gold); color: var(--bg); }
-#subs-note { font-size: 13px; color: var(--dim); }
-#subs-note.warn { color: var(--error); }
 
 /* INFO GRID */
 .info-grid {
@@ -241,17 +220,17 @@ footer a:hover { text-decoration: underline; }
 </div>
 
 <div class="video-wrap">
-  <div id="vimeo-player"></div>
+  <iframe
+    id="stream-player"
+    src="https://customer-rpc993ghonhfpshh.cloudflarestream.com/7dce694943b1f80435f5c0b633557900/iframe?preload=metadata"
+    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+    allowfullscreen="true"
+    title="Between the Mountain and the Sky"
+  ></iframe>
   <div id="player-fallback">
     <div class="big">The player did not load</div>
     <div class="small">Refresh the page, or try a different browser such as Chrome. If it still will not play, see Having Trouble below.</div>
   </div>
-</div>
-
-<div class="subs-row">
-  <span class="lbl">Subtitles</span>
-  <div class="lang-tabs" id="lang-tabs"></div>
-  <span id="subs-note"></span>
 </div>
 
 <div class="info-grid">
@@ -264,7 +243,7 @@ footer a:hover { text-decoration: underline; }
 
   <div class="card">
     <h2>Subtitles</h2>
-    <p>Pick your language in the row under the film, or use the <span class="k">CC</span> button inside the player. Your choice sticks for the whole film.</p>
+    <p>Use the <span class="k">CC</span> button inside the player to pick your language. Your choice sticks for the whole film.</p>
     <p>Casting to a TV with Chromecast can drop subtitles on some models. If that happens, AirPlay or an HDMI cable carries them reliably.</p>
   </div>
 
@@ -293,18 +272,15 @@ footer a:hover { text-decoration: underline; }
 
 </div>
 
-<script src="https://player.vimeo.com/api/player.js"></script>
+<script src="https://embed.cloudflarestream.com/embed/sdk.latest.js"></script>
 <script>
 // ============================================================
 // CONFIG
-// Interim: Vimeo embed. Swaps to Cloudflare Stream later; only
-// this block and the player adapter below should need touching.
+// Cloudflare Stream embed (replaced the interim Vimeo embed).
+// The iframe src lives in the markup above; the SDK attaches
+// to it by element id in the player adapter below.
 // ============================================================
 const CONFIG = {
-  // 1100519723 (Kajabi rental, has all language tracks) is domain-locked to
-  // Kajabi: privacy error here. Either allow this domain in its Vimeo embed
-  // settings, or upload the FULL_FILM SRT set to this video below.
-  vimeoUrl: 'https://vimeo.com/1074813658',
   accessEnd: new Date(2026, 7, 19, 23, 59, 59), // Aug 19 (mock; portal wires the real date)
   resumeKey: 'bmats_watch_position',
   resumeMinSeconds: 60,      // ignore positions earlier than this
@@ -349,15 +325,16 @@ const CONFIG = {
 })();
 
 // ============================================================
-// PLAYER (Vimeo adapter)
+// PLAYER (Cloudflare Stream adapter)
+// Subtitles: the Stream player API has no programmatic text
+// track switching after load (defaultTextTrack is init-only),
+// so the old custom language picker is gone. Viewers pick a
+// language with the CC menu built into the player; all eight
+// tracks (en CC, nl, it, fr, hi, es, es-419, pt-BR) live there.
 // ============================================================
-let player;
+let player = null;
 try {
-  player = new Vimeo.Player('vimeo-player', {
-    url: CONFIG.vimeoUrl,
-    responsive: true,
-    byline: false, title: false, portrait: false,
-  });
+  player = Stream(document.getElementById('stream-player'));
 } catch (e) {
   document.getElementById('player-fallback').classList.add('visible');
 }
@@ -365,68 +342,6 @@ try {
 const failTimer = setTimeout(() => {
   document.getElementById('player-fallback').classList.add('visible');
 }, 12000);
-
-// ============================================================
-// SUBTITLES: native text tracks, enumerated from the video
-// ============================================================
-const LABELS = {
-  'en': 'English', 'en-ca': 'English CC', 'en-us': 'English',
-  'nl': 'Dutch', 'it': 'Italian', 'fr': 'French', 'hi': 'Hindi',
-  'es': 'Spanish', 'es-419': 'Spanish LatAm', 'es-mx': 'Spanish LatAm',
-  'pt': 'Portuguese', 'pt-br': 'Portuguese BR', 'de': 'German', 'ne': 'Nepali',
-};
-
-function buildTabs(tracks) {
-  const wrap = document.getElementById('lang-tabs');
-  const note = document.getElementById('subs-note');
-  wrap.innerHTML = '';
-  if (!tracks.length) {
-    note.textContent = 'No subtitle tracks are loaded on this video yet.';
-    note.className = 'warn';
-    return;
-  }
-  note.textContent = '';
-  const savedLang = localStorage.getItem('bmats_watch_lang');
-
-  const off = document.createElement('button');
-  off.className = 'lang-tab'; off.textContent = 'Off';
-  off.onclick = () => {
-    player.disableTextTrack();
-    setActive(off);
-    localStorage.setItem('bmats_watch_lang', 'off');
-  };
-  wrap.appendChild(off);
-
-  tracks.forEach(t => {
-    const b = document.createElement('button');
-    b.className = 'lang-tab';
-    b.textContent = LABELS[t.language.toLowerCase()] || t.label || t.language;
-    b.dataset.lang = t.language;
-    b.onclick = () => {
-      player.enableTextTrack(t.language).then(() => {
-        setActive(b);
-        localStorage.setItem('bmats_watch_lang', t.language);
-      }).catch(() => {});
-    };
-    wrap.appendChild(b);
-    if (t.mode === 'showing' && (!savedLang || savedLang === t.language)) setActive(b);
-  });
-
-  if (savedLang && savedLang !== 'off') {
-    const btn = wrap.querySelector('[data-lang="' + savedLang + '"]');
-    if (btn) btn.click();
-  } else if (savedLang === 'off') {
-    off.click();
-  } else if (!wrap.querySelector('.active')) {
-    const en = wrap.querySelector('[data-lang^="en"]');
-    if (en) en.click(); else setActive(off);
-  }
-}
-
-function setActive(btn) {
-  document.querySelectorAll('.lang-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
 
 // ============================================================
 // RESUME (localStorage now; D1 server-side later)
@@ -443,7 +358,9 @@ function offerResume() {
     (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
   document.getElementById('resume-bar').classList.add('visible');
   document.getElementById('resume-btn').onclick = () => {
-    player.setCurrentTime(pos).then(() => player.play()).catch(() => {});
+    player.currentTime = pos;
+    const p = player.play();
+    if (p && p.catch) p.catch(() => {});
     document.getElementById('resume-bar').classList.remove('visible');
   };
   document.getElementById('startover-btn').onclick = () => {
@@ -453,26 +370,22 @@ function offerResume() {
 }
 
 if (player) {
-  player.ready().then(() => {
+  let resumeOffered = false;
+  player.addEventListener('loadedmetadata', () => {
     clearTimeout(failTimer);
-    return Promise.all([player.getTextTracks(), player.getDuration()]);
-  }).then(([tracks, d]) => {
-    duration = d || 0;
-    buildTabs(tracks || []);
-    offerResume();
-  }).catch(() => {
-    clearTimeout(failTimer);
-    document.getElementById('player-fallback').classList.add('visible');
+    duration = player.duration || 0;
+    if (!resumeOffered) { resumeOffered = true; offerResume(); }
   });
 
-  player.on('timeupdate', data => {
-    if (data.seconds - lastSaved >= 5 || data.seconds < lastSaved) {
-      lastSaved = data.seconds;
-      localStorage.setItem(CONFIG.resumeKey, String(data.seconds));
+  player.addEventListener('timeupdate', () => {
+    const seconds = player.currentTime || 0;
+    if (seconds - lastSaved >= 5 || seconds < lastSaved) {
+      lastSaved = seconds;
+      localStorage.setItem(CONFIG.resumeKey, String(seconds));
     }
   });
 
-  player.on('ended', () => localStorage.removeItem(CONFIG.resumeKey));
+  player.addEventListener('ended', () => localStorage.removeItem(CONFIG.resumeKey));
 }
 </script>
 
@@ -600,7 +513,7 @@ const TREE = {
     opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
   },
   subs: {
-    text: 'Pick your language in the row just under the film, or use the CC button %cc% inside the player. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
+    text: 'Use the CC button %cc% inside the player to pick your language. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
     opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
   },
   gift: {
