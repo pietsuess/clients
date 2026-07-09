@@ -39,8 +39,11 @@ p { line-height: 1.6; text-align: justify; text-align-last: left; text-wrap: pre
 header {
   position: sticky; top: 0; z-index: 50; background: var(--black);
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-  gap: 2vw; padding: 26px 3.4vw;
+  gap: 2vw; padding: 12px 3.4vw;
+  transition: transform 0.35s ease;
 }
+/* Hidden once scrolled a short way down; slides back in near the top */
+header.nav-hidden { transform: translateY(-100%); }
 /* Single tidy row on desktop (live wraps 5+2, which reads as ragged); wraps gracefully when it can't fit */
 nav { display: flex; flex-wrap: wrap; align-items: center; column-gap: clamp(13px, 1.35vw, 24px); row-gap: 9px; }
 nav a { color: var(--white); text-decoration: none; font-size: 12.5px; letter-spacing: 0.8px; }
@@ -48,7 +51,7 @@ nav a:hover { opacity: 0.65; }
 /* Live site underlines the current page's nav link (1px, at the baseline) */
 nav a.active { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 .brand { display: block; justify-self: center; }
-.brand img { height: 92px; display: block; }
+.brand img { height: 68px; display: block; }
 .hdr-right { display: flex; align-items: center; justify-content: flex-end; gap: 24px; }
 .hdr-right .icon { color: var(--white); opacity: 0.9; }
 .hdr-right .icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; }
@@ -406,6 +409,20 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 <script>
 // Some browsers park muted autoplay until nudged.
 document.getElementById('hero-video').play().catch(function () {});
+
+// Hide the header once scrolled a short way down; bring it back near the top.
+(function () {
+  var header = document.getElementById('hdr');
+  var threshold = 160;
+  var ticking = false;
+  function update() {
+    header.classList.toggle('nav-hidden', window.scrollY > threshold);
+    ticking = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { window.requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+})();
 </script>
 </body>
 </html>
