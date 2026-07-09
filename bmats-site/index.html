@@ -410,13 +410,22 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 // Some browsers park muted autoplay until nudged.
 document.getElementById('hero-video').play().catch(function () {});
 
-// Hide the header once scrolled a short way down; bring it back near the top.
+// Hide the header when scrolling down past a short way; reveal on any upward scroll.
 (function () {
   var header = document.getElementById('hdr');
   var threshold = 160;
+  var lastY = window.scrollY;
   var ticking = false;
   function update() {
-    header.classList.toggle('nav-hidden', window.scrollY > threshold);
+    var y = window.scrollY;
+    if (y <= threshold) {
+      header.classList.remove('nav-hidden');        // always shown near the top
+    } else if (y > lastY + 4) {
+      header.classList.add('nav-hidden');            // scrolling down
+    } else if (y < lastY - 4) {
+      header.classList.remove('nav-hidden');         // scrolling up
+    }
+    lastY = y;
     ticking = false;
   }
   window.addEventListener('scroll', function () {
