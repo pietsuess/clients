@@ -176,6 +176,8 @@
     <li><span class="d">Jul 6</span>The main website gets rebuilt custom (off Squarespace) and the mailing list moves from Mailchimp into Kajabi, once the critical path is done.</li>
     <li><span class="d">Jul 7</span>Planning number for August: 7,500 to 10,000 purchases, more if the paid ads land. Everything downstream (video delivery, support, emails) gets sized for that.</li>
     <li><span class="d">Jul 7</span>Jeremy keeps editing the site himself, and the "upcoming screenings" spreadsheet that Lonnie fills stays. Whatever replaces Squarespace must keep both as easy as they are today.</li>
+    <li><span class="d">Jul 8</span>The new site is a faithful rebuild of the current look, consolidated from eleven pages to seven. Real fonts, real copy, every image self-hosted.</li>
+    <li><span class="d">Jul 9</span>Everything now lives on Cloudflare in the film's own account: the rebuilt site, the watch portal and the purchase database each have their own address there. Hosting cost stays $0 until event traffic warrants the $5 plan.</li>
   </ul>
 </div>
 
@@ -301,7 +303,8 @@
   <ul class="tasks">
     <li data-s="done"><i class="dot"></i>New Cloudflare account for BMATS: Jeremy created it, Piet is building in it<span class="who">Done · Jul 7</span></li>
     <li data-s="wait"><i class="dot"></i>Move the domain's DNS into that account: main Squarespace site stays exactly as-is, and we gain watch.betweenthemountainandthesky.com<span class="who">Jeremy + Piet</span></li>
-    <li data-s="todo"><i class="dot"></i>WATCH and SUPPORT buttons on the main site point to the portal; portal styled to match the main site</li>
+    <li data-s="done"><i class="dot"></i>Portal gets its own Cloudflare address (<a href="https://bmats-watch.pages.dev/rent/" target="_blank" rel="noopener" style="color:var(--accent)">bmats-watch.pages.dev</a>), ready to become watch.betweenthemountainandthesky.com the moment DNS lands<span class="who">Done · Jul 9</span></li>
+    <li data-s="active"><i class="dot"></i>WATCH and SUPPORT buttons on the main site point to the portal; portal styled to match the main site (the rental page wears the new design now; remaining pages follow)<span class="who">Piet</span></li>
     <li data-s="todo"><i class="dot"></i>Kajabi checkout moves onto the film's own domain (checkout.betweenthemountainandthesky.com) so buyers never land on "mykajabi.com" at the payment step</li>
     <li data-s="active"><i class="dot"></i>Checkout opens as a small payment window over the rental page; when payment lands, the page transforms and the film starts right there (demo works; needs the real-checkout test; fallback is the plain redirect)<span class="who">Piet</span></li>
     <li data-s="active"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database (database and receiver live on the film's Cloudflare account; last step is pointing Kajabi's webhook at it, needs the Kajabi login)<span class="who">Piet</span></li>
@@ -391,14 +394,15 @@
 
 <section data-name="Main site">
   <h2>9 · Main site off Squarespace</h2>
-  <p class="note">Rebuild the marketing site custom on Cloudflare: zero monthly fee, one design across everything, full control. Scheduled after the portal is standing; before the event only if the critical path finishes early.</p>
+  <p class="note">Rebuild the marketing site custom on Cloudflare: zero monthly fee, one design across everything, full control. The whole seven-page rebuild is now standing at <a href="https://bmats-site.pages.dev" target="_blank" rel="noopener" style="color:var(--accent)">bmats-site.pages.dev</a>: a faithful port of the current look with real fonts and every image self-hosted. The public domain stays on Squarespace until the DNS switch.</p>
   <div class="secbar"><i></i></div>
   <ul class="tasks">
-    <li data-s="wait"><i class="dot"></i>Does anyone on the team edit the site themselves? (Decides how editable the rebuild needs to be)<span class="who">Jeremy</span></li>
-    <li data-s="todo"><i class="dot"></i>Inventory before touching anything: domain registration, waitlist form destination, anything else living in Squarespace</li>
-    <li data-s="todo"><i class="dot"></i>Rebuild the site custom: story, screenings, press, host-a-screening, reviews</li>
+    <li data-s="done"><i class="dot"></i>Does anyone on the team edit the site themselves? (Jeremy does; the screenings spreadsheet stays exactly as it works today)<span class="who">Done · Jul 7</span></li>
+    <li data-s="done"><i class="dot"></i>Inventory before touching anything: all eleven live pages harvested, every word, font, colour and image pulled from the source<span class="who">Done · Jul 8</span></li>
+    <li data-s="done"><i class="dot"></i>Rebuild the site custom: home, watch, support, host-a-screening, contact, share, press, all live on the staging address above; Lonnie's screenings lists carried over unchanged<span class="who">Done · Jul 9</span></li>
+    <li data-s="active"><i class="dot"></i>Review pass on the rebuilt pages, then fill the last real links (donation destination, share downloads, press articles)<span class="who">Piet + Jeremy</span></li>
     <li data-s="todo"><i class="dot"></i>Waitlist signup rebuilt, feeding Kajabi directly (no Mailchimp in between)</li>
-    <li data-s="todo"><i class="dot"></i>Switch DNS to the new site, verify everything, then cancel Squarespace</li>
+    <li data-s="wait"><i class="dot"></i>Switch DNS to the new site, verify everything, then cancel Squarespace (waiting on the domain move to finish propagating)<span class="who">Jeremy + Piet</span></li>
   </ul>
 </section>
 
@@ -416,7 +420,7 @@
 
 <footer>
   <span>Between the Mountain and the Sky · platform build</span>
-  <span>Last updated July 7, 2026</span>
+  <span>Last updated July 9, 2026</span>
 </footer>
 
 </div>
