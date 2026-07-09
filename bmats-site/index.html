@@ -17,7 +17,7 @@
    Headings on the live site are Orpheus Pro 400 (Adobe); Marcellus is the
    free stand-in until fonts are settled. Palette is the site's own:
    pure black / pure white / #f6f6f6 / #d9d9d9 grayscale.
-   Dev images point at the Squarespace CDN; self-host before launch. */
+   Images + hero video are self-hosted under assets/ (portable to any host). */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
   --black: #000; --white: #fff; --light: #f6f6f6; --accent: #d9d9d9;
@@ -199,7 +199,7 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
     <a href="press/">PRESS</a>
   </nav>
   <a class="brand" href="./">
-    <img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
+    <img src="assets/img/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
   </a>
   <div class="hdr-right">
     <a class="icon" href="https://www.instagram.com/betweenthemountain" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="0.9" fill="currentColor" stroke="none"/></svg></a>
@@ -212,18 +212,18 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 <section id="hero">
   <div class="bgimg dim">
     <video id="hero-video" src="assets/hero-banner.mp4" autoplay muted loop playsinline
-      poster="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/203ded15-5e57-4c57-8fb7-f760008aa750/BMS_R1_01-07-17-16-%281080p%29.jpg"
+      poster="assets/img/hero-poster.jpg"
       style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
   </div>
   <div class="inner">
-    <img class="logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/ca222037-5f06-4f61-a6ee-6f778f37dc32/BTMATS_Logo_DBP%2Bfilmby.png" alt="Between the Mountain and the Sky - a film by Jeremy Power Regimbal, from the Duplass Brothers">
+    <img class="logo" src="assets/img/hero-logo.png" alt="Between the Mountain and the Sky - a film by Jeremy Power Regimbal, from the Duplass Brothers">
     <h4>Filmed over twenty years around the world. The powerful true story of how one woman's heart opened wide enough to hold fifty children and change their lives forever.</h4>
   </div>
 </section>
 
 <!-- 2. GLOBAL SCREENING EVENT -->
 <section id="event" class="center">
-  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/7fd8133f-43df-43b9-b0ca-c192af1b1a91/BTMATS_WEDDING_BUBBLES_KIDS0.jpg')"></div>
+  <div class="bgimg dim" style="background-image:url('assets/img/event-bg.jpg')"></div>
   <div class="inner">
     <h2 class="line1">JOIN OUR NEXT GLOBAL SCREENING</h2>
     <h2 class="line2">AUGUST 12-19, 2026</h2>
@@ -240,7 +240,7 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 
 <!-- 3. QUOTES (live: over the mustard-field photo, white italic text) -->
 <section class="center">
-  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/2852b15c-1975-4142-8af8-c992fc749a27/Screenshot-2025-06-18-at-6.02.07+PM-1140x570.png')"></div>
+  <div class="bgimg dim" style="background-image:url('assets/img/quotes-field-bg.png')"></div>
   <div class="inner quotes">
     <blockquote><h3>&ldquo;Huge and world changing.&rdquo;</h3><h4>CHERYL STRAYED, AUTHOR</h4></blockquote>
     <blockquote><h3>&ldquo;Vibrates with love and meaning&rdquo;</h3><h4>BENNETT MILLER, DIRECTOR</h4></blockquote>
@@ -258,7 +258,7 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 
 <!-- 5. OTHER WAYS TO WATCH -->
 <section id="otherways" class="center">
-  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/410c55f4-b01d-419b-b3e2-fe05223e77fb/3J8A1527.JPG')"></div>
+  <div class="bgimg dim" style="background-image:url('assets/img/otherways-bg.jpg')"></div>
   <div class="inner">
     <h2 class="sec-title">OTHER WAYS TO WATCH THE FILM?</h2>
     <div class="watch-grid">
@@ -280,7 +280,7 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 
 <!-- 6. LETTERBOXD MARQUEE -->
 <section id="letterboxd" class="s-white">
-  <img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/4750af35-f8d1-44ae-be06-5a98a3b65189/letterboxd-logo-v-pos-rgb-1000px.png" alt="Letterboxd">
+  <img src="assets/img/letterboxd-logo.png" alt="Letterboxd">
   <div class="marquee">
     <span>Raw and immediate &ndash; David Phillips<i>〰</i></span>
     <span>Cried thru the whole thing &ndash; Miagleason48<i>〰</i></span>
@@ -320,7 +320,7 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 
 <!-- 9. AWARDS -->
 <section id="awards" class="center">
-  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/7a59b9a8-f773-48bf-bb50-e736b97bc1d2/MountainFilm_Awards.jpg')"></div>
+  <div class="bgimg dim" style="background-image:url('assets/img/awards-bg.jpg')"></div>
   <div class="inner">
     <h2 class="sec-title">30+ FESTIVALS AWARDS WORLDWIDE</h2>
     <h4 class="kicker" style="margin:26px 0 30px">INCLUDING</h4>
@@ -344,8 +344,8 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
   <div class="inner">
     <h2 class="sec-title">Leave us a review!</h2>
     <div class="logos">
-      <a href="https://www.rottentomatoes.com/m/between_the_mountain_and_the_sky" target="_blank" rel="noopener"><img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/db5eb1ee-d4a1-4739-a329-282920816049/rottentomatoes_logo_40.336d6fe66ff.png" alt="Rotten Tomatoes"></a>
-      <a href="https://www.imdb.com/title/tt8721632/" target="_blank" rel="noopener"><img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/e32d34ce-cb1c-411e-9d54-c635c7c552db/IMDB_Logo_2016.svg.png" alt="IMDb"></a>
+      <a href="https://www.rottentomatoes.com/m/between_the_mountain_and_the_sky" target="_blank" rel="noopener"><img src="assets/img/rottentomatoes-logo.png" alt="Rotten Tomatoes"></a>
+      <a href="https://www.imdb.com/title/tt8721632/" target="_blank" rel="noopener"><img src="assets/img/imdb-logo.png" alt="IMDb"></a>
     </div>
   </div>
 </section>
@@ -359,15 +359,15 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
       <p>Through a mix of raw home videos and v&eacute;rit&eacute; footage captured through a lens of love, the film reaches a rare level of intimacy, resisting staged interviews, makeup, and talking heads to reveal something deeper.</p>
       <p>Honest, soul-baring, and deeply human, it reminds us that healing begins the moment we stop pretending we&rsquo;re unbreakable.</p>
     </div>
-    <img src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/32abd643-64a3-414b-aba5-30ff31f2e2a4/BTMATS+27x40+FINAL+%400.25x.jpg" alt="Between the Mountain and the Sky film poster">
+    <img src="assets/img/film-poster.jpg" alt="Between the Mountain and the Sky film poster">
   </div>
 </section>
 
 <!-- 12. THE BOOK -->
 <section id="book">
-  <div class="bgimg dim" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/8cf85ae1-b565-4a52-a267-5eb7d94cc0f0/3J8A1724.JPG')"></div>
+  <div class="bgimg dim" style="background-image:url('assets/img/book-bg.jpg')"></div>
   <div class="inner cols">
-    <img class="cover" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/95e1a02b-8f85-44d8-90aa-8bcd4f806161/FINAL_BOOK_COVER_lowres.png" alt="Between the Mountain and the Sky book cover">
+    <img class="cover" src="assets/img/book-cover.png" alt="Between the Mountain and the Sky book cover">
     <div>
       <h2 class="sec-title">THE BOOK</h2>
       <h3>Over 85,000 copies sold globally!</h3>
@@ -390,9 +390,9 @@ footer img.title { width: min(560px, 78vw); margin: 0 auto 50px; display: block;
 
 <!-- FOOTER / JOIN -->
 <footer id="join">
-  <div class="bgimg" style="background-image:url('https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/d72f002f-e852-43a4-800c-87dadcc70b73/BTMATS_CLIP_1-STILL_Water0.jpg')"></div>
+  <div class="bgimg" style="background-image:url('assets/img/footer-bg.jpg')"></div>
   <div class="inner">
-    <img class="title" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/c0bf776e-86c4-4e29-b64e-ec9547f4a0de/BTMATS+TITLE.png" alt="Between the Mountain and the Sky">
+    <img class="title" src="assets/img/footer-title.png" alt="Between the Mountain and the Sky">
     <h3 style="font-size:clamp(20px,1.8vw,28px);margin-bottom:26px">JOIN THE FAMILY</h3>
     <form class="join-form" onsubmit="return false" title="Mailchimp signup wires in here">
       <input type="email" placeholder="Email address" aria-label="Email address">
