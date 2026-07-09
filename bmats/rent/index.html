@@ -41,6 +41,20 @@ p, li { text-align: justify; text-align-last: left; text-wrap: pretty; }
 
 header { text-align: center; padding: 60px 0 10px; }
 .film-logo { height: clamp(150px, 20vw, 220px); display: inline-block; }
+.quote-cycle {
+  max-width: 480px; margin: 26px auto 0; text-align: center;
+  opacity: 1; transition: opacity 0.7s ease;
+}
+.quote-cycle .q {
+  font-family: var(--head); font-weight: 400;
+  font-size: min(1vw + 0.95rem, 29px); color: var(--ink);
+  line-height: 1.35; min-height: 4.05em;
+  display: flex; align-items: center; justify-content: center;
+}
+.quote-cycle .qa {
+  margin-top: 10px; font-size: 12px; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 2.2px;
+}
 .tagline {
   font-family: var(--head); font-weight: 400;
   font-size: min(1.44vw + 1rem, 41.9px); color: var(--ink);
@@ -62,7 +76,7 @@ header { text-align: center; padding: 60px 0 10px; }
 
 .trailer-mini {
   display: flex; align-items: center; gap: 16px; width: 100%;
-  margin-top: 22px; padding: 10px 14px;
+  margin: 0 0 22px; padding: 10px 14px;
   background: var(--panel); border: 1px solid var(--line); cursor: pointer;
   font-family: var(--garamond); color: var(--ink); text-align: left;
 }
@@ -125,14 +139,15 @@ header { text-align: center; padding: 60px 0 10px; }
   background: var(--panel-deep); border: 1px solid var(--line); color: var(--ink); outline: none;
 }
 .field input:focus { border-color: var(--gold); }
-.field .why { font-size: 12.5px; color: var(--dim); margin-top: 7px; line-height: 1.55; }
+.field .why { font-size: 14.5px; color: var(--dim); margin-top: 8px; line-height: 1.55; text-wrap: balance; }
 .row2 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
 .reassure { font-size: 12.5px; color: var(--dim); margin-top: 14px; line-height: 1.55; text-align: center; text-align-last: center; }
-.impact { font-size: 13.5px; line-height: 1.65; border-left: 2px solid var(--gold); padding-left: 15px; margin-bottom: 26px; }
+.impact { font-size: 13.5px; line-height: 1.65; border-left: 2px solid var(--gold); padding-left: 15px; margin: 2px 0 18px; }
 .impact b { color: var(--gold); }
+.rent-btn .amt { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700; letter-spacing: 0.5px; }
 .rent-btn {
   display: block; width: 100%; padding: 17px 0; font-family: var(--garamond);
-  font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;
+  font-size: 19px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;
   background: var(--gold); color: var(--bg); border: none; cursor: pointer;
 }
 .rent-btn:hover { background: var(--gold-hover); }
@@ -220,15 +235,24 @@ footer {
     <img class="film-logo" src="https://images.squarespace-cdn.com/content/v1/667da6b0d213c7409a6c778b/1afd4847-4a0f-4fc5-b1f4-38ca62fca202/BTMATS_FilmTitle_PaleYellowGrain.png" alt="Between the Mountain and the Sky">
     <a class="head-side" href="../watch/">Watch</a>
   </div>
-  <div class="tagline">A story about love, loss, and what it means to be a family.</div>
+  <div class="quote-cycle" id="quote-cycle" aria-live="polite">
+    <div class="q" id="qc-q">&ldquo;One of the best films I&rsquo;ve seen in a long time.&rdquo;</div>
+    <div class="qa" id="qc-a">Edward Norton, Actor</div>
+  </div>
   <p class="sub">Take your time. Watch it somewhere quiet.</p>
 </header>
 
 <div class="rent-wrap">
+  <button class="trailer-mini" id="trailer-mini" aria-label="Watch the trailer">
+    <span class="tm-thumb"><img src="https://i.vimeocdn.com/video/2140688108-0f4599aabaf8596fd1239f4b2b73ae44a59bf9171fb9d8c9a757734953f8b2fc-d_640x360?region=us" alt=""><i class="tm-play"></i></span>
+    <span class="tm-label">Watch the trailer</span>
+  </button>
+
   <div class="buy-card">
     <h2>Rent the film</h2>
     <p class="terms">7 days of access · watch as many times as you like · subtitles in 8 languages</p>
     <div class="pwyw-label">Pay what you want</div>
+    <p class="impact"><b>40% of every rental</b> goes directly to BlinkNow, supporting the children and community at the heart of the film.</p>
     <div class="amounts">
       <button data-amt="15">$15</button>
       <button data-amt="25">$25</button>
@@ -240,22 +264,17 @@ footer {
       <input type="number" id="custom-amt" min="5" step="1" placeholder="Other">
       <span class="hint">$35 is the suggested amount</span>
     </div>
-    <p class="impact"><b>40% of every rental</b> goes directly to BlinkNow, supporting the children and community at the heart of the film.</p>
     <div class="field">
       <label for="email">Email</label>
       <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
       <div class="why">Your watch link goes here. It is the only thing you ever need to get back in; there is no password.</div>
     </div>
-    <button class="rent-btn" id="rent-btn">Pay $35 and start watching</button>
+    <button class="rent-btn" id="rent-btn">Pay <span class="amt">$35</span> and start watching</button>
     <p class="reassure">Payment opens in a small secure window. The film unlocks right here the moment it goes through.</p>
     <p class="reassure" id="popup-fallback" style="display:none">Nothing opened? Your browser blocked the window. <a href="#" id="popup-retry" style="color:var(--gold)">Open checkout</a></p>
     <p class="gift-line">Giving it to someone? <a href="#" id="gift-link">Gift a rental instead</a></p>
   </div>
 
-  <button class="trailer-mini" id="trailer-mini" aria-label="Watch the trailer">
-    <span class="tm-thumb"><img src="https://i.vimeocdn.com/video/2140688108-0f4599aabaf8596fd1239f4b2b73ae44a59bf9171fb9d8c9a757734953f8b2fc-d_640x360?region=us" alt=""><i class="tm-play"></i></span>
-    <span class="tm-label">Watch the trailer</span>
-  </button>
 </div>
 
 <div class="film-reveal">
@@ -280,7 +299,7 @@ footer {
   var rent = document.getElementById('rent-btn');
   function setAmount(a) {
     amount = a;
-    rent.textContent = 'Pay $' + a + ' and start watching';
+    rent.innerHTML = 'Pay <span class="amt">$' + a + '</span> and start watching';
   }
   btns.forEach(function (b) {
     b.onclick = function () {
@@ -422,6 +441,30 @@ footer {
     reveal.classList.add('on');
     reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+  // Rotating quotes in the header: 5s visible, fade out, swap, fade in.
+  var QUOTES = [
+    ['\u201COne of the best films I\u2019ve seen in a long time.\u201D', 'Edward Norton, Actor'],
+    ['\u201CHuge and world changing.\u201D', 'Cheryl Strayed, Author'],
+    ['\u201CVibrates with love and meaning.\u201D', 'Bennett Miller, Director'],
+    ['\u201CA reminder of what humans are capable of.\u201D', 'The Kathmandu Post'],
+    ['\u201CBreathtaking.\u201D', 'UK Film Awards'],
+    ['\u201CA deeply personal story about love and loss.\u201D', 'SJ Magazine'],
+    ['\u201CWhat a gorgeous, gorgeous film. All about love. Just love. All love.\u201D', 'Audience member']
+  ];
+  var qi = 0;
+  var qWrap = document.getElementById('quote-cycle');
+  var qQ = document.getElementById('qc-q');
+  var qA = document.getElementById('qc-a');
+  setInterval(function () {
+    qWrap.style.opacity = '0';
+    setTimeout(function () {
+      qi = (qi + 1) % QUOTES.length;
+      qQ.textContent = QUOTES[qi][0];
+      qA.textContent = QUOTES[qi][1];
+      qWrap.style.opacity = '1';
+    }, 720);
+  }, 5720);
+
   // Trailer lightbox
   var tlb = document.getElementById('tlb');
   var tlbFrame = tlb.querySelector('iframe');
