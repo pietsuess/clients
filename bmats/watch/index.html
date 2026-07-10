@@ -48,11 +48,11 @@ header { text-align: center; padding: 60px 0 26px; }
   border-radius: 0; padding: 12px 22px;
 }
 .access-banner .until {
-  font-family: var(--garamond);
-  font-size: 21px; color: var(--ink); letter-spacing: 0.3px;
+  font-family: var(--sans);
+  font-size: 16px; color: var(--ink); letter-spacing: 0.2px;
 }
 .access-banner .remaining {
-  font-family: var(--garamond); font-size: 12px; color: var(--gold);
+  font-family: var(--sans); font-size: 11px; color: var(--gold);
   text-transform: uppercase; letter-spacing: 2px;
 }
 
@@ -127,7 +127,7 @@ header { text-align: center; padding: 60px 0 26px; }
 #ctrl-bar button { background: none; border: none; color: #fff; cursor: pointer; padding: 3px; display: flex; }
 #ctrl-bar button:hover { color: var(--gold); }
 #ctrl-bar button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.t-label { font-family: var(--garamond); font-size: 13.5px; color: #fff; letter-spacing: 0.5px; min-width: 54px; text-align: center; }
+.t-label { font-family: var(--sans); font-size: 12.5px; color: #fff; letter-spacing: 0.4px; min-width: 54px; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
 #seek, #vol { -webkit-appearance: none; appearance: none; height: 3px; background: rgba(255,255,255,0.25); cursor: pointer; border: none; }
 #seek { flex: 1; }
 #vol { width: 62px; }
@@ -321,7 +321,7 @@ footer a:hover { text-decoration: underline; }
 
   <div class="card">
     <h2>Subtitles</h2>
-    <p>English subtitles are on from the start, in the film's own style. Use the <span class="k">CC</span> button in the player controls to pick another language. Your choice sticks for the whole film.</p>
+    <p>The film's original English subtitles are on from the start, listed as <span class="k">Original</span>. Use the <span class="k">CC</span> button in the player controls to pick another language. Your choice sticks for the whole film.</p>
     <p>Full closed captions, with sound descriptions for viewers who are hard of hearing, are in the same menu as <span class="k">English CC</span>.</p>
     <p>Casting to a TV with Chromecast can drop subtitles on some models. If that happens, AirPlay or an HDMI cable carries them reliably.</p>
   </div>
@@ -421,7 +421,7 @@ const FILM = {
   manifest: 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/manifest/video.m3u8',
   subKey: 'bmats_sub_lang',
   subs: [
-    ['en', 'English'],
+    ['en', 'Original'],
     ['en-CA', 'English CC'],
     ['nl', 'Nederlands'],
     ['it', 'Italiano'],
@@ -454,8 +454,67 @@ if (video.canPlayType('application/vnd.apple.mpegurl')) {
   clearTimeout(failTimer); showFallback();
 }
 
-// ---------- subtitles ----------
+// ---------- subtitles (self-fetched VTT, self-timed overlay) ----------
+// The overlay does NOT ride on the media engine's text tracks: hls.js
+// and Safari feed cues differently and unreliably. Instead the page
+// fetches the caption file straight from Stream (same CDN, CORS *)
+// and times cues off the video clock. Engine text tracks are kept
+// warm only to hand subtitles to the system renderer where the
+// overlay cannot follow: iOS native fullscreen and AirPlay.
 let subLang = localStorage.getItem(FILM.subKey) || 'en';
+const CAP_BASE = FILM.manifest.replace('manifest/video.m3u8', 'captions/');
+const cueCache = {};
+let cues = null;        // active language's [{a, b, text}]
+let systemSubs = false; // true while iOS fullscreen / AirPlay renders natively
+
+function parseVTT(txt) {
+  const out = [];
+  const blocks = txt.replace(/\r/g, '').split(/\n\n+/);
+  for (let i = 0; i < blocks.length; i++) {
+    const lines = blocks[i].split('\n');
+    const ti = lines.findIndex(l => l.indexOf('-->') > -1);
+    if (ti < 0) continue;
+    const m = lines[ti].match(/(\d+):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d+):(\d{2}):(\d{2})\.(\d{3})/);
+    if (!m) continue;
+    const text = lines.slice(ti + 1).join('\n')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .trim();
+    if (!text) continue;
+    out.push({
+      a: (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) + (+m[4]) / 1000,
+      b: (+m[5]) * 3600 + (+m[6]) * 60 + (+m[7]) + (+m[8]) / 1000,
+      text: text,
+    });
+  }
+  return out;
+}
+
+async function loadSubs(lang) {
+  if (lang === 'off') { cues = null; return; }
+  if (cueCache[lang]) { cues = cueCache[lang]; return; }
+  cues = null;
+  try {
+    const r = await fetch(CAP_BASE + encodeURIComponent(lang) + '?v=2');
+    if (!r.ok) throw new Error(r.status);
+    cueCache[lang] = parseVTT(await r.text());
+    if (subLang === lang) cues = cueCache[lang];
+  } catch (e) { /* stays empty; menu re-pick retries */ }
+}
+
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+let lastSubHTML = '';
+function renderSubs() {
+  let html = '';
+  if (!systemSubs && cues) {
+    const t = video.currentTime;
+    const act = [];
+    for (let i = 0; i < cues.length; i++) if (t >= cues[i].a && t <= cues[i].b) act.push(cues[i].text);
+    html = act.map(x => esc(x).replace(/\n/g, '<br>')).join('<br>');
+  }
+  if (html !== lastSubHTML) { lastSubHTML = html; subLayer.innerHTML = html; }
+}
+(function subTick() { renderSubs(); requestAnimationFrame(subTick); })();
 
 function activeTrack() {
   if (subLang === 'off') return null;
@@ -468,47 +527,27 @@ function activeTrack() {
 }
 
 function applySub() {
-  if (hls && hls.subtitleTracks.length) {
-    hls.subtitleTrack = subLang === 'off' ? -1 :
-      hls.subtitleTracks.findIndex(t => (t.lang || '').toLowerCase() === subLang.toLowerCase());
-  }
+  loadSubs(subLang);
+  const chosen = activeTrack();
   const ts = video.textTracks;
   for (let i = 0; i < ts.length; i++) {
     if (ts[i].kind !== 'subtitles' && ts[i].kind !== 'captions') continue;
-    ts[i].mode = (ts[i] === activeTrack()) ? 'hidden' : 'disabled';
+    ts[i].mode = (ts[i] === chosen) ? 'hidden' : 'disabled';
   }
-  renderSubs();
   markMenu();
 }
 
-function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function renderSubs() {
-  const t = activeTrack();
-  if (!t || t.mode === 'disabled' || !t.activeCues || !t.activeCues.length) { subLayer.innerHTML = ''; return; }
-  const lines = [];
-  for (let i = 0; i < t.activeCues.length; i++) {
-    const raw = (t.activeCues[i].text || '')
-      .replace(/<[^>]*>/g, '')
-      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-    raw.split('\n').forEach(l => { if (l.trim()) lines.push(esc(l)); });
-  }
-  subLayer.innerHTML = lines.join('<br>');
-}
+video.textTracks.addEventListener('addtrack', applySub);
 
-video.textTracks.addEventListener('addtrack', (e) => {
-  if (e.track) e.track.addEventListener('cuechange', renderSubs);
-  applySub();
+// Hand off to the system renderer where the overlay cannot follow.
+video.addEventListener('webkitbeginfullscreen', () => {
+  systemSubs = true;
+  const t = activeTrack(); if (t) t.mode = 'showing';
 });
-video.addEventListener('timeupdate', renderSubs); // belt for missed cuechange
-
-// Overlay cannot follow into iOS native fullscreen or onto an AirPlay TV:
-// hand the track to the system renderer there, take it back after.
-video.addEventListener('webkitbeginfullscreen', () => { const t = activeTrack(); if (t) t.mode = 'showing'; });
-video.addEventListener('webkitendfullscreen', applySub);
+video.addEventListener('webkitendfullscreen', () => { systemSubs = false; applySub(); });
 video.addEventListener('webkitcurrentplaybacktargetiswirelesschanged', () => {
-  const t = activeTrack();
-  if (t) t.mode = video.webkitCurrentPlaybackTargetIsWireless ? 'showing' : 'hidden';
-  renderSubs();
+  systemSubs = !!video.webkitCurrentPlaybackTargetIsWireless;
+  const t = activeTrack(); if (t) t.mode = systemSubs ? 'showing' : 'hidden';
 });
 
 // Subtitle size scales with the player (fraction set in CSS --sub-scale).
@@ -796,7 +835,7 @@ const TREE = {
     opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
   },
   subs: {
-    text: 'English subtitles are on from the start. Use the CC button %cc% in the player controls to pick another language; full closed captions are listed there as English CC. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
+    text: 'The film\'s original English subtitles are on from the start, listed as Original. Use the CC button %cc% in the player controls to pick another language; full closed captions are listed there as English CC. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
     opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
   },
   gift: {
