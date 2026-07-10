@@ -147,6 +147,7 @@ header { text-align: center; padding: 60px 0 26px; }
 #vol::-moz-range-thumb { background: #fff; }
 @media (hover: none) { #vol { display: none; } }
 #cc-wrap, #q-wrap { position: relative; display: flex; }
+#q-wrap[hidden], #cc-wrap[hidden] { display: none; }
 #cc-menu, #q-menu {
   position: absolute; right: 0; bottom: 36px; min-width: 215px;
   background: var(--panel); border: 1px solid var(--line);
@@ -781,22 +782,25 @@ document.addEventListener('click', (e) => { if (!e.target.closest('#cc-wrap')) c
   if (!hls) return;
   const qWrap = document.getElementById('q-wrap');
   const qMenu = document.getElementById('q-menu');
-  hls.on(Hls.Events.MANIFEST_PARSED, () => {
-    const levels = hls.levels.map((l, i) => ({ i, h: l.height })).sort((a, b) => b.h - a.h);
-    qMenu.innerHTML = '';
-    [{ i: -1, label: 'Auto' }].concat(levels.map(l => ({ i: l.i, label: l.h + 'p' }))).forEach((it) => {
-      const b = document.createElement('button');
-      if (it.i === -1) { b.textContent = 'Auto '; const n = document.createElement('i'); n.id = 'q-now'; b.appendChild(n); }
-      else b.textContent = it.label;
-      b.onclick = () => {
-        hls.currentLevel = it.i; // -1 = auto
-        qMenu.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-        qMenu.classList.remove('open');
-      };
-      if (it.i === -1) b.classList.add('on');
-      qMenu.appendChild(b);
-    });
-    qWrap.hidden = false;
+  qWrap.hidden = false;
+  // Static ladder, resolved to a live hls level at click time — the menu
+  // works no matter when (or whether) the manifest has parsed.
+  [0, 1080, 720, 480, 360, 240].forEach((h) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    if (h === 0) { b.textContent = 'Auto '; const n = document.createElement('i'); n.id = 'q-now'; b.appendChild(n); b.classList.add('on'); }
+    else b.textContent = h + 'p';
+    b.onclick = (e2) => {
+      e2.stopPropagation();
+      if (h === 0) hls.currentLevel = -1;
+      else {
+        const idx = hls.levels.findIndex(l => l.height === h);
+        if (idx > -1) hls.currentLevel = idx;
+      }
+      qMenu.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+      qMenu.classList.remove('open');
+    };
+    qMenu.appendChild(b);
   });
   hls.on(Hls.Events.LEVEL_SWITCHED, (e2, d) => {
     const el = document.getElementById('q-now');
