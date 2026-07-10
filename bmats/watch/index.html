@@ -238,7 +238,7 @@ footer a:hover { text-decoration: underline; }
 <div class="video-wrap">
   <iframe
     id="stream-player"
-    src="https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/iframe?preload=metadata"
+    src="https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/iframe?preload=metadata&defaultTextTrack=en"
     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
     allowfullscreen="true"
     title="Between the Mountain and the Sky"
@@ -259,7 +259,8 @@ footer a:hover { text-decoration: underline; }
 
   <div class="card">
     <h2>Subtitles</h2>
-    <p>Use the <span class="k">CC</span> button inside the player to pick your language. Your choice sticks for the whole film.</p>
+    <p>English subtitles are on from the start, in the film's own style. Use the <span class="k">CC</span> button inside the player to pick another language. Your choice sticks for the whole film.</p>
+    <p>Full closed captions, with sound descriptions for viewers who are hard of hearing, are in the same menu under <span class="k">Canadian English</span>.</p>
     <p>Casting to a TV with Chromecast can drop subtitles on some models. If that happens, AirPlay or an HDMI cable carries them reliably.</p>
   </div>
 
@@ -345,8 +346,10 @@ const CONFIG = {
 // Subtitles: the Stream player API has no programmatic text
 // track switching after load (defaultTextTrack is init-only),
 // so the old custom language picker is gone. Viewers pick a
-// language with the CC menu built into the player; all eight
-// tracks (en CC, nl, it, fr, hi, es, es-419, pt-BR) live there.
+// language with the CC menu built into the player; nine tracks
+// (en subtitles [default on, yellow burn-in style via VTT STYLE
+// block], en-CA = the CC file, nl, it, fr, hi, es, es-419,
+// pt-BR) live there.
 // ============================================================
 let player = null;
 try {
@@ -529,7 +532,7 @@ const TREE = {
     opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
   },
   subs: {
-    text: 'Use the CC button %cc% inside the player to pick your language. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
+    text: 'English subtitles are on from the start. Use the CC button %cc% inside the player to pick another language; full closed captions are listed there as Canadian English. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
     opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
   },
   gift: {
