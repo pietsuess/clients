@@ -88,14 +88,64 @@ header { text-align: center; padding: 60px 0 26px; }
 #resume-bar button:hover { background: var(--gold-hover); color: var(--bg); }
 #resume-bar button.ghost:hover { background: none; border-color: var(--gold); color: var(--ink); }
 
-/* PLAYER */
+/* PLAYER (self-hosted: hls.js / native HLS + our own subtitle layer) */
 .video-wrap {
-  position: relative; width: min(56%, 880px); min-height: 200px;
+  position: relative; width: min(56%, 880px); aspect-ratio: 16 / 9;
   margin: 0 auto;
   background: #000; border: 1px solid rgba(255,255,255,0.22); border-radius: 0; overflow: hidden;
+  /* Subtitle look: the reason this player exists. Tune here. */
+  --sub-color: #FFE100;
+  --sub-bottom: 14.5%;   /* bottom edge of subs, % of player height (sits just above a 2.39:1 letterbox bar) */
+  --sub-scale: 0.031;    /* font-size as a fraction of player height (JS reads this) */
 }
-.video-wrap iframe { border: 0; display: block; width: 100%; aspect-ratio: 16 / 9; }
+.video-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; display: block; background: #000; }
 @media (max-width: 900px) { .video-wrap { width: 100%; } }
+#sub-layer {
+  position: absolute; left: 5%; right: 5%; bottom: var(--sub-bottom);
+  text-align: center; pointer-events: none; z-index: 3;
+  color: var(--sub-color); font-family: var(--sans); font-weight: 500; line-height: 1.35;
+  letter-spacing: 0; text-align-last: center;
+  text-shadow: 0 0 6px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.9);
+}
+#big-play {
+  position: absolute; inset: 0; margin: auto; width: 92px; height: 92px; z-index: 4;
+  background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.55); border-radius: 50%;
+  color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+#big-play:hover { border-color: var(--gold); color: var(--gold); }
+#big-play svg { width: 34px; height: 34px; margin-left: 5px; fill: currentColor; }
+.video-wrap.playing #big-play { display: none; }
+#ctrl-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 5;
+  display: flex; align-items: center; gap: 13px; padding: 12px 16px 10px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.82));
+  opacity: 1; transition: opacity 0.25s;
+}
+.video-wrap.idle #ctrl-bar { opacity: 0; pointer-events: none; }
+.video-wrap.idle { cursor: none; }
+#ctrl-bar button { background: none; border: none; color: #fff; cursor: pointer; padding: 3px; display: flex; }
+#ctrl-bar button:hover { color: var(--gold); }
+#ctrl-bar button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.t-label { font-family: var(--garamond); font-size: 13.5px; color: #fff; letter-spacing: 0.5px; min-width: 54px; text-align: center; }
+#seek, #vol { -webkit-appearance: none; appearance: none; height: 3px; background: rgba(255,255,255,0.25); cursor: pointer; border: none; }
+#seek { flex: 1; }
+#vol { width: 62px; }
+#seek::-webkit-slider-thumb, #vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--gold); border: none; }
+#seek::-moz-range-thumb, #vol::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--gold); border: none; }
+#vol::-webkit-slider-thumb { background: #fff; }
+#vol::-moz-range-thumb { background: #fff; }
+@media (hover: none) { #vol { display: none; } }
+#cc-wrap { position: relative; display: flex; }
+#cc-menu {
+  position: absolute; right: 0; bottom: 36px; min-width: 215px;
+  background: var(--panel); border: 1px solid var(--line);
+  display: none; padding: 6px 0; max-height: 300px; overflow-y: auto;
+}
+#cc-menu.open { display: block; }
+#cc-menu button { display: block; width: 100%; text-align: left; padding: 8px 16px; font-family: var(--sans); font-size: 13.5px; color: var(--body); }
+#cc-menu button:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
+#cc-menu button.on { color: var(--gold); }
 #player-fallback {
   position: absolute; inset: 0; display: none;
   flex-direction: column; align-items: center; justify-content: center;
@@ -235,14 +285,26 @@ footer a:hover { text-decoration: underline; }
   <button class="ghost" id="startover-btn">Start over</button>
 </div>
 
-<div class="video-wrap">
-  <iframe
-    id="stream-player"
-    src="https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/iframe?preload=metadata&defaultTextTrack=en"
-    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-    allowfullscreen="true"
-    title="Between the Mountain and the Sky"
-  ></iframe>
+<div class="video-wrap" id="player-shell">
+  <video id="film" preload="metadata" playsinline crossorigin="anonymous"
+    poster="https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/thumbnails/thumbnail.jpg"
+    title="Between the Mountain and the Sky"></video>
+  <div id="sub-layer" aria-live="off"></div>
+  <button id="big-play" aria-label="Play"><svg viewBox="0 0 24 24"><polygon points="6 3 21 12 6 21"/></svg></button>
+  <div id="ctrl-bar">
+    <button id="pp" aria-label="Play or pause"></button>
+    <span class="t-label" id="t-now">0:00</span>
+    <input id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">
+    <span class="t-label" id="t-len">&ndash;:&ndash;&ndash;</span>
+    <button id="mute-btn" aria-label="Mute"></button>
+    <input id="vol" type="range" min="0" max="100" value="100" aria-label="Volume">
+    <div id="cc-wrap">
+      <button id="cc-btn" aria-label="Subtitles"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 15h4M13 15h5M6 11h2M11 11h7"/></svg></button>
+      <div id="cc-menu"></div>
+    </div>
+    <button id="airplay-btn" aria-label="AirPlay" hidden><svg viewBox="0 0 24 24"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21" fill="currentColor" stroke="none"/></svg></button>
+    <button id="fs-btn2" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+  </div>
   <div id="player-fallback">
     <div class="big">The player did not load</div>
     <div class="small">Refresh the page, or try a different browser such as Chrome. If it still will not play, see Having Trouble below.</div>
@@ -259,8 +321,8 @@ footer a:hover { text-decoration: underline; }
 
   <div class="card">
     <h2>Subtitles</h2>
-    <p>English subtitles are on from the start, in the film's own style. Use the <span class="k">CC</span> button inside the player to pick another language. Your choice sticks for the whole film.</p>
-    <p>Full closed captions, with sound descriptions for viewers who are hard of hearing, are in the same menu under <span class="k">Canadian English</span>.</p>
+    <p>English subtitles are on from the start, in the film's own style. Use the <span class="k">CC</span> button in the player controls to pick another language. Your choice sticks for the whole film.</p>
+    <p>Full closed captions, with sound descriptions for viewers who are hard of hearing, are in the same menu as <span class="k">English CC</span>.</p>
     <p>Casting to a TV with Chromecast can drop subtitles on some models. If that happens, AirPlay or an HDMI cable carries them reliably.</p>
   </div>
 
@@ -289,13 +351,18 @@ footer a:hover { text-decoration: underline; }
 
 </div>
 
-<script src="https://embed.cloudflarestream.com/embed/sdk.latest.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
 <script>
 // ============================================================
 // CONFIG
-// Cloudflare Stream embed (replaced the interim Vimeo embed).
-// The iframe src lives in the markup above; the SDK attaches
-// to it by element id in the player adapter below.
+// Self-hosted player over the Cloudflare Stream HLS manifest
+// (replaced the Stream iframe player). WHY: the iframe player's
+// caption renderer forces white-on-black boxed cues; it drops
+// VTT STYLE blocks and its CSS is unreachable cross-origin. The
+// theatrical subtitle look (yellow, no box, over the picture)
+// requires rendering cues ourselves, so playback moved to a
+// <video> element (hls.js, or native HLS on Safari/iOS) and
+// subtitles render into #sub-layer under our CSS.
 // ============================================================
 const CONFIG = {
   accessEnd: new Date(2026, 7, 19, 23, 59, 59), // Aug 19 (mock; portal wires the real date)
@@ -334,7 +401,7 @@ const CONFIG = {
   const isApple = /iPhone|iPad|Macintosh/.test(ua);
   const methods = {
     airplay: '<p><span class="k">AirPlay</span> (iPhone, iPad, Mac + Apple TV): press play, tap the AirPlay icon in the player controls, pick your TV. Subtitles come along.</p>',
-    chromecast: '<p><span class="k">Chromecast</span> (Android + Google TV): press play, tap the cast icon in the player controls, pick your TV. If subtitles vanish on the TV, switch to HDMI.</p>',
+    chromecast: '<p><span class="k">Chromecast</span> (Android + Google TV): in Chrome, open the browser menu and choose <span class="k">Cast</span>, then pick your TV. Subtitles come along. If the picture stutters, an HDMI cable is the sure path.</p>',
     hdmi: '<p><span class="k">HDMI</span> (any laptop, any TV): plug the cable in, switch the TV to that input, press play and go full screen.</p>',
   };
   const order = isApple ? ['airplay', 'chromecast', 'hdmi'] : ['chromecast', 'airplay', 'hdmi'];
@@ -342,25 +409,222 @@ const CONFIG = {
 })();
 
 // ============================================================
-// PLAYER (Cloudflare Stream adapter)
-// Subtitles: the Stream player API has no programmatic text
-// track switching after load (defaultTextTrack is init-only),
-// so the old custom language picker is gone. Viewers pick a
-// language with the CC menu built into the player; nine tracks
-// (en subtitles [default on, yellow burn-in style via VTT STYLE
-// block], en-CA = the CC file, nl, it, fr, hi, es, es-419,
-// pt-BR) live there.
+// PLAYER ENGINE
+// Nine text tracks come in-manifest from Stream. The chosen
+// track runs with mode "hidden" and we paint its active cues
+// into #sub-layer (full CSS control). Two places the overlay
+// cannot follow: iOS native fullscreen and AirPlay. There the
+// track flips to mode "showing" and the system renders it
+// (the VTT itself carries <c.yellow> + line:74% for those).
 // ============================================================
-let player = null;
-try {
-  player = Stream(document.getElementById('stream-player'));
-} catch (e) {
-  document.getElementById('player-fallback').classList.add('visible');
+const FILM = {
+  manifest: 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/manifest/video.m3u8',
+  subKey: 'bmats_sub_lang',
+  subs: [
+    ['en', 'English'],
+    ['en-CA', 'English CC'],
+    ['nl', 'Nederlands'],
+    ['it', 'Italiano'],
+    ['fr', 'Français'],
+    ['hi', 'हिन्दी'],
+    ['es', 'Español'],
+    ['es-419', 'Español (Latinoamérica)'],
+    ['pt-BR', 'Português (Brasil)'],
+  ],
+};
+
+const video = document.getElementById('film');
+const shell = document.getElementById('player-shell');
+const subLayer = document.getElementById('sub-layer');
+
+function showFallback() { document.getElementById('player-fallback').classList.add('visible'); }
+const failTimer = setTimeout(showFallback, 12000);
+
+let hls = null;
+if (video.canPlayType('application/vnd.apple.mpegurl')) {
+  video.src = FILM.manifest;              // Safari / iOS: native HLS (keeps AirPlay first-class)
+} else if (window.Hls && Hls.isSupported()) {
+  hls = new Hls();
+  hls.subtitleDisplay = false;            // tracks load, browser does not render; we do
+  hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) { clearTimeout(failTimer); showFallback(); } });
+  hls.on(Hls.Events.MANIFEST_PARSED, applySub);
+  hls.loadSource(FILM.manifest);
+  hls.attachMedia(video);
+} else {
+  clearTimeout(failTimer); showFallback();
 }
 
-const failTimer = setTimeout(() => {
-  document.getElementById('player-fallback').classList.add('visible');
-}, 12000);
+// ---------- subtitles ----------
+let subLang = localStorage.getItem(FILM.subKey) || 'en';
+
+function activeTrack() {
+  if (subLang === 'off') return null;
+  const ts = video.textTracks;
+  for (let i = 0; i < ts.length; i++) {
+    if ((ts[i].kind === 'subtitles' || ts[i].kind === 'captions') &&
+        (ts[i].language || '').toLowerCase() === subLang.toLowerCase()) return ts[i];
+  }
+  return null;
+}
+
+function applySub() {
+  if (hls && hls.subtitleTracks.length) {
+    hls.subtitleTrack = subLang === 'off' ? -1 :
+      hls.subtitleTracks.findIndex(t => (t.lang || '').toLowerCase() === subLang.toLowerCase());
+  }
+  const ts = video.textTracks;
+  for (let i = 0; i < ts.length; i++) {
+    if (ts[i].kind !== 'subtitles' && ts[i].kind !== 'captions') continue;
+    ts[i].mode = (ts[i] === activeTrack()) ? 'hidden' : 'disabled';
+  }
+  renderSubs();
+  markMenu();
+}
+
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function renderSubs() {
+  const t = activeTrack();
+  if (!t || t.mode === 'disabled' || !t.activeCues || !t.activeCues.length) { subLayer.innerHTML = ''; return; }
+  const lines = [];
+  for (let i = 0; i < t.activeCues.length; i++) {
+    const raw = (t.activeCues[i].text || '')
+      .replace(/<[^>]*>/g, '')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    raw.split('\n').forEach(l => { if (l.trim()) lines.push(esc(l)); });
+  }
+  subLayer.innerHTML = lines.join('<br>');
+}
+
+video.textTracks.addEventListener('addtrack', (e) => {
+  if (e.track) e.track.addEventListener('cuechange', renderSubs);
+  applySub();
+});
+video.addEventListener('timeupdate', renderSubs); // belt for missed cuechange
+
+// Overlay cannot follow into iOS native fullscreen or onto an AirPlay TV:
+// hand the track to the system renderer there, take it back after.
+video.addEventListener('webkitbeginfullscreen', () => { const t = activeTrack(); if (t) t.mode = 'showing'; });
+video.addEventListener('webkitendfullscreen', applySub);
+video.addEventListener('webkitcurrentplaybacktargetiswirelesschanged', () => {
+  const t = activeTrack();
+  if (t) t.mode = video.webkitCurrentPlaybackTargetIsWireless ? 'showing' : 'hidden';
+  renderSubs();
+});
+
+// Subtitle size scales with the player (fraction set in CSS --sub-scale).
+function sizeSubs() {
+  const scale = parseFloat(getComputedStyle(shell).getPropertyValue('--sub-scale')) || 0.031;
+  subLayer.style.fontSize = Math.max(13, Math.round(shell.clientHeight * scale)) + 'px';
+}
+window.addEventListener('resize', sizeSubs);
+document.addEventListener('fullscreenchange', sizeSubs);
+sizeSubs();
+
+// ---------- controls ----------
+const ppBtn = document.getElementById('pp');
+const muteBtn = document.getElementById('mute-btn');
+const seek = document.getElementById('seek');
+const vol = document.getElementById('vol');
+const ccMenu = document.getElementById('cc-menu');
+const I = {
+  play: '<svg viewBox="0 0 24 24"><polygon points="7 4 20 12 7 20" fill="currentColor" stroke="none"/></svg>',
+  pause: '<svg viewBox="0 0 24 24"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>',
+  vol: '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  muted: '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19" fill="currentColor" stroke="none"/><line x1="15" y1="9" x2="21" y2="15"/><line x1="21" y1="9" x2="15" y2="15"/></svg>',
+};
+
+function fmt(s) {
+  s = Math.max(0, Math.floor(s || 0));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0');
+}
+function paintButtons() {
+  ppBtn.innerHTML = video.paused ? I.play : I.pause;
+  muteBtn.innerHTML = (video.muted || video.volume === 0) ? I.muted : I.vol;
+  shell.classList.toggle('playing', !video.paused);
+}
+function togglePlay() {
+  if (video.paused) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
+  else video.pause();
+}
+ppBtn.onclick = togglePlay;
+document.getElementById('big-play').onclick = togglePlay;
+video.addEventListener('click', togglePlay);
+video.addEventListener('dblclick', () => document.getElementById('fs-btn2').click());
+video.addEventListener('play', paintButtons);
+video.addEventListener('pause', () => { paintButtons(); wake(); });
+video.addEventListener('volumechange', () => { paintButtons(); vol.value = video.muted ? 0 : Math.round(video.volume * 100); });
+
+muteBtn.onclick = () => { video.muted = !video.muted; };
+vol.oninput = () => { video.volume = vol.value / 100; video.muted = vol.value === '0'; };
+
+let seeking = false;
+seek.addEventListener('input', () => { seeking = true; if (video.duration) video.currentTime = (seek.value / 1000) * video.duration; });
+seek.addEventListener('change', () => { seeking = false; });
+video.addEventListener('timeupdate', () => {
+  document.getElementById('t-now').textContent = fmt(video.currentTime);
+  if (!seeking && video.duration) seek.value = Math.round((video.currentTime / video.duration) * 1000);
+});
+
+document.getElementById('fs-btn2').onclick = () => {
+  if (document.fullscreenElement) { document.exitFullscreen(); return; }
+  if (shell.requestFullscreen) shell.requestFullscreen();
+  else if (shell.webkitRequestFullscreen) shell.webkitRequestFullscreen();
+  else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen(); // iPhone: native player
+};
+
+// AirPlay button, Safari only.
+if (window.WebKitPlaybackTargetAvailabilityEvent) {
+  video.addEventListener('webkitplaybacktargetavailabilitychanged', (ev) => {
+    document.getElementById('airplay-btn').hidden = ev.availability !== 'available';
+  });
+  document.getElementById('airplay-btn').onclick = () => video.webkitShowPlaybackTargetPicker();
+}
+
+// Subtitle menu: our labels, our order. "English CC" at last gets its real name.
+(function buildMenu() {
+  const items = [['off', 'Off']].concat(FILM.subs);
+  items.forEach(([code, label]) => {
+    const b = document.createElement('button');
+    b.textContent = label; b.dataset.code = code;
+    b.onclick = () => {
+      subLang = code;
+      try { localStorage.setItem(FILM.subKey, code); } catch (e) {}
+      applySub();
+      ccMenu.classList.remove('open');
+    };
+    ccMenu.appendChild(b);
+  });
+})();
+function markMenu() {
+  ccMenu.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.code === subLang));
+}
+markMenu();
+document.getElementById('cc-btn').onclick = (e) => { e.stopPropagation(); ccMenu.classList.toggle('open'); };
+document.addEventListener('click', (e) => { if (!e.target.closest('#cc-wrap')) ccMenu.classList.remove('open'); });
+
+// Auto-hide controls while playing.
+let idleTimer = null;
+function wake() {
+  shell.classList.remove('idle');
+  clearTimeout(idleTimer);
+  if (!video.paused) idleTimer = setTimeout(() => {
+    if (!ccMenu.classList.contains('open')) shell.classList.add('idle');
+  }, 2800);
+}
+['mousemove', 'touchstart', 'play'].forEach(ev => shell.addEventListener(ev, wake, { passive: true }));
+wake();
+
+// Keyboard: space play, f fullscreen, m mute, arrows seek 10s.
+document.addEventListener('keydown', (e) => {
+  if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'f') document.getElementById('fs-btn2').click();
+  else if (e.key === 'm') video.muted = !video.muted;
+  else if (e.key === 'ArrowRight') video.currentTime += 10;
+  else if (e.key === 'ArrowLeft') video.currentTime -= 10;
+  wake();
+});
 
 // ============================================================
 // RESUME (localStorage now; D1 server-side later)
@@ -372,13 +636,11 @@ function offerResume() {
   const pos = parseFloat(localStorage.getItem(CONFIG.resumeKey) || '0');
   if (pos < CONFIG.resumeMinSeconds) return;
   if (duration && pos > duration - CONFIG.resumeEndBuffer) return;
-  const h = Math.floor(pos / 3600), m = Math.floor((pos % 3600) / 60), s = Math.floor(pos % 60);
-  document.getElementById('resume-time').textContent =
-    (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(s).padStart(2, '0');
+  document.getElementById('resume-time').textContent = fmt(pos);
   document.getElementById('resume-bar').classList.add('visible');
   document.getElementById('resume-btn').onclick = () => {
-    player.currentTime = pos;
-    const p = player.play();
+    video.currentTime = pos;
+    const p = video.play();
     if (p && p.catch) p.catch(() => {});
     document.getElementById('resume-bar').classList.remove('visible');
   };
@@ -388,24 +650,26 @@ function offerResume() {
   };
 }
 
-if (player) {
-  let resumeOffered = false;
-  player.addEventListener('loadedmetadata', () => {
-    clearTimeout(failTimer);
-    duration = player.duration || 0;
-    if (!resumeOffered) { resumeOffered = true; offerResume(); }
-  });
+let resumeOffered = false;
+video.addEventListener('loadedmetadata', () => {
+  clearTimeout(failTimer);
+  duration = video.duration || 0;
+  document.getElementById('t-len').textContent = fmt(duration);
+  paintButtons();
+  applySub();
+  if (!resumeOffered) { resumeOffered = true; offerResume(); }
+});
 
-  player.addEventListener('timeupdate', () => {
-    const seconds = player.currentTime || 0;
-    if (seconds - lastSaved >= 5 || seconds < lastSaved) {
-      lastSaved = seconds;
-      localStorage.setItem(CONFIG.resumeKey, String(seconds));
-    }
-  });
+video.addEventListener('timeupdate', () => {
+  const seconds = video.currentTime || 0;
+  if (seconds - lastSaved >= 5 || seconds < lastSaved) {
+    lastSaved = seconds;
+    localStorage.setItem(CONFIG.resumeKey, String(seconds));
+  }
+});
 
-  player.addEventListener('ended', () => localStorage.removeItem(CONFIG.resumeKey));
-}
+video.addEventListener('ended', () => localStorage.removeItem(CONFIG.resumeKey));
+paintButtons();
 </script>
 
 <!-- CHAT HELPER -->
@@ -520,7 +784,7 @@ const TREE = {
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_cast: {
-    text: 'First, make sure your phone and the TV are on the same wifi network %wifi%; that is the most common snag. Then press play, tap the cast symbol %cast% in the player controls and pick your TV. One caution: some Chromecast models drop subtitles. If yours does, an HDMI cable from a laptop is the sure path. Details in the <a href="' + '../faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    text: 'First, make sure your device and the TV are on the same wifi network %wifi%; that is the most common snag. Then, in Chrome, open the browser menu (the three dots), choose Cast %cast% and pick your TV. Subtitles come along with the picture. If it stutters, an HDMI cable from a laptop is the sure path. Details in the <a href="' + '../faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_hdmi: {
@@ -532,7 +796,7 @@ const TREE = {
     opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
   },
   subs: {
-    text: 'English subtitles are on from the start. Use the CC button %cc% inside the player to pick another language; full closed captions are listed there as Canadian English. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, that is a known Chromecast quirk: AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
+    text: 'English subtitles are on from the start. Use the CC button %cc% in the player controls to pick another language; full closed captions are listed there as English CC. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
     opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
   },
   gift: {
