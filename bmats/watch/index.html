@@ -125,6 +125,16 @@ header { text-align: center; padding: 60px 0 26px; }
 .video-wrap.idle #ctrl-bar { opacity: 0; pointer-events: none; }
 .video-wrap.idle { cursor: none; }
 #ctrl-bar button { background: none; border: none; color: #fff; cursor: pointer; padding: 3px; display: flex; }
+#ctrl-bar button[hidden] { display: none; }
+#cast-note {
+  position: absolute; inset: 0; z-index: 2; display: none;
+  align-items: center; justify-content: center;
+  font-family: var(--sans); font-size: 15px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--body);
+}
+.video-wrap.casting #cast-note { display: flex; }
+.video-wrap.casting video { opacity: 0.25; }
+.video-wrap.casting #big-play, .video-wrap.casting #sub-layer { display: none; }
 #ctrl-bar button:hover { color: var(--gold); }
 #ctrl-bar button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .t-label { font-family: var(--sans); font-size: 12.5px; color: #fff; letter-spacing: 0.4px; min-width: 54px; text-align: center; font-variant-numeric: lining-nums tabular-nums; }
@@ -292,6 +302,7 @@ footer a:hover { text-decoration: underline; }
     poster="https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/thumbnails/thumbnail.jpg"
     title="Between the Mountain and the Sky"></video>
   <div id="sub-layer" aria-live="off"></div>
+  <div id="cast-note">Playing on your TV</div>
   <button id="big-play" aria-label="Play"><svg viewBox="0 0 24 24"><polygon points="6 3 21 12 6 21"/></svg></button>
   <div id="ctrl-bar">
     <button id="pp" aria-label="Play or pause"></button>
@@ -305,6 +316,7 @@ footer a:hover { text-decoration: underline; }
       <div id="cc-menu"></div>
     </div>
     <button id="airplay-btn" aria-label="AirPlay" hidden><svg viewBox="0 0 24 24"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21" fill="currentColor" stroke="none"/></svg></button>
+    <button id="cast-btn" aria-label="Cast to TV" hidden><svg viewBox="0 0 24 24"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><line x1="2" y1="20" x2="2.01" y2="20"/></svg></button>
     <button id="fs-btn2" aria-label="Full screen"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
   </div>
   <div id="player-fallback">
@@ -354,6 +366,7 @@ footer a:hover { text-decoration: underline; }
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+<script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 <script>
 // ============================================================
 // CONFIG
@@ -403,7 +416,7 @@ const CONFIG = {
   const isApple = /iPhone|iPad|Macintosh/.test(ua);
   const methods = {
     airplay: '<p><span class="k">AirPlay</span> (iPhone, iPad, Mac + Apple TV): press play, tap the AirPlay icon in the player controls, pick your TV. Subtitles come along.</p>',
-    chromecast: '<p><span class="k">Chromecast</span> (Android + Google TV): in Chrome, open the browser menu and choose <span class="k">Cast</span>, then pick your TV. Subtitles come along. If the picture stutters, an HDMI cable is the sure path.</p>',
+    chromecast: '<p><span class="k">Chromecast</span> (Android + Google TV): tap the cast icon in the player controls, pick your TV. Subtitles come along.</p>',
     hdmi: '<p><span class="k">HDMI</span> (any laptop, any TV): plug the cable in, switch the TV to that input, press play and go full screen.</p>',
   };
   const order = isApple ? ['airplay', 'chromecast', 'hdmi'] : ['chromecast', 'airplay', 'hdmi'];
@@ -450,7 +463,10 @@ let hls = null;
 if (video.canPlayType('application/vnd.apple.mpegurl')) {
   video.src = FILM.manifest;              // Safari / iOS: native HLS (keeps AirPlay first-class)
 } else if (window.Hls && Hls.isSupported()) {
-  hls = new Hls();
+  // Start ABR assuming a fast pipe so playback opens at 1080p and only
+  // steps DOWN if the connection can't keep up (Jeremy 2026-07-10: the
+  // default conservative start opened soft and looked worse than Vimeo).
+  hls = new Hls({ abrEwmaDefaultEstimate: 8000000 });
   hls.subtitleDisplay = false;            // tracks load, browser does not render; we do
   hls.on(Hls.Events.ERROR, (e, data) => { if (data.fatal) { clearTimeout(failTimer); showFallback(); } });
   hls.on(Hls.Events.MANIFEST_PARSED, applySub);
@@ -583,11 +599,13 @@ function fmt(s) {
   return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0');
 }
 function paintButtons() {
-  ppBtn.innerHTML = video.paused ? I.play : I.pause;
+  const paused = casting ? rp.isPaused : video.paused;
+  ppBtn.innerHTML = paused ? I.play : I.pause;
   muteBtn.innerHTML = (video.muted || video.volume === 0) ? I.muted : I.vol;
-  shell.classList.toggle('playing', !video.paused);
+  shell.classList.toggle('playing', !paused);
 }
 function togglePlay() {
+  if (casting) { rpc.playOrPause(); return; }
   if (video.paused) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
   else video.pause();
 }
@@ -603,7 +621,11 @@ muteBtn.onclick = () => { video.muted = !video.muted; };
 vol.oninput = () => { video.volume = vol.value / 100; video.muted = vol.value === '0'; };
 
 let seeking = false;
-seek.addEventListener('input', () => { seeking = true; if (video.duration) video.currentTime = (seek.value / 1000) * video.duration; });
+seek.addEventListener('input', () => {
+  seeking = true;
+  if (casting) { rp.currentTime = (seek.value / 1000) * (rp.duration || duration); rpc.seek(); return; }
+  if (video.duration) video.currentTime = (seek.value / 1000) * video.duration;
+});
 seek.addEventListener('change', () => { seeking = false; });
 video.addEventListener('timeupdate', () => {
   document.getElementById('t-now').textContent = fmt(video.currentTime);
@@ -623,6 +645,95 @@ if (window.WebKitPlaybackTargetAvailabilityEvent) {
     document.getElementById('airplay-btn').hidden = ev.availability !== 'available';
   });
   document.getElementById('airplay-btn').onclick = () => video.webkitShowPlaybackTargetPicker();
+}
+
+// ---------- Chromecast (Google Cast sender, Chrome only) ----------
+// Casts the HLS manifest to the default receiver with all caption files
+// attached as sideloaded tracks, styled to match the page (yellow burn-ins,
+// white subs, no background, no edge). While casting, the page controls
+// drive the TV and the local video sits paused.
+let casting = false;
+let rp = null, rpc = null;
+
+window.__onGCastApiAvailable = function (available) {
+  if (!available) return;
+  const ctx = cast.framework.CastContext.getInstance();
+  ctx.setOptions({
+    receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+  });
+  const castBtn = document.getElementById('cast-btn');
+  castBtn.hidden = ctx.getCastState() === cast.framework.CastState.NO_DEVICES_AVAILABLE;
+  ctx.addEventListener(cast.framework.CastContextEventType.CAST_STATE_CHANGED, (e) => {
+    castBtn.hidden = e.castState === cast.framework.CastState.NO_DEVICES_AVAILABLE;
+  });
+  castBtn.onclick = () => { ctx.requestSession().catch(() => {}); };
+
+  rp = new cast.framework.RemotePlayer();
+  rpc = new cast.framework.RemotePlayerController(rp);
+  rpc.addEventListener(cast.framework.RemotePlayerEventType.IS_CONNECTED_CHANGED, () => {
+    casting = rp.isConnected;
+    systemSubs = casting; // receiver renders subtitles; hide the overlay
+    shell.classList.toggle('casting', casting);
+    if (casting) { video.pause(); castLoad(); }
+    else {
+      const t = (rp.savedPlayerState && rp.savedPlayerState.currentTime) || 0;
+      if (t) video.currentTime = t;
+      applySub();
+    }
+    paintButtons();
+  });
+  rpc.addEventListener(cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, paintButtons);
+  rpc.addEventListener(cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED, () => {
+    if (!casting) return;
+    document.getElementById('t-now').textContent = fmt(rp.currentTime);
+    if (!seeking && rp.duration) seek.value = Math.round((rp.currentTime / rp.duration) * 1000);
+    if (rp.currentTime > 0) localStorage.setItem(CONFIG.resumeKey, String(rp.currentTime));
+  });
+};
+
+function castTrackId() {
+  const all = FILM.subs.concat(FILM.ccs);
+  const i = all.findIndex((s) => s[0] === subLang);
+  return i < 0 ? null : i + 1;
+}
+function castStyle() {
+  const s = new chrome.cast.media.TextTrackStyle();
+  s.foregroundColor = subLang === FILM.burnin ? '#FFE100FF' : '#FFFFFFFF';
+  s.backgroundColor = '#00000000';
+  s.edgeType = chrome.cast.media.TextTrackEdgeType.NONE;
+  s.fontGenericFamily = chrome.cast.media.TextTrackFontGenericFamily.SANS_SERIF;
+  s.fontScale = 0.9;
+  return s;
+}
+function castLoad() {
+  const session = cast.framework.CastContext.getInstance().getCurrentSession();
+  if (!session) return;
+  const info = new chrome.cast.media.MediaInfo(FILM.manifest, 'application/x-mpegurl');
+  info.streamType = chrome.cast.media.StreamType.BUFFERED;
+  info.metadata = new chrome.cast.media.GenericMediaMetadata();
+  info.metadata.title = 'Between the Mountain and the Sky';
+  info.tracks = FILM.subs.concat(FILM.ccs).map((s, i) => {
+    const t = new chrome.cast.media.Track(i + 1, chrome.cast.media.TrackType.TEXT);
+    t.trackContentId = CAP_BASE + encodeURIComponent(s[0]) + '?v=3';
+    t.trackContentType = 'text/vtt';
+    t.subtype = chrome.cast.media.TextTrackType.SUBTITLES;
+    t.name = s[1]; t.language = s[0];
+    return t;
+  });
+  info.textTrackStyle = castStyle();
+  const req = new chrome.cast.media.LoadRequest(info);
+  req.currentTime = video.currentTime || 0;
+  const id = castTrackId();
+  req.activeTrackIds = id ? [id] : [];
+  session.loadMedia(req).catch(() => {});
+}
+function castApplyLang() {
+  const session = cast.framework.CastContext.getInstance().getCurrentSession();
+  const m = session && session.getMediaSession();
+  if (!m) return;
+  const id = castTrackId();
+  m.editTracksInfo(new chrome.cast.media.EditTracksInfoRequest(id ? [id] : [], castStyle()), () => {}, () => {});
 }
 
 // Subtitle menu: two sections. Subtitles ("Off" = the theatrical English
@@ -838,7 +949,7 @@ const TREE = {
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_cast: {
-    text: 'First, make sure your device and the TV are on the same wifi network %wifi%; that is the most common snag. Then, in Chrome, open the browser menu (the three dots), choose Cast %cast% and pick your TV. Subtitles come along with the picture. If it stutters, an HDMI cable from a laptop is the sure path. Details in the <a href="' + '../faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
+    text: 'First, make sure your device and the TV are on the same wifi network %wifi%; that is the most common snag. Then tap the cast symbol %cast% in the player controls and pick your TV. Subtitles come along. If it stutters, an HDMI cable from a laptop is the sure path. Details in the <a href="' + '../faq/' + '" target="_blank" rel="noopener">FAQ</a>.',
     opts: [['That worked', 'solved'], ['Still stuck', 'ticket']],
   },
   tv_hdmi: {
