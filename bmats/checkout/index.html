@@ -68,6 +68,7 @@ body.gift .gift-only { display: block; }
   background: var(--gold); color: var(--bg); border: none; cursor: pointer;
 }
 #pay-btn:hover { background: var(--gold-hover); }
+#pay-btn .amt { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700; letter-spacing: 0.5px; }
 #pay-btn:disabled { opacity: 0.6; cursor: default; }
 .reassure { font-size: 12px; color: var(--dim); margin-top: 12px; text-align: center; text-align-last: center; }
 #done { display: none; text-align: center; padding: 40px 10px; }
@@ -125,7 +126,7 @@ body.gift .gift-only { display: block; }
     </div>
     <div class="why">Put in any numbers for the cc to test.</div>
   </div>
-  <button id="pay-btn">Pay $35</button>
+  <button id="pay-btn">Pay <span class="amt">$35</span></button>
   <p class="reassure" id="reassure">The film unlocks on the page behind this window the moment payment goes through.</p>
 </div>
 
@@ -159,7 +160,7 @@ body.gift .gift-only { display: block; }
     var paintGift = function () {
       amt = GIFT_PRICE + (bumpEl.checked ? BUMP_PRICE : 0);
       document.getElementById('amt').textContent = '$' + amt;
-      btn.textContent = 'Send gift · $' + amt;
+      btn.innerHTML = 'Send gift · <span class="amt">$' + amt + '</span>';
     };
     bumpEl.onchange = paintGift;
     paintGift();
@@ -167,7 +168,7 @@ body.gift .gift-only { display: block; }
     amt = parseInt(q.get('amt'), 10);
     if (!(amt >= 5)) amt = 35;
     document.getElementById('amt').textContent = '$' + amt;
-    btn.textContent = 'Pay $' + amt;
+    btn.innerHTML = 'Pay <span class="amt">$' + amt + '</span>';
   }
   var em = q.get('email');
   if (em) document.getElementById('email').value = em;
