@@ -103,10 +103,10 @@ header { text-align: center; padding: 60px 0 26px; }
 #sub-layer {
   position: absolute; left: 5%; right: 5%; bottom: var(--sub-bottom);
   text-align: center; pointer-events: none; z-index: 3;
-  color: var(--sub-color); font-family: var(--sans); font-weight: 500; line-height: 1.35;
+  color: #fff; font-family: var(--sans); font-weight: 500; line-height: 1.35;
   letter-spacing: 0; text-align-last: center;
-  text-shadow: 0 0 6px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.9);
 }
+#sub-layer.burnin { color: var(--sub-color); }
 #big-play {
   position: absolute; inset: 0; margin: auto; width: 92px; height: 92px; z-index: 4;
   background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.55); border-radius: 50%;
@@ -143,7 +143,9 @@ header { text-align: center; padding: 60px 0 26px; }
   display: none; padding: 6px 0; max-height: 300px; overflow-y: auto;
 }
 #cc-menu.open { display: block; }
-#cc-menu button { display: block; width: 100%; text-align: left; padding: 8px 16px; font-family: var(--sans); font-size: 13.5px; color: var(--body); }
+#cc-menu button { display: block; width: 100%; text-align: left; padding: 8px 16px; font-family: var(--sans); font-size: 13.5px; color: var(--body); background: none; border: none; cursor: pointer; }
+.cc-head { padding: 9px 16px 4px; font-family: var(--sans); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+.cc-head + .cc-head, #cc-menu button + .cc-head { border-top: 1px solid var(--line); margin-top: 6px; }
 #cc-menu button:hover { color: var(--ink); background: rgba(255,255,255,0.06); }
 #cc-menu button.on { color: var(--gold); }
 #player-fallback {
@@ -321,8 +323,8 @@ footer a:hover { text-decoration: underline; }
 
   <div class="card">
     <h2>Subtitles</h2>
-    <p>The film's original English subtitles are on from the start, listed as <span class="k">Original</span>. Use the <span class="k">CC</span> button in the player controls to pick another language. Your choice sticks for the whole film.</p>
-    <p>Full closed captions, with sound descriptions for viewers who are hard of hearing, are in the same menu as <span class="k">English CC</span>.</p>
+    <p>With subtitles <span class="k">Off</span> the film plays as it did in theatres: the Nepali dialogue carries its English translations. The <span class="k">CC</span> button in the player controls has full subtitles in eight languages, and your choice sticks for the whole film.</p>
+    <p>Closed captions, with sound descriptions for viewers who are hard of hearing, have their own section in that menu.</p>
     <p>Casting to a TV with Chromecast can drop subtitles on some models. If that happens, AirPlay or an HDMI cable carries them reliably.</p>
   </div>
 
@@ -419,17 +421,21 @@ const CONFIG = {
 // ============================================================
 const FILM = {
   manifest: 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/manifest/video.m3u8',
-  subKey: 'bmats_sub_lang',
+  subKey: 'bmats_sub_lang2',
+  burnin: 'en-GB', // the theatrical baseline: English burn-ins for the Nepali dialogue
   subs: [
-    ['en', 'Original'],
-    ['en-CA', 'English CC'],
-    ['nl', 'Nederlands'],
-    ['it', 'Italiano'],
-    ['fr', 'Français'],
-    ['hi', 'हिन्दी'],
+    ['en-GB', 'Off'],
+    ['en', 'English'],
     ['es', 'Español'],
     ['es-419', 'Español (Latinoamérica)'],
+    ['fr', 'Français'],
+    ['nl', 'Nederlands'],
+    ['it', 'Italiano'],
     ['pt-BR', 'Português (Brasil)'],
+    ['hi', 'हिन्दी'],
+  ],
+  ccs: [
+    ['en-CA', 'English CC'],
   ],
 };
 
@@ -461,7 +467,7 @@ if (video.canPlayType('application/vnd.apple.mpegurl')) {
 // and times cues off the video clock. Engine text tracks are kept
 // warm only to hand subtitles to the system renderer where the
 // overlay cannot follow: iOS native fullscreen and AirPlay.
-let subLang = localStorage.getItem(FILM.subKey) || 'en';
+let subLang = localStorage.getItem(FILM.subKey) || FILM.burnin;
 const CAP_BASE = FILM.manifest.replace('manifest/video.m3u8', 'captions/');
 const cueCache = {};
 let cues = null;        // active language's [{a, b, text}]
@@ -491,11 +497,10 @@ function parseVTT(txt) {
 }
 
 async function loadSubs(lang) {
-  if (lang === 'off') { cues = null; return; }
   if (cueCache[lang]) { cues = cueCache[lang]; return; }
   cues = null;
   try {
-    const r = await fetch(CAP_BASE + encodeURIComponent(lang) + '?v=2');
+    const r = await fetch(CAP_BASE + encodeURIComponent(lang) + '?v=3');
     if (!r.ok) throw new Error(r.status);
     cueCache[lang] = parseVTT(await r.text());
     if (subLang === lang) cues = cueCache[lang];
@@ -517,7 +522,6 @@ function renderSubs() {
 (function subTick() { renderSubs(); requestAnimationFrame(subTick); })();
 
 function activeTrack() {
-  if (subLang === 'off') return null;
   const ts = video.textTracks;
   for (let i = 0; i < ts.length; i++) {
     if ((ts[i].kind === 'subtitles' || ts[i].kind === 'captions') &&
@@ -528,6 +532,7 @@ function activeTrack() {
 
 function applySub() {
   loadSubs(subLang);
+  subLayer.classList.toggle('burnin', subLang === FILM.burnin);
   const chosen = activeTrack();
   const ts = video.textTracks;
   for (let i = 0; i < ts.length; i++) {
@@ -620,10 +625,16 @@ if (window.WebKitPlaybackTargetAvailabilityEvent) {
   document.getElementById('airplay-btn').onclick = () => video.webkitShowPlaybackTargetPicker();
 }
 
-// Subtitle menu: our labels, our order. "English CC" at last gets its real name.
+// Subtitle menu: two sections. Subtitles ("Off" = the theatrical English
+// burn-ins, always the baseline) and Closed captions (own section; more
+// CC languages land here when their files are ready).
 (function buildMenu() {
-  const items = [['off', 'Off']].concat(FILM.subs);
-  items.forEach(([code, label]) => {
+  function head(label) {
+    const h = document.createElement('div');
+    h.className = 'cc-head'; h.textContent = label;
+    ccMenu.appendChild(h);
+  }
+  function item(code, label) {
     const b = document.createElement('button');
     b.textContent = label; b.dataset.code = code;
     b.onclick = () => {
@@ -633,7 +644,11 @@ if (window.WebKitPlaybackTargetAvailabilityEvent) {
       ccMenu.classList.remove('open');
     };
     ccMenu.appendChild(b);
-  });
+  }
+  head('Subtitles');
+  FILM.subs.forEach(([c, l]) => item(c, l));
+  head('Closed captions');
+  FILM.ccs.forEach(([c, l]) => item(c, l));
 })();
 function markMenu() {
   ccMenu.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.code === subLang));
@@ -835,7 +850,7 @@ const TREE = {
     opts: [['Show me those options', 'tv'], ['Still stuck', 'ticket']],
   },
   subs: {
-    text: 'The film\'s original English subtitles are on from the start, listed as Original. Use the CC button %cc% in the player controls to pick another language; full closed captions are listed there as English CC. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
+    text: 'With subtitles Off, the film still shows its own English translations for the Nepali dialogue, as in theatres. The CC button %cc% in the player controls has full subtitles in eight languages, and closed captions have their own section in that menu. Your choice sticks for the whole film. If you are casting to a TV and subtitles vanish, AirPlay %airplay% and HDMI %hdmi% carry them reliably.',
     opts: [['Sorted', 'solved'], ['My language is missing', 'ticket'], ['Still stuck', 'ticket']],
   },
   gift: {
