@@ -101,6 +101,25 @@ body {
 .nav-submit:hover { transform: translateY(-2px); background: #f0856e; }
 .nav-submit:disabled { opacity: .55; cursor: default; transform: none; }
 
+/* ---------- Download buttons ---------- */
+.downloads {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  padding: 20px 32px 4px;
+}
+.dl-btn {
+  font-family: 'Urbanist', sans-serif; font-weight: 700; font-size: .95rem;
+  padding: 13px 26px; border-radius: 2px; text-decoration: none;
+  letter-spacing: .03em; display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(254,249,240,.95); color: var(--ink);
+  transition: transform .15s ease, background .2s ease, opacity .2s ease;
+  cursor: pointer;
+}
+.dl-btn:hover { transform: translateY(-2px); background: #fff; }
+.dl-btn .sub { font-family: 'Poppins', sans-serif; font-weight: 400; font-size: .78rem; opacity: .65; }
+.dl-btn.disabled {
+  opacity: .5; cursor: not-allowed; pointer-events: none;
+}
+
 /* ---------- Layout ---------- */
 .app { display: none; }
 .app.unlocked { display: block; }
@@ -237,6 +256,15 @@ footer {
        image to view it larger.</p>
   </section>
 
+  <div class="downloads">
+    <a class="dl-btn" id="dlWeb" href="downloads/Fulford-Elementary-Photos-WebSize.zip" download>
+      Download All &mdash; Web Size <span class="sub">.zip</span>
+    </a>
+    <a class="dl-btn disabled" id="dlFull" href="downloads/Fulford-Elementary-Photos-FullSize.zip" download>
+      Download All &mdash; Full Size <span class="sub">coming soon</span>
+    </a>
+  </div>
+
   <div class="grid" id="grid"></div>
 
   <footer>Fulford Elementary &middot; Photography by Piet Suess</footer>
@@ -371,6 +399,17 @@ const PHOTOS = [
   "FulfordElem_May27_DSC07472.jpg",
   "FulfordElem_May27_DSC07486.jpg"
 ];
+
+/* ---------- Full-size download: auto-enable once the zip exists ---------- */
+const dlFull = document.getElementById('dlFull');
+fetch(dlFull.getAttribute('href'), { method: 'HEAD' })
+  .then((res) => {
+    if (res.ok) {
+      dlFull.classList.remove('disabled');
+      dlFull.querySelector('.sub').textContent = '.zip';
+    }
+  })
+  .catch(() => {});
 
 /* ---------- Password gate ---------- */
 const gate = document.getElementById('gate');
