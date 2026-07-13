@@ -1422,24 +1422,43 @@
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
 
-  fetch("assets/tree-pointcloud.obj")
+  fetch("assets/tree-pointcloud.obj?v=pc3")
     .then(function (res) { return res.text(); })
     .then(function (text) {
-      var world = [];
+      // Parse raw verts first, then normalize HERE from the measured bounds.
+      // The asset is already normalized, but normalizing defensively at load
+      // means a stale-cached asset of any scale can never fling the dots to
+      // off-screen coordinates.
+      var raw = [];
+      var minX = Infinity, maxX = -Infinity;
+      var minY = Infinity, maxY = -Infinity;
+      var minZ = Infinity, maxZ = -Infinity;
       var objLines = text.split("\n");
       for (var li = 0; li < objLines.length; li++) {
         var ln = objLines[li];
         if (ln.charCodeAt(0) === 118 && ln.charCodeAt(1) === 32) {
           var parts = ln.split(" ");
-          world.push(
-            parseFloat(parts[1]) * TREE_HEIGHT + TREE_CX,
-            parseFloat(parts[2]) * TREE_HEIGHT + TREE_BASE_Y,
-            parseFloat(parts[3]) * TREE_HEIGHT + TREE_CZ
-          );
+          var rx = parseFloat(parts[1]);
+          var ry = parseFloat(parts[2]);
+          var rz = parseFloat(parts[3]);
+          if (rx !== rx || ry !== ry || rz !== rz) continue;
+          raw.push(rx, ry, rz);
+          if (rx < minX) minX = rx; if (rx > maxX) maxX = rx;
+          if (ry < minY) minY = ry; if (ry > maxY) maxY = ry;
+          if (rz < minZ) minZ = rz; if (rz > maxZ) maxZ = rz;
         }
       }
-      var treeCount = world.length / 3;
+      var treeCount = raw.length / 3;
       if (!treeCount) return;
+      var normH = Math.max(0.0001, maxY - minY);
+      var normCX = (minX + maxX) / 2;
+      var normCZ = (minZ + maxZ) / 2;
+      var world = new Float32Array(treeCount * 3);
+      for (var wi = 0; wi < treeCount; wi++) {
+        world[wi * 3]     = ((raw[wi * 3]     - normCX) / normH) * TREE_HEIGHT + TREE_CX;
+        world[wi * 3 + 1] = ((raw[wi * 3 + 1] - minY)   / normH) * TREE_HEIGHT + TREE_BASE_Y;
+        world[wi * 3 + 2] = ((raw[wi * 3 + 2] - normCZ) / normH) * TREE_HEIGHT + TREE_CZ;
+      }
 
       // Shuffle indices; first slice becomes mote targets, rest are fill.
       var idx = new Array(treeCount);
