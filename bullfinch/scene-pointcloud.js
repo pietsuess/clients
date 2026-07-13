@@ -1381,7 +1381,14 @@
     }
     requestAnimationFrame(animate);
   }
-  animate();
+  // NOTE: animate() is invoked AFTER the Layer T block below (see the call
+  // right before the Public API section). The first animate() call runs a
+  // full frame synchronously, and that frame reads Layer T state via
+  // treeZoomBump()/updateTreeFormation(). If those vars were still undefined
+  // at that moment, NaN would enter the camera parallax smoother and poison
+  // it permanently (NaN + anything = NaN), rendering the entire scene
+  // invisible with no console error. That exact bug shipped once. Do not
+  // move the animate() call back up here.
 
   // ---- Layer T: TREE GROVE FORMATION (index-pointcloud variant only) ----
   // The grove is built FROM the existing dot system, not layered on top:
@@ -1422,7 +1429,7 @@
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
 
-  fetch("assets/tree-pointcloud.obj?v=pc4")
+  fetch("assets/tree-pointcloud.obj?v=pc5")
     .then(function (res) { return res.text(); })
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.
@@ -1580,6 +1587,10 @@
     fillPosAttr.needsUpdate = true;
     fillAlphaAttr.needsUpdate = true;
   }
+
+  // Start the render loop only now that Layer T state exists (see the NOTE
+  // above the Layer T block: the first frame runs synchronously).
+  animate();
 
   // ---- Public API ------------------------------------------------------
   // uConnect runs linearly 0.02 → 1.00. No hold. No convergence.
