@@ -321,8 +321,8 @@
     <li data-s="done"><i class="dot"></i>Pull the Vimeo bandwidth report and confirm real usage<span class="who">Done · Jul 6</span></li>
     <li data-s="wait"><i class="dot"></i>Vimeo call: find out how long before the account is restricted (sets our migration deadline)<span class="who">Jeremy</span></li>
     <li data-s="done"><i class="dot"></i>Cloudflare Stream subscription activated on the film's account, upload access confirmed<span class="who">Done · Jul 9</span></li>
-    <li data-s="active"><i class="dot"></i>Upload the film to Cloudflare Stream and verify picture quality end to end (working master uploaded Jul 9 and playable; quality check in progress, a higher-bitrate master follows)<span class="who">Piet</span></li>
-    <li data-s="done"><i class="dot"></i>Load the subtitle files (all eight languages) and verify they display (loaded onto the film, all eight report ready; on-screen check rides with the quality pass)<span class="who">Done · Jul 9</span></li>
+    <li data-s="done"><i class="dot"></i>Upload the film to Cloudflare Stream and verify picture quality end to end (the final high-bitrate master went live Jul 10, playing at full 1080p; picture approved Jul 13)<span class="who">Done · Jul 13</span></li>
+    <li data-s="done"><i class="dot"></i>Load the subtitle files and verify they display (ten tracks live on the final master: eight languages plus the theatrical burn-ins and English closed captions)<span class="who">Done · Jul 10</span></li>
     <li data-s="todo"><i class="dot"></i>Turn on signed playback links (video only plays for paying viewers, links expire on their own)</li>
     <li data-s="todo"><i class="dot"></i>Real-device TV test: AirPlay, Chromecast (with subtitles on!), HDMI, iPad, older Android</li>
     <li data-s="todo"><i class="dot"></i>Set up the Vimeo backup-link path for support edge cases</li>
@@ -331,7 +331,7 @@
 
 <section data-name="Watch portal">
   <h2>2 · The watch portal (passwordless viewing)</h2>
-  <p class="note">One address for everything: watch link in, film plays, no passwords. This becomes the only link we ever send people. Working demo of the whole journey: <a href="../rent/" target="_blank" rel="noopener" style="color:var(--accent)">the rental page</a> (pay in the small window, the film starts in place; the gift checkout works the same way) and <a href="../watch/" target="_blank" rel="noopener" style="color:var(--accent)">the watch page</a> with the chat helper. Demo only: no real charges, front-end only for now.</p>
+  <p class="note">One address for everything: watch link in, film plays, no passwords. This becomes the only link we ever send people. Working demo of the whole journey: <a href="../rent/" target="_blank" rel="noopener" style="color:var(--accent)">the rental page</a> (pay in the small window; the page unlocks and one press of WATCH THE FILM takes you to the film; the gift checkout works the same way) and <a href="../watch/" target="_blank" rel="noopener" style="color:var(--accent)">the watch page</a> with the chat helper. Demo only: no real charges, front-end only for now.</p>
   <div class="secbar"><i></i></div>
   <ul class="tasks">
     <li data-s="done"><i class="dot"></i>New Cloudflare account for BMATS: Jeremy created it, Piet is building in it<span class="who">Done · Jul 7</span></li>
@@ -339,10 +339,10 @@
     <li data-s="done"><i class="dot"></i>Portal gets its own Cloudflare address (<a href="https://bmats-watch.pages.dev/rent/" target="_blank" rel="noopener" style="color:var(--accent)">bmats-watch.pages.dev</a>), ready to become watch.betweenthemountainandthesky.com the moment DNS lands<span class="who">Done · Jul 9</span></li>
     <li data-s="active"><i class="dot"></i>WATCH and SUPPORT buttons on the main site point to the portal; portal styled to match the main site (the rental page wears the new design now; remaining pages follow)<span class="who">Piet</span></li>
     <li data-s="todo"><i class="dot"></i>Kajabi checkout moves onto the film's own domain (checkout.betweenthemountainandthesky.com) so buyers never land on "mykajabi.com" at the payment step</li>
-    <li data-s="active"><i class="dot"></i>Checkout opens as a small payment window over the rental page; when payment lands, the page transforms and the film starts right there (demo works; needs the real-checkout test; fallback is the plain redirect)<span class="who">Piet</span></li>
+    <li data-s="active"><i class="dot"></i>Checkout opens as a small payment window over the rental page; when payment lands, the page transforms and a WATCH THE FILM button takes the buyer straight to the watch page (demo works; needs the real-checkout test; fallback is the plain redirect)<span class="who">Piet</span></li>
     <li data-s="active"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database (API key in hand and the purchase webhook is created and pointed at our receiver, for every current and future offer; plumbing tested with a synthetic purchase. Last inch: one real checkout, the free IDA offer works, to confirm the exact payload Kajabi sends)<span class="who">Piet</span></li>
     <li data-s="active"><i class="dot"></i>Email watch-link login, with a 6-digit code fallback for anyone whose email mangles the link (login page live and tested against the real backend, both paths one-time as designed; email sending comes next)<span class="who">Piet</span></li>
-    <li data-s="done"><i class="dot"></i>Watch page: film player, subtitle picker, big clear controls<span class="who">Done · Jul 6</span></li>
+    <li data-s="done"><i class="dot"></i>Watch page: our own film player, built from scratch so the subtitles are finally under our control: theatrical yellow burn-ins by default, nine subtitle choices plus closed captions, a picture-quality menu, AirPlay and Chromecast buttons<span class="who">Done · Jul 10</span></li>
     <li data-s="done"><i class="dot"></i>"You have access until Aug 19 · 2 days remaining" banner (real dates arrive with the database)<span class="who">Done · Jul 6</span></li>
     <li data-s="active"><i class="dot"></i>Resume where you left off, even on a different device (works on the same device; cross-device needs the database)<span class="who">Piet</span></li>
     <li data-s="done"><i class="dot"></i>Friendly error panel instead of a blank screen (try Chrome, refresh, contact us, backup link)<span class="who">Done · Jul 6</span></li>
@@ -417,11 +417,11 @@
 
 <section data-name="Subtitles">
   <h2>8 · New subtitle languages</h2>
-  <p class="note">German, Portuguese, French, Hindi, Nepali, through the same translation workflow used for Dutch and Italian.</p>
+  <p class="note">German and Nepali remain, through the same translation workflow that delivered French, Hindi and Portuguese.</p>
   <div class="secbar"><i></i></div>
   <ul class="tasks">
-    <li data-s="todo"><i class="dot"></i>Translate and review the five new languages</li>
-    <li data-s="todo"><i class="dot"></i>Load them into the player with a clear language picker</li>
+    <li data-s="done"><i class="dot"></i>French, Hindi and Portuguese: translated, loaded, and live in the player's language picker alongside Spanish (two flavours), Dutch and Italian<span class="who">Done · Jul 10</span></li>
+    <li data-s="todo"><i class="dot"></i>German and Nepali: translate, review, load the same way</li>
   </ul>
 </section>
 
@@ -474,7 +474,7 @@
 
 <footer>
   <span>Between the Mountain and the Sky · platform build</span>
-  <span>Last updated July 10, 2026</span>
+  <span>Last updated July 13, 2026</span>
 </footer>
 
 </div>
