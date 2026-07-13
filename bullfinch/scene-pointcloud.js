@@ -1422,7 +1422,7 @@
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
 
-  fetch("assets/tree-pointcloud.obj?v=pc3")
+  fetch("assets/tree-pointcloud.obj?v=pc4")
     .then(function (res) { return res.text(); })
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.

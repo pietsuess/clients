@@ -450,38 +450,6 @@
     <script src="swot.js?v=v4-5"></script>
     <script src="stat-field.js?v=v4-6"></script>
     <script>
-      // Tree grove formation driver (index-pointcloud variant). Element-
-      // anchored triggers, the standard ScrollTrigger pattern: positions are
-      // computed by GSAP itself (pin spacing included), no trigger lookup.
-      // Formation: section 03 approaching the viewport (= section 02
-      // releasing) until 03 is pinned. Zoom return: 04 approaching.
-      window.addEventListener("load", function () {
-        if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
-        var s03 = document.getElementById("opportunity");
-        var s04 = document.getElementById("data");
-        if (!s03) return;
-        ScrollTrigger.create({
-          trigger: s03,
-          start: "top bottom",   // 03's top enters the viewport: 02 is releasing
-          end: "top top",        // 03 pinned: grove fully formed
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) { window.bullfinchCanopy.setTreeProgress(self.progress); },
-        });
-        if (s04) {
-          ScrollTrigger.create({
-            trigger: s04,
-            start: "top bottom",
-            end: "top top",
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) { window.bullfinchCanopy.setTreeZoomReturn(self.progress); },
-          });
-        }
-        ScrollTrigger.refresh();
-      });
-    </script>
-    <script>
       // Section marks: build the SVG for each .section-mark, then drive its
       // assemble/disassemble with scroll position. One mark per section (the
       // hero and the closing section deliberately have none).
