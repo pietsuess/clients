@@ -1410,25 +1410,49 @@
   // the real pinned panel ranges (leaving 02 -> settled on 03) and drives
   // setTreeProgress: 0 -> 1 as 03 arrives (form), back to 0 as 04 arrives
   // (disperse to the ambient field). No global-progress guesswork here.
-  var TREE_HEIGHT = 3.6;        // world units
+  var TREE_MAX_HEIGHT = 3.8;    // world-unit clamp on grove height
   var TREE_BASE_Y = -2.5;       // forest floor (same plane the red dot lands on)
-  var TREE_CX = -5.2;           // grove center: inside the left graphics column (text is right)
   var TREE_CZ = -1.5;
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
   var treeFormP = 0;            // per-frame smoothed
   var treeReady = false;
-  var moteTreeTarget = new Float32Array(PARTICLE_POOL * 3);
-  var moteCapture    = new Float32Array(PARTICLE_POOL * 3);
-  var moteLocked     = new Uint8Array(PARTICLE_POOL);
-  var moteFormSeed   = new Float32Array(PARTICLE_POOL);
+  var treeNorm = null;          // normalized grove coords (height 1, base 0, centered)
+  var fillNorm = null;
+  var assetHalfW = 0.7;         // measured from the asset at load
+  var moteNormIdx = new Int32Array(PARTICLE_POOL);
+  var moteCapture  = new Float32Array(PARTICLE_POOL * 3);
+  var moteLocked   = new Uint8Array(PARTICLE_POOL);
+  var moteFormSeed = new Float32Array(PARTICLE_POOL);
   var fillAlphaAttr = null, fillPosAttr = null;
-  var fillSeedArr = null, fillStartArr = null, fillTargetArr = null;
+  var fillSeedArr = null, fillStartArr = null;
   var fillCount = 0;
   for (var ms = 0; ms < PARTICLE_POOL; ms++) moteFormSeed[ms] = Math.random();
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
 
-  fetch("assets/tree-pointcloud.obj?v=pc6")
+  // The grove is placed like the OTHER graphics: directly left of the text
+  // column, never under it. The zone is MEASURED from the DOM (panel left
+  // padding to the text block's left edge) and converted from pixels to
+  // world units at grove depth every frame, so alignment holds across
+  // viewports and through the camera pull-back.
+  var groveZoneL = 64, groveZoneR = 480;   // px fallbacks, remeasured below
+  function measureGroveZone() {
+    var panel = document.getElementById("opportunity");
+    var inner = panel && panel.querySelector(".panel__inner");
+    if (!panel || !inner) {
+      groveZoneL = window.innerWidth * 0.05;
+      groveZoneR = window.innerWidth * 0.32;
+      return;
+    }
+    var pad = parseFloat(getComputedStyle(panel).paddingLeft) || 32;
+    var textLeft = inner.getBoundingClientRect().left;
+    groveZoneL = pad;
+    groveZoneR = Math.max(pad + 120, textLeft - 24);   // keep a gap to the text
+  }
+  measureGroveZone();
+  window.addEventListener("resize", measureGroveZone);
+
+  fetch("assets/tree-pointcloud.obj?v=pc7")
     .then(function (res) { return res.text(); })
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.
@@ -1459,12 +1483,13 @@
       var normH = Math.max(0.0001, maxY - minY);
       var normCX = (minX + maxX) / 2;
       var normCZ = (minZ + maxZ) / 2;
-      var world = new Float32Array(treeCount * 3);
+      treeNorm = new Float32Array(treeCount * 3);
       for (var wi = 0; wi < treeCount; wi++) {
-        world[wi * 3]     = ((raw[wi * 3]     - normCX) / normH) * TREE_HEIGHT + TREE_CX;
-        world[wi * 3 + 1] = ((raw[wi * 3 + 1] - minY)   / normH) * TREE_HEIGHT + TREE_BASE_Y;
-        world[wi * 3 + 2] = ((raw[wi * 3 + 2] - normCZ) / normH) * TREE_HEIGHT + TREE_CZ;
+        treeNorm[wi * 3]     = (raw[wi * 3]     - normCX) / normH;
+        treeNorm[wi * 3 + 1] = (raw[wi * 3 + 1] - minY)   / normH;
+        treeNorm[wi * 3 + 2] = (raw[wi * 3 + 2] - normCZ) / normH;
       }
+      assetHalfW = ((maxX - minX) / normH) / 2 || 0.7;
 
       // Shuffle indices; first slice becomes mote targets, rest are fill.
       var idx = new Array(treeCount);
@@ -1475,10 +1500,7 @@
       }
       var take = 0;
       for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
-        var ti = idx[take] * 3;
-        moteTreeTarget[mi * 3]     = world[ti];
-        moteTreeTarget[mi * 3 + 1] = world[ti + 1];
-        moteTreeTarget[mi * 3 + 2] = world[ti + 2];
+        moteNormIdx[mi] = idx[take];
       }
 
       fillCount = treeCount - take;
@@ -1487,14 +1509,14 @@
       var fillRed  = new Float32Array(fillCount);
       var fillSize = new Float32Array(fillCount);
       var fillGlow = new Float32Array(fillCount);
-      fillSeedArr   = new Float32Array(fillCount);
-      fillStartArr  = new Float32Array(fillCount * 3);
-      fillTargetArr = new Float32Array(fillCount * 3);
+      fillSeedArr  = new Float32Array(fillCount);
+      fillStartArr = new Float32Array(fillCount * 3);
+      fillNorm     = new Float32Array(fillCount * 3);
       for (var fi = 0; fi < fillCount; fi++) {
         var si = idx[take + fi] * 3;
-        fillTargetArr[fi * 3]     = world[si];
-        fillTargetArr[fi * 3 + 1] = world[si + 1];
-        fillTargetArr[fi * 3 + 2] = world[si + 2];
+        fillNorm[fi * 3]     = treeNorm[si];
+        fillNorm[fi * 3 + 1] = treeNorm[si + 1];
+        fillNorm[fi * 3 + 2] = treeNorm[si + 2];
         // Fly in from the ambient mote field volume (same distribution the
         // motes spawn in), so the whole field reads as condensing into trees.
         fillStartArr[fi * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
@@ -1549,6 +1571,18 @@
       return;
     }
     var ff = smoothstep(0.88, 1.0, waveProgress[7] || 0);
+    // Pixel-to-world conversion at grove depth for THIS frame's camera, so
+    // the grove stays seated in the measured zone through the pull-back.
+    var lt2 = uniforms.uLayerTint.value;
+    var camZ = lerp(CAM_START.z, CAM_END.z, lt2) + treeZoomBump();
+    var dist = Math.max(1, camZ - TREE_CZ);
+    var halfW = Math.tan((camera.fov || 55) * Math.PI / 360) * dist * camera.aspect;
+    var zl = ((groveZoneL / window.innerWidth) * 2 - 1) * halfW;
+    var zr = ((groveZoneR / window.innerWidth) * 2 - 1) * halfW;
+    var groveCX = (zl + zr) / 2;
+    var S = (zr - zl) * 0.92 / (assetHalfW * 2);
+    if (S > TREE_MAX_HEIGHT) S = TREE_MAX_HEIGHT;
+    if (S < 0.8) S = 0.8;
     for (var i = 2; i < PARTICLE_POOL; i++) {
       var w = tClamp01(treeFormP * 1.25 - moteFormSeed[i] * 0.25);
       if (w <= 0) { moteLocked[i] = 0; continue; }
@@ -1561,9 +1595,13 @@
       }
       var e = w * w * (3 - 2 * w);
       var sway = Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.02 * e;
-      positions[xi] = moteCapture[xi] + (moteTreeTarget[xi] - moteCapture[xi]) * e + sway;
-      positions[yi] = moteCapture[yi] + (moteTreeTarget[yi] - moteCapture[yi]) * e;
-      positions[zi] = moteCapture[zi] + (moteTreeTarget[zi] - moteCapture[zi]) * e;
+      var mt = moteNormIdx[i] * 3;
+      var mtx = treeNorm[mt]     * S + groveCX;
+      var mty = treeNorm[mt + 1] * S + TREE_BASE_Y;
+      var mtz = treeNorm[mt + 2] * S + TREE_CZ;
+      positions[xi] = moteCapture[xi] + (mtx - moteCapture[xi]) * e + sway;
+      positions[yi] = moteCapture[yi] + (mty - moteCapture[yi]) * e;
+      positions[zi] = moteCapture[zi] + (mtz - moteCapture[zi]) * e;
       var aTree = lerp(0.9 * e, 0.25, ff);
       if (aTree > alphas[i]) alphas[i] = aTree;
     }
@@ -1576,9 +1614,12 @@
       var wf = tClamp01(treeFormP * 1.25 - fillSeedArr[f] * 0.25);
       var ef = wf * wf * (3 - 2 * wf);
       var f3 = f * 3;
-      fp[f3]     = fillStartArr[f3]     + (fillTargetArr[f3]     - fillStartArr[f3]) * ef;
-      fp[f3 + 1] = fillStartArr[f3 + 1] + (fillTargetArr[f3 + 1] - fillStartArr[f3 + 1]) * ef;
-      fp[f3 + 2] = fillStartArr[f3 + 2] + (fillTargetArr[f3 + 2] - fillStartArr[f3 + 2]) * ef;
+      var ftx = fillNorm[f3]     * S + groveCX;
+      var fty = fillNorm[f3 + 1] * S + TREE_BASE_Y;
+      var ftz = fillNorm[f3 + 2] * S + TREE_CZ;
+      fp[f3]     = fillStartArr[f3]     + (ftx - fillStartArr[f3]) * ef;
+      fp[f3 + 1] = fillStartArr[f3 + 1] + (fty - fillStartArr[f3 + 1]) * ef;
+      fp[f3 + 2] = fillStartArr[f3 + 2] + (ftz - fillStartArr[f3 + 2]) * ef;
       // visible almost as soon as they start moving, so the flight is seen
       fa[f] = Math.min(1, ef * 3.0) * fillAmp;
     }
