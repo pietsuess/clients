@@ -717,7 +717,8 @@ function castStyle() {
   const s = new chrome.cast.media.TextTrackStyle();
   s.foregroundColor = subLang === FILM.burnin ? '#FFE100FF' : '#FFFFFFFF';
   s.backgroundColor = '#00000000';
-  s.edgeType = chrome.cast.media.TextTrackEdgeType.NONE;
+  s.edgeType = chrome.cast.media.TextTrackEdgeType.DROP_SHADOW; // matches the page overlay's subtle black drop
+  s.edgeColor = '#000000A6';
   s.fontGenericFamily = chrome.cast.media.TextTrackFontGenericFamily.SANS_SERIF;
   s.fontScale = 0.9;
   return s;
