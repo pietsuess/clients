@@ -1291,6 +1291,11 @@
         partGeo.attributes.aSize.needsUpdate = true;
       }
 
+      // Tree grove formation (index-pointcloud variant): repositions locked
+      // motes and fades fill dots. Must run BEFORE the buffers upload and
+      // before the lines read positions below.
+      updateTreeFormation(elapsed);
+
       partGeo.attributes.position.needsUpdate = true;
       partGeo.attributes.aAlpha.needsUpdate = true;
       partGeo.attributes.aGlow.needsUpdate = true;
@@ -1306,6 +1311,9 @@
       var dollyX = lerp(CAM_START.x, CAM_END.x, dollyT);
       var dollyY = lerp(CAM_START.y, CAM_END.y, dollyT);
       var dollyZ = lerp(CAM_START.z, CAM_END.z, dollyT);
+      // Pull back over the grove formation band to take in all three trees,
+      // then rejoin the scripted dolly before the closing choreography.
+      dollyZ += treeZoomBump(lt);
       // Clamp defensively (must never cross 0.5).
       if (dollyY < 0.5) dollyY = 0.5;
 
@@ -1375,141 +1383,155 @@
   }
   animate();
 
-  // ---- Layer T: TREE POINT CLOUD (index-pointcloud variant only) --------
-  // ~5k dots parsed from assets/tree-pointcloud.obj (vertex-only OBJ,
-  // canopy/trunk sampled 1/3 - 2/3). The dots fade in on a loose dispersed
-  // shell just before the Data Layer band, then each converges to its tree
-  // position with per-dot stagger. Formation runs 0.32 - 0.44 of global
-  // scroll: it completes exactly as line wave 4 fires (0.44 - 0.49), so the
-  // tree assembles against a settled network and hands off to the next wave.
-  // Independent layer: shares no buffers with motes or lines.
-  var TREE_FORM_START = 0.32;
-  var TREE_FORM_END   = 0.44;
-  var TREE_FADE_LEAD  = 0.06;   // dispersed dots fade in over this band before formation
-  var TREE_BASE_Y = -2.5;       // forest floor (same as final red dot landing)
-  var TREE_HEIGHT = 4.5;
-  var TREE_X = 2.2, TREE_Z = -3.0;
-  var treeUniforms = {
-    uProgress: { value: 0 },
-    uFade:     { value: 0 },
-    uSize:     { value: 0.04 },
-    uScale:    { value: 1 },
-    uMote:     { value: readCssColor("--gl-mote") },
-    uAccent:   { value: readCssColor("--gl-accent") },
-  };
-  function updateTreePointScale() {
-    var h = renderer.domElement.clientHeight || window.innerHeight;
-    treeUniforms.uScale.value = h / (2 * Math.tan((camera.fov * Math.PI / 180) / 2));
-  }
-  updateTreePointScale();
-  window.addEventListener("resize", updateTreePointScale);
+  // ---- Layer T: TREE GROVE FORMATION (index-pointcloud variant only) ----
+  // The grove is built FROM the existing dot system, not layered on top:
+  //   - Every ambient mote (all except the two red dots) is assigned a
+  //     target point in the tree cloud. Leaving section 02 (scroll 0.30),
+  //     each mote flies from wherever it currently drifts to its tree
+  //     position with per-dot stagger, completing by 0.42. The cascade
+  //     lines read live mote positions every frame, so the drawn network
+  //     is CARRIED into the grove, edges flexing along the way.
+  //   - The remaining tree points render as fill dots through the SAME
+  //     particle material as the motes (identical size/color/glow
+  //     language) and fade in in place as the motes arrive.
+  //   - The camera bumps back during the band (see treeZoomBump in the
+  //     dolly) to take in all three trees, then returns to the scripted
+  //     path well before the closing convergence choreography.
+  // Asset: assets/tree-pointcloud.obj holds three trees side by side
+  // along X, normalized to height 1 with base at y = 0, centered on x.
+  var TREE_FORM_START = 0.30;   // the moment section 02 starts releasing
+  var TREE_FORM_END   = 0.42;   // fully formed mid Data Layer
+  var TREE_HEIGHT = 4.2;        // world units
+  var TREE_BASE_Y = -2.5;       // forest floor (same plane the red dot lands on)
+  var TREE_CX = -2.6;           // grove center: screen-left, where graphics live
+  var TREE_CZ = -1.5;
+  var treeFormTarget = 0;       // written by setProgress
+  var treeFormP = 0;            // per-frame smoothed
+  var treeReady = false;
+  var moteTreeTarget = new Float32Array(PARTICLE_POOL * 3);
+  var moteCapture    = new Float32Array(PARTICLE_POOL * 3);
+  var moteLocked     = new Uint8Array(PARTICLE_POOL);
+  var moteFormSeed   = new Float32Array(PARTICLE_POOL);
+  var fillAlphaAttr = null, fillSeedArr = null, fillCount = 0;
+  for (var ms = 0; ms < PARTICLE_POOL; ms++) moteFormSeed[ms] = Math.random();
+
+  function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+
   fetch("assets/tree-pointcloud.obj")
     .then(function (res) { return res.text(); })
     .then(function (text) {
-      var raw = [];
-      var minY = Infinity, maxY = -Infinity;
+      var world = [];
       var objLines = text.split("\n");
       for (var li = 0; li < objLines.length; li++) {
         var ln = objLines[li];
         if (ln.charCodeAt(0) === 118 && ln.charCodeAt(1) === 32) {
           var parts = ln.split(" ");
-          var vx = parseFloat(parts[1]);
-          var vy = parseFloat(parts[2]);
-          var vz = parseFloat(parts[3]);
-          raw.push(vx, vy, vz);
-          if (vy < minY) minY = vy;
-          if (vy > maxY) maxY = vy;
+          world.push(
+            parseFloat(parts[1]) * TREE_HEIGHT + TREE_CX,
+            parseFloat(parts[2]) * TREE_HEIGHT + TREE_BASE_Y,
+            parseFloat(parts[3]) * TREE_HEIGHT + TREE_CZ
+          );
         }
       }
-      var treeCount = raw.length / 3;
+      var treeCount = world.length / 3;
       if (!treeCount) return;
-      // Center xz, sit the base on the forest floor, scale to TREE_HEIGHT.
-      var cxSum = 0, czSum = 0;
-      for (var ci2 = 0; ci2 < treeCount; ci2++) {
-        cxSum += raw[ci2 * 3];
-        czSum += raw[ci2 * 3 + 2];
+
+      // Shuffle indices; first slice becomes mote targets, rest are fill.
+      var idx = new Array(treeCount);
+      for (var s0 = 0; s0 < treeCount; s0++) idx[s0] = s0;
+      for (var s1 = treeCount - 1; s1 > 0; s1--) {
+        var s2 = (Math.random() * (s1 + 1)) | 0;
+        var tmpI = idx[s1]; idx[s1] = idx[s2]; idx[s2] = tmpI;
       }
-      var treeCx = cxSum / treeCount;
-      var treeCz = czSum / treeCount;
-      var treeScale = TREE_HEIGHT / Math.max(0.0001, maxY - minY);
-      var treePos   = new Float32Array(treeCount * 3);
-      var treeStart = new Float32Array(treeCount * 3);
-      var treeSeed  = new Float32Array(treeCount);
-      var treeTint  = new Float32Array(treeCount);
-      var shellR    = TREE_HEIGHT * 1.4;
-      var shellCy   = TREE_BASE_Y + TREE_HEIGHT * 0.55;
-      for (var pi = 0; pi < treeCount; pi++) {
-        var tx = (raw[pi * 3]     - treeCx) * treeScale + TREE_X;
-        var ty = (raw[pi * 3 + 1] - minY)   * treeScale + TREE_BASE_Y;
-        var tz = (raw[pi * 3 + 2] - treeCz) * treeScale + TREE_Z;
-        treePos[pi * 3]     = tx;
-        treePos[pi * 3 + 1] = ty;
-        treePos[pi * 3 + 2] = tz;
-        var su = Math.random() * 2 - 1;
-        var sa = Math.random() * Math.PI * 2;
-        var sr = shellR * (0.8 + Math.random() * 0.9);
-        var sq = Math.sqrt(1 - su * su);
-        treeStart[pi * 3]     = TREE_X + sr * sq * Math.cos(sa);
-        treeStart[pi * 3 + 1] = shellCy + sr * su * 0.7;
-        treeStart[pi * 3 + 2] = TREE_Z + sr * sq * Math.sin(sa);
-        treeSeed[pi] = Math.random();
-        // canopy grades toward accent, same curve as the standalone tester
-        treeTint[pi] = Math.pow((ty - TREE_BASE_Y) / TREE_HEIGHT, 2.2) * 0.35;
+      var take = 0;
+      for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
+        var ti = idx[take] * 3;
+        moteTreeTarget[mi * 3]     = world[ti];
+        moteTreeTarget[mi * 3 + 1] = world[ti + 1];
+        moteTreeTarget[mi * 3 + 2] = world[ti + 2];
       }
-      var treeGeo = new THREE.BufferGeometry();
-      treeGeo.setAttribute("position", new THREE.BufferAttribute(treePos, 3));
-      treeGeo.setAttribute("aStart",   new THREE.BufferAttribute(treeStart, 3));
-      treeGeo.setAttribute("aSeed",    new THREE.BufferAttribute(treeSeed, 1));
-      treeGeo.setAttribute("aTint",    new THREE.BufferAttribute(treeTint, 1));
-      var treeMat = new THREE.ShaderMaterial({
-        uniforms: treeUniforms,
-        vertexShader: [
-          "attribute vec3 aStart;",
-          "attribute float aSeed;",
-          "attribute float aTint;",
-          "uniform float uProgress;",
-          "uniform float uSize;",
-          "uniform float uScale;",
-          "varying float vTint;",
-          "varying float vForm;",
-          "void main() {",
-          "  float p = clamp(uProgress * 1.25 - aSeed * 0.25, 0.0, 1.0);",
-          "  p = p * p * (3.0 - 2.0 * p);",
-          "  vec3 pos = mix(aStart, position, p);",
-          "  vec4 mv = modelViewMatrix * vec4(pos, 1.0);",
-          "  gl_PointSize = uSize * uScale / -mv.z;",
-          "  gl_Position = projectionMatrix * mv;",
-          "  vTint = aTint;",
-          "  vForm = p;",
-          "}",
-        ].join("\n"),
-        fragmentShader: [
-          "uniform vec3 uMote;",
-          "uniform vec3 uAccent;",
-          "uniform float uFade;",
-          "varying float vTint;",
-          "varying float vForm;",
-          "void main() {",
-          "  vec2 c = gl_PointCoord - 0.5;",
-          "  float d = length(c);",
-          "  if (d > 0.5) discard;",
-          "  float a = smoothstep(0.5, 0.3, d) * (0.35 + 0.55 * vForm) * uFade;",
-          "  gl_FragColor = vec4(mix(uMote, uAccent, vTint), a);",
-          "}",
-        ].join("\n"),
-        transparent: true,
-        depthWrite: false,
-        depthTest: false,
-        blending: THREE.AdditiveBlending,
-      });
-      var treePoints = new THREE.Points(treeGeo, treeMat);
-      treePoints.renderOrder = 5;   // beneath motes (10) and the red seed (100)
-      treePoints.frustumCulled = false;
-      scene.add(treePoints);
+
+      fillCount = treeCount - take;
+      var fillPos  = new Float32Array(fillCount * 3);
+      var fillA    = new Float32Array(fillCount);
+      var fillRed  = new Float32Array(fillCount);
+      var fillSize = new Float32Array(fillCount);
+      var fillGlow = new Float32Array(fillCount);
+      fillSeedArr  = new Float32Array(fillCount);
+      for (var fi = 0; fi < fillCount; fi++) {
+        var si = idx[take + fi] * 3;
+        fillPos[fi * 3]     = world[si];
+        fillPos[fi * 3 + 1] = world[si + 1];
+        fillPos[fi * 3 + 2] = world[si + 2];
+        fillSize[fi] = BASE_MOTE_SIZE * (0.45 + Math.random() * 0.25);
+        fillSeedArr[fi] = Math.random();
+      }
+      var fillGeo = new THREE.BufferGeometry();
+      fillGeo.setAttribute("position", new THREE.BufferAttribute(fillPos, 3));
+      fillGeo.setAttribute("aAlpha",   new THREE.BufferAttribute(fillA, 1));
+      fillGeo.setAttribute("aRed",     new THREE.BufferAttribute(fillRed, 1));
+      fillGeo.setAttribute("aSize",    new THREE.BufferAttribute(fillSize, 1));
+      fillGeo.setAttribute("aGlow",    new THREE.BufferAttribute(fillGlow, 1));
+      fillAlphaAttr = fillGeo.attributes.aAlpha;
+      var fillPoints = new THREE.Points(fillGeo, partMat);
+      fillPoints.renderOrder = 9;    // just beneath the ambient motes (10)
+      fillPoints.frustumCulled = false;
+      scene.add(fillPoints);
+      treeReady = true;
     })
     .catch(function (err) {
       console.error("tree point cloud failed to load:", err);
     });
+
+  // Camera pull-back over the formation band: out 0.28-0.38, hold through
+  // the Data Layer read, back on path 0.50-0.64 (before closing).
+  function treeZoomBump(lt) {
+    function ss(a, b, x) {
+      x = tClamp01((x - a) / (b - a));
+      return x * x * (3 - 2 * x);
+    }
+    return 3.2 * (ss(0.28, 0.38, lt) - ss(0.50, 0.64, lt));
+  }
+
+  // Runs every frame from the animate loop, after the organic mote update
+  // and before position buffers upload / lines read them.
+  function updateTreeFormation(elapsed) {
+    treeFormP += (treeFormTarget - treeFormP) * 0.08;
+    if (!treeReady) return;
+    if (treeFormP < 0.001) {
+      for (var r = 2; r < PARTICLE_POOL; r++) moteLocked[r] = 0;
+      if (fillAlphaAttr && fillAlphaAttr.array[0] !== 0) {
+        for (var rf = 0; rf < fillCount; rf++) fillAlphaAttr.array[rf] = 0;
+        fillAlphaAttr.needsUpdate = true;
+      }
+      return;
+    }
+    var ff = smoothstep(0.88, 1.0, waveProgress[7] || 0);
+    for (var i = 2; i < PARTICLE_POOL; i++) {
+      var w = tClamp01(treeFormP * 1.25 - moteFormSeed[i] * 0.25);
+      if (w <= 0) { moteLocked[i] = 0; continue; }
+      var xi = i * 3, yi = xi + 1, zi = xi + 2;
+      if (!moteLocked[i]) {
+        moteLocked[i] = 1;
+        moteCapture[xi] = positions[xi];
+        moteCapture[yi] = positions[yi];
+        moteCapture[zi] = positions[zi];
+      }
+      var e = w * w * (3 - 2 * w);
+      var sway = Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.02 * e;
+      positions[xi] = moteCapture[xi] + (moteTreeTarget[xi] - moteCapture[xi]) * e + sway;
+      positions[yi] = moteCapture[yi] + (moteTreeTarget[yi] - moteCapture[yi]) * e;
+      positions[zi] = moteCapture[zi] + (moteTreeTarget[zi] - moteCapture[zi]) * e;
+      var aTree = lerp(0.9 * e, 0.25, ff);
+      if (aTree > alphas[i]) alphas[i] = aTree;
+    }
+    var fa = fillAlphaAttr.array;
+    for (var f = 0; f < fillCount; f++) {
+      var wf = tClamp01(treeFormP * 1.3 - fillSeedArr[f] * 0.3);
+      fa[f] = wf * wf * (3 - 2 * wf) * lerp(0.6, 0.2, ff);
+    }
+    fillAlphaAttr.needsUpdate = true;
+  }
 
   // ---- Public API ------------------------------------------------------
   // uConnect runs linearly 0.02 → 1.00. No hold. No convergence.
@@ -1519,12 +1541,8 @@
     uniforms.uShaftFade.value   = 1.0 - v;
     uniforms.uMoteDensity.value = v;
     uniforms.uConnect.value     = v;
-    // Tree layer (index-pointcloud variant): fade dispersed dots in just
-    // before the band, then drive formation across it.
-    treeUniforms.uProgress.value = Math.max(0, Math.min(1,
-      (v - TREE_FORM_START) / (TREE_FORM_END - TREE_FORM_START)));
-    treeUniforms.uFade.value = Math.max(0, Math.min(1,
-      (v - (TREE_FORM_START - TREE_FADE_LEAD)) / TREE_FADE_LEAD));
+    // Tree grove formation band (index-pointcloud variant)
+    treeFormTarget = tClamp01((v - TREE_FORM_START) / (TREE_FORM_END - TREE_FORM_START));
   }
   function setWaveProgress(wave, p) {
     var idx = Math.max(1, Math.min(7, wave | 0));
