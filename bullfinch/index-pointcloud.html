@@ -44,6 +44,18 @@
         --gl-canopy: #576244;
         --gl-understory: #171008;
       }
+      /* Section 03 gets the same two-column layout as the other graphic
+         sections (mirrors the #product/.panel--media rules): text in the
+         right column, the left column belongs to the tree grove. */
+      #opportunity {
+        grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
+        gap: clamp(18px, 3vw, 48px);
+      }
+      #opportunity .panel__inner {
+        grid-column: 2;
+        justify-self: start;
+        max-width: min(44vw, var(--col-narrow));
+      }
     </style>
 
     <style>
@@ -453,7 +465,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-pointcloud.js?v=pc7"></script>
+    <script src="scene-pointcloud.js?v=pc8"></script>
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=v4-5"></script>

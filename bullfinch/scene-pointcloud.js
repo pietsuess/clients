@@ -1410,7 +1410,7 @@
   // the real pinned panel ranges (leaving 02 -> settled on 03) and drives
   // setTreeProgress: 0 -> 1 as 03 arrives (form), back to 0 as 04 arrives
   // (disperse to the ambient field). No global-progress guesswork here.
-  var TREE_MAX_HEIGHT = 3.8;    // world-unit clamp on grove height
+  var TREE_MAX_HEIGHT = 5.0;    // world-unit clamp on grove height
   var TREE_BASE_Y = -2.5;       // forest floor (same plane the red dot lands on)
   var TREE_CZ = -1.5;
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
@@ -1452,7 +1452,7 @@
   measureGroveZone();
   window.addEventListener("resize", measureGroveZone);
 
-  fetch("assets/tree-pointcloud.obj?v=pc7")
+  fetch("assets/tree-pointcloud.obj?v=pc8")
     .then(function (res) { return res.text(); })
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.
@@ -1525,7 +1525,7 @@
         fillPos[fi * 3]     = fillStartArr[fi * 3];
         fillPos[fi * 3 + 1] = fillStartArr[fi * 3 + 1];
         fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
-        fillSize[fi] = BASE_MOTE_SIZE * (0.45 + Math.random() * 0.25);
+        fillSize[fi] = BASE_MOTE_SIZE * (0.6 + Math.random() * 0.3);
         fillSeedArr[fi] = Math.random();
       }
       var fillGeo = new THREE.BufferGeometry();
@@ -1609,7 +1609,7 @@
     // family as the motes) rather than fading in place.
     var fa = fillAlphaAttr.array;
     var fp = fillPosAttr.array;
-    var fillAmp = lerp(0.6, 0.2, ff);
+    var fillAmp = lerp(0.72, 0.2, ff);
     for (var f = 0; f < fillCount; f++) {
       var wf = tClamp01(treeFormP * 1.25 - fillSeedArr[f] * 0.25);
       var ef = wf * wf * (3 - 2 * wf);
