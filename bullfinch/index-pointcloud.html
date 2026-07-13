@@ -450,6 +450,46 @@
     <script src="swot.js?v=v4-5"></script>
     <script src="stat-field.js?v=v4-6"></script>
     <script>
+      // Tree grove formation driver (index-pointcloud variant). Anchored to
+      // the REAL pinned panel ranges, same pattern as the wave timing in
+      // swot.js: formation runs from leaving section 02 to settled on 03;
+      // the camera zoom-return runs from leaving 03 into 04.
+      window.addEventListener("load", function () {
+        if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
+        function pinOf(id) {
+          var el = document.getElementById(id);
+          if (!el) return null;
+          var all = ScrollTrigger.getAll();
+          for (var i = 0; i < all.length; i++) {
+            if (all[i].trigger === el && all[i].pin) return all[i];
+          }
+          return null;
+        }
+        var p02 = pinOf("product");
+        var p03 = pinOf("opportunity");
+        var p04 = pinOf("data");
+        if (!p02 || !p03) return;
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return p02.start + (p02.end - p02.start) * 0.85; },
+          end: function () { return p03.start + (p03.end - p03.start) * 0.15; },
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { window.bullfinchCanopy.setTreeProgress(self.progress); },
+        });
+        if (p04) {
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return p03.start + (p03.end - p03.start) * 0.75; },
+            end: function () { return p04.start + (p04.end - p04.start) * 0.20; },
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) { window.bullfinchCanopy.setTreeZoomReturn(self.progress); },
+          });
+        }
+      });
+    </script>
+    <script>
       // Section marks: build the SVG for each .section-mark, then drive its
       // assemble/disassemble with scroll position. One mark per section (the
       // hero and the closing section deliberately have none).

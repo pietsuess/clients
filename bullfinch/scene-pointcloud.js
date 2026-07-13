@@ -1313,7 +1313,7 @@
       var dollyZ = lerp(CAM_START.z, CAM_END.z, dollyT);
       // Pull back over the grove formation band to take in all three trees,
       // then rejoin the scripted dolly before the closing choreography.
-      dollyZ += treeZoomBump(lt);
+      dollyZ += treeZoomBump();
       // Clamp defensively (must never cross 0.5).
       if (dollyY < 0.5) dollyY = 0.5;
 
@@ -1399,20 +1399,25 @@
   //     path well before the closing convergence choreography.
   // Asset: assets/tree-pointcloud.obj holds three trees side by side
   // along X, normalized to height 1 with base at y = 0, centered on x.
-  var TREE_FORM_START = 0.30;   // the moment section 02 starts releasing
-  var TREE_FORM_END   = 0.42;   // fully formed mid Data Layer
+  // Timing is DOM-anchored: index-pointcloud.html creates ScrollTriggers on
+  // the real pinned panel ranges (leaving 02 -> settled on 03) and drives
+  // setTreeProgress / setTreeZoomReturn. No global-progress guesswork here.
   var TREE_HEIGHT = 4.2;        // world units
   var TREE_BASE_Y = -2.5;       // forest floor (same plane the red dot lands on)
   var TREE_CX = -2.6;           // grove center: screen-left, where graphics live
   var TREE_CZ = -1.5;
-  var treeFormTarget = 0;       // written by setProgress
+  var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
   var treeFormP = 0;            // per-frame smoothed
+  var treeZoomReturnTarget = 0; // driven by setTreeZoomReturn (camera rejoins path)
+  var treeZoomReturnP = 0;
   var treeReady = false;
   var moteTreeTarget = new Float32Array(PARTICLE_POOL * 3);
   var moteCapture    = new Float32Array(PARTICLE_POOL * 3);
   var moteLocked     = new Uint8Array(PARTICLE_POOL);
   var moteFormSeed   = new Float32Array(PARTICLE_POOL);
-  var fillAlphaAttr = null, fillSeedArr = null, fillCount = 0;
+  var fillAlphaAttr = null, fillPosAttr = null;
+  var fillSeedArr = null, fillStartArr = null, fillTargetArr = null;
+  var fillCount = 0;
   for (var ms = 0; ms < PARTICLE_POOL; ms++) moteFormSeed[ms] = Math.random();
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
@@ -1457,12 +1462,22 @@
       var fillRed  = new Float32Array(fillCount);
       var fillSize = new Float32Array(fillCount);
       var fillGlow = new Float32Array(fillCount);
-      fillSeedArr  = new Float32Array(fillCount);
+      fillSeedArr   = new Float32Array(fillCount);
+      fillStartArr  = new Float32Array(fillCount * 3);
+      fillTargetArr = new Float32Array(fillCount * 3);
       for (var fi = 0; fi < fillCount; fi++) {
         var si = idx[take + fi] * 3;
-        fillPos[fi * 3]     = world[si];
-        fillPos[fi * 3 + 1] = world[si + 1];
-        fillPos[fi * 3 + 2] = world[si + 2];
+        fillTargetArr[fi * 3]     = world[si];
+        fillTargetArr[fi * 3 + 1] = world[si + 1];
+        fillTargetArr[fi * 3 + 2] = world[si + 2];
+        // Fly in from the ambient mote field volume (same distribution the
+        // motes spawn in), so the whole field reads as condensing into trees.
+        fillStartArr[fi * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
+        fillStartArr[fi * 3 + 1] = (Math.random() - 0.5) * 12;
+        fillStartArr[fi * 3 + 2] = (Math.random() - 0.5) * 10 - 1.0;
+        fillPos[fi * 3]     = fillStartArr[fi * 3];
+        fillPos[fi * 3 + 1] = fillStartArr[fi * 3 + 1];
+        fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
         fillSize[fi] = BASE_MOTE_SIZE * (0.45 + Math.random() * 0.25);
         fillSeedArr[fi] = Math.random();
       }
@@ -1473,6 +1488,7 @@
       fillGeo.setAttribute("aSize",    new THREE.BufferAttribute(fillSize, 1));
       fillGeo.setAttribute("aGlow",    new THREE.BufferAttribute(fillGlow, 1));
       fillAlphaAttr = fillGeo.attributes.aAlpha;
+      fillPosAttr   = fillGeo.attributes.position;
       var fillPoints = new THREE.Points(fillGeo, partMat);
       fillPoints.renderOrder = 9;    // just beneath the ambient motes (10)
       fillPoints.frustumCulled = false;
@@ -1483,20 +1499,22 @@
       console.error("tree point cloud failed to load:", err);
     });
 
-  // Camera pull-back over the formation band: out 0.28-0.38, hold through
-  // the Data Layer read, back on path 0.50-0.64 (before closing).
-  function treeZoomBump(lt) {
+  // Camera pull-back: eases out with the formation itself, holds while the
+  // grove is read, then eases back as the DOM-anchored return trigger
+  // (leaving 03 into 04) runs — always in sync with what is on screen.
+  function treeZoomBump() {
     function ss(a, b, x) {
       x = tClamp01((x - a) / (b - a));
       return x * x * (3 - 2 * x);
     }
-    return 3.2 * (ss(0.28, 0.38, lt) - ss(0.50, 0.64, lt));
+    return 3.6 * ss(0.02, 0.55, treeFormP) * (1 - ss(0.0, 1.0, treeZoomReturnP));
   }
 
   // Runs every frame from the animate loop, after the organic mote update
   // and before position buffers upload / lines read them.
   function updateTreeFormation(elapsed) {
     treeFormP += (treeFormTarget - treeFormP) * 0.08;
+    treeZoomReturnP += (treeZoomReturnTarget - treeZoomReturnP) * 0.08;
     if (!treeReady) return;
     if (treeFormP < 0.001) {
       for (var r = 2; r < PARTICLE_POOL; r++) moteLocked[r] = 0;
@@ -1525,11 +1543,22 @@
       var aTree = lerp(0.9 * e, 0.25, ff);
       if (aTree > alphas[i]) alphas[i] = aTree;
     }
+    // Fill dots FLY from the ambient field into the trees (same stagger
+    // family as the motes) rather than fading in place.
     var fa = fillAlphaAttr.array;
+    var fp = fillPosAttr.array;
+    var fillAmp = lerp(0.6, 0.2, ff);
     for (var f = 0; f < fillCount; f++) {
-      var wf = tClamp01(treeFormP * 1.3 - fillSeedArr[f] * 0.3);
-      fa[f] = wf * wf * (3 - 2 * wf) * lerp(0.6, 0.2, ff);
+      var wf = tClamp01(treeFormP * 1.25 - fillSeedArr[f] * 0.25);
+      var ef = wf * wf * (3 - 2 * wf);
+      var f3 = f * 3;
+      fp[f3]     = fillStartArr[f3]     + (fillTargetArr[f3]     - fillStartArr[f3]) * ef;
+      fp[f3 + 1] = fillStartArr[f3 + 1] + (fillTargetArr[f3 + 1] - fillStartArr[f3 + 1]) * ef;
+      fp[f3 + 2] = fillStartArr[f3 + 2] + (fillTargetArr[f3 + 2] - fillStartArr[f3 + 2]) * ef;
+      // visible almost as soon as they start moving, so the flight is seen
+      fa[f] = Math.min(1, ef * 3.0) * fillAmp;
     }
+    fillPosAttr.needsUpdate = true;
     fillAlphaAttr.needsUpdate = true;
   }
 
@@ -1541,8 +1570,6 @@
     uniforms.uShaftFade.value   = 1.0 - v;
     uniforms.uMoteDensity.value = v;
     uniforms.uConnect.value     = v;
-    // Tree grove formation band (index-pointcloud variant)
-    treeFormTarget = tClamp01((v - TREE_FORM_START) / (TREE_FORM_END - TREE_FORM_START));
   }
   function setWaveProgress(wave, p) {
     var idx = Math.max(1, Math.min(7, wave | 0));
@@ -1577,6 +1604,11 @@
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
     setSeedReveal: setSeedReveal,
+    // Tree grove formation (index-pointcloud variant): both are driven by
+    // DOM-anchored ScrollTriggers in index-pointcloud.html, keyed on the
+    // real pinned panel ranges — never on global page progress.
+    setTreeProgress: function (p) { treeFormTarget = tClamp01(p); },
+    setTreeZoomReturn: function (p) { treeZoomReturnTarget = tClamp01(p); },
     getLayerTint: function () { return uniforms.uLayerTint.value; },
   };
 })();
