@@ -1,0 +1,1145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+
+    <title>Bullfinch Earth - The FICO for forests.</title>
+    <meta name="description" content="Wearable forest sensors that turn ordinary field movement into trusted inventory data." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bullfinch Earth - The FICO for forests." />
+    <meta property="og:description" content="Wearable forest sensors that turn ordinary field movement into trusted inventory data." />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Bullfinch Earth - The FICO for forests." />
+    <meta name="twitter:description" content="Wearable forest sensors that turn ordinary field movement into trusted inventory data." />
+    <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
+
+    <script>
+      (function () {
+        if ("scrollRestoration" in history) {
+          history.scrollRestoration = "manual";
+        }
+        window.scrollTo(0, 0);
+        document.documentElement.setAttribute("data-theme", "dark");
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
+    />
+
+    <link rel="stylesheet" href="styles.css?v=v4-6" />
+
+    <style>
+      /* Section marks — one per section, beside each eyebrow (bottom-right
+         corner on mobile). Updated Bullfinch Earth Marks choreography: people
+         cluster spins as it gathers, nature fronds wipe bottom-to-top, tech
+         rotates / slides / wipes. Animations are CSS keyframes (gather / reveal
+         / peopleSpin), paused and scrubbed by each panel's scroll progress. */
+      @property --build { syntax: "<number>"; inherits: true; initial-value: 1; }
+      @property --glow  { syntax: "<number>"; inherits: true; initial-value: 0; }
+      @property --pang  { syntax: "<angle>";  inherits: true; initial-value: 0deg; }
+      @property --rev   { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+      /* Wrapper hugs the eyebrow text and anchors the mark to the end of the
+         label. The mark lives OUTSIDE the eyebrow <p>, so swot.js's opacity
+         reveal on the eyebrow does NOT fade the mark — the mark carries its own
+         reveal in its keyframes. The wrapper takes over the eyebrow's bottom
+         margin so the box stays text-height (mark centres on the text line) and
+         the gap to the verdict is unchanged. */
+      .eyebrow-anchor {
+        position: relative;
+        width: -moz-fit-content;
+        width: fit-content;
+        margin: 0 0 32px 0;
+      }
+      .eyebrow-anchor .panel__eyebrow {
+        margin: 0;
+      }
+
+      /* The mark is taken OUT OF FLOW (absolute), so it adds no layout height
+         and cannot shift the verdict or the section's vertical rhythm. It sits
+         centred on the eyebrow line, just to its right. --mark-box is the SVG's
+         real rendered size (the glyph fills only the middle ~40% of its 0..100
+         viewBox, and .panel clips overflow, so the box itself must be large). */
+      .section-mark {
+        --mark-box: 128px;
+        --mo: 2.5;
+        --spin: 2;
+        --glowk: 1;
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: calc(var(--mark-box) * -0.13); /* seat ink ~14px off the label */
+        width: var(--mark-box);
+        height: var(--mark-box);
+        pointer-events: none;
+        animation:
+          gather 4s linear infinite alternate,
+          reveal 4s cubic-bezier(0.33, 0, 0.2, 1) infinite alternate;
+        animation-play-state: paused; /* scrubbed by scroll (see script) */
+      }
+      .section-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+      }
+      .section-mark .mw { fill: var(--ink); }
+      .section-mark .rfill { fill: var(--accent); }
+      .section-mark .red {
+        filter: drop-shadow(0 0 calc(var(--glow, 0) * var(--glowk, 1) * 3px) var(--accent));
+      }
+      .section-mark .a-move {
+        transform-box: fill-box;
+        transform: translate(calc(var(--ox, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)),
+                             calc(var(--oy, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)));
+      }
+      .section-mark .a-grow {
+        transform-box: fill-box;
+        transform: scale(var(--p, var(--build, 1)));
+      }
+      .section-mark .a-rot {
+        transform-box: fill-box;
+        transform: rotate(calc(var(--rot, 0deg) * (1 - var(--p, var(--build, 1))) * var(--spin, 1)));
+      }
+      /* people: whole cluster spins around its centroid (own paused keyframe) */
+      .section-mark .grp-spin {
+        transform-box: view-box;
+        transform: rotate(var(--pang, 0deg));
+        animation: peopleSpin 4s linear infinite alternate;
+        animation-play-state: paused;
+      }
+      .section-mark .fade {
+        opacity: clamp(0, calc(var(--p, var(--build, 1)) * 1.6), 1);
+      }
+      /* nature: fronds wipe bottom-to-top; middles slide out from behind */
+      .section-mark .n-reveal { clip-path: inset(calc((1 - var(--rp, 1)) * 100%) 0% 0% 0%); }
+      .section-mark .n-slide {
+        transform-box: fill-box;
+        transform: translateX(calc(var(--sx, 0px) * (1 - var(--sp, 1))));
+      }
+
+      @keyframes gather {
+        0%   { --build: 0; --glow: 0; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+        56%  { --build: 1; --glow: 0.7; }
+        100% { --build: 1; --glow: 0.95; }
+      }
+      @keyframes peopleSpin {
+        0%   { --pang: 360deg; }
+        44%  { --pang: 180deg; }
+        80%  { --pang: 33deg; animation-timing-function: cubic-bezier(0.17, 0.31, 0.5, 1); }
+        100% { --pang: -12deg; }
+      }
+      @keyframes reveal {
+        0%   { --rev: 0; }
+        100% { --rev: 1; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .section-mark, .section-mark .grp-spin { animation: none; }
+      }
+
+      /* Mobile: the mark is moved out of the eyebrow (see script) and parked in
+         the panel's bottom-right corner. Its containing block is .panel__inner
+         (full-height, no transform), so bottom/right track the screen corner
+         while the panel is the one on screen. */
+      @media (max-width: 720px) {
+        .section-mark--corner {
+          --mark-box: 104px;
+          left: auto;
+          top: auto;
+          /* negative offsets cancel the glyph's transparent padding so the ink
+             tucks into the corner rather than floating ~30px in from it */
+          right: calc(var(--mark-box) * -0.16);
+          bottom: calc(var(--mark-box) * -0.16);
+          transform: none;
+          margin-left: 0;
+          z-index: 5; /* sit above .panel__inner (z-index:2) and panel media */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="splash" id="splash" aria-label="Begin presentation">
+      <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen presentation">
+        <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
+      </button>
+    </div>
+
+    <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+    <div class="text-veil" aria-hidden="true"></div>
+    <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
+      <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
+    </div>
+    <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
+
+    <header class="site-nav" aria-label="Website navigation">
+      <a class="site-nav__brand" href="./" data-restart-splash data-nav-label="Bullfinch Earth" aria-label="Restart Bullfinch Earth">
+        <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+          <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+          <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+        </svg>
+      </a>
+      <div class="site-nav__hover-label" id="site-nav-hover-label" aria-hidden="true"></div>
+      <nav class="site-nav__links" aria-label="Primary">
+        <a href="#problem" data-scroll-target="#problem" data-nav-label="The gap" aria-label="01 The gap">01</a>
+        <a href="#product" data-scroll-target="#product" data-nav-label="The wearable" aria-label="02 The wearable">02</a>
+        <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Data layer" aria-label="03 Data layer">03</a>
+        <a href="#data" data-scroll-target="#data" data-nav-label="Traction" aria-label="04 Traction">04</a>
+        <a href="#proof" data-scroll-target="#proof" data-nav-label="Business" aria-label="05 Business">05</a>
+        <a href="#team" data-scroll-target="#team" data-nav-label="Team" aria-label="06 Team">06</a>
+        <a href="#decisions" data-scroll-target="#decisions" data-nav-label="Next steps" aria-label="07 Next steps">07</a>
+        <a href="#closing" data-scroll-target="#closing" data-nav-label="Contact" aria-label="08 Contact">08</a>
+        <button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Enter full screen">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+            <path d="M4 9V4h5" />
+            <path d="M15 4h5v5" />
+            <path d="M20 15v5h-5" />
+            <path d="M9 20H4v-5" />
+          </svg>
+        </button>
+      </nav>
+    </header>
+    <main id="page">
+      <section class="hero" aria-label="Hero">
+        <div class="hero__inner">
+          <p class="hero__eyebrow">
+            <svg class="hero__eyebrow-mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+              <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+              <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+            </svg>
+            <span>BULLFINCH EARTH</span>
+          </p>
+          <h1 class="hero__title">
+            <span class="hero__line hero__line--1">The FICO for forests.</span>
+          </h1>
+          <p class="hero__subtitle hero__line hero__line--2">Ground truth every market can trust.</p>
+        </div>
+        <div class="hero__scroll-cue" aria-hidden="true">
+          <span class="hero__scroll-cue-label">Scroll</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </section>
+
+      <section class="swot" id="swot" aria-label="Bullfinch Earth story">
+        <article class="panel panel--media" id="problem" data-panel="1">
+          <div class="panel__stat" aria-label="Today, manual forestry measures data for only 1% of trees">
+            <div class="stat-grid" id="statGrid" aria-hidden="true"></div>
+            <div class="stat-read">
+              <div class="stat-label">
+                <span class="stat-line" id="statToday">TODAY</span>
+                <span class="stat-line" id="statBull">BULLFINCH</span>
+              </div>
+              <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
+              <p class="stat-rest">of trees measured</p>
+            </div>
+          </div>
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE GAP</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Forest inventory is still built on tape measures and small samples.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Field reality.</span> Professional foresters still measure trees by hand across small plots, using the same core workflow that has shaped inventory for generations.</p>
+              <p><span class="lead">Data gap.</span> Timber, wildfire insurance, carbon, biodiversity, and ESG decisions all depend on ground truth that is still scarce, expensive, and inconsistent.</p>
+              <p><span class="lead">Market pressure.</span> Nature markets are asking for trust, but the reliable under-canopy data layer has not existed at operational scale.</p>
+            </div>
+            <p class="panel__numeric">MANUAL PLOTS &middot; SMALL SAMPLES &middot; HIGH-VALUE DECISIONS</p>
+          </div>
+        </article>
+
+        <article class="panel panel--media" id="product" data-panel="2">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">02 &middot; THE WEARABLE</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Mount lightweight sensors, walk, and the data flows.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Zero training.</span> Bullfinch uses phone-scale, off-the-shelf sensors plus proprietary edge AI and sensor fusion.</p>
+              <p><span class="lead">Passive capture.</span> As a forester moves, the wearable collects species classification, DBH, timber volume, stocking density, and forest condition signals.</p>
+              <p><span class="lead">No extra survey day.</span> The product turns normal field activity into repeatable inventory data without a LiDAR backpack or workflow reset.</p>
+              <p><span class="lead">Data product.</span> Observations can feed maps, tables, reports, models, and partner systems that need trustworthy forest-floor inputs.</p>
+            </div>
+            <p class="panel__numeric">SPECIES &middot; DBH &middot; VOLUME &middot; STOCKING DENSITY</p>
+          </div>
+        </article>
+
+        <article class="panel" id="opportunity" data-panel="3">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; DATA LAYER</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Bullfinch is the ground-truth layer for forestry, finance, and carbon.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">For foresters.</span> Denser operational inventory without adding more field burden to an already shrinking workforce.</p>
+              <p><span class="lead">For markets.</span> Insurers, banks, carbon registries, and ESG providers need reliable forest-floor data to price risk and trust claims.</p>
+              <p><span class="lead">For platforms.</span> Bullfinch creates a repeatable data stream for MRV, wildfire risk, biodiversity, restoration, and stewardship products.</p>
+            </div>
+            <p class="panel__numeric">FORESTRY &middot; INSURANCE &middot; CARBON &middot; ESG</p>
+          </div>
+        </article>
+
+        <article class="panel" id="data" data-panel="4">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">04 &middot; TRACTION</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Paid deployments and a $<span class="count-up" id="tractionCount">39</span>M pipeline, before general availability.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Paid pilots.</span> Weyerhaeuser, the #1 US timberland owner, and Long View Forest are signed Design Partners.</p>
+              <p><span class="lead">Proven in the field.</span> Green Diamond Resource Company, the #5 US timberland owner, estimates $20K to $30K in annual savings in a single division. On-site demos with Forsite, Wagner, Vermont Department of Forests, and the Ontario Woodlot Association.</p>
+              <p><span class="lead">Recognition.</span> A UK Space Agency under-canopy geolocation project, a Forest Business Accelerator award, a Conservation X Labs Fire Grand Challenge semi-final, and top-6 and top-5 finishes at the Seattle and Okanagan angel conferences.</p>
+              <p><span class="lead">Stewardship.</span> A BC benefit company building with Indigenous partners, including the Salmon Parks Stewardship Society (Mowachaht / Muchalaht First Nation), and Traditional Ecological Knowledge.</p>
+              <p class="panel__quote">"Honestly, in many ways I think you will revolutionize forestry."<cite>Regional Manager, Weyerhaeuser</cite></p>
+            </div>
+            <p class="panel__numeric">WEYERHAEUSER &middot; LONG VIEW FOREST &middot; UK SPACE AGENCY &middot; $39M PIPELINE</p>
+          </div>
+        </article>
+
+        <article class="panel panel--media" id="proof" data-panel="5">
+          <div class="panel__chart" aria-label="Market opportunity">
+            <figure class="bullseye-fig">
+              <svg class="bullseye" viewBox="0 0 360 380" role="img" aria-label="Market opportunity bullseye: a $188M forester beachhead nested inside a $1.05B obtainable market, a $2.7B serviceable market, and a $3.4B to $6B total addressable market by 2030.">
+                <defs>
+                  <!-- Phase 1: this radius grows 0..150 first, revealing all the
+                       faint circles outward from the centre. -->
+                  <clipPath id="be-clip-s"><circle id="be-clip-s-c" cx="180" cy="190" r="150"></circle></clipPath>
+                  <!-- Phase 2: AFTER the circles are complete, this radius grows
+                       with sticky holds so the red fills region by region. -->
+                  <clipPath id="be-clip-r"><circle id="be-clip-r-c" cx="180" cy="190" r="150"></circle></clipPath>
+                </defs>
+                <g class="be-scene" clip-path="url(#be-clip-s)">
+                  <circle class="be-ring be-tam" cx="180" cy="190" r="150"></circle>
+                  <circle class="be-ring be-sam" cx="180" cy="190" r="100"></circle>
+                  <circle class="be-ring be-som" cx="180" cy="190" r="63"></circle>
+                  <circle class="be-ring be-beach" cx="180" cy="190" r="26"></circle>
+                </g>
+                <g clip-path="url(#be-clip-r)">
+                  <!-- Red band filling the CURRENT region. JS sets its radius +
+                       width per region; the red clip reveals it region by region.
+                       Defaults to the TAM band for the static fallback. -->
+                  <circle class="be-sweep" cx="180" cy="190" r="125"></circle>
+                </g>
+                <!-- ONE leader + ONE label, outside the clips. JS parks the line
+                     on a FIXED spot for each region and swaps the label to the
+                     ring being filled. -->
+                <line class="be-leader" x1="180" y1="40" x2="180" y2="65"></line>
+                <text class="be-cap" text-anchor="middle">
+                  <tspan class="be-cap-name" x="180" y="28">TAM</tspan><tspan class="be-cap-val" dx="8">$6B</tspan>
+                </text>
+              </svg>
+              <figcaption class="bullseye-cap">$20K per unit / year &#183; area scales with market size</figcaption>
+            </figure>
+          </div>
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">05 &middot; BUSINESS</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">A subscription product for the people who already walk the forest.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Beachhead.</span> Professional foresters and forest managers pay for better inventory where accuracy, labor, and risk already carry budget.</p>
+              <p><span class="lead">Model.</span> Annual subscriptions package wearable sensors, analysis, and stand-level or tree-level inventory outputs.</p>
+              <p><span class="lead">Expansion.</span> Enterprise software adoption creates a data stream; data customers then pull more inventory through the network.</p>
+              <p><span class="lead">Why now.</span> Forestry labor is shrinking while wildfire, carbon, insurance, and biodiversity markets need verifiable ground truth.</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel panel--media" id="team" data-panel="6">
+          <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
+            <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
+              <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+              <figcaption>Seth Sternberg &middot; CEO</figcaption>
+            </figure>
+            <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
+              <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
+              <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
+            </figure>
+            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+              <img src="assets/graham-headshot.png" alt="Graham Smith" />
+              <figcaption>Graham Smith &middot; CCO</figcaption>
+            </figure>
+          </div>
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">06 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
+            <div class="panel__evidence">
+              <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
+              <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim, the Mars guy.</button> CTO and PhD astrophysicist, Oxford and Cambridge, who built cameras now operating on Mars with NASA JPL.</p>
+              <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry and field operations, plus finance and customer depth.</p>
+            </div>
+            <p class="panel__numeric">MARS CAMERAS &middot; 400M+ PRODUCTS &middot; BC FIELD OPS</p>
+          </div>
+        </article>
+
+
+
+        <article class="panel" id="decisions" data-panel="7">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">07 &middot; NEXT STEPS</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Choose the conversation that matches your role.</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Design partners.</span> Bring a real inventory, wildfire, carbon, biodiversity, or forest-health workflow to stress-test Bullfinch in the field.</p>
+              <p><span class="lead">Investors.</span> Download the current investment overview and traction detail behind the FICO for forests thesis.</p>
+              <p><span class="lead">Data customers.</span> Explore how Bullfinch data could feed insurance, banking, carbon, ESG, MRV, or stewardship products.</p>
+            </div>
+            <p class="panel__numeric">DESIGN PARTNERS &middot; INVESTORS &middot; DATA CUSTOMERS</p>
+          </div>
+        </article>
+
+
+      </section>
+
+      <section class="closing" id="closing" aria-label="Closing">
+        <div class="closing__inner">
+          <svg class="closing__logo bullfinch-mark" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+            <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+            <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+          </svg>
+          <h2 class="closing__title">
+            <span class="closing__line closing__line--1">What's measured is valued.</span>
+            <span class="closing__line closing__line--2">What's valued is protected.</span>
+          </h2>
+          <div class="contact-actions closing__actions">
+            <a href="mailto:hello@bullfinch.earth?subject=Investment%20overview%20request">Request investment overview</a>
+            <a href="mailto:hello@bullfinch.earth?subject=Investor%20conversation">Investor conversation</a>
+            <a href="mailto:hello@bullfinch.earth?subject=Design%20partner%20pilot">Design partner pilot</a>
+            <a href="mailto:hello@bullfinch.earth?subject=Data%20partnership">Data partnership</a>
+          </div>
+        </div>
+
+        <footer class="site-footer" id="site-footer">
+          <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
+          <p class="site-footer__line">BULLFINCH EARTH<br />THE FICO FOR FORESTS</p>
+          <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 15 6-6 6 6" />
+            </svg>
+          </button>
+        </footer>
+      </section>
+    </main>
+
+    <div class="bio-modal" id="team-bio-modal" hidden role="dialog" aria-modal="true" aria-labelledby="team-bio-title">
+      <div class="bio-modal__backdrop" data-bio-close></div>
+      <section class="bio-modal__panel" role="document">
+        <button class="bio-modal__close" type="button" aria-label="Close team bio" data-bio-close>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+        <img class="bio-modal__photo" id="team-bio-photo" src="" alt="" />
+        <div class="bio-modal__content">
+          <p class="bio-modal__eyebrow">Team bio</p>
+          <h2 class="bio-modal__title" id="team-bio-title"></h2>
+          <p class="bio-modal__body" id="team-bio-body"></p>
+        </div>
+      </section>
+    </div>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="theme.js"></script>
+    <script src="scroll.js"></script>
+    <script src="scene.js?v=v4-5"></script>
+    <script src="case-animation.js?v=v4-4"></script>
+    <script src="field-film.js?v=v4-4"></script>
+    <script src="swot.js?v=v4-5"></script>
+    <script src="stat-field.js?v=v4-6"></script>
+    <script>
+      // Section marks: build the SVG for each .section-mark, then drive its
+      // assemble/disassemble with scroll position. One mark per section (the
+      // hero and the closing section deliberately have none).
+      (function () {
+        "use strict";
+        function f(n) { return Math.round(n * 100) / 100; }
+        function sailPath(x, y, w, h) {
+          return "M" + f(x) + "," + f(y + 0.4427 * h) +
+                 " C" + f(x) + "," + f(y + 0.1412 * h) + " " + f(x + 0.595 * w) + "," + f(y) + " " + f(x + w) + "," + f(y) +
+                 " L" + f(x + w) + "," + f(y + h) + " L" + f(x) + "," + f(y + h) + " Z";
+        }
+        function shapeEl(s) {
+          var cls = s.k === "r" ? "rfill red" : "mw";
+          if (s.t === "c") return '<circle class="' + cls + '" cx="' + s.cx + '" cy="' + s.cy + '" r="' + s.r + '"/>';
+          if (s.t === "q") return '<rect class="' + cls + '" x="' + f(s.x) + '" y="' + f(s.y) + '" width="' + f(s.w) + '" height="' + f(s.h) + '" rx="' + (s.rx != null ? s.rx : 2.5) + '" ry="' + (s.rx != null ? s.rx : 2.5) + '"/>';
+          return '<path class="' + cls + '" d="' + sailPath(s.x, s.y, s.w, s.h) + '"/>';
+        }
+        function ctr(s) { return s.t === "c" ? [s.cx, s.cy] : [s.x + s.w / 2, s.y + s.h / 2]; }
+
+        var SRC = {
+          people: function () { return [
+            { t: "c", cx: 40.22, cy: 40.76, r: 8.35, k: "w", o: 0 },
+            { t: "c", cx: 47.22, cy: 59.24, r: 8.35, k: "w", o: 1 },
+            { t: "c", cx: 59.78, cy: 43.93, r: 8.35, k: "r", o: 2 }]; },
+          nature: function () { return [
+            { t: "s", x: 24.518, y: 34.74, w: 18.41, h: 30.521, k: "w", o: 0 },
+            { t: "s", x: 46.77, y: 41.152, w: 14.542, h: 24.182, k: "r", o: 1 },
+            { t: "s", x: 65.155, y: 48.14, w: 10.327, h: 17.121, k: "w", o: 2 }]; },
+          tech: function () { return [
+            { t: "q", x: 25.158, y: 30.174, w: 14, h: 15, rx: 1.453, k: "w", o: 0 },
+            { t: "q", x: 43.0, y: 45.174, w: 14, h: 24.651, rx: 1.453, k: "w", o: 1 },
+            { t: "q", x: 60.842, y: 36.948, w: 14, h: 32.878, rx: 1.453, k: "r", o: 2 }]; }
+        };
+        var SIG = {
+          people: { type: "move", dir: "radial" },
+          nature: { type: "grow", origin: "bottom center" },
+          tech: { type: "rot", origin: "center", angle: "auto" }
+        };
+        function animShape(cat, s) {
+          // every shape rides --build directly → all dots stay in sync
+          var inner = shapeEl(s), p = "var(--build,1)", m = SIG[cat];
+          if (m.type === "move") {
+            var c = ctr(s), dx = c[0] - s._cx, dy = c[1] - s._cy, mag = Math.hypot(dx, dy);
+            if (mag < 5) { dx = 0; dy = -1; mag = 1; }
+            return '<g class="fade" style="--p:' + p + '"><g class="a-move" style="--ox:' + f(dx / mag * 22) + "px;--oy:" + f(dy / mag * 22) + "px;--p:" + p + '">' + inner + "</g></g>";
+          }
+          if (m.type === "grow") {
+            return '<g class="a-grow" style="transform-origin:' + m.origin + ";--p:" + p + '">' + inner + "</g>";
+          }
+          var ang = (m.angle === "auto") ? (s.o % 2 ? 90 : -90) : m.angle;
+          return '<g class="fade" style="--p:' + p + '"><g class="a-rot" style="transform-origin:' + m.origin + ";--rot:" + ang + "deg;--p:" + p + '">' + inner + "</g></g>";
+        }
+        function mark(cat) {
+          var shapes = SRC[cat]();
+          var cx = 0, cy = 0;
+          shapes.forEach(function (s) { var c = ctr(s); cx += c[0]; cy += c[1]; });
+          cx /= shapes.length; cy /= shapes.length;
+          shapes.forEach(function (s) { s._cx = cx; s._cy = cy; });
+
+          // nature: all three fronds wipe bottom-to-top in a slight cascade
+          if (cat === "nature") {
+            var nwin = { 0: [0, 0.5], 1: [0.2, 0.55], 2: [0.4, 0.6] };
+            var nhtml = shapes.map(function (s) {
+              var w = nwin[s.o];
+              var rp = "clamp(0,calc((var(--rev,1) - " + w[0] + ") / " + w[1] + "),1)";
+              return '<g class="n-reveal" style="--rp:' + rp + '">' + shapeEl(s) + "</g>";
+            }).join("");
+            return '<svg viewBox="0 0 100 100" aria-hidden="true">' + nhtml + "</svg>";
+          }
+
+          // tech: top-left square rotates in, middle slides in from left, red wipes up
+          if (cat === "tech") {
+            var thtml = shapes.map(function (s) {
+              if (s.o === 0) {
+                var pr = "clamp(0,calc(var(--rev,1) / 0.5),1)";
+                return '<g class="fade" style="--p:' + pr + '"><g class="a-rot" style="transform-origin:center;--rot:-90deg;--p:' + pr + '">' + shapeEl(s) + "</g></g>";
+              }
+              if (s.o === 1) {
+                var sp = "clamp(0,calc((var(--rev,1) - 0.42) / 0.33),1)";
+                return '<g class="n-slide fade" style="--sx:-26px;--sp:' + sp + ";--p:" + sp + '">' + shapeEl(s) + "</g>";
+              }
+              var rp = "clamp(0,calc((var(--rev,1) - 0.6) / 0.4),1)";
+              return '<g class="n-reveal" style="--rp:' + rp + '">' + shapeEl(s) + "</g>";
+            }).join("");
+            return '<svg viewBox="0 0 100 100" aria-hidden="true">' + thtml + "</svg>";
+          }
+
+          // people: spin the whole cluster around its centroid as it gathers
+          var inner = shapes.map(function (s) { return animShape(cat, s); }).join("");
+          if (cat === "people") {
+            inner = '<g class="grp-spin" style="transform-origin:' + f(cx) + "px " + f(cy) + 'px">' + inner + "</g>";
+          }
+          return '<svg viewBox="0 0 100 100" aria-hidden="true">' + inner + "</svg>";
+        }
+
+        var marks = Array.prototype.slice.call(document.querySelectorAll(".section-mark"));
+        if (!marks.length) return;
+        marks.forEach(function (el) {
+          var cat = el.getAttribute("data-mark");
+          if (SRC[cat]) el.innerHTML = mark(cat);
+        });
+
+        // On mobile the mark leaves the eyebrow and parks in the panel's
+        // bottom-right corner. It has to move out of the eyebrow in the DOM
+        // because the eyebrow carries a scroll transform, which would otherwise
+        // trap the mark's positioning context inside the label.
+        var isMobile = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        if (isMobile) {
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel");
+            if (!panel) return;
+            // Anchor to the PANEL (always exactly one viewport tall with the
+            // same padding), not .panel__inner — on media panels the inner
+            // column stops short of the bottom, which would raise the mark.
+            el.classList.add("section-mark--corner");
+            panel.appendChild(el);
+          });
+        }
+
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) return; // CSS drops the animations → marks rest assembled
+
+        // Scrub a mark's keyframe animations (gather / reveal / peopleSpin) from
+        // panel progress, with a dwell band so it HOLDS assembled mid-pin rather
+        // than scrubbing straight through. The animations are `alternate`, so
+        // currentTime 0->d builds and d->2d releases.
+        function dwellTime(p, d) {
+          var h0 = 0.4, h1 = 0.6;                 // assembled "catch" zone
+          if (p < h0) return (p / h0) * d;        // build   0 -> d
+          if (p < h1) return d;                   // hold assembled
+          return d + ((p - h1) / (1 - h1)) * d;   // release d -> 2d
+        }
+        function applyTimes(el, timeFor) {
+          var anims = el.getAnimations ? el.getAnimations({ subtree: true }) : [];
+          anims.forEach(function (a) {
+            try {
+              a.pause();
+              a.currentTime = timeFor(a.effect.getComputedTiming().duration);
+            } catch (e) {}
+          });
+        }
+
+        if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
+          // Mirror swot.js's panel pin range so progress lines up with the pin.
+          var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel");
+            if (!panel) return;
+            var scrub = function (p) {
+              var prog = clamp01(p);
+              applyTimes(el, function (d) { return dwellTime(prog, d); });
+            };
+            ScrollTrigger.create({
+              trigger: panel,
+              start: "top top",
+              // Match each panel's actual pin length so the eyebrow mark's
+              // assemble/hold/release lines up with the pin. #proof has a longer
+              // pin (see swot.js), so its mark must animate across that range
+              // instead of finishing (leaving) early.
+              end: panel.id === "proof"
+                ? (mobileLike ? "+=220%" : "+=380%")
+                : (mobileLike ? "+=100%" : "+=200%"),
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: function (self) { scrub(self.progress); },
+              onRefresh: function (self) { scrub(self.progress || 0); }
+            });
+            scrub(0);
+          });
+        } else {
+          // Fallback (no GSAP / pins): drive from viewport position — centre of
+          // the screen = assembled (currentTime d), edges = disassembled (0).
+          var loop = function () {
+            var vh = window.innerHeight || document.documentElement.clientHeight;
+            marks.forEach(function (el) {
+              var r = el.getBoundingClientRect();
+              var c = r.top + r.height / 2;
+              var m = clamp01(1 - Math.abs((c - vh / 2) / vh) / 0.42);
+              applyTimes(el, function (d) { return m * d; });
+            });
+            requestAnimationFrame(loop);
+          };
+          requestAnimationFrame(loop);
+        }
+      })();
+    </script>
+    <script>
+      // Market bullseye (section 05): FULLY SCROLL-DRIVEN, in two phases. Phase
+      // 1: a growing clip reveals the complete faint circles outward from the
+      // centre. Phase 2 (only once the circles are whole): a second clip grows
+      // with STICKY HOLDS so the red fills the chart region by region, dwelling
+      // on each completed market so none slips past. One label + one leader sit
+      // on a FIXED spot per region (they don't chase the growing edge). The TAM
+      // is the stickiest hold; then the whole bullseye SHRINKS back in as you
+      // scroll away (an animation, not a passive scroll-off), and scrolling back
+      // up reverses it. Safe by default: no motion / no GSAP leaves the chart
+      // static and complete, red on the TAM.
+      (function () {
+        var svg = document.querySelector("#proof .bullseye");
+        var panel = document.getElementById("proof");
+        if (!svg || !panel) return;
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced || typeof ScrollTrigger === "undefined" || typeof gsap === "undefined") return;
+
+        var clipS = svg.querySelector("#be-clip-s-c");
+        var clipR = svg.querySelector("#be-clip-r-c");
+        var sweep = svg.querySelector(".be-sweep");
+        var leader = svg.querySelector(".be-leader");
+        var cap = svg.querySelector(".be-cap");
+        var capName = svg.querySelector(".be-cap-name");
+        var capVal = svg.querySelector(".be-cap-val");
+        var bcap = document.querySelector("#proof .bullseye-cap");
+        if (!clipS || !clipR || !sweep || !leader || !cap) return;
+
+        var CX = 180, CY = 190;
+        // Each region: the red band that fills it (mid-radius + thickness), its
+        // outer boundary, and the label shown while it is being filled. The
+        // leader parks at the top of the band (fixed per region).
+        var REGIONS = [
+          { band: { r: 13,   w: 26 }, outer: 26,  name: "BEACHHEAD", num: 188,  dec: 0, suf: "M" },
+          { band: { r: 44.5, w: 37 }, outer: 63,  name: "SOM",       num: 1.05, dec: 2, suf: "B" },
+          { band: { r: 81.5, w: 37 }, outer: 100, name: "SAM",       num: 2.7,  dec: 1, suf: "B" },
+          { band: { r: 125,  w: 50 }, outer: 150, name: "TAM",       num: 6,    dec: 0, suf: "B" }
+        ];
+
+        // Phase 1 — the circles build (scaffold reveal radius), then hold full
+        // to the end (they only retract if you scroll back up).
+        var SKF = [
+          { p: 0.08, f: 0 }, { p: 0.20, f: 150 }, { p: 1.00, f: 150 }
+        ];
+        // Phase 2 — red reveal radius. The build runs in the FIRST part of the
+        // (long) pin; the TAM then fills and holds full across the entire back
+        // half, so the finished $6B sits there for a long stretch and is hard to
+        // scroll past. (Scrolling back up retracts everything.)
+        var RKF = [
+          { p: 0.22, f: 0 },
+          { p: 0.27, f: 26 },  { p: 0.33, f: 26 },   // beachhead fills, brief hold
+          { p: 0.37, f: 63 },  { p: 0.43, f: 63 },   // SOM, brief hold
+          { p: 0.47, f: 100 }, { p: 0.52, f: 100 },  // SAM, brief hold
+          { p: 0.56, f: 150 }, { p: 1.00, f: 150 }   // TAM fills (~0.56), then holds full to the end
+        ];
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        function interp(KF, p) {
+          if (p <= KF[0].p) return KF[0].f;
+          for (var i = 0; i < KF.length - 1; i++) {
+            var a = KF[i], b = KF[i + 1];
+            if (p <= b.p) return a.f + (b.f - a.f) * ((p - a.p) / (b.p - a.p));
+          }
+          return KF[KF.length - 1].f;
+        }
+        function regionFor(f) {
+          if (f <= 0) return -1;
+          for (var i = 0; i < REGIONS.length; i++) if (f <= REGIONS[i].outer + 0.001) return i;
+          return REGIONS.length - 1;
+        }
+
+        var lastRegion = -2;
+        var countRAF = null;
+        function fmt(n, dec, suf) { return "$" + n.toFixed(dec) + suf; }
+        function countUp(target, dec, suf) {
+          // Tick the value up to its number when a region becomes active.
+          if (countRAF) cancelAnimationFrame(countRAF);
+          var dur = 700, start = null;
+          function step(ts) {
+            if (start === null) start = ts;
+            var t = Math.min(1, (ts - start) / dur);
+            var e = 1 - Math.pow(1 - t, 3);
+            if (capVal) capVal.textContent = fmt(target * e, dec, suf);
+            if (t < 1) { countRAF = requestAnimationFrame(step); }
+            else { countRAF = null; if (capVal) capVal.textContent = fmt(target, dec, suf); }
+          }
+          countRAF = requestAnimationFrame(step);
+        }
+        function setRegion(idx) {
+          if (idx < 0) return;
+          var r = REGIONS[idx];
+          sweep.setAttribute("r", r.band.r);
+          sweep.style.strokeWidth = r.band.w;
+          if (capName) capName.textContent = r.name;
+          countUp(r.num, r.dec, r.suf);     // value counts up to its number
+          // park the leader on a FIXED spot for this region (top of its band)
+          leader.setAttribute("x2", CX);
+          leader.setAttribute("y2", (CY - r.band.r).toFixed(2));
+          // re-trigger the "comes up" nudge as each region begins
+          cap.classList.remove("is-step");
+          void cap.getBoundingClientRect();
+          cap.classList.add("is-step");
+        }
+        function drive(p) {
+          var sBuilt = interp(SKF, p);
+          var rBuilt = interp(RKF, p);
+          var reg = regionFor(rBuilt);
+          if (reg !== lastRegion) {
+            if (reg >= 0) setRegion(reg);
+            lastRegion = reg;
+          }
+          // ANIMATED EXIT: over the last stretch the whole bullseye SHRINKS back
+          // in (the reverse of the build) as you scroll away — it never just
+          // scrolls off full. The label/region stay on the TAM while it
+          // collapses; scrolling back up grows it again.
+          var exitT = clamp01((p - 0.94) / 0.06);
+          var k = 1 - exitT;
+          clipS.setAttribute("r", (sBuilt * k).toFixed(2));
+          clipR.setAttribute("r", (rBuilt * k).toFixed(2));
+          var vis = clamp01((rBuilt - 1) / 10) * k; // label + line appear with the red, shrink out on exit
+          leader.style.opacity = (0.9 * vis).toFixed(3);
+          cap.style.opacity = vis.toFixed(3);
+          if (bcap) bcap.style.opacity = vis.toFixed(3); // the "$20K / area" caption rides the same fade (no persisting)
+        }
+
+        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        ScrollTrigger.create({
+          trigger: panel,
+          start: "top top",
+          end: mobileLike ? "+=220%" : "+=380%", // MUST match #proof's pin length in swot.js
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { drive(self.progress); },
+          onRefresh: function (self) { drive(self.progress || 0); }
+        });
+        drive(0);
+      })();
+    </script>
+    <script>
+      if (window.location.protocol === "file:") {
+        document.body.classList.add("is-file-protocol");
+      }
+    </script>
+    <script>
+      (function () {
+        function scrollToTarget(selector) {
+          var target = document.querySelector(selector);
+          if (!target) return;
+          var destination = target;
+          if (selector === "#page") {
+            destination = 0;
+          } else if (selector === "#closing") {
+            destination = target.offsetTop + window.innerHeight * 0.42;
+          } else if (target.classList && target.classList.contains("panel") && typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh();
+            var panelTrigger = ScrollTrigger.getAll().find(function (trigger) {
+              return trigger.trigger === target && trigger.pin === target;
+            });
+            if (panelTrigger) {
+              destination = panelTrigger.start + (panelTrigger.end - panelTrigger.start) * 0.68;
+            } else {
+              destination = target.offsetTop + window.innerHeight * 1.36;
+            }
+          }
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(destination);
+          } else {
+            if (typeof destination === "number") {
+              window.scrollTo({ top: destination, behavior: "smooth" });
+            } else {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        }
+
+        function updateScrollIndicator() {
+          // One-way: once scrolled, stay revealed. The nav (and the fullscreen
+          // toggle inside it) is gated on has-scrolled, so removing it when
+          // scroll returns to the top (or a fullscreen toggle resets scroll)
+          // made the nav + toggle vanish. resetSplash clears it on restart.
+          if (window.scrollY > 8) document.body.classList.add("has-scrolled");
+        }
+
+        document.addEventListener("click", function (event) {
+          var restart = event.target.closest("[data-restart-splash]");
+          if (restart) {
+            event.preventDefault();
+            window.location.replace(window.location.pathname + window.location.search);
+            return;
+          }
+          var trigger = event.target.closest("[data-scroll-target]");
+          if (!trigger) return;
+          event.preventDefault();
+          scrollToTarget(trigger.getAttribute("data-scroll-target"));
+        });
+        window.addEventListener("scroll", updateScrollIndicator, { passive: true });
+        updateScrollIndicator();
+
+        var navLabel = document.getElementById("site-nav-hover-label");
+        var navItems = document.querySelectorAll("[data-nav-label]");
+        if (navLabel && navItems.length) {
+          navItems.forEach(function (item) {
+            function showLabel() {
+              navLabel.textContent = item.getAttribute("data-nav-label") || "";
+              navLabel.classList.add("is-visible");
+            }
+            function hideLabel() {
+              navLabel.classList.remove("is-visible");
+            }
+            item.addEventListener("mouseenter", showLabel);
+            item.addEventListener("focus", showLabel);
+            item.addEventListener("mouseleave", hideLabel);
+            item.addEventListener("blur", hideLabel);
+          });
+        }
+      })();
+    </script>
+    <script>
+      (function () {
+        var modal = document.getElementById("team-bio-modal");
+        var title = document.getElementById("team-bio-title");
+        var body = document.getElementById("team-bio-body");
+        var photo = document.getElementById("team-bio-photo");
+        if (!modal || !title || !body || !photo) return;
+
+        var bios = {
+          seth: {
+            title: "Seth Sternberg · CEO",
+            photo: "assets/seth-headshot.png",
+            body: "Seth brings 25+ years across wearables, AR/VR, IoT, AI, and sensor fusion, with more than 400M licensed products in market. He has worked as both product leader and software engineer, and holds a mathematics degree from the University of Maryland.",
+          },
+          graham: {
+            title: "Graham Smith · CCO",
+            photo: "assets/graham-headshot.png",
+            body: "Graham brings 10 years managing forestry and construction projects in ecologically sensitive British Columbia sites, plus five years as an account manager in finance. He anchors Bullfinch in field reality, customer relationships, and commercial translation.",
+          },
+          tim: {
+            title: "Tim Goodsall, PhD · CTO",
+            photo: "assets/tim-headshot_scaled.png",
+            body: "Tim is a PhD astrophysicist and hardware engineer with 15+ years in remote sensing and instrumentation, including NASA/JPL missions such as Mars 2020, InSight, Euclid, and OCO-3. He brings deep imaging, sensing, and field-hardened hardware experience.",
+          },
+        };
+        var lastTrigger = null;
+        var currentBioKey = null;
+        var bioOrder = ["seth", "tim", "graham"];
+
+        function openBio(key, trigger) {
+          var bio = bios[key];
+          if (!bio) return;
+          lastTrigger = trigger || document.activeElement;
+          currentBioKey = key;
+          title.textContent = bio.title;
+          body.textContent = bio.body;
+          photo.src = bio.photo;
+          photo.alt = bio.title;
+          modal.hidden = false;
+          document.body.classList.add("is-bio-open");
+          var closeButton = modal.querySelector("[data-bio-close]");
+          if (closeButton) closeButton.focus();
+        }
+
+        function closeBio() {
+          modal.hidden = true;
+          currentBioKey = null;
+          document.body.classList.remove("is-bio-open");
+          if (lastTrigger && typeof lastTrigger.focus === "function") {
+            lastTrigger.focus();
+          }
+        }
+
+        function moveBio(direction) {
+          if (!currentBioKey) return;
+          var currentIndex = bioOrder.indexOf(currentBioKey);
+          if (currentIndex === -1) return;
+          var nextIndex = (currentIndex + direction + bioOrder.length) % bioOrder.length;
+          openBio(bioOrder[nextIndex], lastTrigger);
+        }
+
+        document.addEventListener("click", function (event) {
+          var trigger = event.target.closest("[data-bio-person]");
+          if (trigger) {
+            event.preventDefault();
+            openBio(trigger.getAttribute("data-bio-person"), trigger);
+            return;
+          }
+          if (event.target.closest("[data-bio-close]")) {
+            event.preventDefault();
+            closeBio();
+          }
+        });
+
+        document.addEventListener("keydown", function (event) {
+          var trigger = event.target.closest && event.target.closest("[data-bio-person]");
+          if (trigger && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openBio(trigger.getAttribute("data-bio-person"), trigger);
+            return;
+          }
+          if (!modal.hidden) {
+            if (event.key === "Escape") {
+              closeBio();
+            } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+              event.preventDefault();
+              moveBio(1);
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+              event.preventDefault();
+              moveBio(-1);
+            }
+          }
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        var splash = document.getElementById("splash");
+        var button = document.getElementById("splash-button");
+        var sequence = document.getElementById("splash-sequence");
+        var fullscreenToggle = document.getElementById("fullscreen-toggle");
+        if (!splash || !button || !sequence) return;
+        var sequenceCtx = sequence.getContext("2d");
+        if (!sequenceCtx) return;
+
+        // Center the splash logo against the VISUAL viewport (what's actually
+        // visible), not the layout viewport. Before fullscreen the visual
+        // viewport is smaller than the layout one in BOTH dimensions and
+        // anchored top-left, so CSS centering put the logo low AND right; once
+        // fullscreen they match and it looked centered. Pin the splash to the
+        // visual viewport's size + offset so it's centered in every state.
+        function sizeSplash() {
+          var vv = window.visualViewport;
+          if (vv) {
+            splash.style.width = vv.width + "px";
+            splash.style.height = vv.height + "px";
+            splash.style.left = vv.offsetLeft + "px";
+            splash.style.top = vv.offsetTop + "px";
+            splash.style.right = "auto";
+            splash.style.bottom = "auto";
+          } else {
+            splash.style.height = window.innerHeight + "px";
+          }
+        }
+        sizeSplash();
+        window.addEventListener("resize", sizeSplash);
+        window.addEventListener("orientationchange", sizeSplash);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", sizeSplash);
+          window.visualViewport.addEventListener("scroll", sizeSplash);
+        }
+
+        var frames = [];
+        var frameVersion = "v=3";
+        for (var i = 7; i <= 28; i++) {
+          frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?" + frameVersion);
+        }
+        var loadedFrames = frames.map(function (src) {
+          var img = new Image();
+          img.decoding = "async";
+          img.src = src;
+          return img;
+        });
+        var isPlaying = false;
+
+        function drawFrame(index) {
+          var img = loadedFrames[index];
+          if (!img || !img.complete || !img.naturalWidth) return;
+          sequenceCtx.clearRect(0, 0, sequence.width, sequence.height);
+          sequenceCtx.drawImage(img, 0, 0, sequence.width, sequence.height);
+        }
+
+        loadedFrames[0].addEventListener("load", function () { drawFrame(0); }, { once: true });
+        if (loadedFrames[0].complete) drawFrame(0);
+
+        function resetSplash() {
+          isPlaying = false;
+          splash.hidden = false;
+          splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
+          document.body.classList.remove("has-entered", "has-scrolled", "has-reached-01");
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(0, { immediate: true });
+          } else {
+            window.scrollTo(0, 0);
+          }
+          drawFrame(0);
+        }
+
+        function enter() {
+          splash.classList.add("is-leaving");
+          window.setTimeout(function () {
+            splash.hidden = true;
+          }, 180);
+        }
+
+        function beginHandoff() {
+          document.body.classList.add("has-entered");
+          splash.classList.add("is-sequence-done");
+          document.dispatchEvent(new CustomEvent("bullfinch:splashcomplete"));
+          window.setTimeout(enter, 860);
+        }
+
+        function playSequence() {
+          if (isPlaying) return;
+          isPlaying = true;
+          drawFrame(0);
+          splash.classList.add("is-playing");
+          var start = performance.now();
+          var frameDuration = 1000 / 12;
+          var holdLastFrame = 180;
+          function tick(now) {
+            var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
+            drawFrame(frameIndex);
+            if (frameIndex < frames.length - 1) {
+              requestAnimationFrame(tick);
+            } else {
+              window.setTimeout(beginHandoff, holdLastFrame);
+            }
+          }
+          requestAnimationFrame(tick);
+        }
+
+        function isFullscreen() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        }
+
+        function updateFullscreenToggle() {
+          var active = Boolean(isFullscreen());
+          document.body.classList.toggle("is-fullscreen", active);
+          if (fullscreenToggle) {
+            fullscreenToggle.setAttribute("aria-label", active ? "Exit full screen" : "Enter full screen");
+            fullscreenToggle.setAttribute("aria-pressed", active ? "true" : "false");
+          }
+        }
+
+        function exitFullscreen() {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+          if (exit) {
+            try {
+              exit.call(document);
+            } catch (e) {}
+          }
+        }
+
+        function enterFullscreen() {
+          var root = document.documentElement;
+          var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+          if (request) {
+            try {
+              request.call(root);
+            } catch (e) {}
+          }
+        }
+
+        function toggleFullscreen() {
+          if (isFullscreen()) {
+            exitFullscreen();
+          } else {
+            enterFullscreen();
+          }
+        }
+
+        // Only restore the splash on an actual back/forward-cache restore.
+        // Resetting on every pageshow also fired when exiting fullscreen on
+        // mobile, which wiped `has-entered` and hid the nav + fullscreen toggle.
+        window.addEventListener("pageshow", function (event) {
+          if (event.persisted) resetSplash();
+        });
+        document.addEventListener("fullscreenchange", updateFullscreenToggle);
+        document.addEventListener("webkitfullscreenchange", updateFullscreenToggle);
+        document.addEventListener("MSFullscreenChange", updateFullscreenToggle);
+        if (fullscreenToggle) fullscreenToggle.addEventListener("click", toggleFullscreen);
+        updateFullscreenToggle();
+
+        // Entering/exiting fullscreen changes the viewport. Re-sync the WebGL
+        // buffer, ScrollTrigger pin spacing, and Lenis once it settles, or the
+        // page keeps the old (taller) scroll height and leaves a black strip /
+        // dead scroll space at the bottom.
+        function refreshLayoutAfterViewportChange() {
+          window.dispatchEvent(new Event("resize"));
+          if (window.lenis && window.lenis.resize) window.lenis.resize();
+          if (window.ScrollTrigger && window.ScrollTrigger.refresh) window.ScrollTrigger.refresh();
+        }
+        ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (ev) {
+          document.addEventListener(ev, function () {
+            setTimeout(refreshLayoutAfterViewportChange, 200);
+          });
+        });
+
+        // Advance on a click ANYWHERE on the splash, not just the logo button.
+        // (The button still bubbles here, so a single listener covers both.)
+        splash.addEventListener("click", function () {
+          var root = document.documentElement;
+          var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+          if (request) {
+            try {
+              var result = request.call(root);
+              if (result && result.then) result.then(playSequence).catch(playSequence);
+              else playSequence();
+            } catch (e) {
+              playSequence();
+            }
+          } else {
+            playSequence();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
