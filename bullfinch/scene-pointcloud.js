@@ -1408,15 +1408,14 @@
   // along X, normalized to height 1 with base at y = 0, centered on x.
   // Timing is DOM-anchored: index-pointcloud.html creates ScrollTriggers on
   // the real pinned panel ranges (leaving 02 -> settled on 03) and drives
-  // setTreeProgress / setTreeZoomReturn. No global-progress guesswork here.
-  var TREE_HEIGHT = 4.2;        // world units
+  // setTreeProgress: 0 -> 1 as 03 arrives (form), back to 0 as 04 arrives
+  // (disperse to the ambient field). No global-progress guesswork here.
+  var TREE_HEIGHT = 3.6;        // world units
   var TREE_BASE_Y = -2.5;       // forest floor (same plane the red dot lands on)
-  var TREE_CX = -2.6;           // grove center: screen-left, where graphics live
+  var TREE_CX = -5.2;           // grove center: inside the left graphics column (text is right)
   var TREE_CZ = -1.5;
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
   var treeFormP = 0;            // per-frame smoothed
-  var treeZoomReturnTarget = 0; // driven by setTreeZoomReturn (camera rejoins path)
-  var treeZoomReturnP = 0;
   var treeReady = false;
   var moteTreeTarget = new Float32Array(PARTICLE_POOL * 3);
   var moteCapture    = new Float32Array(PARTICLE_POOL * 3);
@@ -1429,7 +1428,7 @@
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
 
-  fetch("assets/tree-pointcloud.obj?v=pc5")
+  fetch("assets/tree-pointcloud.obj?v=pc6")
     .then(function (res) { return res.text(); })
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.
@@ -1525,22 +1524,21 @@
       console.error("tree point cloud failed to load:", err);
     });
 
-  // Camera pull-back: eases out with the formation itself, holds while the
-  // grove is read, then eases back as the DOM-anchored return trigger
-  // (leaving 03 into 04) runs — always in sync with what is on screen.
+  // Camera pull-back rides the formation itself: out as the grove forms,
+  // held while it stands, and back in as the dots disperse again (the 04
+  // trigger drives the formation back to 0, so the camera follows for free).
   function treeZoomBump() {
     function ss(a, b, x) {
       x = tClamp01((x - a) / (b - a));
       return x * x * (3 - 2 * x);
     }
-    return 3.6 * ss(0.02, 0.55, treeFormP) * (1 - ss(0.0, 1.0, treeZoomReturnP));
+    return 2.2 * ss(0.05, 0.6, treeFormP);
   }
 
   // Runs every frame from the animate loop, after the organic mote update
   // and before position buffers upload / lines read them.
   function updateTreeFormation(elapsed) {
     treeFormP += (treeFormTarget - treeFormP) * 0.08;
-    treeZoomReturnP += (treeZoomReturnTarget - treeZoomReturnP) * 0.08;
     if (!treeReady) return;
     if (treeFormP < 0.001) {
       for (var r = 2; r < PARTICLE_POOL; r++) moteLocked[r] = 0;
@@ -1634,11 +1632,10 @@
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
     setSeedReveal: setSeedReveal,
-    // Tree grove formation (index-pointcloud variant): both are driven by
-    // DOM-anchored ScrollTriggers in index-pointcloud.html, keyed on the
-    // real pinned panel ranges — never on global page progress.
+    // Tree grove formation (index-pointcloud variant): driven by the
+    // DOM-anchored ScrollTriggers in index-pointcloud.html. 03 approaching
+    // drives 0 -> 1 (form); 04 approaching drives 1 -> 0 (disperse).
     setTreeProgress: function (p) { treeFormTarget = tClamp01(p); },
-    setTreeZoomReturn: function (p) { treeZoomReturnTarget = tClamp01(p); },
     getLayerTint: function () { return uniforms.uLayerTint.value; },
   };
 })();

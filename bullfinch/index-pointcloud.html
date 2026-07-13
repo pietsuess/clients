@@ -444,7 +444,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-pointcloud.js?v=pc5"></script>
+    <script src="scene-pointcloud.js?v=pc6"></script>
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=v4-5"></script>
@@ -452,9 +452,10 @@
     <script>
       // Tree grove formation driver (index-pointcloud variant). Element-
       // anchored triggers, the standard ScrollTrigger pattern: positions are
-      // computed by GSAP itself (pin spacing included), no trigger lookup.
-      // Formation: section 03 approaching the viewport (= section 02
-      // releasing) until 03 is pinned. Zoom return: 04 approaching.
+      // computed by GSAP itself (pin spacing included). Formation: section
+      // 03 approaching (= 02 releasing) until 03 is pinned. Dispersal: the
+      // same value driven back to 0 as 04 approaches, so the field returns
+      // to the exact ambient feel of the earlier sections.
       window.addEventListener("load", function () {
         if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
         var s03 = document.getElementById("opportunity");
@@ -475,7 +476,7 @@
             end: "top top",
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { window.bullfinchCanopy.setTreeZoomReturn(self.progress); },
+            onUpdate: function (self) { window.bullfinchCanopy.setTreeProgress(1 - self.progress); },
           });
         }
         ScrollTrigger.refresh();
