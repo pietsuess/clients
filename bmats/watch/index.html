@@ -321,7 +321,7 @@ footer a:hover { text-decoration: underline; }
       <div id="q-menu"></div>
     </div>
     <div id="cc-wrap">
-      <button id="cc-btn" aria-label="Subtitles"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 15h4M13 15h5M6 11h2M11 11h7"/></svg></button>
+      <button id="cc-btn" aria-label="Subtitles"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M7 12h3M12 12h5"/></svg></button>
       <div id="cc-menu"></div>
     </div>
     <button id="airplay-btn" aria-label="AirPlay" hidden><svg viewBox="0 0 24 24"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21" fill="currentColor" stroke="none"/></svg></button>
@@ -469,8 +469,13 @@ function showFallback() { document.getElementById('player-fallback').classList.a
 const failTimer = setTimeout(showFallback, 12000);
 
 let hls = null;
-if (video.canPlayType('application/vnd.apple.mpegurl')) {
-  video.src = FILM.manifest;              // Safari / iOS: native HLS (keeps AirPlay first-class)
+// Native HLS is reserved for Apple browsers (keeps AirPlay first-class).
+// Chrome now claims native HLS too, but going native there loses the
+// quality menu, so every non-Apple browser runs hls.js.
+const appleNative = video.canPlayType('application/vnd.apple.mpegurl') &&
+                    /apple/i.test(navigator.vendor || '');
+if (appleNative) {
+  video.src = FILM.manifest;              // Safari / iOS
 } else if (window.Hls && Hls.isSupported()) {
   // Start ABR assuming a fast pipe so playback opens at 1080p and only
   // steps DOWN if the connection can't keep up (Jeremy 2026-07-10: the
@@ -481,6 +486,8 @@ if (video.canPlayType('application/vnd.apple.mpegurl')) {
   hls.on(Hls.Events.MANIFEST_PARSED, applySub);
   hls.loadSource(FILM.manifest);
   hls.attachMedia(video);
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+  video.src = FILM.manifest;              // non-Apple native HLS, hls.js unavailable: plays, no quality menu
 } else {
   clearTimeout(failTimer); showFallback();
 }
