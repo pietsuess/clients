@@ -94,9 +94,6 @@ header { text-align: center; padding: 60px 0 10px; }
 }
 .tm-label { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; }
 
-.film-reveal { display: none; background: #000; border: 1px solid rgba(255,255,255,0.22); margin: 48px auto 0; max-width: 860px; }
-.film-reveal.on { display: block; }
-.film-reveal iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
 
 .tlb { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.88); }
 .tlb.on { display: flex; }
@@ -290,10 +287,6 @@ footer {
 
 </div>
 
-<div class="film-reveal">
-  <iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Between the Mountain and the Sky"></iframe>
-</div>
-
 <div class="co-modal" id="co-modal">
   <button class="x" id="co-close" aria-label="Close checkout">&times;</button>
   <div class="co-box"><iframe id="co-frame" title="Secure checkout"></iframe></div>
@@ -395,18 +388,12 @@ footer {
       (g.msg ? ' Your note rides along on it.' : '') +
       ' You get the receipt and a copy of the gift email, so you can always forward it yourself.</p>' +
       (g.bump
-        ? '<p class="terms">Your own rental came with it. The film is ready to play on this page, and your watch link is on its way to <b style="color:var(--gold)">' + esc(g.buyerEmail) + '</b>.</p>'
+        ? '<p class="terms">Your own rental came with it. The film is ready whenever you are, and your watch link is on its way to <b style="color:var(--gold)">' + esc(g.buyerEmail) + '</b>.</p>'
         : '') +
       '<p class="impact"><b>Thank you.</b> 40% of net proceeds will be donated to BlinkNow, the organization at the heart of this story.</p>' +
       (g.bump
-        ? '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>'
+        ? '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Watch the film</a>'
         : '');
-    if (g.bump) {
-      var reveal = document.querySelector('.film-reveal');
-      reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/iframe?preload=metadata&defaultTextTrack=en';
-      reveal.classList.add('on');
-      reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
   }
 
   // Gift landed via popup: same-origin storage event, transform in place.
@@ -427,7 +414,7 @@ footer {
     }
   } catch (e) {}
 
-  // Purchase landed: transform in place, start the film right here.
+  // Purchase landed: transform in place, button through to the watch page.
   window.addEventListener('storage', function (ev) {
     if (ev.key !== 'bmats_demo_paid' || !ev.newValue) return;
     closeModal(false);
@@ -436,15 +423,11 @@ footer {
     var card = document.querySelector('.buy-card');
     card.innerHTML =
       '<h2>You are in</h2>' +
-      '<p class="terms">The film is ready to play right here. Press play, and go fullscreen for the best picture. Your watch link is on its way to ' +
+      '<p class="terms">The film is ready whenever you are. Your watch link is on its way to ' +
       (email ? '<b style="color:var(--gold)">' + email.replace(/</g, '&lt;') + '</b>' : 'your email') +
       ' for later and for your other devices.</p>' +
       '<p class="impact"><b>Thank you.</b> 40% of net proceeds will be donated to BlinkNow, the organization at the heart of this story.</p>' +
-      '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Open the full watch page (subtitles, TV help)</a>';
-    var reveal = document.querySelector('.film-reveal');
-    reveal.querySelector('iframe').src = 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/iframe?preload=metadata&defaultTextTrack=en';
-    reveal.classList.add('on');
-    reveal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      '<a class="rent-btn" style="text-decoration:none;text-align:center;display:block;margin-top:18px" href="../watch/?welcome=1">Watch the film</a>';
   });
   // Rotating quotes in the header: 5s visible, fade out, swap, fade in.
   var QUOTES = [
@@ -539,7 +522,7 @@ const TREE = {
     ],
   },
   terms: {
-    text: 'Seven days of access from the moment you pay, unlimited viewings, on any device: laptop, phone, tablet or your TV %tv%. Subtitles in eight languages %cc%. The film starts playing right here the moment payment goes through, and a watch link lands in your email for later.',
+    text: 'Seven days of access from the moment you pay, unlimited viewings, on any device: laptop, phone, tablet or your TV %tv%. Subtitles in eight languages %cc%. The film is one click away the moment payment goes through, and a watch link lands in your email for later.',
     opts: [['That answers it', 'solved'], ['Another question', 'start']],
   },
   pwyw: {
