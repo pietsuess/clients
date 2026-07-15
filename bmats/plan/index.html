@@ -362,7 +362,7 @@
     <li data-s="todo"><i class="dot"></i>Kajabi checkout moves onto the film's own domain (checkout.betweenthemountainandthesky.com) so buyers never land on "mykajabi.com" at the payment step</li>
     <li data-s="active"><i class="dot"></i>Checkout opens as a small payment window over the rental page; when payment lands, the page transforms and a WATCH THE FILM button takes the buyer straight to the watch page (demo works; needs the real-checkout test; fallback is the plain redirect)<span class="who">Piet</span></li>
     <li data-s="active"><i class="dot"></i>Purchase records flow automatically from Kajabi into our own database (API key in hand and the purchase webhook is created and pointed at our receiver, for every current and future offer; plumbing tested with a synthetic purchase. Last inch: one real checkout, the free IDA offer works, to confirm the exact payload Kajabi sends)<span class="who">Piet</span></li>
-    <li data-s="active"><i class="dot"></i>Email watch-link login, with a 6-digit code fallback for anyone whose email mangles the link (login page live and tested against the real backend, both paths one-time as designed; email sending comes next)<span class="who">Piet</span></li>
+    <li data-s="active"><i class="dot"></i>Email watch-link login, with a 6-digit code fallback for anyone whose email mangles the link (login page live and tested against the real backend, both paths one-time as designed; the sending code is built and tested, and switches on the moment Postmark approves the account)<span class="who">Piet</span></li>
     <li data-s="done"><i class="dot"></i>Watch page: our own film player, built from scratch so the subtitles are finally under our control: theatrical yellow burn-ins by default, nine subtitle choices plus closed captions, a picture-quality menu, AirPlay and Chromecast buttons<span class="who">Done · Jul 10</span></li>
     <li data-s="done"><i class="dot"></i>Review-round polish on the player: subtle drop shadow on the subtitles, a cleaner subtitle icon, the quality menu restored in Chrome, and the Chromecast subtitle style matched to the page<span class="who">Done · Jul 15</span></li>
     <li data-s="done"><i class="dot"></i>"You have access until Aug 19 · 2 days remaining" banner (real dates arrive with the database)<span class="who">Done · Jul 6</span></li>
@@ -422,7 +422,7 @@
     <li data-s="active"><i class="dot"></i>Reminder sequence: 24 h "need help?", day 4 "don't forget", 48 h left, final day (drafts written, ready to paste into Kajabi)<span class="who">Piet</span></li>
     <li data-s="todo"><i class="dot"></i>"Haven't started watching?" emails driven by real play data from the portal, not guesses</li>
     <li data-s="todo"><i class="dot"></i>Move the Mailchimp audience into Kajabi (tags preserved: waitlist, past viewers, hosts), then cancel Mailchimp</li>
-    <li data-s="todo"><i class="dot"></i>Watch links ride their own dedicated delivery service so they never land in spam; all human-written email lives in Kajabi</li>
+    <li data-s="wait"><i class="dot"></i>Watch links ride their own dedicated delivery service so they never land in spam; all human-written email lives in Kajabi (Postmark account created Jul 15 and awaiting their approval review; the sending plumbing is already built into our receiver)<span class="who">Jeremy</span></li>
   </ul>
 </section>
 
