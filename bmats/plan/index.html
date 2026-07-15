@@ -57,6 +57,20 @@
   .decisions li:last-child{border-bottom:none}
   .decisions .d{color:var(--accent);font-size:12.5px;margin-right:8px;white-space:nowrap}
 
+  /* what's next: auto-built from every task not yet done */
+  .nextup{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px 22px;margin-top:28px}
+  .nextup>h2{font-size:19px;margin-bottom:2px}
+  .nextup>.note{color:var(--dim);font-size:14px}
+  .nextup h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:500;margin:16px 0 2px}
+  .nextup ul{list-style:none}
+  .nextup li{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+  .nextup li:last-child{border-bottom:none}
+  .nextup li .dot{position:relative;top:1px}
+  .nextup a{color:var(--ink);text-decoration:none}
+  .nextup a:hover{color:var(--accent)}
+  .nextup .sec{margin-left:auto;flex:none;font-size:12px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;padding-left:14px;white-space:nowrap}
+  @media(max-width:640px){.nextup .sec{display:none}}
+
   /* money */
   .money{margin-top:44px}
   .money h2{font-size:22px;margin-bottom:4px}
@@ -196,6 +210,12 @@
     <div><div class="n">3</div><h3>Watch, anywhere</h3><p>Any device, pick your subtitles, pause and resume later. Clear help for getting it onto the TV.</p></div>
   </div>
 </header>
+
+<div class="nextup">
+  <h2>What's next</h2>
+  <p class="note">Everything not yet done, gathered automatically from the sections below and grouped by who it sits with. Click a task to jump to its context.</p>
+  <div id="nextup-groups"></div>
+</div>
 
 <div class="decisions">
   <h2>Decisions made</h2>
@@ -495,6 +515,50 @@
         d = s.querySelectorAll('ul.tasks li[data-s="done"]').length,
         f = s.querySelector('.secbar i');
     if (f && t.length) f.style.width = Math.round(d / t.length * 100) + '%';
+  });
+
+  // What's next: every task not marked done, grouped by owner, linking home.
+  var groups = { piet: [], jeremy: [], both: [], open: [] };
+  document.querySelectorAll('section[data-name]').forEach(function(s, i){
+    if (!s.id) s.id = 'sec-' + i;
+    var name = s.getAttribute('data-name');
+    s.querySelectorAll('ul.tasks li').forEach(function(li){
+      var st = li.getAttribute('data-s');
+      if (st === 'done') return;
+      var whoEl = li.querySelector('.who');
+      var w = (whoEl ? whoEl.textContent : '').toLowerCase();
+      var text = '';
+      li.childNodes.forEach(function(n){
+        if (n === whoEl || (n.nodeType === 1 && n.tagName === 'I')) return;
+        text += n.textContent;
+      });
+      text = text.trim().replace(/\s*\([^()]*\)$/, ''); // drop a trailing status parenthetical
+      var key = (w.indexOf('piet') > -1 && w.indexOf('jeremy') > -1) ? 'both'
+              : w.indexOf('piet') > -1 ? 'piet'
+              : w.indexOf('jeremy') > -1 ? 'jeremy' : 'open';
+      groups[key].push({ text: text, state: st, sec: name, id: s.id });
+    });
+  });
+  var stateOrder = { active: 0, next: 1, wait: 2, todo: 3 };
+  var groupLabel = { piet: 'With Piet', jeremy: 'With Jeremy', both: 'Piet and Jeremy together', open: 'Not yet assigned' };
+  var host = document.getElementById('nextup-groups');
+  ['piet', 'jeremy', 'both', 'open'].forEach(function(k){
+    var items = groups[k];
+    if (!items.length) return;
+    items.sort(function(a, b){ return (stateOrder[a.state] || 9) - (stateOrder[b.state] || 9); });
+    var h = document.createElement('h3');
+    h.textContent = groupLabel[k];
+    var ul = document.createElement('ul');
+    items.forEach(function(it){
+      var li = document.createElement('li');
+      var dot = document.createElement('i'); dot.className = 'dot d-' + it.state;
+      var a = document.createElement('a'); a.href = '#' + it.id; a.textContent = it.text;
+      var sec = document.createElement('span'); sec.className = 'sec'; sec.textContent = it.sec;
+      li.appendChild(dot); li.appendChild(a); li.appendChild(sec);
+      ul.appendChild(li);
+    });
+    host.appendChild(h);
+    host.appendChild(ul);
   });
 
   // Notes to Piet, via Web3Forms (free form-to-email relay).
