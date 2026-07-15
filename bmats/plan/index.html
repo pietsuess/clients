@@ -165,6 +165,19 @@
   #note-status{font-size:14px;margin-top:12px;display:none}
   #note-status.ok{display:block;color:var(--done)}
   #note-status.err{display:block;color:var(--over)}
+  #jeremy-notes details{border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-top:10px}
+  #jeremy-notes summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px}
+  #jeremy-notes summary::-webkit-details-marker{display:none}
+  #jeremy-notes summary:hover{background:rgba(255,255,255,0.02)}
+  #jeremy-notes .chip{flex:none;font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:20px}
+  #jeremy-notes .chip.done{color:var(--done);border:1px solid var(--done)}
+  #jeremy-notes .chip.open{color:var(--accent);border:1px solid var(--accent)}
+  #jeremy-notes .chip.note{color:var(--next);border:1px solid var(--next)}
+  #jeremy-notes .q{flex:1;font-size:15px}
+  #jeremy-notes .caret{flex:none;color:var(--dim);transition:transform .2s}
+  #jeremy-notes details[open] .caret{transform:rotate(90deg)}
+  #jeremy-notes .body{padding:12px 16px 16px;border-top:1px solid var(--line);color:var(--dim);font-size:14.5px}
+  #jeremy-notes .body .said{color:var(--ink);font-style:italic;margin-bottom:10px}
 
   footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--dim);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
 </style>
@@ -471,6 +484,59 @@
     <li>Gift pricing: fixed price and bulk tiers?</li>
     <li>Who staffs support besides Jeremy?</li>
   </ul>
+</section>
+
+<section id="jeremy-notes">
+  <h2>Notes from Jeremy</h2>
+  <p class="note">Notes you sent from watching the build, with where each one landed. Click any note to open it.</p>
+
+  <details>
+    <summary>
+      <span class="chip open">Open</span>
+      <span class="q">Donate pop-ups during and after the film, like Vimeo</span>
+      <svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
+    </summary>
+    <div class="body">
+      <p class="said">&ldquo;One of the things I loved about Vimeo is it allowed us to have pop-up buttons at the end that kept coming up to prompt people to donate to support the film. How can we do something similar?&rdquo;</p>
+      <p>Very doable, and cleaner than Vimeo since we own the player: we control exactly when and how often a donate prompt appears over the film. Two things needed before it goes in: the real donate link and where it should point (the film's impact page, or BlinkNow directly), and the behaviour, a single end-card when the film finishes or a gentler prompt that returns on an interval. Once those are set it wires straight into the player.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <span class="chip done">Done</span>
+      <span class="q">Access should be 7 days from rental, not a fixed "until August 19"</span>
+      <svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
+    </summary>
+    <div class="body">
+      <p class="said">&ldquo;Your access runs until August 19 &hellip; but they should get access for 7 days from the time they rent. ie &lsquo;Streaming access for 7 full days from the time you rent.&rsquo;&rdquo;</p>
+      <p>Fixed. The Your rental card now reads &ldquo;Streaming access for 7 full days from the time you rent.&rdquo; The system already grants 7 days from purchase, so only the wording was off. The &ldquo;August 19&rdquo; was placeholder text; once real dates flow, each viewer's banner shows their own rent-plus-7 date and countdown.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <span class="chip note">Note</span>
+      <span class="q">AirPlay and Cast icons not showing on the player</span>
+      <svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
+    </summary>
+    <div class="body">
+      <p class="said">&ldquo;In the &lsquo;WATCH ON YOUR TV&rsquo; section it mentions hitting the &lsquo;Airplay icon&rsquo; or the &lsquo;cast icon&rsquo; but I don't see either of those on the actual player?&rdquo;</p>
+      <p>Working as designed. The icons appear only when the browser supports that method (AirPlay on Safari and Apple devices, Cast on Chrome) and an actual Apple TV or Chromecast is on the same wifi, so we never show a button that leads nowhere. On a desktop with no cast device nearby, neither shows. Open question back to you: want a line added to the TV card spelling out that the icons are device-dependent?</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>
+      <span class="chip done">Done</span>
+      <span class="q">Point people to the Need help? bubble before they email</span>
+      <svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
+    </summary>
+    <div class="body">
+      <p class="said">&ldquo;Having trouble? Maybe at the top we mention to click the &lsquo;NEED HELP&rsquo; bubble in the corner &hellip; Ideally we want people to not click email before they have tried other things.&rdquo;</p>
+      <p>Done. The Having trouble? card now opens by pointing to the Need help? button, makes tapping it step one, and reframes email as the last resort, routed through the bubble where possible.</p>
+    </div>
+  </details>
 </section>
 
 <section id="notes">
