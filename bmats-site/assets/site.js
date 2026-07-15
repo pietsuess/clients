@@ -49,6 +49,14 @@
 
   var OFF = /^(0|no|false|off|hide)$/i;
 
+  // Render sheet text safely: escape all HTML, then turn *asterisks* into
+  // italics. Jeremy types  a *special one-week* event  to italicise part of
+  // a line. No raw HTML from the sheet is ever inserted.
+  function render(s) {
+    var esc = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return esc.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  }
+
   fetch(CONTENT_CSV_URL, { cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw 0; return r.text(); })
     .then(function (text) {
@@ -61,7 +69,7 @@
       });
       document.querySelectorAll('[data-cms]').forEach(function (el) {
         var row = map[el.getAttribute('data-cms')];
-        if (row && row.value !== '') el.textContent = row.value;
+        if (row && row.value !== '') el.innerHTML = render(row.value);
       });
       document.querySelectorAll('[data-cms-section]').forEach(function (el) {
         var row = map[el.getAttribute('data-cms-section') + '.show'];
