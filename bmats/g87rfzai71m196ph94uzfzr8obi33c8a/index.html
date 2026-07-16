@@ -148,11 +148,11 @@ header { text-align: center; padding: 60px 0 26px; }
 
 /* INFO GRID */
 .info-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 16px; margin-top: 40px;
 }
-@media (max-width: 1100px) { .info-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 620px) { .info-grid { grid-template-columns: 1fr; } }
+/* three cards, so 3 -> 1: a two-column step would orphan the last one */
+@media (max-width: 900px) { .info-grid { grid-template-columns: 1fr; } }
 .card {
   background: var(--panel); border: 1px solid var(--line);
   border-radius: 0; padding: 24px 24px 22px;
