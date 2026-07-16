@@ -317,7 +317,6 @@ const CONFIG = {
 // ============================================================
 const FILM = {
   manifest: 'https://customer-rpc993ghonhfpshh.cloudflarestream.com/49608a272b171d2b3acb9e011b05c3dd/manifest/video.m3u8',
-  subKey: 'bmats_sub_lang2',
   burnin: 'en-GB', // the theatrical baseline: English burn-ins for the Nepali dialogue
   subs: [
     ['en-GB', 'Off'],
@@ -373,7 +372,10 @@ if (appleNative) {
 // and times cues off the video clock. Engine text tracks are kept
 // warm only to hand subtitles to the system renderer where the
 // overlay cannot follow: iOS native fullscreen and AirPlay.
-let subLang = localStorage.getItem(FILM.subKey) || FILM.burnin;
+// Screener always opens on the burn-in baseline. Deliberately does not
+// restore a saved choice: every visit starts as the film played in
+// theatres, and the picker still works for the rest of the session.
+let subLang = FILM.burnin;
 const CAP_BASE = FILM.manifest.replace('manifest/video.m3u8', 'captions/');
 const cueCache = {};
 let cues = null;        // active language's [{a, b, text}]
@@ -640,8 +642,7 @@ function castApplyLang() {
     const b = document.createElement('button');
     b.textContent = label; b.dataset.code = code;
     b.onclick = () => {
-      subLang = code;
-      try { localStorage.setItem(FILM.subKey, code); } catch (e) {}
+      subLang = code; // session only, never persisted (see subLang init)
       applySub();
       ccMenu.classList.remove('open');
     };
