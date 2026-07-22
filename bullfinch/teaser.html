@@ -23,10 +23,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" />
-    <link rel="stylesheet" href="teaser.css?v=t1" />
+    <link rel="stylesheet" href="teaser.css?v=t2" />
   </head>
   <body>
     <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+
+    <!-- Logo-to-ball PNG splash sequence (restored from the investor build) -->
+    <div class="splash" id="splash" aria-label="Bullfinch Earth">
+      <button class="splash__button" id="splash-button" type="button" aria-label="Skip intro">
+        <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
+      </button>
+    </div>
 
     <header class="nav" aria-label="Site navigation">
       <a class="nav__brand" href="./" aria-label="Bullfinch Earth">
@@ -36,8 +43,14 @@
         </svg>
       </a>
       <div class="nav__right">
-        <a class="nav__link nav__link--role" href="index-pointcloud.html">For investors</a>
-        <a class="nav__cta" href="mailto:hello@bullfinch.earth?subject=Request%20a%20demo">Request a demo</a>
+        <nav class="nav__sections" aria-label="Sections">
+          <a class="nav__link" href="#how">How it works</a>
+          <a class="nav__link" href="#who">Who it's for</a>
+          <a class="nav__link" href="#contact">Contact</a>
+          <span class="nav__sep" aria-hidden="true"></span>
+          <a class="nav__link" href="index-pointcloud.html">For investors</a>
+        </nav>
+        <a class="nav__cta" href="#contact">Request a demo</a>
       </div>
     </header>
 
@@ -58,7 +71,7 @@
           </h1>
           <p class="hero__sub">Bullfinch Earth measures, monitors, and maps <b>every stem</b>, passively, while foresters do their normal jobs.</p>
           <div class="hero__actions">
-            <a class="btn btn--primary" href="mailto:hello@bullfinch.earth?subject=Request%20a%20demo">Request a demo</a>
+            <a class="btn btn--primary" href="#contact">Request a demo</a>
             <a class="btn btn--ghost" href="#how">See how it works</a>
           </div>
         </div>
@@ -77,9 +90,9 @@
         </div>
       </section>
 
-      <!-- SECTION 1 - HOW IT WORKS (id=opportunity: the grove forms in the left column) -->
-      <section class="steps" id="opportunity" aria-label="How it works">
-        <div class="steps__grove" aria-hidden="true">
+      <!-- SECTION 1 - HOW IT WORKS (id=opportunity: grove forms in the left column) -->
+      <section class="steps" id="how" aria-label="How it works">
+        <div class="steps__grove" id="opportunity" aria-hidden="true">
           <span class="steps__grove-label">STEM MAP</span>
         </div>
         <div class="panel__inner">
@@ -104,8 +117,8 @@
         </div>
       </section>
 
-      <!-- SECTION 2 - WHO -->
-      <section class="who" aria-label="Who needs Bullfinch">
+      <!-- SECTION 2 - WHO (five equal cells) -->
+      <section class="who" id="who" aria-label="Who needs Bullfinch">
         <div class="who__inner">
           <p class="eyebrow"><span>02 &middot; WHO IT'S FOR</span></p>
           <h2 class="who__head">Who needs to Bullfinch?</h2>
@@ -134,42 +147,46 @@
         </div>
       </section>
 
-      <!-- SECTION 3 - TRUSTED + CLOSE -->
-      <!-- TRUSTED BY: placeholder wordmarks. Swap for real partner logos when confirmed. -->
+      <!-- TRUSTED BY (six even cells; self-hosted logos + wordmarks) -->
       <section class="trusted" aria-label="Trusted by">
         <p class="trusted__label">Trusted by</p>
-        <div class="trusted__row">
-          <span class="trusted__mark">Weyerhaeuser</span>
-          <span class="trusted__mark">NHRI</span>
-          <span class="trusted__mark">Long View Forest</span>
-          <span class="trusted__mark">UK Space Agency</span>
-          <span class="trusted__mark">Forest Business Accelerator</span>
-          <span class="trusted__mark">Okanagan</span>
+        <div class="trusted__grid">
+          <span class="logo-cell"><img src="assets/logos/weyerhaeuser.svg" alt="Weyerhaeuser" loading="lazy" /></span>
+          <span class="logo-cell"><img src="assets/logos/nhri.png" alt="NHRI" loading="lazy" /></span>
+          <span class="logo-cell"><img src="assets/logos/longview.png" alt="Long View Forest" loading="lazy" /></span>
+          <span class="logo-cell"><img src="assets/logos/uksa.png" alt="UK Space Agency" loading="lazy" /></span>
+          <!-- TODO: real logo art for these two when available -->
+          <span class="logo-cell logo-cell--text">Forest Business<br />Accelerator</span>
+          <span class="logo-cell logo-cell--text">Okanagan</span>
         </div>
       </section>
 
-      <section class="closing" id="closing" aria-label="Closing">
-        <svg class="closing__logo" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+      <!-- CONTACT + CLOSE (Web3Forms POST, no email-client links) -->
+      <section class="contact" id="contact" aria-label="Contact">
+        <svg class="contact__logo" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
           <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
           <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
         </svg>
-        <h2 class="closing__title">Nature from the ground up.</h2>
-        <div class="closing__actions">
-          <a class="btn btn--primary" href="mailto:hello@bullfinch.earth?subject=Request%20a%20demo">Request a demo</a>
-          <a class="btn btn--ghost" href="mailto:hello@bullfinch.earth?subject=Hello%20Bullfinch">Contact us</a>
-        </div>
-        <p class="closing__note">Raising or evaluating the opportunity? <a href="index-pointcloud.html">See the full investor story &rarr;</a></p>
+        <h2 class="contact__title">Nature from the ground up.</h2>
+        <!-- Web3Forms: paste the real access key into the hidden input below. -->
+        <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="REPLACE_WITH_WEB3FORMS_ACCESS_KEY" />
+          <input type="hidden" name="subject" value="Bullfinch Earth - demo request" />
+          <input type="hidden" name="from_name" value="Bullfinch Earth teaser" />
+          <input type="text" name="name" placeholder="Name" autocomplete="name" required />
+          <input type="email" name="email" placeholder="Email" autocomplete="email" required />
+          <input class="full" type="text" name="organization" placeholder="Organization" autocomplete="organization" />
+          <textarea class="full" name="message" placeholder="What forest, and what are you trying to measure?"></textarea>
+          <button class="btn btn--primary" type="submit">Request a demo</button>
+        </form>
+        <p class="contact__note">Raising or evaluating the opportunity? <a href="index-pointcloud.html">See the full investor story &rarr;</a></p>
       </section>
     </main>
 
     <footer class="footer" aria-label="Footer">
-      <span>Bullfinch Earth &middot; Salt Spring Island, BC</span>
-      <span>
-        <a href="mailto:hello@bullfinch.earth">Email</a>
-        &nbsp;&middot;&nbsp;
-        <!-- TODO: replace with the real LinkedIn company URL -->
-        <a href="https://www.linkedin.com/company/bullfinch-earth/" target="_blank" rel="noopener">LinkedIn</a>
-      </span>
+      <span>Bullfinch Earth</span>
+      <!-- TODO: replace with the real LinkedIn company URL -->
+      <a href="https://www.linkedin.com/company/bullfinch-earth/" target="_blank" rel="noopener">LinkedIn</a>
       <button class="footer__top" type="button" aria-label="Back to top" data-top>
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
       </button>
@@ -190,18 +207,70 @@
       })();
     </script>
     <script>
+      // ---- Splash: play the logo-to-ball PNG sequence, then reveal the page --
+      (function () {
+        var splash = document.getElementById("splash");
+        var cv = document.getElementById("splash-sequence");
+        function enter() {
+          document.body.classList.add("has-entered");
+          if (splash) { splash.classList.add("is-leaving"); setTimeout(function () { if (splash) splash.remove(); }, 900); }
+        }
+        if (!splash || !cv) { enter(); return; }
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) { enter(); return; }
+
+        var ctx = cv.getContext("2d");
+        var FIRST = 7, LAST = 28, total = LAST - FIRST + 1;
+        var imgs = [], loaded = 0, started = false, finished = false;
+        function pad(n) { return ("00000" + n).slice(-5); }
+        function finish() { if (finished) return; finished = true; enter(); }
+
+        document.getElementById("splash-button").addEventListener("click", finish);
+        // Safety: never trap the visitor behind a stalled preload.
+        var safety = setTimeout(function () { if (!started) finish(); }, 4000);
+
+        for (var i = FIRST; i <= LAST; i++) {
+          var im = new Image();
+          im.src = "logo-seq/Logo_To_Ball_" + pad(i) + ".png";
+          im.onload = im.onerror = function () { if (++loaded === total && !started) play(); };
+          imgs.push(im);
+        }
+        function play() {
+          started = true;
+          clearTimeout(safety);
+          var f = 0, fps = 24, last = 0, holdEnd = 0;
+          function step(t) {
+            if (finished) return;
+            if (!last) last = t;
+            if (t - last >= 1000 / fps) {
+              last = t;
+              ctx.clearRect(0, 0, 360, 360);
+              var im = imgs[Math.min(f, total - 1)];
+              if (im && im.width) ctx.drawImage(im, 0, 0, 360, 360);
+              f++;
+              if (f >= total) {
+                if (!holdEnd) holdEnd = t;
+                if (t - holdEnd > 380) { finish(); return; }  // brief hold on the ball
+              }
+            }
+            requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        }
+      })();
+    </script>
+    <script>
       // ---- Rotating hero use-case ----
       (function () {
         var host = document.getElementById("rotator");
         var word = document.getElementById("rotatorWord");
         if (!host || !word) return;
-        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         var words = [
           "forestry.", "wildfire risk.", "carbon projects.", "ESG.",
           "invasive species.", "biodiversity.", "natural asset valuation."
         ];
         var i = 0;
-        if (reduced) return; // leave the first word in place
         setInterval(function () {
           host.classList.add("is-out");
           setTimeout(function () {
@@ -214,12 +283,10 @@
     </script>
     <script>
       // ---- Smooth scroll (lenis) + scene driver -----------------------------
-      // The point-cloud field engine (scene-pointcloud.js) is driven purely by
-      // scroll position here: NO GSAP pins, NO section choreography. The global
-      // scroll fraction feeds setProgress (camera dolly + the closing
-      // convergence to the seed dot); the "how it works" section (#opportunity)
-      // drives setTreeProgress so the grove forms as it reaches centre and
-      // disperses as it leaves.
+      // scene-pointcloud.js is driven purely by scroll position: no GSAP pins.
+      // Global scroll fraction feeds setProgress (camera dolly + closing
+      // convergence to the seed dot); the "how it works" section drives
+      // setTreeProgress so the grove forms at centre and disperses on exit.
       (function () {
         var cap = window.bullfinchCanopy;
         var lenis = null;
@@ -227,18 +294,15 @@
           lenis = new Lenis({ smoothWheel: true, lerp: 0.1, wheelMultiplier: 0.9 });
           window.lenis = lenis;
         }
-
         function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
         var maxScroll = 1;
-        function recalc() {
-          maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-        }
+        function recalc() { maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight); }
         recalc();
         window.addEventListener("resize", recalc);
         window.addEventListener("load", recalc);
 
         var steps = document.getElementById("opportunity");
-        var closing = document.getElementById("closing");
+        var closing = document.getElementById("contact");
 
         function tick(time) {
           if (lenis) lenis.raf(time);
@@ -247,23 +311,16 @@
           var p = clamp01(y / maxScroll);
           if (cap) {
             if (cap.setProgress) cap.setProgress(p);
-            // Seed dot scales in across the first viewport (hero -> problem band).
             if (cap.setSeedReveal) cap.setSeedReveal(clamp01(y / (vh * 0.9)));
-            // Network waves 1..7 cascade in across the page (swot.js does this
-            // per pinned panel on the investor build; here they ride global
-            // scroll so the field knits together as you move down).
             if (cap.setWaveProgress) {
               for (var w = 1; w <= 7; w++) cap.setWaveProgress(w, clamp01(p * 7 - (w - 1)));
             }
-            // Grove forms while the "how it works" section is near centre.
             if (cap.setTreeProgress && steps) {
               var r = steps.getBoundingClientRect();
               var center = r.top + r.height / 2;
-              var d = Math.abs(center - vh / 2) / vh;   // 0 = perfectly centred
+              var d = Math.abs(center - vh / 2) / vh;
               cap.setTreeProgress(clamp01(1 - d / 0.62));
             }
-            // Closing convergence: lines draw to the seed dot as the closing
-            // section settles; the blast arms past 0.75 (scene handles timing).
             if (cap.setConvergenceProgress && closing) {
               var cr = closing.getBoundingClientRect();
               cap.setConvergenceProgress(clamp01((vh - cr.top) / Math.max(1, cr.height)));
@@ -275,7 +332,7 @@
       })();
     </script>
     <script>
-      // ---- Anchor + back-to-top ----
+      // ---- Anchor scrolling + back-to-top ----
       (function () {
         document.addEventListener("click", function (e) {
           var top = e.target.closest("[data-top]");
