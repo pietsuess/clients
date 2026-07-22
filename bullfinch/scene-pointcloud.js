@@ -1656,7 +1656,7 @@
       positions[xi] = moteCapture[xi] + (mtx - moteCapture[xi]) * e + sway;
       positions[yi] = moteCapture[yi] + (mty - moteCapture[yi]) * e;
       positions[zi] = moteCapture[zi] + (mtz - moteCapture[zi]) * e;
-      var aTree = lerp(0.9 * e, 0.25, ff);
+      var aTree = lerp(1.0 * e, 0.3, ff);   // fully opaque when formed (brighter on the earthy field)
       if (aTree > alphas[i]) alphas[i] = aTree;
     }
     if (redSizeDirty) partGeo.attributes.aSize.needsUpdate = true;
@@ -1664,7 +1664,7 @@
     // family as the motes) rather than fading in place.
     var fa = fillAlphaAttr.array;
     var fp = fillPosAttr.array;
-    var fillAmp = lerp(0.72, 0.2, ff);
+    var fillAmp = lerp(1.0, 0.3, ff);   // fill dots fully opaque when formed
     for (var f = 0; f < fillCount; f++) {
       var wf = tClamp01(treeFormP * 1.25 - fillSeedArr[f] * 0.25);
       var ef = wf * wf * (3 - 2 * wf);

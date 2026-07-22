@@ -45,7 +45,14 @@
         --gl-understory: #746044;  /* warm mid brown (understory / lower grade)       */
         --gl-base: #3B402D;        /* earthy atmosphere floor -- lifts the near-black */
                                    /* clear color so the forest tint actually reads.  */
+        --gl-mote: #F0ECDF;        /* brighter motes so the grove reads on the olive  */
       }
+      /* The earthy backdrop is far lighter than the near-black this UI was tuned
+         for, so the quiet chrome (nav numbers, the numeric label line) lost its
+         contrast. Lift them to a soft white that reads on olive AND on the
+         darker upper sections. Active nav + hover still go full white below. */
+      .site-nav a { color: rgba(250, 250, 250, 0.6); }
+      .panel__numeric { color: rgba(250, 250, 250, 0.55); }
       /* #opportunity only: drop the text readability veil (blur + dim) so the
          tree grove reads against the bare earthy backdrop. The veil is a single
          global fixed layer; this class -- toggled by the grove driver while
@@ -476,7 +483,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-pointcloud.js?v=pc10"></script>
+    <script src="scene-pointcloud.js?v=pc11"></script>
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=v4-5"></script>
