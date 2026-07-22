@@ -41,8 +41,17 @@
          the space-gray canopy to a green-brown forest read. Only the two
          backdrop colors change; everything else inherits the base theme. */
       :root {
-        --gl-canopy: #576244;
-        --gl-understory: #171008;
+        --gl-canopy: #9BA56E;      /* light mossy green (near canopy / top of grade) */
+        --gl-understory: #66503A;  /* warm medium brown (understory / floor)         */
+      }
+      /* #opportunity only: drop the text readability veil (blur + dim) so the
+         tree grove reads against the bare earthy backdrop. The veil is a single
+         global fixed layer; this class -- toggled by the grove driver while
+         section 03 is active -- neutralizes it without touching the shared CSS. */
+      body.pc-bare-veil .text-veil {
+        opacity: 0 !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
       }
       /* Section 03 gets the same two-column layout as the other graphic
          sections (mirrors the #product/.panel--media rules): text in the
@@ -465,39 +474,74 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-pointcloud.js?v=pc8"></script>
+    <script src="scene-pointcloud.js?v=pc9"></script>
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=v4-5"></script>
     <script src="stat-field.js?v=v4-6"></script>
     <script>
-      // Tree grove formation driver (index-pointcloud variant). Element-
-      // anchored triggers, the standard ScrollTrigger pattern: positions are
-      // computed by GSAP itself (pin spacing included). Formation: section
-      // 03 approaching (= 02 releasing) until 03 is pinned. Dispersal: the
-      // same value driven back to 0 as 04 approaches, so the field returns
-      // to the exact ambient feel of the earlier sections.
+      // Tree grove formation driver (index-pointcloud variant).
+      //
+      // Timing is locked to the pinned-panel COPY, not to raw viewport
+      // crossings. Panels pin +=200% desktop / +=100% mobile, so 1vh of scroll
+      // = 0.5% (desktop) / 1% (mobile) of a panel's pin; the offsets below come
+      // straight from that.
+      //   FORM:      starts ~0.87 through #product's pin -- as the 02 PNG model
+      //              is fading out -- and completes at ~0.43 of #opportunity's
+      //              pin, exactly when the "For platforms." line reveals.
+      //   HOLD:      grove stands (slow turn) through the #opportunity read.
+      //   DISPERSE:  starts as #opportunity begins to leave (~0.92 of its pin)
+      //              and completes at ~0.43 of #data's pin -- when "Paid pilots."
+      //              reveals. That section has no visual of its own, so the
+      //              dispersal is given the full run to land.
+      // smootherstep eases BOTH ends: nothing is revealed while 02 is still on
+      // screen (slow to start), and it settles cleanly onto the target line.
       window.addEventListener("load", function () {
         if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
         var s03 = document.getElementById("opportunity");
         var s04 = document.getElementById("data");
         if (!s03) return;
+        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        function smootherstep(x) {
+          x = x < 0 ? 0 : (x > 1 ? 1 : x);
+          return x * x * x * (x * (x * 6 - 15) + 10);
+        }
+
+        // FORM: 02 model fading -> "For platforms." (0.43 into #opportunity)
         ScrollTrigger.create({
           trigger: s03,
-          start: "top bottom",   // 03's top enters the viewport: 02 is releasing
-          end: "top top",        // 03 pinned: grove fully formed
+          start: mobileLike ? "top top+=12%" : "top top+=25%",
+          end:   mobileLike ? "+=55%" : "+=111%",
           scrub: true,
           invalidateOnRefresh: true,
-          onUpdate: function (self) { window.bullfinchCanopy.setTreeProgress(self.progress); },
+          onUpdate: function (self) {
+            window.bullfinchCanopy.setTreeProgress(smootherstep(self.progress));
+          },
         });
+
+        // Drop the readability veil (blur + dim) for #opportunity only, from the
+        // form lead-in through the end of its pin -- the grove reads better on
+        // the bare earthy backdrop.
+        ScrollTrigger.create({
+          trigger: s03,
+          start: mobileLike ? "top top+=12%" : "top top+=25%",
+          end:   mobileLike ? "+=112%" : "+=225%",
+          onToggle: function (self) {
+            document.body.classList.toggle("pc-bare-veil", self.isActive);
+          },
+        });
+
+        // DISPERSE: #opportunity leaving -> "Paid pilots." (0.43 into #data)
         if (s04) {
           ScrollTrigger.create({
             trigger: s04,
-            start: "top bottom",
-            end: "top top",
+            start: mobileLike ? "top top+=8%" : "top top+=15%",
+            end:   mobileLike ? "+=51%" : "+=101%",
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { window.bullfinchCanopy.setTreeProgress(1 - self.progress); },
+            onUpdate: function (self) {
+              window.bullfinchCanopy.setTreeProgress(1 - smootherstep(self.progress));
+            },
           });
         }
         ScrollTrigger.refresh();

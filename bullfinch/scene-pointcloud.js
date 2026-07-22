@@ -1411,10 +1411,18 @@
   // setTreeProgress: 0 -> 1 as 03 arrives (form), back to 0 as 04 arrives
   // (disperse to the ambient field). No global-progress guesswork here.
   var TREE_MAX_HEIGHT = 5.0;    // world-unit clamp on grove height
-  var TREE_BASE_Y = -2.5;       // forest floor (same plane the red dot lands on)
+  var TREE_BASE_Y = -2.5;       // legacy forest floor (grove now centers on the text)
+  var TREE_CENTER_OFFSET_Y = 0; // nudge grove off screen-vertical-center (+ = up)
   var TREE_CZ = -1.5;
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
   var treeFormP = 0;            // per-frame smoothed
+  // Grove yaw: a gentle constant turn while the grove stands, ramping up
+  // through the assembly + dispersal motion (like the standalone tester's
+  // auto-orbit) and easing back to the slow turn once formed / dispersed.
+  var treeSpinAngle = 0;        // accumulated yaw (rad), integrated per frame
+  var treeSpinPrevT = 0;        // last elapsed sample, for the local dt
+  var TREE_SPIN_BASE = 0.12;    // rad/s while standing (the "slow turn")
+  var TREE_SPIN_BOOST = 0.85;   // rad/s added at mid-transition (peak liveliness)
   var treeReady = false;
   var treeNorm = null;          // normalized grove coords (height 1, base 0, centered)
   var fillNorm = null;
@@ -1583,6 +1591,25 @@
     var S = (zr - zl) * 0.92 / (assetHalfW * 2);
     if (S > TREE_MAX_HEIGHT) S = TREE_MAX_HEIGHT;
     if (S < 0.8) S = 0.8;
+    // Seat the grove's CENTER on the screen-vertical center (the middle of the
+    // #opportunity text column) rather than on the forest floor. Trace the
+    // camera's center ray to the grove z-plane so the center holds through the
+    // dolly/tilt and the zoom pull-back. camZ (with the bump) is computed above.
+    var camY2 = lerp(CAM_START.y, CAM_END.y, lt2); if (camY2 < 0.5) camY2 = 0.5;
+    var lookY2 = lerp(CAM_START.y, -1.5, lt2);
+    var tRay = (TREE_CZ - camZ) / (-camZ);          // camZ in [3,10]; never 0
+    var groveCenterY = camY2 + tRay * (lookY2 - camY2);
+    var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y;
+
+    // Yaw the whole grove about its own vertical axis. Slow constant turn while
+    // it stands (treeFormP ~ 0 or 1); lively through the transition (env peaks
+    // at treeFormP 0.5). Time-integrated, so it keeps turning on a paused scroll
+    // -- the standalone tester's continuous orbit, gated to the assembly motion.
+    var dtSpin = treeSpinPrevT ? Math.min(0.05, elapsed - treeSpinPrevT) : 0;
+    treeSpinPrevT = elapsed;
+    var spinEnv = 4 * treeFormP * (1 - treeFormP);  // 0 at ends, 1 mid-transition
+    treeSpinAngle += (TREE_SPIN_BASE + TREE_SPIN_BOOST * spinEnv) * dtSpin;
+    var spinCos = Math.cos(treeSpinAngle), spinSin = Math.sin(treeSpinAngle);
     for (var i = 2; i < PARTICLE_POOL; i++) {
       var w = tClamp01(treeFormP * 1.25 - moteFormSeed[i] * 0.25);
       if (w <= 0) { moteLocked[i] = 0; continue; }
@@ -1596,9 +1623,11 @@
       var e = w * w * (3 - 2 * w);
       var sway = Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.02 * e;
       var mt = moteNormIdx[i] * 3;
-      var mtx = treeNorm[mt]     * S + groveCX;
-      var mty = treeNorm[mt + 1] * S + TREE_BASE_Y;
-      var mtz = treeNorm[mt + 2] * S + TREE_CZ;
+      var mlx = treeNorm[mt]     * S;   // grove-local x/z, before yaw
+      var mlz = treeNorm[mt + 2] * S;
+      var mtx = groveCX + mlx * spinCos - mlz * spinSin;
+      var mty = treeNorm[mt + 1] * S + baseY;
+      var mtz = TREE_CZ  + mlx * spinSin + mlz * spinCos;
       positions[xi] = moteCapture[xi] + (mtx - moteCapture[xi]) * e + sway;
       positions[yi] = moteCapture[yi] + (mty - moteCapture[yi]) * e;
       positions[zi] = moteCapture[zi] + (mtz - moteCapture[zi]) * e;
@@ -1614,9 +1643,11 @@
       var wf = tClamp01(treeFormP * 1.25 - fillSeedArr[f] * 0.25);
       var ef = wf * wf * (3 - 2 * wf);
       var f3 = f * 3;
-      var ftx = fillNorm[f3]     * S + groveCX;
-      var fty = fillNorm[f3 + 1] * S + TREE_BASE_Y;
-      var ftz = fillNorm[f3 + 2] * S + TREE_CZ;
+      var flx = fillNorm[f3]     * S;   // grove-local x/z, before yaw
+      var flz = fillNorm[f3 + 2] * S;
+      var ftx = groveCX + flx * spinCos - flz * spinSin;
+      var fty = fillNorm[f3 + 1] * S + baseY;
+      var ftz = TREE_CZ  + flx * spinSin + flz * spinCos;
       fp[f3]     = fillStartArr[f3]     + (ftx - fillStartArr[f3]) * ef;
       fp[f3 + 1] = fillStartArr[f3 + 1] + (fty - fillStartArr[f3 + 1]) * ef;
       fp[f3 + 2] = fillStartArr[f3 + 2] + (ftz - fillStartArr[f3 + 2]) * ef;
