@@ -484,36 +484,47 @@
     <script>
       // Tree grove formation driver (index-pointcloud variant).
       //
-      // Timing is locked to the pinned-panel COPY, not to raw viewport
-      // crossings. Panels pin +=200% desktop / +=100% mobile, so 1vh of scroll
-      // = 0.5% (desktop) / 1% (mobile) of a panel's pin; the offsets below come
-      // straight from that.
-      //   FORM:      starts ~0.87 through #product's pin -- as the 02 PNG model
-      //              is fading out -- and completes at ~0.43 of #opportunity's
-      //              pin, exactly when the "For platforms." line reveals.
-      //   HOLD:      grove stands (slow turn) through the #opportunity read.
-      //   DISPERSE:  starts as #opportunity begins to leave (~0.92 of its pin)
-      //              and completes at ~0.43 of #data's pin -- when "Paid pilots."
-      //              reveals. That section has no visual of its own, so the
-      //              dispersal is given the full run to land.
-      // smootherstep eases BOTH ends: nothing is revealed while 02 is still on
-      // screen (slow to start), and it settles cleanly onto the target line.
+      // Timing is anchored to the panels' ACTUAL resolved pin scroll-positions
+      // (swot.js pins each panel), read as fractions of each pin. This is the
+      // robust pattern -- putting a scrubbed trigger directly ON a pinned
+      // element (#opportunity / #data) makes its start/end resolve wrong, which
+      // is what made the dispersal wait in dead space and then snap.
+      //   FORM:     0.87 of #product's pin (02 model fading) -> 0.43 of
+      //             #opportunity's pin ("For platforms." reveals).
+      //   HOLD:     brief stand while 03 reads.
+      //   DISPERSE: 0.58 of #opportunity (as 03 goes) -> 0.43 of #data
+      //             ("Paid pilots."). Linear + the scene's own inertia = a
+      //             steady, continuous dissolve: no dead gap, no sudden snap.
       window.addEventListener("load", function () {
         if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
+        var s02 = document.getElementById("product");
         var s03 = document.getElementById("opportunity");
         var s04 = document.getElementById("data");
         if (!s03) return;
-        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+
         function smootherstep(x) {
           x = x < 0 ? 0 : (x > 1 ? 1 : x);
           return x * x * x * (x * (x * 6 - 15) + 10);
         }
+        // The PIN ScrollTrigger swot.js created for a panel (skip our own
+        // non-pinning triggers on the same element).
+        function pinFor(el) {
+          var all = ScrollTrigger.getAll();
+          for (var i = 0; i < all.length; i++) {
+            if (all[i].trigger === el && all[i].pin) return all[i];
+          }
+          return null;
+        }
+        function at(pt, f) { return pt.start + (pt.end - pt.start) * f; }
 
-        // FORM: 02 model fading -> "For platforms." (0.43 into #opportunity)
+        var p2 = pinFor(s02), p3 = pinFor(s03), p4 = pinFor(s04);
+        if (!p3) return;
+
+        // FORM
         ScrollTrigger.create({
-          trigger: s03,
-          start: mobileLike ? "top top+=12%" : "top top+=25%",
-          end:   mobileLike ? "+=55%" : "+=111%",
+          trigger: document.body,
+          start: function () { return p2 ? at(p2, 0.87) : at(p3, 0); },
+          end:   function () { return at(p3, 0.43); },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
@@ -521,32 +532,28 @@
           },
         });
 
-        // Drop the readability veil (blur + dim) for #opportunity only, from the
-        // form lead-in through the end of its pin -- the grove reads better on
-        // the bare earthy backdrop.
+        // Drop the readability veil (blur + dim) while #opportunity holds the
+        // grove -- it reads better on the bare earthy backdrop.
         ScrollTrigger.create({
-          trigger: s03,
-          start: mobileLike ? "top top+=12%" : "top top+=25%",
-          end:   mobileLike ? "+=112%" : "+=225%",
+          trigger: document.body,
+          start: function () { return p2 ? at(p2, 0.87) : at(p3, 0); },
+          end:   function () { return at(p3, 1.0); },
           onToggle: function (self) {
             document.body.classList.toggle("pc-bare-veil", self.isActive);
           },
         });
 
-        // DISPERSE: begins the moment #opportunity starts to leave (~0.88 of
-        // its pin) and lands at "Paid pilots." (0.43 into #data). Unlike the
-        // form, this uses (1 - p)^3 -- responsive at the start (the grove comes
-        // apart as soon as 03 goes) then eases gently onto the target line.
-        if (s04) {
+        // DISPERSE (steady, linear -- the scene's own smoothing softens the ends)
+        if (p4) {
           ScrollTrigger.create({
-            trigger: s04,
-            start: mobileLike ? "top top+=12%" : "top top+=24%",
-            end:   mobileLike ? "+=55%" : "+=110%",
+            trigger: document.body,
+            start: function () { return at(p3, 0.58); },
+            end:   function () { return at(p4, 0.43); },
             scrub: true,
             invalidateOnRefresh: true,
             onUpdate: function (self) {
               var p = self.progress < 0 ? 0 : (self.progress > 1 ? 1 : self.progress);
-              window.bullfinchCanopy.setTreeProgress((1 - p) * (1 - p) * (1 - p));
+              window.bullfinchCanopy.setTreeProgress(1 - p);
             },
           });
         }
