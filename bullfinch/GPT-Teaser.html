@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bullfinch Earth - Ground truth for forestry</title>
+  <meta name="description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #090b08;
+      --forest: #163d2a;
+      --moss: #7f9561;
+      --fern: #a8be82;
+      --beige: #e8e1d2;
+      --paper: #f4efe4;
+      --coral: #ff5a63;
+      --line: rgba(232,225,210,.22);
+      --pad: clamp(28px,5vw,82px);
+      --sans: "Geist", Helvetica, Arial, sans-serif;
+      --mono: "Geist Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; background: var(--black); }
+    body { margin: 0; background: var(--black); color: var(--beige); font-family: var(--sans); overflow-x: hidden; }
+    body, p, li { text-align: justify; text-align-last: left; }
+    a { color: inherit; }
+    button, input, textarea { font: inherit; }
+    ::selection { background: var(--fern); color: var(--black); }
+
+
+    .site-nav {
+      position: fixed; inset: 0 0 auto; z-index: 30;
+      min-height: 78px; padding: 16px var(--pad);
+      display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 28px;
+      background: linear-gradient(180deg, rgba(9,11,8,.94), rgba(9,11,8,.62) 72%, transparent);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 13px; text-decoration: none; }
+    .brand img { width: 42px; height: auto; display: block; }
+    .brand span { font: 500 11px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; }
+    .nav-links { display: flex; justify-content: center; align-items: center; gap: clamp(16px,2.8vw,46px); }
+    .nav-links a, .investor-link {
+      text-decoration: none; text-transform: uppercase; font: 500 10px/1 var(--mono); letter-spacing: .16em;
+      color: rgba(232,225,210,.68); transition: color .2s ease;
+    }
+    .nav-links a:hover, .nav-links a.is-active, .investor-link:hover { color: var(--paper); }
+    .nav-links a::before { content: attr(data-n); color: var(--fern); margin-right: 7px; }
+    .investor-link { border: 1px solid var(--line); padding: 12px 16px; border-radius: 999px; }
+
+
+    section { position: relative; scroll-margin-top: 70px; }
+    .eyebrow {
+      margin: 0 0 18px; font: 600 11px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase;
+      color: var(--fern);
+    }
+    .eyebrow::before { content: ""; display: inline-block; width: 34px; height: 1px; background: currentColor; margin: 0 12px 3px 0; }
+    h1, h2, h3 { margin: 0; letter-spacing: -.045em; text-wrap: balance; }
+    h1 { font-size: clamp(72px,10vw,164px); line-height: .82; font-weight: 600; }
+    h2 { font-size: clamp(54px,7vw,112px); line-height: .88; font-weight: 550; }
+    h3 { font-size: clamp(24px,2.4vw,42px); line-height: .98; font-weight: 560; }
+    .accent { color: var(--fern); }
+    .coral { color: var(--coral); }
+
+
+    .hero {
+      min-height: 100vh; display: grid; align-content: end; padding: 150px var(--pad) 52px;
+      background:
+        radial-gradient(90% 70% at 84% 25%, rgba(127,149,97,.26), transparent 55%),
+        linear-gradient(135deg, #090b08 12%, #10271d 54%, #203e2b 100%);
+      isolation: isolate;
+    }
+    #forest-field { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; opacity: .62; }
+    .hero-grid { display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; align-items: end; }
+    .hero-copy { grid-column: 1 / 10; }
+    .hero-deck {
+      grid-column: 1 / 7; margin: 36px 0 0; font-size: clamp(18px,1.55vw,26px); line-height: 1.45;
+      color: rgba(232,225,210,.78); font-weight: 350;
+    }
+    .hero-deck strong { color: var(--paper); font-weight: 650; }
+    .hero-actions { grid-column: 1 / 8; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 22px;
+      border: 1px solid rgba(232,225,210,.32); border-radius: 999px; text-decoration: none;
+      text-transform: uppercase; font: 600 11px/1 var(--mono); letter-spacing: .13em;
+      transition: transform .2s ease, background .2s ease, color .2s ease;
+    }
+    .button:hover { transform: translateY(-2px); }
+    .button--primary { background: var(--coral); color: var(--black); border-color: var(--coral); }
+    .button--quiet { background: rgba(9,11,8,.18); }
+    .hero-index {
+      grid-column: 9 / 13; grid-row: 2 / 5; align-self: end; margin: 0; padding: 0; list-style: none;
+      border-top: 1px solid var(--line);
+    }
+    .hero-index li {
+      display: grid; grid-template-columns: 23px 1fr; gap: 10px; align-items: center;
+      min-height: 44px; border-bottom: 1px solid var(--line);
+      font: 500 10px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(232,225,210,.7);
+    }
+    .hero-index b { color: var(--fern); font-weight: 500; }
+    .problem-strip {
+      grid-column: 1 / 13; margin-top: 58px; display: grid; grid-template-columns: 2fr 3fr 3fr; gap: 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    }
+    .problem-strip > * { padding: 20px 22px 20px 0; }
+    .problem-strip > * + * { border-left: 1px solid var(--line); padding-left: 22px; }
+    .problem-strip .stat { font-size: clamp(42px,5.4vw,78px); line-height: .8; letter-spacing: -.06em; color: var(--fern); }
+    .problem-strip p { margin: 0; font-size: clamp(13px,1vw,16px); line-height: 1.5; color: rgba(232,225,210,.72); }
+
+
+    .how {
+      min-height: 180vh; padding: 110px var(--pad); background: var(--paper); color: var(--black);
+    }
+    .how-head { display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; margin-bottom: 76px; }
+    .how-head .eyebrow { grid-column: 1 / 4; color: var(--forest); }
+    .how-head h2 { grid-column: 4 / 13; }
+    .how-stage { display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; min-height: 120vh; }
+    .case-wrap {
+      grid-column: 1 / 7; position: sticky; top: 86px; height: calc(100vh - 116px);
+      display: grid; place-items: center; align-self: start; overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(127,149,97,.22), transparent 58%),
+        repeating-radial-gradient(circle at 50% 50%, transparent 0 42px, rgba(22,61,42,.1) 43px 44px);
+      border: 1px solid rgba(9,11,8,.12);
+    }
+    #case-animation { display: block; width: min(92%,760px); height: min(92%,760px); object-fit: contain; }
+    .case-caption {
+      position: absolute; left: 20px; bottom: 18px; margin: 0;
+      font: 600 9px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase; color: rgba(9,11,8,.48);
+    }
+    .steps { grid-column: 8 / 13; padding: 10vh 0 32vh; }
+    .step { min-height: 38vh; padding: 34px 0; border-top: 1px solid rgba(9,11,8,.2); }
+    .step:last-child { border-bottom: 1px solid rgba(9,11,8,.2); }
+    .step-num { margin: 0 0 30px; color: var(--forest); font: 600 11px/1 var(--mono); letter-spacing: .16em; }
+    .step p { margin: 20px 0 0; font-size: clamp(16px,1.25vw,21px); line-height: 1.55; color: rgba(9,11,8,.7); }
+    .step strong { color: var(--forest); }
+
+
+    .who { padding: 118px var(--pad) 126px; background: var(--forest); color: var(--beige); }
+    .who-head { display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; align-items: end; margin-bottom: 64px; }
+    .who-head .eyebrow { grid-column: 1 / 4; }
+    .who-head h2 { grid-column: 4 / 12; }
+    .audience-grid { display: grid; grid-template-columns: repeat(5,1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    .audience {
+      min-height: 300px; padding: 24px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      display: flex; flex-direction: column; justify-content: space-between; background: rgba(9,11,8,.07);
+      transition: background .25s ease, transform .25s ease;
+    }
+    .audience:hover { background: rgba(168,190,130,.1); transform: translateY(-4px); }
+    .audience .icon { width: 54px; height: 54px; color: var(--fern); }
+    .audience .icon svg { width: 100%; height: 100%; display: block; }
+    .audience small { display: block; margin-bottom: 12px; font: 600 9px/1.2 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--fern); }
+    .audience h3 { font-size: clamp(20px,1.8vw,30px); letter-spacing: -.035em; }
+    .audience p { margin: 15px 0 0; font-size: 14px; line-height: 1.5; color: rgba(232,225,210,.66); }
+
+
+    .proof { padding: 112px var(--pad) 50px; background: var(--beige); color: var(--black); }
+    .proof-head { display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; margin-bottom: 62px; }
+    .proof-head .eyebrow { grid-column: 1 / 4; color: var(--forest); }
+    .proof-head h2 { grid-column: 4 / 13; }
+    .logo-grid { display: grid; grid-template-columns: repeat(6,1fr); border-top: 1px solid rgba(9,11,8,.18); border-left: 1px solid rgba(9,11,8,.18); }
+    .logo-cell {
+      min-height: 150px; padding: 24px 18px; display: grid; place-items: center;
+      border-right: 1px solid rgba(9,11,8,.18); border-bottom: 1px solid rgba(9,11,8,.18); background: rgba(244,239,228,.54);
+    }
+    .logo-cell img { display: block; max-width: 90%; max-height: 66px; width: auto; height: auto; filter: grayscale(1) contrast(1.08); }
+    .logo-type { text-align: center; font-weight: 750; line-height: .95; letter-spacing: -.04em; font-size: 18px; }
+    .logo-type span { display: block; margin-top: 8px; font: 600 8px/1 var(--mono); letter-spacing: .13em; text-transform: uppercase; color: var(--forest); }
+    .closing {
+      display: grid; grid-template-columns: repeat(12,1fr); gap: 18px; align-items: end;
+      padding: 120px 0 74px; border-bottom: 1px solid rgba(9,11,8,.2);
+    }
+    .closing h2 { grid-column: 1 / 10; }
+    .closing-actions { grid-column: 10 / 13; display: grid; gap: 10px; }
+    .closing .button--primary { width: 100%; }
+    .closing .button--quiet { border-color: rgba(9,11,8,.3); width: 100%; }
+    footer {
+      min-height: 110px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px;
+      font: 500 9px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: rgba(9,11,8,.55);
+    }
+    footer img { width: 36px; justify-self: center; }
+    footer a { justify-self: end; text-decoration: none; }
+
+
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    :focus-visible { outline: 2px solid var(--coral); outline-offset: 4px; }
+
+
+    @media (max-width: 960px) {
+      .site-nav { grid-template-columns: auto 1fr; }
+      .investor-link { justify-self: end; }
+      .nav-links { display: none; }
+      .hero-copy { grid-column: 1 / 13; }
+      .hero-deck { grid-column: 1 / 10; }
+      .hero-index { grid-column: 8 / 13; }
+      .problem-strip { grid-template-columns: 1fr; }
+      .problem-strip > * + * { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; }
+      .how-head .eyebrow, .proof-head .eyebrow, .who-head .eyebrow { grid-column: 1 / 13; }
+      .how-head h2, .proof-head h2, .who-head h2 { grid-column: 1 / 13; }
+      .case-wrap { grid-column: 1 / 13; position: relative; top: 0; height: 70vh; }
+      .steps { grid-column: 1 / 13; padding-bottom: 10vh; }
+      .audience-grid { grid-template-columns: repeat(5,minmax(190px,1fr)); overflow-x: auto; }
+      .logo-grid { grid-template-columns: repeat(3,1fr); }
+      .closing h2, .closing-actions { grid-column: 1 / 13; }
+      .closing-actions { margin-top: 30px; grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .audience, .button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-nav" aria-label="Site navigation">
+    <a class="brand" href="#top" aria-label="Bullfinch Earth, back to top">
+      <img src="bullfinch-mark.svg" alt="">
+      <span>Bullfinch Earth</span>
+    </a>
+    <nav class="nav-links" aria-label="Page sections">
+      <a href="#top" data-n="01">Ground truth</a>
+      <a href="#how" data-n="02">How it works</a>
+      <a href="#who" data-n="03">Who it is for</a>
+      <a href="#proof" data-n="04">Proof</a>
+    </nav>
+    <a class="investor-link" href="index-pointcloud.html">Investor story</a>
+  </header>
+
+
+  <main>
+    <section class="hero" id="top" aria-label="Ground truth for forestry">
+      <canvas id="forest-field" aria-hidden="true"></canvas>
+      <div class="hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Bullfinch Earth</p>
+          <h1>Ground truth<br>for <span class="accent">forestry.</span></h1>
+        </div>
+        <p class="hero-deck reveal">Bullfinch Earth measures, monitors, and maps <strong>every stem</strong> passively, while foresters do their normal jobs.</p>
+        <div class="hero-actions reveal">
+          <a class="button button--primary" href="https://www.bullfinch.earth/" target="_blank" rel="noopener">Request a demo</a>
+          <a class="button button--quiet" href="#how">See how it works</a>
+        </div>
+        <ul class="hero-index reveal" aria-label="Applications">
+          <li><b>01</b> Forest operations</li>
+          <li><b>02</b> Wildfire risk</li>
+          <li><b>03</b> Carbon and MRV</li>
+          <li><b>04</b> Biodiversity</li>
+          <li><b>05</b> Natural asset value</li>
+        </ul>
+        <div class="problem-strip reveal">
+          <div><div class="stat">&lt;1%</div></div>
+          <p>Manual inventory is slow, frustrating, and usually measures less than one percent of what is actually there.</p>
+          <p>Bullfinch automates the process. No dedicated trip, no workflow reset, and no stopping to measure.</p>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="how" id="how">
+      <div class="how-head reveal">
+        <p class="eyebrow">From a field walk to forest data</p>
+        <h2>Is it really<br>this <span class="accent">easy?</span></h2>
+      </div>
+      <div class="how-stage">
+        <div class="case-wrap reveal" aria-label="Bullfinch wearable animation">
+          <canvas id="case-animation" width="760" height="760" aria-hidden="true"></canvas>
+          <p class="case-caption">Scroll to move through the wearable</p>
+        </div>
+        <div class="steps">
+          <article class="step reveal">
+            <p class="step-num">01 / Wear</p>
+            <h3>Secure to your vest.</h3>
+            <p>Bullfinch attaches securely and stays <strong>blissfully out of your way.</strong></p>
+          </article>
+          <article class="step reveal">
+            <p class="step-num">02 / Walk</p>
+            <h3>Do your normal job.</h3>
+            <p>Press “Start Bullfinching” and go do your thing. <strong>No training, no stopping, no dedicated trip.</strong></p>
+          </article>
+          <article class="step reveal">
+            <p class="step-num">03 / Data</p>
+            <h3>Receive complete stem maps.</h3>
+            <p>Stand data is delivered automatically, with <strong>30 times more data than manual cruising</strong> every time you are in the field.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="who" id="who">
+      <div class="who-head reveal">
+        <p class="eyebrow">Who needs Bullfinch</p>
+        <h2>One walk.<br><span class="accent">Five decisions.</span></h2>
+      </div>
+      <div class="audience-grid">
+        <article class="audience reveal">
+          <div class="icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor"><path d="M8 54h48M16 54V27l16-15 16 15v27M26 54V39h12v15"/></svg></div>
+          <div><small>Timber companies</small><h3>Know what you are bringing to market.</h3></div>
+        </article>
+        <article class="audience reveal">
+          <div class="icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor"><path d="M12 52l10-18 8 8 12-25 10 35M9 52h46"/></svg></div>
+          <div><small>Consulting foresters</small><h3>Complete more billable projects per season.</h3></div>
+        </article>
+        <article class="audience reveal">
+          <div class="icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor"><circle cx="32" cy="32" r="22"/><path d="M20 37c8-1 15-8 18-19 7 8 8 18 1 24-6 6-14 4-19-5Z"/></svg></div>
+          <div><small>Carbon and MRV</small><h3>Ground truth that registries can trust.</h3></div>
+        </article>
+        <article class="audience reveal">
+          <div class="icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor"><path d="M32 7c8 12 17 19 17 31a17 17 0 1 1-34 0c0-7 4-13 10-20 0 11 4 16 9 18-1-9 1-18-2-29Z"/></svg></div>
+          <div><small>Wildfire and insurance</small><h3>Below-canopy fuel data at scale.</h3></div>
+        </article>
+        <article class="audience reveal">
+          <div class="icon"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor"><circle cx="32" cy="32" r="7"/><path d="M9 32h16M39 32h16M32 9v16M32 39v16M16 16l11 11M37 37l11 11M48 16 37 27M27 37 16 48"/></svg></div>
+          <div><small>Remote sensing</small><h3>See what satellites cannot below the canopy.</h3></div>
+        </article>
+      </div>
+    </section>
+
+
+    <section class="proof" id="proof">
+      <div class="proof-head reveal">
+        <p class="eyebrow">Trusted in the field</p>
+        <h2>Built with the people<br>who <span class="accent">know forests.</span></h2>
+      </div>
+      <div class="logo-grid reveal" aria-label="Bullfinch Earth partners and supporters">
+        <div class="logo-cell"><img src="https://www.weyerhaeuser.com/application/files/6117/6842/0924/WYLogo_Horizontal_Color_RGB_1.svg" alt="Weyerhaeuser"></div>
+        <div class="logo-cell"><img src="https://hardwoodsnb.ca/wp-content/uploads/2025/01/NHRI-Logo_Full-Name-e1738261275213.png" alt="Northern Hardwoods Research Institute"></div>
+        <div class="logo-cell"><img src="https://www.longviewforest.com/uploads/6/2/3/5/62350817/published/326192-long-view-forest-logo-no-background.png?1779298423" alt="Long View Forest"></div>
+        <div class="logo-cell"><img src="https://assets.publishing.service.gov.uk/media/67c9881175d7505462fc6634/full_transparent.png" alt="UK Space Agency"></div>
+        <div class="logo-cell"><div class="logo-type">FOREST BUSINESS<span>ACCELERATOR</span></div></div>
+        <div class="logo-cell"><div class="logo-type">OKGN ANGEL<span>SUMMIT</span></div></div>
+      </div>
+      <div class="closing reveal">
+        <h2>Nature from the<br><span class="accent">ground up.</span></h2>
+        <div class="closing-actions">
+          <a class="button button--primary" href="https://www.bullfinch.earth/" target="_blank" rel="noopener">Request a demo</a>
+          <a class="button button--quiet" href="index-pointcloud.html">View investor story</a>
+        </div>
+      </div>
+      <footer>
+        <span>Bullfinch Earth</span>
+        <img src="bullfinch-mark.svg" alt="Bullfinch Earth">
+        <a href="https://www.linkedin.com/company/bullfinch-earth/" target="_blank" rel="noopener">LinkedIn</a>
+      </footer>
+    </section>
+  </main>
+
+
+  <script>
+    (function () {
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var revealEls = document.querySelectorAll(".reveal");
+      if (!("IntersectionObserver" in window) || reduced) {
+        revealEls.forEach(function (el) { el.classList.add("in"); });
+      } else {
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) { entry.target.classList.add("in"); observer.unobserve(entry.target); }
+          });
+        }, { threshold: .12, rootMargin: "0px 0px -7% 0px" });
+        revealEls.forEach(function (el) { observer.observe(el); });
+      }
+
+
+      var links = Array.prototype.slice.call(document.querySelectorAll(".nav-links a"));
+      var sections = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+      function spy() {
+        var y = window.scrollY + window.innerHeight * .35;
+        var active = 0;
+        sections.forEach(function (section, i) { if (section && y >= section.offsetTop) active = i; });
+        links.forEach(function (a, i) { a.classList.toggle("is-active", i === active); });
+      }
+      window.addEventListener("scroll", spy, { passive: true });
+      spy();
+
+
+      var field = document.getElementById("forest-field");
+      var fctx = field.getContext("2d");
+      var points = [];
+      function sizeField() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        field.width = Math.round(field.clientWidth * dpr);
+        field.height = Math.round(field.clientHeight * dpr);
+        points = [];
+        var count = Math.round(field.clientWidth / 8);
+        for (var i = 0; i < count; i++) {
+          points.push({
+            x: Math.random() * field.width,
+            y: Math.random() * field.height,
+            r: (Math.random() * 1.8 + .5) * dpr,
+            h: (Math.random() * .42 + .12) * field.height,
+            a: Math.random() * .44 + .12
+          });
+        }
+      }
+      function drawField(t) {
+        fctx.clearRect(0, 0, field.width, field.height);
+        points.forEach(function (p, i) {
+          var sway = Math.sin(t * .00025 + i) * 8;
+          fctx.strokeStyle = "rgba(168,190,130," + (p.a * .35) + ")";
+          fctx.lineWidth = Math.max(1, p.r * .45);
+          fctx.beginPath();
+          fctx.moveTo(p.x, p.y);
+          fctx.lineTo(p.x + sway, Math.max(0, p.y - p.h));
+          fctx.stroke();
+          fctx.fillStyle = "rgba(232,225,210," + p.a + ")";
+          fctx.beginPath();
+          fctx.arc(p.x + sway, Math.max(0, p.y - p.h), p.r, 0, Math.PI * 2);
+          fctx.fill();
+        });
+        if (!reduced) requestAnimationFrame(drawField);
+      }
+      sizeField();
+      drawField(0);
+      window.addEventListener("resize", sizeField);
+
+
+      var canvas = document.getElementById("case-animation");
+      var ctx = canvas.getContext("2d");
+      var total = 288;
+      var frames = [];
+      var loaded = [];
+      var requested = 0;
+      var rendered = -1;
+      var started = false;
+      function framePath(index) {
+        return "case-anim-webp/Case_anim" + String(index).padStart(4, "0") + ".webp?v=gpt1";
+      }
+      function fit() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var w = canvas.clientWidth || 760;
+        var h = canvas.clientHeight || 760;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+      }
+      function render(index) {
+        requested = index;
+        var img = frames[index];
+        if (!img || !loaded[index] || rendered === index) return;
+        fit();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var scale = Math.min(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+        var w = img.naturalWidth * scale;
+        var h = img.naturalHeight * scale;
+        ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+        rendered = index;
+      }
+      function loadFrames() {
+        if (started) return;
+        started = true;
+        for (var i = 1; i <= total; i++) {
+          (function (frameNumber) {
+            var img = new Image();
+            var index = frameNumber - 1;
+            loaded[index] = false;
+            img.decoding = "async";
+            img.onload = function () { loaded[index] = true; if (index === requested || (index === 0 && rendered < 0)) render(index); };
+            img.src = framePath(frameNumber);
+            frames[index] = img;
+          })(i);
+        }
+      }
+      var how = document.getElementById("how");
+      if ("IntersectionObserver" in window) {
+        var loader = new IntersectionObserver(function (entries) {
+          if (entries[0].isIntersecting) { loadFrames(); loader.disconnect(); }
+        }, { rootMargin: "120% 0px" });
+        loader.observe(how);
+      } else { loadFrames(); }
+      function scrub() {
+        var rect = how.getBoundingClientRect();
+        var travel = Math.max(1, how.offsetHeight - window.innerHeight);
+        var progress = Math.max(0, Math.min(1, -rect.top / travel));
+        render(Math.min(total - 1, Math.floor(progress * total)));
+      }
+      window.addEventListener("scroll", scrub, { passive: true });
+      window.addEventListener("resize", function () { rendered = -1; render(requested); });
+      scrub();
+    })();
+  </script>
+</body>
+</html>
