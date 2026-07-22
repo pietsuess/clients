@@ -319,20 +319,29 @@
   partGeo.setAttribute("aRed",     new THREE.BufferAttribute(isRedMote, 1));
   partGeo.setAttribute("aSize",    new THREE.BufferAttribute(sizes, 1));
   partGeo.setAttribute("aGlow",    new THREE.BufferAttribute(glows, 1));
+  // Per-mote height gradient for the grove (like the standalone tester): 0 at
+  // the base, ramping toward the accent at the canopy top. 0 for all motes
+  // until the tree targets are assigned at obj load, and only visible while the
+  // grove is formed (scaled by uTreeForm in the shader).
+  var treeTint = new Float32Array(PARTICLE_POOL);
+  partGeo.setAttribute("aTreeTint", new THREE.BufferAttribute(treeTint, 1));
 
   var partVertex = [
     "attribute float aAlpha;",
     "attribute float aRed;",
     "attribute float aSize;",
     "attribute float aGlow;",
+    "attribute float aTreeTint;",
     "uniform float uPixelRatio;",
     "uniform float uTime;",
     "varying float vAlpha;",
     "varying float vRed;",
     "varying float vGlow;",
+    "varying float vTreeTint;",
     "void main(){",
     "  vAlpha = aAlpha;",
     "  vRed   = aRed;",
+    "  vTreeTint = aTreeTint;",
     "  // seed mote pulses subtly (sin time on a 2.4s period)",
     "  float seedPulse = aRed * (0.65 + 0.35 * (0.5 + 0.5 * sin(uTime * 2.618)));",
     "  vGlow  = max(aGlow, seedPulse);",
@@ -352,8 +361,10 @@
     "varying float vAlpha;",
     "varying float vRed;",
     "varying float vGlow;",
+    "varying float vTreeTint;",
     "uniform vec3  uColor;",
     "uniform vec3  uAccent;",
+    "uniform float uTreeForm;",
     "void main(){",
     "  vec2 c = gl_PointCoord - vec2(0.5);",
     "  float d = length(c);",
@@ -362,6 +373,8 @@
     "  if (aa <= 0.0 && vGlow <= 0.01) discard;",
     "  vec3 col = mix(uColor, uAccent, vRed);",
     "  col = mix(col, uAccent, vGlow * 0.8);",
+    "  // Grove height gradient: base mote color -> accent up the canopy.",
+    "  col = mix(col, uAccent, clamp(vTreeTint * uTreeForm, 0.0, 1.0));",
     "  // Outer red glow ring when newly connected (or always on the seed via",
     "  // the seed-pulse contribution to vGlow from the vertex shader).",
     "  float ringMask = smoothstep(0.55, 0.32, d) - smoothstep(0.32, 0.18, d);",
@@ -380,6 +393,7 @@
       uAccent:      uniforms.uAccent,
       uPixelRatio:  { value: renderer.getPixelRatio() },
       uTime:        uniforms.uTime,
+      uTreeForm:    { value: 0 },
     },
     vertexShader: partVertex,
     fragmentShader: partFragment,
@@ -399,6 +413,7 @@
   redGeo.setAttribute("aRed",     partGeo.attributes.aRed);
   redGeo.setAttribute("aSize",    partGeo.attributes.aSize);
   redGeo.setAttribute("aGlow",    partGeo.attributes.aGlow);
+  redGeo.setAttribute("aTreeTint", partGeo.attributes.aTreeTint);
   redGeo.setDrawRange(0, 2);        // first 2 vertices only
   var redMat = partMat.clone();
   redMat.depthTest = false;         // never occluded by anything
@@ -1515,9 +1530,12 @@
       // hovering apart as separate god-dots. They ramp down to mote size while
       // formed and are restored to their canonical roles once dispersed.
       var take = 0;
+      var TREE_TINT = 0.55;   // max blend toward the accent at the canopy top
       for (var mi = 0; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
         moteNormIdx[mi] = idx[take];
+        treeTint[mi] = Math.pow(treeNorm[idx[take] * 3 + 1], 2.2) * TREE_TINT;
       }
+      partGeo.attributes.aTreeTint.needsUpdate = true;
 
       fillCount = treeCount - take;
       var fillPos  = new Float32Array(fillCount * 3);
@@ -1528,11 +1546,13 @@
       fillSeedArr  = new Float32Array(fillCount);
       fillStartArr = new Float32Array(fillCount * 3);
       fillNorm     = new Float32Array(fillCount * 3);
+      var fillTint = new Float32Array(fillCount);
       for (var fi = 0; fi < fillCount; fi++) {
         var si = idx[take + fi] * 3;
         fillNorm[fi * 3]     = treeNorm[si];
         fillNorm[fi * 3 + 1] = treeNorm[si + 1];
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
+        fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
         // Fly in from the ambient mote field volume (same distribution the
         // motes spawn in), so the whole field reads as condensing into trees.
         fillStartArr[fi * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
@@ -1550,6 +1570,7 @@
       fillGeo.setAttribute("aRed",     new THREE.BufferAttribute(fillRed, 1));
       fillGeo.setAttribute("aSize",    new THREE.BufferAttribute(fillSize, 1));
       fillGeo.setAttribute("aGlow",    new THREE.BufferAttribute(fillGlow, 1));
+      fillGeo.setAttribute("aTreeTint", new THREE.BufferAttribute(fillTint, 1));
       fillAlphaAttr = fillGeo.attributes.aAlpha;
       fillPosAttr   = fillGeo.attributes.position;
       var fillPoints = new THREE.Points(fillGeo, partMat);
@@ -1577,6 +1598,7 @@
   // and before position buffers upload / lines read them.
   function updateTreeFormation(elapsed) {
     treeFormP += (treeFormTarget - treeFormP) * 0.08;
+    partMat.uniforms.uTreeForm.value = treeFormP;  // height gradient shows only while formed
     if (!treeReady) return;
     if (treeFormP < 0.001) {
       for (var r = 0; r < PARTICLE_POOL; r++) moteLocked[r] = 0;
