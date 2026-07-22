@@ -269,6 +269,10 @@
   var alphas      = new Float32Array(PARTICLE_POOL);
   var isRedMote   = new Float32Array(PARTICLE_POOL);
   var sizes       = new Float32Array(PARTICLE_POOL);
+  // The teaser begins in a low forest-floor layer. starFieldHome preserves
+  // the original full-volume coordinates so the closing can return to that
+  // field before the existing convergence completes the journey.
+  var starFieldHome = new Float32Array(PARTICLE_POOL * 3);
 
   // Horizontal field is scaled to the viewport aspect so the network stays
   // within screen bounds on ANY device. The camera's vertical FOV is constant,
@@ -278,9 +282,15 @@
   var viewAspect = window.innerWidth / Math.max(1, window.innerHeight);
   var FIELD_HALF_X = Math.max(2.2, Math.min(6.5, 4.2 * viewAspect));
   for (var i = 0; i < PARTICLE_POOL; i++) {
-    positions[i * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 12;
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1.0;
+    var fieldX = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
+    var fieldY = (Math.random() - 0.5) * 12;
+    var fieldZ = (Math.random() - 0.5) * 10 - 1.0;
+    starFieldHome[i * 3]     = fieldX;
+    starFieldHome[i * 3 + 1] = fieldY;
+    starFieldHome[i * 3 + 2] = fieldZ;
+    positions[i * 3]     = fieldX;
+    positions[i * 3 + 1] = -3.9 + Math.random() * 2.1;
+    positions[i * 3 + 2] = -1.0 + Math.random() * 7.0;
     swayPhase[i] = Math.random() * Math.PI * 2;
     swayRate[i]  = 0.2 + Math.random() * 0.35;
     fallSpeed[i] = 0.06 + Math.random() * 0.10;
@@ -1314,6 +1324,7 @@
       // motes and fades fill dots. Must run BEFORE the buffers upload and
       // before the lines read positions below.
       updateTreeFormation(elapsed);
+      updateFinalField();
 
       partGeo.attributes.position.needsUpdate = true;
       partGeo.attributes.aAlpha.needsUpdate = true;
@@ -1440,8 +1451,8 @@
   // auto-orbit) and easing back to the slow turn once formed / dispersed.
   var treeSpinAngle = 0;        // accumulated yaw (rad), integrated per frame
   var treeSpinPrevT = 0;        // last elapsed sample, for the local dt
-  var TREE_SPIN_BASE = 0.12;    // rad/s while standing (the "slow turn")
-  var TREE_SPIN_BOOST = 0.85;   // rad/s added at mid-transition (peak liveliness)
+  var TREE_SPIN_BASE = 0.035;   // slow, even turntable motion
+  var TREE_SPIN_BOOST = 0.0;
   var treeReady = false;
   var treeNorm = null;          // normalized grove coords (height 1, base 0, centered)
   var fillNorm = null;
@@ -1453,30 +1464,21 @@
   var fillAlphaAttr = null, fillPosAttr = null;
   var fillSeedArr = null, fillStartArr = null;
   var fillCount = 0;
+  var finalFieldTarget = 0;
+  var finalFieldP = 0;
+  var finalFieldCapture = new Float32Array(PARTICLE_POOL * 3);
+  var finalFieldLocked = false;
   // Target height drives the reveal after the OBJ is assigned, so the exact
   // Point Cloud 3 grove forms from forest floor to canopy.
   for (var ms = 0; ms < PARTICLE_POOL; ms++) moteFormSeed[ms] = 0;
 
   function tClamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
 
-  // The grove is placed like the OTHER graphics: directly left of the text
-  // column, never under it. The zone is MEASURED from the DOM (panel left
-  // padding to the text block's left edge) and converted from pixels to
-  // world units at grove depth every frame, so alignment holds across
-  // viewports and through the camera pull-back.
+  // Centre the three-tree Point Cloud 3 grove across the viewport.
   var groveZoneL = 64, groveZoneR = 480;   // px fallbacks, remeasured below
   function measureGroveZone() {
-    var panel = document.getElementById("opportunity");
-    var inner = panel && panel.querySelector(".panel__inner");
-    if (!panel || !inner) {
-      groveZoneL = window.innerWidth * 0.05;
-      groveZoneR = window.innerWidth * 0.32;
-      return;
-    }
-    var pad = parseFloat(getComputedStyle(panel).paddingLeft) || 32;
-    var textLeft = inner.getBoundingClientRect().left;
-    groveZoneL = pad;
-    groveZoneR = Math.max(pad + 120, textLeft - 24);   // keep a gap to the text
+    groveZoneL = window.innerWidth * 0.18;
+    groveZoneR = window.innerWidth * 0.82;
   }
   measureGroveZone();
   window.addEventListener("resize", measureGroveZone);
@@ -1556,11 +1558,10 @@
         fillNorm[fi * 3 + 1] = treeNorm[si + 1];
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
         fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
-        // Fly in from the ambient mote field volume (same distribution the
-        // motes spawn in), so the whole field reads as condensing into trees.
+        // Fly in from the same low forest-floor layer as the ambient motes.
         fillStartArr[fi * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
-        fillStartArr[fi * 3 + 1] = (Math.random() - 0.5) * 12;
-        fillStartArr[fi * 3 + 2] = (Math.random() - 0.5) * 10 - 1.0;
+        fillStartArr[fi * 3 + 1] = -3.9 + Math.random() * 2.1;
+        fillStartArr[fi * 3 + 2] = -1.0 + Math.random() * 7.0;
         fillPos[fi * 3]     = fillStartArr[fi * 3];
         fillPos[fi * 3 + 1] = fillStartArr[fi * 3 + 1];
         fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
@@ -1709,6 +1710,29 @@
     fillAlphaAttr.needsUpdate = true;
   }
 
+  // Once the grove has done its job, the same motes leave the tree targets and
+  // return to the original full-volume field. The existing final convergence
+  // then draws that field into the central red point.
+  function updateFinalField() {
+    finalFieldP += (finalFieldTarget - finalFieldP) * 0.075;
+    if (finalFieldTarget > 0.001 && !finalFieldLocked) {
+      finalFieldCapture.set(positions);
+      finalFieldLocked = true;
+    }
+    if (!finalFieldLocked) return;
+    for (var i = 2; i < PARTICLE_POOL; i++) {
+      var stagger = (i % 11) * 0.015;
+      var w = tClamp01(finalFieldP * 1.15 - stagger);
+      var e = w * w * (3 - 2 * w);
+      var i3 = i * 3;
+      positions[i3]     = lerp(finalFieldCapture[i3],     starFieldHome[i3],     e);
+      positions[i3 + 1] = lerp(finalFieldCapture[i3 + 1], starFieldHome[i3 + 1], e);
+      positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], starFieldHome[i3 + 2], e);
+      if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
+    }
+    if (finalFieldTarget < 0.001 && finalFieldP < 0.002) finalFieldLocked = false;
+  }
+
   // Start the render loop only now that Layer T state exists (see the NOTE
   // above the Layer T block: the first frame runs synchronously).
   animate();
@@ -1759,6 +1783,7 @@
     // DOM-anchored ScrollTriggers in index-pointcloud.html. 03 approaching
     // drives 0 -> 1 (form); 04 approaching drives 1 -> 0 (disperse).
     setTreeProgress: function (p) { treeFormTarget = tClamp01(p); },
+    setFinalFieldProgress: function (p) { finalFieldTarget = tClamp01(p); },
     getLayerTint: function () { return uniforms.uLayerTint.value; },
   };
 })();
