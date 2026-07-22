@@ -41,8 +41,10 @@
          the space-gray canopy to a green-brown forest read. Only the two
          backdrop colors change; everything else inherits the base theme. */
       :root {
-        --gl-canopy: #9BA56E;      /* light mossy green (near canopy / top of grade) */
-        --gl-understory: #66503A;  /* warm medium brown (understory / floor)         */
+        --gl-canopy: #AEB782;      /* light mossy green (near canopy / top of grade) */
+        --gl-understory: #746044;  /* warm mid brown (understory / lower grade)       */
+        --gl-base: #3B402D;        /* earthy atmosphere floor -- lifts the near-black */
+                                   /* clear color so the forest tint actually reads.  */
       }
       /* #opportunity only: drop the text readability veil (blur + dim) so the
          tree grove reads against the bare earthy backdrop. The veil is a single
@@ -200,7 +202,7 @@
   </head>
   <body>
     <div class="splash" id="splash" aria-label="Begin presentation">
-      <button class="splash__button" id="splash-button" type="button" aria-label="Begin fullscreen presentation">
+      <button class="splash__button" id="splash-button" type="button" aria-label="Begin presentation">
         <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
       </button>
     </div>
@@ -474,7 +476,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-pointcloud.js?v=pc9"></script>
+    <script src="scene-pointcloud.js?v=pc10"></script>
     <script src="case-animation.js?v=v4-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=v4-5"></script>
@@ -531,16 +533,20 @@
           },
         });
 
-        // DISPERSE: #opportunity leaving -> "Paid pilots." (0.43 into #data)
+        // DISPERSE: begins the moment #opportunity starts to leave (~0.88 of
+        // its pin) and lands at "Paid pilots." (0.43 into #data). Unlike the
+        // form, this uses (1 - p)^3 -- responsive at the start (the grove comes
+        // apart as soon as 03 goes) then eases gently onto the target line.
         if (s04) {
           ScrollTrigger.create({
             trigger: s04,
-            start: mobileLike ? "top top+=8%" : "top top+=15%",
-            end:   mobileLike ? "+=51%" : "+=101%",
+            start: mobileLike ? "top top+=12%" : "top top+=24%",
+            end:   mobileLike ? "+=55%" : "+=110%",
             scrub: true,
             invalidateOnRefresh: true,
             onUpdate: function (self) {
-              window.bullfinchCanopy.setTreeProgress(1 - smootherstep(self.progress));
+              var p = self.progress < 0 ? 0 : (self.progress > 1 ? 1 : self.progress);
+              window.bullfinchCanopy.setTreeProgress((1 - p) * (1 - p) * (1 - p));
             },
           });
         }
@@ -1221,21 +1227,11 @@
         });
 
         // Advance on a click ANYWHERE on the splash, not just the logo button.
-        // (The button still bubbles here, so a single listener covers both.)
+        // Entering the presentation no longer forces fullscreen -- it just
+        // starts the animation. Fullscreen stays available on demand via the
+        // dedicated #fullscreen-toggle button.
         splash.addEventListener("click", function () {
-          var root = document.documentElement;
-          var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
-          if (request) {
-            try {
-              var result = request.call(root);
-              if (result && result.then) result.then(playSequence).catch(playSequence);
-              else playSequence();
-            } catch (e) {
-              playSequence();
-            }
-          } else {
-            playSequence();
-          }
+          playSequence();
         });
       })();
     </script>

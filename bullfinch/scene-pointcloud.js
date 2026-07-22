@@ -76,7 +76,11 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobileLike ? 1.35 : 2));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
 
-  var bgColor = readCssColor("--bg");
+  // Clear color: the point-cloud variant lifts the near-black base to an earthy
+  // atmosphere floor (--gl-base) so the backdrop tint reads as forest, not void.
+  // Falls back to --bg for the standard scene.
+  var baseRaw = getComputedStyle(document.documentElement).getPropertyValue("--gl-base").trim();
+  var bgColor = readCssColor(baseRaw ? "--gl-base" : "--bg");
   renderer.setClearColor(bgColor, 1);
 
   var scene = new THREE.Scene();
@@ -174,8 +178,8 @@
     "  tinted = mix(tinted, uUnderstory, depthShade * 0.38);",
     // Soft vignette so the canvas reads as atmosphere.
     "  vec2 centered = vUv - 0.5;",
-    "  float disc = 1.0 - smoothstep(0.28, 0.62, length(centered));",
-    "  float alpha = field * 0.55 * disc;",
+    "  float disc = 1.0 - smoothstep(0.34, 0.84, length(centered));",
+    "  float alpha = field * 0.72 * disc;",
     "  gl_FragColor = vec4(tinted, alpha);",
     "}",
   ].join("\n");
@@ -1506,8 +1510,12 @@
         var s2 = (Math.random() * (s1 + 1)) | 0;
         var tmpI = idx[s1]; idx[s1] = idx[s2]; idx[s2] = tmpI;
       }
+      // Include indices 0 (the bullfinch seed) and 1 (the floor convergence
+      // dot) so the red motes join the grove as ordinary points instead of
+      // hovering apart as separate god-dots. They ramp down to mote size while
+      // formed and are restored to their canonical roles once dispersed.
       var take = 0;
-      for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
+      for (var mi = 0; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
         moteNormIdx[mi] = idx[take];
       }
 
@@ -1571,7 +1579,17 @@
     treeFormP += (treeFormTarget - treeFormP) * 0.08;
     if (!treeReady) return;
     if (treeFormP < 0.001) {
-      for (var r = 2; r < PARTICLE_POOL; r++) moteLocked[r] = 0;
+      for (var r = 0; r < PARTICLE_POOL; r++) moteLocked[r] = 0;
+      // Restore the fixed convergence dot to the floor and both red motes to
+      // full size (the seed's size is re-applied upstream via seedReveal). This
+      // guarantees the closing convergence reads the exact canonical position.
+      positions[FINAL_RED_IDX * 3]     = FINAL_RED_X;
+      positions[FINAL_RED_IDX * 3 + 1] = FINAL_RED_Y;
+      positions[FINAL_RED_IDX * 3 + 2] = FINAL_RED_Z;
+      if (sizes[FINAL_RED_IDX] !== RED_MOTE_SIZE) {
+        sizes[FINAL_RED_IDX] = RED_MOTE_SIZE;
+        partGeo.attributes.aSize.needsUpdate = true;
+      }
       if (fillAlphaAttr && fillAlphaAttr.array[0] !== 0) {
         for (var rf = 0; rf < fillCount; rf++) fillAlphaAttr.array[rf] = 0;
         fillAlphaAttr.needsUpdate = true;
@@ -1610,7 +1628,8 @@
     var spinEnv = 4 * treeFormP * (1 - treeFormP);  // 0 at ends, 1 mid-transition
     treeSpinAngle += (TREE_SPIN_BASE + TREE_SPIN_BOOST * spinEnv) * dtSpin;
     var spinCos = Math.cos(treeSpinAngle), spinSin = Math.sin(treeSpinAngle);
-    for (var i = 2; i < PARTICLE_POOL; i++) {
+    var redSizeDirty = false;
+    for (var i = 0; i < PARTICLE_POOL; i++) {
       var w = tClamp01(treeFormP * 1.25 - moteFormSeed[i] * 0.25);
       if (w <= 0) { moteLocked[i] = 0; continue; }
       var xi = i * 3, yi = xi + 1, zi = xi + 2;
@@ -1621,6 +1640,12 @@
         moteCapture[zi] = positions[zi];
       }
       var e = w * w * (3 - 2 * w);
+      // Red motes (seed + convergence dot) shrink from god-size to mote size as
+      // they join the grove, so they read as part of the cloud, not apart.
+      if (isRedMote[i]) {
+        var rs = lerp(RED_MOTE_SIZE, BASE_MOTE_SIZE, e);
+        if (sizes[i] !== rs) { sizes[i] = rs; redSizeDirty = true; }
+      }
       var sway = Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.02 * e;
       var mt = moteNormIdx[i] * 3;
       var mlx = treeNorm[mt]     * S;   // grove-local x/z, before yaw
@@ -1634,6 +1659,7 @@
       var aTree = lerp(0.9 * e, 0.25, ff);
       if (aTree > alphas[i]) alphas[i] = aTree;
     }
+    if (redSizeDirty) partGeo.attributes.aSize.needsUpdate = true;
     // Fill dots FLY from the ambient field into the trees (same stagger
     // family as the motes) rather than fading in place.
     var fa = fillAlphaAttr.array;
