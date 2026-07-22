@@ -1368,11 +1368,11 @@
       camera.position.y = dollyY + camParY;
       camera.position.z = dollyZ;
       // LINEAR camera tilt across the entire scroll, not eased to the end.
-      // At scroll 0: gaze HORIZONTAL (lookAt y = camera y = 4.0).
+      // At scroll 0: gaze down into the low forest-floor mote layer.
       // At scroll 1: gaze ANGLED DOWN (lookAt y = -1.5).
       // Drives a slow, continuous downward pan over the whole journey.
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
-      var lookY = lerp(CAM_START.y, -1.5, rawProgress);
+      var lookY = lerp(0.0, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
 
       // Contact blast: TIME-based slow bloom, armed by scroll crossing the land
@@ -1640,7 +1640,7 @@
     // camera's center ray to the grove z-plane so the center holds through the
     // dolly/tilt and the zoom pull-back. camZ (with the bump) is computed above.
     var camY2 = lerp(CAM_START.y, CAM_END.y, lt2); if (camY2 < 0.5) camY2 = 0.5;
-    var lookY2 = lerp(CAM_START.y, -1.5, lt2);
+    var lookY2 = lerp(0.0, -1.5, lt2);
     var tRay = (TREE_CZ - camZ) / (-camZ);          // camZ in [3,10]; never 0
     var groveCenterY = camY2 + tRay * (lookY2 - camY2);
     var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y;
@@ -1773,11 +1773,32 @@
     previousConvergenceProgress = v;
     setWaveProgress(7, v);
   }
+  // The closing palette changes as one coordinated state. There is no color
+  // tween, so text and scene can never pass through a low-contrast midpoint.
+  function setFinalPalette(active) {
+    var canopyName = active ? "--gl-final-canopy" : "--gl-canopy";
+    var underName = active ? "--gl-final-understory" : "--gl-understory";
+    var shaftName = active ? "--gl-final-shaft" : "--gl-light-shaft";
+    var moteName = active ? "--gl-final-mote" : "--gl-mote";
+    var lineName = active ? "--gl-final-line" : "--gl-line";
+    var baseName = active ? "--gl-final-base" : "--gl-base";
+    var nextLine = readCssRgba(lineName);
+    uniforms.uCanopy.value.copy(readCssColor(canopyName));
+    uniforms.uUnderstory.value.copy(readCssColor(underName));
+    uniforms.uLightShaft.value.copy(readCssColor(shaftName));
+    uniforms.uLine.value.copy(nextLine.color);
+    uniforms.uLineAlpha.value = nextLine.alpha;
+    partMat.uniforms.uColor.value.copy(readCssColor(moteName));
+    arrowMat.uniforms.uColor.value.copy(readCssColor(moteName));
+    bgColor.copy(readCssColor(baseName));
+    renderer.setClearColor(bgColor, 1);
+  }
   window.bullfinchCanopy = {
     setProgress: setProgress,
     setLayerTint: setProgress,
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
+    setFinalPalette: setFinalPalette,
     setSeedReveal: setSeedReveal,
     // Tree grove formation (index-pointcloud variant): driven by the
     // DOM-anchored ScrollTriggers in index-pointcloud.html. 03 approaching

@@ -45,12 +45,18 @@
         --ink-soft: #425748;
         --ink-quiet: #607164;
         --rule: rgba(22, 37, 27, 0.18);
-        --gl-canopy: #d8d7a6;
-        --gl-understory: #11271b;
+        --gl-canopy: #e7dfc4;
+        --gl-understory: #aeb782;
         --gl-base: #e7dfc4;
-        --gl-mote: #f6f0d4;
-        --gl-line: rgba(30, 65, 43, 0.48);
+        --gl-mote: #23331f;
+        --gl-line: rgba(35, 51, 31, 0.4);
         --gl-light-shaft: #f6e7ad;
+        --gl-final-base: #11271b;
+        --gl-final-canopy: #183424;
+        --gl-final-understory: #07150e;
+        --gl-final-mote: #f4efd9;
+        --gl-final-line: rgba(244, 239, 217, 0.5);
+        --gl-final-shaft: #8fa777;
         --text-veil-bg-strong: 10%;
         --text-veil-bg-soft: 5%;
         --text-veil-blur: 9px;
@@ -58,10 +64,17 @@
         --text-veil-opacity: 0.44;
       }
       body.is-final-contrast {
+        --bg: #11271b;
+        --bg-elev: #183424;
         --ink: #f4efd9;
         --ink-soft: #d2d8c5;
         --ink-quiet: #a8b7a8;
         --rule: rgba(244, 239, 217, 0.2);
+      }
+      html, body,
+      .panel__verdict, .panel__eyebrow, .panel__numeric,
+      .panel__evidence p, .site-footer__line, .fullscreen-toggle {
+        transition: none !important;
       }
       [data-theme="dark"] .bullfinch-mark__dark { fill: var(--ink); }
       .site-nav a { color: var(--ink-quiet); }
@@ -207,27 +220,19 @@
       /* Full-width forest journey, preserving the original interactive parts. */
       .forest-photo {
         position: fixed;
-        inset: 0 0 auto auto;
-        z-index: 1;
-        width: 61vw;
+        inset: 0;
+        z-index: 2;
+        width: 100vw;
         height: 100dvh;
-        background: url("assets/sun-through-trees.jpg") center center / cover no-repeat;
-        clip-path: polygon(calc(var(--forest-edge, -35vw) + 100vh) 0, 100% 0, 100% 100%, var(--forest-edge, -35vw) 100%);
+        background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
+        clip-path: polygon(var(--forest-edge-top, 95vw) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, 95vw) - 100vh) 100%);
         filter: saturate(.82) contrast(.96) brightness(1.04);
         will-change: clip-path;
       }
       .canopy-canvas { z-index: 0; }
-      .text-veil { z-index: 2; }
+      .text-veil { z-index: 1; }
       #page { z-index: 3; }
       .hero { background: transparent; }
-      .hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        background: linear-gradient(90deg, rgba(231,223,196,.98) 0 42%, rgba(231,223,196,.92) 58%, rgba(231,223,196,0) 76%);
-        pointer-events: none;
-      }
       .hero__inner { width: calc(100vw - clamp(48px, 8vw, 144px)); max-width: none; }
       .hero__title { width: 100%; max-width: none; }
       .hero-is { min-height: clamp(174px, 26vw, 365px); }
@@ -254,20 +259,24 @@
         transition: opacity 440ms ease, transform 560ms cubic-bezier(.2,.75,.18,1);
       }
       .hero-is__term.is-active { opacity: 1; transform: translateY(0); }
-      .hero__subtitle { max-width: 72vw; font-size: clamp(16px, 1.55vw, 25px); color: var(--ink); }
+      .hero__subtitle { max-width: 68vw; font-size: clamp(16px, 1.55vw, 25px); color: var(--ink); }
 
       .corner-logo-sequence {
         position: fixed;
         top: 15px;
         right: clamp(24px, 4vw, 64px);
         z-index: 61;
-        width: 104px;
-        height: 104px;
+        width: 92px;
+        height: 92px;
         pointer-events: none;
         transition: width 900ms cubic-bezier(.2,.75,.18,1), height 900ms cubic-bezier(.2,.75,.18,1);
       }
-      .corner-logo-sequence.is-settled { width: 58px; height: 58px; }
-      .corner-logo-sequence canvas { width: 100%; height: 100%; }
+      .corner-logo-sequence.is-settled { width: 52px; height: 52px; }
+      .corner-logo-sequence canvas,
+      .corner-logo-static { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 180ms linear; }
+      .corner-logo-static { opacity: 0; }
+      .corner-logo-sequence.is-settled canvas { opacity: 0; }
+      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; }
       .site-nav { padding-right: clamp(116px, 11vw, 170px); }
       .site-nav__brand { visibility: hidden; }
       .corner-wordmark { display: none; }
@@ -279,8 +288,8 @@
       #problem .panel__evidence p { text-align: justify; text-align-last: left; }
 
       #product.panel--media {
-        grid-template-columns: minmax(260px, .92fr) minmax(300px, 1.15fr) minmax(285px, .93fr);
-        gap: clamp(20px, 3vw, 52px);
+        grid-template-columns: minmax(260px, 1fr) minmax(340px, 1.15fr) minmax(260px, 1fr);
+        gap: clamp(26px, 3.2vw, 58px);
       }
       #product .panel__inner { grid-column: 2; max-width: none; padding-top: 0; }
       #product .panel__verdict { font-size: clamp(38px, 4.2vw, 70px); }
@@ -288,43 +297,50 @@
       #product .panel__evidence p { padding: 9px 0; border-top: 1px solid var(--rule); text-align: justify; text-align-last: left; }
       #product .panel__evidence p:first-child { border-top: 0; }
       #product .panel__numeric { margin-top: 18px; }
-      #product .panel__stat { grid-column: 3; justify-self: end; flex-direction: column; align-items: flex-start; gap: 18px; }
-      #product .stat-grid { --dot: clamp(8px, .78vw, 12px); }
+      #product .panel__stat { grid-column: 3; justify-self: end; flex-direction: column; align-items: flex-start; gap: 16px; width: 100%; }
+      #product .stat-grid { --dot: clamp(9px, .82vw, 13px); }
       #product .stat-read { min-width: 160px; }
-      .case-fixed-layer.panel__model { width: min(29vw, 430px); max-width: 30vw; left: var(--pad-x); }
+      .case-fixed-layer.panel__model {
+        width: min(28vw, 440px);
+        max-width: 29vw;
+        left: var(--pad-x);
+        top: 50%;
+        transform: translateY(-50%);
+      }
 
       #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
       #opportunity .tree-readouts {
         position: absolute;
         z-index: 4;
-        top: clamp(64px, 9vh, 102px);
-        left: 18vw;
-        width: 64vw;
+        top: clamp(54px, 7vh, 78px);
+        left: 16vw;
+        width: 68vw;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        font: 500 clamp(10px, .72vw, 12px)/1 var(--font-mono);
-        letter-spacing: .13em;
-        text-transform: uppercase;
+        gap: 4vw;
         color: var(--ink-soft);
         text-align: center;
       }
+      .tree-readout { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: var(--ink); }
+      .tree-readout__latin { font: italic 400 clamp(10px, .78vw, 13px)/1.1 var(--font-body); }
+      .tree-readout__metric { font: 500 clamp(8px, .59vw, 10px)/1.25 var(--font-mono); letter-spacing: .03em; }
       #opportunity .panel__inner {
         position: absolute;
         z-index: 5;
         left: var(--pad-x);
         right: var(--pad-x);
-        bottom: 18px;
+        bottom: 14px;
         width: auto;
         max-width: none;
         height: auto;
-        padding: 14px 0 0;
+        padding: 0;
         justify-content: flex-end;
-        background: color-mix(in srgb, var(--bg) 88%, transparent);
-        -webkit-backdrop-filter: blur(7px);
-        backdrop-filter: blur(7px);
-        border-top: 1px solid var(--rule);
+        background: transparent;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
       }
-      .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 0 0 10px; }
+      .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
       .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
       #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
       .audience-grid {
@@ -333,12 +349,12 @@
         border-top: 1px solid var(--rule);
         border-bottom: 1px solid var(--rule);
       }
-      .audience-item { min-height: 72px; padding: 9px 13px 10px; border-left: 1px solid var(--rule); }
+      .audience-item { min-height: 66px; padding: 8px 13px 9px; border-left: 1px solid var(--rule); }
       .audience-item:first-child { border-left: 0; padding-left: 0; }
       .audience-item h3 { margin: 0 0 6px; font-size: clamp(12px, .95vw, 16px); font-weight: 600; line-height: 1.08; }
       .audience-item p { margin: 0; font-size: clamp(9px, .68vw, 12px); line-height: 1.25; text-align: justify; text-align-last: left; }
       .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-bottom: 1px solid var(--rule); }
-      .trust-strip div { height: 47px; padding: 7px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
+      .trust-strip div { height: 44px; padding: 7px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
       .trust-strip div:first-child { border-left: 0; }
       .trust-strip img { max-width: 100%; max-height: 28px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
       body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
@@ -346,13 +362,13 @@
       .closing { padding-top: clamp(54px, 8vh, 86px); }
       .closing__inner { max-width: none; gap: clamp(15px, 2.8vh, 28px); }
       .closing__logo { height: clamp(46px, 6vh, 62px); }
-      .closing__title { max-width: 14ch; font-size: clamp(52px, 7vw, 108px); line-height: .9; }
+      .closing__title { max-width: none; font-size: clamp(50px, 6.6vw, 102px); line-height: .9; text-transform: uppercase; }
+      .closing__line { white-space: nowrap; }
       .closing__actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
       .closing__actions a { justify-content: space-between; color: var(--ink); }
       .site-footer { padding-top: 14px; }
 
       @media (max-width: 900px) {
-        .forest-photo { width: 72vw; }
         .hero-is__cycle { white-space: normal; height: 2.1em; max-width: 14ch; }
         #problem .panel__evidence { grid-template-columns: 1fr; }
         #product.panel--media { grid-template-columns: 1fr 1fr; }
@@ -373,6 +389,10 @@
     <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
     <div class="corner-logo-sequence" id="corner-logo-sequence-wrap" aria-hidden="true">
       <canvas id="corner-logo-sequence" width="360" height="360"></canvas>
+      <svg class="corner-logo-static bullfinch-mark" viewBox="50 35 100 70">
+        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+      </svg>
     </div>
 
     <header class="site-nav" aria-label="Website navigation">
@@ -462,10 +482,28 @@
         </article>
 
         <article class="panel" id="opportunity" data-panel="3">
-          <div class="tree-readouts" aria-hidden="true">
-            <span>TREE 01 / CONIFER</span>
-            <span>TREE 02 / CONIFER</span>
-            <span>TREE 03 / CONIFER</span>
+          <div class="tree-readouts" aria-label="Tree identification results">
+            <div class="tree-readout">
+              <span class="tree-readout__common">Douglas Fir</span>
+              <span class="tree-readout__latin">Pseudotsuga menziesii</span>
+              <span class="tree-readout__metric">Confidence: 0.876</span>
+              <span class="tree-readout__metric">Genus Score: 0.876</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
+            <div class="tree-readout">
+              <span class="tree-readout__common">Norway spruce</span>
+              <span class="tree-readout__latin">Picea abies</span>
+              <span class="tree-readout__metric">Confidence: 0.823</span>
+              <span class="tree-readout__metric">Genus Score: 0.823</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
+            <div class="tree-readout">
+              <span class="tree-readout__common">Balsam Poplar</span>
+              <span class="tree-readout__latin">Populus balsamifera</span>
+              <span class="tree-readout__metric">Confidence: 0.777</span>
+              <span class="tree-readout__metric">Genus Score: 0.777</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
           </div>
           <div class="panel__inner">
             <div class="ground-heading">
@@ -610,16 +648,23 @@
               scrub: true,
               onUpdate: function (self) {
                 var p = self.progress;
-                var edge = (-window.innerWidth * 0.35) + p * (window.innerWidth * 0.96);
-                document.documentElement.style.setProperty("--forest-edge", edge.toFixed(2) + "px");
+                var start = window.innerWidth * 0.95;
+                var edgeTop = start + p * (window.innerWidth + window.innerHeight - start);
+                document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
               },
             });
             ScrollTrigger.create({
               trigger: "#closing",
-              start: "top 64%",
+              start: "top bottom",
               end: "bottom bottom",
-              onEnter: function () { document.body.classList.add("is-final-contrast"); },
-              onLeaveBack: function () { document.body.classList.remove("is-final-contrast"); },
+              onEnter: function () {
+                document.body.classList.add("is-final-contrast");
+                if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPalette) window.bullfinchCanopy.setFinalPalette(true);
+              },
+              onLeaveBack: function () {
+                document.body.classList.remove("is-final-contrast");
+                if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPalette) window.bullfinchCanopy.setFinalPalette(false);
+              },
             });
           }
         });
