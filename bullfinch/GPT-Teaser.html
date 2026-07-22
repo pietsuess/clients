@@ -225,7 +225,7 @@
         width: 100vw;
         height: 100dvh;
         background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
-        clip-path: polygon(var(--forest-edge-top, 95vw) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, 95vw) - 100vh) 100%);
+        clip-path: polygon(var(--forest-edge-top, 45vw) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, 45vw) + 100vh) 100%);
         filter: saturate(.82) contrast(.96) brightness(1.04);
         will-change: clip-path;
       }
@@ -233,22 +233,30 @@
       .text-veil { z-index: 1; }
       #page { z-index: 3; }
       .hero { background: transparent; }
-      .hero__inner { width: calc(100vw - clamp(48px, 8vw, 144px)); max-width: none; }
+      .hero__inner {
+        --hero-logo-size: clamp(54px, 5.1vw, 78px);
+        --hero-logo-gap: clamp(14px, 1.8vw, 28px);
+        --hero-copy-inset: calc(var(--hero-logo-size) + var(--hero-logo-gap));
+        width: calc(100vw - clamp(48px, 8vw, 144px));
+        max-width: none;
+      }
       .hero__title { width: 100%; max-width: none; }
-      .hero-is { min-height: clamp(174px, 26vw, 365px); }
+      .hero-is { min-height: 0; }
+      .hero-brand-row { display: flex; align-items: center; gap: var(--hero-logo-gap); }
       .hero-is__label,
       .hero-is__prefix,
       .hero-is__cycle { display: block; }
-      .hero-is__label { font-size: clamp(64px, 10.2vw, 166px); letter-spacing: -.067em; line-height: .82; }
-      .hero-is__prefix { margin-top: .12em; font-size: clamp(27px, 4.35vw, 70px); letter-spacing: -.045em; line-height: .9; }
+      .hero-is__label { font-size: clamp(50px, 7.2vw, 112px); letter-spacing: -.055em; line-height: .86; }
+      .hero-is__prefix { margin-top: .16em; margin-left: var(--hero-copy-inset); font-size: clamp(25px, 3.8vw, 60px); letter-spacing: -.04em; line-height: .92; }
       .hero-is__cycle {
         position: relative;
         height: 1.05em;
         margin-top: .05em;
-        font-size: clamp(24px, 4.05vw, 65px);
+        font-size: clamp(25px, 3.8vw, 60px);
         letter-spacing: -.042em;
         line-height: 1;
         white-space: nowrap;
+        margin-left: var(--hero-copy-inset);
       }
       .hero-is__term {
         position: absolute;
@@ -257,38 +265,81 @@
         opacity: 0;
         transform: translateY(.45em);
         transition: opacity 440ms ease, transform 560ms cubic-bezier(.2,.75,.18,1);
+        color: var(--accent);
       }
       .hero-is__term.is-active { opacity: 1; transform: translateY(0); }
-      .hero__subtitle { max-width: 68vw; font-size: clamp(16px, 1.55vw, 25px); color: var(--ink); }
+      .hero__subtitle {
+        max-width: calc(50vw - var(--hero-copy-inset));
+        margin-left: var(--hero-copy-inset);
+        margin-top: clamp(8px, 1.2vh, 14px);
+        font-size: clamp(16px, 1.45vw, 23px);
+        color: var(--ink);
+        text-align: justify;
+        text-align-last: left;
+      }
 
       .corner-logo-sequence {
-        position: fixed;
-        top: 15px;
-        right: clamp(24px, 4vw, 64px);
-        z-index: 61;
-        width: 92px;
-        height: 92px;
+        position: relative;
+        z-index: 1;
+        width: var(--hero-logo-size);
+        height: var(--hero-logo-size);
+        flex: 0 0 auto;
         pointer-events: none;
-        transition: width 900ms cubic-bezier(.2,.75,.18,1), height 900ms cubic-bezier(.2,.75,.18,1);
       }
-      .corner-logo-sequence.is-settled { width: 52px; height: 52px; }
       .corner-logo-sequence canvas,
-      .corner-logo-static { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 180ms linear; }
+      .corner-logo-static {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transition: opacity 180ms linear, transform 900ms cubic-bezier(.2,.75,.18,1);
+        transform: scale(1.28);
+      }
       .corner-logo-static { opacity: 0; }
-      .corner-logo-sequence.is-settled canvas { opacity: 0; }
-      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; }
-      .site-nav { padding-right: clamp(116px, 11vw, 170px); }
+      .corner-logo-sequence.is-settled canvas { opacity: 0; transform: scale(.74); }
+      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: scale(.74); }
+      .site-nav {
+        padding-right: var(--pad-x);
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
       .site-nav__brand { visibility: hidden; }
       .corner-wordmark { display: none; }
 
-      #problem.panel--media { grid-template-columns: 1fr; }
-      #problem .panel__inner { max-width: none; }
-      #problem .panel__verdict { max-width: 16ch; font-size: clamp(45px, 6.3vw, 96px); }
+      #problem.panel--media {
+        grid-template-columns: minmax(0, 1.35fr) minmax(340px, .65fr);
+        gap: clamp(30px, 4vw, 74px);
+      }
+      #problem .panel__inner { grid-column: 1; max-width: none; }
+      #problem .panel__verdict { max-width: 16ch; margin-left: 0; font-size: clamp(45px, 6.3vw, 96px); }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
       #problem .panel__evidence p { text-align: justify; text-align-last: left; }
+      #problem .panel__stat {
+        grid-column: 2;
+        justify-self: stretch;
+        align-self: center;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        min-height: 180px;
+      }
+      #problem .stat-grid { display: none; }
+      #problem .stat-read { min-width: 0; }
+      #problem .stat-num { align-items: baseline; gap: clamp(5px, .6vw, 10px); }
+      #problem .stat-less,
+      #problem .stat-readout {
+        font-family: var(--font-mono);
+        font-size: clamp(54px, 7.4vw, 118px);
+        font-weight: 500;
+        line-height: .8;
+        letter-spacing: -.08em;
+        color: var(--ink);
+      }
+      #problem .stat-unit { font-size: clamp(25px, 3vw, 48px); }
 
       #product.panel--media {
-        grid-template-columns: minmax(260px, 1fr) minmax(340px, 1.15fr) minmax(260px, 1fr);
+        grid-template-columns: minmax(420px, .9fr) minmax(420px, 1.1fr);
         gap: clamp(26px, 3.2vw, 58px);
       }
       #product .panel__inner { grid-column: 2; max-width: none; padding-top: 0; }
@@ -297,16 +348,15 @@
       #product .panel__evidence p { padding: 9px 0; border-top: 1px solid var(--rule); text-align: justify; text-align-last: left; }
       #product .panel__evidence p:first-child { border-top: 0; }
       #product .panel__numeric { margin-top: 18px; }
-      #product .panel__stat { grid-column: 3; justify-self: end; flex-direction: column; align-items: flex-start; gap: 16px; width: 100%; }
-      #product .stat-grid { --dot: clamp(9px, .82vw, 13px); }
-      #product .stat-read { min-width: 160px; }
       .case-fixed-layer.panel__model {
-        width: min(28vw, 440px);
-        max-width: 29vw;
+        width: min(42vw, 760px);
+        max-width: 44vw;
+        height: 100dvh;
         left: var(--pad-x);
-        top: 50%;
-        transform: translateY(-50%);
+        top: 0;
+        transform: none;
       }
+      .case-fixed-layer .panel__model-canvas { width: 100%; height: 100%; }
 
       #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
       #opportunity .tree-readouts {
@@ -364,8 +414,8 @@
       .closing__logo { height: clamp(46px, 6vh, 62px); }
       .closing__title { max-width: none; font-size: clamp(50px, 6.6vw, 102px); line-height: .9; text-transform: uppercase; }
       .closing__line { white-space: nowrap; }
-      .closing__actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
-      .closing__actions a { justify-content: space-between; color: var(--ink); }
+      .closing__actions { display: flex; width: auto; justify-content: center; gap: clamp(22px, 3vw, 48px); }
+      .closing__actions a { justify-content: center; color: var(--ink); }
       .site-footer { padding-top: 14px; }
 
       @media (max-width: 900px) {
@@ -373,7 +423,7 @@
         #problem .panel__evidence { grid-template-columns: 1fr; }
         #product.panel--media { grid-template-columns: 1fr 1fr; }
         #product .panel__inner { grid-column: 2; }
-        #product .panel__stat { display: none; }
+        #problem.panel--media { grid-template-columns: 1fr 1fr; }
         .audience-grid { grid-template-columns: repeat(5, 210px); overflow-x: auto; }
         .trust-strip { grid-template-columns: repeat(6, 150px); overflow-x: auto; }
       }
@@ -387,14 +437,6 @@
       <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
     </div>
     <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
-    <div class="corner-logo-sequence" id="corner-logo-sequence-wrap" aria-hidden="true">
-      <canvas id="corner-logo-sequence" width="360" height="360"></canvas>
-      <svg class="corner-logo-static bullfinch-mark" viewBox="50 35 100 70">
-        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
-        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
-      </svg>
-    </div>
-
     <header class="site-nav" aria-label="Website navigation">
       <a class="site-nav__brand" href="./" data-restart-splash data-nav-label="Bullfinch Earth" aria-label="Restart Bullfinch Earth">
         <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
@@ -422,7 +464,16 @@
       <section class="hero" aria-label="Hero">
         <div class="hero__inner">
           <h1 class="hero__title hero-is">
-            <span class="hero-is__label">BULLFINCH IS</span>
+            <span class="hero-brand-row">
+              <span class="corner-logo-sequence" id="corner-logo-sequence-wrap" aria-hidden="true">
+                <canvas id="corner-logo-sequence" width="360" height="360"></canvas>
+                <svg class="corner-logo-static bullfinch-mark" viewBox="50 35 100 70">
+                  <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+                  <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+                </svg>
+              </span>
+              <span class="hero-is__label">BULLFINCH IS</span>
+            </span>
             <span class="hero-is__prefix">GROUND TRUTH FOR</span>
             <span class="hero-is__cycle" aria-label="Forestry, Wildfire Risk and Mitigation, Carbon Projects, ESG, Invasive Species Detection, Biodiversity, and Natural Asset Valuation">
               <span class="hero-is__term is-active">FORESTRY</span>
@@ -455,6 +506,16 @@
             </div>
             <p class="panel__numeric">ONE FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
           </div>
+          <div class="panel__stat panel__stat--problem" aria-label="Today, manual forestry measures data for less than 1% of trees">
+            <div class="stat-grid" id="statGrid" aria-hidden="true"></div>
+            <div class="stat-read">
+              <div class="stat-label">
+                <span class="stat-line" id="statToday">TODAY</span>
+              </div>
+              <p class="stat-num"><span class="stat-less">&lt;</span><span class="stat-readout" id="statReadout" aria-hidden="true">1</span><span class="stat-unit">%</span></p>
+              <p class="stat-rest">of trees measured</p>
+            </div>
+          </div>
         </article>
 
         <article class="panel panel--media" id="product" data-panel="2">
@@ -467,17 +528,6 @@
               <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
             </div>
             <p class="panel__numeric">WEAR &middot; WALK &middot; DATA</p>
-          </div>
-          <div class="panel__stat panel__stat--product" aria-label="Today, manual forestry measures data for only 1% of trees">
-            <div class="stat-grid" id="statGrid" aria-hidden="true"></div>
-            <div class="stat-read">
-              <div class="stat-label">
-                <span class="stat-line" id="statToday">TODAY</span>
-                <span class="stat-line" id="statBull">BULLFINCH</span>
-              </div>
-              <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
-              <p class="stat-rest">of trees measured</p>
-            </div>
           </div>
         </article>
 
@@ -549,7 +599,7 @@
 
         <footer class="site-footer" id="site-footer">
           <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
-          <p class="site-footer__line">BULLFINCH EARTH<br />NATURE FROM THE GROUND UP</p>
+          <p class="site-footer__line">BULLFINCH EARTH<br />The FICO of Forests</p>
           <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m6 15 6-6 6 6" />
@@ -582,11 +632,11 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-gpt-teaser.js?v=forest-journey-2"></script>
-    <script src="case-animation.js?v=v4-4"></script>
+    <script src="scene-gpt-teaser.js?v=forest-journey-4"></script>
+    <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot.js?v=v4-5"></script>
-    <script src="stat-field-gpt.js?v=forest-journey-2"></script>
+    <script src="swot.js?v=forest-journey-4"></script>
+    <script src="stat-field-gpt.js?v=forest-journey-4"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -644,12 +694,13 @@
             ScrollTrigger.create({
               trigger: ".hero",
               start: "top top",
-              end: "bottom top",
+              end: function () { return "+=" + Math.round(window.innerHeight * 1.75); },
               scrub: true,
+              invalidateOnRefresh: true,
               onUpdate: function (self) {
                 var p = self.progress;
-                var start = window.innerWidth * 0.95;
-                var edgeTop = start + p * (window.innerWidth + window.innerHeight - start);
+                var start = window.innerWidth * 0.45;
+                var edgeTop = start + p * (window.innerWidth - start);
                 document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
               },
             });
@@ -674,6 +725,7 @@
       // One continuous field: low motes, bottom-up grove, then final field.
       window.addEventListener("load", function () {
         if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
+        var s01 = document.getElementById("problem");
         var s02 = document.getElementById("product");
         var s03 = document.getElementById("opportunity");
         var closing = document.getElementById("closing");
@@ -694,13 +746,40 @@
         }
         function at(pt, f) { return pt.start + (pt.end - pt.start) * f; }
 
-        var p2 = pinFor(s02), p3 = pinFor(s03);
-        if (!p3) return;
+        var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
+        if (!p1 || !p2 || !p3) return;
+
+        // Opening forest-floor motes resolve into the <1% grid while section
+        // 01 arrives. The same trigger reverses the grid back into the ground.
+        ScrollTrigger.create({
+          trigger: s01,
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+          onUpdate: function (self) {
+            if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(smootherstep(self.progress));
+          },
+        });
+
+        // Leaving the inventory section releases the grid into an open cloud.
+        // Wave 1 draws only after that cloud has begun to open.
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return at(p1, 0.68); },
+          end: function () { return at(p2, 0.18); },
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) {
+            var p = smootherstep(self.progress);
+            if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(1 - p);
+            if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
+          },
+        });
 
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return p2 ? at(p2, 0.30) : at(p3, 0); },
-          end:   function () { return at(p3, 0.24); },
+          start: function () { return at(p2, 0.62); },
+          end:   function () { return at(p3, 0.18); },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
@@ -711,7 +790,7 @@
 
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return p2 ? at(p2, 0.30) : at(p3, 0); },
+          start: function () { return at(p2, 0.58); },
           end:   function () { return at(p3, 0.88); },
           onToggle: function (self) {
             document.body.classList.toggle("pc-bare-veil", self.isActive);
@@ -720,7 +799,7 @@
 
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p3, 0.72); },
+          start: function () { return at(p3, 0.74); },
           endTrigger: closing,
           end: "top 44%",
           scrub: true,

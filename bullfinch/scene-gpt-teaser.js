@@ -111,7 +111,9 @@
     uAccent:       { value: readCssColor("--gl-accent") },
     uLayerTint:    { value: 0 },
     uShaftFade:    { value: 1 },
-    uMoteDensity:  { value: 0 },
+    // Keep a visible forest-floor layer on the opening frame. The remaining
+    // density still follows scroll directly.
+    uMoteDensity:  { value: 0.08 },
     uConnect:      { value: 0 },
   };
 
@@ -273,6 +275,12 @@
   // the original full-volume coordinates so the closing can return to that
   // field before the existing convergence completes the journey.
   var starFieldHome = new Float32Array(PARTICLE_POOL * 3);
+  var groundFieldHome = new Float32Array(PARTICLE_POOL * 3);
+  var statGridHome = new Float32Array(PARTICLE_POOL * 3);
+  var statSlotByMote = new Int16Array(PARTICLE_POOL);
+  statSlotByMote.fill(-1);
+  var openFieldP = 0;
+  var statFormP = 0;
 
   // Horizontal field is scaled to the viewport aspect so the network stays
   // within screen bounds on ANY device. The camera's vertical FOV is constant,
@@ -283,14 +291,17 @@
   var FIELD_HALF_X = Math.max(2.2, Math.min(6.5, 4.2 * viewAspect));
   for (var i = 0; i < PARTICLE_POOL; i++) {
     var fieldX = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
-    var fieldY = (Math.random() - 0.5) * 12;
-    var fieldZ = (Math.random() - 0.5) * 10 - 1.0;
+    var fieldY = (Math.random() - 0.5) * 5.0 - 0.2;
+    var fieldZ = (Math.random() - 0.5) * 5.0;
     starFieldHome[i * 3]     = fieldX;
     starFieldHome[i * 3 + 1] = fieldY;
     starFieldHome[i * 3 + 2] = fieldZ;
-    positions[i * 3]     = fieldX;
-    positions[i * 3 + 1] = -3.9 + Math.random() * 2.1;
-    positions[i * 3 + 2] = -1.0 + Math.random() * 7.0;
+    groundFieldHome[i * 3]     = fieldX;
+    groundFieldHome[i * 3 + 1] = -2.9 + Math.random() * 0.55;
+    groundFieldHome[i * 3 + 2] = fieldZ;
+    positions[i * 3]     = groundFieldHome[i * 3];
+    positions[i * 3 + 1] = groundFieldHome[i * 3 + 1];
+    positions[i * 3 + 2] = groundFieldHome[i * 3 + 2];
     swayPhase[i] = Math.random() * Math.PI * 2;
     swayRate[i]  = 0.2 + Math.random() * 0.35;
     fallSpeed[i] = 0.06 + Math.random() * 0.10;
@@ -304,18 +315,41 @@
     isRedMote[i] = 0;
     sizes[i] = BASE_MOTE_SIZE;
   }
+  // One hundred scene motes form the <1% field. Index 0 occupies the centre
+  // slot and remains the single red measured tree; index 1 is reserved for the
+  // closing convergence point and is not part of this grid.
+  var statMoteIndices = [0];
+  for (var sm = 2; sm <= 100 && sm < PARTICLE_POOL; sm++) statMoteIndices.push(sm);
+  var statSlots = [];
+  for (var ss = 0; ss < 100; ss++) if (ss !== 55) statSlots.push(ss);
+  statSlotByMote[0] = 55;
+  for (var si = 1; si < statMoteIndices.length; si++) statSlotByMote[statMoteIndices[si]] = statSlots[si - 1];
+  for (var sg = 0; sg < statMoteIndices.length; sg++) {
+    var moteIndex = statMoteIndices[sg];
+    var slot = statSlotByMote[moteIndex];
+    var col = slot % 10;
+    var row = Math.floor(slot / 10);
+    statGridHome[moteIndex * 3] = 0.8 + col * 0.34;
+    statGridHome[moteIndex * 3 + 1] = 1.2 - row * 0.34;
+    statGridHome[moteIndex * 3 + 2] = 0.0;
+  }
   // index 0 is the bullfinch: always on, 2.4x size, drifts slower
   isRedMote[0]   = 1.0;
   sizes[0]       = RED_MOTE_SIZE;
   fallSpeed[0]   = 0.025;
   swayRate[0]    = 0.10;
   thresholds[0]  = 0.0;
-  // Park the seed in the hero headline area, around the second line of type.
-  // The first line wave does not begin until after the opening data-stack
-  // panel has passed.
-  positions[0]   = 0.0;
-  positions[1]   = 3.45;
-  positions[2]   = 4.5;
+  // Keep the seed inside the visible forest-floor field. It expands into the
+  // open cloud with every other mote instead of drifting above the viewport.
+  groundFieldHome[0] = 0.0;
+  groundFieldHome[1] = -2.62;
+  groundFieldHome[2] = 0.8;
+  starFieldHome[0] = 0.0;
+  starFieldHome[1] = -0.6;
+  starFieldHome[2] = 0.4;
+  positions[0] = groundFieldHome[0];
+  positions[1] = groundFieldHome[1];
+  positions[2] = groundFieldHome[2];
 
   // aGlow: per-mote electricity. 1.0 = full rim-glow, decays to 0 over 1.2s
   // after a mote becomes "connected" in the cascade. The seed mote sits at
@@ -587,7 +621,7 @@
   //   y = -2.5  (forest floor — below the canopy plane, revealed by tilt-down)
   //   z = 0.0   (on the focal axis the camera looks down through)
   var FINAL_RED_X = 0.0;
-  var FINAL_RED_Y = -2.5;
+  var FINAL_RED_Y = -1.5;
   var FINAL_RED_Z = 0.0;
   positions[FINAL_RED_IDX * 3]     = FINAL_RED_X;
   positions[FINAL_RED_IDX * 3 + 1] = FINAL_RED_Y;
@@ -906,6 +940,7 @@
       var arrowVisible = wave === 7
         ? (strokeProgress > 0.001 ? 0.95 : 0.0)
         : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
+      arrowVisible *= (1 - statFormP) * (wave === 7 ? 1 : (1 - treeFormP));
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -937,7 +972,8 @@
       // length, avoiding the previous fade-in behavior.
       var finalFadeForLines = smoothstep(0.88, 1.0, waveProgress[7] || 0);
       var lineFloor = wave === 7 ? 1.0 : lerp(1.0, 0.25, finalFadeForLines);
-      var visible = strokeProgress > 0.001 ? lineFloor : 0.0;
+      var treeLineGate = wave === 7 ? 1.0 : (1 - treeFormP);
+      var visible = strokeProgress > 0.001 ? lineFloor * (1 - statFormP) * treeLineGate : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
     }
@@ -1258,33 +1294,31 @@
       lastElapsed = elapsed;
       uniforms.uTime.value = elapsed;
 
-      // Motes drift (gentle, downward). No convergence math — lines
-      // simply track wherever the motes go.
+      // The opening mote ground is spatially driven by scroll, not time. This
+      // makes every position fully reversible when scroll direction changes.
       var density = uniforms.uMoteDensity.value;
-      var fallScale = lerp(1.0, 0.55, density);
-      // Connected (network) dots have fallSpeed 0, so they hold their shape and
-      // the convergence ring stays put; only ambient motes drift past.
       var finalFade = smoothstep(0.88, 1.0, waveProgress[7] || 0);
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
         var yi = i * 3 + 1;
-        // Index 1 = final red dot. ABSOLUTELY STATIONARY in world space — the
-        // camera dollies/tilts down to arrive at it, which gives the focal
-        // point real depth and parallax. Always on; it simply starts below the
-        // gaze and is revealed as the camera lands. Skip all movement.
+        // Index 1 is reserved for the closing convergence point. Keep it out
+        // of the opening and middle sections; the final line pass reveals it.
         if (i === 1) {
-          alphas[i] = 1.0;
+          alphas[i] = smoothstep(0.0, 0.15, waveProgress[7] || 0);
           continue;
         }
-        positions[yi] -= fallSpeed[i] * 0.0020 * fallScale;
-        if (i === 0) {
-          positions[xi] += Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.0008;
-        } else {
-          positions[xi] += Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.0010;
-        }
-        if (positions[yi] < -7.0) {
-          positions[yi] = 7.0;
-          positions[xi] = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
+        var scrollPhase = density * Math.PI * 2;
+        var groundX = groundFieldHome[xi] + Math.sin(scrollPhase + swayPhase[i]) * density * 0.08;
+        var groundY = groundFieldHome[yi] + Math.cos(scrollPhase * 0.7 + swayPhase[i]) * density * 0.035;
+        var groundZ = groundFieldHome[xi + 2] - density * 0.45;
+        positions[xi] = lerp(groundX, starFieldHome[xi], openFieldP);
+        positions[yi] = lerp(groundY, starFieldHome[yi], openFieldP);
+        positions[xi + 2] = lerp(groundZ, starFieldHome[xi + 2], openFieldP);
+        var statSlot = statSlotByMote[i];
+        if (statSlot >= 0 && statFormP > 0) {
+          positions[xi] = lerp(positions[xi], statGridHome[xi], statFormP);
+          positions[yi] = lerp(positions[yi], statGridHome[yi], statFormP);
+          positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statFormP);
         }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
@@ -1298,6 +1332,10 @@
           alphas[i] = 1.0;
         } else {
           alphas[i] = lerp(0.9 * gate, 0.25, finalFade);
+        }
+        if (statFormP > 0) {
+          if (statSlot >= 0) alphas[i] = Math.max(alphas[i], 0.92 * statFormP);
+          else alphas[i] *= 1 - statFormP;
         }
         // Decay rim-glow at 1/1.2s. Glow values are set to 1.0 by the line
         // latch logic when a child mote first gets connected.
@@ -1314,7 +1352,7 @@
 
       // Seed reveal: scale the first red dot from 0 -> full (RED_MOTE_SIZE).
       // aSize is shared with redGeo, so one needsUpdate refreshes both draws.
-      var seedTargetSize = RED_MOTE_SIZE * seedReveal;
+      var seedTargetSize = lerp(RED_MOTE_SIZE * seedReveal, BASE_MOTE_SIZE * 1.1, statFormP);
       if (sizes[0] !== seedTargetSize) {
         sizes[0] = seedTargetSize;
         partGeo.attributes.aSize.needsUpdate = true;
@@ -1372,7 +1410,7 @@
       // At scroll 1: gaze ANGLED DOWN (lookAt y = -1.5).
       // Drives a slow, continuous downward pan over the whole journey.
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
-      var lookY = lerp(0.0, -1.5, rawProgress);
+      var lookY = lerp(-1.0, -1.5, rawProgress);
       camera.lookAt(0, lookY, 0);
 
       // Contact blast: TIME-based slow bloom, armed by scroll crossing the land
@@ -1445,7 +1483,7 @@
   var TREE_CENTER_OFFSET_Y = 0; // nudge grove off screen-vertical-center (+ = up)
   var TREE_CZ = -1.5;
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
-  var treeFormP = 0;            // per-frame smoothed
+  var treeFormP = 0;            // exact scroll-derived formation progress
   // Grove yaw: a gentle constant turn while the grove stands, ramping up
   // through the assembly + dispersal motion (like the standalone tester's
   // auto-orbit) and easing back to the slow turn once formed / dispersed.
@@ -1558,10 +1596,10 @@
         fillNorm[fi * 3 + 1] = treeNorm[si + 1];
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
         fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
-        // Fly in from the same low forest-floor layer as the ambient motes.
+        // Fly in from the open cloud that precedes the tree-identification stage.
         fillStartArr[fi * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
-        fillStartArr[fi * 3 + 1] = -3.9 + Math.random() * 2.1;
-        fillStartArr[fi * 3 + 2] = -1.0 + Math.random() * 7.0;
+        fillStartArr[fi * 3 + 1] = -2.7 + Math.random() * 5.0;
+        fillStartArr[fi * 3 + 2] = -2.5 + Math.random() * 5.0;
         fillPos[fi * 3]     = fillStartArr[fi * 3];
         fillPos[fi * 3 + 1] = fillStartArr[fi * 3 + 1];
         fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
@@ -1601,7 +1639,7 @@
   // Runs every frame from the animate loop, after the organic mote update
   // and before position buffers upload / lines read them.
   function updateTreeFormation(elapsed) {
-    treeFormP += (treeFormTarget - treeFormP) * 0.08;
+    treeFormP = treeFormTarget;
     partMat.uniforms.uTreeForm.value = treeFormP;  // height gradient shows only while formed
     if (!treeReady) return;
     if (treeFormP < 0.001) {
@@ -1640,7 +1678,7 @@
     // camera's center ray to the grove z-plane so the center holds through the
     // dolly/tilt and the zoom pull-back. camZ (with the bump) is computed above.
     var camY2 = lerp(CAM_START.y, CAM_END.y, lt2); if (camY2 < 0.5) camY2 = 0.5;
-    var lookY2 = lerp(0.0, -1.5, lt2);
+    var lookY2 = lerp(-1.0, -1.5, lt2);
     var tRay = (TREE_CZ - camZ) / (-camZ);          // camZ in [3,10]; never 0
     var groveCenterY = camY2 + tRay * (lookY2 - camY2);
     var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y;
@@ -1672,7 +1710,7 @@
         var rs = lerp(RED_MOTE_SIZE, BASE_MOTE_SIZE, e);
         if (sizes[i] !== rs) { sizes[i] = rs; redSizeDirty = true; }
       }
-      var sway = Math.sin(elapsed * swayRate[i] + swayPhase[i]) * 0.02 * e;
+      var sway = Math.sin(treeFormP * Math.PI * 2 + swayPhase[i]) * 0.02 * e;
       var mt = moteNormIdx[i] * 3;
       var mlx = treeNorm[mt]     * S;   // grove-local x/z, before yaw
       var mlz = treeNorm[mt + 2] * S;
@@ -1714,7 +1752,14 @@
   // return to the original full-volume field. The existing final convergence
   // then draws that field into the central red point.
   function updateFinalField() {
-    finalFieldP += (finalFieldTarget - finalFieldP) * 0.075;
+    finalFieldP = finalFieldTarget;
+    // Continuously retain the fully assembled grove while this transition is
+    // at zero. Both scroll directions therefore use the same starting state.
+    if (finalFieldP <= 0) {
+      finalFieldCapture.set(positions);
+      finalFieldLocked = false;
+      return;
+    }
     if (finalFieldTarget > 0.001 && !finalFieldLocked) {
       finalFieldCapture.set(positions);
       finalFieldLocked = true;
@@ -1730,7 +1775,6 @@
       positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], starFieldHome[i3 + 2], e);
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
     }
-    if (finalFieldTarget < 0.001 && finalFieldP < 0.002) finalFieldLocked = false;
   }
 
   // Start the render loop only now that Layer T state exists (see the NOTE
@@ -1743,7 +1787,7 @@
     var v = Math.max(0, Math.min(1, p));
     uniforms.uLayerTint.value   = v;
     uniforms.uShaftFade.value   = 1.0 - v;
-    uniforms.uMoteDensity.value = v;
+    uniforms.uMoteDensity.value = 0.08 + v * 0.92;
     uniforms.uConnect.value     = v;
   }
   function setWaveProgress(wave, p) {
@@ -1800,6 +1844,8 @@
     setConvergenceProgress: setConvergenceProgress,
     setFinalPalette: setFinalPalette,
     setSeedReveal: setSeedReveal,
+    setStatProgress: function (p) { statFormP = tClamp01(p); },
+    setOpenFieldProgress: function (p) { openFieldP = tClamp01(p); },
     // Tree grove formation (index-pointcloud variant): driven by the
     // DOM-anchored ScrollTriggers in index-pointcloud.html. 03 approaching
     // drives 0 -> 1 (form); 04 approaching drives 1 -> 0 (disperse).

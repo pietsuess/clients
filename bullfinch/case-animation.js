@@ -73,7 +73,9 @@
     var width = img.naturalWidth * scale;
     var height = img.naturalHeight * scale;
     var x = (cw - width) / 2;
-    var y = (ch - height) / 2;
+    // The sequence is top-seated in the viewport. Preserve the complete frame
+    // and use every available pixel below it without cropping its top edge.
+    var y = 0;
     ctx.drawImage(img, x, y, width, height);
   }
 

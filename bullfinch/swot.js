@@ -57,10 +57,9 @@
     window.setTimeout(revealHero, 80);
   }
 
-  // ===== Hero exit motion (TWO lines, staggered fade) ====================
-  // Eyebrow:  0.00 – 0.20
-  // Line 1:   0.18 – 0.36
-  // Line 2:   0.30 – 0.48
+  // ===== Hero exit motion ================================================
+  // The copy leaves quickly while the single forest diagonal continues its
+  // slower hide on a separate, longer trigger in GPT-Teaser.html.
   var hero = document.querySelector(".hero");
   if (hero && !reduced) {
     ScrollTrigger.create({
@@ -70,16 +69,13 @@
       scrub: true,
       onUpdate: function (self) {
         var p = self.progress;
-        var pe = 1 - Math.max(0, Math.min(1, (p - 0.00) / 0.20));
-        var p1 = 1 - Math.max(0, Math.min(1, (p - 0.18) / 0.18));
-        var p2 = 1 - Math.max(0, Math.min(1, (p - 0.30) / 0.18));
-        var eb = hero.querySelector(".hero__eyebrow");
-        var l1 = hero.querySelector(".hero__line--1");
-        var l2 = hero.querySelector(".hero__line--2");
-        if (eb) eb.style.opacity = pe;
-        if (l1) l1.style.opacity = p1;
-        if (l2) l2.style.opacity = p2;
-        setTextVeilOpacity(smooth01(Math.max(p1, p2)) * 0.84);
+        var out = smooth01(mapRange(p, 0.04, 0.30));
+        var inner = hero.querySelector(".hero__inner");
+        if (inner) {
+          inner.style.opacity = 1 - out;
+          inner.style.transform = "translateY(" + (-90 * out) + "px)";
+        }
+        setTextVeilOpacity((1 - out) * 0.84);
       },
     });
   }
@@ -163,9 +159,8 @@
     var inner    = panel.querySelector(".panel__inner");
     var media    = panel.querySelector(".panel__video");
 
-    // First beat is visual: arrows land, dots pulse, then copy appears.
-    // 18%–24% eyebrow slides in
-    var pe = mapRange(p, 0.18, 0.24);
+    // Copy arrives immediately with the panel so there is no empty viewport.
+    var pe = mapRange(p, 0.00, 0.06);
     if (eyebrow) {
       eyebrow.style.opacity = pe;
       eyebrow.style.transform = "translateX(" + (-16 * (1 - pe)) + "px)";
@@ -186,20 +181,20 @@
       window.bullfinchUiAnimation.setScrollProgress(p);
     }
 
-    // 24%–36% verdict fades in with vertical translate ONLY.
+    // Verdict follows immediately after the eyebrow.
     // No scale, no letter-spacing animation: those reflow balanced text,
     // which makes words pop between lines mid-scrub. Locked layout, soft entry.
-    var pv = mapRange(p, 0.24, 0.36);
+    var pv = mapRange(p, 0.02, 0.10);
     if (verdict) {
       verdict.style.opacity = pv;
       verdict.style.transform = "translateY(" + (16 * (1 - pv)) + "px)";
     }
 
-    // 38%–58% evidence sequential reveal (stagger)
+    // Evidence settles early and remains readable for most of the pin.
     if (evidence.length) {
-      var winStart = 0.38;
-      var step = 0.045;
-      var segLen = 0.10;
+      var winStart = 0.08;
+      var step = 0.035;
+      var segLen = 0.09;
       for (var i = 0; i < evidence.length; i++) {
         var s = winStart + i * step;
         var e = s + segLen;
@@ -209,20 +204,19 @@
       }
     }
 
-    // 60%–66% numeric line reveals
-    var pn = mapRange(p, 0.60, 0.66);
+    var pn = mapRange(p, 0.18, 0.24);
     if (numeric) {
       numeric.style.opacity = pn;
       numeric.style.transform = "translateY(" + (16 * (1 - pn)) + "px)";
     }
 
-    // 66%–94% HOLD. 94%–100% inner block fades + translates up.
-    var px = mapRange(p, 0.94, 1.00);
+    // Hold through the reading window, then leave before the next panel arrives.
+    var px = mapRange(p, 0.84, 0.96);
     if (inner) {
       inner.style.opacity = 1 - px;
       inner.style.transform = "translateY(" + (-24 * px) + "px)";
-      var veilIn = smooth01(mapRange(p, 0.22, 0.44));
-      var veilOut = smooth01(1 - mapRange(p, 0.84, 1.00));
+      var veilIn = smooth01(mapRange(p, 0.02, 0.16));
+      var veilOut = smooth01(1 - mapRange(p, 0.80, 0.96));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
   }
@@ -265,7 +259,7 @@
       // for a long stretch and is genuinely hard to scroll past.
       end: panel.id === "proof"
         ? (mobileLike ? "+=220%" : "+=380%")
-        : (mobileLike ? "+=100%" : "+=200%"),
+        : (mobileLike ? "+=100%" : "+=150%"),
       pin: true,
       pinSpacing: true,
       scrub: true,
