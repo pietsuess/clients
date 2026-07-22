@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <title>Bullfinch Earth - Nature from the ground up.</title>
+    <meta name="description" content="Bullfinch measures, monitors, and maps every stem, passively, while foresters do their normal jobs." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bullfinch Earth - Nature from the ground up." />
+    <meta property="og:description" content="Ground truth for forestry, wildfire, carbon, and biodiversity. Every stem, passively measured." />
+    <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
+
+    <script>
+      (function () {
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        window.scrollTo(0, 0);
+        document.documentElement.setAttribute("data-theme", "dark");
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" />
+    <link rel="stylesheet" href="teaser.css?v=t1" />
+  </head>
+  <body>
+    <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+
+    <header class="nav" aria-label="Site navigation">
+      <a class="nav__brand" href="./" aria-label="Bullfinch Earth">
+        <svg class="nav__mark" viewBox="50 35 100 70" aria-hidden="true">
+          <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+          <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+        </svg>
+      </a>
+      <div class="nav__right">
+        <a class="nav__link nav__link--role" href="index-pointcloud.html">For investors</a>
+        <a class="nav__cta" href="mailto:hello@bullfinch.earth?subject=Request%20a%20demo">Request a demo</a>
+      </div>
+    </header>
+
+    <main id="page">
+      <!-- HERO (problem framing folded in below) -->
+      <section class="hero" aria-label="Hero">
+        <div class="hero__inner">
+          <p class="eyebrow">
+            <svg class="eyebrow__mark" viewBox="50 35 100 70" aria-hidden="true">
+              <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+              <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+            </svg>
+            <span>BULLFINCH EARTH</span>
+          </p>
+          <h1 class="hero__title">
+            <span class="fixed">Ground truth for</span>
+            <span class="rotator" id="rotator" aria-live="polite"><span class="rotator__word" id="rotatorWord">forestry.</span></span>
+          </h1>
+          <p class="hero__sub">Bullfinch Earth measures, monitors, and maps <b>every stem</b>, passively, while foresters do their normal jobs.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="mailto:hello@bullfinch.earth?subject=Request%20a%20demo">Request a demo</a>
+            <a class="btn btn--ghost" href="#how">See how it works</a>
+          </div>
+        </div>
+        <div class="scroll-cue" aria-hidden="true">
+          <span>Scroll</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+        </div>
+      </section>
+
+      <!-- PROBLEM BEAT (part of the hero region, not a numbered stop) -->
+      <section class="band" aria-label="The problem">
+        <div class="band__inner">
+          <h2 class="band__head">Dedicated inventories are so 19th century.</h2>
+          <p class="band__body">Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools and techniques from the 19th century. It's slow, frustrating, and usually measures <b>less than 1%</b> of what's actually there.</p>
+          <p class="band__body">Bullfinch fully automates the forest inventory process. No training, no stopping, no dedicated trip. Just do your job and the data flows. Continuously. Every time you're in the field. For any reason.</p>
+        </div>
+      </section>
+
+      <!-- SECTION 1 - HOW IT WORKS (id=opportunity: the grove forms in the left column) -->
+      <section class="steps" id="opportunity" aria-label="How it works">
+        <div class="steps__grove" aria-hidden="true">
+          <span class="steps__grove-label">STEM MAP</span>
+        </div>
+        <div class="panel__inner">
+          <p class="eyebrow"><span>01 &middot; HOW IT WORKS</span></p>
+          <h2 class="steps__head">Is it really this easy?</h2>
+
+          <div class="step">
+            <span class="step__n">01</span>
+            <h3 class="step__name">Wear</h3>
+            <p class="step__desc">Bullfinch attaches securely to your vest and stays blissfully out of your way.</p>
+          </div>
+          <div class="step">
+            <span class="step__n">02</span>
+            <h3 class="step__name">Walk</h3>
+            <p class="step__desc">Just press &ldquo;Start Bullfinching&rdquo; and go do your thing.</p>
+          </div>
+          <div class="step">
+            <span class="step__n">03</span>
+            <h3 class="step__name">Data</h3>
+            <p class="step__desc">Complete stem maps and stand data are delivered automatically. <span class="step__stat">30x more data</span> than manual cruising, every time you're in the field.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2 - WHO -->
+      <section class="who" aria-label="Who needs Bullfinch">
+        <div class="who__inner">
+          <p class="eyebrow"><span>02 &middot; WHO IT'S FOR</span></p>
+          <h2 class="who__head">Who needs to Bullfinch?</h2>
+          <div class="who__grid">
+            <div class="card">
+              <span class="card__k">Timber companies</span>
+              <h3 class="card__name">Actually know what you're bringing to market.</h3>
+            </div>
+            <div class="card">
+              <span class="card__k">Consulting foresters</span>
+              <h3 class="card__name">More billable projects per season.</h3>
+            </div>
+            <div class="card">
+              <span class="card__k">Carbon &amp; MRV</span>
+              <h3 class="card__name">Ground truth that registries trust.</h3>
+            </div>
+            <div class="card">
+              <span class="card__k">Wildfire &amp; Insurance</span>
+              <h3 class="card__name">Below-canopy fuel data at scale.</h3>
+            </div>
+            <div class="card">
+              <span class="card__k">Remote sensing</span>
+              <h3 class="card__name">Greater accuracy and visibility below the canopy.</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3 - TRUSTED + CLOSE -->
+      <!-- TRUSTED BY: placeholder wordmarks. Swap for real partner logos when confirmed. -->
+      <section class="trusted" aria-label="Trusted by">
+        <p class="trusted__label">Trusted by</p>
+        <div class="trusted__row">
+          <span class="trusted__mark">Weyerhaeuser</span>
+          <span class="trusted__mark">NHRI</span>
+          <span class="trusted__mark">Long View Forest</span>
+          <span class="trusted__mark">UK Space Agency</span>
+          <span class="trusted__mark">Forest Business Accelerator</span>
+          <span class="trusted__mark">Okanagan</span>
+        </div>
+      </section>
+
+      <section class="closing" id="closing" aria-label="Closing">
+        <svg class="closing__logo" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+          <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+          <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+        </svg>
+        <h2 class="closing__title">Nature from the ground up.</h2>
+        <div class="closing__actions">
+          <a class="btn btn--primary" href="mailto:hello@bullfinch.earth?subject=Request%20a%20demo">Request a demo</a>
+          <a class="btn btn--ghost" href="mailto:hello@bullfinch.earth?subject=Hello%20Bullfinch">Contact us</a>
+        </div>
+        <p class="closing__note">Raising or evaluating the opportunity? <a href="index-pointcloud.html">See the full investor story &rarr;</a></p>
+      </section>
+    </main>
+
+    <footer class="footer" aria-label="Footer">
+      <span>Bullfinch Earth &middot; Salt Spring Island, BC</span>
+      <span>
+        <a href="mailto:hello@bullfinch.earth">Email</a>
+        &nbsp;&middot;&nbsp;
+        <!-- TODO: replace with the real LinkedIn company URL -->
+        <a href="https://www.linkedin.com/company/bullfinch-earth/" target="_blank" rel="noopener">LinkedIn</a>
+      </span>
+      <button class="footer__top" type="button" aria-label="Back to top" data-top>
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+      </button>
+    </footer>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="scene-pointcloud.js?v=pc12"></script>
+    <script>
+      // ---- Fallback: no WebGL -> hide canvas, show solid earthy --gl-base ----
+      (function () {
+        var ok = false;
+        try {
+          var c = document.createElement("canvas");
+          ok = !!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl")));
+        } catch (e) { ok = false; }
+        if (!ok) document.body.classList.add("is-fallback");
+      })();
+    </script>
+    <script>
+      // ---- Rotating hero use-case ----
+      (function () {
+        var host = document.getElementById("rotator");
+        var word = document.getElementById("rotatorWord");
+        if (!host || !word) return;
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var words = [
+          "forestry.", "wildfire risk.", "carbon projects.", "ESG.",
+          "invasive species.", "biodiversity.", "natural asset valuation."
+        ];
+        var i = 0;
+        if (reduced) return; // leave the first word in place
+        setInterval(function () {
+          host.classList.add("is-out");
+          setTimeout(function () {
+            i = (i + 1) % words.length;
+            word.textContent = words[i];
+            host.classList.remove("is-out");
+          }, 430);
+        }, 2300);
+      })();
+    </script>
+    <script>
+      // ---- Smooth scroll (lenis) + scene driver -----------------------------
+      // The point-cloud field engine (scene-pointcloud.js) is driven purely by
+      // scroll position here: NO GSAP pins, NO section choreography. The global
+      // scroll fraction feeds setProgress (camera dolly + the closing
+      // convergence to the seed dot); the "how it works" section (#opportunity)
+      // drives setTreeProgress so the grove forms as it reaches centre and
+      // disperses as it leaves.
+      (function () {
+        var cap = window.bullfinchCanopy;
+        var lenis = null;
+        if (window.Lenis && !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+          lenis = new Lenis({ smoothWheel: true, lerp: 0.1, wheelMultiplier: 0.9 });
+          window.lenis = lenis;
+        }
+
+        function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+        var maxScroll = 1;
+        function recalc() {
+          maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        }
+        recalc();
+        window.addEventListener("resize", recalc);
+        window.addEventListener("load", recalc);
+
+        var steps = document.getElementById("opportunity");
+        var closing = document.getElementById("closing");
+
+        function tick(time) {
+          if (lenis) lenis.raf(time);
+          var y = window.scrollY || window.pageYOffset || 0;
+          var vh = window.innerHeight || 1;
+          var p = clamp01(y / maxScroll);
+          if (cap) {
+            if (cap.setProgress) cap.setProgress(p);
+            // Seed dot scales in across the first viewport (hero -> problem band).
+            if (cap.setSeedReveal) cap.setSeedReveal(clamp01(y / (vh * 0.9)));
+            // Network waves 1..7 cascade in across the page (swot.js does this
+            // per pinned panel on the investor build; here they ride global
+            // scroll so the field knits together as you move down).
+            if (cap.setWaveProgress) {
+              for (var w = 1; w <= 7; w++) cap.setWaveProgress(w, clamp01(p * 7 - (w - 1)));
+            }
+            // Grove forms while the "how it works" section is near centre.
+            if (cap.setTreeProgress && steps) {
+              var r = steps.getBoundingClientRect();
+              var center = r.top + r.height / 2;
+              var d = Math.abs(center - vh / 2) / vh;   // 0 = perfectly centred
+              cap.setTreeProgress(clamp01(1 - d / 0.62));
+            }
+            // Closing convergence: lines draw to the seed dot as the closing
+            // section settles; the blast arms past 0.75 (scene handles timing).
+            if (cap.setConvergenceProgress && closing) {
+              var cr = closing.getBoundingClientRect();
+              cap.setConvergenceProgress(clamp01((vh - cr.top) / Math.max(1, cr.height)));
+            }
+          }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      })();
+    </script>
+    <script>
+      // ---- Anchor + back-to-top ----
+      (function () {
+        document.addEventListener("click", function (e) {
+          var top = e.target.closest("[data-top]");
+          if (top) { scrollToY(0); return; }
+          var a = e.target.closest('a[href^="#"]');
+          if (!a) return;
+          var id = a.getAttribute("href");
+          if (id === "#") return;
+          var el = document.querySelector(id);
+          if (!el) return;
+          e.preventDefault();
+          scrollToY(el.getBoundingClientRect().top + (window.scrollY || 0));
+        });
+        function scrollToY(y) {
+          if (window.lenis && typeof window.lenis.scrollTo === "function") window.lenis.scrollTo(y);
+          else window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      })();
+    </script>
+  </body>
+</html>
