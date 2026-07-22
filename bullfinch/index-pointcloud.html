@@ -1123,6 +1123,15 @@
             window.scrollTo(0, 0);
           }
           drawFrame(0);
+          autoStart();   // restart plays on its own too -- never wait for a click
+        }
+
+        // Auto-enter: the intro plays by itself, no click required. A brief beat
+        // on the static logo, then the sequence hands off into the site. (The
+        // click listener below still works as an optional skip / restart.)
+        function autoStart() {
+          if (isPlaying || splash.hidden) return;
+          window.setTimeout(playSequence, 650);
         }
 
         function enter() {
@@ -1233,6 +1242,14 @@
         splash.addEventListener("click", function () {
           playSequence();
         });
+
+        // Kick the auto-enter once the first frame is decodable (or right away
+        // if it is already cached), so the page enters itself on load.
+        if (loadedFrames[0].complete) {
+          autoStart();
+        } else {
+          loadedFrames[0].addEventListener("load", autoStart, { once: true });
+        }
       })();
     </script>
   </body>
