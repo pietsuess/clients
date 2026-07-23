@@ -308,7 +308,7 @@
   // upper part of the viewport. The Y samples are stratified across and just
   // beyond the frame, while varied ray distance preserves real 3D depth.
   var openFieldCamera = new THREE.PerspectiveCamera(55, viewAspect, 0.1, 200);
-  var openCameraProgress = 0.52;
+  var openCameraProgress = 0.40;
   openFieldCamera.position.set(
     lerp(CAM_START.x, CAM_END.x, openCameraProgress),
     lerp(CAM_START.y, CAM_END.y, openCameraProgress),
@@ -499,7 +499,7 @@
     "  // halo motes get a slightly larger point so the glow ring renders",
     "  float sizeBoost = 1.0 + vGlow * 0.6;",
     "  gl_PointSize = aSize * sizeBoost * uPointScale * uPixelRatio * (1.0 / -mv.z);",
-    "  gl_PointSize = clamp(gl_PointSize, 2.0, 42.0);",
+    "  gl_PointSize = clamp(gl_PointSize, 2.0, 64.0);",
     "  gl_Position = projectionMatrix * mv;",
     "}",
   ].join("\n");
@@ -1459,8 +1459,10 @@
     // in its own column slot; flex keeps the readout to its right. Falls back to
     // the readout's left edge if the box hasn't been laid out.
     var box = document.getElementById("statGrid");
-    var dotPx = Math.max(11, Math.min(15, window.innerWidth * .0115));
-    var stepPx = dotPx + 4;
+    // Match the original dark version's read: BIG dots, near-touching pitch
+    // (diameter ~85% of cell pitch) so the 10x10 is one confident block.
+    var dotPx = Math.max(13, Math.min(19, window.innerWidth * .014));
+    var stepPx = dotPx * 1.15;
     var centerX, centerY;
     var boxRect = box && box.getBoundingClientRect();
     if (boxRect && boxRect.width > 1) {
@@ -1555,8 +1557,10 @@
         } else {
           // Ordinary field motes never fade during statistic assembly or
           // disassembly. Their positions and colors change, not their count.
-          alphas[i] = 0.9 * gate;
-          var statSize = lerp(BASE_MOTE_SIZE, 76, statFormP);
+          // Grid members go FULLY opaque as the stat forms (block contrast);
+          // non-grid motes keep the ambient 0.9.
+          alphas[i] = statSlot >= 0 ? lerp(0.9 * gate, 1.0, statFormP) : 0.9 * gate;
+          var statSize = lerp(BASE_MOTE_SIZE, 104, statFormP);
           if (sizes[i] !== statSize) { sizes[i] = statSize; statSizeDirty = true; }
         }
         // Decay rim-glow at 1/1.2s. Glow values are set to 1.0 by the line
@@ -1977,7 +1981,11 @@
 
     // Publish each trunk's viewport X as a CSS var so the DOM species
     // readouts sit CENTRED over the peaks of their trees on any viewport.
-    if (treeMeans) {
+    // LATCHED: only publish while the grove is FULLY formed — on reverse
+    // scroll the camera un-flattens and the projection moves, which made the
+    // fixed labels slide horizontally. Below full formation the last
+    // published values stay put and the data just un-writes in place.
+    if (treeMeans && treeFormP >= 0.999) {
       for (var tlx = 0; tlx < 3; tlx++) {
         treeLabelVec.set(groveCX + treeMeans[tlx] * SX, baseY + S, TREE_CZ).project(camera);
         document.documentElement.style.setProperty(
@@ -2170,19 +2178,44 @@
     shaft: readCssColor("--gl-final-shaft"), mote: readCssColor("--gl-final-mote"),
     line: readCssRgba("--gl-final-line"), base: readCssColor("--gl-final-base")
   };
+  // Section 02 product tint: the backdrop plane + clear color pull toward a
+  // light green while the device section is on screen (eased in/out by the
+  // swot p2 trigger) so 01 and 03 stay beige. Slight canopy/understory split
+  // preserves the vertical gradient. Piet will taste-tune the hue.
+  var productPalette = {
+    canopy: new THREE.Color("#EAF3DF"),
+    understory: new THREE.Color("#D8E7C5"),
+    base: new THREE.Color("#E4EFD8")
+  };
   var paletteScratch = new THREE.Color();
-  function setFinalPaletteProgress(p) {
-    p = tClamp01(p);
-    uniforms.uCanopy.value.lerpColors(dayPalette.canopy, finalPalette.canopy, p);
-    uniforms.uUnderstory.value.lerpColors(dayPalette.understory, finalPalette.understory, p);
-    uniforms.uLightShaft.value.lerpColors(dayPalette.shaft, finalPalette.shaft, p);
-    uniforms.uLine.value.lerpColors(dayPalette.line.color, finalPalette.line.color, p);
-    uniforms.uLineAlpha.value = lerp(dayPalette.line.alpha, finalPalette.line.alpha, p);
-    paletteScratch.lerpColors(dayPalette.mote, finalPalette.mote, p);
+  var tintScratch = new THREE.Color();
+  var finalPaletteP = 0;
+  var productTintP = 0;
+  function applyScenePalette() {
+    // Product tint applies over the day palette; the closing night palette
+    // then lerps on top. The two bands never overlap in scroll, but composing
+    // keeps any call order safe.
+    tintScratch.lerpColors(dayPalette.canopy, productPalette.canopy, productTintP);
+    uniforms.uCanopy.value.lerpColors(tintScratch, finalPalette.canopy, finalPaletteP);
+    tintScratch.lerpColors(dayPalette.understory, productPalette.understory, productTintP);
+    uniforms.uUnderstory.value.lerpColors(tintScratch, finalPalette.understory, finalPaletteP);
+    uniforms.uLightShaft.value.lerpColors(dayPalette.shaft, finalPalette.shaft, finalPaletteP);
+    uniforms.uLine.value.lerpColors(dayPalette.line.color, finalPalette.line.color, finalPaletteP);
+    uniforms.uLineAlpha.value = lerp(dayPalette.line.alpha, finalPalette.line.alpha, finalPaletteP);
+    paletteScratch.lerpColors(dayPalette.mote, finalPalette.mote, finalPaletteP);
     partMat.uniforms.uColor.value.copy(paletteScratch);
     arrowMat.uniforms.uColor.value.copy(paletteScratch);
-    bgColor.lerpColors(dayPalette.base, finalPalette.base, p);
+    tintScratch.lerpColors(dayPalette.base, productPalette.base, productTintP);
+    bgColor.lerpColors(tintScratch, finalPalette.base, finalPaletteP);
     renderer.setClearColor(bgColor, 1);
+  }
+  function setFinalPaletteProgress(p) {
+    finalPaletteP = tClamp01(p);
+    applyScenePalette();
+  }
+  function setProductTintProgress(p) {
+    productTintP = tClamp01(p);
+    applyScenePalette();
   }
   function setFinalPalette(active) { setFinalPaletteProgress(active ? 1 : 0); }
   window.bullfinchCanopy = {
@@ -2192,6 +2225,7 @@
     setConvergenceProgress: setConvergenceProgress,
     setFinalPalette: setFinalPalette,
     setFinalPaletteProgress: setFinalPaletteProgress,
+    setProductTintProgress: setProductTintProgress,
     setSeedReveal: setSeedReveal,
     setStatProgress: function (p) { statFormP = tClamp01(p); },
     setStatFillProgress: function (p) { statFillP = tClamp01(p); },

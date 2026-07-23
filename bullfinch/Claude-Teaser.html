@@ -739,10 +739,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-7"></script>
+    <script src="scene-claude-teaser.js?v=claude-8"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-6"></script>
+    <script src="swot-claude.js?v=claude-7"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -1002,11 +1002,14 @@
         });
 
         // Leaving the inventory section releases the grid into an open cloud.
-        // Wave 1 draws only after that cloud has begun to open.
+        // The ENTIRE release completes inside 01's pin (the panel un-write
+        // starts at 0.88, so the motes spread exactly as the copy leaves) —
+        // running past the unpin made the DOM grid anchor ride up the page
+        // while the motes chased their 02 stations downward.
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p1, 0.92); },
-          end: function () { return at(p2, 0.18); },
+          start: function () { return at(p1, 0.84); },
+          end: function () { return at(p1, 1.0); },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {

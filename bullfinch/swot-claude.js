@@ -132,8 +132,10 @@
     if (closingEl) {
       var rect = closingEl.getBoundingClientRect();
       if (rect.top <= window.innerHeight) {
-        var cp = clamp01((window.innerHeight - rect.top) / ((window.innerHeight * 0.5) || 1));
-        return smooth01(mapRange(cp, 0.35, 0.75)) * 0.42;
+        // Closing veil is OFF (Piet): the tint + backdrop blur dimmed the
+        // whole field and drew a blur-halo "stroke" around the final red
+        // dot. The night-grade text sits fine on the dark field without it.
+        return 0;
       }
     }
     return 0;
@@ -207,13 +209,22 @@
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
 
+    // 03 (#opportunity): trees + species data are already done at pin start,
+    // so the lower bar (audience grid + partners strip) must not trickle in
+    // on the generic bands (~45% of the pin). Compressed bands finish it by
+    // ~0.18 — effectively with the data.
+    var fastBar = panel.id === "opportunity";
+    var FAST_S = [0.02, 0.03, 0.05, 0.05, 0.07, 0.08];
+    var writeWindow = fastBar ? 0.10 : 0.16;
+    var writeStagger = fastBar ? 0.01 : 0.03;
+
     for (var si = 0; si < WRITE_ORDER.length; si++) {
       var group = panel.querySelectorAll(WRITE_ORDER[si].sel);
       if (!group.length) continue;
-      var s = WRITE_ORDER[si].s;
+      var s = fastBar ? FAST_S[si] : WRITE_ORDER[si].s;
       var horizontal = WRITE_ORDER[si].dir === "x";
       for (var gi = 0; gi < group.length; gi++) {
-        var e = smooth01(mapRange(p, s + gi * 0.03, s + 0.16 + gi * 0.03));
+        var e = smooth01(mapRange(p, s + gi * writeStagger, s + writeWindow + gi * writeStagger));
         var w = e * (1 - leave);
         var hidden = ((1 - w) * 100).toFixed(2) + "%";
         group[gi].style.clipPath = horizontal
@@ -393,8 +404,10 @@
 
   // ===== Closing section veil ============================================
   // The closing card's arrival is owned by the HTML (revealClosing) — it is
-  // the ONE element allowed to slide in. No fades, no duplicate line
-  // choreography here; this trigger only runs the text veil.
+  // the ONE element allowed to slide in. The closing veil itself is OFF
+  // (Piet): it dimmed/blurred the field and put a stroke halo around the
+  // final dot. This trigger now just guarantees the veil is fully cleared,
+  // including any residue left by panel 3's leave band on fast scrolls.
   var closing = document.querySelector(".closing");
   if (closing && !reduced) {
     ScrollTrigger.create({
@@ -402,8 +415,8 @@
       start: "top bottom",
       end: "top center",
       scrub: true,
-      onUpdate: function (self) {
-        setTextVeilOpacity(smooth01(mapRange(self.progress, 0.35, 0.75)) * 0.42);
+      onUpdate: function () {
+        setTextVeilOpacity(0);
       },
     });
   }
@@ -452,6 +465,13 @@
           var fadeIn = smooth01(mapRange(p, 0.00, caseFadeInEndProgress));
           var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, 1.00));
           setProductCase(fadeIn * (1 - fadeOut), p);
+          // 02 backdrop tint: ease the scene to light green while the device
+          // section holds, back to beige before 03 arrives.
+          if (window.bullfinchCanopy.setProductTintProgress) {
+            window.bullfinchCanopy.setProductTintProgress(
+              smooth01(mapRange(p, 0.0, 0.15)) * (1 - smooth01(mapRange(p, 0.85, 1.0)))
+            );
+          }
         },
       });
     }
