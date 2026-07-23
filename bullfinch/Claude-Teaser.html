@@ -742,7 +742,7 @@
     <script src="scene-claude-teaser.js?v=claude-11"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-10"></script>
+    <script src="swot-claude.js?v=claude-11"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -991,14 +991,23 @@
         // from the first scroll pixel all the way to 01's pin, so it reads
         // slow and deliberate instead of a last-second swoop. The same
         // trigger reverses the grid back into the ground.
-        // R1: the grid assembly (motes rising to form the <1% grid) is driven by
-        // the HERO PIN's progress in swot-claude, so the motes come up in
-        // LOCKSTEP with the hero words erasing and the forest diagonal wiping —
-        // the whole 00 -> 01 handoff on ONE progress value. The grid's home is
-        // pin-relative, so it forms at its section-01 screen spot even while
-        // #problem is still below the fold. Exposed here (setStatStage owns the
-        // stat-crisp-offset + is-stat-stage class as well).
-        window.__bfSetGridAssembly = setStatStage;
+        // R2: the grid assembly (motes rising to form the <1% grid) runs on the
+        // #problem pin's ENTRY band [0 -> 0.30], the SAME window the 01 copy
+        // (swot WRITE_ORDER) and the TODAY readout (stat-field-gpt, fades in
+        // 0.06->0.26) populate. So arriving at 01, the motes rise INTO the grid
+        // exactly as the text writes on — grid and text together, no grid-alone
+        // moment. The seed already sits at grid centre; the dots assemble around
+        // it. (The forest diagonal + hero words are the 00->01 leave, on the
+        // hero pin.)
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return p1.start; },
+          end: function () { return at(p1, 0.30); },
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { setStatStage(self.progress); },
+          onLeaveBack: function () { setStatStage(0); },
+        });
 
         // Leaving the inventory section releases the grid into an open cloud.
         // The ENTIRE release completes inside 01's pin (the panel un-write

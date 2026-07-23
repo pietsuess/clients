@@ -100,12 +100,12 @@
             : "inset(0 0 " + hid + " 0)";
         }
         setTextVeilOpacity((1 - smooth01(mapRange(p, 0.06, 0.60))) * 0.84);
-        // R1 (the 00 -> 01 leave): the motes rising into the <1% grid and the
-        // forest diagonal wiping off are driven by THIS SAME hero-pin progress,
-        // so the words erasing, the motes coming up, and the diagonal covering
-        // all move together on one scrub. Both setters are defined in the HTML
-        // (grid owns stat-crisp-offset; forest owns --forest-edge-top).
-        if (window.__bfSetGridAssembly) window.__bfSetGridAssembly(p);
+        // R1 (the 00 -> 01 leave): the forest diagonal wiping off is driven by
+        // THIS hero-pin progress, so the hero words erasing and the diagonal
+        // covering move together on one scrub. The grid assembly (motes coming
+        // up) is driven on the #problem pin's ENTRY band instead, so the motes
+        // rise INTO the grid exactly as the 01 copy + TODAY readout write on
+        // (R2: grid and text populate together, not grid-then-text).
         if (window.__bfSetForestWipe) window.__bfSetForestWipe(p);
       },
     });
