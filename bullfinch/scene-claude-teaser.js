@@ -350,8 +350,11 @@
     isRedMote[i] = 0;
     sizes[i] = BASE_MOTE_SIZE;
     statAssemblyDelay[i] = 0.26 + Math.random() * 0.58;
-    statArcX[i] = (Math.random() - 0.5) * 1.6;
-    statArcY[i] = (Math.random() - 0.5) * 1.2;
+    // Tighter assembly arc: the wide overshoot flung motes left across the 01
+    // headline mid-formation. Keep the swirl subtle so the grid resolves inside
+    // its own column and never crosses into the "So 19th Century" line.
+    statArcX[i] = (Math.random() - 0.5) * 0.6;
+    statArcY[i] = (Math.random() - 0.5) * 0.5;
   }
   // The closing is an inhabited mote volume, not a distant starfield. Keep a
   // restrained set inside the camera frustum and physically send the rest
@@ -1388,15 +1391,25 @@
   }
   function updateStatGridTargets() {
     if (statFormP <= 0) return;
-    var read = document.querySelector("#problem .stat-read");
-    if (!read) return;
-    var rect = read.getBoundingClientRect();
+    // Anchor to the reserved (visibility:hidden) #statGrid box so the grid sits
+    // in its own column slot; flex keeps the readout to its right. Falls back to
+    // the readout's left edge if the box hasn't been laid out.
+    var box = document.getElementById("statGrid");
     var dotPx = Math.max(11, Math.min(15, window.innerWidth * .0115));
-    var gapPx = Math.max(20, Math.min(44, window.innerWidth * .026));
     var stepPx = dotPx + 4;
-    var gridWidth = dotPx * 10 + 36;
-    var centerX = rect.left - gapPx - gridWidth / 2;
-    var centerY = rect.top + rect.height / 2;
+    var centerX, centerY;
+    var boxRect = box && box.getBoundingClientRect();
+    if (boxRect && boxRect.width > 1) {
+      centerX = boxRect.left + boxRect.width / 2;
+      centerY = boxRect.top + boxRect.height / 2;
+    } else {
+      var read = document.querySelector("#problem .stat-read");
+      if (!read) return;
+      var rect = read.getBoundingClientRect();
+      var gapPx = Math.max(20, Math.min(44, window.innerWidth * .026));
+      centerX = rect.left - gapPx - (dotPx * 10 + 36) / 2;
+      centerY = rect.top + rect.height / 2;
+    }
     for (var i = 2; i < PARTICLE_POOL; i++) {
       var slot = statSlotByMote[i];
       var col = slot % 10;
@@ -1627,12 +1640,16 @@
   var TREE_CAMERA_Y = 0.82;     // level side elevation, no upward or downward view
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
   var treeFormP = 0;            // exact scroll-derived formation progress
-  // Grove yaw: a gentle constant turn while the grove stands, ramping up
-  // through the assembly + dispersal motion (like the standalone tester's
-  // auto-orbit) and easing back to the slow turn once formed / dispersed.
-  var treeSpinAngle = 0;        // accumulated yaw (rad), integrated per frame
-  var treeSpinPrevT = 0;        // last elapsed sample, for the local dt
-  var TREE_SPIN_BASE = 0.0175;  // half-speed, even turntable motion
+  // Grove yaw: each of the three trees turns on ITS OWN vertical axis, at its
+  // own rate and starting phase, so they read as three independent turntables
+  // rather than one locked grove. Time-integrated, so they keep turning on a
+  // paused scroll (the standalone tester's continuous orbit).
+  var treeSpinAngle = [0, 0, 0]; // accumulated yaw per tree (rad), integrated per frame
+  var treeSpinPrevT = 0;         // last elapsed sample, for the local dt
+  var TREE_SPIN_BASE = 0.032;    // faster turntable motion (was 0.0175)
+  var TREE_SPIN_RATE = [1.0, 1.34, 0.77]; // per-tree rate multipliers (desync)
+  var TREE_SPIN_PHASE = [0.0, 2.1, 4.2];  // per-tree starting angle (rad)
+  var treeSpinInit = false;      // seed the phases once
   var TREE_SPIN_BOOST = 0.0;
   var treeReady = false;
   var treeNorm = null;          // normalized grove coords (height 1, base 0, centered)
@@ -1641,6 +1658,8 @@
   var fillClusterCenter = null;
   var assetHalfW = 0.7;         // measured from the asset at load
   var moteNormIdx = new Int32Array(PARTICLE_POOL);
+  var moteTreeIdx = new Uint8Array(PARTICLE_POOL); // which of the 3 trees this mote joins
+  var fillTreeIdx = null;                          // same, for the fill dots (sized at load)
   var moteCapture  = new Float32Array(PARTICLE_POOL * 3);
   var moteLocked   = new Uint8Array(PARTICLE_POOL);
   var moteFormSeed = new Float32Array(PARTICLE_POOL);
@@ -1750,6 +1769,7 @@
       var TREE_TINT = 0.55;   // max blend toward the accent at the canopy top
       for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
         moteNormIdx[mi] = idx[take];
+        moteTreeIdx[mi] = clusterAssignment[idx[take]];
         moteFormSeed[mi] = treeNorm[idx[take] * 3 + 1];
         treeTint[mi] = Math.pow(treeNorm[idx[take] * 3 + 1], 2.2) * TREE_TINT;
       }
@@ -1766,6 +1786,7 @@
       fillStartArr = new Float32Array(fillCount * 3);
       fillNorm     = new Float32Array(fillCount * 3);
       fillClusterCenter = new Float32Array(fillCount);
+      fillTreeIdx  = new Uint8Array(fillCount);
       var fillTint = new Float32Array(fillCount);
       for (var fi = 0; fi < fillCount; fi++) {
         var si = idx[take + fi] * 3;
@@ -1773,6 +1794,7 @@
         fillNorm[fi * 3 + 1] = treeNorm[si + 1];
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
         fillClusterCenter[fi] = treeClusterCenter[idx[take + fi]];
+        fillTreeIdx[fi] = clusterAssignment[idx[take + fi]];
         fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
         // Fly in from the open cloud that precedes the tree-identification stage.
         var finalAngle = Math.random() * Math.PI * 2;
@@ -1879,9 +1901,17 @@
     // -- the standalone tester's continuous orbit, gated to the assembly motion.
     var dtSpin = treeSpinPrevT ? Math.min(0.05, elapsed - treeSpinPrevT) : 0;
     treeSpinPrevT = elapsed;
+    if (!treeSpinInit) {                              // seed each tree's start phase once
+      for (var sp = 0; sp < 3; sp++) treeSpinAngle[sp] = TREE_SPIN_PHASE[sp];
+      treeSpinInit = true;
+    }
     var spinEnv = 4 * treeFormP * (1 - treeFormP);  // 0 at ends, 1 mid-transition
-    treeSpinAngle += (TREE_SPIN_BASE + TREE_SPIN_BOOST * spinEnv) * dtSpin;
-    var spinCos = Math.cos(treeSpinAngle), spinSin = Math.sin(treeSpinAngle);
+    var spinCos = [0, 0, 0], spinSin = [0, 0, 0];
+    for (var st = 0; st < 3; st++) {
+      treeSpinAngle[st] += (TREE_SPIN_BASE * TREE_SPIN_RATE[st] + TREE_SPIN_BOOST * spinEnv) * dtSpin;
+      spinCos[st] = Math.cos(treeSpinAngle[st]);
+      spinSin[st] = Math.sin(treeSpinAngle[st]);
+    }
     for (var i = 2; i < PARTICLE_POOL; i++) {
       var w = tClamp01(treeFormP * 1.25 - moteFormSeed[i] * 0.25);
       if (w <= 0) { moteLocked[i] = 0; continue; }
@@ -1897,11 +1927,13 @@
       var mt = moteNormIdx[i] * 3;
       var moteCenter = treeClusterCenter[moteNormIdx[i]];
       var moteTrunkX = moteCenter * SX;
+      var mTree = moteTreeIdx[i];
+      var mCos = spinCos[mTree], mSin = spinSin[mTree];
       var mlx = (treeNorm[mt] - moteCenter) * S;
       var mlz = treeNorm[mt + 2] * S;
-      var mtx = groveCX + moteTrunkX + mlx * spinCos - mlz * spinSin;
+      var mtx = groveCX + moteTrunkX + mlx * mCos - mlz * mSin;
       var mty = treeNorm[mt + 1] * S + baseY;
-      var mtz = TREE_CZ  + mlx * spinSin + mlz * spinCos;
+      var mtz = TREE_CZ  + mlx * mSin + mlz * mCos;
       positions[xi] = moteCapture[xi] + (mtx - moteCapture[xi]) * e + sway;
       positions[yi] = moteCapture[yi] + (mty - moteCapture[yi]) * e;
       positions[zi] = moteCapture[zi] + (mtz - moteCapture[zi]) * e;
@@ -1919,11 +1951,13 @@
       var f3 = f * 3;
       var fillCenter = fillClusterCenter[f];
       var fillTrunkX = fillCenter * SX;
+      var fTree = fillTreeIdx[f];
+      var fCos = spinCos[fTree], fSin = spinSin[fTree];
       var flx = (fillNorm[f3] - fillCenter) * S;
       var flz = fillNorm[f3 + 2] * S;
-      var ftx = groveCX + fillTrunkX + flx * spinCos - flz * spinSin;
+      var ftx = groveCX + fillTrunkX + flx * fCos - flz * fSin;
       var fty = fillNorm[f3 + 1] * S + baseY;
-      var ftz = TREE_CZ  + flx * spinSin + flz * spinCos;
+      var ftz = TREE_CZ  + flx * fSin + flz * fCos;
       fp[f3]     = fillStartArr[f3]     + (ftx - fillStartArr[f3]) * ef;
       fp[f3 + 1] = fillStartArr[f3 + 1] + (fty - fillStartArr[f3 + 1]) * ef;
       fp[f3 + 2] = fillStartArr[f3 + 2] + (ftz - fillStartArr[f3 + 2]) * ef;

@@ -503,6 +503,17 @@
       }
       #problem .stat-visual { display: flex; align-items: center; gap: clamp(18px, 2.2vw, 36px); }
       #problem .stat-read { transform: none; }
+      /* Reserve a real box for the mote grid inside the right column so the
+         WebGL grid lands in its own space (flex pushes the readout to its
+         right) instead of being flung left across the 01 headline. The dots
+         are drawn by the particle scene; this box is just its anchor. */
+      #problem #statGrid {
+        display: block;
+        visibility: hidden;
+        flex: 0 0 auto;
+        width: clamp(152px, 12vw, 190px);
+        height: clamp(152px, 12vw, 190px);
+      }
       .problem-note {
         margin: 0;
         max-width: 46ch;
@@ -723,7 +734,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-1"></script>
+    <script src="scene-claude-teaser.js?v=claude-2"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=forest-journey-6"></script>
@@ -868,6 +879,43 @@
               onUpdate: function (self) { setFinalGrade(self.progress); },
               onRefresh: function (self) { setFinalGrade(self.progress || 0); }
             });
+
+            // Closing behaves like the index: its logo, headline lines and
+            // actions ANIMATE IN (and back out on reverse) as the section lands,
+            // rather than arriving fully formed from below. Scrubbed + staggered.
+            var closeReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var closeEls = [
+              { el: document.querySelector(".closing__logo"),          band: [0.00, 0.46] },
+              { el: document.querySelector(".closing__line--1"),       band: [0.12, 0.60] },
+              { el: document.querySelector(".closing__line--2"),       band: [0.22, 0.70] },
+              { el: document.querySelector(".closing__actions"),       band: [0.38, 0.92] }
+            ].filter(function (c) { return c.el; });
+            if (!closeReduced && closeEls.length) {
+              closeEls.forEach(function (c) {
+                c.el.style.opacity = "0";
+                c.el.style.transform = "translateY(30px)";
+                c.el.style.willChange = "opacity, transform";
+              });
+              function revealClosing(p) {
+                p = p < 0 ? 0 : (p > 1 ? 1 : p);
+                closeEls.forEach(function (c) {
+                  var a = c.band[0], b = c.band[1];
+                  var t = (p - a) / (b - a);
+                  t = t < 0 ? 0 : (t > 1 ? 1 : t);
+                  var e = t * t * (3 - 2 * t);      // smoothstep
+                  c.el.style.opacity = e.toFixed(3);
+                  c.el.style.transform = "translateY(" + (30 * (1 - e)).toFixed(2) + "px)";
+                });
+              }
+              ScrollTrigger.create({
+                trigger: "#closing",
+                start: "top 82%",
+                end: "top 34%",
+                scrub: true,
+                onUpdate: function (self) { revealClosing(self.progress); },
+                onRefresh: function (self) { revealClosing(self.progress || 0); }
+              });
+            }
           }
         });
       })();
@@ -905,6 +953,20 @@
         var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
         if (!p1 || !p2 || !p3) return;
         var treeDataLines = Array.prototype.slice.call(s03.querySelectorAll(".tree-readout span"));
+        // Pre-parse the numeric readouts (Confidence / Genus Score / Count) so
+        // they can COUNT UP in place as each tree forms — the data reads as if
+        // it's being generated live, not printed. Prefix + target + precision
+        // are captured once; textContent is rewritten each frame.
+        treeDataLines.forEach(function (line) {
+          if (!line.classList.contains("tree-readout__metric")) return;
+          var m = line.textContent.match(/^(.*?)([\d.]+)\s*$/);
+          if (!m) return;
+          line.dataset.prefix = m[1];
+          line.dataset.target = m[2];
+          line.dataset.decimals = m[2].indexOf(".") >= 0
+            ? String(m[2].length - m[2].indexOf(".") - 1)
+            : "0";
+        });
         function writeTreeData(p) {
           treeDataLines.forEach(function (line, index) {
             var lineIndex = index % 5;
@@ -912,6 +974,10 @@
             var write = (p - start) / .26;
             write = write < 0 ? 0 : (write > 1 ? 1 : write);
             line.style.setProperty("--write", write.toFixed(4));
+            if (line.dataset.target !== undefined) {
+              var val = parseFloat(line.dataset.target) * write;
+              line.textContent = line.dataset.prefix + val.toFixed(parseInt(line.dataset.decimals, 10));
+            }
           });
         }
 
