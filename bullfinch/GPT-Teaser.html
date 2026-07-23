@@ -299,26 +299,34 @@
       .corner-wordmark { display: none; }
 
       #problem.panel--media {
-        grid-template-columns: 1fr minmax(600px, 48vw);
-        grid-template-rows: auto 1fr;
-        column-gap: clamp(30px, 4vw, 74px);
-        align-content: center;
+        display: block;
       }
-      #problem .panel__inner { grid-column: 2; grid-row: 2; max-width: none; align-self: start; text-align: right; }
+      #problem .panel__inner {
+        position: absolute;
+        right: var(--pad-x);
+        top: 50%;
+        width: min(58vw, 1080px);
+        height: auto;
+        max-width: none;
+        transform: translateY(-34%);
+        text-align: right;
+        align-items: flex-end;
+      }
       #problem .eyebrow-anchor { margin-left: auto; }
-      #problem .panel__verdict { max-width: 16ch; margin-left: auto; font-size: clamp(45px, 6.3vw, 96px); }
+      #problem .panel__verdict { max-width: 13ch; margin-left: auto; font-size: clamp(45px, 5.6vw, 88px); text-align: right; }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
       #problem .panel__evidence p { text-align: right; text-align-last: right; }
       #problem .panel__numeric { text-align: right; text-align-last: right; }
       #problem .panel__stat {
-        grid-column: 2;
-        grid-row: 1;
-        justify-self: stretch;
-        align-self: end;
-        flex-direction: column;
+        position: absolute;
+        z-index: 6;
+        top: clamp(52px, 7vh, 76px);
+        right: var(--pad-x);
+        width: min(58vw, 1080px);
+        justify-content: flex-end;
         align-items: flex-end;
-        gap: 12px;
-        min-height: 154px;
+        gap: clamp(18px, 2.2vw, 36px);
+        min-height: 138px;
         text-align: right;
       }
       #problem .stat-grid { display: none; }
@@ -339,28 +347,31 @@
       #product .panel__evidence p:first-child { border-top: 0; }
       #product .panel__numeric { margin-top: 18px; }
       .case-fixed-layer.panel__model {
-        width: min(42vw, 760px);
-        max-width: 44vw;
+        width: min(48vw, 880px);
+        max-width: 48vw;
         height: 100dvh;
-        left: var(--pad-x);
+        left: 0;
         top: 0;
         transform: none;
       }
       .case-fixed-layer .panel__model-canvas { width: 100%; height: 100%; }
+      body.is-tree-stage .case-fixed-layer.panel__model,
+      body.is-final-contrast .case-fixed-layer.panel__model { opacity: 0 !important; }
 
       #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
       #opportunity .tree-readouts {
         --tree-data-p: 0;
         position: absolute;
         z-index: 4;
-        top: clamp(54px, 7vh, 78px);
-        left: 4vw;
-        width: 92vw;
+        top: clamp(48px, 6vh, 68px);
+        left: 3vw;
+        width: 94vw;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 6vw;
         color: var(--ink-soft);
         text-align: center;
+        pointer-events: none;
       }
       .tree-readout { display: flex; flex-direction: column; align-items: center; gap: 3px; }
       .tree-readout span {
@@ -419,14 +430,17 @@
         text-align-last: left;
       }
 
-      .closing { padding-top: clamp(54px, 8vh, 86px); }
-      .closing__inner { max-width: none; gap: clamp(15px, 2.8vh, 28px); }
-      .closing__logo { height: clamp(46px, 6vh, 62px); }
-      .closing__title { max-width: none; font-size: clamp(50px, 6.6vw, 102px); line-height: .9; text-transform: uppercase; }
+      .closing { padding-top: clamp(52px, 8vh, 78px); }
+      .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
+      .closing__logo { height: clamp(34px, 4.5vh, 46px); }
+      .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
       .closing__line { white-space: nowrap; }
-      .closing__actions { display: flex; width: auto; justify-content: center; gap: clamp(22px, 3vw, 48px); }
-      .closing__actions a { justify-content: center; color: var(--ink); }
-      .site-footer { padding-top: 14px; }
+      .closing__actions { display: flex; width: auto; justify-content: center; gap: clamp(22px, 3vw, 42px); margin-top: 6px; }
+      .closing__actions a { justify-content: center; color: var(--ink); font-size: clamp(13px, 1vw, 16px); }
+      .site-footer { padding: 10px var(--pad-x) max(28px, env(safe-area-inset-bottom)); gap: 10px; }
+      .site-footer__wordmark { display: none; }
+      .site-footer__line { opacity: 1; transform: none; }
+      .site-footer__top { bottom: max(10px, env(safe-area-inset-bottom)); }
 
       @media (max-width: 900px) {
         .hero-is__cycle { white-space: normal; height: 2.1em; max-width: 14ch; }
@@ -646,11 +660,11 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-gpt-teaser.js?v=forest-journey-6"></script>
+    <script src="scene-gpt-teaser.js?v=forest-journey-7"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot.js?v=forest-journey-4"></script>
-    <script src="stat-field-gpt.js?v=forest-journey-6"></script>
+    <script src="swot.js?v=forest-journey-5"></script>
+    <script src="stat-field-gpt.js?v=forest-journey-7"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -708,7 +722,7 @@
             ScrollTrigger.create({
               trigger: ".hero",
               start: "top top",
-              end: function () { return "+=" + Math.round(window.innerHeight * 1.75); },
+              end: function () { return "+=" + Math.round(window.innerHeight * 1.10); },
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) {
@@ -805,7 +819,7 @@
         // Wave 1 draws only after that cloud has begun to open.
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p1, 0.68); },
+          start: function () { return at(p1, 0.92); },
           end: function () { return at(p2, 0.18); },
           scrub: true,
           invalidateOnRefresh: true,
@@ -1022,13 +1036,11 @@
             ScrollTrigger.create({
               trigger: panel,
               start: "top top",
-              // Match each panel's actual pin length so the eyebrow mark's
-              // assemble/hold/release lines up with the pin. #proof has a longer
-              // pin (see swot.js), so its mark must animate across that range
-              // instead of finishing (leaving) early.
+              // Match each panel's actual pin length so the mark reaches the
+              // reverse half before the panel releases.
               end: panel.id === "proof"
                 ? (mobileLike ? "+=220%" : "+=380%")
-                : (mobileLike ? "+=100%" : "+=200%"),
+                : (mobileLike ? "+=100%" : "+=150%"),
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) { scrub(self.progress); },

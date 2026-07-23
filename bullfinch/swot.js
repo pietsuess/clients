@@ -214,7 +214,9 @@
     var px = mapRange(p, 0.84, 0.96);
     if (inner) {
       inner.style.opacity = 1 - px;
-      inner.style.transform = "translateY(" + (-24 * px) + "px)";
+      inner.style.transform = panel.id === "problem"
+        ? "translateY(calc(-34% - " + (24 * px) + "px))"
+        : "translateY(" + (-24 * px) + "px)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.80, 0.96));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
