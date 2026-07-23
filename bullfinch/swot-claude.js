@@ -14,8 +14,8 @@
    PANEL PIN (scrub: true):
      ~5%  – 45%  elements write on in sequence (eyebrow → verdict →
                  evidence/audience → numeric → trust line)
-     45%  – 88%  HOLD (reader can stop scrolling and read)
-     88%  – 98%  un-write in place; gone before the pin releases
+     45%  – 80%  HOLD (reader can stop scrolling and read)
+     80%  – 100% un-write in place, in lockstep with the 01->02 motes/forest
 
    HERO EXIT (over ~0.30 of the hero scroll):
      headline WIPES out top-down in place (no fade) while the forest
@@ -202,7 +202,10 @@
     // drift and no crossfade. The blocks themselves never move. Tree readouts
     // are owned entirely by writeTreeData in the HTML (write-on + count-up) —
     // never touch their opacity or transform here.
-    var leave = smooth01(mapRange(p, 0.88, 0.98));
+    // R1: the 01 copy un-writes over [0.80, 1.0] of the pin — the SAME range and
+    // easing the HTML unified 01->02 trigger uses to spread the motes, fade the
+    // seed and wipe the forest diagonal, so all four move together on one scrub.
+    var leave = smooth01(mapRange(p, 0.80, 1.00));
 
     if (inner) {
       // The container itself carries chrome (03's frosted background + blur,

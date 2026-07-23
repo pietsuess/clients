@@ -331,7 +331,11 @@
     // RANDOM screen Y, not index-stratified: the cascade children are index
     // neighbours of the seed, and stratifying y by index parked every
     // connected mote at the same height — the ugly horizontal band of lines.
-    var openScreenY = -1.25 + 2.5 * Math.random();
+    // R7: sample the VISIBLE band evenly (NDC y beyond ~±1 is off-frame, so the
+    // old -1.25..1.25 wasted ~10% of motes below the bottom edge and read as
+    // bottom-clustered). -1.0..1.15 fills the frame top-to-bottom, slight upward
+    // bias against the downward camera tilt at the 02 release.
+    var openScreenY = -1.0 + 2.15 * Math.random();
     // Piet: we must be INSIDE the 02 mote field, not looking at it from afar.
     // Ray distances start right at the camera (big near motes sweeping past as
     // the dolly moves through) and run deep for real depth.
@@ -1482,6 +1486,7 @@
   // (convergence dot).
   var statDotWorldSize = 76;
   var statBoxSizePx = 0;
+  var statViewProbe = new THREE.Vector3();
   function rebuildStarFieldHomes() {
     for (var i = 0; i < PARTICLE_POOL; i++) {
       if (i === 1) continue;                     // convergence dot: not in the cloud
@@ -1514,11 +1519,11 @@
       box.style.height = gridPx + "px";
       statBoxSizePx = gridPx;
     }
-    // Exact rendered size: aSize such that the shader projects the disc at
-    // dotPx CSS px on the z=0 grid plane — the WebGL dot and the layout
-    // pitch can no longer drift apart.
+    // aSize is computed AFTER the grid centre is known (below) from the TRUE
+    // view-space depth of the grid plane. Round 6 used camera.position.z, which
+    // ignores the camera tilt, so the disc oversized past the pitch and the
+    // 10x10 fused into overlapping blobs.
     var statScale = lerp(0.82, 0.76, statFormP);
-    statDotWorldSize = dotPx * Math.max(1, camera.position.z) / Math.max(0.1, statScale);
     var centerX, centerY;
     var boxRect = box && box.getBoundingClientRect();
     if (boxRect && boxRect.width > 1 && panel) {
@@ -1537,6 +1542,18 @@
       centerX = rect.left - gapPx - (dotPx * 10 + 36) / 2;
       centerY = rect.top + rect.height / 2;
     }
+    // R4: land the rendered disc at a CLEAN fraction of the layout pitch so the
+    // 10x10 reads as distinct dots (the dark original), not a blob. The shader's
+    // size model is aSize*uPointScale*uPixelRatio / (-mv.z), so a disc of
+    // targetPx CSS px needs aSize = targetPx * (-mv.z) / uPointScale. uPointScale
+    // == statScale during the grid; (-mv.z) is the grid centre's real view-space
+    // depth (camera.z alone breaks under the tilt).
+    var STAT_DOT_PITCH_RATIO = 0.82;
+    var gridCentreWorld = statScreenToWorld(centerX, centerY, 0);
+    statViewProbe.set(gridCentreWorld.x, gridCentreWorld.y, gridCentreWorld.z)
+                 .applyMatrix4(camera.matrixWorldInverse);
+    var statViewDepth = Math.max(0.1, -statViewProbe.z);
+    statDotWorldSize = (stepPx * STAT_DOT_PITCH_RATIO) * statViewDepth / Math.max(0.1, statScale);
     for (var i = 0; i < PARTICLE_POOL; i++) {
       var slot = statSlotByMote[i];
       if (slot < 0) continue;                 // index 1 (convergence dot) is not in the grid
@@ -1553,12 +1570,64 @@
     }
   }
 
+  // R8: LINEAR dolly + tilt across the whole scroll, driven by absolute scroll
+  // (uLayerTint). Runs at the TOP of each frame so the grid anchor and the
+  // camera-relative star homes are built against the current camera — fully
+  // deterministic on a nav jump (no stale-camera pop).
+  function positionCamera(dt) {
+    var lt = uniforms.uLayerTint.value;
+    var dollyT = lt;                              // raw scroll progress, linear
+    var dollyX = lerp(CAM_START.x, CAM_END.x, dollyT);
+    var dollyY = lerp(CAM_START.y, CAM_END.y, dollyT);
+    var dollyZ = lerp(CAM_START.z, CAM_END.z, dollyT);
+    // Pull back over the grove formation band to take in all three trees,
+    // then rejoin the scripted dolly before the closing choreography.
+    dollyZ += treeZoomBump();
+    // Clamp defensively (must never cross 0.5).
+    if (dollyY < 0.5) dollyY = 0.5;
+
+    // Cursor parallax — fades out as the camera lands so the
+    // landing stays still. Effectively zero past progress 0.90.
+    var parallaxAttenuation = hasFinePointer ? (1.0 - smoothstep(0.85, 1.0, lt)) : 0.0;
+    if (hasFinePointer) {
+      var halfH = Math.tan((55 * Math.PI / 180) / 2) * Math.max(0.5, Math.abs(dollyZ));
+      var halfW = halfH * camera.aspect;
+      var maxX = (18 / window.innerWidth) * halfW * 2 * parallaxAttenuation;
+      var maxY = (10 / window.innerHeight) * halfH * 2 * parallaxAttenuation;
+      var targetX = mouseNX * maxX;
+      var targetY = -mouseNY * maxY;
+      camParX += (targetX - camParX) * 0.05;
+      camParY += (targetY - camParY) * 0.05;
+    } else {
+      camParX = 0;
+      camParY = 0;
+    }
+
+    var flatTreeView = smoothstep(0.05, 0.25, treeFormP);
+    camera.position.x = dollyX + camParX;
+    camera.position.y = lerp(dollyY + camParY, TREE_CAMERA_Y, flatTreeView);
+    camera.position.z = dollyZ;
+    // LINEAR camera tilt across the entire scroll, not eased to the end.
+    // At scroll 0: gaze down into the low forest-floor mote layer.
+    // At scroll 1: gaze ANGLED DOWN (lookAt y = -1.5).
+    var lookY = lerp(lerp(-1.0, -1.5, dollyT), TREE_CAMERA_Y, flatTreeView);
+    camera.lookAt(0, lookY, 0);
+  }
+
   function animate() {
     if (visible) {
       var elapsed = clock.getElapsedTime();
       var dt = Math.min(0.05, Math.max(0, elapsed - lastElapsed));
       lastElapsed = elapsed;
       uniforms.uTime.value = elapsed;
+
+      // R8: position the camera FIRST, from absolute scroll (uLayerTint), so the
+      // grid anchor and the camera-relative star homes below are built against
+      // THIS frame's camera. Round 6 positioned the camera at the END of the
+      // frame, so updateStatGridTargets/rebuildStarFieldHomes used the PREVIOUS
+      // frame's camera — on a nav jump that stale camera flung the homes to
+      // off-screen points for a frame (the pop-then-settle). Now deterministic.
+      positionCamera(dt);
 
       // The opening mote ground is spatially driven by scroll, not time. This
       // makes every position fully reversible when scroll direction changes.
@@ -1674,48 +1743,9 @@
       // Update line buffer (reads live positions for both endpoints).
       updateEdgePositionsAnimated(dt);
 
-      // LINEAR dolly across the ENTIRE scroll (no easing, no early hold).
-      // The user wanted a slow continuous camera pan over the whole journey.
-      // Removing smoothstep + tightening to 0..1 means it never finishes early.
-      var lt = uniforms.uLayerTint.value;
-      var dollyT = lt;                              // raw scroll progress, linear
-      var dollyX = lerp(CAM_START.x, CAM_END.x, dollyT);
-      var dollyY = lerp(CAM_START.y, CAM_END.y, dollyT);
-      var dollyZ = lerp(CAM_START.z, CAM_END.z, dollyT);
-      // Pull back over the grove formation band to take in all three trees,
-      // then rejoin the scripted dolly before the closing choreography.
-      dollyZ += treeZoomBump();
-      // Clamp defensively (must never cross 0.5).
-      if (dollyY < 0.5) dollyY = 0.5;
-
-      // Cursor parallax — fades out as the camera lands so the
-      // landing stays still. Effectively zero past progress 0.90.
-      var parallaxAttenuation = hasFinePointer ? (1.0 - smoothstep(0.85, 1.0, lt)) : 0.0;
-      if (hasFinePointer) {
-        var halfH = Math.tan((55 * Math.PI / 180) / 2) * Math.max(0.5, Math.abs(dollyZ));
-        var halfW = halfH * camera.aspect;
-        var maxX = (18 / window.innerWidth) * halfW * 2 * parallaxAttenuation;
-        var maxY = (10 / window.innerHeight) * halfH * 2 * parallaxAttenuation;
-        var targetX = mouseNX * maxX;
-        var targetY = -mouseNY * maxY;
-        camParX += (targetX - camParX) * 0.05;
-        camParY += (targetY - camParY) * 0.05;
-      } else {
-        camParX = 0;
-        camParY = 0;
-      }
-
-      var flatTreeView = smoothstep(0.05, 0.25, treeFormP);
-      camera.position.x = dollyX + camParX;
-      camera.position.y = lerp(dollyY + camParY, TREE_CAMERA_Y, flatTreeView);
-      camera.position.z = dollyZ;
-      // LINEAR camera tilt across the entire scroll, not eased to the end.
-      // At scroll 0: gaze down into the low forest-floor mote layer.
-      // At scroll 1: gaze ANGLED DOWN (lookAt y = -1.5).
-      // Drives a slow, continuous downward pan over the whole journey.
-      var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
-      var lookY = lerp(lerp(-1.0, -1.5, rawProgress), TREE_CAMERA_Y, flatTreeView);
-      camera.lookAt(0, lookY, 0);
+      // R8: camera dolly/tilt now runs in positionCamera(dt) at the TOP of the
+      // frame (see the call above) so the grid + star homes use the current
+      // camera. Nothing to do here.
 
       // Contact blast: TIME-based slow bloom, armed by scroll crossing the land
       // point (see setConvergenceProgress). Plays over SHOCKWAVE_DURATION at a
@@ -2049,11 +2079,13 @@
 
     // Publish each trunk's viewport X as a CSS var so the DOM species
     // readouts sit CENTRED over the peaks of their trees on any viewport.
-    // LATCHED: only publish while the grove is FULLY formed — on reverse
-    // scroll the camera un-flattens and the projection moves, which made the
-    // fixed labels slide horizontally. Below full formation the last
-    // published values stay put and the data just un-writes in place.
-    if (treeMeans && treeFormP >= 0.80) {
+    // R6a: publish as soon as the camera has FLATTENED (treeFormP >= 0.25,
+    // where flatTreeView is already 1 and the projection is stable) — well
+    // before the readouts write on at treeFormP 0.80. That kills the
+    // fallback-to-projected POP: --tree-x is already correct on the first
+    // visible frame, so no default-then-correct jump. Below 0.25 the camera
+    // un-flattens, but the readouts are invisible there so it can't be seen.
+    if (treeMeans && treeFormP >= 0.25) {
       for (var tlx = 0; tlx < 3; tlx++) {
         treeLabelVec.set(groveCX + treeMeans[tlx] * SX, baseY + S, TREE_CZ).project(camera);
         document.documentElement.style.setProperty(

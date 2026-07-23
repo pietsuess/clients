@@ -739,10 +739,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-10"></script>
+    <script src="scene-claude-teaser.js?v=claude-11"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-8"></script>
+    <script src="swot-claude.js?v=claude-9"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -844,17 +844,17 @@
             }
             paintForestEdge();
             window.setTimeout(startHeroArrival, 120);
-            ScrollTrigger.create({
-              trigger: ".hero",
-              start: "top top",
-              end: function () { return "+=" + Math.round(window.innerHeight * 1.10); },
-              scrub: true,
-              invalidateOnRefresh: true,
-              onUpdate: function (self) {
-                forestScroll = self.progress;
-                paintForestEdge();
-              },
-            });
+            // R1/R3: the forest diagonal no longer wipes during the hero. It
+            // holds at its settled edge through 01, then wipes across the frame
+            // during the 01->02 transition, in lockstep with the copy un-write
+            // and the mote spread (the unified trigger in the next script block
+            // calls this setter). Removing this second ScrollTrigger on ".hero"
+            // (it was competing with swot-claude's hero PIN and letting the hero
+            // copy scroll up and crop) also stops the sliding subtitle.
+            window.__bfSetForestCover = function (v) {
+              forestScroll = v < 0 ? 0 : (v > 1 ? 1 : v);
+              paintForestEdge();
+            };
             var root = document.documentElement;
             var grade = {
               bg: ["#e7dfc4", "#11271b"],
@@ -995,13 +995,15 @@
         // trigger reverses the grid back into the ground.
         ScrollTrigger.create({
           trigger: document.body,
-          start: "top top",
-          end: function () { return p1.start; },
+          start: function () { return p1.start; },
+          end: function () { return at(p1, 0.30); },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
-            // LINEAR, not eased: motes visibly rise from the first scroll
-            // pixel (eased starts hid all early motion).
+            // R2: the grid assembles across the 01 pin's first 30% — the SAME
+            // band the panel copy writes on (swot WRITE_ORDER ~0.05-0.45) — so
+            // the dots LAND as the words populate. Linear, so the assembly is
+            // visible from the first pixel of the pin.
             setStatStage(self.progress);
           },
           onLeaveBack: function () { setStatStage(0); },
@@ -1016,14 +1018,27 @@
         // finishes exactly as we REACH 02. Never a fast split then a dead sit.
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p1, 0.84); },
-          end: function () { return p2.start; },
+          start: function () { return at(p1, 0.80); },
+          end: function () { return p1.end; },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
-            var p = smootherstep(self.progress);
+            // R1: ONE scrub over ONE range ([0.80, 1.0] of the 01 pin) runs the
+            // whole 01->02 handoff SIMULTANEOUSLY — grid releases into the 02
+            // cloud, seed fades out in place (R5), forest diagonal wipes across —
+            // in lockstep with the 01 copy un-write (swot uses the same [0.80,1.0]
+            // band and the same smoothstep easing below).
+            var p = self.progress; p = p * p * (3 - 2 * p);   // smoothstep, matches swot leave
             setStatStage(1 - p);
             if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
+            if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1 - p);   // R5: seed gone by 02
+            if (window.__bfSetForestCover) window.__bfSetForestCover(p);                              // R1: forest wipe
+          },
+          onLeaveBack: function () {
+            // Scrolled back above the transition: seed visible again for 01,
+            // forest back to its settled (un-wiped) edge.
+            if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1);
+            if (window.__bfSetForestCover) window.__bfSetForestCover(0);
           },
         });
 
