@@ -739,10 +739,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-9"></script>
+    <script src="scene-claude-teaser.js?v=claude-10"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-7"></script>
+    <script src="swot-claude.js?v=claude-8"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -1000,7 +1000,9 @@
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
-            setStatStage(smootherstep(self.progress));
+            // LINEAR, not eased: motes visibly rise from the first scroll
+            // pixel (eased starts hid all early motion).
+            setStatStage(self.progress);
           },
           onLeaveBack: function () { setStatStage(0); },
         });
@@ -1010,10 +1012,12 @@
         // starts at 0.88, so the motes spread exactly as the copy leaves) —
         // running past the unpin made the DOM grid anchor ride up the page
         // while the motes chased their 02 stations downward.
+        // Piet: ONE slow spread — it starts as the 01 copy starts leaving and
+        // finishes exactly as we REACH 02. Never a fast split then a dead sit.
         ScrollTrigger.create({
           trigger: document.body,
           start: function () { return at(p1, 0.84); },
-          end: function () { return at(p1, 1.0); },
+          end: function () { return p2.start; },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {

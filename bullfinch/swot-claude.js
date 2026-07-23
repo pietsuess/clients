@@ -68,26 +68,38 @@
   }
 
   // ===== Hero exit motion ================================================
-  // The copy leaves quickly while the single forest diagonal continues its
-  // slower hide on a separate, longer trigger in GPT-Teaser.html.
+  // Piet: the hero must NOT scroll up and get cropped. It is PINNED and its
+  // copy is erased IN PARTS, in place — brand row, headline, prefix, cycle,
+  // subtitle wiped one after another — then the emptied hero releases.
   var hero = document.querySelector(".hero");
   if (hero && !reduced) {
+    var HERO_PARTS = [
+      { sel: ".hero-brand-row",   dir: "x" },
+      { sel: ".hero-is__label",   dir: "x" },
+      { sel: ".hero-is__prefix",  dir: "x" },
+      { sel: ".hero-is__cycle",   dir: "x" },
+      { sel: ".hero__subtitle",   dir: "y" }
+    ];
     ScrollTrigger.create({
       trigger: hero,
       start: "top top",
-      end: "bottom top",
+      end: "+=80%",
+      pin: true,
+      pinSpacing: true,
       scrub: true,
+      anticipatePin: 1,
       onUpdate: function (self) {
         var p = self.progress;
-        var out = smooth01(mapRange(p, 0.04, 0.30));
-        var inner = hero.querySelector(".hero__inner");
-        if (inner) {
-          // No fade: the headline is WIPED away top-down in place — erased
-          // like cleared data — while the forest diagonal continues its own
-          // slower hide behind it. Fully reversible on upward scroll.
-          inner.style.clipPath = "inset(" + (out * 100).toFixed(2) + "% 0 0 0)";
+        for (var hi = 0; hi < HERO_PARTS.length; hi++) {
+          var el = hero.querySelector(HERO_PARTS[hi].sel);
+          if (!el) continue;
+          var out = smooth01(mapRange(p, 0.06 + hi * 0.13, 0.34 + hi * 0.13));
+          var hid = (out * 100).toFixed(2) + "%";
+          el.style.clipPath = HERO_PARTS[hi].dir === "x"
+            ? "inset(0 0 0 " + hid + ")"
+            : "inset(0 0 " + hid + " 0)";
         }
-        setTextVeilOpacity((1 - out) * 0.84);
+        setTextVeilOpacity((1 - smooth01(mapRange(p, 0.06, 0.60))) * 0.84);
       },
     });
   }
@@ -213,10 +225,13 @@
     // so the lower bar (audience grid + partners strip) must not trickle in
     // on the generic bands (~45% of the pin). Compressed bands finish it by
     // ~0.18 — effectively with the data.
+    // Trees form by 0.08 of the pin and the species data finishes WITH the
+    // formation — so the whole lower bar must be done by ~0.08 too, not
+    // trailing after (Piet: finishes at the SAME time as the data).
     var fastBar = panel.id === "opportunity";
-    var FAST_S = [0.02, 0.03, 0.05, 0.05, 0.07, 0.08];
-    var writeWindow = fastBar ? 0.10 : 0.16;
-    var writeStagger = fastBar ? 0.01 : 0.03;
+    var FAST_S = [0.00, 0.01, 0.02, 0.02, 0.03, 0.03];
+    var writeWindow = fastBar ? 0.045 : 0.16;
+    var writeStagger = fastBar ? 0.005 : 0.03;
 
     for (var si = 0; si < WRITE_ORDER.length; si++) {
       var group = panel.querySelectorAll(WRITE_ORDER[si].sel);
@@ -299,25 +314,10 @@
     panelTriggers.push(panelTrigger);
   });
 
-  // ===== Seed (first red dot) reveal =====================================
-  // Invisible while the hero headline holds; scales 0 -> full over the scroll
-  // from the hero into section 01 (the first panel reaching the top).
-  if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setSeedReveal) {
-    var firstPanel = panels[0];
-    if (firstPanel) {
-      window.bullfinchCanopy.setSeedReveal(0);
-      ScrollTrigger.create({
-        trigger: firstPanel,
-        start: "top bottom",   // panel 01 enters as the hero scrolls away
-        end: "top top",        // panel 01 pinned at top = section 01 arrived
-        scrub: true,
-        invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          window.bullfinchCanopy.setSeedReveal(self.progress);
-        },
-      });
-    }
-  }
+  // ===== Seed (first red dot) ============================================
+  // Piet: the seed is VISIBLE FROM THE VERY FIRST SCREEN, seated at the
+  // exact screen spot it occupies in the pinned grid, and it does not move
+  // until after the grid. No reveal trigger — the scene defaults it to 1.
 
   // ===== Product case: size model to the space left above the text =======
   // The text is bottom-anchored in CSS so it is ALWAYS fully on screen. Measure

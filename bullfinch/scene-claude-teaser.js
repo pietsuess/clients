@@ -339,6 +339,13 @@
     openScreenXs[i] = openScreenX;
     openScreenYs[i] = openScreenY;
     openDists[i] = openDistance;
+    if (i === 0) {
+      // Seed's 02 station: a fixed CAMERA-RELATIVE spot near the top so it
+      // rides the view like the rest of the cloud (no world-space up-travel).
+      openScreenXs[0] = 0.28;
+      openScreenYs[0] = 0.55;
+      openDists[0] = 4.0;
+    }
     openProbe.set(openScreenX, openScreenY, 0.35).unproject(openFieldCamera);
     openDirection.copy(openProbe).sub(openFieldCamera.position).normalize();
     var fieldX = openFieldCamera.position.x + openDirection.x * openDistance;
@@ -368,7 +375,9 @@
     alphas[i] = 0;
     isRedMote[i] = 0;
     sizes[i] = BASE_MOTE_SIZE;
-    statAssemblyDelay[i] = 0.26 + Math.random() * 0.58;
+    // Near-zero minimum: motes start rising the moment assembly begins
+    // (Piet: populate as soon as the hero text starts disassembling).
+    statAssemblyDelay[i] = 0.05 + Math.random() * 0.60;
     // Tighter assembly arc: the wide overshoot flung motes left across the 01
     // headline mid-formation. Keep the swirl subtle so the grid resolves inside
     // its own column and never crosses into the "So 19th Century" line.
@@ -390,7 +399,9 @@
       // depth running from deep space right up to the landed camera (z 3.0),
       // so near motes read huge and the volume surrounds the viewer.
       closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.35;
-      closingFieldHome[ci * 3 + 1] = -3.4 + Math.random() * 7.0;
+      // Concentrated on the landed camera's visible band (view centre is
+      // world y=-1.5 at z=0) so the frame fills TOP to bottom, no low clump.
+      closingFieldHome[ci * 3 + 1] = -2.8 + Math.random() * 5.4;
       closingFieldHome[ci * 3 + 2] = -4.0 + Math.random() * 6.4;   // up to z 2.4, right at the camera
     } else {
       var closingAngle = Math.random() * Math.PI * 2;
@@ -1469,8 +1480,11 @@
   // through 02 is plain dolly parallax. Fully reversible: scrolling back re-
   // enters the band and re-projects again. Skips 0 (seed station) and 1
   // (convergence dot).
+  var statDotWorldSize = 76;
+  var statBoxSizePx = 0;
   function rebuildStarFieldHomes() {
-    for (var i = 2; i < PARTICLE_POOL; i++) {
+    for (var i = 0; i < PARTICLE_POOL; i++) {
+      if (i === 1) continue;                     // convergence dot: not in the cloud
       openProbe.set(openScreenXs[i], openScreenYs[i], 0.35).unproject(camera);
       openDirection.copy(openProbe).sub(camera.position).normalize();
       starFieldHome[i * 3]     = camera.position.x + openDirection.x * openDists[i];
@@ -1487,15 +1501,34 @@
     // in its own column slot; flex keeps the readout to its right. Falls back to
     // the readout's left edge if the box hasn't been laid out.
     var box = document.getElementById("statGrid");
+    var panel = document.getElementById("problem");
     // Match the original dark version's read: BIG dots, near-touching pitch
     // (diameter ~85% of cell pitch) so the 10x10 is one confident block.
     var dotPx = Math.max(13, Math.min(19, window.innerWidth * .014));
-    var stepPx = dotPx * 1.15;
+    var stepPx = dotPx * 1.12;
+    // Reserve the grid's TRUE footprint in the DOM so the copy below sits
+    // clear of the last row instead of crowding it.
+    var gridPx = Math.round(stepPx * 9 + dotPx + 44);
+    if (box && statBoxSizePx !== gridPx) {
+      box.style.width = gridPx + "px";
+      box.style.height = gridPx + "px";
+      statBoxSizePx = gridPx;
+    }
+    // Exact rendered size: aSize such that the shader projects the disc at
+    // dotPx CSS px on the z=0 grid plane — the WebGL dot and the layout
+    // pitch can no longer drift apart.
+    var statScale = lerp(0.82, 0.76, statFormP);
+    statDotWorldSize = dotPx * Math.max(1, camera.position.z) / Math.max(0.1, statScale);
     var centerX, centerY;
     var boxRect = box && box.getBoundingClientRect();
-    if (boxRect && boxRect.width > 1) {
+    if (boxRect && boxRect.width > 1 && panel) {
+      // PIN-RELATIVE anchor (Piet): the grid's home is where the box sits
+      // when 01 is PINNED (panel top at viewport top) — the exact same
+      // screen spot from the very first frame to the last. The grid, and
+      // the seed at its centre, NEVER ride the page in either direction.
+      var panelTop = panel.getBoundingClientRect().top;
       centerX = boxRect.left + boxRect.width / 2;
-      centerY = boxRect.top + boxRect.height / 2;
+      centerY = (boxRect.top - panelTop) + boxRect.height / 2;
     } else {
       var read = document.querySelector("#problem .stat-read");
       if (!read) return;
@@ -1533,7 +1566,11 @@
       partMat.uniforms.uStatForm.value = statFormP;
       partMat.uniforms.uStatFill.value = statFillP;
       updateStatGridTargets();
-      if (openFieldP > 0 && openFieldP < 1) rebuildStarFieldHomes();
+      // ALWAYS camera-relative while released (Piet: the cloud must never
+      // travel up as the dolly descends — and never pop when nav-jumping
+      // back). The cloud is rigidly attached to the live camera; the only
+      // on-screen motion is the spread itself.
+      if (openFieldP > 0) rebuildStarFieldHomes();
       var statSizeDirty = false;
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
@@ -1589,7 +1626,7 @@
           // Grid members go FULLY opaque as the stat forms (block contrast);
           // non-grid motes keep the ambient 0.9.
           alphas[i] = statSlot >= 0 ? lerp(0.9 * gate, 1.0, statFormP) : 0.9 * gate;
-          var statSize = lerp(BASE_MOTE_SIZE, 104, statFormP);
+          var statSize = lerp(BASE_MOTE_SIZE, statDotWorldSize, statFormP);
           if (sizes[i] !== statSize) { sizes[i] = statSize; statSizeDirty = true; }
         }
         // Decay rim-glow at 1/1.2s. Glow values are set to 1.0 by the line
@@ -1608,7 +1645,9 @@
 
       // Seed reveal: scale the first red dot from 0 -> full (RED_MOTE_SIZE).
       // aSize is shared with redGeo, so one needsUpdate refreshes both draws.
-      var seedTargetSize = RED_MOTE_SIZE * seedReveal;
+      // Seed renders at exactly one grid cell's size — it IS a cell of the
+      // grid, just red, from the very first frame.
+      var seedTargetSize = statDotWorldSize * seedReveal;
       if (sizes[0] !== seedTargetSize) {
         sizes[0] = seedTargetSize;
         partGeo.attributes.aSize.needsUpdate = true;
@@ -2014,7 +2053,7 @@
     // scroll the camera un-flattens and the projection moves, which made the
     // fixed labels slide horizontally. Below full formation the last
     // published values stay put and the data just un-writes in place.
-    if (treeMeans && treeFormP >= 0.999) {
+    if (treeMeans && treeFormP >= 0.80) {
       for (var tlx = 0; tlx < 3; tlx++) {
         treeLabelVec.set(groveCX + treeMeans[tlx] * SX, baseY + S, TREE_CZ).project(camera);
         document.documentElement.style.setProperty(
