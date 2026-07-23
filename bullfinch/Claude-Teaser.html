@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+
+    <title>Bullfinch Earth - Ground Truth for Forestry</title>
+    <meta name="description" content="Bullfinch Earth measures, monitors, and maps every stem, passively, while foresters do their normal jobs." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bullfinch Earth - Nature from the Ground Up" />
+    <meta property="og:description" content="Ground truth for forestry, wildfire, carbon, and biodiversity. Every stem, passively measured." />
+    <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
+
+    <script>
+      (function () {
+        if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+        window.scrollTo(0, 0);
+        document.documentElement.setAttribute("data-theme", "light");
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" />
+    <link rel="stylesheet" href="styles.css?v=v4-6" />
+
+    <style>
+      /* =====================================================================
+         DAYLIGHT / BEIGE grade (teaser). Overrides styles.css's single dark
+         theme on :root[data-theme="light"]. The forked scene (scene-teaser-pc.js)
+         reads these --gl-* vars at init so the point cloud is dark trees on light.
+         --bg and --ink are ALSO animated live by the night driver (day -> night)
+         so the whole page + scene grade together with no bad-contrast middle.
+         ===================================================================== */
+      :root[data-theme="light"] {
+        --bg: #ECE6D3;             /* paper / beige */
+        --bg-elev: #E2DBC4;
+        --ink: #14200D;            /* deep forest green (darker text) */
+        --ink-soft: #4E5A3E;
+        --ink-quiet: #838A6F;
+        --accent: #B3402E;         /* brick red (scene seed + CTA) */
+        --green: #2F7D32;          /* brighter forest green (hero accents) */
+        --rule: rgba(20, 32, 13, 0.14);
+
+        --gl-base: #ECE6D3;
+        --gl-canopy: #E2DCC6;
+        --gl-understory: #D2C7A6;
+        --gl-light-shaft: #C7B587;
+        --gl-mote: #26331C;        /* dark motes = dark trees on light */
+        --gl-line: rgba(38, 51, 28, 0.4);
+        --gl-accent: #B3402E;
+
+        --text-veil-bg-strong: 28%;
+        --text-veil-bg-soft: 15%;
+        --text-veil-blur: 16px;
+        --text-veil-saturate: 1.0;
+      }
+      .site-nav a { color: rgba(20, 32, 13, 0.55); }
+      .panel__numeric { color: rgba(20, 32, 13, 0.5); }
+
+      /* Mark flips light once the descent turns to night (JS toggles .is-night). */
+      body.is-night .bullfinch-mark__dark { fill: #E9EDF6; }
+      body.is-night .site-nav a { color: rgba(233, 237, 246, 0.6); }
+
+      /* ---- Forest photo: HERO ONLY, wiped away on a 45deg diagonal ---------
+         Fixed layers behind the mote canvas. The beige cover (var --bg) sits
+         over the photo and its clip-path opens a right-side wedge (sun is on the
+         right); scrolling the first screen closes the wedge until the forest is
+         gone, handing off into the mote/tree world. */
+      .hero-forest {
+        position: fixed; inset: 0; z-index: -2;
+        background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
+        will-change: opacity;
+      }
+      .hero-cover {
+        position: fixed; inset: 0; z-index: -1;
+        background: var(--bg);
+        clip-path: polygon(0 0, 50% 0, 62% 100%, 0 100%);
+        will-change: clip-path;
+      }
+
+      /* ---- Top-right logo: the ball-to-logo plays here, then the logo lives
+         here permanently (nav brand moved to the right). ---------------------- */
+      .site-nav { justify-content: space-between; }
+      .corner-logo {
+        position: fixed;
+        top: clamp(14px, 2.4vh, 26px);
+        right: clamp(16px, 2.4vw, 34px);
+        width: clamp(52px, 6vw, 78px);
+        height: clamp(52px, 6vw, 78px);
+        z-index: 60;
+      }
+      .corner-logo__seq { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .corner-logo__mark {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        opacity: 0; transition: opacity 0.5s ease;
+        cursor: pointer;
+      }
+      .corner-logo.is-done .corner-logo__seq { opacity: 0; }
+      .corner-logo.is-done .corner-logo__mark { opacity: 1; }
+
+      /* ---- Hero: BULLFINCH IS + fixed-slot rotating use-case (no reflow) ---- */
+      .hero { text-align: center; }
+      .hero__inner { align-items: center; margin: 0 auto; text-align: center; }
+      .hero__eyebrow { justify-content: center; }
+      .hero__is {
+        font-family: var(--font-display);
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: clamp(13px, 1.5vw, 17px);
+        color: var(--green);
+        margin: 0 0 0.5em 0;
+      }
+      .hero__gt {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: min(6.6vw, 6.2vh, 78px);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin: 0;
+      }
+      /* The rotating word sits in its OWN fixed-height, non-wrapping slot so
+         cycling to a longer phrase never re-breaks a line or moves anything. */
+      .hero__rotor {
+        height: 1.15em;
+        margin: 0.08em 0 0.5em 0;
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: min(6.6vw, 6.2vh, 78px);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        overflow: visible;
+      }
+      .rotator {
+        color: var(--green);
+        display: inline-block;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        will-change: opacity, transform;
+      }
+      .rotator.is-out { opacity: 0; transform: translateY(0.18em); }
+      .hero__sub {
+        max-width: 30ch;
+        margin: 0 auto;
+        color: var(--ink-soft);
+      }
+      .hero__actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: clamp(22px, 3.4vh, 38px); opacity: 0; transform: translateY(8px); transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s; }
+      body.has-entered .hero__actions { opacity: 1; transform: none; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; border-radius: 999px; font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; transition: transform 0.2s ease, filter 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+      .btn--primary { background: var(--accent); color: #FBF3E4; }
+      .btn--primary:hover { transform: translateY(-1px); filter: brightness(1.06); }
+      .btn--ghost { border: 1px solid var(--rule); color: var(--ink); }
+      .btn--ghost:hover { border-color: color-mix(in srgb, var(--green) 50%, var(--rule)); transform: translateY(-1px); }
+
+      /* ---- 02 dual-graphic: case PNG sequence LEFT, <1% dot-field RIGHT ----- */
+      #product { grid-template-columns: 1fr; }
+      #product .panel__inner {
+        grid-column: 1;
+        max-width: 640px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      #product .eyebrow-anchor { margin-left: auto; margin-right: auto; }
+      .easy-media {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        display: grid;
+        grid-template-columns: 1fr;
+        align-items: center;
+        justify-items: center;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      body.is-easy .easy-media { opacity: 1; }
+      .easy-media__case { width: min(44vw, 520px); }
+      .easy-media__case canvas { width: 100%; height: auto; }
+      .easy-media__stat { width: min(38vw, 420px); }
+      @media (max-width: 760px) {
+        .easy-media { grid-template-columns: 1fr; opacity: 0 !important; }
+      }
+
+      /* ---- 03 FROM THE GROUND UP: turntable trees centred, compressed copy
+         + logos in three lines at the bottom, species readout above ---------- */
+      #opportunity { grid-template-columns: 1fr; align-content: end; }
+      #opportunity .panel__inner {
+        grid-column: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        align-self: end;
+        padding-bottom: clamp(20px, 4vh, 44px);
+        text-align: center;
+      }
+      .grove-readout {
+        position: absolute;
+        top: clamp(90px, 16vh, 150px);
+        left: 0; right: 0;
+        display: flex;
+        justify-content: center;
+        gap: clamp(18px, 4vw, 56px);
+        font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace);
+        font-size: clamp(10px, 1.1vw, 13px);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        pointer-events: none;
+      }
+      .grove-readout span { display: inline-flex; align-items: baseline; gap: 8px; }
+      .grove-readout b { color: var(--green); font-weight: 600; }
+      .grove-readout em { font-style: normal; color: var(--ink-quiet); }
+      .ground-head {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: clamp(24px, 3.4vw, 40px);
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin: 0 0 12px 0;
+      }
+      .ground-roles {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: clamp(14px, 1.5vw, 18px);
+        color: var(--ink-soft);
+        margin: 0 0 16px 0;
+        text-wrap: balance;
+      }
+      .ground-roles .dot { color: var(--green); margin: 0 6px; }
+      .ground-logos {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(10px, 1.4vw, 22px);
+      }
+      .ground-logos .logo-cell {
+        display: flex; align-items: center; justify-content: center;
+        min-height: 46px; padding: 8px 14px;
+        background: #FFFFFF; border: 1px solid var(--rule); border-radius: 10px;
+      }
+      .ground-logos .logo-cell img { max-height: 26px; width: auto; opacity: 0.9; }
+      .ground-logos .logo-cell--text {
+        font-family: var(--font-display); font-weight: 600; font-size: 12px;
+        line-height: 1.15; color: #26331C; text-align: center;
+      }
+
+      /* ---- Closing: smaller headline (max 2 lines), logo stays on screen,
+         starfield behind (motes converge on night) --------------------------- */
+      .closing__title { font-size: min(5vw, 5.2vh, 60px); max-width: 16ch; }
+      .closing__logo { height: 64px; }
+      body.is-night .closing__title,
+      body.is-night .contact__note,
+      body.is-night .site-footer__line { color: #E9EDF6; }
+
+      /* ---- Contact form (Web3Forms, inert for now) ------------------------- */
+      .contact-form { width: 100%; max-width: 600px; margin: 4px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; }
+      @media (max-width: 560px) { .contact-form { grid-template-columns: 1fr; } }
+      .contact-form input, .contact-form textarea { width: 100%; padding: 13px 15px; border: 1px solid var(--rule); border-radius: 12px; background: color-mix(in srgb, var(--bg) 55%, #ffffff); color: var(--ink); font: inherit; font-size: 15px; }
+      .contact-form .full { grid-column: 1 / -1; }
+      .contact-form textarea { min-height: 88px; resize: vertical; }
+      .contact-form input::placeholder, .contact-form textarea::placeholder { color: var(--ink-quiet); }
+      .contact-form .btn { grid-column: 1 / -1; justify-self: center; }
+      .contact__note { margin-top: clamp(18px, 3vh, 30px); font-size: 14px; color: var(--ink-soft); }
+      .contact__note a { color: var(--ink); border-bottom: 1px solid color-mix(in srgb, var(--green) 55%, transparent); }
+      .site-footer__social { font-family: var(--font-mono, "Geist Mono", ui-monospace, monospace); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+
+      /* ---- 01 THE PROBLEM: two columns. LEFT = heading + intro paragraph.
+         RIGHT = the <1% stat dot-field graphic with the "Bullfinch fully
+         automates" paragraph directly BELOW it. Both paragraphs are block
+         justified, last line flush left. ------------------------------------ */
+      #problem { grid-template-columns: minmax(0, 1fr) minmax(300px, min(42vw, 500px)); gap: clamp(30px, 5vw, 92px); place-items: center; align-content: center; }
+      #problem .panel__inner { grid-column: 1; justify-self: start; max-width: 58ch; }
+      #problem .panel__evidence p,
+      #problem .problem-note { text-align: justify; text-align-last: left; }
+      #problem .problem-graphic {
+        grid-column: 2;
+        justify-self: stretch;
+        align-self: center;
+        display: flex;
+        flex-direction: column;
+        gap: clamp(18px, 2.8vh, 32px);
+      }
+      #problem .problem-graphic .panel__stat { z-index: 2; }
+      .problem-note { margin: 0; color: var(--ink-soft); max-width: 48ch;
+        font-size: clamp(14px, 1.05vw, 16px); line-height: 1.5; }
+      @media (max-width: 860px) {
+        #problem { grid-template-columns: 1fr; gap: 26px; align-content: center; }
+        #problem .panel__inner, #problem .problem-graphic { grid-column: 1; justify-self: center; }
+        #problem .problem-graphic { align-items: center; text-align: center; }
+      }
+
+      /* ---- <1% dot-field: BLACK field, ONE RED centre rendered ON TOP,
+         radiating to ALL RED as the readout counts up. ---------------------- */
+      #problem .stat-dot { background: color-mix(in srgb, var(--ink) 88%, transparent); opacity: 0.5; }
+      #problem .stat-dot.is-on { background: var(--accent); opacity: 1; position: relative; z-index: 1; }
+      #problem .stat-dot.is-one {
+        background: var(--accent); opacity: 1; position: relative; z-index: 2;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 26%, transparent);
+      }
+    </style>
+
+    <style>
+      /* Section marks (verbatim from the investor build). */
+      @property --build { syntax: "<number>"; inherits: true; initial-value: 1; }
+      @property --glow  { syntax: "<number>"; inherits: true; initial-value: 0; }
+      @property --pang  { syntax: "<angle>";  inherits: true; initial-value: 0deg; }
+      @property --rev   { syntax: "<number>"; inherits: true; initial-value: 1; }
+      .eyebrow-anchor { position: relative; width: -moz-fit-content; width: fit-content; margin: 0 0 32px 0; }
+      .eyebrow-anchor .panel__eyebrow { margin: 0; }
+      .section-mark { --mark-box: 128px; --mo: 2.5; --spin: 2; --glowk: 1; position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: calc(var(--mark-box) * -0.13); width: var(--mark-box); height: var(--mark-box); pointer-events: none; animation: gather 4s linear infinite alternate, reveal 4s cubic-bezier(0.33, 0, 0.2, 1) infinite alternate; animation-play-state: paused; }
+      .section-mark svg { width: 100%; height: 100%; display: block; overflow: visible; }
+      .section-mark .mw { fill: var(--ink); }
+      .section-mark .rfill { fill: var(--accent); }
+      .section-mark .red { filter: drop-shadow(0 0 calc(var(--glow, 0) * var(--glowk, 1) * 3px) var(--accent)); }
+      .section-mark .a-move { transform-box: fill-box; transform: translate(calc(var(--ox, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)), calc(var(--oy, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1))); }
+      .section-mark .a-grow { transform-box: fill-box; transform: scale(var(--p, var(--build, 1))); }
+      .section-mark .a-rot { transform-box: fill-box; transform: rotate(calc(var(--rot, 0deg) * (1 - var(--p, var(--build, 1))) * var(--spin, 1))); }
+      .section-mark .grp-spin { transform-box: view-box; transform: rotate(var(--pang, 0deg)); animation: peopleSpin 4s linear infinite alternate; animation-play-state: paused; }
+      .section-mark .fade { opacity: clamp(0, calc(var(--p, var(--build, 1)) * 1.6), 1); }
+      .section-mark .n-reveal { clip-path: inset(calc((1 - var(--rp, 1)) * 100%) 0% 0% 0%); }
+      .section-mark .n-slide { transform-box: fill-box; transform: translateX(calc(var(--sx, 0px) * (1 - var(--sp, 1)))); }
+      @keyframes gather { 0% { --build: 0; --glow: 0; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); } 56% { --build: 1; --glow: 0.7; } 100% { --build: 1; --glow: 0.95; } }
+      @keyframes peopleSpin { 0% { --pang: 360deg; } 44% { --pang: 180deg; } 80% { --pang: 33deg; animation-timing-function: cubic-bezier(0.17, 0.31, 0.5, 1); } 100% { --pang: -12deg; } }
+      @keyframes reveal { 0% { --rev: 0; } 100% { --rev: 1; } }
+      @media (prefers-reduced-motion: reduce) { .section-mark, .section-mark .grp-spin { animation: none; } }
+      @media (max-width: 720px) { .section-mark--corner { --mark-box: 104px; left: auto; top: auto; right: calc(var(--mark-box) * -0.16); bottom: calc(var(--mark-box) * -0.16); transform: none; margin-left: 0; z-index: 5; } }
+    </style>
+  </head>
+  <body>
+    <div class="hero-forest" aria-hidden="true"></div>
+    <div class="hero-cover" aria-hidden="true"></div>
+
+    <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+    <div class="text-veil" aria-hidden="true"></div>
+
+    <!-- 02 fixed graphic: the case device sequence (the <1% dot-field now lives in 01) -->
+    <div class="easy-media" aria-hidden="true">
+      <div class="easy-media__case">
+        <canvas id="case-animation" width="720" height="720" aria-hidden="true"></canvas>
+      </div>
+    </div>
+
+    <!-- Top-right: ball-to-logo plays here, then the logo lives here -->
+    <div class="corner-logo" id="cornerLogo" data-restart-splash>
+      <canvas class="corner-logo__seq" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
+      <svg class="corner-logo__mark bullfinch-mark" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+      </svg>
+    </div>
+
+    <header class="site-nav" aria-label="Website navigation">
+      <nav class="site-nav__links" aria-label="Primary">
+        <a href="#problem" data-scroll-target="#problem" data-nav-label="The problem" aria-label="01 The problem">01</a>
+        <a href="#product" data-scroll-target="#product" data-nav-label="How it works" aria-label="02 How it works">02</a>
+        <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="From the ground up" aria-label="03 From the ground up">03</a>
+        <a href="#closing" data-scroll-target="#closing" data-nav-label="Contact" aria-label="04 Contact">04</a>
+        <a class="site-nav__investor" href="index-pointcloud.html" data-nav-label="For investors" aria-label="For investors">Investors</a>
+      </nav>
+      <div class="site-nav__hover-label" id="site-nav-hover-label" aria-hidden="true"></div>
+    </header>
+
+    <main id="page">
+      <section class="hero" aria-label="Hero">
+        <div class="hero__inner">
+          <p class="hero__eyebrow"><span>BULLFINCH EARTH</span></p>
+          <p class="hero__is hero__line hero__line--1">Bullfinch is</p>
+          <p class="hero__gt hero__line hero__line--2">Ground truth for</p>
+          <div class="hero__rotor" aria-live="polite"><span class="rotator" id="rotator"><span class="rotator__word" id="rotatorWord">Forestry</span></span></div>
+          <p class="hero__sub">Bullfinch Earth measures, monitors, and maps <b>every stem</b> &ndash; passively &ndash; while foresters do their normal jobs.</p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#closing" data-scroll-target="#closing">Request a Demo</a>
+            <a class="btn btn--ghost" href="#problem" data-scroll-target="#problem">See how it works</a>
+          </div>
+        </div>
+        <div class="hero__scroll-cue" aria-hidden="true">
+          <span class="hero__scroll-cue-label">Scroll</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+        </div>
+      </section>
+
+      <section class="swot" id="swot" aria-label="Bullfinch Earth story">
+        <!-- 01 THE PROBLEM (text beat; the <1% dots now live on 02) -->
+        <article class="panel" id="problem" data-panel="1">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE PROBLEM</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Dedicated Inventories Are So 19th Century</h2>
+            <div class="panel__evidence">
+              <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It&rsquo;s slow, frustrating, and usually measures <b>&lt;1%</b> of what&rsquo;s actually there.</p>
+            </div>
+            <p class="panel__numeric">MANUAL PLOTS &middot; SMALL SAMPLES &middot; &lt;1% MEASURED</p>
+          </div>
+          <div class="problem-graphic">
+            <div class="panel__stat" aria-label="Today, manual forestry measures data for only 1% of trees">
+              <div class="stat-grid" id="statGrid" aria-hidden="true"></div>
+              <div class="stat-read">
+                <div class="stat-label">
+                  <span class="stat-line" id="statToday">TODAY</span>
+                  <span class="stat-line" id="statBull">BULLFINCH</span>
+                </div>
+                <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
+                <p class="stat-rest">of trees measured</p>
+              </div>
+            </div>
+            <p class="problem-note">Bullfinch fully automates the forest inventory process &ndash; no training, no stopping, no dedicated trip. Just do your job and the data flows. Continuously. Every time you&rsquo;re in the field. For any reason.</p>
+          </div>
+        </article>
+
+        <!-- 02 HOW IT WORKS (case device seq LEFT + <1% dots RIGHT, fixed layer) -->
+        <article class="panel" id="product" data-panel="2">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">02 &middot; HOW IT WORKS</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Is It Really This Easy?</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Wear.</span> Bullfinch attaches securely to your vest and stays blissfully out of your way.</p>
+              <p><span class="lead">Walk.</span> Just press &ldquo;Start Bullfinching&rdquo; and go do your thing.</p>
+              <p><span class="lead">Data.</span> Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you&rsquo;re in the field.</p>
+            </div>
+            <p class="panel__numeric">WEAR &middot; WALK &middot; DATA &middot; 30X MORE DATA</p>
+          </div>
+        </article>
+
+        <!-- 03 FROM THE GROUND UP (turntable trees centred; compressed copy + logos) -->
+        <article class="panel" id="opportunity" data-panel="3">
+          <div class="grove-readout" aria-hidden="true">
+            <span><b>Douglas Fir</b> <em>38.4m</em></span>
+            <span><b>Western Redcedar</b> <em>29.1m</em></span>
+            <span><b>Bigleaf Maple</b> <em>17.6m</em></span>
+          </div>
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; FROM THE GROUND UP</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+            <h2 class="ground-head">Who Need to Bullfinch?</h2>
+            <p class="ground-roles">Timber companies<span class="dot">&middot;</span>Consulting foresters<span class="dot">&middot;</span>Carbon &amp; MRV<span class="dot">&middot;</span>Wildfire &amp; Insurance<span class="dot">&middot;</span>Remote sensing</p>
+            <div class="ground-logos">
+              <span class="logo-cell"><img src="assets/logos/weyerhaeuser.svg" alt="Weyerhaeuser" loading="lazy" /></span>
+              <span class="logo-cell"><img src="assets/logos/nhri.png" alt="NHRI" loading="lazy" /></span>
+              <span class="logo-cell"><img src="assets/logos/longview.png" alt="Long View Forest" loading="lazy" /></span>
+              <span class="logo-cell"><img src="assets/logos/uksa.png" alt="UK Space Agency" loading="lazy" /></span>
+              <span class="logo-cell logo-cell--text">Forest Business Accelerator</span>
+              <span class="logo-cell logo-cell--text">Okanagan</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Close: night has fallen, motes converge to a central point (starfield) -->
+      <section class="closing" id="closing" aria-label="Closing">
+        <div class="closing__inner">
+          <svg class="closing__logo bullfinch-mark" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+            <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+            <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+          </svg>
+          <h2 class="closing__title">
+            <span class="closing__line closing__line--1">Nature from</span>
+            <span class="closing__line closing__line--2">the Ground Up</span>
+          </h2>
+          <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
+            <input type="hidden" name="access_key" value="REPLACE_WITH_WEB3FORMS_ACCESS_KEY" />
+            <input type="hidden" name="subject" value="Bullfinch Earth - demo request" />
+            <input type="hidden" name="from_name" value="Bullfinch Earth teaser" />
+            <input type="text" name="name" placeholder="Name" autocomplete="name" required />
+            <input type="email" name="email" placeholder="Email" autocomplete="email" required />
+            <input class="full" type="text" name="organization" placeholder="Organization" autocomplete="organization" />
+            <textarea class="full" name="message" placeholder="What forest, and what are you trying to measure?"></textarea>
+            <button class="btn btn--primary" type="submit">Request a Demo</button>
+          </form>
+          <p class="contact__note">Raising or evaluating the opportunity? <a href="index-pointcloud.html">See the full investor story &rarr;</a></p>
+        </div>
+
+        <footer class="site-footer" id="site-footer">
+          <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
+          <p class="site-footer__line">BULLFINCH EARTH<br />NATURE FROM THE GROUND UP</p>
+          <a class="site-footer__social" href="https://www.linkedin.com/company/bullfinch-earth/" target="_blank" rel="noopener">LinkedIn</a>
+          <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6" /></svg>
+          </button>
+        </footer>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="scroll.js"></script>
+    <script src="scene-teaser-pc.js?v=t1"></script>
+    <script src="case-animation.js?v=v4-4"></script>
+    <script src="swot.js?v=v4-5"></script>
+    <script src="stat-field.js?v=v4-6"></script>
+
+    <script>
+      // Day -> night descent + DOM colour crossfade + hero forest 45deg wipe.
+      // One passive scroll listener drives:
+      //   - the scene's setNightProgress (clear colour + backdrop + motes go dark
+      //     so the finale reads as a starfield),
+      //   - --bg / --ink lerped in lockstep so the DOM never passes through a
+      //     bad-contrast middle,
+      //   - the beige cover's clip-path closing over the forest photo,
+      //   - the fixed 02 dual-graphic + 03 species readout visibility bands.
+      (function () {
+        var root = document.documentElement;
+        var body = document.body;
+        var cover = document.querySelector(".hero-cover");
+        var forest = document.querySelector(".hero-forest");
+        var DAY_BG = [0xEC, 0xE6, 0xD3], NIGHT_BG = [0x0B, 0x0F, 0x16];
+        var DAY_INK = [0x14, 0x20, 0x0D], NIGHT_INK = [0xE9, 0xED, 0xF6];
+        function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+        function smooth(a, b, x) { var t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); }
+        function mix(a, b, t) { return "rgb(" + Math.round(a[0] + (b[0] - a[0]) * t) + "," + Math.round(a[1] + (b[1] - a[1]) * t) + "," + Math.round(a[2] + (b[2] - a[2]) * t) + ")"; }
+
+        var problem = document.getElementById("problem");
+        var product = document.getElementById("product");
+        var opportunity = document.getElementById("opportunity");
+
+        function rectProg(el, aVh, bVh) {
+          // 0 before the element's top reaches aVh of the viewport, 1 once it
+          // reaches bVh. Used to band the fixed graphics to their section.
+          if (!el) return 0;
+          var r = el.getBoundingClientRect();
+          var vh = window.innerHeight || 1;
+          var top = r.top;
+          return clamp01((aVh * vh - top) / ((aVh - bVh) * vh || 1));
+        }
+
+        function frame() {
+          var max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+          var y = window.scrollY || window.pageYOffset || 0;
+          var g = clamp01(y / max);
+          var vh = window.innerHeight || 1;
+
+          // Night: held off until the last third, complete by the very bottom.
+          var night = smooth(0.60, 0.98, g);
+          if (window.bullfinchCanopy && window.bullfinchCanopy.setNightProgress) {
+            window.bullfinchCanopy.setNightProgress(night);
+          }
+          root.style.setProperty("--bg", mix(DAY_BG, NIGHT_BG, night));
+          root.style.setProperty("--ink", mix(DAY_INK, NIGHT_INK, night));
+          body.classList.toggle("is-night", night > 0.5);
+
+          // Forest wipe over the first screen (page covers more as we descend).
+          var hp = clamp01(y / (vh * 0.9));
+          var openTop = (1 - hp) * 50;
+          var openBot = (1 - hp) * 38;
+          if (cover) cover.style.clipPath = "polygon(0 0, " + (100 - openTop) + "% 0, " + (100 - openBot) + "% 100%, 0 100%)";
+          if (forest) forest.style.opacity = (1 - clamp01((g - 0.06) / 0.10)).toFixed(3);
+
+          // 02 dual-graphic shows while #product owns the screen.
+          var easyOn = product && product.getBoundingClientRect().top < vh * 0.55 && opportunity && opportunity.getBoundingClientRect().top > vh * 0.4;
+          body.classList.toggle("is-easy", !!easyOn);
+
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      })();
+    </script>
+
+    <script>
+      // Tree grove driver (teaser): FORM over 02 -> 03, HOLD on 03, DISPERSE as
+      // 03 leaves; the motes then CONVERGE to the central point at the close
+      // (swot.js setConvergenceProgress) -- the starfield gather at the very end.
+      window.addEventListener("load", function () {
+        if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
+        var s02 = document.getElementById("product");
+        var s03 = document.getElementById("opportunity");
+        if (!s03) return;
+        function smootherstep(x) { x = x < 0 ? 0 : (x > 1 ? 1 : x); return x * x * x * (x * (x * 6 - 15) + 10); }
+        function pinFor(el) { var all = ScrollTrigger.getAll(); for (var i = 0; i < all.length; i++) { if (all[i].trigger === el && all[i].pin) return all[i]; } return null; }
+        function at(pt, f) { return pt.start + (pt.end - pt.start) * f; }
+        var p2 = pinFor(s02), p3 = pinFor(s03);
+        if (!p3) return;
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return p2 ? at(p2, 0.87) : at(p3, 0); },
+          end: function () { return at(p3, 0.43); },
+          scrub: true, invalidateOnRefresh: true,
+          onUpdate: function (self) { window.bullfinchCanopy.setTreeProgress(smootherstep(self.progress)); },
+        });
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return at(p3, 0.58); },
+          end: function () { return at(p3, 1.0); },
+          scrub: true, invalidateOnRefresh: true,
+          onUpdate: function (self) { var p = self.progress < 0 ? 0 : (self.progress > 1 ? 1 : self.progress); window.bullfinchCanopy.setTreeProgress(1 - p); },
+        });
+        ScrollTrigger.refresh();
+      });
+    </script>
+
+    <script>
+      // Section marks builder (verbatim from the investor build).
+      (function () {
+        "use strict";
+        function f(n) { return Math.round(n * 100) / 100; }
+        function sailPath(x, y, w, h) { return "M" + f(x) + "," + f(y + 0.4427 * h) + " C" + f(x) + "," + f(y + 0.1412 * h) + " " + f(x + 0.595 * w) + "," + f(y) + " " + f(x + w) + "," + f(y) + " L" + f(x + w) + "," + f(y + h) + " L" + f(x) + "," + f(y + h) + " Z"; }
+        function shapeEl(s) { var cls = s.k === "r" ? "rfill red" : "mw"; if (s.t === "c") return '<circle class="' + cls + '" cx="' + s.cx + '" cy="' + s.cy + '" r="' + s.r + '"/>'; if (s.t === "q") return '<rect class="' + cls + '" x="' + f(s.x) + '" y="' + f(s.y) + '" width="' + f(s.w) + '" height="' + f(s.h) + '" rx="' + (s.rx != null ? s.rx : 2.5) + '" ry="' + (s.rx != null ? s.rx : 2.5) + '"/>'; return '<path class="' + cls + '" d="' + sailPath(s.x, s.y, s.w, s.h) + '"/>'; }
+        function ctr(s) { return s.t === "c" ? [s.cx, s.cy] : [s.x + s.w / 2, s.y + s.h / 2]; }
+        var SRC = {
+          people: function () { return [{ t: "c", cx: 40.22, cy: 40.76, r: 8.35, k: "w", o: 0 }, { t: "c", cx: 47.22, cy: 59.24, r: 8.35, k: "w", o: 1 }, { t: "c", cx: 59.78, cy: 43.93, r: 8.35, k: "r", o: 2 }]; },
+          nature: function () { return [{ t: "s", x: 24.518, y: 34.74, w: 18.41, h: 30.521, k: "w", o: 0 }, { t: "s", x: 46.77, y: 41.152, w: 14.542, h: 24.182, k: "r", o: 1 }, { t: "s", x: 65.155, y: 48.14, w: 10.327, h: 17.121, k: "w", o: 2 }]; },
+          tech: function () { return [{ t: "q", x: 25.158, y: 30.174, w: 14, h: 15, rx: 1.453, k: "w", o: 0 }, { t: "q", x: 43.0, y: 45.174, w: 14, h: 24.651, rx: 1.453, k: "w", o: 1 }, { t: "q", x: 60.842, y: 36.948, w: 14, h: 32.878, rx: 1.453, k: "r", o: 2 }]; }
+        };
+        var SIG = { people: { type: "move", dir: "radial" }, nature: { type: "grow", origin: "bottom center" }, tech: { type: "rot", origin: "center", angle: "auto" } };
+        function animShape(cat, s) {
+          var inner = shapeEl(s), p = "var(--build,1)", m = SIG[cat];
+          if (m.type === "move") { var c = ctr(s), dx = c[0] - s._cx, dy = c[1] - s._cy, mag = Math.hypot(dx, dy); if (mag < 5) { dx = 0; dy = -1; mag = 1; } return '<g class="fade" style="--p:' + p + '"><g class="a-move" style="--ox:' + f(dx / mag * 22) + "px;--oy:" + f(dy / mag * 22) + "px;--p:" + p + '">' + inner + "</g></g>"; }
+          if (m.type === "grow") { return '<g class="a-grow" style="transform-origin:' + m.origin + ";--p:" + p + '">' + inner + "</g>"; }
+          var ang = (m.angle === "auto") ? (s.o % 2 ? 90 : -90) : m.angle;
+          return '<g class="fade" style="--p:' + p + '"><g class="a-rot" style="transform-origin:' + m.origin + ";--rot:" + ang + "deg;--p:" + p + '">' + inner + "</g></g>";
+        }
+        function mark(cat) {
+          var shapes = SRC[cat](); var cx = 0, cy = 0;
+          shapes.forEach(function (s) { var c = ctr(s); cx += c[0]; cy += c[1]; });
+          cx /= shapes.length; cy /= shapes.length;
+          shapes.forEach(function (s) { s._cx = cx; s._cy = cy; });
+          if (cat === "nature") { var nwin = { 0: [0, 0.5], 1: [0.2, 0.55], 2: [0.4, 0.6] }; var nhtml = shapes.map(function (s) { var w = nwin[s.o]; var rp = "clamp(0,calc((var(--rev,1) - " + w[0] + ") / " + w[1] + "),1)"; return '<g class="n-reveal" style="--rp:' + rp + '">' + shapeEl(s) + "</g>"; }).join(""); return '<svg viewBox="0 0 100 100" aria-hidden="true">' + nhtml + "</svg>"; }
+          if (cat === "tech") { var thtml = shapes.map(function (s) { if (s.o === 0) { var pr = "clamp(0,calc(var(--rev,1) / 0.5),1)"; return '<g class="fade" style="--p:' + pr + '"><g class="a-rot" style="transform-origin:center;--rot:-90deg;--p:' + pr + '">' + shapeEl(s) + "</g></g>"; } if (s.o === 1) { var sp = "clamp(0,calc((var(--rev,1) - 0.42) / 0.33),1)"; return '<g class="n-slide fade" style="--sx:-26px;--sp:' + sp + ";--p:" + sp + '">' + shapeEl(s) + "</g>"; } var rp = "clamp(0,calc((var(--rev,1) - 0.6) / 0.4),1)"; return '<g class="n-reveal" style="--rp:' + rp + '">' + shapeEl(s) + "</g>"; }).join(""); return '<svg viewBox="0 0 100 100" aria-hidden="true">' + thtml + "</svg>"; }
+          var inner = shapes.map(function (s) { return animShape(cat, s); }).join("");
+          if (cat === "people") { inner = '<g class="grp-spin" style="transform-origin:' + f(cx) + "px " + f(cy) + 'px">' + inner + "</g>"; }
+          return '<svg viewBox="0 0 100 100" aria-hidden="true">' + inner + "</svg>";
+        }
+        var marks = Array.prototype.slice.call(document.querySelectorAll(".section-mark"));
+        if (!marks.length) return;
+        marks.forEach(function (el) { var cat = el.getAttribute("data-mark"); if (SRC[cat]) el.innerHTML = mark(cat); });
+        var isMobile = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        if (isMobile) { marks.forEach(function (el) { var panel = el.closest(".panel"); if (!panel) return; el.classList.add("section-mark--corner"); panel.appendChild(el); }); }
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) return;
+        function dwellTime(p, d) { var h0 = 0.4, h1 = 0.6; if (p < h0) return (p / h0) * d; if (p < h1) return d; return d + ((p - h1) / (1 - h1)) * d; }
+        function applyTimes(el, timeFor) { var anims = el.getAnimations ? el.getAnimations({ subtree: true }) : []; anims.forEach(function (a) { try { a.pause(); a.currentTime = timeFor(a.effect.getComputedTiming().duration); } catch (e) {} }); }
+        if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
+          var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel"); if (!panel) return;
+            var scrub = function (p) { applyTimes(el, function (d) { return dwellTime(clamp01(p), d); }); };
+            ScrollTrigger.create({ trigger: panel, start: "top top", end: mobileLike ? "+=100%" : "+=200%", scrub: true, invalidateOnRefresh: true, onUpdate: function (self) { scrub(self.progress); }, onRefresh: function (self) { scrub(self.progress || 0); } });
+            scrub(0);
+          });
+        }
+      })();
+    </script>
+
+    <script>
+      // Rotating hero use-case (verbatim slash items). Fixed slot -> no reflow.
+      (function () {
+        var host = document.getElementById("rotator");
+        var word = document.getElementById("rotatorWord");
+        if (!host || !word) return;
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var words = ["Forestry", "Wildfire Risk & Mitigation", "Carbon Projects", "ESG", "Invasive Species Detection", "Biodiversity", "Natural Asset Valuation"];
+        var i = 0;
+        setInterval(function () {
+          host.classList.add("is-out");
+          setTimeout(function () { i = (i + 1) % words.length; word.textContent = words[i]; host.classList.remove("is-out"); }, 300);
+        }, 2400);
+      })();
+    </script>
+
+    <script>
+      // Anchor scrolling + restart + nav hover-label.
+      (function () {
+        function scrollToTarget(selector) {
+          var target = document.querySelector(selector);
+          if (!target) return;
+          var destination = target;
+          if (selector === "#page") { destination = 0; }
+          else if (selector === "#closing") { destination = target.offsetTop + window.innerHeight * 0.42; }
+          else if (target.classList && target.classList.contains("panel") && typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh();
+            var pt = ScrollTrigger.getAll().find(function (t) { return t.trigger === target && t.pin === target; });
+            destination = pt ? pt.start + (pt.end - pt.start) * 0.5 : target.offsetTop + window.innerHeight;
+          }
+          if (window.lenis && typeof window.lenis.scrollTo === "function") window.lenis.scrollTo(destination);
+          else if (typeof destination === "number") window.scrollTo({ top: destination, behavior: "smooth" });
+          else target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        document.addEventListener("click", function (event) {
+          var restart = event.target.closest("[data-restart-splash]");
+          if (restart) { event.preventDefault(); window.location.replace(window.location.pathname + window.location.search); return; }
+          var trigger = event.target.closest("[data-scroll-target]");
+          if (!trigger) return;
+          event.preventDefault();
+          scrollToTarget(trigger.getAttribute("data-scroll-target"));
+        });
+        var navLabel = document.getElementById("site-nav-hover-label");
+        var navItems = document.querySelectorAll("[data-nav-label]");
+        if (navLabel && navItems.length) {
+          navItems.forEach(function (item) {
+            function show() { navLabel.textContent = item.getAttribute("data-nav-label") || ""; navLabel.classList.add("is-visible"); }
+            function hide() { navLabel.classList.remove("is-visible"); }
+            item.addEventListener("mouseenter", show); item.addEventListener("focus", show);
+            item.addEventListener("mouseleave", hide); item.addEventListener("blur", hide);
+          });
+        }
+      })();
+    </script>
+
+    <script>
+      // Corner ball-to-logo: plays the PNG sequence small in the top-right, then
+      // the resting logo lives there. No full-screen curtain -- the hero is
+      // visible from load (swot.js reveals it since there is no #splash element).
+      (function () {
+        var wrap = document.getElementById("cornerLogo");
+        var cv = document.getElementById("splash-sequence");
+        if (!wrap || !cv) return;
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        function done() {
+          wrap.classList.add("is-done");
+          document.body.classList.add("has-entered");
+          document.dispatchEvent(new CustomEvent("bullfinch:splashcomplete"));
+        }
+        if (reduced) { done(); return; }
+        var ctx = cv.getContext("2d");
+        if (!ctx) { done(); return; }
+        var frames = [];
+        for (var i = 7; i <= 28; i++) frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?v=3");
+        var imgs = frames.map(function (s) { var im = new Image(); im.decoding = "async"; im.src = s; return im; });
+        function draw(k) { var im = imgs[k]; if (!im || !im.complete || !im.naturalWidth) return; ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(im, 0, 0, cv.width, cv.height); }
+        var started = false;
+        function play() {
+          if (started) return; started = true;
+          var start = performance.now(), dur = 1000 / 12;
+          function tick(now) {
+            var k = Math.min(frames.length - 1, Math.floor((now - start) / dur));
+            draw(k);
+            if (k < frames.length - 1) requestAnimationFrame(tick);
+            else setTimeout(done, 320);
+          }
+          requestAnimationFrame(tick);
+        }
+        // brief beat on the static first frame, then play
+        if (imgs[0].complete) { draw(0); setTimeout(play, 600); }
+        else imgs[0].addEventListener("load", function () { draw(0); setTimeout(play, 600); }, { once: true });
+        var safety = setTimeout(function () { if (!started) done(); }, 4000);
+        wrap.addEventListener("click", function () { clearTimeout(safety); play(); });
+      })();
+    </script>
+  </body>
+</html>
