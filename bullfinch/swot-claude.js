@@ -156,63 +156,40 @@
   }
 
   function applyPanelProgress(panel, p) {
-    var eyebrow  = panel.querySelector(".panel__eyebrow");
-    var verdict  = panel.querySelector(".panel__verdict");
-    var evidence = panel.querySelectorAll(".panel__evidence p");
-    var numeric  = panel.querySelector(".panel__numeric");
     var inner    = panel.querySelector(".panel__inner");
     var media    = panel.querySelector(".panel__video");
+    var readouts = panel.querySelector(".tree-readouts");
 
-    // IN-PLACE choreography (Claude fork): every element FADES in as the panel
-    // pins and FADES out as it leaves — opacity only, ZERO translation. Nothing
-    // floats up from below or slides off the top. The pin holds the panel fixed,
-    // so opacity alone reads as "animate in / out in place". Before the pin
-    // (p=0) and after it (p=1) the copy is fully transparent, so the empty
-    // section can scroll through without any visible drift.
-    var leave = smooth01(mapRange(p, 0.88, 0.98));     // shared fade-OUT
-    function inPlace(a, b) { return smooth01(mapRange(p, a, b)) * (1 - leave); }
+    // IN-PLACE choreography (Claude fork): the ENTIRE .panel__inner block —
+    // headline, body, stat readout, audience grid, partner logos, ground
+    // heading — plus the tree readouts FADE in as the panel pins and FADE out
+    // as it leaves. Opacity ONLY, zero translation: opacity on .panel__inner
+    // cascades to every descendant, so one fade covers all of them and NOTHING
+    // slides up from below or off the top. Before the pin (p=0) and after it
+    // (p=1) everything is transparent, so the empty section scrolls through with
+    // no visible drift. (The closing card is the one exception — it may slide,
+    // handled in the HTML.)
+    var appear = smooth01(mapRange(p, 0.04, 0.20));
+    var leave  = smooth01(mapRange(p, 0.86, 0.98));
+    var vis = appear * (1 - leave);
 
-    if (eyebrow) {
-      eyebrow.style.opacity = inPlace(0.02, 0.12);
-      eyebrow.style.transform = "none";
-    }
-
-    // Media (case animation / stat visual) fades in place too — no side slide.
-    if (media) {
-      var isProduct = panel.id === "product";
-      var pm = isProduct ? (1 - leave) : inPlace(0.06, 0.22);
-      if (!isProduct || p > 0.001) media.style.opacity = pm;
-      media.style.transform = isProduct ? "translate3d(0, -50%, 0)" : "none";
-    }
-    if (panel.id === "opportunity" && window.bullfinchUiAnimation && window.bullfinchUiAnimation.setScrollProgress) {
-      window.bullfinchUiAnimation.setScrollProgress(p);
-    }
-
-    if (verdict) {
-      verdict.style.opacity = inPlace(0.06, 0.18);
-      verdict.style.transform = "none";
-    }
-
-    if (evidence.length) {
-      for (var i = 0; i < evidence.length; i++) {
-        var a = 0.12 + i * 0.05;                        // gentle stagger, still in place
-        evidence[i].style.opacity = inPlace(a, a + 0.14);
-        evidence[i].style.transform = "none";
-      }
-    }
-
-    if (numeric) {
-      numeric.style.opacity = inPlace(0.18, 0.32);
-      numeric.style.transform = "none";
-    }
-
-    // Inner block never translates. Veil tracks the same in/out band.
     if (inner) {
-      inner.style.opacity = 1;
+      inner.style.opacity = vis;
       inner.style.transform = "none";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
+    }
+    if (readouts) readouts.style.opacity = vis;
+
+    // Media: the #product case is a fixed layer whose fade is owned by
+    // setProductCase (in AND out, within the pin) — don't fight it here; just
+    // keep it centred and untranslated so it never slides.
+    if (media) {
+      media.style.transform = (panel.id === "product") ? "translate3d(0, -50%, 0)" : "none";
+    }
+    if (panel.id === "opportunity" && window.bullfinchUiAnimation && window.bullfinchUiAnimation.setScrollProgress) {
+      window.bullfinchUiAnimation.setScrollProgress(p);
     }
   }
 
@@ -429,25 +406,13 @@
       window.bullfinchCanopy.setWaveProgress(wave, progress);
     }
 
-    for (var wi = 0; wi < 6; wi++) {
-      (function (idx) {
-        if (!panelTriggers[idx] || !panelTriggers[idx + 1]) return;
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: function () {
-            return panelTriggers[idx].start + (panelTriggers[idx].end - panelTriggers[idx].start) * 0.88;
-          },
-          end: function () {
-            return panelTriggers[idx + 1].start + (panelTriggers[idx + 1].end - panelTriggers[idx + 1].start) * 0.08;
-          },
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) {
-            setWave(idx + 1, self.progress);
-          },
-        });
-      })(wi);
-    }
+    // Claude fork: the cascade waves are NO LONGER driven here. The old loop
+    // tied each wave to a panel-to-panel transition, but the teaser only has 3
+    // panels, so waves 3-6 never fired (only ~15 of the lines drew). The scene
+    // now drives the waves directly from global scroll (see setProgress) so the
+    // network draws continuously across the whole journey. `setWave` is left in
+    // place for the convergence path below.
+    void setWave;
 
     if (panelTriggers[0] && panelTriggers[1] && panelTriggers[2]) {
       ScrollTrigger.create({

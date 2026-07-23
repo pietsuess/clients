@@ -359,18 +359,23 @@
   // The closing is an inhabited mote volume, not a distant starfield. Keep a
   // restrained set inside the camera frustum and physically send the rest
   // outside it. No particle is hidden with opacity.
-  var CLOSING_VISIBLE_MOTES = 96;
+  // Claude fork: the closing should feel like a mote-field cloud we are INSIDE,
+  // not a distant night sky. Keep most of the pool visible, spread it wider,
+  // and bring depth CLOSE to the camera (some motes in front of the focal
+  // plane) so it envelops the viewer. Only a thin remainder drifts to the far
+  // ring for depth.
+  var CLOSING_VISIBLE_MOTES = Math.round(PARTICLE_POOL * 0.62);
   for (var ci = 2; ci < PARTICLE_POOL; ci++) {
     if (ci < CLOSING_VISIBLE_MOTES + 2) {
-      closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 0.92;
-      closingFieldHome[ci * 3 + 1] = -2.8 + Math.random() * 5.4;
-      closingFieldHome[ci * 3 + 2] = -3.2 + Math.random() * 2.5;
+      closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
+      closingFieldHome[ci * 3 + 1] = -3.2 + Math.random() * 6.4;
+      closingFieldHome[ci * 3 + 2] = -4.6 + Math.random() * 5.4;   // some IN FRONT of z=0
     } else {
       var closingAngle = Math.random() * Math.PI * 2;
-      var closingRadius = 11 + Math.random() * 12;
+      var closingRadius = 8 + Math.random() * 9;
       closingFieldHome[ci * 3]     = Math.cos(closingAngle) * closingRadius;
       closingFieldHome[ci * 3 + 1] = Math.sin(closingAngle) * closingRadius * 0.75;
-      closingFieldHome[ci * 3 + 2] = -2.8 + Math.random() * 1.8;
+      closingFieldHome[ci * 3 + 2] = -3.0 + Math.random() * 3.0;
     }
   }
   // Every ordinary field mote forms the exact original 10x10 statistic.
@@ -587,13 +592,15 @@
   // Each wave fires in a TIGHT band at its transition. By the time the user
   // settles on a panel, the wave is complete. They read the panel in a stable
   // state. When they scroll on, the next wave fires.
+  // Claude fork: the teaser has 4 sections, not the index's 6, and Piet wants a
+  // RESTRAINED network — about 25 lines total, drawn continuously across the
+  // whole journey (see setProgress, which drives each wave over a broad global
+  // scroll band). Three cascade waves fan 4 → 8 → 8 = 20 lines; the convergence
+  // adds ~5 feeders → ~25 total. Waves are no longer tied to panel transitions.
   var WAVE_BANDS = [
-    { wave: 1, start: 0.05, end: 0.10, fanout: 5 },   // hero → panel 1
-    { wave: 2, start: 0.20, end: 0.25, fanout: 2 },   // panel 1 → 2
-    { wave: 3, start: 0.32, end: 0.37, fanout: 2 },   // panel 2 → 3
-    { wave: 4, start: 0.44, end: 0.49, fanout: 2 },   // panel 3 → 4
-    { wave: 5, start: 0.56, end: 0.61, fanout: 1 },   // panel 4 → 5 (single line, no split)
-    { wave: 6, start: 0.68, end: 0.73, fanout: 1 },   // panel 5 → 6 (single line, no split)
+    { wave: 1, start: 0.00, end: 0.34, fanout: 4 },   // seed fans 4
+    { wave: 2, start: 0.22, end: 0.56, fanout: 2 },   // each of 4 fans 2  (+8)
+    { wave: 3, start: 0.46, end: 0.80, fanout: 1 },   // each of 8 fans 1  (+8)
   ];
 
   // Helper: find K nearest unconnected motes to a parent, preferring motes
@@ -716,9 +723,9 @@
   // Terminal dots are the last frontier we computed (wave-5 children).
   // A restrained sample draws to the final red dot so the closing remains a
   // legible constellation rather than a screen of spokes.
-  var fullTerminalDots = frontier;             // length up to 80
+  var fullTerminalDots = frontier;             // length up to 8 now
   var terminalDots = [];
-  var desiredFeeders = 14;
+  var desiredFeeders = 5;                       // ~25 lines total across the journey
   for (var td = 0; td < desiredFeeders; td++) {
     terminalDots.push(fullTerminalDots.length >= desiredFeeders
       ? fullTerminalDots[Math.floor(td * fullTerminalDots.length / desiredFeeders)]
@@ -1034,9 +1041,10 @@
       var arrowVisible = wave === 7
         ? (strokeProgress > 0.001 ? 0.95 : 0.0)
         : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
-      arrowVisible *= (1 - statFormP) * (wave === 7
-        ? smoothstep(0.72, 1.0, finalFieldP)
-        : openFieldP * (1 - treeFormP) * (1 - finalFieldP));
+      // Claude fork: cascade lines PERSIST through the stat grid and the tree
+      // grove (no statForm/treeForm/openField gating). Only the convergence
+      // wave stays gated to the closing so it lands with the finale.
+      arrowVisible *= (wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : 1.0);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -1066,8 +1074,8 @@
 
       // Geometry does the drawing. Alpha is simply on while the segment has
       // length, avoiding the previous fade-in behavior.
-      var journeyGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : openFieldP * (1 - treeFormP) * (1 - finalFieldP);
-      var visible = strokeProgress > 0.001 ? (1 - statFormP) * journeyGate : 0.0;
+      var journeyGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : 1.0;
+      var visible = strokeProgress > 0.001 ? journeyGate : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
     }
@@ -1514,7 +1522,7 @@
       // optical scale.
       partMat.uniforms.uPointScale.value = lerp(
         lerp(0.82, 0.76, statFormP),
-        lerp(0.82, 0.72, finalFieldP),
+        lerp(0.82, 1.15, finalFieldP),   // GROW at the close so motes read near/chunky, not distant specks
         Math.max(treeFormP, finalFieldP)
       );
 
@@ -2031,6 +2039,13 @@
     uniforms.uShaftFade.value   = 1.0 - v;
     uniforms.uMoteDensity.value = 0.08 + v * 0.92;
     uniforms.uConnect.value     = v;
+    // Claude fork: drive the cascade DIRECTLY from global scroll so it draws
+    // continuously across the WHOLE journey, beginning on the first page.
+    // Broad overlapping bands (not panel-transition gaps). swot no longer
+    // drives these waves — the convergence (wave 7) stays on its own trigger.
+    setWaveProgress(1, (v - 0.00) / 0.34);
+    setWaveProgress(2, (v - 0.22) / 0.34);
+    setWaveProgress(3, (v - 0.46) / 0.34);
   }
   function setWaveProgress(wave, p) {
     var idx = Math.max(1, Math.min(7, wave | 0));
