@@ -100,6 +100,13 @@
             : "inset(0 0 " + hid + " 0)";
         }
         setTextVeilOpacity((1 - smooth01(mapRange(p, 0.06, 0.60))) * 0.84);
+        // R1 (the 00 -> 01 leave): the motes rising into the <1% grid and the
+        // forest diagonal wiping off are driven by THIS SAME hero-pin progress,
+        // so the words erasing, the motes coming up, and the diagonal covering
+        // all move together on one scrub. Both setters are defined in the HTML
+        // (grid owns stat-crisp-offset; forest owns --forest-edge-top).
+        if (window.__bfSetGridAssembly) window.__bfSetGridAssembly(p);
+        if (window.__bfSetForestWipe) window.__bfSetForestWipe(p);
       },
     });
   }

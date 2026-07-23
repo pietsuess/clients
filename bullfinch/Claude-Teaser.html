@@ -742,7 +742,7 @@
     <script src="scene-claude-teaser.js?v=claude-11"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-9"></script>
+    <script src="swot-claude.js?v=claude-10"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -844,21 +844,15 @@
             }
             paintForestEdge();
             window.setTimeout(startHeroArrival, 120);
-            // Forest is a HERO element: it wipes OFF over the hero zone
-            // (forestScroll 0 -> 1 = covering -> gone) so section 01 sits on
-            // clean beige. Triggered on document.body (NOT ".hero") so it does
-            // not compete with swot's hero PIN.
-            ScrollTrigger.create({
-              trigger: document.body,
-              start: "top top",
-              end: function () { return "+=" + Math.round(window.innerHeight * 1.10); },
-              scrub: true,
-              invalidateOnRefresh: true,
-              onUpdate: function (self) {
-                forestScroll = self.progress;
-                paintForestEdge();
-              },
-            });
+            // Forest is a HERO (00) element. It wipes OFF as you scroll 00 -> 01
+            // (forestScroll 0 -> 1 = covering right-half -> gone), driven by the
+            // HERO PIN's progress in swot-claude so it moves in LOCKSTEP with the
+            // hero words erasing and the motes rising into the grid. By section
+            // 01 forestScroll is 1 (gone) so 01 sits on clean beige.
+            window.__bfSetForestWipe = function (v) {
+              forestScroll = v < 0 ? 0 : (v > 1 ? 1 : v);
+              paintForestEdge();
+            };
             var root = document.documentElement;
             var grade = {
               bg: ["#e7dfc4", "#11271b"],
@@ -997,21 +991,14 @@
         // from the first scroll pixel all the way to 01's pin, so it reads
         // slow and deliberate instead of a last-second swoop. The same
         // trigger reverses the grid back into the ground.
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: function () { return p1.start; },
-          end: function () { return at(p1, 0.30); },
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) {
-            // R2: the grid assembles across the 01 pin's first 30% — the SAME
-            // band the panel copy writes on (swot WRITE_ORDER ~0.05-0.45) — so
-            // the dots LAND as the words populate. Linear, so the assembly is
-            // visible from the first pixel of the pin.
-            setStatStage(self.progress);
-          },
-          onLeaveBack: function () { setStatStage(0); },
-        });
+        // R1: the grid assembly (motes rising to form the <1% grid) is driven by
+        // the HERO PIN's progress in swot-claude, so the motes come up in
+        // LOCKSTEP with the hero words erasing and the forest diagonal wiping —
+        // the whole 00 -> 01 handoff on ONE progress value. The grid's home is
+        // pin-relative, so it forms at its section-01 screen spot even while
+        // #problem is still below the fold. Exposed here (setStatStage owns the
+        // stat-crisp-offset + is-stat-stage class as well).
+        window.__bfSetGridAssembly = setStatStage;
 
         // Leaving the inventory section releases the grid into an open cloud.
         // The ENTIRE release completes inside 01's pin (the panel un-write
