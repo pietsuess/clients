@@ -844,17 +844,21 @@
             }
             paintForestEdge();
             window.setTimeout(startHeroArrival, 120);
-            // R1/R3: the forest diagonal no longer wipes during the hero. It
-            // holds at its settled edge through 01, then wipes across the frame
-            // during the 01->02 transition, in lockstep with the copy un-write
-            // and the mote spread (the unified trigger in the next script block
-            // calls this setter). Removing this second ScrollTrigger on ".hero"
-            // (it was competing with swot-claude's hero PIN and letting the hero
-            // copy scroll up and crop) also stops the sliding subtitle.
-            window.__bfSetForestCover = function (v) {
-              forestScroll = v < 0 ? 0 : (v > 1 ? 1 : v);
-              paintForestEdge();
-            };
+            // Forest is a HERO element: it wipes OFF over the hero zone
+            // (forestScroll 0 -> 1 = covering -> gone) so section 01 sits on
+            // clean beige. Triggered on document.body (NOT ".hero") so it does
+            // not compete with swot's hero PIN.
+            ScrollTrigger.create({
+              trigger: document.body,
+              start: "top top",
+              end: function () { return "+=" + Math.round(window.innerHeight * 1.10); },
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: function (self) {
+                forestScroll = self.progress;
+                paintForestEdge();
+              },
+            });
             var root = document.documentElement;
             var grade = {
               bg: ["#e7dfc4", "#11271b"],
@@ -1024,21 +1028,17 @@
           invalidateOnRefresh: true,
           onUpdate: function (self) {
             // R1: ONE scrub over ONE range ([0.80, 1.0] of the 01 pin) runs the
-            // whole 01->02 handoff SIMULTANEOUSLY — grid releases into the 02
-            // cloud, seed fades out in place (R5), forest diagonal wipes across —
-            // in lockstep with the 01 copy un-write (swot uses the same [0.80,1.0]
-            // band and the same smoothstep easing below).
+            // 01->02 handoff SIMULTANEOUSLY — grid releases into the 02 cloud and
+            // the seed fades out in place (R5) — in lockstep with the 01 copy
+            // un-write (swot uses the same [0.80,1.0] band and smoothstep below).
             var p = self.progress; p = p * p * (3 - 2 * p);   // smoothstep, matches swot leave
             setStatStage(1 - p);
             if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
             if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1 - p);   // R5: seed gone by 02
-            if (window.__bfSetForestCover) window.__bfSetForestCover(p);                              // R1: forest wipe
           },
           onLeaveBack: function () {
-            // Scrolled back above the transition: seed visible again for 01,
-            // forest back to its settled (un-wiped) edge.
+            // Scrolled back above the transition: seed visible again for 01.
             if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1);
-            if (window.__bfSetForestCover) window.__bfSetForestCover(0);
           },
         });
 
