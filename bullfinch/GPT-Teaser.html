@@ -71,19 +71,9 @@
         --ink-quiet: #a8b7a8;
         --rule: rgba(244, 239, 217, 0.2);
       }
-      html, body,
-      .panel__verdict, .panel__eyebrow, .panel__numeric,
-      .panel__evidence p, .site-footer__line, .fullscreen-toggle {
-        transition: none !important;
-      }
       [data-theme="dark"] .bullfinch-mark__dark { fill: var(--ink); }
       .site-nav a { color: var(--ink-quiet); }
       .panel__numeric { color: var(--ink-quiet); }
-      body.pc-bare-veil .text-veil {
-        opacity: 0 !important;
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
-      }
     </style>
 
     <style>
@@ -131,10 +121,8 @@
         width: var(--mark-box);
         height: var(--mark-box);
         pointer-events: none;
-        animation:
-          gather 4s linear infinite alternate,
-          reveal 4s cubic-bezier(0.33, 0, 0.2, 1) infinite alternate;
-        animation-play-state: paused; /* scrubbed by scroll (see script) */
+        --build: 0;
+        --rev: 0;
       }
       .section-mark svg {
         width: 100%;
@@ -164,8 +152,6 @@
       .section-mark .grp-spin {
         transform-box: view-box;
         transform: rotate(var(--pang, 0deg));
-        animation: peopleSpin 4s linear infinite alternate;
-        animation-play-state: paused;
       }
       .section-mark .fade {
         opacity: clamp(0, calc(var(--p, var(--build, 1)) * 1.6), 1);
@@ -299,44 +285,48 @@
       .corner-logo-sequence.is-settled canvas { opacity: 0; transform: scale(.74); }
       .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: scale(.74); }
       .site-nav {
+        justify-content: flex-start;
+        padding-left: var(--pad-x);
         padding-right: var(--pad-x);
         opacity: 1;
         transform: none;
         pointer-events: auto;
       }
-      .site-nav__brand { visibility: hidden; }
+      .site-nav__brand { display: none; }
+      .site-nav__links { margin-left: 0; }
+      .site-nav__hover-label { left: var(--pad-x); top: 50px; transform: translateY(-2px); }
+      .site-nav__hover-label.is-visible { transform: translateY(0); }
       .corner-wordmark { display: none; }
 
       #problem.panel--media {
-        grid-template-columns: minmax(0, 1.35fr) minmax(340px, .65fr);
-        gap: clamp(30px, 4vw, 74px);
+        grid-template-columns: 1fr minmax(600px, 48vw);
+        grid-template-rows: auto 1fr;
+        column-gap: clamp(30px, 4vw, 74px);
+        align-content: center;
       }
-      #problem .panel__inner { grid-column: 1; max-width: none; }
-      #problem .panel__verdict { max-width: 16ch; margin-left: 0; font-size: clamp(45px, 6.3vw, 96px); }
+      #problem .panel__inner { grid-column: 2; grid-row: 2; max-width: none; align-self: start; text-align: right; }
+      #problem .eyebrow-anchor { margin-left: auto; }
+      #problem .panel__verdict { max-width: 16ch; margin-left: auto; font-size: clamp(45px, 6.3vw, 96px); }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
-      #problem .panel__evidence p { text-align: justify; text-align-last: left; }
+      #problem .panel__evidence p { text-align: right; text-align-last: right; }
+      #problem .panel__numeric { text-align: right; text-align-last: right; }
       #problem .panel__stat {
         grid-column: 2;
+        grid-row: 1;
         justify-self: stretch;
-        align-self: center;
+        align-self: end;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: flex-end;
         gap: 12px;
-        min-height: 180px;
+        min-height: 154px;
+        text-align: right;
       }
       #problem .stat-grid { display: none; }
       #problem .stat-read { min-width: 0; }
-      #problem .stat-num { align-items: baseline; gap: clamp(5px, .6vw, 10px); }
-      #problem .stat-less,
-      #problem .stat-readout {
-        font-family: var(--font-mono);
-        font-size: clamp(54px, 7.4vw, 118px);
-        font-weight: 500;
-        line-height: .8;
-        letter-spacing: -.08em;
-        color: var(--ink);
-      }
-      #problem .stat-unit { font-size: clamp(25px, 3vw, 48px); }
+      #problem .stat-label { margin-left: auto; }
+      #problem .stat-line { left: auto; right: 0; text-align: right; }
+      #problem .stat-num { justify-content: flex-end; align-items: flex-end; gap: 10px; }
+      #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
 
       #product.panel--media {
         grid-template-columns: minmax(420px, .9fr) minmax(420px, 1.1fr);
@@ -360,18 +350,24 @@
 
       #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
       #opportunity .tree-readouts {
+        --tree-data-p: 0;
         position: absolute;
         z-index: 4;
         top: clamp(54px, 7vh, 78px);
-        left: 16vw;
-        width: 68vw;
+        left: 4vw;
+        width: 92vw;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 4vw;
+        gap: 6vw;
         color: var(--ink-soft);
         text-align: center;
       }
       .tree-readout { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .tree-readout span {
+        --write: 0;
+        clip-path: inset(0 calc((1 - var(--write)) * 100%) 0 0);
+        white-space: nowrap;
+      }
       .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: var(--ink); }
       .tree-readout__latin { font: italic 400 clamp(10px, .78vw, 13px)/1.1 var(--font-body); }
       .tree-readout__metric { font: 500 clamp(8px, .59vw, 10px)/1.25 var(--font-mono); letter-spacing: .03em; }
@@ -403,11 +399,25 @@
       .audience-item:first-child { border-left: 0; padding-left: 0; }
       .audience-item h3 { margin: 0 0 6px; font-size: clamp(12px, .95vw, 16px); font-weight: 600; line-height: 1.08; }
       .audience-item p { margin: 0; font-size: clamp(9px, .68vw, 12px); line-height: 1.25; text-align: justify; text-align-last: left; }
-      .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-bottom: 1px solid var(--rule); }
+      .trust-line { display: grid; grid-template-columns: minmax(160px, .9fr) 6fr; border-bottom: 1px solid var(--rule); }
+      .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
       .trust-strip div { height: 44px; padding: 7px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
       .trust-strip div:first-child { border-left: 0; }
       .trust-strip img { max-width: 100%; max-height: 28px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
       body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
+      .trust-label {
+        min-height: 44px;
+        margin: 0;
+        padding-right: 14px;
+        display: flex;
+        align-items: center;
+        font: 500 clamp(9px, .68vw, 11px)/1 var(--font-mono);
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--ink-quiet);
+        text-align: left;
+        text-align-last: left;
+      }
 
       .closing { padding-top: clamp(54px, 8vh, 86px); }
       .closing__inner { max-width: none; gap: clamp(15px, 2.8vh, 28px); }
@@ -511,8 +521,9 @@
             <div class="stat-read">
               <div class="stat-label">
                 <span class="stat-line" id="statToday">TODAY</span>
+                <span class="stat-line" id="statBull">BULLFINCH</span>
               </div>
-              <p class="stat-num"><span class="stat-less">&lt;</span><span class="stat-readout" id="statReadout" aria-hidden="true">1</span><span class="stat-unit">%</span></p>
+              <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
               <p class="stat-rest">of trees measured</p>
             </div>
           </div>
@@ -567,13 +578,16 @@
               <article class="audience-item"><h3>Wildfire &amp; Insurance</h3><p>Below-canopy fuel data at scale</p></article>
               <article class="audience-item"><h3>Remote sensing</h3><p>greater accuracy &amp; visibility below the canopy</p></article>
             </div>
-            <div class="trust-strip" aria-label="Trusted by">
-              <div><img src="assets/logos/weyerhaeuser.svg" alt="Weyerhaeuser"></div>
-              <div><img src="assets/logos/nhri.png" alt="New Hampshire Rapid Initiative"></div>
-              <div><img src="assets/logos/longview.png" alt="Long View Forest"></div>
-              <div><img src="assets/logos/uksa.png" alt="UK Space Agency"></div>
-              <div><img src="assets/logos/fba.png" alt="Forest Business Accelerator"></div>
-              <div><img src="assets/logos/okanagan-angel-summit.svg" alt="Okanagan Angel Summit"></div>
+            <div class="trust-line">
+              <p class="trust-label">Partners and recognition</p>
+              <div class="trust-strip" aria-label="Bullfinch Earth partners and recognition">
+                <div><img src="assets/logos/weyerhaeuser.svg" alt="Weyerhaeuser"></div>
+                <div><img src="assets/logos/nhri.png" alt="New Hampshire Rapid Initiative"></div>
+                <div><img src="assets/logos/longview.png" alt="Long View Forest"></div>
+                <div><img src="assets/logos/uksa.png" alt="UK Space Agency"></div>
+                <div><img src="assets/logos/fba.png" alt="Forest Business Accelerator"></div>
+                <div><img src="assets/logos/okanagan-angel-summit.svg" alt="Okanagan Angel Summit"></div>
+              </div>
             </div>
           </div>
         </article>
@@ -632,11 +646,11 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-gpt-teaser.js?v=forest-journey-5"></script>
+    <script src="scene-gpt-teaser.js?v=forest-journey-6"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=forest-journey-4"></script>
-    <script src="stat-field-gpt.js?v=forest-journey-4"></script>
+    <script src="stat-field-gpt.js?v=forest-journey-6"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -704,18 +718,34 @@
                 document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
               },
             });
+            var root = document.documentElement;
+            var grade = {
+              bg: ["#e7dfc4", "#11271b"],
+              elevated: ["#d8d5ab", "#183424"],
+              ink: ["#16251b", "#f4efd9"],
+              soft: ["#425748", "#d2d8c5"],
+              quiet: ["#607164", "#a8b7a8"],
+              rule: ["rgba(22,37,27,.18)", "rgba(244,239,217,.2)"]
+            };
+            function setFinalGrade(p) {
+              p = p < 0 ? 0 : (p > 1 ? 1 : p);
+              root.style.setProperty("--bg", gsap.utils.interpolate(grade.bg[0], grade.bg[1], p));
+              root.style.setProperty("--bg-elev", gsap.utils.interpolate(grade.elevated[0], grade.elevated[1], p));
+              root.style.setProperty("--ink", gsap.utils.interpolate(grade.ink[0], grade.ink[1], p));
+              root.style.setProperty("--ink-soft", gsap.utils.interpolate(grade.soft[0], grade.soft[1], p));
+              root.style.setProperty("--ink-quiet", gsap.utils.interpolate(grade.quiet[0], grade.quiet[1], p));
+              root.style.setProperty("--rule", gsap.utils.interpolate(grade.rule[0], grade.rule[1], p));
+              if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPaletteProgress) {
+                window.bullfinchCanopy.setFinalPaletteProgress(p);
+              }
+            }
             ScrollTrigger.create({
               trigger: "#closing",
-              start: "top bottom",
-              end: "bottom bottom",
-              onEnter: function () {
-                document.body.classList.add("is-final-contrast");
-                if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPalette) window.bullfinchCanopy.setFinalPalette(true);
-              },
-              onLeaveBack: function () {
-                document.body.classList.remove("is-final-contrast");
-                if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPalette) window.bullfinchCanopy.setFinalPalette(false);
-              },
+              start: "top 85%",
+              end: "top 55%",
+              scrub: true,
+              onUpdate: function (self) { setFinalGrade(self.progress); },
+              onRefresh: function (self) { setFinalGrade(self.progress || 0); }
             });
           }
         });
@@ -748,6 +778,16 @@
 
         var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
         if (!p1 || !p2 || !p3) return;
+        var treeDataLines = Array.prototype.slice.call(s03.querySelectorAll(".tree-readout span"));
+        function writeTreeData(p) {
+          treeDataLines.forEach(function (line, index) {
+            var lineIndex = index % 5;
+            var start = .10 + lineIndex * .10;
+            var write = (p - start) / .26;
+            write = write < 0 ? 0 : (write > 1 ? 1 : write);
+            line.style.setProperty("--write", write.toFixed(4));
+          });
+        }
 
         // Opening forest-floor motes resolve into the <1% grid while section
         // 01 arrives. The same trigger reverses the grid back into the ground.
@@ -773,15 +813,6 @@
             var p = smootherstep(self.progress);
             if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(1 - p);
             if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
-          },
-        });
-
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: function () { return at(p2, 0.58); },
-          end:   function () { return at(p3, 0.88); },
-          onToggle: function (self) {
-            document.body.classList.toggle("pc-bare-veil", self.isActive);
           },
         });
 
@@ -816,11 +847,13 @@
             }
             window.bullfinchCanopy.setTreeProgress(treeP);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            writeTreeData(treeP);
             document.body.classList.toggle("is-tree-stage", treeP > 0.05);
           },
           onLeaveBack: function () {
             window.bullfinchCanopy.setTreeProgress(0);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
+            writeTreeData(0);
             document.body.classList.remove("is-tree-stage");
           },
         });
@@ -949,27 +982,33 @@
 
         function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
         var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (reduced) return; // CSS drops the animations → marks rest assembled
-
-        // Scrub a mark's keyframe animations (gather / reveal / peopleSpin) from
-        // panel progress, with a dwell band so it HOLDS assembled mid-pin rather
-        // than scrubbing straight through. The animations are `alternate`, so
-        // currentTime 0->d builds and d->2d releases.
-        function dwellTime(p, d) {
-          var h0 = 0.4, h1 = 0.6;                 // assembled "catch" zone
-          if (p < h0) return (p / h0) * d;        // build   0 -> d
-          if (p < h1) return d;                   // hold assembled
-          return d + ((p - h1) / (1 - h1)) * d;   // release d -> 2d
-        }
-        function applyTimes(el, timeFor) {
-          var anims = el.getAnimations ? el.getAnimations({ subtree: true }) : [];
-          anims.forEach(function (a) {
-            try {
-              a.pause();
-              a.currentTime = timeFor(a.effect.getComputedTiming().duration);
-            } catch (e) {}
+        if (reduced) {
+          marks.forEach(function (el) {
+            el.style.setProperty("--build", "1");
+            el.style.setProperty("--rev", "1");
+            el.style.setProperty("--pang", "-12deg");
           });
+          return;
         }
+
+        // Drive the original mark geometry directly from scroll. The second
+        // half is the exact inverse of the first, so every piece animates out
+        // instead of being carried away assembled with its panel.
+        function markState(p) {
+          var x;
+          if (p < 0.34) x = p / 0.34;
+          else if (p < 0.62) x = 1;
+          else x = 1 - (p - 0.62) / 0.32;
+          x = clamp01(x);
+          return x * x * (3 - 2 * x);
+        }
+        function applyMarkAmount(el, x) {
+          el.style.setProperty("--build", x.toFixed(4));
+          el.style.setProperty("--rev", x.toFixed(4));
+          el.style.setProperty("--glow", (x * .95).toFixed(4));
+          el.style.setProperty("--pang", (360 - 372 * x).toFixed(2) + "deg");
+        }
+        function applyMarkState(el, p) { applyMarkAmount(el, markState(p)); }
 
         if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
           // Mirror swot.js's panel pin range so progress lines up with the pin.
@@ -978,8 +1017,7 @@
             var panel = el.closest(".panel");
             if (!panel) return;
             var scrub = function (p) {
-              var prog = clamp01(p);
-              applyTimes(el, function (d) { return dwellTime(prog, d); });
+              applyMarkState(el, clamp01(p));
             };
             ScrollTrigger.create({
               trigger: panel,
@@ -1007,12 +1045,42 @@
               var r = el.getBoundingClientRect();
               var c = r.top + r.height / 2;
               var m = clamp01(1 - Math.abs((c - vh / 2) / vh) / 0.42);
-              applyTimes(el, function (d) { return m * d; });
+              applyMarkAmount(el, m);
             });
             requestAnimationFrame(loop);
           };
           requestAnimationFrame(loop);
         }
+      })();
+    </script>
+    <script>
+      // The teaser has no splash element, so fullscreen must not be trapped
+      // inside the legacy splash initializer.
+      (function () {
+        var toggle = document.getElementById("fullscreen-toggle");
+        if (!toggle) return;
+        function active() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        }
+        function sync() {
+          var on = Boolean(active());
+          document.body.classList.toggle("is-fullscreen", on);
+          toggle.setAttribute("aria-label", on ? "Exit full screen" : "Enter full screen");
+          toggle.setAttribute("aria-pressed", on ? "true" : "false");
+        }
+        toggle.addEventListener("click", function () {
+          if (active()) {
+            var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+            if (exit) exit.call(document);
+          } else {
+            var request = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.msRequestFullscreen;
+            if (request) request.call(document.documentElement);
+          }
+        });
+        ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (name) {
+          document.addEventListener(name, sync);
+        });
+        sync();
       })();
     </script>
     <script>

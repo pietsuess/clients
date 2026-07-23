@@ -278,9 +278,11 @@
   var groundFieldHome = new Float32Array(PARTICLE_POOL * 3);
   var statGridHome = new Float32Array(PARTICLE_POOL * 3);
   var statSlotByMote = new Int16Array(PARTICLE_POOL);
+  var statRank = new Float32Array(PARTICLE_POOL);
   statSlotByMote.fill(-1);
   var openFieldP = 0;
   var statFormP = 0;
+  var statFillP = 0;
 
   // Horizontal field is scaled to the viewport aspect so the network stays
   // within screen bounds on ANY device. The camera's vertical FOV is constant,
@@ -296,57 +298,64 @@
     starFieldHome[i * 3]     = fieldX;
     starFieldHome[i * 3 + 1] = fieldY;
     starFieldHome[i * 3 + 2] = fieldZ;
-    groundFieldHome[i * 3]     = fieldX;
-    groundFieldHome[i * 3 + 1] = -2.9 + Math.random() * 0.55;
-    groundFieldHome[i * 3 + 2] = fieldZ;
+    // A shallow, full-width forest-floor band. It extends beyond both frame
+    // edges, occupies only the bottom eighth, and has very little z-depth.
+    var bandT = (i + 0.5) / PARTICLE_POOL;
+    groundFieldHome[i * 3]     = (bandT * 2 - 1) * FIELD_HALF_X * 1.24 + (Math.random() - 0.5) * 0.12;
+    groundFieldHome[i * 3 + 1] = -2.78 + Math.random() * 0.16;
+    groundFieldHome[i * 3 + 2] = 0.35 + (Math.random() - 0.5) * 0.34;
     positions[i * 3]     = groundFieldHome[i * 3];
     positions[i * 3 + 1] = groundFieldHome[i * 3 + 1];
     positions[i * 3 + 2] = groundFieldHome[i * 3 + 2];
     swayPhase[i] = Math.random() * Math.PI * 2;
     swayRate[i]  = 0.2 + Math.random() * 0.35;
     fallSpeed[i] = 0.06 + Math.random() * 0.10;
-    // Half the pool always on so >=200 motes are visible at progress 0.
-    if (i < PARTICLE_POOL * 0.50) {
-      thresholds[i] = 0.0;
-    } else {
-      thresholds[i] = (i - PARTICLE_POOL * 0.50) / (PARTICLE_POOL * 0.50);
-    }
+    thresholds[i] = 0.0;
     alphas[i] = 0;
     isRedMote[i] = 0;
     sizes[i] = BASE_MOTE_SIZE;
   }
-  // One hundred scene motes form the <1% field. Index 0 occupies the centre
-  // slot and remains the single red measured tree; index 1 is reserved for the
-  // closing convergence point and is not part of this grid.
-  var statMoteIndices = [0];
-  for (var sm = 2; sm <= 100 && sm < PARTICLE_POOL; sm++) statMoteIndices.push(sm);
-  var statSlots = [];
-  for (var ss = 0; ss < 100; ss++) if (ss !== 55) statSlots.push(ss);
-  statSlotByMote[0] = 55;
-  for (var si = 1; si < statMoteIndices.length; si++) statSlotByMote[statMoteIndices[si]] = statSlots[si - 1];
-  for (var sg = 0; sg < statMoteIndices.length; sg++) {
-    var moteIndex = statMoteIndices[sg];
-    var slot = statSlotByMote[moteIndex];
+  // Every ordinary field mote forms the exact original 10x10 statistic.
+  // Multiple motes occupy each cell exactly; none are hidden or faded to fake
+  // a smaller pool. The two narrative endpoints stay separate.
+  var statOrder = [];
+  for (var ss = 0; ss < 100; ss++) statOrder.push(ss);
+  statOrder.sort(function (a, b) {
+    return Math.hypot(a % 10 - 5, Math.floor(a / 10) - 5) - Math.hypot(b % 10 - 5, Math.floor(b / 10) - 5);
+  });
+  var rankBySlot = new Float32Array(100);
+  for (var sr = 0; sr < 100; sr++) rankBySlot[statOrder[sr]] = sr / 99;
+  var overlapX = [0, 0, 0, 0];
+  var overlapY = [0, 0, 0, 0];
+  for (var moteIndex = 2; moteIndex < PARTICLE_POOL; moteIndex++) {
+    var ordinal = moteIndex - 2;
+    var slot = (ordinal + 55) % 100;
+    var overlap = Math.floor(ordinal / 100) % 4;
+    statSlotByMote[moteIndex] = slot;
+    statRank[moteIndex] = rankBySlot[slot];
     var col = slot % 10;
     var row = Math.floor(slot / 10);
-    statGridHome[moteIndex * 3] = 0.8 + col * 0.34;
-    statGridHome[moteIndex * 3 + 1] = 1.2 - row * 0.34;
+    statGridHome[moteIndex * 3] = 0.8 + col * 0.34 + overlapX[overlap];
+    statGridHome[moteIndex * 3 + 1] = 1.2 - row * 0.34 + overlapY[overlap];
     statGridHome[moteIndex * 3 + 2] = 0.0;
   }
+  // The centre cell is the single measured tree in the original graphic.
+  isRedMote[2] = 1.0;
   // index 0 is the bullfinch: always on, 2.4x size, drifts slower
   isRedMote[0]   = 1.0;
   sizes[0]       = RED_MOTE_SIZE;
   fallSpeed[0]   = 0.025;
   swayRate[0]    = 0.10;
   thresholds[0]  = 0.0;
-  // Keep the seed inside the visible forest-floor field. It expands into the
-  // open cloud with every other mote instead of drifting above the viewport.
+  // The original seed stays at the top, sends its network, and is then left
+  // behind as the camera travels forward. It never joins the stat, trees, or
+  // closing endpoint.
   groundFieldHome[0] = 0.0;
-  groundFieldHome[1] = -2.62;
-  groundFieldHome[2] = 0.8;
+  groundFieldHome[1] = 3.45;
+  groundFieldHome[2] = 4.5;
   starFieldHome[0] = 0.0;
-  starFieldHome[1] = -0.6;
-  starFieldHome[2] = 0.4;
+  starFieldHome[1] = 3.45;
+  starFieldHome[2] = 4.5;
   positions[0] = groundFieldHome[0];
   positions[1] = groundFieldHome[1];
   positions[2] = groundFieldHome[2];
@@ -363,6 +372,7 @@
   partGeo.setAttribute("aRed",     new THREE.BufferAttribute(isRedMote, 1));
   partGeo.setAttribute("aSize",    new THREE.BufferAttribute(sizes, 1));
   partGeo.setAttribute("aGlow",    new THREE.BufferAttribute(glows, 1));
+  partGeo.setAttribute("aStatRank", new THREE.BufferAttribute(statRank, 1));
   // Per-mote height gradient for the grove (like the standalone tester): 0 at
   // the base, ramping toward the accent at the canopy top. 0 for all motes
   // until the tree targets are assigned at obj load, and only visible while the
@@ -376,18 +386,21 @@
     "attribute float aSize;",
     "attribute float aGlow;",
     "attribute float aTreeTint;",
+    "attribute float aStatRank;",
     "uniform float uPixelRatio;",
     "uniform float uTime;",
     "varying float vAlpha;",
     "varying float vRed;",
     "varying float vGlow;",
     "varying float vTreeTint;",
+    "varying float vStatRank;",
     "void main(){",
     "  vAlpha = aAlpha;",
     "  vRed   = aRed;",
     "  vTreeTint = aTreeTint;",
+    "  vStatRank = aStatRank;",
     "  // seed mote pulses subtly (sin time on a 2.4s period)",
-    "  float seedPulse = aRed * (0.65 + 0.35 * (0.5 + 0.5 * sin(uTime * 2.618)));",
+    "  float seedPulse = aRed * step(70.0, aSize) * (0.65 + 0.35 * (0.5 + 0.5 * sin(uTime * 2.618)));",
     "  vGlow  = max(aGlow, seedPulse);",
     "  vec4 mv = modelViewMatrix * vec4(position, 1.0);",
     "  // halo motes get a slightly larger point so the glow ring renders",
@@ -406,16 +419,22 @@
     "varying float vRed;",
     "varying float vGlow;",
     "varying float vTreeTint;",
+    "varying float vStatRank;",
     "uniform vec3  uColor;",
     "uniform vec3  uAccent;",
     "uniform float uTreeForm;",
+    "uniform float uStatForm;",
+    "uniform float uStatFill;",
+    "uniform vec3 uStatMuted;",
     "void main(){",
     "  vec2 c = gl_PointCoord - vec2(0.5);",
     "  float d = length(c);",
     "  // Hard-edged solid disc with 1px AA. Same for red and gray motes.",
     "  float aa = smoothstep(0.50, 0.47, d);",
     "  if (aa <= 0.0 && vGlow <= 0.01) discard;",
-    "  vec3 col = mix(uColor, uAccent, vRed);",
+    "  float statOn = step(vStatRank, uStatFill);",
+    "  vec3 statCol = mix(uStatMuted, uColor, statOn);",
+    "  vec3 col = mix(mix(uColor, statCol, uStatForm), uAccent, vRed);",
     "  col = mix(col, uAccent, vGlow * 0.8);",
     "  // Grove height gradient: base mote color -> accent up the canopy.",
     "  col = mix(col, uAccent, clamp(vTreeTint * uTreeForm, 0.0, 1.0));",
@@ -438,6 +457,9 @@
       uPixelRatio:  { value: renderer.getPixelRatio() },
       uTime:        uniforms.uTime,
       uTreeForm:    { value: 0 },
+      uStatForm:    { value: 0 },
+      uStatFill:    { value: 0 },
+      uStatMuted:   { value: readCssColor("--ink-soft") },
     },
     vertexShader: partVertex,
     fragmentShader: partFragment,
@@ -458,6 +480,7 @@
   redGeo.setAttribute("aSize",    partGeo.attributes.aSize);
   redGeo.setAttribute("aGlow",    partGeo.attributes.aGlow);
   redGeo.setAttribute("aTreeTint", partGeo.attributes.aTreeTint);
+  redGeo.setAttribute("aStatRank", partGeo.attributes.aStatRank);
   redGeo.setDrawRange(0, 2);        // first 2 vertices only
   var redMat = partMat.clone();
   redMat.depthTest = false;         // never occluded by anything
@@ -940,7 +963,7 @@
       var arrowVisible = wave === 7
         ? (strokeProgress > 0.001 ? 0.95 : 0.0)
         : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
-      arrowVisible *= (1 - statFormP) * (wave === 7 ? 1 : (1 - treeFormP));
+      arrowVisible *= (1 - statFormP) * (wave === 7 ? 1 : (1 - treeFormP) * (1 - finalFieldP));
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -970,10 +993,8 @@
 
       // Geometry does the drawing. Alpha is simply on while the segment has
       // length, avoiding the previous fade-in behavior.
-      var finalFadeForLines = smoothstep(0.88, 1.0, waveProgress[7] || 0);
-      var lineFloor = wave === 7 ? 1.0 : lerp(1.0, 0.25, finalFadeForLines);
-      var treeLineGate = wave === 7 ? 1.0 : (1 - treeFormP);
-      var visible = strokeProgress > 0.001 ? lineFloor * (1 - statFormP) * treeLineGate : 0.0;
+      var journeyGate = wave === 7 ? 1.0 : (1 - treeFormP) * (1 - finalFieldP);
+      var visible = strokeProgress > 0.001 ? (1 - statFormP) * journeyGate : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
     }
@@ -1286,6 +1307,40 @@
   }
 
   var lastElapsed = 0;
+  var statProbe = new THREE.Vector3();
+  var statDirection = new THREE.Vector3();
+  var statWorld = new THREE.Vector3();
+  function statScreenToWorld(px, py, zPlane) {
+    statProbe.set(px / window.innerWidth * 2 - 1, 1 - py / window.innerHeight * 2, .5).unproject(camera);
+    statDirection.copy(statProbe).sub(camera.position).normalize();
+    var distance = (zPlane - camera.position.z) / statDirection.z;
+    return statWorld.copy(camera.position).addScaledVector(statDirection, distance);
+  }
+  function updateStatGridTargets() {
+    if (statFormP <= 0) return;
+    var read = document.querySelector("#problem .stat-read");
+    if (!read) return;
+    var rect = read.getBoundingClientRect();
+    var dotPx = Math.max(11, Math.min(15, window.innerWidth * .0115));
+    var gapPx = Math.max(20, Math.min(44, window.innerWidth * .026));
+    var stepPx = dotPx + 4;
+    var gridWidth = dotPx * 10 + 36;
+    var centerX = rect.left - gapPx - gridWidth / 2;
+    var centerY = rect.top + rect.height / 2;
+    for (var i = 2; i < PARTICLE_POOL; i++) {
+      var slot = statSlotByMote[i];
+      var col = slot % 10;
+      var row = Math.floor(slot / 10);
+      var cluster = Math.floor((i - 2) / 100) % 4;
+      var px = centerX + (col - 4.5) * stepPx + overlapX[cluster] * 32;
+      var py = centerY + (row - 4.5) * stepPx + overlapY[cluster] * 32;
+      var world = statScreenToWorld(px, py, 0);
+      var i3 = i * 3;
+      statGridHome[i3] = world.x;
+      statGridHome[i3 + 1] = world.y;
+      statGridHome[i3 + 2] = world.z;
+    }
+  }
 
   function animate() {
     if (visible) {
@@ -1297,7 +1352,10 @@
       // The opening mote ground is spatially driven by scroll, not time. This
       // makes every position fully reversible when scroll direction changes.
       var density = uniforms.uMoteDensity.value;
-      var finalFade = smoothstep(0.88, 1.0, waveProgress[7] || 0);
+      partMat.uniforms.uStatForm.value = statFormP;
+      partMat.uniforms.uStatFill.value = statFillP;
+      updateStatGridTargets();
+      var statSizeDirty = false;
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
         var yi = i * 3 + 1;
@@ -1324,18 +1382,17 @@
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
         if (i === 0) {
-          // Seed fades + scales in via seedReveal (hero -> section 01).
-          alphas[i] = lerp(1.0, 0.25, finalFade) * seedReveal;
+          alphas[i] = seedReveal;
         } else if (i === 1) {
           // Final red dot is fixed at the floor. Always on — the camera
           // simply pans down to reveal it. No alpha gating.
           alphas[i] = 1.0;
         } else {
-          alphas[i] = lerp(0.9 * gate, 0.25, finalFade);
-        }
-        if (statFormP > 0) {
-          if (statSlot >= 0) alphas[i] = Math.max(alphas[i], 0.92 * statFormP);
-          else alphas[i] *= 1 - statFormP;
+          // Ordinary field motes never fade during statistic assembly or
+          // disassembly. Their positions and colors change, not their count.
+          alphas[i] = 0.9 * gate;
+          var statSize = lerp(BASE_MOTE_SIZE, 104, statFormP);
+          if (sizes[i] !== statSize) { sizes[i] = statSize; statSizeDirty = true; }
         }
         // Decay rim-glow at 1/1.2s. Glow values are set to 1.0 by the line
         // latch logic when a child mote first gets connected.
@@ -1347,12 +1404,13 @@
       if (hoveredMoteIdx >= 0) {
         glows[hoveredMoteIdx] = Math.max(glows[hoveredMoteIdx], 0.95);
       }
+      if (statSizeDirty) partGeo.attributes.aSize.needsUpdate = true;
       // Final red dot is FIXED at (0, -2.5, 0) — set once at startup. The
       // camera tilts down to reveal it. NO position animation here.
 
       // Seed reveal: scale the first red dot from 0 -> full (RED_MOTE_SIZE).
       // aSize is shared with redGeo, so one needsUpdate refreshes both draws.
-      var seedTargetSize = lerp(RED_MOTE_SIZE * seedReveal, BASE_MOTE_SIZE * 1.1, statFormP);
+      var seedTargetSize = RED_MOTE_SIZE * seedReveal;
       if (sizes[0] !== seedTargetSize) {
         sizes[0] = seedTargetSize;
         partGeo.attributes.aSize.needsUpdate = true;
@@ -1489,7 +1547,7 @@
   // auto-orbit) and easing back to the slow turn once formed / dispersed.
   var treeSpinAngle = 0;        // accumulated yaw (rad), integrated per frame
   var treeSpinPrevT = 0;        // last elapsed sample, for the local dt
-  var TREE_SPIN_BASE = 0.035;   // slow, even turntable motion
+  var TREE_SPIN_BASE = 0.0175;  // half-speed, even turntable motion
   var TREE_SPIN_BOOST = 0.0;
   var treeReady = false;
   var treeNorm = null;          // normalized grove coords (height 1, base 0, centered)
@@ -1502,6 +1560,8 @@
   var fillAlphaAttr = null, fillPosAttr = null;
   var fillSeedArr = null, fillStartArr = null;
   var fillCount = 0;
+  var fillFinalCapture = null;
+  var fillFinalLocked = false;
   var finalFieldTarget = 0;
   var finalFieldP = 0;
   var finalFieldCapture = new Float32Array(PARTICLE_POOL * 3);
@@ -1515,8 +1575,8 @@
   // Centre the three-tree Point Cloud 3 grove across the viewport.
   var groveZoneL = 64, groveZoneR = 480;   // px fallbacks, remeasured below
   function measureGroveZone() {
-    groveZoneL = window.innerWidth * 0.18;
-    groveZoneR = window.innerWidth * 0.82;
+    groveZoneL = window.innerWidth * 0.03;
+    groveZoneR = window.innerWidth * 0.97;
   }
   measureGroveZone();
   window.addEventListener("resize", measureGroveZone);
@@ -1568,13 +1628,11 @@
         var s2 = (Math.random() * (s1 + 1)) | 0;
         var tmpI = idx[s1]; idx[s1] = idx[s2]; idx[s2] = tmpI;
       }
-      // Include indices 0 (the bullfinch seed) and 1 (the floor convergence
-      // dot) so the red motes join the grove as ordinary points instead of
-      // hovering apart as separate god-dots. They ramp down to mote size while
-      // formed and are restored to their canonical roles once dispersed.
+      // The opening seed and closing endpoint are narrative anchors, not tree
+      // material. Only the ordinary field motes join the grove.
       var take = 0;
       var TREE_TINT = 0.55;   // max blend toward the accent at the canopy top
-      for (var mi = 0; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
+      for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
         moteNormIdx[mi] = idx[take];
         moteFormSeed[mi] = treeNorm[idx[take] * 3 + 1];
         treeTint[mi] = Math.pow(treeNorm[idx[take] * 3 + 1], 2.2) * TREE_TINT;
@@ -1587,6 +1645,7 @@
       var fillRed  = new Float32Array(fillCount);
       var fillSize = new Float32Array(fillCount);
       var fillGlow = new Float32Array(fillCount);
+      var fillStatRank = new Float32Array(fillCount);
       fillSeedArr  = new Float32Array(fillCount);
       fillStartArr = new Float32Array(fillCount * 3);
       fillNorm     = new Float32Array(fillCount * 3);
@@ -1606,7 +1665,9 @@
         fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
         fillSize[fi] = BASE_MOTE_SIZE * (0.9 + Math.random() * 0.3);
         fillSeedArr[fi] = fillNorm[fi * 3 + 1];
+        fillStatRank[fi] = 1;
       }
+      fillFinalCapture = new Float32Array(fillCount * 3);
       var fillGeo = new THREE.BufferGeometry();
       fillGeo.setAttribute("position", new THREE.BufferAttribute(fillPos, 3));
       fillGeo.setAttribute("aAlpha",   new THREE.BufferAttribute(fillA, 1));
@@ -1614,6 +1675,7 @@
       fillGeo.setAttribute("aSize",    new THREE.BufferAttribute(fillSize, 1));
       fillGeo.setAttribute("aGlow",    new THREE.BufferAttribute(fillGlow, 1));
       fillGeo.setAttribute("aTreeTint", new THREE.BufferAttribute(fillTint, 1));
+      fillGeo.setAttribute("aStatRank", new THREE.BufferAttribute(fillStatRank, 1));
       fillAlphaAttr = fillGeo.attributes.aAlpha;
       fillPosAttr   = fillGeo.attributes.position;
       var fillPoints = new THREE.Points(fillGeo, partMat);
@@ -1657,7 +1719,7 @@
         sizes[FINAL_RED_IDX] = RED_MOTE_SIZE;
         partGeo.attributes.aSize.needsUpdate = true;
       }
-      if (fillAlphaAttr && fillAlphaAttr.array[0] !== 0) {
+      if (fillAlphaAttr && finalFieldP <= 0 && fillAlphaAttr.array[0] !== 0) {
         for (var rf = 0; rf < fillCount; rf++) fillAlphaAttr.array[rf] = 0;
         fillAlphaAttr.needsUpdate = true;
       }
@@ -1673,8 +1735,11 @@
     var zl = ((groveZoneL / window.innerWidth) * 2 - 1) * halfW;
     var zr = ((groveZoneR / window.innerWidth) * 2 - 1) * halfW;
     var groveCX = (zl + zr) / 2;
-    var S = (zr - zl) * 0.92 / (assetHalfW * 2);
-    if (S > TREE_MAX_HEIGHT) S = TREE_MAX_HEIGHT;
+    // Horizontal and vertical scales are independent: the grove fills almost
+    // the entire width, while height is capped so no crown is cropped. This
+    // spreads the three trees apart instead of shrinking them into a cluster.
+    var SX = (zr - zl) * 0.98 / (assetHalfW * 2);
+    var S = Math.min(TREE_MAX_HEIGHT, SX);
     if (S < 0.8) S = 0.8;
     // Seat the grove's CENTER on the screen-vertical center (the middle of the
     // #opportunity text column) rather than on the forest floor. Trace the
@@ -1695,8 +1760,7 @@
     var spinEnv = 4 * treeFormP * (1 - treeFormP);  // 0 at ends, 1 mid-transition
     treeSpinAngle += (TREE_SPIN_BASE + TREE_SPIN_BOOST * spinEnv) * dtSpin;
     var spinCos = Math.cos(treeSpinAngle), spinSin = Math.sin(treeSpinAngle);
-    var redSizeDirty = false;
-    for (var i = 0; i < PARTICLE_POOL; i++) {
+    for (var i = 2; i < PARTICLE_POOL; i++) {
       var w = tClamp01(treeFormP * 1.25 - moteFormSeed[i] * 0.25);
       if (w <= 0) { moteLocked[i] = 0; continue; }
       var xi = i * 3, yi = xi + 1, zi = xi + 2;
@@ -1707,15 +1771,9 @@
         moteCapture[zi] = positions[zi];
       }
       var e = w * w * (3 - 2 * w);
-      // Red motes (seed + convergence dot) shrink from god-size to mote size as
-      // they join the grove, so they read as part of the cloud, not apart.
-      if (isRedMote[i]) {
-        var rs = lerp(RED_MOTE_SIZE, BASE_MOTE_SIZE, e);
-        if (sizes[i] !== rs) { sizes[i] = rs; redSizeDirty = true; }
-      }
       var sway = Math.sin(treeFormP * Math.PI * 2 + swayPhase[i]) * 0.02 * e;
       var mt = moteNormIdx[i] * 3;
-      var mlx = treeNorm[mt]     * S;   // grove-local x/z, before yaw
+      var mlx = treeNorm[mt]     * SX;  // full-width grove x, before yaw
       var mlz = treeNorm[mt + 2] * S;
       var mtx = groveCX + mlx * spinCos - mlz * spinSin;
       var mty = treeNorm[mt + 1] * S + baseY;
@@ -1723,10 +1781,9 @@
       positions[xi] = moteCapture[xi] + (mtx - moteCapture[xi]) * e + sway;
       positions[yi] = moteCapture[yi] + (mty - moteCapture[yi]) * e;
       positions[zi] = moteCapture[zi] + (mtz - moteCapture[zi]) * e;
-      var aTree = lerp(1.0 * e, 0.3, ff);   // fully opaque when formed (brighter on the earthy field)
+      var aTree = 1.0;
       if (aTree > alphas[i]) alphas[i] = aTree;
     }
-    if (redSizeDirty) partGeo.attributes.aSize.needsUpdate = true;
     // Fill dots FLY from the ambient field into the trees (same stagger
     // family as the motes) rather than fading in place.
     var fa = fillAlphaAttr.array;
@@ -1761,11 +1818,17 @@
     if (finalFieldP <= 0) {
       finalFieldCapture.set(positions);
       finalFieldLocked = false;
+      if (fillFinalCapture && fillPosAttr) fillFinalCapture.set(fillPosAttr.array);
+      fillFinalLocked = false;
       return;
     }
     if (finalFieldTarget > 0.001 && !finalFieldLocked) {
       finalFieldCapture.set(positions);
       finalFieldLocked = true;
+    }
+    if (fillFinalCapture && fillPosAttr && !fillFinalLocked) {
+      fillFinalCapture.set(fillPosAttr.array);
+      fillFinalLocked = true;
     }
     if (!finalFieldLocked) return;
     for (var i = 2; i < PARTICLE_POOL; i++) {
@@ -1777,6 +1840,22 @@
       positions[i3 + 1] = lerp(finalFieldCapture[i3 + 1], starFieldHome[i3 + 1], e);
       positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], starFieldHome[i3 + 2], e);
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
+    }
+    if (fillFinalLocked && fillPosAttr && fillAlphaAttr) {
+      var fp = fillPosAttr.array;
+      var fa = fillAlphaAttr.array;
+      for (var f = 0; f < fillCount; f++) {
+        var fs = (f % 13) * 0.012;
+        var fw = tClamp01(finalFieldP * 1.13 - fs);
+        var fe = fw * fw * (3 - 2 * fw);
+        var f3 = f * 3;
+        fp[f3]     = lerp(fillFinalCapture[f3],     fillStartArr[f3],     fe);
+        fp[f3 + 1] = lerp(fillFinalCapture[f3 + 1], fillStartArr[f3 + 1], fe);
+        fp[f3 + 2] = lerp(fillFinalCapture[f3 + 2], fillStartArr[f3 + 2], fe);
+        fa[f] = 1;
+      }
+      fillPosAttr.needsUpdate = true;
+      fillAlphaAttr.needsUpdate = true;
     }
   }
 
@@ -1820,34 +1899,41 @@
     previousConvergenceProgress = v;
     setWaveProgress(7, v);
   }
-  // The closing palette changes as one coordinated state. There is no color
-  // tween, so text and scene can never pass through a low-contrast midpoint.
-  function setFinalPalette(active) {
-    var canopyName = active ? "--gl-final-canopy" : "--gl-canopy";
-    var underName = active ? "--gl-final-understory" : "--gl-understory";
-    var shaftName = active ? "--gl-final-shaft" : "--gl-light-shaft";
-    var moteName = active ? "--gl-final-mote" : "--gl-mote";
-    var lineName = active ? "--gl-final-line" : "--gl-line";
-    var baseName = active ? "--gl-final-base" : "--gl-base";
-    var nextLine = readCssRgba(lineName);
-    uniforms.uCanopy.value.copy(readCssColor(canopyName));
-    uniforms.uUnderstory.value.copy(readCssColor(underName));
-    uniforms.uLightShaft.value.copy(readCssColor(shaftName));
-    uniforms.uLine.value.copy(nextLine.color);
-    uniforms.uLineAlpha.value = nextLine.alpha;
-    partMat.uniforms.uColor.value.copy(readCssColor(moteName));
-    arrowMat.uniforms.uColor.value.copy(readCssColor(moteName));
-    bgColor.copy(readCssColor(baseName));
+  var dayPalette = {
+    canopy: readCssColor("--gl-canopy"), understory: readCssColor("--gl-understory"),
+    shaft: readCssColor("--gl-light-shaft"), mote: readCssColor("--gl-mote"),
+    line: readCssRgba("--gl-line"), base: readCssColor("--gl-base")
+  };
+  var finalPalette = {
+    canopy: readCssColor("--gl-final-canopy"), understory: readCssColor("--gl-final-understory"),
+    shaft: readCssColor("--gl-final-shaft"), mote: readCssColor("--gl-final-mote"),
+    line: readCssRgba("--gl-final-line"), base: readCssColor("--gl-final-base")
+  };
+  var paletteScratch = new THREE.Color();
+  function setFinalPaletteProgress(p) {
+    p = tClamp01(p);
+    uniforms.uCanopy.value.lerpColors(dayPalette.canopy, finalPalette.canopy, p);
+    uniforms.uUnderstory.value.lerpColors(dayPalette.understory, finalPalette.understory, p);
+    uniforms.uLightShaft.value.lerpColors(dayPalette.shaft, finalPalette.shaft, p);
+    uniforms.uLine.value.lerpColors(dayPalette.line.color, finalPalette.line.color, p);
+    uniforms.uLineAlpha.value = lerp(dayPalette.line.alpha, finalPalette.line.alpha, p);
+    paletteScratch.lerpColors(dayPalette.mote, finalPalette.mote, p);
+    partMat.uniforms.uColor.value.copy(paletteScratch);
+    arrowMat.uniforms.uColor.value.copy(paletteScratch);
+    bgColor.lerpColors(dayPalette.base, finalPalette.base, p);
     renderer.setClearColor(bgColor, 1);
   }
+  function setFinalPalette(active) { setFinalPaletteProgress(active ? 1 : 0); }
   window.bullfinchCanopy = {
     setProgress: setProgress,
     setLayerTint: setProgress,
     setWaveProgress: setWaveProgress,
     setConvergenceProgress: setConvergenceProgress,
     setFinalPalette: setFinalPalette,
+    setFinalPaletteProgress: setFinalPaletteProgress,
     setSeedReveal: setSeedReveal,
     setStatProgress: function (p) { statFormP = tClamp01(p); },
+    setStatFillProgress: function (p) { statFillP = tClamp01(p); },
     setOpenFieldProgress: function (p) { openFieldP = tClamp01(p); },
     // Tree grove formation (index-pointcloud variant): driven by the
     // DOM-anchored ScrollTriggers in index-pointcloud.html. 03 approaching

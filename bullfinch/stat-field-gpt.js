@@ -1,40 +1,99 @@
-/* Bullfinch teaser <1% readout. The 100-dot grid is rendered by the shared
-   point-cloud scene so the opening ground motes become the measurement field. */
+/* Bullfinch teaser <1% readout. The original 001 -> 100 seven-segment and
+   TODAY -> BULLFINCH animation drive the shared WebGL mote field. */
 (function () {
   var panel = document.getElementById("problem");
   var stat = panel && panel.querySelector(".panel__stat--problem");
-  if (!panel || !stat) return;
+  var readoutEl = document.getElementById("statReadout");
+  if (!panel || !stat || !readoutEl) return;
 
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+  var lblToday = document.getElementById("statToday");
+  var lblBull = document.getElementById("statBull");
+  var labelEl = panel.querySelector(".stat-label");
+  var numEl = panel.querySelector(".stat-num");
+  var restEl = panel.querySelector(".stat-rest");
+
+  var SEG_RECT = { a:[9,0,32,9], b:[41,9,9,31.5], c:[41,49.5,9,31.5], d:[9,81,32,9],
+                   e:[0,49.5,9,31.5], f:[0,9,9,31.5], g:[9,40.5,32,9] };
+  var SEG_ON = { "0":"abcdef", "1":"bc", "2":"abged", "3":"abgcd", "4":"fgbc",
+                 "5":"afgcd", "6":"afgecd", "7":"abc", "8":"abcdefg", "9":"abcdfg" };
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var digitMaps = [];
+  for (var dp = 0; dp < 3; dp++) {
+    var svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("class", "stat-digit");
+    svg.setAttribute("viewBox", "0 0 50 90");
+    var map = {};
+    Object.keys(SEG_RECT).forEach(function (seg) {
+      var r = SEG_RECT[seg];
+      var rect = document.createElementNS(SVGNS, "rect");
+      rect.setAttribute("x", r[0]); rect.setAttribute("y", r[1]);
+      rect.setAttribute("width", r[2]); rect.setAttribute("height", r[3]);
+      rect.setAttribute("rx", "2"); rect.setAttribute("class", "stat-seg");
+      svg.appendChild(rect); map[seg] = rect;
+    });
+    readoutEl.appendChild(svg); digitMaps.push(map);
+  }
+  function setReadout(n) {
+    var s = String(n); while (s.length < 3) s = "0" + s;
+    for (var i = 0; i < 3; i++) {
+      var lit = SEG_ON[s.charAt(i)] || "";
+      var m = digitMaps[i];
+      Object.keys(m).forEach(function (seg) {
+        m[seg].setAttribute("class", "stat-seg" + (lit.indexOf(seg) >= 0 ? " on" : ""));
+      });
+    }
+  }
+
   function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+  function mapRange(x, a, b) { return clamp01((x - a) / (b - a)); }
   function smooth(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
-  function show(p) {
-    stat.style.opacity = p;
-    stat.style.transform = "translateY(" + (18 * (1 - p)) + "px)";
+  function ease(x) { x = clamp01(x); return 1 - Math.pow(1 - x, 3); }
+  function paint(fillProgress) {
+    var nLit = Math.max(1, Math.round(fillProgress * 100));
+    var labelT = ease(clamp01(fillProgress / .5));
+    setReadout(nLit);
+    if (lblToday) {
+      lblToday.style.opacity = 1 - labelT;
+      lblToday.style.filter = "blur(" + (labelT * 6) + "px)";
+    }
+    if (lblBull) {
+      lblBull.style.opacity = labelT;
+      lblBull.style.filter = "blur(" + ((1 - labelT) * 5) + "px)";
+      lblBull.style.transform = "translateY(" + (-(1 - labelT) * 3) + "em)";
+    }
+    if (window.bullfinchCanopy && window.bullfinchCanopy.setStatFillProgress) {
+      window.bullfinchCanopy.setStatFillProgress(fillProgress);
+    }
   }
 
   if (reduced || typeof ScrollTrigger === "undefined") {
-    show(1);
+    [labelEl, numEl, restEl].forEach(function (el) { if (el) { el.style.opacity = 1; el.style.transform = "none"; } });
+    paint(0);
     return;
   }
 
-  show(0);
-  ScrollTrigger.create({
-    trigger: panel,
-    start: "top bottom",
-    end: "top top",
-    scrub: true,
-    onUpdate: function (self) { show(smooth(self.progress)); },
-  });
+  var items = [labelEl, numEl, restEl];
+  function drive(p) {
+    for (var i = 0; i < items.length; i++) {
+      var el = items[i]; if (!el) continue;
+      var inT = mapRange(p, .06 + i * .05, .16 + i * .05);
+      var outT = mapRange(p, .86 + (items.length - 1 - i) * .018, .92 + (items.length - 1 - i) * .018);
+      el.style.opacity = inT * (1 - outT);
+      el.style.transform = "translateY(" + (22 * (1 - inT) - 24 * outT) + "px)";
+    }
+    paint(ease(mapRange(p, .30, .74)));
+  }
+  drive(0);
   ScrollTrigger.create({
     trigger: panel,
     start: "top top",
-    end: mobileLike ? "+=100%" : "+=150%",
+    end: mobileLike ? "+=100%" : "+=200%",
     scrub: true,
-    onUpdate: function (self) {
-      show(1 - smooth(clamp01((self.progress - 0.72) / 0.20)));
-    },
+    invalidateOnRefresh: true,
+    onUpdate: function (self) { drive(self.progress); },
+    onRefresh: function (self) { drive(self.progress || 0); }
   });
 })();
 
