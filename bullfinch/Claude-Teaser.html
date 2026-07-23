@@ -737,7 +737,7 @@
     <script src="scene-claude-teaser.js?v=claude-2"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot.js?v=forest-journey-6"></script>
+    <script src="swot-claude.js?v=claude-1"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -893,8 +893,7 @@
             if (!closeReduced && closeEls.length) {
               closeEls.forEach(function (c) {
                 c.el.style.opacity = "0";
-                c.el.style.transform = "translateY(30px)";
-                c.el.style.willChange = "opacity, transform";
+                c.el.style.willChange = "opacity";
               });
               function revealClosing(p) {
                 p = p < 0 ? 0 : (p > 1 ? 1 : p);
@@ -902,9 +901,8 @@
                   var a = c.band[0], b = c.band[1];
                   var t = (p - a) / (b - a);
                   t = t < 0 ? 0 : (t > 1 ? 1 : t);
-                  var e = t * t * (3 - 2 * t);      // smoothstep
+                  var e = t * t * (3 - 2 * t);      // smoothstep — fade IN PLACE
                   c.el.style.opacity = e.toFixed(3);
-                  c.el.style.transform = "translateY(" + (30 * (1 - e)).toFixed(2) + "px)";
                 });
               }
               ScrollTrigger.create({
