@@ -402,23 +402,30 @@
     statGridHome[moteIndex * 3 + 1] = 1.2 - row * 0.34 + overlapY[overlap];
     statGridHome[moteIndex * 3 + 2] = 0.0;
   }
-  // The centre cell is the single measured tree in the original graphic.
-  isRedMote[2] = 1.0;
-  // index 0 is the bullfinch: always on, 2.4x size, drifts slower
-  isRedMote[0]   = 1.0;
+  // Claude fork: the cascade SEED IS the grid's centre red cell — the single
+  // measured "1%" tree. Index 0 takes the centre slot (55) and joins the grid,
+  // so the network fans out FROM the centre red dot instead of a stray mote
+  // parked at the top of the screen. Index 2 loses its separate red so there is
+  // ONE red dot at centre, not two.
+  isRedMote[2] = 0.0;               // was the duplicate centre red — now a normal grid dot
+  isRedMote[0]   = 1.0;             // the seed = the measured centre cell
   sizes[0]       = RED_MOTE_SIZE;
   fallSpeed[0]   = 0.025;
   swayRate[0]    = 0.10;
   thresholds[0]  = 0.0;
-  // The original seed stays at the top, sends its network, and is then left
-  // behind as the camera travels forward. It never joins the stat, trees, or
-  // closing endpoint.
+  statSlotByMote[0] = 55;           // centre cell (col 5, row 5)
+  statRank[0]       = rankBySlot[55];
+  statGridHome[0]   = 0.8 + 5 * 0.34;   // fallback centre coords (DOM-anchored each frame)
+  statGridHome[1]   = 1.2 - 5 * 0.34;
+  statGridHome[2]   = 0.0;
+  // The seed lives in the low central field before the grid forms, then flies
+  // to the grid centre with the rest — no longer parked at the top.
   groundFieldHome[0] = 0.0;
-  groundFieldHome[1] = 3.45;
-  groundFieldHome[2] = 4.5;
+  groundFieldHome[1] = -0.55;
+  groundFieldHome[2] = 0.4;
   starFieldHome[0] = 0.0;
-  starFieldHome[1] = 3.45;
-  starFieldHome[2] = 4.5;
+  starFieldHome[1] = -0.55;
+  starFieldHome[2] = 0.4;
   positions[0] = groundFieldHome[0];
   positions[1] = groundFieldHome[1];
   positions[2] = groundFieldHome[2];
@@ -1418,11 +1425,12 @@
       centerX = rect.left - gapPx - (dotPx * 10 + 36) / 2;
       centerY = rect.top + rect.height / 2;
     }
-    for (var i = 2; i < PARTICLE_POOL; i++) {
+    for (var i = 0; i < PARTICLE_POOL; i++) {
       var slot = statSlotByMote[i];
+      if (slot < 0) continue;                 // index 1 (convergence dot) is not in the grid
       var col = slot % 10;
       var row = Math.floor(slot / 10);
-      var cluster = Math.floor((i - 2) / 100) % 4;
+      var cluster = i < 2 ? 0 : Math.floor((i - 2) / 100) % 4;   // guard: no negative index for the seed
       var px = centerX + (col - 4.5) * stepPx + overlapX[cluster] * 32;
       var py = centerY + (row - 4.5) * stepPx + overlapY[cluster] * 32;
       var world = statScreenToWorld(px, py, 0);

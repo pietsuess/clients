@@ -155,36 +155,62 @@
     window.setTimeout(refreshTextVeilLayer, 520);
   }
 
+  var STAGGER = [
+    { sel: ".panel__eyebrow",     s: 0.05 },
+    { sel: ".panel__verdict",     s: 0.11 },
+    { sel: ".ground-heading",     s: 0.11 },
+    { sel: ".panel__evidence p",  s: 0.17 },
+    { sel: ".audience-item",      s: 0.17 },
+    { sel: ".panel__numeric",     s: 0.25 },
+    { sel: ".trust-line",         s: 0.30 }
+  ];
+
   function applyPanelProgress(panel, p) {
     var inner    = panel.querySelector(".panel__inner");
     var media    = panel.querySelector(".panel__video");
     var readouts = panel.querySelector(".tree-readouts");
 
-    // IN-PLACE choreography (Claude fork): the ENTIRE .panel__inner block —
-    // headline, body, stat readout, audience grid, partner logos, ground
-    // heading — plus the tree readouts FADE in as the panel pins and FADE out
-    // as it leaves. Opacity ONLY, zero translation: opacity on .panel__inner
-    // cascades to every descendant, so one fade covers all of them and NOTHING
-    // slides up from below or off the top. Before the pin (p=0) and after it
-    // (p=1) everything is transparent, so the empty section scrolls through with
-    // no visible drift. (The closing card is the one exception — it may slide,
-    // handled in the HTML.)
-    var appear = smooth01(mapRange(p, 0.04, 0.20));
+    // ANIMATED in-place choreography (Claude fork): the block SLIDES IN from the
+    // left and fades as the panel pins, its inner elements CASCADE in on a
+    // stagger, then everything fades out in place as it leaves. Motion is
+    // HORIZONTAL only (+ opacity) — real animation, but nothing floats up from
+    // below or slides off the top. Opacity on .panel__inner cascades to every
+    // child (audience grid, partner logos, ground heading), so the whole card
+    // is covered; the stagger adds life on top. On exit the slide is 0 (fade
+    // only), so the empty section scrolls away with no drift. The closing card
+    // is the sole exception (may slide — handled in the HTML).
+    var appear = smooth01(mapRange(p, 0.04, 0.24));
     var leave  = smooth01(mapRange(p, 0.86, 0.98));
     var vis = appear * (1 - leave);
+    var blockX = (1 - appear) * -56;         // slide in from the left; 0 on exit
 
     if (inner) {
       inner.style.opacity = vis;
-      inner.style.transform = "none";
+      inner.style.transform = "translateX(" + blockX.toFixed(1) + "px)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
-    if (readouts) readouts.style.opacity = vis;
+    if (readouts) {
+      readouts.style.opacity = vis;
+      readouts.style.transform = "translateX(" + blockX.toFixed(1) + "px)";
+    }
+
+    // Staggered extra motion on the key elements: each starts a little further
+    // left and catches up on its own beat. Transform composes with the block's
+    // slide; opacity is owned by the block. Exit leaves them settled (no drift).
+    for (var si = 0; si < STAGGER.length; si++) {
+      var group = panel.querySelectorAll(STAGGER[si].sel);
+      if (!group.length) continue;
+      var s = STAGGER[si].s;
+      for (var gi = 0; gi < group.length; gi++) {
+        var e = smooth01(mapRange(p, s + gi * 0.015, s + 0.18 + gi * 0.015));
+        group[gi].style.transform = "translateX(" + ((1 - e) * -34).toFixed(1) + "px)";
+      }
+    }
 
     // Media: the #product case is a fixed layer whose fade is owned by
-    // setProductCase (in AND out, within the pin) — don't fight it here; just
-    // keep it centred and untranslated so it never slides.
+    // setProductCase (in AND out, within the pin) — don't fight it here.
     if (media) {
       media.style.transform = (panel.id === "product") ? "translate3d(0, -50%, 0)" : "none";
     }
