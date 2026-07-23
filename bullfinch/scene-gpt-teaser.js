@@ -97,6 +97,11 @@
   var DOLLY_END_PROGRESS = 0.90;  // camera lands at this point and holds
   camera.position.copy(CAM_START);
   camera.lookAt(0, -1.0, 0);
+  // unproject() is used below to place the opening field against the actual
+  // viewport. Commit the camera transform first so those screen coordinates
+  // do not inherit the camera's pre-lookAt matrix.
+  camera.updateProjectionMatrix();
+  camera.updateMatrixWorld(true);
   scene.add(camera); // required so child of camera renders
 
   // ---- Shared uniforms -------------------------------------------------
@@ -295,10 +300,31 @@
   // no dot ends up too close / behind it.
   var viewAspect = window.innerWidth / Math.max(1, window.innerHeight);
   var FIELD_HALF_X = Math.max(2.2, Math.min(6.5, 4.2 * viewAspect));
+  // Build the open volume through the camera used around section 02. This
+  // removes the fixed world-space Y ceiling that projected every mote into the
+  // upper part of the viewport. The Y samples are stratified across and just
+  // beyond the frame, while varied ray distance preserves real 3D depth.
+  var openFieldCamera = new THREE.PerspectiveCamera(55, viewAspect, 0.1, 200);
+  var openCameraProgress = 0.52;
+  openFieldCamera.position.set(
+    lerp(CAM_START.x, CAM_END.x, openCameraProgress),
+    lerp(CAM_START.y, CAM_END.y, openCameraProgress),
+    lerp(CAM_START.z, CAM_END.z, openCameraProgress)
+  );
+  openFieldCamera.lookAt(0, lerp(-1.0, -1.5, openCameraProgress), 0);
+  openFieldCamera.updateProjectionMatrix();
+  openFieldCamera.updateMatrixWorld(true);
+  var openProbe = new THREE.Vector3();
+  var openDirection = new THREE.Vector3();
   for (var i = 0; i < PARTICLE_POOL; i++) {
-    var fieldX = (Math.random() - 0.5) * 2 * FIELD_HALF_X;
-    var fieldY = (Math.random() - 0.5) * 5.0 - 0.2;
-    var fieldZ = -3.5 + Math.random() * 2.5;
+    var openScreenX = (Math.random() - 0.5) * 2.24;
+    var openScreenY = -1.12 + 2.24 * ((i + Math.random()) / PARTICLE_POOL);
+    var openDistance = 6.0 + Math.random() * 5.0;
+    openProbe.set(openScreenX, openScreenY, 0.35).unproject(openFieldCamera);
+    openDirection.copy(openProbe).sub(openFieldCamera.position).normalize();
+    var fieldX = openFieldCamera.position.x + openDirection.x * openDistance;
+    var fieldY = openFieldCamera.position.y + openDirection.y * openDistance;
+    var fieldZ = openFieldCamera.position.z + openDirection.z * openDistance;
     starFieldHome[i * 3]     = fieldX;
     starFieldHome[i * 3 + 1] = fieldY;
     starFieldHome[i * 3 + 2] = fieldZ;
