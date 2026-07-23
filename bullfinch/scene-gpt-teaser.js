@@ -96,7 +96,7 @@
   var CAM_END   = new THREE.Vector3(0, 0.5, 3.0);
   var DOLLY_END_PROGRESS = 0.90;  // camera lands at this point and holds
   camera.position.copy(CAM_START);
-  camera.lookAt(0, 0, 0);
+  camera.lookAt(0, -1.0, 0);
   scene.add(camera); // required so child of camera renders
 
   // ---- Shared uniforms -------------------------------------------------
@@ -259,9 +259,9 @@
   // Index 0 is the red bullfinch mote (always visible, 2.4x size, accent).
   // Half the pool is always on so the canopy reads populated at progress 0.
   var PARTICLE_POOL = mobileLike ? 260 : 400;
-  var BASE_MOTE_SIZE = 28.0;
+  var BASE_MOTE_SIZE = 38.0;
   // Red mote is a solid red disc 2.2x base size, clearly larger than the rest.
-  var RED_MOTE_SIZE  = 62.0;
+  var RED_MOTE_SIZE  = 82.0;
 
   var positions   = new Float32Array(PARTICLE_POOL * 3);
   var swayPhase   = new Float32Array(PARTICLE_POOL);
@@ -275,8 +275,12 @@
   // the original full-volume coordinates so the closing can return to that
   // field before the existing convergence completes the journey.
   var starFieldHome = new Float32Array(PARTICLE_POOL * 3);
+  var closingFieldHome = new Float32Array(PARTICLE_POOL * 3);
   var groundFieldHome = new Float32Array(PARTICLE_POOL * 3);
   var statGridHome = new Float32Array(PARTICLE_POOL * 3);
+  var statAssemblyDelay = new Float32Array(PARTICLE_POOL);
+  var statArcX = new Float32Array(PARTICLE_POOL);
+  var statArcY = new Float32Array(PARTICLE_POOL);
   var statSlotByMote = new Int16Array(PARTICLE_POOL);
   var statRank = new Float32Array(PARTICLE_POOL);
   statSlotByMote.fill(-1);
@@ -298,10 +302,13 @@
     starFieldHome[i * 3]     = fieldX;
     starFieldHome[i * 3 + 1] = fieldY;
     starFieldHome[i * 3 + 2] = fieldZ;
+    closingFieldHome[i * 3]     = fieldX;
+    closingFieldHome[i * 3 + 1] = fieldY;
+    closingFieldHome[i * 3 + 2] = fieldZ;
     // A shallow, full-width forest-floor band. It extends beyond both frame
     // edges, occupies only the bottom eighth, and has very little z-depth.
     var bandT = (i + 0.5) / PARTICLE_POOL;
-    var bandProbe = new THREE.Vector3((bandT * 2 - 1) * 1.16, -0.82 - Math.random() * 0.16, 0.35).unproject(camera);
+    var bandProbe = new THREE.Vector3((bandT * 2 - 1) * 1.16, -0.68 - Math.random() * 0.31, 0.35).unproject(camera);
     var bandDir = bandProbe.sub(camera.position).normalize();
     groundFieldHome[i * 3]     = camera.position.x + bandDir.x * 7.2;
     groundFieldHome[i * 3 + 1] = camera.position.y + bandDir.y * 7.2;
@@ -316,6 +323,26 @@
     alphas[i] = 0;
     isRedMote[i] = 0;
     sizes[i] = BASE_MOTE_SIZE;
+    statAssemblyDelay[i] = 0.26 + Math.random() * 0.58;
+    statArcX[i] = (Math.random() - 0.5) * 1.6;
+    statArcY[i] = (Math.random() - 0.5) * 1.2;
+  }
+  // The closing is an inhabited mote volume, not a distant starfield. Keep a
+  // restrained set inside the camera frustum and physically send the rest
+  // outside it. No particle is hidden with opacity.
+  var CLOSING_VISIBLE_MOTES = 96;
+  for (var ci = 2; ci < PARTICLE_POOL; ci++) {
+    if (ci < CLOSING_VISIBLE_MOTES + 2) {
+      closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 0.92;
+      closingFieldHome[ci * 3 + 1] = -2.8 + Math.random() * 5.4;
+      closingFieldHome[ci * 3 + 2] = -3.2 + Math.random() * 2.5;
+    } else {
+      var closingAngle = Math.random() * Math.PI * 2;
+      var closingRadius = 11 + Math.random() * 12;
+      closingFieldHome[ci * 3]     = Math.cos(closingAngle) * closingRadius;
+      closingFieldHome[ci * 3 + 1] = Math.sin(closingAngle) * closingRadius * 0.75;
+      closingFieldHome[ci * 3 + 2] = -2.8 + Math.random() * 1.8;
+    }
   }
   // Every ordinary field mote forms the exact original 10x10 statistic.
   // Multiple motes occupy each cell exactly; none are hidden or faded to fake
@@ -648,7 +675,7 @@
   //   y = -2.5  (forest floor — below the canopy plane, revealed by tilt-down)
   //   z = 0.0   (on the focal axis the camera looks down through)
   var FINAL_RED_X = 0.0;
-  var FINAL_RED_Y = -2.8;
+  var FINAL_RED_Y = -3.0;
   var FINAL_RED_Z = 0.0;
   positions[FINAL_RED_IDX * 3]     = FINAL_RED_X;
   positions[FINAL_RED_IDX * 3 + 1] = FINAL_RED_Y;
@@ -660,8 +687,11 @@
   // legible constellation rather than a screen of spokes.
   var fullTerminalDots = frontier;             // length up to 80
   var terminalDots = [];
-  for (var td = 0; td < fullTerminalDots.length; td += 6) {
-    terminalDots.push(fullTerminalDots[td]);
+  var desiredFeeders = 14;
+  for (var td = 0; td < desiredFeeders; td++) {
+    terminalDots.push(fullTerminalDots.length >= desiredFeeders
+      ? fullTerminalDots[Math.floor(td * fullTerminalDots.length / desiredFeeders)]
+      : td + 2);
   }
   if (terminalDots.length > 0) {
     // Convergence band pulled inward. uConnect tracks scroll progress 1:1.
@@ -692,8 +722,8 @@
   for (var cf = 0; cf < PARTICLE_POOL; cf++) {
     if (connectedSet[cf]) fallSpeed[cf] = 0;
   }
-  var convRX = Math.min(FIELD_HALF_X * 0.85, 3.0);
-  var convRY = 1.9;
+  var convRX = Math.min(FIELD_HALF_X * 0.78, 2.7);
+  var convRY = 0.72;
   for (var tr = 0; tr < terminalDots.length; tr++) {
     var tIdx = terminalDots[tr];
     var ang = (tr / Math.max(1, terminalDots.length)) * Math.PI * 2;
@@ -701,6 +731,12 @@
     positions[tIdx * 3]     = FINAL_RED_X + Math.cos(ang) * convRX * rr;
     positions[tIdx * 3 + 1] = FINAL_RED_Y + Math.sin(ang) * convRY * rr;
     positions[tIdx * 3 + 2] = FINAL_RED_Z + (((tr % 3) - 1) * 0.35);
+    // These exact on-screen feeder positions are also their final star targets.
+    // The later field expansion must not overwrite them with off-screen random
+    // points and recreate the long lines seen in the failed closing frames.
+    closingFieldHome[tIdx * 3]     = positions[tIdx * 3];
+    closingFieldHome[tIdx * 3 + 1] = positions[tIdx * 3 + 1];
+    closingFieldHome[tIdx * 3 + 2] = positions[tIdx * 3 + 2];
   }
 
   var EDGE_COUNT = finalEdges.length;
@@ -1380,9 +1416,14 @@
         positions[xi + 2] = lerp(groundZ, starFieldHome[xi + 2], openFieldP);
         var statSlot = statSlotByMote[i];
         if (statSlot >= 0 && statFormP > 0) {
-          positions[xi] = lerp(positions[xi], statGridHome[xi], statFormP);
-          positions[yi] = lerp(positions[yi], statGridHome[yi], statFormP);
-          positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statFormP);
+          // Randomized late arrivals prevent the grid from announcing itself
+          // too early. The same per-mote delay and arc run backwards on upward
+          // scroll, so assembly and disassembly remain exact physical inverses.
+          var statMove = smoothstep(statAssemblyDelay[i], 1.0, statFormP);
+          var statArc = Math.sin(statMove * Math.PI);
+          positions[xi] = lerp(positions[xi], statGridHome[xi], statMove) + statArcX[i] * statArc;
+          positions[yi] = lerp(positions[yi], statGridHome[yi], statMove) + statArcY[i] * statArc;
+          positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statMove);
         }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
@@ -1431,8 +1472,8 @@
       // starfield into bubbles. Each stage uses the same motes at a controlled
       // optical scale.
       partMat.uniforms.uPointScale.value = lerp(
-        lerp(0.78, 0.58, statFormP),
-        lerp(0.62, 0.34, finalFieldP),
+        lerp(0.82, 0.76, statFormP),
+        lerp(0.82, 0.72, finalFieldP),
         Math.max(treeFormP, finalFieldP)
       );
 
@@ -1474,15 +1515,16 @@
         camParY = 0;
       }
 
+      var flatTreeView = smoothstep(0.05, 0.25, treeFormP);
       camera.position.x = dollyX + camParX;
-      camera.position.y = dollyY + camParY;
+      camera.position.y = lerp(dollyY + camParY, TREE_CAMERA_Y, flatTreeView);
       camera.position.z = dollyZ;
       // LINEAR camera tilt across the entire scroll, not eased to the end.
       // At scroll 0: gaze down into the low forest-floor mote layer.
       // At scroll 1: gaze ANGLED DOWN (lookAt y = -1.5).
       // Drives a slow, continuous downward pan over the whole journey.
       var rawProgress = uniforms.uLayerTint.value;   // 0..1 raw scroll progress
-      var lookY = lerp(-1.0, -1.5, rawProgress);
+      var lookY = lerp(lerp(-1.0, -1.5, rawProgress), TREE_CAMERA_Y, flatTreeView);
       camera.lookAt(0, lookY, 0);
 
       // Contact blast: TIME-based slow bloom, armed by scroll crossing the land
@@ -1550,10 +1592,11 @@
   // the real pinned panel ranges (leaving 02 -> settled on 03) and drives
   // setTreeProgress: 0 -> 1 as 03 arrives (form), back to 0 as 04 arrives
   // (disperse to the ambient field). No global-progress guesswork here.
-  var TREE_MAX_HEIGHT = 4.35;   // preserve crowns while spreading the grove full-width
+  var TREE_MAX_HEIGHT = 4.05;   // preserve crowns and keep all trunks above the content strip
   var TREE_BASE_Y = -2.5;       // legacy forest floor (grove now centers on the text)
-  var TREE_CENTER_OFFSET_Y = -0.62; // keep readouts above the crowns, never on top of them
+  var TREE_CENTER_OFFSET_Y = 0.32; // aligned bases sit above the compact audience strip
   var TREE_CZ = -1.5;
+  var TREE_CAMERA_Y = 0.82;     // level side elevation, no upward or downward view
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
   var treeFormP = 0;            // exact scroll-derived formation progress
   // Grove yaw: a gentle constant turn while the grove stands, ramping up
@@ -1565,7 +1608,9 @@
   var TREE_SPIN_BOOST = 0.0;
   var treeReady = false;
   var treeNorm = null;          // normalized grove coords (height 1, base 0, centered)
+  var treeClusterCenter = null; // per-point centre of its tree, for in-place turntables
   var fillNorm = null;
+  var fillClusterCenter = null;
   var assetHalfW = 0.7;         // measured from the asset at load
   var moteNormIdx = new Int32Array(PARTICLE_POOL);
   var moteCapture  = new Float32Array(PARTICLE_POOL * 3);
@@ -1635,6 +1680,35 @@
       }
       assetHalfW = ((maxX - minX) / normH) / 2 || 0.7;
 
+      // Resolve the three tree centres from the actual OBJ x distribution.
+      // Rotating every point around the entire grove made the trees orbit,
+      // change scale, and drop through the content strip. Each tree now turns
+      // slowly around its own trunk while its screen position stays fixed.
+      var xSamples = new Array(treeCount);
+      for (var xc = 0; xc < treeCount; xc++) xSamples[xc] = treeNorm[xc * 3];
+      xSamples.sort(function (a, b) { return a - b; });
+      var clusterMeans = [
+        xSamples[Math.floor(treeCount / 6)],
+        xSamples[Math.floor(treeCount / 2)],
+        xSamples[Math.floor(treeCount * 5 / 6)]
+      ];
+      var clusterAssignment = new Uint8Array(treeCount);
+      for (var kit = 0; kit < 8; kit++) {
+        var sums = [0, 0, 0], counts = [0, 0, 0];
+        for (var kp = 0; kp < treeCount; kp++) {
+          var kx = treeNorm[kp * 3];
+          var best = 0;
+          if (Math.abs(kx - clusterMeans[1]) < Math.abs(kx - clusterMeans[best])) best = 1;
+          if (Math.abs(kx - clusterMeans[2]) < Math.abs(kx - clusterMeans[best])) best = 2;
+          clusterAssignment[kp] = best;
+          sums[best] += kx;
+          counts[best] += 1;
+        }
+        for (var kc = 0; kc < 3; kc++) if (counts[kc]) clusterMeans[kc] = sums[kc] / counts[kc];
+      }
+      treeClusterCenter = new Float32Array(treeCount);
+      for (var ka = 0; ka < treeCount; ka++) treeClusterCenter[ka] = clusterMeans[clusterAssignment[ka]];
+
       // Shuffle indices; first slice becomes mote targets, rest are fill.
       var idx = new Array(treeCount);
       for (var s0 = 0; s0 < treeCount; s0++) idx[s0] = s0;
@@ -1663,12 +1737,14 @@
       fillSeedArr  = new Float32Array(fillCount);
       fillStartArr = new Float32Array(fillCount * 3);
       fillNorm     = new Float32Array(fillCount * 3);
+      fillClusterCenter = new Float32Array(fillCount);
       var fillTint = new Float32Array(fillCount);
       for (var fi = 0; fi < fillCount; fi++) {
         var si = idx[take + fi] * 3;
         fillNorm[fi * 3]     = treeNorm[si];
         fillNorm[fi * 3 + 1] = treeNorm[si + 1];
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
+        fillClusterCenter[fi] = treeClusterCenter[idx[take + fi]];
         fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
         // Fly in from the open cloud that precedes the tree-identification stage.
         var finalAngle = Math.random() * Math.PI * 2;
@@ -1761,8 +1837,10 @@
     // #opportunity text column) rather than on the forest floor. Trace the
     // camera's center ray to the grove z-plane so the center holds through the
     // dolly/tilt and the zoom pull-back. camZ (with the bump) is computed above.
+    var treeView = smoothstep(0.05, 0.25, treeFormP);
     var camY2 = lerp(CAM_START.y, CAM_END.y, lt2); if (camY2 < 0.5) camY2 = 0.5;
-    var lookY2 = lerp(-1.0, -1.5, lt2);
+    camY2 = lerp(camY2, TREE_CAMERA_Y, treeView);
+    var lookY2 = lerp(lerp(-1.0, -1.5, lt2), TREE_CAMERA_Y, treeView);
     var tRay = (TREE_CZ - camZ) / (-camZ);          // camZ in [3,10]; never 0
     var groveCenterY = camY2 + tRay * (lookY2 - camY2);
     var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y;
@@ -1789,9 +1867,11 @@
       var e = w * w * (3 - 2 * w);
       var sway = Math.sin(treeFormP * Math.PI * 2 + swayPhase[i]) * 0.02 * e;
       var mt = moteNormIdx[i] * 3;
-      var mlx = treeNorm[mt]     * SX;  // full-width grove x, before yaw
+      var moteCenter = treeClusterCenter[moteNormIdx[i]];
+      var moteTrunkX = moteCenter * SX;
+      var mlx = (treeNorm[mt] - moteCenter) * S;
       var mlz = treeNorm[mt + 2] * S;
-      var mtx = groveCX + mlx * spinCos - mlz * spinSin;
+      var mtx = groveCX + moteTrunkX + mlx * spinCos - mlz * spinSin;
       var mty = treeNorm[mt + 1] * S + baseY;
       var mtz = TREE_CZ  + mlx * spinSin + mlz * spinCos;
       positions[xi] = moteCapture[xi] + (mtx - moteCapture[xi]) * e + sway;
@@ -1809,9 +1889,11 @@
       var wf = tClamp01(treeFormP * 1.25 - fillSeedArr[f] * 0.25);
       var ef = wf * wf * (3 - 2 * wf);
       var f3 = f * 3;
-      var flx = fillNorm[f3]     * SX;  // match the full-width scale used by the shared motes
+      var fillCenter = fillClusterCenter[f];
+      var fillTrunkX = fillCenter * SX;
+      var flx = (fillNorm[f3] - fillCenter) * S;
       var flz = fillNorm[f3 + 2] * S;
-      var ftx = groveCX + flx * spinCos - flz * spinSin;
+      var ftx = groveCX + fillTrunkX + flx * spinCos - flz * spinSin;
       var fty = fillNorm[f3 + 1] * S + baseY;
       var ftz = TREE_CZ  + flx * spinSin + flz * spinCos;
       fp[f3]     = fillStartArr[f3]     + (ftx - fillStartArr[f3]) * ef;
@@ -1852,9 +1934,9 @@
       var w = tClamp01(finalFieldP * 1.15 - stagger);
       var e = w * w * (3 - 2 * w);
       var i3 = i * 3;
-      positions[i3]     = lerp(finalFieldCapture[i3],     starFieldHome[i3],     e);
-      positions[i3 + 1] = lerp(finalFieldCapture[i3 + 1], starFieldHome[i3 + 1], e);
-      positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], starFieldHome[i3 + 2], e);
+      positions[i3]     = lerp(finalFieldCapture[i3],     closingFieldHome[i3],     e);
+      positions[i3 + 1] = lerp(finalFieldCapture[i3 + 1], closingFieldHome[i3 + 1], e);
+      positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], closingFieldHome[i3 + 2], e);
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
     }
     if (fillFinalLocked && fillPosAttr && fillAlphaAttr) {

@@ -40,13 +40,17 @@
   gsap.registerPlugin(ScrollTrigger);
 
   // ===== Splash handoff reveal of hero =================================
-  gsap.set(".hero__eyebrow", { opacity: 0, x: -44, y: 0 });
-  gsap.set(".hero__line",    { opacity: 0, x: -72, y: 0 });
+  var hasTeaserHero = Boolean(document.querySelector(".hero-is"));
+  if (!hasTeaserHero) {
+    gsap.set(".hero__eyebrow", { opacity: 0, x: -44, y: 0 });
+    gsap.set(".hero__line",    { opacity: 0, x: -72, y: 0 });
+  }
 
   var heroRevealed = false;
   function revealHero() {
     if (heroRevealed) return;
     heroRevealed = true;
+    if (hasTeaserHero) return;
     gsap.to(".hero__eyebrow", { opacity: 1, x: 0, duration: 0.72, ease: "power3.out", delay: 0.05 });
     gsap.to(".hero__line--1", { opacity: 1, x: 0, duration: 0.78, ease: "power3.out", delay: 0.23 });
     gsap.to(".hero__line--2", { opacity: 1, x: 0, duration: 0.78, ease: "power3.out", delay: 0.41 });
@@ -160,7 +164,7 @@
     var media    = panel.querySelector(".panel__video");
 
     // Copy arrives immediately with the panel so there is no empty viewport.
-    var pe = mapRange(p, 0.00, 0.06);
+    var pe = 1;
     if (eyebrow) {
       eyebrow.style.opacity = pe;
       eyebrow.style.transform = "translateX(" + (-16 * (1 - pe)) + "px)";
@@ -184,7 +188,7 @@
     // Verdict follows immediately after the eyebrow.
     // No scale, no letter-spacing animation: those reflow balanced text,
     // which makes words pop between lines mid-scrub. Locked layout, soft entry.
-    var pv = mapRange(p, 0.02, 0.10);
+    var pv = 1;
     if (verdict) {
       verdict.style.opacity = pv;
       verdict.style.transform = "translateY(" + (16 * (1 - pv)) + "px)";
@@ -192,33 +196,26 @@
 
     // Evidence settles early and remains readable for most of the pin.
     if (evidence.length) {
-      var winStart = 0.08;
-      var step = 0.035;
-      var segLen = 0.09;
       for (var i = 0; i < evidence.length; i++) {
-        var s = winStart + i * step;
-        var e = s + segLen;
-        var pp = mapRange(p, s, e);
+        var pp = 1;
         evidence[i].style.opacity = pp;
         evidence[i].style.transform = "translateY(" + (24 * (1 - pp)) + "px)";
       }
     }
 
-    var pn = mapRange(p, 0.18, 0.24);
+    var pn = 1;
     if (numeric) {
       numeric.style.opacity = pn;
       numeric.style.transform = "translateY(" + (16 * (1 - pn)) + "px)";
     }
 
     // Hold through the reading window, then leave before the next panel arrives.
-    var px = mapRange(p, 0.84, 0.96);
+    var px = mapRange(p, 0.965, 0.995);
     if (inner) {
       inner.style.opacity = 1 - px;
-      inner.style.transform = panel.id === "problem"
-        ? "translateY(calc(-34% - " + (24 * px) + "px))"
-        : "translateY(" + (-24 * px) + "px)";
+      inner.style.transform = "translateY(" + (-24 * px) + "px)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
-      var veilOut = smooth01(1 - mapRange(p, 0.80, 0.96));
+      var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
   }
@@ -460,10 +457,10 @@
       ScrollTrigger.create({
         trigger: document.body,
         start: function () {
-          return panelTriggers[0].start + (panelTriggers[0].end - panelTriggers[0].start) * 0.88;
+          return panelTriggers[1].start;
         },
         end: function () {
-          return panelTriggers[2].start + (panelTriggers[2].end - panelTriggers[2].start) * 0.08;
+          return panelTriggers[1].end;
         },
         scrub: true,
         invalidateOnRefresh: true,

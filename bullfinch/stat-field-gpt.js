@@ -83,7 +83,7 @@
       el.style.opacity = inT * (1 - outT);
       el.style.transform = "translateY(" + (22 * (1 - inT) - 24 * outT) + "px)";
     }
-    paint(ease(mapRange(p, .30, .74)));
+    paint(ease(mapRange(p, .26, .60)));
   }
   drive(0);
   ScrollTrigger.create({

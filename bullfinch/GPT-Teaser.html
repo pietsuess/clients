@@ -54,14 +54,16 @@
         --gl-final-base: #11271b;
         --gl-final-canopy: #183424;
         --gl-final-understory: #07150e;
-        --gl-final-mote: #f4efd9;
-        --gl-final-line: rgba(244, 239, 217, 0.5);
+        --gl-final-mote: #aeb398;
+        --gl-final-line: rgba(226, 221, 191, 0.36);
         --gl-final-shaft: #8fa777;
         --text-veil-bg-strong: 10%;
         --text-veil-bg-soft: 5%;
         --text-veil-blur: 9px;
         --text-veil-saturate: 0.98;
         --text-veil-opacity: 0.44;
+        --stat-crisp-offset: 0;
+        --tree-crisp-offset: 0;
       }
       body.is-final-contrast {
         --bg: #11271b;
@@ -211,12 +213,15 @@
         width: 100vw;
         height: 100dvh;
         background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
-        clip-path: polygon(var(--forest-edge-top, 45vw) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, 45vw) + 100vh) 100%);
+        clip-path: polygon(var(--forest-edge-top, -100vh) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, -100vh) + 100vh) 100%);
         filter: saturate(.82) contrast(.96) brightness(1.04);
         will-change: clip-path;
       }
       .canopy-canvas { z-index: 0; }
-      .text-veil { z-index: 1; }
+      .text-veil {
+        z-index: 1;
+        opacity: clamp(0, calc(var(--text-veil-opacity) - var(--stat-crisp-offset) - var(--tree-crisp-offset)), 1);
+      }
       #page { z-index: 3; }
       .hero { background: transparent; }
       .hero__inner {
@@ -254,6 +259,21 @@
         color: var(--accent);
       }
       .hero-is__term.is-active { opacity: 1; transform: translateY(0); }
+      .hero-brand-row,
+      .hero-is__prefix,
+      .hero-is__cycle,
+      .hero__subtitle {
+        opacity: 0;
+        transform: translate3d(-42px, 18px, 0);
+        transition: opacity 680ms ease, transform 900ms cubic-bezier(.18,.72,.16,1);
+      }
+      body.has-hero-arrived .hero-brand-row,
+      body.has-hero-arrived .hero-is__prefix,
+      body.has-hero-arrived .hero-is__cycle,
+      body.has-hero-arrived .hero__subtitle { opacity: 1; transform: translate3d(0, 0, 0); }
+      body.has-hero-arrived .hero-is__prefix { transition-delay: 110ms; }
+      body.has-hero-arrived .hero-is__cycle { transition-delay: 190ms; }
+      body.has-hero-arrived .hero__subtitle { transition-delay: 290ms; }
       .hero__subtitle {
         max-width: calc(50vw - var(--hero-copy-inset));
         margin-left: var(--hero-copy-inset);
@@ -299,42 +319,54 @@
       .corner-wordmark { display: none; }
 
       #problem.panel--media {
-        display: block;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: 1fr;
+        gap: clamp(54px, 7vw, 118px);
+        place-items: center stretch;
+      }
+      #problem.panel--media::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 17vh;
+        bottom: 17vh;
+        width: 1px;
+        background: var(--rule);
       }
       #problem .panel__inner {
-        position: absolute;
-        right: var(--pad-x);
-        top: 50%;
-        width: min(58vw, 1080px);
+        position: relative;
+        grid-column: 1;
+        width: 100%;
         height: auto;
         max-width: none;
-        transform: translateY(-34%);
+        transform: none;
         text-align: right;
         align-items: flex-end;
       }
       #problem .eyebrow-anchor { margin-left: auto; }
-      #problem .panel__verdict { max-width: 13ch; margin-left: auto; font-size: clamp(45px, 5.6vw, 88px); text-align: right; }
+      #problem .panel__verdict { max-width: none; margin-left: auto; font-size: clamp(44px, 3.7vw, 62px); text-align: right; }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
       #problem .panel__evidence p { text-align: right; text-align-last: right; }
       #problem .panel__numeric { text-align: right; text-align-last: right; }
       #problem .panel__stat {
-        position: absolute;
+        position: relative;
         z-index: 6;
-        top: clamp(52px, 7vh, 76px);
-        right: var(--pad-x);
-        width: min(58vw, 1080px);
-        justify-content: flex-end;
-        align-items: flex-end;
+        grid-column: 2;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
         gap: clamp(18px, 2.2vw, 36px);
-        min-height: 138px;
+        min-height: 220px;
         text-align: right;
       }
       #problem .stat-grid { display: none; }
-      #problem .stat-read { min-width: 0; }
+      #problem .stat-read { min-width: 0; transform: translateX(clamp(70px, 6vw, 105px)); }
       #problem .stat-label { margin-left: auto; }
       #problem .stat-line { left: auto; right: 0; text-align: right; }
       #problem .stat-num { justify-content: flex-end; align-items: flex-end; gap: 10px; }
       #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
+      #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
 
       #product.panel--media {
         grid-template-columns: minmax(420px, .9fr) minmax(420px, 1.1fr);
@@ -347,8 +379,8 @@
       #product .panel__evidence p:first-child { border-top: 0; }
       #product .panel__numeric { margin-top: 18px; }
       .case-fixed-layer.panel__model {
-        width: min(48vw, 880px);
-        max-width: 48vw;
+        width: min(40vw, 720px);
+        max-width: 40vw;
         height: 100dvh;
         left: 0;
         top: 0;
@@ -393,9 +425,9 @@
         height: auto;
         padding: 0;
         justify-content: flex-end;
-        background: transparent;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        -webkit-backdrop-filter: blur(5px) saturate(.95);
+        backdrop-filter: blur(5px) saturate(.95);
       }
       .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
       .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
@@ -437,7 +469,7 @@
       .closing__line { white-space: nowrap; }
       .closing__actions { display: flex; width: auto; justify-content: center; gap: clamp(22px, 3vw, 42px); margin-top: 6px; }
       .closing__actions a { justify-content: center; color: var(--ink); font-size: clamp(13px, 1vw, 16px); }
-      .site-footer { padding: 10px var(--pad-x) max(28px, env(safe-area-inset-bottom)); gap: 10px; }
+      .site-footer { padding: 10px var(--pad-x) max(68px, calc(env(safe-area-inset-bottom) + 68px)); gap: 10px; }
       .site-footer__wordmark { display: none; }
       .site-footer__line { opacity: 1; transform: none; }
       .site-footer__top { bottom: max(10px, env(safe-area-inset-bottom)); }
@@ -523,7 +555,7 @@
         <article class="panel panel--media" id="problem" data-panel="1">
           <div class="panel__inner">
             <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Dedicated Inventories Are So 19th Century</h2>
+            <h2 class="panel__verdict">Dedicated Inventories Are<br>So 19th Century</h2>
             <div class="panel__evidence">
               <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
               <p>Bullfinch fully automates the forest inventory process – no training, no stopping, no dedicated trip. Just do your job and the data flows. Continuously. Every time you’re in the field. For any reason.</p>
@@ -660,11 +692,11 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-gpt-teaser.js?v=forest-journey-7"></script>
+    <script src="scene-gpt-teaser.js?v=forest-journey-8"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot.js?v=forest-journey-5"></script>
-    <script src="stat-field-gpt.js?v=forest-journey-7"></script>
+    <script src="swot.js?v=forest-journey-6"></script>
+    <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -683,6 +715,9 @@
           var ctx = canvas.getContext("2d");
           var frames = [];
           var loaded = 0;
+          var framesReady = false;
+          var arrivalReady = document.body.classList.contains("has-hero-arrived");
+          var sequenceStarted = false;
           var first = 7;
           var last = 28;
           function draw(img) {
@@ -690,6 +725,8 @@
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           }
           function play() {
+            if (sequenceStarted) return;
+            sequenceStarted = true;
             var index = frames.length - 1;
             var lastTick = 0;
             function tick(time) {
@@ -703,6 +740,13 @@
             }
             requestAnimationFrame(tick);
           }
+          function maybePlay() {
+            if (framesReady && arrivalReady) play();
+          }
+          document.addEventListener("bullfinch:heroarrival", function () {
+            arrivalReady = true;
+            maybePlay();
+          });
           for (var n = first; n <= last; n++) {
             (function (frameNumber) {
               var img = new Image();
@@ -710,7 +754,10 @@
               img.onload = function () {
                 frames[slot] = img;
                 loaded += 1;
-                if (loaded === last - first + 1) play();
+                if (loaded === last - first + 1) {
+                  framesReady = true;
+                  maybePlay();
+                }
               };
               img.src = "logo-seq/Logo_To_Ball_" + String(frameNumber).padStart(5, "0") + ".png";
             })(n);
@@ -719,6 +766,37 @@
 
         window.addEventListener("load", function () {
           if (window.ScrollTrigger) {
+            var forestArrival = 0;
+            var forestScroll = 0;
+            var heroArrivalStarted = false;
+            var heroTextReleased = false;
+            function paintForestEdge() {
+              var settled = window.innerWidth * 0.45;
+              var fullForest = -window.innerHeight - 2;
+              var arrivalEdge = fullForest + (settled - fullForest) * forestArrival;
+              var edgeTop = arrivalEdge + forestScroll * (window.innerWidth - settled);
+              document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
+            }
+            function startHeroArrival() {
+              if (heroArrivalStarted) return;
+              heroArrivalStarted = true;
+              var started = performance.now();
+              var duration = 1500;
+              function arrive(now) {
+                var raw = Math.min(1, (now - started) / duration);
+                forestArrival = raw * raw * (3 - 2 * raw);
+                if (raw >= .52 && !heroTextReleased) {
+                  heroTextReleased = true;
+                  document.body.classList.add("has-hero-arrived");
+                  document.dispatchEvent(new CustomEvent("bullfinch:heroarrival"));
+                }
+                paintForestEdge();
+                if (raw < 1) requestAnimationFrame(arrive);
+              }
+              requestAnimationFrame(arrive);
+            }
+            paintForestEdge();
+            window.setTimeout(startHeroArrival, 120);
             ScrollTrigger.create({
               trigger: ".hero",
               start: "top top",
@@ -726,10 +804,8 @@
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) {
-                var p = self.progress;
-                var start = window.innerWidth * 0.45;
-                var edgeTop = start + p * (window.innerWidth - start);
-                document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
+                forestScroll = self.progress;
+                paintForestEdge();
               },
             });
             var root = document.documentElement;
@@ -789,6 +865,11 @@
           return null;
         }
         function at(pt, f) { return pt.start + (pt.end - pt.start) * f; }
+        function setStatStage(p) {
+          if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(p);
+          document.documentElement.style.setProperty("--stat-crisp-offset", (p * .84).toFixed(4));
+          document.body.classList.toggle("is-stat-stage", p > 0.04);
+        }
 
         var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
         if (!p1 || !p2 || !p3) return;
@@ -811,8 +892,9 @@
           end: "top top",
           scrub: true,
           onUpdate: function (self) {
-            if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(smootherstep(self.progress));
+            setStatStage(smootherstep(self.progress));
           },
+          onLeaveBack: function () { setStatStage(0); },
         });
 
         // Leaving the inventory section releases the grid into an open cloud.
@@ -825,7 +907,7 @@
           invalidateOnRefresh: true,
           onUpdate: function (self) {
             var p = smootherstep(self.progress);
-            if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(1 - p);
+            setStatStage(1 - p);
             if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
           },
         });
@@ -861,6 +943,7 @@
             }
             window.bullfinchCanopy.setTreeProgress(treeP);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            document.documentElement.style.setProperty("--tree-crisp-offset", (treeP * .84).toFixed(4));
             writeTreeData(treeP);
             document.body.classList.toggle("is-tree-stage", treeP > 0.05);
           },
@@ -868,6 +951,7 @@
             window.bullfinchCanopy.setTreeProgress(0);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
             writeTreeData(0);
+            document.documentElement.style.setProperty("--tree-crisp-offset", "0");
             document.body.classList.remove("is-tree-stage");
           },
         });
