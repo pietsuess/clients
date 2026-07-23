@@ -512,12 +512,6 @@
         text-align: justify;
         text-align-last: left;
       }
-      /* the <1% coverage grid: shown, BLACK field, RED fill + RED centre on top */
-      #problem .stat-grid { display: grid; }
-      #problem .stat-dot { background: #14210E; opacity: 1; transform: scale(1); }
-      #problem .stat-dot.is-on  { background: #C0392B; position: relative; z-index: 1; }
-      #problem .stat-dot.is-one { background: #C0392B; position: relative; z-index: 2;
-        box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.28); }
     </style>
   </head>
   <body>
@@ -729,7 +723,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-gpt-teaser.js?v=forest-journey-9"></script>
+    <script src="scene-claude-teaser.js?v=claude-1"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=forest-journey-6"></script>
@@ -1725,50 +1719,6 @@
         } else {
           loadedFrames[0].addEventListener("load", autoStart, { once: true });
         }
-      })();
-    </script>
-    <script>
-      // Claude fork: real <1% dot coverage. Codex routes the dots through the
-      // WebGL motes (CSS grid hidden); this restores the reliable DOM grid the
-      // original Claude version used — BLACK field, ONE RED centre, radiating to
-      // ALL RED as the readout counts up. Same fill window as stat-field-gpt.js.
-      (function () {
-        var panel = document.getElementById("problem");
-        var gridEl = document.getElementById("statGrid");
-        if (!panel || !gridEl) return;
-        var COLS = 10, ROWS = 10, N = COLS * ROWS;
-        var ORIGIN_R = 5, ORIGIN_C = 5, ONE = ORIGIN_R * COLS + ORIGIN_C;
-        var dots = [];
-        for (var i = 0; i < N; i++) { var d = document.createElement("span"); d.className = "stat-dot"; gridEl.appendChild(d); dots.push(d); }
-        var order = [];
-        for (var j = 0; j < N; j++) order.push(j);
-        order.sort(function (a, b) {
-          var da = Math.hypot(a % COLS - ORIGIN_C, Math.floor(a / COLS) - ORIGIN_R);
-          var db = Math.hypot(b % COLS - ORIGIN_C, Math.floor(b / COLS) - ORIGIN_R);
-          return da - db;
-        });
-        function clamp01(x) { return Math.max(0, Math.min(1, x)); }
-        function mapRange(x, a, b) { return clamp01((x - a) / (b - a)); }
-        function ease(x) { x = clamp01(x); return 1 - Math.pow(1 - x, 3); }
-        function paint(fillProgress) {
-          var nLit = Math.max(1, Math.round(fillProgress * 100));
-          for (var k = 0; k < N; k++) {
-            var idx = order[k], on = k < nLit;
-            dots[idx].className = "stat-dot" + (idx === ONE ? " is-one" : (on ? " is-on" : ""));
-          }
-        }
-        paint(0);
-        if (typeof ScrollTrigger === "undefined" || typeof gsap === "undefined") { paint(1); return; }
-        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
-        ScrollTrigger.create({
-          trigger: panel,
-          start: "top top",
-          end: mobileLike ? "+=100%" : "+=200%",
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) { paint(ease(mapRange(self.progress, 0.26, 0.60))); },
-          onRefresh: function (self) { paint(ease(mapRange(self.progress || 0, 0.26, 0.60))); }
-        });
       })();
     </script>
   </body>
