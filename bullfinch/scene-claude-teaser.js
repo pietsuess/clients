@@ -317,9 +317,12 @@
   var openProbe = new THREE.Vector3();
   var openDirection = new THREE.Vector3();
   for (var i = 0; i < PARTICLE_POOL; i++) {
-    var openScreenX = (Math.random() - 0.5) * 2.24;
-    var openScreenY = -1.12 + 2.24 * ((i + Math.random()) / PARTICLE_POOL);
-    var openDistance = 6.0 + Math.random() * 5.0;
+    var openScreenX = (Math.random() - 0.5) * 2.5;
+    var openScreenY = -1.25 + 2.5 * ((i + Math.random()) / PARTICLE_POOL);
+    // Piet: we must be INSIDE the 02 mote field, not looking at it from afar.
+    // Ray distances start right at the camera (big near motes sweeping past as
+    // the dolly moves through) and run deep for real depth.
+    var openDistance = 1.3 + Math.random() * 8.7;
     openProbe.set(openScreenX, openScreenY, 0.35).unproject(openFieldCamera);
     openDirection.copy(openProbe).sub(openFieldCamera.position).normalize();
     var fieldX = openFieldCamera.position.x + openDirection.x * openDistance;
@@ -367,9 +370,12 @@
   var CLOSING_VISIBLE_MOTES = Math.round(PARTICLE_POOL * 0.62);
   for (var ci = 2; ci < PARTICLE_POOL; ci++) {
     if (ci < CLOSING_VISIBLE_MOTES + 2) {
-      closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.15;
-      closingFieldHome[ci * 3 + 1] = -3.2 + Math.random() * 6.4;
-      closingFieldHome[ci * 3 + 2] = -4.6 + Math.random() * 5.4;   // some IN FRONT of z=0
+      // Piet: completely INSIDE the mote field at the close. Wider spread,
+      // depth running from deep space right up to the landed camera (z 3.0),
+      // so near motes read huge and the volume surrounds the viewer.
+      closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.35;
+      closingFieldHome[ci * 3 + 1] = -3.4 + Math.random() * 7.0;
+      closingFieldHome[ci * 3 + 2] = -4.0 + Math.random() * 6.4;   // up to z 2.4, right at the camera
     } else {
       var closingAngle = Math.random() * Math.PI * 2;
       var closingRadius = 8 + Math.random() * 9;
@@ -420,16 +426,17 @@
   statGridHome[2]   = 0.0;
   // The seed lives in the low central field before the grid forms, flies to
   // the grid centre with the rest, then — as the grid releases into the open
-  // cloud (openFieldP 0 -> 1, section 02 arriving) — it RISES UP and OFF the
-  // top of the frame, left behind by the story. It must never drift through
-  // 02/03/04 as a stray red dot: one red on screen at a time (grid-centre red
-  // in 01, none through the middle, the convergence red at the close).
+  // cloud — it stays AMONG the grouping (Piet: it must remain part of the 02
+  // field, mid-frame, mid-depth) and only leaves UP and OFF the top as the
+  // trees arrive (see the treeFormP rise in the position loop). One red on
+  // screen at a time: grid-centre red in 01, seed riding the cloud in 02,
+  // the convergence red alone at the close.
   groundFieldHome[0] = 0.0;
   groundFieldHome[1] = -0.55;
   groundFieldHome[2] = 0.4;
-  starFieldHome[0] = 0.0;
-  starFieldHome[1] = 6.5;   // far above every camera framing (visible top maxes ~4.6)
-  starFieldHome[2] = 0.4;
+  starFieldHome[0] = 0.35;
+  starFieldHome[1] = 0.0;
+  starFieldHome[2] = 1.4;
   // The seed seats at the grid centre FIRST, with no assembly swirl — the grid
   // assembles around it, so the cascade visibly originates from the centre dot.
   statAssemblyDelay[0] = 0.0;
@@ -520,12 +527,11 @@
     "  col = mix(col, uAccent, vGlow * 0.8);",
     "  // Grove height gradient: base mote color -> accent up the canopy.",
     "  col = mix(col, uAccent, clamp(vTreeTint * uTreeForm, 0.0, 1.0));",
-    "  // Outer red glow ring when newly connected (or always on the seed via",
-    "  // the seed-pulse contribution to vGlow from the vertex shader).",
-    "  float ringMask = smoothstep(0.55, 0.32, d) - smoothstep(0.32, 0.18, d);",
-    "  float haloAlpha = vGlow * ringMask * 0.65;",
-    "  float coreAlpha = vAlpha * aa;",
-    "  float alpha = max(coreAlpha, haloAlpha);",
+    "  // NO glow rings — Piet: never any red rings except the closing pulse",
+    "  // wave. vGlow still tints the dot itself red on contact (color mix",
+    "  // above), but renders no halo. This also stops the invisible",
+    "  // convergence dot (alpha 0, permanent pulse) leaking a floating ring.",
+    "  float alpha = vAlpha * aa;",
     "  gl_FragColor = vec4(col, alpha);",
     "}",
   ].join("\n");
@@ -675,12 +681,19 @@
     // spread evenly). Effect: when a parent activates, you see 5 (or 2)
     // lines fan out from it like a flower opening, not a slow drift.
     var SIBLING_STAGGER = 0.001;
-    var parentSpan = Math.max(0.001, band.end - band.start - band.fanout * SIBLING_STAGGER);
+    // Thresholds are NORMALIZED to the wave's own 0..1 progress (they used to
+    // be built in old global-band units 0.0-0.8, which — with drawDuration
+    // 1.0 — meant most edges could mathematically NEVER finish drawing:
+    // permanent mid-line arrowheads, "pathetic" draws. Now every edge starts
+    // inside the first 0.2 of its wave and completes by wave progress 1.0
+    // (0.2 window + 0.8 drawDuration).
+    var THRESHOLD_WINDOW = 0.2;
+    var parentSpan = Math.max(0.001, THRESHOLD_WINDOW - band.fanout * SIBLING_STAGGER);
     for (var fi = 0; fi < frontier.length; fi++) {
       var parent = frontier[fi];
       var parentStart = frontier.length <= 1
-        ? band.start
-        : band.start + parentSpan * (fi / (frontier.length - 1));
+        ? 0
+        : parentSpan * (fi / (frontier.length - 1));
       var children = findUnconnectedChildren(parent, band.fanout, connectedSet);
       for (var ki = 0; ki < children.length; ki++) {
         var child = children[ki];
@@ -741,11 +754,15 @@
   // legible constellation rather than a screen of spokes.
   var fullTerminalDots = frontier;             // length up to 8 now
   var terminalDots = [];
-  var desiredFeeders = 5;                       // ~25 lines total across the journey
-  for (var td = 0; td < desiredFeeders; td++) {
-    terminalDots.push(fullTerminalDots.length >= desiredFeeders
-      ? fullTerminalDots[Math.floor(td * fullTerminalDots.length / desiredFeeders)]
-      : td + 2);
+  // Piet: the finale must be UNMISSABLE — at least 25 lines drawing into the
+  // final red dot from all around, with the viewer inside the mote field.
+  // Every real terminal feeds it, topped up with ordinary field motes.
+  var desiredFeeders = 25;
+  for (var td = 0; td < fullTerminalDots.length && terminalDots.length < desiredFeeders; td++) {
+    terminalDots.push(fullTerminalDots[td]);
+  }
+  for (var tf = 2; tf < PARTICLE_POOL && terminalDots.length < desiredFeeders; tf++) {
+    if (terminalDots.indexOf(tf) === -1) terminalDots.push(tf);
   }
   if (terminalDots.length > 0) {
     // Convergence band pulled inward. uConnect tracks scroll progress 1:1.
@@ -1017,7 +1034,7 @@
       // Convergence lines (wave 7) finish drawing at progress 0.75, so contact
       // with the final red dot happens late in the closing scroll. The blast is
       // time-based (see SHOCKWAVE_DURATION), so a later land doesn't speed it up.
-      var drawDuration = wave === 7 ? 0.75 : 1.0;
+      var drawDuration = wave === 7 ? 0.75 : 0.8;
 
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
@@ -1497,6 +1514,11 @@
           positions[yi] = lerp(positions[yi], statGridHome[yi], statMove) + statArcY[i] * statArc;
           positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statMove);
         }
+        if (i === 0) {
+          // Seed exit: stays among the 02 grouping, then leaves straight UP
+          // off the top as the trees form. Scroll-reversible.
+          positions[yi] += smoothstep(0.0, 0.45, treeFormP) * 9.0;
+        }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
         var gate = smoothstep(thresholds[i], thresholds[i] + 0.05, density);
@@ -1545,7 +1567,7 @@
       // optical scale.
       partMat.uniforms.uPointScale.value = lerp(
         lerp(0.82, 0.76, statFormP),
-        lerp(0.82, 1.15, finalFieldP),   // GROW at the close so motes read near/chunky, not distant specks
+        lerp(0.82, 1.5, finalFieldP),    // GROW at the close so motes read near/chunky, not distant specks
         Math.max(treeFormP, finalFieldP)
       );
 
@@ -2062,15 +2084,15 @@
     uniforms.uShaftFade.value   = 1.0 - v;
     uniforms.uMoteDensity.value = 0.08 + v * 0.92;
     uniforms.uConnect.value     = v;
-    // Claude fork: drive the cascade DIRECTLY from global scroll so it draws
-    // continuously across the WHOLE journey. Broad overlapping bands (not
-    // panel-transition gaps). swot no longer drives these waves — the
-    // convergence (wave 7) stays on its own trigger. Wave 1 waits out the
-    // hero (~first 0.12 of scroll) so the first lines fan out WITH the <1%
-    // grid as it assembles, never over an empty hero.
-    setWaveProgress(1, (v - 0.12) / 0.30);
-    setWaveProgress(2, (v - 0.30) / 0.32);
-    setWaveProgress(3, (v - 0.50) / 0.32);
+    // Claude fork: drive the cascade DIRECTLY from global scroll. STRICTLY
+    // SEQUENTIAL bands (Piet: a wave must not start before the previous
+    // wave's lines have LANDED): wave 1 fans from the seed fast, right as
+    // the <1% grid assembles (hero occupies the first ~0.10 of scroll);
+    // wave 2 begins only after wave 1 completes, wave 3 after wave 2.
+    // Convergence (wave 7) stays on its own DOM trigger.
+    setWaveProgress(1, (v - 0.10) / 0.08);   // lands by 0.18
+    setWaveProgress(2, (v - 0.19) / 0.16);   // lands by 0.35
+    setWaveProgress(3, (v - 0.36) / 0.18);   // lands by 0.54
   }
   function setWaveProgress(wave, p) {
     var idx = Math.max(1, Math.min(7, wave | 0));

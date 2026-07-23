@@ -393,7 +393,10 @@
       #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
       #opportunity .tree-readouts {
         --tree-data-p: 0;
-        position: absolute;
+        /* FIXED to the viewport: the data populates in its FINAL RESTING
+           PLACE while the trees form — it must never ride up with the
+           section's scroll (write-on/count-up only, no travel). */
+        position: fixed;
         z-index: 4;
         top: clamp(48px, 6vh, 68px);
         left: 3vw;
@@ -401,7 +404,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 6vw;
-        color: var(--ink-soft);
+        color: #1FE45A;
         text-align: center;
         pointer-events: none;
       }
@@ -411,7 +414,7 @@
         clip-path: inset(0 calc((1 - var(--write)) * 100%) 0 0);
         white-space: nowrap;
       }
-      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: var(--ink); }
+      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: #1FE45A; }
       .tree-readout__latin { font: italic 400 clamp(10px, .78vw, 13px)/1.1 var(--font-body); }
       .tree-readout__metric { font: 500 clamp(8px, .59vw, 10px)/1.25 var(--font-mono); letter-spacing: .03em; }
       #opportunity .panel__inner {
@@ -734,10 +737,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-5"></script>
+    <script src="scene-claude-teaser.js?v=claude-6"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-4"></script>
+    <script src="swot-claude.js?v=claude-5"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {

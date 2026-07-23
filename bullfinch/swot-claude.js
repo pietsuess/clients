@@ -191,6 +191,12 @@
     var leave = smooth01(mapRange(p, 0.88, 0.98));
 
     if (inner) {
+      // The container itself carries chrome (03's frosted background + blur,
+      // grid borders) that the per-child clips can't hide — wipe it with the
+      // same language so nothing outlives the content (the grey-slab-over-
+      // the-closing bug).
+      var innerW = smooth01(mapRange(p, 0.02, 0.12)) * (1 - leave);
+      inner.style.clipPath = "inset(0 0 " + ((1 - innerW) * 100).toFixed(2) + "% 0)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
