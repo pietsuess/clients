@@ -114,7 +114,7 @@
         --mark-box: 128px;
         --mo: 2.5;
         --spin: 2;
-        --glowk: 1;
+        --glowk: 0;   /* no red glow halo — it read as a ghost tip on the red piece */
         position: absolute;
         left: 100%;
         top: 50%;
@@ -325,15 +325,6 @@
         gap: clamp(54px, 7vw, 118px);
         place-items: center stretch;
       }
-      #problem.panel--media::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 17vh;
-        bottom: 17vh;
-        width: 1px;
-        background: var(--rule);
-      }
       #problem .panel__inner {
         position: relative;
         grid-column: 1;
@@ -346,6 +337,10 @@
       }
       #problem .eyebrow-anchor { margin-left: auto; }
       #problem .panel__verdict { max-width: none; margin-left: auto; font-size: clamp(44px, 3.7vw, 62px); text-align: right; }
+      /* Three-line staircase: "Are So" seats on the diagonal running from the
+         left edge of "Dedicated" (line 1) to the left edge of "19th" (line 3). */
+      #problem .panel__verdict .vs-line { display: block; }
+      #problem .panel__verdict .vs-line--2 { margin-right: 5.9em; }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
       #problem .panel__evidence p { text-align: right; text-align-last: right; }
       #problem .panel__numeric { text-align: right; text-align-last: right; }
@@ -395,26 +390,30 @@
         --tree-data-p: 0;
         /* FIXED to the viewport: the data populates in its FINAL RESTING
            PLACE while the trees form — it must never ride up with the
-           section's scroll (write-on/count-up only, no travel). */
+           section's scroll (write-on/count-up only, no travel). Each readout
+           is centred over its tree's peak via the --tree-x-N vars the scene
+           publishes from the real projected trunk positions. */
         position: fixed;
         z-index: 4;
         top: clamp(48px, 6vh, 68px);
-        left: 3vw;
-        width: 94vw;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6vw;
-        color: #1FE45A;
+        left: 0;
+        width: 100vw;
+        height: 0;
+        display: block;
+        color: #0E5C2B;
         text-align: center;
         pointer-events: none;
       }
-      .tree-readout { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .tree-readout { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .tree-readout:nth-child(1) { left: var(--tree-x-0, 17%); }
+      .tree-readout:nth-child(2) { left: var(--tree-x-1, 50%); }
+      .tree-readout:nth-child(3) { left: var(--tree-x-2, 83%); }
       .tree-readout span {
         --write: 0;
         clip-path: inset(0 calc((1 - var(--write)) * 100%) 0 0);
         white-space: nowrap;
       }
-      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: #1FE45A; }
+      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: #0E5C2B; }
       .tree-readout__latin { font: italic 400 clamp(10px, .78vw, 13px)/1.1 var(--font-body); }
       .tree-readout__metric { font: 500 clamp(8px, .59vw, 10px)/1.25 var(--font-mono); letter-spacing: .03em; }
       #opportunity .panel__inner {
@@ -426,7 +425,9 @@
         width: auto;
         max-width: none;
         height: auto;
-        padding: 0;
+        /* Inner gutter so nothing sits crammed against the container edges
+           (03 eyebrow, TIMBER COMPANIES, PARTNERS label, the headline). */
+        padding: 0 clamp(18px, 1.8vw, 34px);
         justify-content: flex-end;
         background: color-mix(in srgb, var(--bg) 88%, transparent);
         -webkit-backdrop-filter: blur(5px) saturate(.95);
@@ -447,9 +448,9 @@
       .audience-item p { margin: 0; font-size: clamp(9px, .68vw, 12px); line-height: 1.25; text-align: justify; text-align-last: left; }
       .trust-line { display: grid; grid-template-columns: minmax(160px, .9fr) 6fr; border-bottom: 1px solid var(--rule); }
       .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
-      .trust-strip div { height: 44px; padding: 7px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
+      .trust-strip div { height: 58px; padding: 8px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
       .trust-strip div:first-child { border-left: 0; }
-      .trust-strip img { max-width: 100%; max-height: 28px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
+      .trust-strip img { max-width: 100%; max-height: 42px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
       body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
       .trust-label {
         min-height: 44px;
@@ -465,7 +466,8 @@
         text-align-last: left;
       }
 
-      .closing { padding-top: clamp(52px, 8vh, 78px); }
+      /* Heading block sits LOW, just above the dead-centre red dot. */
+      .closing { padding-top: clamp(90px, 15vh, 210px); }
       .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
       .closing__logo { height: clamp(34px, 4.5vh, 46px); }
       .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
@@ -584,7 +586,7 @@
               <span class="hero-is__term">NATURAL ASSET VALUATION</span>
             </span>
           </h1>
-          <p class="hero__subtitle hero__line hero__line--2">Bullfinch Earth measures, monitors, and maps every stem – passively - while foresters do their normal jobs</p>
+          <p class="hero__subtitle hero__line hero__line--2">Bullfinch Earth measures, monitors, and maps every stem, passively, while foresters do their normal jobs</p>
         </div>
         <div class="hero__scroll-cue" aria-hidden="true">
           <span class="hero__scroll-cue-label">Scroll</span>
@@ -598,7 +600,7 @@
         <article class="panel panel--media" id="problem" data-panel="1">
           <div class="panel__inner">
             <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Dedicated Inventories Are<br>So 19th Century</h2>
+            <h2 class="panel__verdict"><span class="vs-line">Dedicated Inventories</span><span class="vs-line vs-line--2">Are So</span><span class="vs-line">19th Century</span></h2>
             <div class="panel__evidence">
               <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
             </div>
@@ -737,10 +739,10 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-6"></script>
+    <script src="scene-claude-teaser.js?v=claude-7"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-5"></script>
+    <script src="swot-claude.js?v=claude-6"></script>
     <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
       (function () {
@@ -972,8 +974,11 @@
         function writeTreeData(p) {
           treeDataLines.forEach(function (line, index) {
             var lineIndex = index % 5;
-            var start = .10 + lineIndex * .10;
-            var write = (p - start) / .26;
+            // Data populates only once the trees are ASSEMBLED: writes run
+            // over the last stretch of formation (0.80 -> 1.0), never while
+            // the grove is still gathering.
+            var start = .80 + lineIndex * .03;
+            var write = (p - start) / .08;
             write = write < 0 ? 0 : (write > 1 ? 1 : write);
             line.style.setProperty("--write", write.toFixed(4));
             if (line.dataset.target !== undefined) {

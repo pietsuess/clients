@@ -195,8 +195,13 @@
       // grid borders) that the per-child clips can't hide — wipe it with the
       // same language so nothing outlives the content (the grey-slab-over-
       // the-closing bug).
+      // Negative outsets on top/sides: the section-mark icons overhang the
+      // container box, and an exact-box inset CROPPED them (the cut icon
+      // Piet flagged). Only the bottom edge animates; at full reveal the
+      // bottom is also negative so nothing that overhangs is ever clipped.
       var innerW = smooth01(mapRange(p, 0.02, 0.12)) * (1 - leave);
-      inner.style.clipPath = "inset(0 0 " + ((1 - innerW) * 100).toFixed(2) + "% 0)";
+      var innerHid = ((1 - innerW) * 140 - 40).toFixed(2);
+      inner.style.clipPath = "inset(-40% -12% " + innerHid + "% -12%)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);

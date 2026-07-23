@@ -243,7 +243,10 @@
     "}",
   ].join("\n");
 
-  var shaftGeo = new THREE.PlaneGeometry(28, 18, 1, 1);
+  // Tall enough that the plane's bottom edge NEVER enters the frustum — at
+  // 28x18 the edge crossed the bottom of the frame and read as a crisp
+  // "gradient bar" across the page bottom.
+  var shaftGeo = new THREE.PlaneGeometry(28, 34, 1, 1);
   var shaftMat = new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
@@ -318,7 +321,10 @@
   var openDirection = new THREE.Vector3();
   for (var i = 0; i < PARTICLE_POOL; i++) {
     var openScreenX = (Math.random() - 0.5) * 2.5;
-    var openScreenY = -1.25 + 2.5 * ((i + Math.random()) / PARTICLE_POOL);
+    // RANDOM screen Y, not index-stratified: the cascade children are index
+    // neighbours of the seed, and stratifying y by index parked every
+    // connected mote at the same height — the ugly horizontal band of lines.
+    var openScreenY = -1.25 + 2.5 * Math.random();
     // Piet: we must be INSIDE the 02 mote field, not looking at it from afar.
     // Ray distances start right at the camera (big near motes sweeping past as
     // the dolly moves through) and run deep for real depth.
@@ -435,7 +441,7 @@
   groundFieldHome[1] = -0.55;
   groundFieldHome[2] = 0.4;
   starFieldHome[0] = 0.35;
-  starFieldHome[1] = 0.0;
+  starFieldHome[1] = 1.5;   // high in the cloud, near the top — short exit at trees
   starFieldHome[2] = 1.4;
   // The seed seats at the grid centre FIRST, with no assembly swirl — the grid
   // assembles around it, so the cascade visibly originates from the centre dot.
@@ -741,8 +747,11 @@
   //   x = 0.0   (centred horizontally)
   //   y = -2.5  (forest floor — below the canopy plane, revealed by tilt-down)
   //   z = 0.0   (on the focal axis the camera looks down through)
+  // DEAD CENTRE of the landed view: the camera ends at (0, 0.5, 3) looking at
+  // (0, -1.5, 0), so a dot AT (0, -1.5, 0) projects to the exact middle of
+  // the viewport on every aspect ratio.
   var FINAL_RED_X = 0.0;
-  var FINAL_RED_Y = -3.0;
+  var FINAL_RED_Y = -1.5;
   var FINAL_RED_Z = 0.0;
   positions[FINAL_RED_IDX * 3]     = FINAL_RED_X;
   positions[FINAL_RED_IDX * 3 + 1] = FINAL_RED_Y;
@@ -793,15 +802,21 @@
   for (var cf = 0; cf < PARTICLE_POOL; cf++) {
     if (connectedSet[cf]) fallSpeed[cf] = 0;
   }
-  var convRX = Math.min(FIELD_HALF_X * 0.78, 2.7);
-  var convRY = 0.72;
+  // Feeders on a BIG Fibonacci sphere around the final dot — above, below,
+  // beside, behind, and toward the camera, far out — so the convergence reads
+  // as the whole inhabited field draining into one point from every direction
+  // in X, Y and Z, not a small flat ring.
+  var convRBase = 5.2;
   for (var tr = 0; tr < terminalDots.length; tr++) {
     var tIdx = terminalDots[tr];
-    var ang = (tr / Math.max(1, terminalDots.length)) * Math.PI * 2;
-    var rr = 0.6 + 0.4 * (((tr * 7) % 5) / 4);   // vary the radius a little
-    positions[tIdx * 3]     = FINAL_RED_X + Math.cos(ang) * convRX * rr;
-    positions[tIdx * 3 + 1] = FINAL_RED_Y + Math.sin(ang) * convRY * rr;
-    positions[tIdx * 3 + 2] = FINAL_RED_Z + (((tr % 3) - 1) * 0.35);
+    var fu = (tr + 0.5) / Math.max(1, terminalDots.length);
+    var fy = 1 - 2 * fu;
+    var frr = Math.sqrt(Math.max(0, 1 - fy * fy));
+    var fphi = tr * 2.39996323;                      // golden angle
+    var convR = convRBase * (0.7 + 0.6 * (((tr * 13) % 7) / 6));
+    positions[tIdx * 3]     = FINAL_RED_X + Math.cos(fphi) * frr * convR * 1.25;
+    positions[tIdx * 3 + 1] = FINAL_RED_Y + fy * convR * 0.85;
+    positions[tIdx * 3 + 2] = Math.min(2.6, FINAL_RED_Z + Math.sin(fphi) * frr * convR);
     // These exact on-screen feeder positions are also their final star targets.
     // The later field expansion must not overwrite them with off-screen random
     // points and recreate the long lines seen in the failed closing frames.
@@ -1034,7 +1049,7 @@
       // Convergence lines (wave 7) finish drawing at progress 0.75, so contact
       // with the final red dot happens late in the closing scroll. The blast is
       // time-based (see SHOCKWAVE_DURATION), so a later land doesn't speed it up.
-      var drawDuration = wave === 7 ? 0.75 : 0.8;
+      var drawDuration = wave === 7 ? 0.93 : 0.8;
 
       // strokeProgress follows the real DOM trigger for its wave, not a
       // guessed global scroll band. This keeps convergence out of Panel 5.
@@ -1437,7 +1452,9 @@
     return statWorld.copy(camera.position).addScaledVector(statDirection, distance);
   }
   function updateStatGridTargets() {
-    if (statFormP <= 0) return;
+    // Runs EVERY frame (not just while the grid forms): the seed is pinned to
+    // the DOM-anchored grid-centre cell from the very first frame, so its
+    // home must be valid before statFormP ever rises.
     // Anchor to the reserved (visibility:hidden) #statGrid box so the grid sits
     // in its own column slot; flex keeps the readout to its right. Falls back to
     // the readout's left edge if the box hasn't been laid out.
@@ -1496,6 +1513,18 @@
           alphas[i] = smoothstep(0.0, 0.15, waveProgress[7] || 0);
           continue;
         }
+        if (i === 0) {
+          // Piet: the seed is PINNED to the grid-centre cell from the very
+          // start — zero drift, zero assembly flight. Its FIRST movement is
+          // the grid disassembly (openFieldP), a single glide to its station
+          // high in the 02 cloud; then it rises out as the trees form.
+          positions[xi]     = lerp(statGridHome[0], starFieldHome[0], openFieldP);
+          positions[yi]     = lerp(statGridHome[1], starFieldHome[1], openFieldP)
+                            + smoothstep(0.0, 0.45, treeFormP) * 9.0;
+          positions[xi + 2] = lerp(statGridHome[2], starFieldHome[2], openFieldP);
+          alphas[i] = seedReveal;
+          continue;
+        }
         var scrollPhase = density * Math.PI * 2;
         var groundX = groundFieldHome[xi] + Math.sin(scrollPhase + swayPhase[i]) * density * 0.08;
         var groundY = groundFieldHome[yi] + Math.cos(scrollPhase * 0.7 + swayPhase[i]) * density * 0.035;
@@ -1513,11 +1542,6 @@
           positions[xi] = lerp(positions[xi], statGridHome[xi], statMove) + statArcX[i] * statArc;
           positions[yi] = lerp(positions[yi], statGridHome[yi], statMove) + statArcY[i] * statArc;
           positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statMove);
-        }
-        if (i === 0) {
-          // Seed exit: stays among the 02 grouping, then leaves straight UP
-          // off the top as the trees form. Scroll-reversible.
-          positions[yi] += smoothstep(0.0, 0.45, treeFormP) * 9.0;
         }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.
@@ -1698,6 +1722,8 @@
   // rather than one locked grove. Time-integrated, so they keep turning on a
   // paused scroll (the standalone tester's continuous orbit).
   var treeSpinAngle = [0, 0, 0]; // accumulated yaw per tree (rad), integrated per frame
+  var treeMeans = null;          // the three cluster centre Xs (normalized), for DOM label anchoring
+  var treeLabelVec = new THREE.Vector3();
   var treeSpinPrevT = 0;         // last elapsed sample, for the local dt
   var TREE_SPIN_BASE = 0.032;    // faster turntable motion (was 0.0175)
   var TREE_SPIN_RATE = [1.0, 1.34, 0.77]; // per-tree rate multipliers (desync)
@@ -1808,6 +1834,7 @@
       }
       treeClusterCenter = new Float32Array(treeCount);
       for (var ka = 0; ka < treeCount; ka++) treeClusterCenter[ka] = clusterMeans[clusterAssignment[ka]];
+      treeMeans = clusterMeans;
 
       // Shuffle indices; first slice becomes mote targets, rest are fill.
       var idx = new Array(treeCount);
@@ -1947,6 +1974,18 @@
     var tRay = (TREE_CZ - camZ) / (-camZ);          // camZ in [3,10]; never 0
     var groveCenterY = camY2 + tRay * (lookY2 - camY2);
     var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y;
+
+    // Publish each trunk's viewport X as a CSS var so the DOM species
+    // readouts sit CENTRED over the peaks of their trees on any viewport.
+    if (treeMeans) {
+      for (var tlx = 0; tlx < 3; tlx++) {
+        treeLabelVec.set(groveCX + treeMeans[tlx] * SX, baseY + S, TREE_CZ).project(camera);
+        document.documentElement.style.setProperty(
+          "--tree-x-" + tlx,
+          ((treeLabelVec.x * 0.5 + 0.5) * 100).toFixed(2) + "%"
+        );
+      }
+    }
 
     // Yaw the whole grove about its own vertical axis. Slow constant turn while
     // it stands (treeFormP ~ 0 or 1); lively through the transition (env peaks
@@ -2104,10 +2143,10 @@
     seedReveal = Math.max(0, Math.min(1, p));
   }
   var previousConvergenceProgress = 0;
-  // Lines draw over 0 -> 0.75; contact (and the time-based blast) happens late
-  // in the closing scroll. Same on every viewport; the DOM trigger ends exactly
-  // at closing-settled.
-  var FINAL_CONVERGENCE_LAND = 0.75;
+  // Lines draw over 0 -> 0.93; contact (and the time-based blast) fires only
+  // when the closing is essentially SETTLED — Piet: contact was landing too
+  // soon. Same on every viewport; the DOM trigger ends at closing-settled.
+  var FINAL_CONVERGENCE_LAND = 0.93;
   function setConvergenceProgress(p) {
     var v = Math.max(0, Math.min(1, p));
     // Arm the slow blast when scroll first crosses the land point; disarm when
