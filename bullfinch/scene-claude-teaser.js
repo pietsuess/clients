@@ -319,6 +319,13 @@
   openFieldCamera.updateMatrixWorld(true);
   var openProbe = new THREE.Vector3();
   var openDirection = new THREE.Vector3();
+  // Per-mote ray samples are KEPT so the homes can be re-projected through
+  // the LIVE camera during dispersal (see rebuildStarFieldHomes) — a one-time
+  // snapshot through a frozen camera was the ping-pong: motes flew to points
+  // that projected low, then "rose" as the live dolly caught up.
+  var openScreenXs = new Float32Array(PARTICLE_POOL);
+  var openScreenYs = new Float32Array(PARTICLE_POOL);
+  var openDists = new Float32Array(PARTICLE_POOL);
   for (var i = 0; i < PARTICLE_POOL; i++) {
     var openScreenX = (Math.random() - 0.5) * 2.5;
     // RANDOM screen Y, not index-stratified: the cascade children are index
@@ -329,6 +336,9 @@
     // Ray distances start right at the camera (big near motes sweeping past as
     // the dolly moves through) and run deep for real depth.
     var openDistance = 1.3 + Math.random() * 8.7;
+    openScreenXs[i] = openScreenX;
+    openScreenYs[i] = openScreenY;
+    openDists[i] = openDistance;
     openProbe.set(openScreenX, openScreenY, 0.35).unproject(openFieldCamera);
     openDirection.copy(openProbe).sub(openFieldCamera.position).normalize();
     var fieldX = openFieldCamera.position.x + openDirection.x * openDistance;
@@ -1451,6 +1461,24 @@
     var distance = (zPlane - camera.position.z) / statDirection.z;
     return statWorld.copy(camera.position).addScaledVector(statDirection, distance);
   }
+  // MECHANISM fix for the down-then-up dispersal (Piet, round 5): while the
+  // grid release is in flight, re-project every mote's 02 home through the
+  // LIVE camera each frame. The spread becomes one outward motion that ends
+  // exactly where the camera actually is — no frozen-snapshot correction. At
+  // openFieldP = 1 the homes freeze into world space, so remaining movement
+  // through 02 is plain dolly parallax. Fully reversible: scrolling back re-
+  // enters the band and re-projects again. Skips 0 (seed station) and 1
+  // (convergence dot).
+  function rebuildStarFieldHomes() {
+    for (var i = 2; i < PARTICLE_POOL; i++) {
+      openProbe.set(openScreenXs[i], openScreenYs[i], 0.35).unproject(camera);
+      openDirection.copy(openProbe).sub(camera.position).normalize();
+      starFieldHome[i * 3]     = camera.position.x + openDirection.x * openDists[i];
+      starFieldHome[i * 3 + 1] = camera.position.y + openDirection.y * openDists[i];
+      starFieldHome[i * 3 + 2] = camera.position.z + openDirection.z * openDists[i];
+    }
+  }
+
   function updateStatGridTargets() {
     // Runs EVERY frame (not just while the grid forms): the seed is pinned to
     // the DOM-anchored grid-centre cell from the very first frame, so its
@@ -1505,6 +1533,7 @@
       partMat.uniforms.uStatForm.value = statFormP;
       partMat.uniforms.uStatFill.value = statFillP;
       updateStatGridTargets();
+      if (openFieldP > 0 && openFieldP < 1) rebuildStarFieldHomes();
       var statSizeDirty = false;
       for (var i = 0; i < PARTICLE_POOL; i++) {
         var xi = i * 3;
@@ -2183,9 +2212,9 @@
   // swot p2 trigger) so 01 and 03 stay beige. Slight canopy/understory split
   // preserves the vertical gradient. Piet will taste-tune the hue.
   var productPalette = {
-    canopy: new THREE.Color("#EAF3DF"),
-    understory: new THREE.Color("#D8E7C5"),
-    base: new THREE.Color("#E4EFD8")
+    canopy: new THREE.Color("#DFEDC0"),
+    understory: new THREE.Color("#94B873"),
+    base: new THREE.Color("#DAE9B6")
   };
   var paletteScratch = new THREE.Color();
   var tintScratch = new THREE.Color();

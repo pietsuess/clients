@@ -739,7 +739,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-8"></script>
+    <script src="scene-claude-teaser.js?v=claude-9"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-7"></script>
@@ -988,13 +988,17 @@
           });
         }
 
-        // Opening forest-floor motes resolve into the <1% grid while section
-        // 01 arrives. The same trigger reverses the grid back into the ground.
+        // Opening forest-floor motes resolve into the <1% grid. Piet: start
+        // populating the MOMENT the hero begins to leave — the assembly runs
+        // from the first scroll pixel all the way to 01's pin, so it reads
+        // slow and deliberate instead of a last-second swoop. The same
+        // trigger reverses the grid back into the ground.
         ScrollTrigger.create({
-          trigger: s01,
-          start: "top bottom",
-          end: "top top",
+          trigger: document.body,
+          start: "top top",
+          end: function () { return p1.start; },
           scrub: true,
+          invalidateOnRefresh: true,
           onUpdate: function (self) {
             setStatStage(smootherstep(self.progress));
           },
