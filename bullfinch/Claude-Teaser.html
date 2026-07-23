@@ -6,15 +6,15 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta name="googlebot" content="noindex, nofollow" />
 
-    <title>Bullfinch Earth - Ground truth for forestry</title>
+    <title>Bullfinch Earth - Nature from the Ground Up</title>
     <meta name="description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Bullfinch Earth - Ground truth for forestry" />
+    <meta property="og:title" content="Bullfinch Earth - Nature from the Ground Up" />
     <meta property="og:description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
 
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Bullfinch Earth - Ground truth for forestry" />
+    <meta name="twitter:title" content="Bullfinch Earth - Nature from the Ground Up" />
     <meta name="twitter:description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
     <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
 
@@ -37,297 +37,49 @@
 
     <link rel="stylesheet" href="styles.css?v=v4-6" />
     <style>
-      /* Nature grade (point cloud variant only): the backdrop shifts from
-         the space-gray canopy to a green-brown forest read. Only the two
-         backdrop colors change; everything else inherits the base theme. */
-      :root {
-        --gl-canopy: #AEB782;      /* light mossy green (near canopy / top of grade) */
-        --gl-understory: #746044;  /* warm mid brown (understory / lower grade)       */
-        --gl-base: #3B402D;        /* earthy atmosphere floor -- lifts the near-black */
-                                   /* clear color so the forest tint actually reads.  */
-        --gl-mote: #F0ECDF;        /* brighter motes so the grove reads on the olive  */
+      :root,
+      [data-theme="dark"] {
+        --bg: #e7dfc4;
+        --bg-elev: #d8d5ab;
+        --ink: #16251b;
+        --ink-soft: #425748;
+        --ink-quiet: #607164;
+        --rule: rgba(22, 37, 27, 0.18);
+        --gl-canopy: #e7dfc4;
+        --gl-understory: #aeb782;
+        --gl-base: #e7dfc4;
+        --gl-mote: #23331f;
+        --gl-line: rgba(35, 51, 31, 0.4);
+        --gl-light-shaft: #f6e7ad;
+        --gl-final-base: #11271b;
+        --gl-final-canopy: #183424;
+        --gl-final-understory: #07150e;
+        --gl-final-mote: #aeb398;
+        --gl-final-line: rgba(226, 221, 191, 0.36);
+        --gl-final-shaft: #8fa777;
+        --text-veil-bg-strong: 10%;
+        --text-veil-bg-soft: 5%;
+        --text-veil-blur: 9px;
+        --text-veil-saturate: 0.98;
+        --text-veil-opacity: 0.44;
+        --stat-crisp-offset: 0;
+        --tree-crisp-offset: 0;
       }
-      /* The earthy backdrop is far lighter than the near-black this UI was tuned
-         for, so the quiet chrome (nav numbers, the numeric label line) lost its
-         contrast. Lift them to a soft white that reads on olive AND on the
-         darker upper sections. Active nav + hover still go full white below. */
-      .site-nav a { color: rgba(250, 250, 250, 0.6); }
-      .panel__numeric { color: rgba(250, 250, 250, 0.55); }
-      /* Kill the dark text-halo on the bullseye labels -- it read as a harsh
-         black outline against the earthy backdrop. */
-      #proof .be-cap { paint-order: normal; stroke: none; }
-      /* #opportunity only: drop the text readability veil (blur + dim) so the
-         tree grove reads against the bare earthy backdrop. The veil is a single
-         global fixed layer; this class -- toggled by the grove driver while
-         section 03 is active -- neutralizes it without touching the shared CSS. */
-      body.pc-bare-veil .text-veil {
-        opacity: 0 !important;
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
+      body.is-final-contrast {
+        --bg: #11271b;
+        --bg-elev: #183424;
+        --ink: #f4efd9;
+        --ink-soft: #d2d8c5;
+        --ink-quiet: #a8b7a8;
+        --rule: rgba(244, 239, 217, 0.2);
       }
-      /* Section 03 gets the same two-column layout as the other graphic
-         sections (mirrors the #product/.panel--media rules): text in the
-         right column, the left column belongs to the tree grove. */
-      #opportunity {
-        grid-template-columns: minmax(280px, min(40vw, 560px)) minmax(0, var(--col-narrow));
-        gap: clamp(18px, 3vw, 48px);
-      }
-      #opportunity .panel__inner {
-        grid-column: 2;
-        justify-self: start;
-        max-width: min(44vw, var(--col-narrow));
-      }
-
-      /* Teaser edit: the original point-cloud system remains intact. Only the
-         palette, content density, and number of story panels are changed. */
-      :root {
-        --bg: #070907;
-        --bg-elev: #10150f;
-        --ink: #F2EDDF;
-        --ink-soft: #B8B5A8;
-        --ink-quiet: #7D8271;
-        --accent: #A7C47B;
-        --rule: rgba(242, 237, 223, 0.12);
-        --gl-canopy: #8E9C67;
-        --gl-understory: #3E4931;
-        --gl-base: #161C13;
-        --gl-light-shaft: #DCCFAA;
-        --gl-mote: #EAE2CC;
-        --gl-accent: #FF6069;
-      }
-      body, p { text-align: justify; text-align-last: left; }
-      .splash {
-        inset: 18px auto auto 24px;
-        width: 112px;
-        height: 78px;
-        min-height: 0;
-        background: transparent;
-        pointer-events: none;
-      }
-      .splash__button { width: 112px; height: 78px; pointer-events: none; }
-      .splash__sequence { width: 78px; height: 78px; }
-      .splash.is-sequence-done .splash__button {
-        opacity: 0;
-        transform: scale(0.7);
-      }
-      .hero__title { font-size: min(10.5vw, 12vh, 166px); max-width: 12ch; }
-      .hero__subtitle { max-width: 47ch; }
-      .hero__uses {
-        width: min(100%, 1120px);
-        margin-top: clamp(28px, 5vh, 56px);
-        display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 0;
-        border-top: 1px solid var(--rule);
-        border-left: 1px solid var(--rule);
-      }
-      .hero__uses span {
-        min-height: 42px;
-        padding: 0 16px;
-        display: inline-flex;
-        align-items: center;
-        border-right: 1px solid var(--rule);
-        border-bottom: 1px solid var(--rule);
-        color: var(--ink-soft);
-        font-family: var(--font-mono);
-        font-size: 10px;
-        font-weight: 500;
-        letter-spacing: 0.11em;
-        text-transform: uppercase;
-      }
-      .investor-story {
-        margin-left: 8px;
-        padding-left: 24px;
-        border-left: 1px solid var(--rule);
-        text-decoration: none;
-        white-space: nowrap;
-      }
-      #opportunity .panel__evidence { gap: 12px; }
-      #opportunity .panel__evidence p { line-height: 1.42; }
-      #product .panel__evidence,
-      #opportunity .panel__evidence { max-width: none; }
-      #product .panel__evidence .lead,
-      #opportunity .panel__evidence .lead {
-        display: block;
-        margin: 0 0 5px;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.13em;
-        text-transform: uppercase;
-      }
-      #product .panel__evidence p {
-        padding-top: 14px;
-        border-top: 1px solid var(--rule);
-      }
-      #opportunity .panel__evidence p {
-        padding: 10px 0;
-        border-top: 1px solid var(--rule);
-      }
-      #opportunity .panel__evidence p:last-child { border-bottom: 1px solid var(--rule); }
-      #data .panel__inner {
-        max-width: none;
-        justify-content: center;
-      }
-      #data .panel__verdict { max-width: 17ch; }
-      #data .partner-grid {
-        width: 100%;
-        max-width: none;
-        display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 0;
-        margin-top: clamp(28px, 5vh, 54px);
-        border-top: 1px solid var(--rule);
-        border-left: 1px solid var(--rule);
-      }
-      #data .partner {
-        min-width: 0;
-        min-height: clamp(116px, 16vh, 170px);
-        padding: 18px;
-        display: grid;
-        place-items: center;
-        border-right: 1px solid var(--rule);
-        border-bottom: 1px solid var(--rule);
-        background: rgba(7, 9, 7, 0.18);
-      }
-      #data .partner img {
-        display: block;
-        width: auto;
-        height: auto;
-        max-width: 88%;
-        max-height: 58px;
-        filter: grayscale(1) brightness(1.8) contrast(0.85);
-      }
-      #data .partner img[alt="Northern Hardwoods Research Institute"] {
-        filter: grayscale(1) invert(1) contrast(1.25);
-      }
-      #data .partner-type {
-        display: block;
-        text-align: center;
-        text-align-last: center;
-        font-family: var(--font-display);
-        font-size: clamp(15px, 1.25vw, 21px);
-        font-weight: 650;
-        line-height: 1;
-        letter-spacing: -0.035em;
-      }
-      #data .partner-type small {
-        display: block;
-        margin-top: 9px;
-        color: var(--accent);
-        font-family: var(--font-mono);
-        font-size: 8px;
-        font-weight: 500;
-        letter-spacing: 0.13em;
-        line-height: 1.3;
-        text-transform: uppercase;
-      }
-      .closing__inner { max-width: none; }
-      .closing__title { max-width: 20ch; }
-      .deep-preview {
-        width: min(100%, 980px);
-        height: clamp(130px, 21vh, 190px);
-        display: grid;
-        grid-template-columns: minmax(220px, 0.75fr) minmax(420px, 1.25fr);
-        gap: 1px;
-        overflow: hidden;
-        background: var(--rule);
-        border: 1px solid var(--rule);
-      }
-      .deep-preview .panel__chart,
-      .deep-preview .panel__people {
-        position: relative;
-        inset: auto;
-        width: 100%;
-        height: 100%;
-        min-height: 0;
-        aspect-ratio: auto;
-        opacity: 0.72 !important;
-        transform: none !important;
-        background: rgba(7, 9, 7, 0.62);
-      }
-      .deep-preview .bullseye-fig { height: 100%; gap: 0; justify-content: center; }
-      .deep-preview .bullseye-fig { min-height: 0; overflow: hidden; }
-      .deep-preview .bullseye { width: auto; height: 92%; max-height: 92%; }
-      .deep-preview .bullseye-cap { display: none; }
-      .deep-preview .person figcaption { font-size: 7px; }
-      .closing__actions a:first-child {
-        color: #070907;
-        background: var(--accent);
-        padding: 14px 20px;
-      }
-      .closing__actions a:last-child {
-        border-bottom: 1px solid currentColor;
-        padding-bottom: 4px;
-      }
-      @media (max-width: 960px) {
-        #data .partner-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .deep-preview { grid-template-columns: 1fr; height: 180px; }
-        .deep-preview .panel__chart { display: none; }
-      }
-
-      /* ============ Claude fork of Codex GPT-Teaser.html ============
-         (1) 01 THE GAP: the <1% dot-field moves to the RIGHT column with the
-             "Bullfinch fully automates" paragraph directly below it; heading +
-             intro paragraph on the left. (2) the dot-field reads BLACK on a
-             light card, ONE RED centre rendered on top, filling to ALL RED.
-             (3) a clean contact close (see markup + scene swap for the grove
-             and the mote convergence at the end). ======================== */
-      #problem.panel--media {
-        grid-template-columns: minmax(0, 1fr) minmax(300px, min(42vw, 520px));
-        gap: clamp(30px, 5vw, 92px);
-        place-items: center;
-      }
-      #problem .panel__inner { grid-column: 1; justify-self: start; max-width: 56ch; }
-      #problem .problem-graphic {
-        grid-column: 2;
-        justify-self: stretch;
-        align-self: center;
-        display: flex;
-        flex-direction: column;
-        gap: clamp(16px, 2.4vh, 28px);
-      }
-      .problem-note { margin: 0; max-width: 46ch; color: var(--ink-soft);
-        font-size: clamp(14px, 1.05vw, 16px); line-height: 1.5; }
-
-      /* Light card so the BLACK dot-field reads (like the original); the red
-         centre + fill sit ON TOP of the black field. */
-      #problem .panel__stat {
-        background: #ECE6D3;
-        border-radius: 14px;
-        padding: clamp(20px, 2.2vw, 30px);
-        gap: clamp(18px, 2vw, 32px);
-      }
-      #problem .stat-dot { background: #12200C; opacity: 1; transform: scale(1); }
-      #problem .stat-dot.is-on  { background: #C43B2E; position: relative; z-index: 1; }
-      #problem .stat-dot.is-one { background: #C43B2E; position: relative; z-index: 2;
-        box-shadow: 0 0 0 3px rgba(196, 59, 46, 0.28); }
-      #problem .stat-seg { fill: rgba(18, 32, 12, 0.16); }
-      #problem .stat-seg.on { fill: #12200C; }
-      #problem .stat-line { color: #B3402E; }
-      #problem .stat-unit { color: #4E5A3E; }
-      #problem .stat-rest { color: #12200C; }
-      @media (max-width: 860px) {
-        #problem.panel--media { grid-template-columns: 1fr; gap: 24px; }
-        #problem .panel__inner, #problem .problem-graphic { grid-column: 1; justify-self: center; }
-      }
-
-      /* Teaser close: contact form (matches the version end feel). */
-      .contact-form { width: 100%; max-width: 600px; margin: 8px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: left; }
-      @media (max-width: 560px) { .contact-form { grid-template-columns: 1fr; } }
-      .contact-form input, .contact-form textarea { width: 100%; padding: 13px 15px; border: 1px solid var(--rule); border-radius: 12px; background: rgba(255, 255, 255, 0.06); color: var(--ink); font: inherit; font-size: 15px; }
-      .contact-form .full { grid-column: 1 / -1; }
-      .contact-form textarea { min-height: 88px; resize: vertical; }
-      .contact-form input::placeholder, .contact-form textarea::placeholder { color: var(--ink-quiet); }
-      .contact-form .btn { grid-column: 1 / -1; justify-self: center; }
-      .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 24px; border-radius: 999px; font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; cursor: pointer; border: 0; transition: transform 0.2s ease, filter 0.2s ease; }
-      .btn--primary { background: var(--accent); color: #070907; }
-      .btn--primary:hover { transform: translateY(-1px); filter: brightness(1.06); }
-      .contact__note { margin-top: clamp(18px, 3vh, 30px); font-size: 14px; color: var(--ink-soft); text-align: center; }
-      .contact__note a { color: var(--ink); border-bottom: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); }
+      [data-theme="dark"] .bullfinch-mark__dark { fill: var(--ink); }
+      .site-nav a { color: var(--ink-quiet); }
+      .panel__numeric { color: var(--ink-quiet); }
     </style>
 
     <style>
-      /* Section marks - one per section, beside each eyebrow (bottom-right
+      /* Section marks — one per section, beside each eyebrow (bottom-right
          corner on mobile). Updated Bullfinch Earth Marks choreography: people
          cluster spins as it gathers, nature fronds wipe bottom-to-top, tech
          rotates / slides / wipes. Animations are CSS keyframes (gather / reveal
@@ -339,7 +91,7 @@
 
       /* Wrapper hugs the eyebrow text and anchors the mark to the end of the
          label. The mark lives OUTSIDE the eyebrow <p>, so swot.js's opacity
-         reveal on the eyebrow does NOT fade the mark - the mark carries its own
+         reveal on the eyebrow does NOT fade the mark — the mark carries its own
          reveal in its keyframes. The wrapper takes over the eyebrow's bottom
          margin so the box stays text-height (mark centres on the text line) and
          the gap to the verdict is unchanged. */
@@ -371,10 +123,8 @@
         width: var(--mark-box);
         height: var(--mark-box);
         pointer-events: none;
-        animation:
-          gather 4s linear infinite alternate,
-          reveal 4s cubic-bezier(0.33, 0, 0.2, 1) infinite alternate;
-        animation-play-state: paused; /* scrubbed by scroll (see script) */
+        --build: 0;
+        --rev: 0;
       }
       .section-mark svg {
         width: 100%;
@@ -404,8 +154,6 @@
       .section-mark .grp-spin {
         transform-box: view-box;
         transform: rotate(var(--pang, 0deg));
-        animation: peopleSpin 4s linear infinite alternate;
-        animation-play-state: paused;
       }
       .section-mark .fade {
         opacity: clamp(0, calc(var(--p, var(--build, 1)) * 1.6), 1);
@@ -456,21 +204,330 @@
         }
       }
     </style>
+    <style>
+      /* Full-width forest journey, preserving the original interactive parts. */
+      .forest-photo {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        width: 100vw;
+        height: 100dvh;
+        background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
+        clip-path: polygon(var(--forest-edge-top, -100vh) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, -100vh) + 100vh) 100%);
+        filter: saturate(.82) contrast(.96) brightness(1.04);
+        will-change: clip-path;
+      }
+      .canopy-canvas { z-index: 0; }
+      .text-veil {
+        z-index: 1;
+        opacity: clamp(0, calc(var(--text-veil-opacity) - var(--stat-crisp-offset) - var(--tree-crisp-offset)), 1);
+      }
+      #page { z-index: 3; }
+      .hero { background: transparent; }
+      .hero__inner {
+        --hero-logo-size: clamp(54px, 5.1vw, 78px);
+        --hero-logo-gap: clamp(14px, 1.8vw, 28px);
+        --hero-copy-inset: calc(var(--hero-logo-size) + var(--hero-logo-gap));
+        width: calc(100vw - clamp(48px, 8vw, 144px));
+        max-width: none;
+      }
+      .hero__title { width: 100%; max-width: none; }
+      .hero-is { min-height: 0; }
+      .hero-brand-row { display: flex; align-items: center; gap: var(--hero-logo-gap); }
+      .hero-is__label,
+      .hero-is__prefix,
+      .hero-is__cycle { display: block; }
+      .hero-is__label { font-size: clamp(50px, 7.2vw, 112px); letter-spacing: -.055em; line-height: .86; }
+      .hero-is__prefix { margin-top: .16em; margin-left: var(--hero-copy-inset); font-size: clamp(25px, 3.8vw, 60px); letter-spacing: -.04em; line-height: .92; }
+      .hero-is__cycle {
+        position: relative;
+        height: 1.05em;
+        margin-top: .05em;
+        font-size: clamp(25px, 3.8vw, 60px);
+        letter-spacing: -.042em;
+        line-height: 1;
+        white-space: nowrap;
+        margin-left: var(--hero-copy-inset);
+      }
+      .hero-is__term {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        transform: translateY(.45em);
+        transition: opacity 440ms ease, transform 560ms cubic-bezier(.2,.75,.18,1);
+        color: var(--accent);
+      }
+      .hero-is__term.is-active { opacity: 1; transform: translateY(0); }
+      .hero-brand-row,
+      .hero-is__prefix,
+      .hero-is__cycle,
+      .hero__subtitle {
+        opacity: 0;
+        transform: translate3d(-42px, 18px, 0);
+        transition: opacity 680ms ease, transform 900ms cubic-bezier(.18,.72,.16,1);
+      }
+      body.has-hero-arrived .hero-brand-row,
+      body.has-hero-arrived .hero-is__prefix,
+      body.has-hero-arrived .hero-is__cycle,
+      body.has-hero-arrived .hero__subtitle { opacity: 1; transform: translate3d(0, 0, 0); }
+      body.has-hero-arrived .hero-is__prefix { transition-delay: 110ms; }
+      body.has-hero-arrived .hero-is__cycle { transition-delay: 190ms; }
+      body.has-hero-arrived .hero__subtitle { transition-delay: 290ms; }
+      .hero__subtitle {
+        max-width: calc(50vw - var(--hero-copy-inset));
+        margin-left: var(--hero-copy-inset);
+        margin-top: clamp(8px, 1.2vh, 14px);
+        font-size: clamp(16px, 1.45vw, 23px);
+        color: var(--ink);
+        text-align: justify;
+        text-align-last: left;
+      }
+
+      .corner-logo-sequence {
+        position: relative;
+        z-index: 1;
+        width: var(--hero-logo-size);
+        height: var(--hero-logo-size);
+        flex: 0 0 auto;
+        pointer-events: none;
+      }
+      .corner-logo-sequence canvas,
+      .corner-logo-static {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transition: opacity 180ms linear, transform 900ms cubic-bezier(.2,.75,.18,1);
+        transform: scale(1.28);
+      }
+      .corner-logo-static { opacity: 0; }
+      .corner-logo-sequence.is-settled canvas { opacity: 0; transform: scale(.74); }
+      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: scale(.74); }
+      .site-nav {
+        justify-content: flex-start;
+        padding-left: var(--pad-x);
+        padding-right: var(--pad-x);
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
+      .site-nav__brand { display: none; }
+      .site-nav__links { margin-left: 0; }
+      .site-nav__hover-label { left: var(--pad-x); top: 50px; transform: translateY(-2px); }
+      .site-nav__hover-label.is-visible { transform: translateY(0); }
+      .corner-wordmark { display: none; }
+
+      #problem.panel--media {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: 1fr;
+        gap: clamp(54px, 7vw, 118px);
+        place-items: center stretch;
+      }
+      #problem.panel--media::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 17vh;
+        bottom: 17vh;
+        width: 1px;
+        background: var(--rule);
+      }
+      #problem .panel__inner {
+        position: relative;
+        grid-column: 1;
+        width: 100%;
+        height: auto;
+        max-width: none;
+        transform: none;
+        text-align: right;
+        align-items: flex-end;
+      }
+      #problem .eyebrow-anchor { margin-left: auto; }
+      #problem .panel__verdict { max-width: none; margin-left: auto; font-size: clamp(44px, 3.7vw, 62px); text-align: right; }
+      #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
+      #problem .panel__evidence p { text-align: right; text-align-last: right; }
+      #problem .panel__numeric { text-align: right; text-align-last: right; }
+      #problem .panel__stat {
+        position: relative;
+        z-index: 6;
+        grid-column: 2;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(18px, 2.2vw, 36px);
+        min-height: 220px;
+        text-align: right;
+      }
+      #problem .stat-grid { display: none; }
+      #problem .stat-read { min-width: 0; transform: translateX(clamp(70px, 6vw, 105px)); }
+      #problem .stat-label { margin-left: auto; }
+      #problem .stat-line { left: auto; right: 0; text-align: right; }
+      #problem .stat-num { justify-content: flex-end; align-items: flex-end; gap: 10px; }
+      #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
+      #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
+
+      #product.panel--media {
+        grid-template-columns: minmax(420px, .9fr) minmax(420px, 1.1fr);
+        gap: clamp(26px, 3.2vw, 58px);
+      }
+      #product .panel__inner { grid-column: 2; max-width: none; padding-top: 0; }
+      #product .panel__verdict { font-size: clamp(38px, 4.2vw, 70px); }
+      #product .panel__evidence { display: grid; grid-template-columns: 1fr; gap: 0; max-width: none; }
+      #product .panel__evidence p { padding: 9px 0; border-top: 1px solid var(--rule); text-align: justify; text-align-last: left; }
+      #product .panel__evidence p:first-child { border-top: 0; }
+      #product .panel__numeric { margin-top: 18px; }
+      .case-fixed-layer.panel__model {
+        width: min(40vw, 720px);
+        max-width: 40vw;
+        height: 100dvh;
+        left: 0;
+        top: 0;
+        transform: none;
+      }
+      .case-fixed-layer .panel__model-canvas { width: 100%; height: 100%; }
+      body.is-tree-stage .case-fixed-layer.panel__model,
+      body.is-final-contrast .case-fixed-layer.panel__model { opacity: 0 !important; }
+
+      #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
+      #opportunity .tree-readouts {
+        --tree-data-p: 0;
+        position: absolute;
+        z-index: 4;
+        top: clamp(48px, 6vh, 68px);
+        left: 3vw;
+        width: 94vw;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6vw;
+        color: var(--ink-soft);
+        text-align: center;
+        pointer-events: none;
+      }
+      .tree-readout { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .tree-readout span {
+        --write: 0;
+        clip-path: inset(0 calc((1 - var(--write)) * 100%) 0 0);
+        white-space: nowrap;
+      }
+      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: var(--ink); }
+      .tree-readout__latin { font: italic 400 clamp(10px, .78vw, 13px)/1.1 var(--font-body); }
+      .tree-readout__metric { font: 500 clamp(8px, .59vw, 10px)/1.25 var(--font-mono); letter-spacing: .03em; }
+      #opportunity .panel__inner {
+        position: absolute;
+        z-index: 5;
+        left: var(--pad-x);
+        right: var(--pad-x);
+        bottom: 14px;
+        width: auto;
+        max-width: none;
+        height: auto;
+        padding: 0;
+        justify-content: flex-end;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        -webkit-backdrop-filter: blur(5px) saturate(.95);
+        backdrop-filter: blur(5px) saturate(.95);
+      }
+      .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
+      .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
+      #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
+      .audience-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+      .audience-item { min-height: 66px; padding: 8px 13px 9px; border-left: 1px solid var(--rule); }
+      .audience-item:first-child { border-left: 0; padding-left: 0; }
+      .audience-item h3 { margin: 0 0 6px; font-size: clamp(12px, .95vw, 16px); font-weight: 600; line-height: 1.08; }
+      .audience-item p { margin: 0; font-size: clamp(9px, .68vw, 12px); line-height: 1.25; text-align: justify; text-align-last: left; }
+      .trust-line { display: grid; grid-template-columns: minmax(160px, .9fr) 6fr; border-bottom: 1px solid var(--rule); }
+      .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .trust-strip div { height: 44px; padding: 7px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
+      .trust-strip div:first-child { border-left: 0; }
+      .trust-strip img { max-width: 100%; max-height: 28px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
+      body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
+      .trust-label {
+        min-height: 44px;
+        margin: 0;
+        padding-right: 14px;
+        display: flex;
+        align-items: center;
+        font: 500 clamp(9px, .68vw, 11px)/1 var(--font-mono);
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--ink-quiet);
+        text-align: left;
+        text-align-last: left;
+      }
+
+      .closing { padding-top: clamp(52px, 8vh, 78px); }
+      .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
+      .closing__logo { height: clamp(34px, 4.5vh, 46px); }
+      .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
+      .closing__line { white-space: nowrap; }
+      .closing__actions { display: flex; width: auto; justify-content: center; gap: clamp(22px, 3vw, 42px); margin-top: 6px; }
+      .closing__actions a { justify-content: center; color: var(--ink); font-size: clamp(13px, 1vw, 16px); }
+      .site-footer { padding: 10px var(--pad-x) max(68px, calc(env(safe-area-inset-bottom) + 68px)); gap: 10px; }
+      .site-footer__wordmark { display: none; }
+      .site-footer__line { opacity: 1; transform: none; }
+      .site-footer__top { bottom: max(10px, env(safe-area-inset-bottom)); }
+
+      @media (max-width: 900px) {
+        .hero-is__cycle { white-space: normal; height: 2.1em; max-width: 14ch; }
+        #problem .panel__evidence { grid-template-columns: 1fr; }
+        #product.panel--media { grid-template-columns: 1fr 1fr; }
+        #product .panel__inner { grid-column: 2; }
+        #problem.panel--media { grid-template-columns: 1fr 1fr; }
+        .audience-grid { grid-template-columns: repeat(5, 210px); overflow-x: auto; }
+        .trust-strip { grid-template-columns: repeat(6, 150px); overflow-x: auto; }
+      }
+    </style>
+    <style>
+      /* ===== Claude fork of Codex GPT-Teaser — scoped fixes only =====
+         (1) 01: the "Bullfinch fully automates" paragraph now sits BELOW the
+             graphic in the right column; both paragraphs are block-justified,
+             last line left. (2) the <1% field is a real dot grid again —
+             BLACK dots, ONE RED centre rendered on top, filling to ALL RED as
+             the counter climbs (the original Claude behaviour). Codex's
+             colours + forest reveal are untouched. ===================== */
+      #problem .panel__evidence { grid-template-columns: 1fr; }
+      #problem .panel__evidence p { text-align: justify; text-align-last: left; }
+      #problem .panel__stat--problem {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: clamp(20px, 2.6vh, 34px);
+        text-align: left;
+      }
+      #problem .stat-visual { display: flex; align-items: center; gap: clamp(18px, 2.2vw, 36px); }
+      #problem .stat-read { transform: none; }
+      .problem-note {
+        margin: 0;
+        max-width: 46ch;
+        color: var(--ink-soft);
+        font-size: clamp(14px, 1.05vw, 16px);
+        line-height: 1.5;
+        text-align: justify;
+        text-align-last: left;
+      }
+      /* the <1% coverage grid: shown, BLACK field, RED fill + RED centre on top */
+      #problem .stat-grid { display: grid; }
+      #problem .stat-dot { background: #14210E; opacity: 1; transform: scale(1); }
+      #problem .stat-dot.is-on  { background: #C0392B; position: relative; z-index: 1; }
+      #problem .stat-dot.is-one { background: #C0392B; position: relative; z-index: 2;
+        box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.28); }
+    </style>
   </head>
   <body>
-    <div class="splash" id="splash" aria-label="Begin presentation">
-      <button class="splash__button" id="splash-button" type="button" aria-label="Begin presentation">
-        <canvas class="splash__sequence" id="splash-sequence" width="360" height="360" aria-hidden="true"></canvas>
-      </button>
-    </div>
-
     <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+    <div class="forest-photo" aria-hidden="true"></div>
     <div class="text-veil" aria-hidden="true"></div>
     <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
       <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
     </div>
     <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
-
     <header class="site-nav" aria-label="Website navigation">
       <a class="site-nav__brand" href="./" data-restart-splash data-nav-label="Bullfinch Earth" aria-label="Restart Bullfinch Earth">
         <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
@@ -483,8 +540,7 @@
         <a href="#problem" data-scroll-target="#problem" data-nav-label="The gap" aria-label="01 The gap">01</a>
         <a href="#product" data-scroll-target="#product" data-nav-label="How it works" aria-label="02 How it works">02</a>
         <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Who needs Bullfinch" aria-label="03 Who needs Bullfinch">03</a>
-        <a href="#data" data-scroll-target="#data" data-nav-label="In the field" aria-label="04 In the field">04</a>
-        <a class="investor-story" href="index-pointcloud.html" data-nav-label="Investor story">Investor story</a>
+        <a href="#closing" data-scroll-target="#closing" data-nav-label="Go deeper" aria-label="04 Go deeper">04</a>
         <button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Enter full screen">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
             <path d="M4 9V4h5" />
@@ -498,20 +554,29 @@
     <main id="page">
       <section class="hero" aria-label="Hero">
         <div class="hero__inner">
-          <p class="hero__eyebrow">
-            <svg class="hero__eyebrow-mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
-              <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
-              <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
-            </svg>
-            <span>BULLFINCH EARTH</span>
-          </p>
-          <h1 class="hero__title">
-            <span class="hero__line hero__line--1">Ground Truth for Forestry</span>
+          <h1 class="hero__title hero-is">
+            <span class="hero-brand-row">
+              <span class="corner-logo-sequence" id="corner-logo-sequence-wrap" aria-hidden="true">
+                <canvas id="corner-logo-sequence" width="360" height="360"></canvas>
+                <svg class="corner-logo-static bullfinch-mark" viewBox="50 35 100 70">
+                  <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+                  <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+                </svg>
+              </span>
+              <span class="hero-is__label">BULLFINCH IS</span>
+            </span>
+            <span class="hero-is__prefix">GROUND TRUTH FOR</span>
+            <span class="hero-is__cycle" aria-label="Forestry, Wildfire Risk and Mitigation, Carbon Projects, ESG, Invasive Species Detection, Biodiversity, and Natural Asset Valuation">
+              <span class="hero-is__term is-active">FORESTRY</span>
+              <span class="hero-is__term">WILDFIRE RISK &amp; MITIGATION</span>
+              <span class="hero-is__term">CARBON PROJECTS</span>
+              <span class="hero-is__term">ESG</span>
+              <span class="hero-is__term">INVASIVE SPECIES DETECTION</span>
+              <span class="hero-is__term">BIODIVERSITY</span>
+              <span class="hero-is__term">NATURAL ASSET VALUATION</span>
+            </span>
           </h1>
           <p class="hero__subtitle hero__line hero__line--2">Bullfinch Earth measures, monitors, and maps every stem – passively - while foresters do their normal jobs</p>
-          <div class="hero__uses hero__line hero__line--2" aria-label="Bullfinch Earth applications">
-            <span>Wildfire Risk &amp; Mitigation</span><span>Carbon Projects</span><span>ESG</span><span>Invasive Species Detection</span><span>Biodiversity</span><span>Natural Asset Valuation</span>
-          </div>
         </div>
         <div class="hero__scroll-cue" aria-hidden="true">
           <span class="hero__scroll-cue-label">Scroll</span>
@@ -524,15 +589,15 @@
       <section class="swot" id="swot" aria-label="Bullfinch Earth story">
         <article class="panel panel--media" id="problem" data-panel="1">
           <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE GAP</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Dedicated Inventories Are So 19th Century</h2>
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Dedicated Inventories Are<br>So 19th Century</h2>
             <div class="panel__evidence">
               <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
             </div>
-            <p class="panel__numeric">&lt;1% OF WHAT’S ACTUALLY THERE</p>
+            <p class="panel__numeric">ONE FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
           </div>
-          <div class="problem-graphic">
-            <div class="panel__stat" aria-label="Today, manual forestry measures data for only 1% of trees">
+          <div class="panel__stat panel__stat--problem" aria-label="Today, manual forestry measures data for less than 1% of trees">
+            <div class="stat-visual">
               <div class="stat-grid" id="statGrid" aria-hidden="true"></div>
               <div class="stat-read">
                 <div class="stat-label">
@@ -549,137 +614,66 @@
 
         <article class="panel panel--media" id="product" data-panel="2">
           <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">02 &middot; WEAR / WALK / DATA</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">02 &middot; THE BULLFINCH WAY</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
             <h2 class="panel__verdict">Is It Really This Easy?</h2>
             <div class="panel__evidence">
-              <p><span class="lead">1. Wear</span>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
-              <p><span class="lead">2. Walk</span>Just press “Start Bullfinching” and go do your thing</p>
-              <p><span class="lead">3. Data</span>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
+              <p><span class="lead">Wear</span><br>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
+              <p><span class="lead">Walk</span><br>Just press “Start Bullfinching” and go do your thing</p>
+              <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
             </div>
-            <p class="panel__numeric">30X MORE DATA THAN MANUAL CRUISING</p>
+            <p class="panel__numeric">WEAR &middot; WALK &middot; DATA</p>
           </div>
         </article>
 
         <article class="panel" id="opportunity" data-panel="3">
-          <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; FROM THE GROUND UP</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Who Need to Bullfinch?</h2>
-            <div class="panel__evidence">
-              <p><span class="lead">Timber companies</span>Actually know what you’re bringing to market</p>
-              <p><span class="lead">Consulting foresters</span>More billable projects per season</p>
-              <p><span class="lead">Carbon &amp; MRV</span>Ground truth that registries trust</p>
-              <p><span class="lead">Wildfire &amp; Insurance</span>Below-canopy fuel data at scale</p>
-              <p><span class="lead">Remote sensing</span>greater accuracy &amp; visibility below the canopy</p>
+          <div class="tree-readouts" aria-label="Tree identification results">
+            <div class="tree-readout">
+              <span class="tree-readout__common">Douglas Fir</span>
+              <span class="tree-readout__latin">Pseudotsuga menziesii</span>
+              <span class="tree-readout__metric">Confidence: 0.876</span>
+              <span class="tree-readout__metric">Genus Score: 0.876</span>
+              <span class="tree-readout__metric">Count: 1</span>
             </div>
-            <p class="panel__numeric">NATURE FROM THE GROUND UP</p>
-          </div>
-        </article>
-
-        <article class="panel" id="data" data-panel="4">
-          <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">04 &middot; TRUSTED BY</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Trusted By</h2>
-            <div class="panel__evidence partner-grid" aria-label="Bullfinch Earth partners and supporters">
-              <p class="partner"><img src="https://www.weyerhaeuser.com/application/files/6117/6842/0924/WYLogo_Horizontal_Color_RGB_1.svg" alt="Weyerhaeuser" /></p>
-              <p class="partner"><img src="https://hardwoodsnb.ca/wp-content/uploads/2025/01/NHRI-Logo_Full-Name-e1738261275213.png" alt="Northern Hardwoods Research Institute" /></p>
-              <p class="partner"><img src="https://www.longviewforest.com/uploads/6/2/3/5/62350817/published/326192-long-view-forest-logo-no-background.png?1779298423" alt="Long View Forest" /></p>
-              <p class="partner"><img src="https://assets.publishing.service.gov.uk/media/67c9881175d7505462fc6634/full_transparent.png" alt="UK Space Agency" /></p>
-              <p class="partner"><span class="partner-type">FOREST BUSINESS<small>ACCELERATOR</small></span></p>
-              <p class="partner"><span class="partner-type">OKGN ANGEL<small>SUMMIT</small></span></p>
+            <div class="tree-readout">
+              <span class="tree-readout__common">Norway spruce</span>
+              <span class="tree-readout__latin">Picea abies</span>
+              <span class="tree-readout__metric">Confidence: 0.823</span>
+              <span class="tree-readout__metric">Genus Score: 0.823</span>
+              <span class="tree-readout__metric">Count: 1</span>
             </div>
-            <p class="panel__numeric">WY &middot; NHRI &middot; LONG VIEW &middot; UKSA &middot; FBA &middot; OKANAGAN</p>
-          </div>
-        </article>
-
-        <article class="panel panel--media" id="proof" data-panel="5">
-          <div class="panel__chart" aria-label="Market opportunity">
-            <figure class="bullseye-fig">
-              <svg class="bullseye" viewBox="0 0 360 380" role="img" aria-label="Market opportunity bullseye: a $188M forester beachhead nested inside a $1.05B obtainable market, a $2.7B serviceable market, and a $3.4B to $6B total addressable market by 2030.">
-                <defs>
-                  <!-- Phase 1: this radius grows 0..150 first, revealing all the
-                       faint circles outward from the centre. -->
-                  <clipPath id="be-clip-s"><circle id="be-clip-s-c" cx="180" cy="190" r="150"></circle></clipPath>
-                  <!-- Phase 2: AFTER the circles are complete, this radius grows
-                       with sticky holds so the red fills region by region. -->
-                  <clipPath id="be-clip-r"><circle id="be-clip-r-c" cx="180" cy="190" r="150"></circle></clipPath>
-                </defs>
-                <g class="be-scene" clip-path="url(#be-clip-s)">
-                  <circle class="be-ring be-tam" cx="180" cy="190" r="150"></circle>
-                  <circle class="be-ring be-sam" cx="180" cy="190" r="100"></circle>
-                  <circle class="be-ring be-som" cx="180" cy="190" r="63"></circle>
-                  <circle class="be-ring be-beach" cx="180" cy="190" r="26"></circle>
-                </g>
-                <g clip-path="url(#be-clip-r)">
-                  <!-- Red band filling the CURRENT region. JS sets its radius +
-                       width per region; the red clip reveals it region by region.
-                       Defaults to the TAM band for the static fallback. -->
-                  <circle class="be-sweep" cx="180" cy="190" r="125"></circle>
-                </g>
-                <!-- ONE leader + ONE label, outside the clips. JS parks the line
-                     on a FIXED spot for each region and swaps the label to the
-                     ring being filled. -->
-                <line class="be-leader" x1="180" y1="40" x2="180" y2="65"></line>
-                <text class="be-cap" text-anchor="middle">
-                  <tspan class="be-cap-name" x="180" y="28">TAM</tspan><tspan class="be-cap-val" dx="8">$6B</tspan>
-                </text>
-              </svg>
-              <figcaption class="bullseye-cap">$20K per unit / year &#183; area scales with market size</figcaption>
-            </figure>
+            <div class="tree-readout">
+              <span class="tree-readout__common">Balsam Poplar</span>
+              <span class="tree-readout__latin">Populus balsamifera</span>
+              <span class="tree-readout__metric">Confidence: 0.777</span>
+              <span class="tree-readout__metric">Genus Score: 0.777</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
           </div>
           <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">05 &middot; BUSINESS</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">A subscription product for the people who already walk the forest.</h2>
-            <div class="panel__evidence">
-              <p><span class="lead">Beachhead.</span> Professional foresters and forest managers pay for better inventory where accuracy, labor, and risk already carry budget.</p>
-              <p><span class="lead">Model.</span> Annual subscriptions package wearable sensors, analysis, and stand-level or tree-level inventory outputs.</p>
-              <p><span class="lead">Expansion.</span> Enterprise software adoption creates a data stream; data customers then pull more inventory through the network.</p>
-              <p><span class="lead">Why now.</span> Forestry labor is shrinking while wildfire, carbon, insurance, and biodiversity markets need verifiable ground truth.</p>
+            <div class="ground-heading">
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; FROM THE GROUND UP</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
+              <h2 class="panel__verdict">Who Need to Bullfinch?</h2>
+            </div>
+            <div class="audience-grid">
+              <article class="audience-item"><h3>Timber companies</h3><p>Actually know what you’re bringing to market</p></article>
+              <article class="audience-item"><h3>Consulting foresters</h3><p>More billable projects per season</p></article>
+              <article class="audience-item"><h3>Carbon &amp; MRV</h3><p>Ground truth that registries trust</p></article>
+              <article class="audience-item"><h3>Wildfire &amp; Insurance</h3><p>Below-canopy fuel data at scale</p></article>
+              <article class="audience-item"><h3>Remote sensing</h3><p>greater accuracy &amp; visibility below the canopy</p></article>
+            </div>
+            <div class="trust-line">
+              <p class="trust-label">Partners and recognition</p>
+              <div class="trust-strip" aria-label="Bullfinch Earth partners and recognition">
+                <div><img src="assets/logos/weyerhaeuser.svg" alt="Weyerhaeuser"></div>
+                <div><img src="assets/logos/nhri.png" alt="New Hampshire Rapid Initiative"></div>
+                <div><img src="assets/logos/longview.png" alt="Long View Forest"></div>
+                <div><img src="assets/logos/uksa.png" alt="UK Space Agency"></div>
+                <div><img src="assets/logos/fba.png" alt="Forest Business Accelerator"></div>
+                <div><img src="assets/logos/okanagan-angel-summit.svg" alt="Okanagan Angel Summit"></div>
+              </div>
             </div>
           </div>
         </article>
-
-        <article class="panel panel--media" id="team" data-panel="6">
-          <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
-            <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
-              <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
-              <figcaption>Seth Sternberg &middot; CEO</figcaption>
-            </figure>
-            <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
-              <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
-              <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
-            </figure>
-            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
-              <img src="assets/graham-headshot.png" alt="Graham Smith" />
-              <figcaption>Graham Smith &middot; CCO</figcaption>
-            </figure>
-          </div>
-          <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">06 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
-            <div class="panel__evidence">
-              <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
-              <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim, the Mars guy.</button> CTO and PhD astrophysicist, Oxford and Cambridge, who built cameras now operating on Mars with NASA JPL.</p>
-              <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry and field operations, plus finance and customer depth.</p>
-            </div>
-            <p class="panel__numeric">MARS CAMERAS &middot; 400M+ PRODUCTS &middot; BC FIELD OPS</p>
-          </div>
-        </article>
-
-
-
-        <article class="panel" id="decisions" data-panel="7">
-          <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">07 &middot; NEXT STEPS</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict">Choose the conversation that matches your role.</h2>
-            <div class="panel__evidence">
-              <p><span class="lead">Design partners.</span> Bring a real inventory, wildfire, carbon, biodiversity, or forest-health workflow to stress-test Bullfinch in the field.</p>
-              <p><span class="lead">Investors.</span> Download the current investment overview and traction detail behind the FICO for forests thesis.</p>
-              <p><span class="lead">Data customers.</span> Explore how Bullfinch data could feed insurance, banking, carbon, ESG, MRV, or stewardship products.</p>
-            </div>
-            <p class="panel__numeric">DESIGN PARTNERS &middot; INVESTORS &middot; DATA CUSTOMERS</p>
-          </div>
-        </article>
-
 
       </section>
 
@@ -690,25 +684,19 @@
             <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
           </svg>
           <h2 class="closing__title">
-            <span class="closing__line closing__line--1">Nature from</span>
-            <span class="closing__line closing__line--2">the Ground Up</span>
+            <span class="closing__line closing__line--1">Nature from the</span>
+            <span class="closing__line closing__line--2">Ground Up</span>
           </h2>
-          <form class="contact-form" action="https://api.web3forms.com/submit" method="POST">
-            <input type="hidden" name="access_key" value="REPLACE_WITH_WEB3FORMS_ACCESS_KEY" />
-            <input type="hidden" name="subject" value="Bullfinch Earth - demo request" />
-            <input type="hidden" name="from_name" value="Bullfinch Earth teaser" />
-            <input type="text" name="name" placeholder="Name" autocomplete="name" required />
-            <input type="email" name="email" placeholder="Email" autocomplete="email" required />
-            <input class="full" type="text" name="organization" placeholder="Organization" autocomplete="organization" />
-            <textarea class="full" name="message" placeholder="What forest, and what are you trying to measure?"></textarea>
-            <button class="btn btn--primary" type="submit">Request a Demo</button>
-          </form>
-          <p class="contact__note">Raising or evaluating the opportunity? <a href="index-pointcloud.html">See the full investor story &rarr;</a></p>
+          <div class="contact-actions closing__actions">
+            <a href="index-pointcloud.html">Explore the full story</a>
+            <a href="index-pointcloud.html#decisions">Request a Demo</a>
+            <a href="index-pointcloud.html#decisions">Contact Us</a>
+          </div>
         </div>
 
         <footer class="site-footer" id="site-footer">
           <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
-          <p class="site-footer__line">BULLFINCH EARTH<br />GROUND TRUTH FOR FORESTRY</p>
+          <p class="site-footer__line">BULLFINCH EARTH<br />The FICO of Forests</p>
           <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m6 15 6-6 6 6" />
@@ -735,50 +723,170 @@
       </section>
     </div>
 
-    <script>
-      var deepPreview = document.querySelector(".deep-preview");
-      var marketGraphic = document.querySelector("#proof .panel__chart");
-      var teamGraphic = document.querySelector("#team .panel__people");
-      if (deepPreview && marketGraphic) deepPreview.appendChild(marketGraphic);
-      if (deepPreview && teamGraphic) deepPreview.appendChild(teamGraphic);
-      ["proof", "team", "decisions"].forEach(function (id) {
-        var panel = document.getElementById(id);
-        if (panel) panel.remove();
-      });
-      var bioModal = document.getElementById("team-bio-modal");
-      if (bioModal) bioModal.remove();
-    </script>
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-pointcloud.js?v=pc12"></script>
-    <script src="case-animation.js?v=v4-4"></script>
+    <script src="scene-gpt-teaser.js?v=forest-journey-9"></script>
+    <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot.js?v=v4-5"></script>
-    <script src="stat-field.js?v=v4-6"></script>
+    <script src="swot.js?v=forest-journey-6"></script>
+    <script src="stat-field-gpt.js?v=forest-journey-8"></script>
     <script>
-      // Tree grove formation driver (index-pointcloud variant).
-      //
-      // Timing is anchored to the panels' ACTUAL resolved pin scroll-positions
-      // (swot.js pins each panel), read as fractions of each pin. This is the
-      // robust pattern -- putting a scrubbed trigger directly ON a pinned
-      // element (#opportunity / #data) makes its start/end resolve wrong, which
-      // is what made the dispersal wait in dead space and then snap.
-      //   FORM:     0.87 of #product's pin (02 model fading) -> 0.43 of
-      //             #opportunity's pin ("For platforms." reveals).
-      //   HOLD:     brief stand while 03 reads.
-      //   DISPERSE: 0.58 of #opportunity (as 03 goes) -> 0.43 of #data
-      //             ("Paid pilots."). Linear + the scene's own inertia = a
-      //             steady, continuous dissolve: no dead gap, no sudden snap.
+      (function () {
+        var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
+        var active = 0;
+        if (terms.length > 1) {
+          window.setInterval(function () {
+            terms[active].classList.remove("is-active");
+            active = (active + 1) % terms.length;
+            terms[active].classList.add("is-active");
+          }, 2100);
+        }
+
+        var canvas = document.getElementById("corner-logo-sequence");
+        var wrap = document.getElementById("corner-logo-sequence-wrap");
+        if (canvas && wrap) {
+          var ctx = canvas.getContext("2d");
+          var frames = [];
+          var loaded = 0;
+          var framesReady = false;
+          var arrivalReady = document.body.classList.contains("has-hero-arrived");
+          var sequenceStarted = false;
+          var first = 7;
+          var last = 28;
+          function draw(img) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          }
+          function play() {
+            if (sequenceStarted) return;
+            sequenceStarted = true;
+            var index = frames.length - 1;
+            var lastTick = 0;
+            function tick(time) {
+              if (!lastTick || time - lastTick >= 46) {
+                draw(frames[index]);
+                index -= 1;
+                lastTick = time;
+              }
+              if (index >= 0) requestAnimationFrame(tick);
+              else wrap.classList.add("is-settled");
+            }
+            requestAnimationFrame(tick);
+          }
+          function maybePlay() {
+            if (framesReady && arrivalReady) play();
+          }
+          document.addEventListener("bullfinch:heroarrival", function () {
+            arrivalReady = true;
+            maybePlay();
+          });
+          for (var n = first; n <= last; n++) {
+            (function (frameNumber) {
+              var img = new Image();
+              var slot = frameNumber - first;
+              img.onload = function () {
+                frames[slot] = img;
+                loaded += 1;
+                if (loaded === last - first + 1) {
+                  framesReady = true;
+                  maybePlay();
+                }
+              };
+              img.src = "logo-seq/Logo_To_Ball_" + String(frameNumber).padStart(5, "0") + ".png";
+            })(n);
+          }
+        }
+
+        window.addEventListener("load", function () {
+          if (window.ScrollTrigger) {
+            var forestArrival = 0;
+            var forestScroll = 0;
+            var heroArrivalStarted = false;
+            var heroTextReleased = false;
+            function paintForestEdge() {
+              var settled = window.innerWidth * 0.45;
+              var fullForest = -window.innerHeight - 2;
+              var arrivalEdge = fullForest + (settled - fullForest) * forestArrival;
+              var edgeTop = arrivalEdge + forestScroll * (window.innerWidth - settled);
+              document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
+            }
+            function startHeroArrival() {
+              if (heroArrivalStarted) return;
+              heroArrivalStarted = true;
+              var started = performance.now();
+              var duration = 1500;
+              function arrive(now) {
+                var raw = Math.min(1, (now - started) / duration);
+                forestArrival = raw * raw * (3 - 2 * raw);
+                if (raw >= .52 && !heroTextReleased) {
+                  heroTextReleased = true;
+                  document.body.classList.add("has-hero-arrived");
+                  document.dispatchEvent(new CustomEvent("bullfinch:heroarrival"));
+                }
+                paintForestEdge();
+                if (raw < 1) requestAnimationFrame(arrive);
+              }
+              requestAnimationFrame(arrive);
+            }
+            paintForestEdge();
+            window.setTimeout(startHeroArrival, 120);
+            ScrollTrigger.create({
+              trigger: ".hero",
+              start: "top top",
+              end: function () { return "+=" + Math.round(window.innerHeight * 1.10); },
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: function (self) {
+                forestScroll = self.progress;
+                paintForestEdge();
+              },
+            });
+            var root = document.documentElement;
+            var grade = {
+              bg: ["#e7dfc4", "#11271b"],
+              elevated: ["#d8d5ab", "#183424"],
+              ink: ["#16251b", "#f4efd9"],
+              soft: ["#425748", "#d2d8c5"],
+              quiet: ["#607164", "#a8b7a8"],
+              rule: ["rgba(22,37,27,.18)", "rgba(244,239,217,.2)"]
+            };
+            function setFinalGrade(p) {
+              p = p < 0 ? 0 : (p > 1 ? 1 : p);
+              root.style.setProperty("--bg", gsap.utils.interpolate(grade.bg[0], grade.bg[1], p));
+              root.style.setProperty("--bg-elev", gsap.utils.interpolate(grade.elevated[0], grade.elevated[1], p));
+              root.style.setProperty("--ink", gsap.utils.interpolate(grade.ink[0], grade.ink[1], p));
+              root.style.setProperty("--ink-soft", gsap.utils.interpolate(grade.soft[0], grade.soft[1], p));
+              root.style.setProperty("--ink-quiet", gsap.utils.interpolate(grade.quiet[0], grade.quiet[1], p));
+              root.style.setProperty("--rule", gsap.utils.interpolate(grade.rule[0], grade.rule[1], p));
+              if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPaletteProgress) {
+                window.bullfinchCanopy.setFinalPaletteProgress(p);
+              }
+            }
+            ScrollTrigger.create({
+              trigger: "#closing",
+              start: "top 85%",
+              end: "top 55%",
+              scrub: true,
+              onUpdate: function (self) { setFinalGrade(self.progress); },
+              onRefresh: function (self) { setFinalGrade(self.progress || 0); }
+            });
+          }
+        });
+      })();
+    </script>
+    <script>
+      // One continuous field: low motes, bottom-up grove, then final field.
       window.addEventListener("load", function () {
         if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
+        var s01 = document.getElementById("problem");
         var s02 = document.getElementById("product");
         var s03 = document.getElementById("opportunity");
-        var s04 = document.getElementById("data");
-        if (!s03) return;
+        var closing = document.getElementById("closing");
+        if (!s03 || !closing) return;
 
         function smootherstep(x) {
           x = x < 0 ? 0 : (x > 1 ? 1 : x);
@@ -794,49 +902,96 @@
           return null;
         }
         function at(pt, f) { return pt.start + (pt.end - pt.start) * f; }
+        function setStatStage(p) {
+          if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(p);
+          document.documentElement.style.setProperty("--stat-crisp-offset", (p * .84).toFixed(4));
+          document.body.classList.toggle("is-stat-stage", p > 0.04);
+        }
 
-        var p2 = pinFor(s02), p3 = pinFor(s03), p4 = pinFor(s04);
-        if (!p3) return;
+        var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
+        if (!p1 || !p2 || !p3) return;
+        var treeDataLines = Array.prototype.slice.call(s03.querySelectorAll(".tree-readout span"));
+        function writeTreeData(p) {
+          treeDataLines.forEach(function (line, index) {
+            var lineIndex = index % 5;
+            var start = .10 + lineIndex * .10;
+            var write = (p - start) / .26;
+            write = write < 0 ? 0 : (write > 1 ? 1 : write);
+            line.style.setProperty("--write", write.toFixed(4));
+          });
+        }
 
-        // FORM: the grove begins growing from the forest floor during the
-        // latter half of the wearable sequence, then settles as section 03
-        // arrives. The teaser scene orders particles by target height.
+        // Opening forest-floor motes resolve into the <1% grid while section
+        // 01 arrives. The same trigger reverses the grid back into the ground.
+        ScrollTrigger.create({
+          trigger: s01,
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+          onUpdate: function (self) {
+            setStatStage(smootherstep(self.progress));
+          },
+          onLeaveBack: function () { setStatStage(0); },
+        });
+
+        // Leaving the inventory section releases the grid into an open cloud.
+        // Wave 1 draws only after that cloud has begun to open.
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return p2 ? at(p2, 0.52) : at(p3, 0); },
-          end:   function () { return at(p3, 0.18); },
+          start: function () { return at(p1, 0.92); },
+          end: function () { return at(p2, 0.18); },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
-            window.bullfinchCanopy.setTreeProgress(smootherstep(self.progress));
+            var p = smootherstep(self.progress);
+            setStatStage(1 - p);
+            if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
           },
         });
 
-        // Drop the readability veil (blur + dim) while #opportunity holds the
-        // grove -- it reads better on the bare earthy backdrop.
+        // One controller owns the entire grove story. It forms the trees before
+        // section 03, holds them at full strength through its reading window,
+        // then reverses them into the final starfield. No second trigger can
+        // overwrite the tree state.
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p3, 0.02); },
-          end:   function () { return at(p3, 1.0); },
-          onToggle: function (self) {
-            document.body.classList.toggle("pc-bare-veil", self.isActive);
+          start: function () { return at(p2, 0.58); },
+          endTrigger: closing,
+          end: "top 44%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) {
+            var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            var formStart = at(p2, 0.58);
+            var formEnd = at(p3, 0.08);
+            var disperseStart = at(p3, 0.76);
+            var disperseEnd = self.end;
+            var treeP;
+            var fieldP;
+            if (y <= formEnd) {
+              treeP = smootherstep((y - formStart) / Math.max(1, formEnd - formStart));
+              fieldP = 0;
+            } else if (y < disperseStart) {
+              treeP = 1;
+              fieldP = 0;
+            } else {
+              fieldP = smootherstep((y - disperseStart) / Math.max(1, disperseEnd - disperseStart));
+              treeP = 1 - fieldP;
+            }
+            window.bullfinchCanopy.setTreeProgress(treeP);
+            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            document.documentElement.style.setProperty("--tree-crisp-offset", (treeP * .84).toFixed(4));
+            writeTreeData(treeP);
+            document.body.classList.toggle("is-tree-stage", treeP > 0.05);
+          },
+          onLeaveBack: function () {
+            window.bullfinchCanopy.setTreeProgress(0);
+            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
+            writeTreeData(0);
+            document.documentElement.style.setProperty("--tree-crisp-offset", "0");
+            document.body.classList.remove("is-tree-stage");
           },
         });
-
-        // DISPERSE (steady, linear -- the scene's own smoothing softens the ends)
-        if (p4) {
-          ScrollTrigger.create({
-            trigger: document.body,
-            start: function () { return at(p3, 0.58); },
-            end:   function () { return at(p4, 0.43); },
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) {
-              var p = self.progress < 0 ? 0 : (self.progress > 1 ? 1 : self.progress);
-              window.bullfinchCanopy.setTreeProgress(1 - p);
-            },
-          });
-        }
         ScrollTrigger.refresh();
       });
     </script>
@@ -953,7 +1108,7 @@
             var panel = el.closest(".panel");
             if (!panel) return;
             // Anchor to the PANEL (always exactly one viewport tall with the
-            // same padding), not .panel__inner - on media panels the inner
+            // same padding), not .panel__inner — on media panels the inner
             // column stops short of the bottom, which would raise the mark.
             el.classList.add("section-mark--corner");
             panel.appendChild(el);
@@ -962,27 +1117,33 @@
 
         function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
         var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (reduced) return; // CSS drops the animations → marks rest assembled
-
-        // Scrub a mark's keyframe animations (gather / reveal / peopleSpin) from
-        // panel progress, with a dwell band so it HOLDS assembled mid-pin rather
-        // than scrubbing straight through. The animations are `alternate`, so
-        // currentTime 0->d builds and d->2d releases.
-        function dwellTime(p, d) {
-          var h0 = 0.4, h1 = 0.6;                 // assembled "catch" zone
-          if (p < h0) return (p / h0) * d;        // build   0 -> d
-          if (p < h1) return d;                   // hold assembled
-          return d + ((p - h1) / (1 - h1)) * d;   // release d -> 2d
-        }
-        function applyTimes(el, timeFor) {
-          var anims = el.getAnimations ? el.getAnimations({ subtree: true }) : [];
-          anims.forEach(function (a) {
-            try {
-              a.pause();
-              a.currentTime = timeFor(a.effect.getComputedTiming().duration);
-            } catch (e) {}
+        if (reduced) {
+          marks.forEach(function (el) {
+            el.style.setProperty("--build", "1");
+            el.style.setProperty("--rev", "1");
+            el.style.setProperty("--pang", "-12deg");
           });
+          return;
         }
+
+        // Drive the original mark geometry directly from scroll. The second
+        // half is the exact inverse of the first, so every piece animates out
+        // instead of being carried away assembled with its panel.
+        function markState(p) {
+          var x;
+          if (p < 0.34) x = p / 0.34;
+          else if (p < 0.62) x = 1;
+          else x = 1 - (p - 0.62) / 0.32;
+          x = clamp01(x);
+          return x * x * (3 - 2 * x);
+        }
+        function applyMarkAmount(el, x) {
+          el.style.setProperty("--build", x.toFixed(4));
+          el.style.setProperty("--rev", x.toFixed(4));
+          el.style.setProperty("--glow", (x * .95).toFixed(4));
+          el.style.setProperty("--pang", (360 - 372 * x).toFixed(2) + "deg");
+        }
+        function applyMarkState(el, p) { applyMarkAmount(el, markState(p)); }
 
         if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
           // Mirror swot.js's panel pin range so progress lines up with the pin.
@@ -991,19 +1152,16 @@
             var panel = el.closest(".panel");
             if (!panel) return;
             var scrub = function (p) {
-              var prog = clamp01(p);
-              applyTimes(el, function (d) { return dwellTime(prog, d); });
+              applyMarkState(el, clamp01(p));
             };
             ScrollTrigger.create({
               trigger: panel,
               start: "top top",
-              // Match each panel's actual pin length so the eyebrow mark's
-              // assemble/hold/release lines up with the pin. #proof has a longer
-              // pin (see swot.js), so its mark must animate across that range
-              // instead of finishing (leaving) early.
+              // Match each panel's actual pin length so the mark reaches the
+              // reverse half before the panel releases.
               end: panel.id === "proof"
                 ? (mobileLike ? "+=220%" : "+=380%")
-                : (mobileLike ? "+=100%" : "+=200%"),
+                : (mobileLike ? "+=100%" : "+=150%"),
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) { scrub(self.progress); },
@@ -1012,7 +1170,7 @@
             scrub(0);
           });
         } else {
-          // Fallback (no GSAP / pins): drive from viewport position - centre of
+          // Fallback (no GSAP / pins): drive from viewport position — centre of
           // the screen = assembled (currentTime d), edges = disassembled (0).
           var loop = function () {
             var vh = window.innerHeight || document.documentElement.clientHeight;
@@ -1020,12 +1178,42 @@
               var r = el.getBoundingClientRect();
               var c = r.top + r.height / 2;
               var m = clamp01(1 - Math.abs((c - vh / 2) / vh) / 0.42);
-              applyTimes(el, function (d) { return m * d; });
+              applyMarkAmount(el, m);
             });
             requestAnimationFrame(loop);
           };
           requestAnimationFrame(loop);
         }
+      })();
+    </script>
+    <script>
+      // The teaser has no splash element, so fullscreen must not be trapped
+      // inside the legacy splash initializer.
+      (function () {
+        var toggle = document.getElementById("fullscreen-toggle");
+        if (!toggle) return;
+        function active() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        }
+        function sync() {
+          var on = Boolean(active());
+          document.body.classList.toggle("is-fullscreen", on);
+          toggle.setAttribute("aria-label", on ? "Exit full screen" : "Enter full screen");
+          toggle.setAttribute("aria-pressed", on ? "true" : "false");
+        }
+        toggle.addEventListener("click", function () {
+          if (active()) {
+            var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+            if (exit) exit.call(document);
+          } else {
+            var request = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.msRequestFullscreen;
+            if (request) request.call(document.documentElement);
+          }
+        });
+        ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (name) {
+          document.addEventListener(name, sync);
+        });
+        sync();
       })();
     </script>
     <script>
@@ -1067,12 +1255,12 @@
           { band: { r: 125,  w: 50 }, outer: 150, name: "TAM",       num: 6,    dec: 0, suf: "B" }
         ];
 
-        // Phase 1 - the circles build (scaffold reveal radius), then hold full
+        // Phase 1 — the circles build (scaffold reveal radius), then hold full
         // to the end (they only retract if you scroll back up).
         var SKF = [
           { p: 0.08, f: 0 }, { p: 0.20, f: 150 }, { p: 1.00, f: 150 }
         ];
-        // Phase 2 - red reveal radius. The build runs in the FIRST part of the
+        // Phase 2 — red reveal radius. The build runs in the FIRST part of the
         // (long) pin; the TAM then fills and holds full across the entire back
         // half, so the finished $6B sits there for a long stretch and is hard to
         // scroll past. (Scrolling back up retracts everything.)
@@ -1139,7 +1327,7 @@
             lastRegion = reg;
           }
           // ANIMATED EXIT: over the last stretch the whole bullseye SHRINKS back
-          // in (the reverse of the build) as you scroll away - it never just
+          // in (the reverse of the build) as you scroll away — it never just
           // scrolls off full. The label/region stay on the TAM while it
           // collapses; scrolling back up grows it again.
           var exitT = clamp01((p - 0.94) / 0.06);
@@ -1537,6 +1725,50 @@
         } else {
           loadedFrames[0].addEventListener("load", autoStart, { once: true });
         }
+      })();
+    </script>
+    <script>
+      // Claude fork: real <1% dot coverage. Codex routes the dots through the
+      // WebGL motes (CSS grid hidden); this restores the reliable DOM grid the
+      // original Claude version used — BLACK field, ONE RED centre, radiating to
+      // ALL RED as the readout counts up. Same fill window as stat-field-gpt.js.
+      (function () {
+        var panel = document.getElementById("problem");
+        var gridEl = document.getElementById("statGrid");
+        if (!panel || !gridEl) return;
+        var COLS = 10, ROWS = 10, N = COLS * ROWS;
+        var ORIGIN_R = 5, ORIGIN_C = 5, ONE = ORIGIN_R * COLS + ORIGIN_C;
+        var dots = [];
+        for (var i = 0; i < N; i++) { var d = document.createElement("span"); d.className = "stat-dot"; gridEl.appendChild(d); dots.push(d); }
+        var order = [];
+        for (var j = 0; j < N; j++) order.push(j);
+        order.sort(function (a, b) {
+          var da = Math.hypot(a % COLS - ORIGIN_C, Math.floor(a / COLS) - ORIGIN_R);
+          var db = Math.hypot(b % COLS - ORIGIN_C, Math.floor(b / COLS) - ORIGIN_R);
+          return da - db;
+        });
+        function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+        function mapRange(x, a, b) { return clamp01((x - a) / (b - a)); }
+        function ease(x) { x = clamp01(x); return 1 - Math.pow(1 - x, 3); }
+        function paint(fillProgress) {
+          var nLit = Math.max(1, Math.round(fillProgress * 100));
+          for (var k = 0; k < N; k++) {
+            var idx = order[k], on = k < nLit;
+            dots[idx].className = "stat-dot" + (idx === ONE ? " is-one" : (on ? " is-on" : ""));
+          }
+        }
+        paint(0);
+        if (typeof ScrollTrigger === "undefined" || typeof gsap === "undefined") { paint(1); return; }
+        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        ScrollTrigger.create({
+          trigger: panel,
+          start: "top top",
+          end: mobileLike ? "+=100%" : "+=200%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { paint(ease(mapRange(self.progress, 0.26, 0.60))); },
+          onRefresh: function (self) { paint(ease(mapRange(self.progress || 0, 0.26, 0.60))); }
+        });
       })();
     </script>
   </body>
