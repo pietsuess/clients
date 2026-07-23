@@ -632,7 +632,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-gpt-teaser.js?v=forest-journey-4"></script>
+    <script src="scene-gpt-teaser.js?v=forest-journey-5"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot.js?v=forest-journey-4"></script>
@@ -778,18 +778,6 @@
 
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p2, 0.62); },
-          end:   function () { return at(p3, 0.18); },
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) {
-            window.bullfinchCanopy.setTreeProgress(smootherstep(self.progress));
-            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
-          },
-        });
-
-        ScrollTrigger.create({
-          trigger: document.body,
           start: function () { return at(p2, 0.58); },
           end:   function () { return at(p3, 0.88); },
           onToggle: function (self) {
@@ -797,17 +785,43 @@
           },
         });
 
+        // One controller owns the entire grove story. It forms the trees before
+        // section 03, holds them at full strength through its reading window,
+        // then reverses them into the final starfield. No second trigger can
+        // overwrite the tree state.
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p3, 0.74); },
+          start: function () { return at(p2, 0.58); },
           endTrigger: closing,
           end: "top 44%",
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {
-            var p = smootherstep(self.progress);
-            window.bullfinchCanopy.setTreeProgress(1 - p);
-            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(p);
+            var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            var formStart = at(p2, 0.58);
+            var formEnd = at(p3, 0.08);
+            var disperseStart = at(p3, 0.76);
+            var disperseEnd = self.end;
+            var treeP;
+            var fieldP;
+            if (y <= formEnd) {
+              treeP = smootherstep((y - formStart) / Math.max(1, formEnd - formStart));
+              fieldP = 0;
+            } else if (y < disperseStart) {
+              treeP = 1;
+              fieldP = 0;
+            } else {
+              fieldP = smootherstep((y - disperseStart) / Math.max(1, disperseEnd - disperseStart));
+              treeP = 1 - fieldP;
+            }
+            window.bullfinchCanopy.setTreeProgress(treeP);
+            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            document.body.classList.toggle("is-tree-stage", treeP > 0.05);
+          },
+          onLeaveBack: function () {
+            window.bullfinchCanopy.setTreeProgress(0);
+            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
+            document.body.classList.remove("is-tree-stage");
           },
         });
         ScrollTrigger.refresh();

@@ -1521,7 +1521,8 @@
   measureGroveZone();
   window.addEventListener("resize", measureGroveZone);
 
-  fetch("assets/tree-pointcloud.obj?v=pc8")
+  document.body.setAttribute("data-tree-pointcloud", "loading");
+  fetch("assets/tree-pointcloud.obj?v=pc9")
     .then(function (res) { return res.text(); })
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.
@@ -1603,7 +1604,7 @@
         fillPos[fi * 3]     = fillStartArr[fi * 3];
         fillPos[fi * 3 + 1] = fillStartArr[fi * 3 + 1];
         fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
-        fillSize[fi] = BASE_MOTE_SIZE * (0.6 + Math.random() * 0.3);
+        fillSize[fi] = BASE_MOTE_SIZE * (0.9 + Math.random() * 0.3);
         fillSeedArr[fi] = fillNorm[fi * 3 + 1];
       }
       var fillGeo = new THREE.BufferGeometry();
@@ -1620,8 +1621,10 @@
       fillPoints.frustumCulled = false;
       scene.add(fillPoints);
       treeReady = true;
+      document.body.setAttribute("data-tree-pointcloud", "ready");
     })
     .catch(function (err) {
+      document.body.setAttribute("data-tree-pointcloud", "error");
       console.error("tree point cloud failed to load:", err);
     });
 
