@@ -1,19 +1,25 @@
-/* Bullfinch — pinned verdict choreography + scroll-progress driver (v8).
+/* Bullfinch — pinned verdict choreography + scroll-progress driver (v8,
+   Claude fork: CAPTURE MODEL).
 
-   PANEL PIN (200vh per panel, scrub: true):
-     0%   – 4%   eyebrow slides in (translateX -16 → 0, opacity 0 → 1)
-     4%   – 12%  verdict enters opacity 0 → 1, translateY 16 → 0
-                 (NO scale, NO letter-spacing animation — flush-left
-                  balanced text must not reflow mid-scrub)
-     12%  – 22%  evidence paragraphs reveal sequentially (translateY 24 → 0)
-     22%  – 28%  numeric line reveals (translateY 16 → 0)
-     28%  – 88%  HOLD (60% of pin — reader can stop scrolling and read)
-     88%  – 100% inner block fades + translates up 24px
+   ANIMATION MODEL — data capture, no fades, no slides:
+     Copy never opacity-fades and never translates. Each element WRITES ON in
+     place via a clip wipe (the same language as the tree readouts' --write:
+     left-to-right for single lines, top-to-bottom for multi-line justified
+     blocks), holds through the pin, then is WIPED away in place (reverse
+     wipe) before the pin releases — the empty panel scrolls off, nothing
+     drags up or crossfades. Tree readouts are owned ENTIRELY by
+     writeTreeData in the HTML (write-on + count-up); never touched here.
+     The closing card is the sole allowed slide (owned by the HTML).
 
-   HERO EXIT (over ~0.55 viewports of scroll, two lines):
-     eyebrow fades       0.00 – 0.20
-     headline line 1     0.18 – 0.36
-     headline line 2     0.30 – 0.48
+   PANEL PIN (scrub: true):
+     ~5%  – 45%  elements write on in sequence (eyebrow → verdict →
+                 evidence/audience → numeric → trust line)
+     45%  – 88%  HOLD (reader can stop scrolling and read)
+     88%  – 98%  un-write in place; gone before the pin releases
+
+   HERO EXIT (over ~0.30 of the hero scroll):
+     headline WIPES out top-down in place (no fade) while the forest
+     diagonal runs its own slower hide on a separate trigger.
 
    GLOBAL SCROLL → canopy:
      window.bullfinchCanopy.setProgress(t)
@@ -76,8 +82,10 @@
         var out = smooth01(mapRange(p, 0.04, 0.30));
         var inner = hero.querySelector(".hero__inner");
         if (inner) {
-          inner.style.opacity = 1 - out;
-          inner.style.transform = "none";   // fade IN PLACE, never float up
+          // No fade: the headline is WIPED away top-down in place — erased
+          // like cleared data — while the forest diagonal continues its own
+          // slower hide behind it. Fully reversible on upward scroll.
+          inner.style.clipPath = "inset(" + (out * 100).toFixed(2) + "% 0 0 0)";
         }
         setTextVeilOpacity((1 - out) * 0.84);
       },
@@ -155,57 +163,51 @@
     window.setTimeout(refreshTextVeilLayer, 520);
   }
 
-  var STAGGER = [
-    { sel: ".panel__eyebrow",     s: 0.05 },
-    { sel: ".panel__verdict",     s: 0.11 },
-    { sel: ".ground-heading",     s: 0.11 },
-    { sel: ".panel__evidence p",  s: 0.17 },
-    { sel: ".audience-item",      s: 0.17 },
-    { sel: ".panel__numeric",     s: 0.25 },
-    { sel: ".trust-line",         s: 0.30 }
+  // Write-on order. dir "x" = left-to-right wipe (single lines); dir "y" =
+  // top-to-bottom wipe (multi-line justified blocks, where a horizontal wipe
+  // would break across line endings). .ground-heading is covered by its
+  // eyebrow/verdict children — no block-level clip on it (nested clips would
+  // compose two directions on the same text).
+  var WRITE_ORDER = [
+    { sel: ".panel__eyebrow",     s: 0.05, dir: "x" },
+    { sel: ".panel__verdict",     s: 0.10, dir: "y" },
+    { sel: ".panel__evidence p",  s: 0.16, dir: "y" },
+    { sel: ".audience-item",      s: 0.16, dir: "y" },
+    { sel: ".panel__numeric",     s: 0.24, dir: "x" },
+    { sel: ".trust-line",         s: 0.29, dir: "x" }
   ];
 
   function applyPanelProgress(panel, p) {
-    var inner    = panel.querySelector(".panel__inner");
-    var media    = panel.querySelector(".panel__video");
-    var readouts = panel.querySelector(".tree-readouts");
+    var inner = panel.querySelector(".panel__inner");
+    var media = panel.querySelector(".panel__video");
 
-    // ANIMATED in-place choreography (Claude fork): the block SLIDES IN from the
-    // left and fades as the panel pins, its inner elements CASCADE in on a
-    // stagger, then everything fades out in place as it leaves. Motion is
-    // HORIZONTAL only (+ opacity) — real animation, but nothing floats up from
-    // below or slides off the top. Opacity on .panel__inner cascades to every
-    // child (audience grid, partner logos, ground heading), so the whole card
-    // is covered; the stagger adds life on top. On exit the slide is 0 (fade
-    // only), so the empty section scrolls away with no drift. The closing card
-    // is the sole exception (may slide — handled in the HTML).
-    var appear = smooth01(mapRange(p, 0.04, 0.24));
-    var leave  = smooth01(mapRange(p, 0.86, 0.98));
-    var vis = appear * (1 - leave);
-    var blockX = (1 - appear) * -56;         // slide in from the left; 0 on exit
+    // CAPTURE-MODEL choreography (Claude fork): nothing fades, nothing slides.
+    // Copy is revealed the way data is captured — each element WRITES ON in
+    // place via a clip wipe on its own beat — then everything is UN-WRITTEN in
+    // place before the pin releases, so the empty panel scrolls off with no
+    // drift and no crossfade. The blocks themselves never move. Tree readouts
+    // are owned entirely by writeTreeData in the HTML (write-on + count-up) —
+    // never touch their opacity or transform here.
+    var leave = smooth01(mapRange(p, 0.88, 0.98));
 
     if (inner) {
-      inner.style.opacity = vis;
-      inner.style.transform = "translateX(" + blockX.toFixed(1) + "px)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
-    if (readouts) {
-      readouts.style.opacity = vis;
-      readouts.style.transform = "translateX(" + blockX.toFixed(1) + "px)";
-    }
 
-    // Staggered extra motion on the key elements: each starts a little further
-    // left and catches up on its own beat. Transform composes with the block's
-    // slide; opacity is owned by the block. Exit leaves them settled (no drift).
-    for (var si = 0; si < STAGGER.length; si++) {
-      var group = panel.querySelectorAll(STAGGER[si].sel);
+    for (var si = 0; si < WRITE_ORDER.length; si++) {
+      var group = panel.querySelectorAll(WRITE_ORDER[si].sel);
       if (!group.length) continue;
-      var s = STAGGER[si].s;
+      var s = WRITE_ORDER[si].s;
+      var horizontal = WRITE_ORDER[si].dir === "x";
       for (var gi = 0; gi < group.length; gi++) {
-        var e = smooth01(mapRange(p, s + gi * 0.015, s + 0.18 + gi * 0.015));
-        group[gi].style.transform = "translateX(" + ((1 - e) * -34).toFixed(1) + "px)";
+        var e = smooth01(mapRange(p, s + gi * 0.03, s + 0.16 + gi * 0.03));
+        var w = e * (1 - leave);
+        var hidden = ((1 - w) * 100).toFixed(2) + "%";
+        group[gi].style.clipPath = horizontal
+          ? "inset(0 " + hidden + " 0 0)"
+          : "inset(0 0 " + hidden + " 0)";
       }
     }
 
@@ -378,38 +380,21 @@
     updateCurrentNavLink();
   }
 
-  // ===== Closing section reveal ==========================================
+  // ===== Closing section veil ============================================
+  // The closing card's arrival is owned by the HTML (revealClosing) — it is
+  // the ONE element allowed to slide in. No fades, no duplicate line
+  // choreography here; this trigger only runs the text veil.
   var closing = document.querySelector(".closing");
-  if (closing) {
-    var cLine1 = closing.querySelector(".closing__line--1");
-    var cLine2 = closing.querySelector(".closing__line--2");
-    if (reduced) {
-      gsap.set([cLine1, cLine2], { opacity: 1, y: 0 });
-    } else {
-      gsap.set([cLine1, cLine2], { opacity: 0, y: 18 });
-      ScrollTrigger.create({
-        trigger: closing,
-        start: "top bottom",
-        end: "top center",
-        scrub: true,
-        onUpdate: function (self) {
-          var p = self.progress;
-          setTextVeilOpacity(smooth01(mapRange(p, 0.35, 0.75)) * 0.42);
-          // Line 1: reveal 0.00–0.30
-          var p1 = mapRange(p, 0.00, 0.30);
-          if (cLine1) {
-            cLine1.style.opacity = p1;
-            cLine1.style.transform = "translateY(" + (18 * (1 - p1)) + "px)";
-          }
-          // Line 2: reveal 0.20–0.50
-          var p2 = mapRange(p, 0.20, 0.50);
-          if (cLine2) {
-            cLine2.style.opacity = p2;
-            cLine2.style.transform = "translateY(" + (18 * (1 - p2)) + "px)";
-          }
-        },
-      });
-    }
+  if (closing && !reduced) {
+    ScrollTrigger.create({
+      trigger: closing,
+      start: "top bottom",
+      end: "top center",
+      scrub: true,
+      onUpdate: function (self) {
+        setTextVeilOpacity(smooth01(mapRange(self.progress, 0.35, 0.75)) * 0.42);
+      },
+    });
   }
 
   // ===== Canopy wave timing =============================================
@@ -491,7 +476,9 @@
     if (reduced) {
       gsap.set(footerLine, { opacity: 1, y: 0 });
     } else {
-      gsap.set(footerLine, { opacity: 0, y: 12 });
+      // Part of the closing card, so it shares the closing's slide carve-out —
+      // but no fade: always fully opaque, settling the last 12px into place.
+      gsap.set(footerLine, { opacity: 1, y: 12 });
       ScrollTrigger.create({
         trigger: document.body,
         start: function () { return ScrollTrigger.maxScroll(window) - 36; },
@@ -499,9 +486,7 @@
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: function (self) {
-          var p = self.progress;
-          footerLine.style.opacity = p;
-          footerLine.style.transform = "translateY(" + (12 * (1 - p)) + "px)";
+          footerLine.style.transform = "translateY(" + (12 * (1 - self.progress)) + "px)";
         },
       });
     }

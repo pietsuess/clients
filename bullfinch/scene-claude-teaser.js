@@ -418,14 +418,23 @@
   statGridHome[0]   = 0.8 + 5 * 0.34;   // fallback centre coords (DOM-anchored each frame)
   statGridHome[1]   = 1.2 - 5 * 0.34;
   statGridHome[2]   = 0.0;
-  // The seed lives in the low central field before the grid forms, then flies
-  // to the grid centre with the rest — no longer parked at the top.
+  // The seed lives in the low central field before the grid forms, flies to
+  // the grid centre with the rest, then — as the grid releases into the open
+  // cloud (openFieldP 0 -> 1, section 02 arriving) — it RISES UP and OFF the
+  // top of the frame, left behind by the story. It must never drift through
+  // 02/03/04 as a stray red dot: one red on screen at a time (grid-centre red
+  // in 01, none through the middle, the convergence red at the close).
   groundFieldHome[0] = 0.0;
   groundFieldHome[1] = -0.55;
   groundFieldHome[2] = 0.4;
   starFieldHome[0] = 0.0;
-  starFieldHome[1] = -0.55;
+  starFieldHome[1] = 6.5;   // far above every camera framing (visible top maxes ~4.6)
   starFieldHome[2] = 0.4;
+  // The seed seats at the grid centre FIRST, with no assembly swirl — the grid
+  // assembles around it, so the cascade visibly originates from the centre dot.
+  statAssemblyDelay[0] = 0.0;
+  statArcX[0] = 0;
+  statArcY[0] = 0;
   positions[0] = groundFieldHome[0];
   positions[1] = groundFieldHome[1];
   positions[2] = groundFieldHome[2];
@@ -986,6 +995,11 @@
     var dt = dtIn || 0;
     camera.getWorldDirection(tmpCamDir);
     activeLineSet.fill(0);
+    // D2 taper: the cascade web stays prominent while the motes are close
+    // (01–02), then drops to a faint background web as the grove forms and the
+    // closing field spreads — no bold lines slicing across the trees or the
+    // finale. The convergence wave (7) keeps its own gate and stays prominent.
+    var networkTaper = (1 - 0.85 * treeFormP) * (1 - 0.9 * finalFieldP);
     for (var n = 0; n < EDGE_COUNT; n++) {
       var aIdx = edgeA[n];
       var bIdx = edgeB[n];
@@ -1049,9 +1063,10 @@
         ? (strokeProgress > 0.001 ? 0.95 : 0.0)
         : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
       // Claude fork: cascade lines PERSIST through the stat grid and the tree
-      // grove (no statForm/treeForm/openField gating). Only the convergence
-      // wave stays gated to the closing so it lands with the finale.
-      arrowVisible *= (wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : 1.0);
+      // grove (no statForm/openField gating) but TAPER faint once the trees
+      // and closing form (networkTaper above). Only the convergence wave stays
+      // gated to the closing so it lands with the finale.
+      arrowVisible *= (wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : networkTaper);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -1081,7 +1096,7 @@
 
       // Geometry does the drawing. Alpha is simply on while the segment has
       // length, avoiding the previous fade-in behavior.
-      var journeyGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : 1.0;
+      var journeyGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : networkTaper;
       var visible = strokeProgress > 0.001 ? journeyGate : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
@@ -2048,12 +2063,14 @@
     uniforms.uMoteDensity.value = 0.08 + v * 0.92;
     uniforms.uConnect.value     = v;
     // Claude fork: drive the cascade DIRECTLY from global scroll so it draws
-    // continuously across the WHOLE journey, beginning on the first page.
-    // Broad overlapping bands (not panel-transition gaps). swot no longer
-    // drives these waves — the convergence (wave 7) stays on its own trigger.
-    setWaveProgress(1, (v - 0.00) / 0.34);
-    setWaveProgress(2, (v - 0.22) / 0.34);
-    setWaveProgress(3, (v - 0.46) / 0.34);
+    // continuously across the WHOLE journey. Broad overlapping bands (not
+    // panel-transition gaps). swot no longer drives these waves — the
+    // convergence (wave 7) stays on its own trigger. Wave 1 waits out the
+    // hero (~first 0.12 of scroll) so the first lines fan out WITH the <1%
+    // grid as it assembles, never over an empty hero.
+    setWaveProgress(1, (v - 0.12) / 0.30);
+    setWaveProgress(2, (v - 0.30) / 0.32);
+    setWaveProgress(3, (v - 0.50) / 0.32);
   }
   function setWaveProgress(wave, p) {
     var idx = Math.max(1, Math.min(7, wave | 0));
