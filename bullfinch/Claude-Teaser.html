@@ -710,8 +710,9 @@
         text-shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 6px 22px rgba(0, 0, 0, .22);
         text-align: left;
       }
-      /* A — 60 chars, ONE line. */
-      #rise-a p {
+      /* A — 60 chars, ONE line. C — 56 chars, ONE line. */
+      #rise-a p,
+      #rise-c p {
         max-width: 66ch;
         font-size: min(40px, calc(min(88vw, 1240px) / 34));
       }
@@ -723,8 +724,9 @@
       /* Phones: A drops to two lines, B to three — one/two lines at this width
          would put the type under 15px. Desktop keeps the 1/2-line rule. */
       @media (max-width: 720px) {
-        #rise-a p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
-        #rise-b p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
+        #rise-a p,
+        #rise-b p,
+        #rise-c p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
       }
 
       /* ===== Phone pass ==================================================
@@ -813,6 +815,7 @@
     <div class="forest-photo" aria-hidden="true"></div>
     <div class="text-veil" aria-hidden="true"></div>
     <div class="rise-headline" id="rise-a" aria-hidden="true"><p>Using wearable sensors, Bullfinch provides ground-truth data.</p></div>
+    <div class="rise-headline" id="rise-c" aria-hidden="true"><p>Automatically capture ecological data with no extra trips</p></div>
     <div class="rise-headline" id="rise-b" aria-hidden="true"><p>Our mission is to provide the ground truth data humanity needs to protect and restore Nature.</p></div>
     <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
       <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
@@ -1346,7 +1349,8 @@
           function bandEnd(start, end) { return end > start + 40 ? end : start + 40; }
           var riseA = document.getElementById("rise-a");
           var riseB = document.getElementById("rise-b");
-          drive(riseA, 0); drive(riseB, 0);
+          var riseC = document.getElementById("rise-c");
+          drive(riseA, 0); drive(riseB, 0); drive(riseC, 0);
           ScrollTrigger.create({
             trigger: document.body,
             // Widened both ways (Piet): in a touch before the hero unpins (its
@@ -1358,6 +1362,20 @@
             onUpdate: function (self) { drive(riseA, self.progress); },
             onLeaveBack: function () { drive(riseA, 0); },
             onLeave: function () { drive(riseA, 1); },
+          });
+          // C: 01 releasing -> the open field before 02 pins. Starts as the 01
+          // copy is already un-writing (0.80 -> 1.0), so the block only clears
+          // the bottom of the screen once that copy is essentially gone, and it
+          // is off the top by the time 02 pins and writes on.
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return at(p1, 0.86); },
+            end: function () { return bandEnd(at(p1, 0.86), p2.start); },
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) { drive(riseC, self.progress); },
+            onLeaveBack: function () { drive(riseC, 0); },
+            onLeave: function () { drive(riseC, 1); },
           });
           ScrollTrigger.create({
             trigger: document.body,
