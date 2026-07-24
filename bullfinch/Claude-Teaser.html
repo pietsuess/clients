@@ -497,10 +497,11 @@
              BLACK dots, ONE RED centre rendered on top, filling to ALL RED as
              the counter climbs (the original Claude behaviour). Codex's
              colours + forest reveal are untouched. ===================== */
-      /* Lower the left paragraph so its top lines up with the right note, and
-         match their widths (tighten the left from full-column to the same
-         measure the right now uses). */
-      #problem .panel__evidence { grid-template-columns: 1fr; margin-top: clamp(16px, 2.4vh, 40px); }
+      /* Left/right body tops are aligned in JS (alignProblemTops, end of body):
+         each column is independently vertically centered, so a static margin
+         only moves the body HALF as far. The script measures the real gap and
+         applies 2x to whichever body is higher. Widths already match below. */
+      #problem .panel__evidence { grid-template-columns: 1fr; }
       #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
       #problem .panel__stat--problem {
         flex-direction: column;
@@ -1841,6 +1842,42 @@
           autoStart();
         } else {
           loadedFrames[0].addEventListener("load", autoStart, { once: true });
+        }
+      })();
+    </script>
+    <script>
+      /* 01: align the top of the left body ("Inventory data...") with the top
+         of the right note ("Bullfinch fully automates..."). Both #problem
+         columns are independently vertically CENTERED, so a margin on one body
+         re-centers its column and cancels half the shift -- the required
+         margin is exactly 2x the measured gap. layoutTop() sums offsetTop up
+         the chain (LAYOUT position, unaffected by the write-on transforms), so
+         it can be measured at any scroll state. Re-runs on resize + font load. */
+      (function alignProblemTops() {
+        function layoutTop(el) { var y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
+        var evidence = document.querySelector("#problem .panel__evidence");
+        var leftP = evidence && evidence.querySelector("p");
+        var note = document.querySelector("#problem .problem-note");
+        if (!evidence || !leftP || !note) return;
+        function run() {
+          if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
+            evidence.style.marginTop = ""; note.style.marginTop = ""; return;
+          }
+          evidence.style.marginTop = "0px";
+          note.style.marginTop = "0px";
+          var gap = layoutTop(note) - layoutTop(leftP);  // >0: right note lower
+          if (Math.abs(gap) < 1) return;
+          if (gap > 0) evidence.style.marginTop = (gap * 2) + "px";
+          else note.style.marginTop = (-gap * 2) + "px";
+        }
+        var t;
+        function schedule() { clearTimeout(t); t = setTimeout(run, 120); }
+        run();
+        window.addEventListener("resize", schedule);
+        window.addEventListener("orientationchange", schedule);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(run);
+        if (window.ScrollTrigger && window.ScrollTrigger.addEventListener) {
+          window.ScrollTrigger.addEventListener("refreshInit", run);
         }
       })();
     </script>
