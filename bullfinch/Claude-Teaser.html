@@ -497,8 +497,11 @@
              BLACK dots, ONE RED centre rendered on top, filling to ALL RED as
              the counter climbs (the original Claude behaviour). Codex's
              colours + forest reveal are untouched. ===================== */
-      #problem .panel__evidence { grid-template-columns: 1fr; }
-      #problem .panel__evidence p { text-align: justify; text-align-last: left; }
+      /* Lower the left paragraph so its top lines up with the right note, and
+         match their widths (tighten the left from full-column to the same
+         measure the right now uses). */
+      #problem .panel__evidence { grid-template-columns: 1fr; margin-top: clamp(16px, 2.4vh, 40px); }
+      #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
       #problem .panel__stat--problem {
         flex-direction: column;
         align-items: stretch;
@@ -521,7 +524,7 @@
       }
       .problem-note {
         margin: 0;
-        max-width: 46ch;
+        max-width: 50ch;   /* widened to match the left paragraph's measure */
         color: var(--ink-soft);
         font-size: clamp(14px, 1.05vw, 16px);
         line-height: 1.5;
@@ -739,7 +742,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-15"></script>
+    <script src="scene-claude-teaser.js?v=claude-16"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>

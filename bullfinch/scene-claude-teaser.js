@@ -416,8 +416,8 @@
       // depth through the landed camera. Even screen coverage (not even WORLD
       // coverage) is what reads as balanced; the varied ray distance keeps near
       // motes huge and far ones deep, so the volume still surrounds the viewer.
-      var cScreenX = (Math.random() - 0.5) * 2.4;   // full width, slightly past both edges
-      var cScreenY = -1.0 + 2.15 * Math.random();   // fill top-to-bottom (same band as the 02 field)
+      var cScreenX = (Math.random() - 0.5) * 3.0;   // WIDER than the frame: much falls off-screen (sparser, less busy)
+      var cScreenY = -1.35 + 2.7 * Math.random();   // symmetric top-to-bottom, past both edges
       var cDist = 1.4 + Math.random() * 8.6;         // right at the camera -> deep
       closeProbe.set(cScreenX, cScreenY, 0.35).unproject(closingCamera);
       closeDir.copy(closeProbe).sub(closingCamera.position).normalize();
@@ -2014,12 +2014,19 @@
         fillClusterCenter[fi] = treeClusterCenter[idx[take + fi]];
         fillTreeIdx[fi] = clusterAssignment[idx[take + fi]];
         fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
-        // Fly in from the open cloud that precedes the tree-identification stage.
-        var finalAngle = Math.random() * Math.PI * 2;
-        var finalRadius = 8 + Math.random() * 12;
-        fillStartArr[fi * 3]     = Math.cos(finalAngle) * finalRadius;
-        fillStartArr[fi * 3 + 1] = Math.sin(finalAngle) * finalRadius * 0.72;
-        fillStartArr[fi * 3 + 2] = -3.5 + Math.random() * 2.5;
+        // Closing/star target (and the open-cloud fly-in origin): distributed
+        // EVENLY in screen space through the landed camera, like the main
+        // closing motes, and pushed WIDE so most of it sits off-frame — a
+        // sparse even backdrop of far specks, not a bottom-heavy world-space
+        // ring (which read as the low clump through the down-tilted camera).
+        var fScreenX = (Math.random() - 0.5) * 3.6;
+        var fScreenY = -1.5 + 3.0 * Math.random();
+        var fDist = 4.0 + Math.random() * 9.0;   // far -> small specks
+        closeProbe.set(fScreenX, fScreenY, 0.35).unproject(closingCamera);
+        closeDir.copy(closeProbe).sub(closingCamera.position).normalize();
+        fillStartArr[fi * 3]     = closingCamera.position.x + closeDir.x * fDist;
+        fillStartArr[fi * 3 + 1] = closingCamera.position.y + closeDir.y * fDist;
+        fillStartArr[fi * 3 + 2] = closingCamera.position.z + closeDir.z * fDist;
         fillPos[fi * 3]     = fillStartArr[fi * 3];
         fillPos[fi * 3 + 1] = fillStartArr[fi * 3 + 1];
         fillPos[fi * 3 + 2] = fillStartArr[fi * 3 + 2];
