@@ -550,6 +550,119 @@
         text-align: justify;
         text-align-last: left;
       }
+
+      /* ===== Team link (closing footer) + lateral Team screen ============= */
+      /* The link sits in the footer, in flow above the absolutely-positioned
+         up-arrow. Clicking pulls the view right to reveal the Team screen. */
+      .footer-team-link {
+        position: relative;
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0 34px;   /* clear the absolute up-arrow that parks below */
+        padding: 6px 2px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        text-decoration: none;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        transition: color 220ms ease, gap 220ms ease;
+      }
+      .footer-team-link:hover,
+      .footer-team-link:focus-visible {
+        color: var(--ink);
+        gap: 12px;
+      }
+      .footer-team-link svg { width: 15px; height: 15px; flex: none; }
+
+      /* The lateral screen: parks off-screen right, slides in on open. */
+      .team-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 78;   /* above site-nav (50), below the bio modal (80) */
+        background: var(--bg);
+        transform: translateX(100%);
+        visibility: hidden;
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0s linear 620ms;
+        will-change: transform;
+        overflow-y: auto;
+      }
+      body.is-team-open .team-screen {
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0s linear 0s;
+      }
+      /* the current page recedes left as the team screen pulls in from the right */
+      body.is-team-open #page {
+        transform: translateX(-8%);
+        filter: brightness(0.5);
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 620ms ease;
+      }
+      #page {
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 620ms ease;
+      }
+
+      .team-screen__back {
+        position: absolute;
+        top: clamp(24px, 4vh, 40px);
+        left: var(--pad-x);
+        z-index: 4;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 4px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        background: none;
+        border: 0;
+        cursor: pointer;
+        transition: color 220ms ease, gap 220ms ease;
+      }
+      .team-screen__back:hover,
+      .team-screen__back:focus-visible { color: var(--ink); gap: 14px; }
+      .team-screen__back svg { width: 16px; height: 16px; flex: none; }
+
+      /* Mirror .panel + .panel--media so the layout matches section 06 exactly. */
+      .team-screen__stage {
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 32px var(--pad-x);
+        display: grid;
+        place-items: center;
+        grid-template-columns: minmax(240px, min(38vw, 520px)) minmax(0, var(--col-narrow));
+        gap: clamp(48px, 7vw, 112px);
+        isolation: isolate;
+      }
+      /* This panel__video is never scroll-revealed here, so force it visible. */
+      .team-screen .panel__video {
+        opacity: 1;
+        transform: none;
+      }
+
+      @media (max-width: 720px) {
+        .team-screen__stage {
+          grid-template-columns: 1fr;
+          gap: clamp(28px, 6vw, 44px);
+          padding: clamp(84px, 12vh, 110px) var(--pad-x) clamp(40px, 8vh, 72px);
+          place-items: stretch;
+          align-content: center;
+        }
+        body.is-team-open #page { transform: translateX(-5%); }
+      }
     </style>
   </head>
   <body>
@@ -733,6 +846,12 @@
         <footer class="site-footer" id="site-footer">
           <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
           <p class="site-footer__line">BULLFINCH EARTH<br />The FICO of Forests</p>
+          <button class="footer-team-link" type="button" data-team-open aria-controls="team-screen" aria-expanded="false">
+            Meet the Team
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
           <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m6 15 6-6 6 6" />
@@ -741,6 +860,41 @@
         </footer>
       </section>
     </main>
+
+    <section class="team-screen" id="team-screen" aria-label="Bullfinch Earth team" aria-hidden="true">
+      <button class="team-screen__back" type="button" data-team-close aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+        Back
+      </button>
+      <div class="team-screen__stage">
+        <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
+          <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
+            <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+            <figcaption>Seth Sternberg &middot; CEO</figcaption>
+          </figure>
+          <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
+            <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
+            <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
+          </figure>
+          <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+            <img src="assets/graham-headshot.png" alt="Graham Smith" />
+            <figcaption>Graham Smith &middot; CCO</figcaption>
+          </figure>
+        </div>
+        <div class="panel__inner">
+          <div class="eyebrow-anchor"><p class="panel__eyebrow">06 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true" style="--build:1;--rev:1;--glow:.95;--pang:-12deg"></span></div>
+          <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
+          <div class="panel__evidence">
+            <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
+            <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim, the Mars guy.</button> CTO and PhD astrophysicist, Oxford and Cambridge, who built cameras now operating on Mars with NASA JPL.</p>
+            <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry and field operations, plus finance and customer depth.</p>
+          </div>
+          <p class="panel__numeric">MARS CAMERAS &middot; 400M+ PRODUCTS &middot; BC FIELD OPS</p>
+        </div>
+      </div>
+    </section>
 
     <div class="bio-modal" id="team-bio-modal" hidden role="dialog" aria-modal="true" aria-labelledby="team-bio-title">
       <div class="bio-modal__backdrop" data-bio-close></div>
@@ -1865,6 +2019,48 @@
         } else {
           loadedFrames[0].addEventListener("load", autoStart, { once: true });
         }
+      })();
+    </script>
+    <script>
+      // Lateral Team screen: the closing footer link pulls the view right to
+      // reveal the team panel; Back / Escape returns. Bio links inside reuse the
+      // existing document-delegated bio modal, so no extra wiring is needed.
+      (function () {
+        "use strict";
+        var screen = document.getElementById("team-screen");
+        var openBtn = document.querySelector("[data-team-open]");
+        if (!screen || !openBtn) return;
+        var lastFocus = null;
+
+        function openTeam() {
+          lastFocus = document.activeElement;
+          document.body.classList.add("is-team-open");
+          screen.setAttribute("aria-hidden", "false");
+          openBtn.setAttribute("aria-expanded", "true");
+          screen.scrollTop = 0;
+          var back = screen.querySelector("[data-team-close]");
+          if (back) back.focus();
+        }
+        function closeTeam() {
+          document.body.classList.remove("is-team-open");
+          screen.setAttribute("aria-hidden", "true");
+          openBtn.setAttribute("aria-expanded", "false");
+          if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+        }
+
+        openBtn.addEventListener("click", function (e) { e.preventDefault(); openTeam(); });
+        document.addEventListener("click", function (e) {
+          if (e.target.closest("[data-team-close]")) { e.preventDefault(); closeTeam(); }
+        });
+        document.addEventListener("keydown", function (e) {
+          // Only close on Escape when the team screen is the topmost layer
+          // (the bio modal handles its own Escape while it is open).
+          var bio = document.getElementById("team-bio-modal");
+          var bioOpen = bio && !bio.hidden;
+          if (e.key === "Escape" && document.body.classList.contains("is-team-open") && !bioOpen) {
+            closeTeam();
+          }
+        });
       })();
     </script>
   </body>
