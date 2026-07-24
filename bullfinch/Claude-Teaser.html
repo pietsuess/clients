@@ -520,7 +520,10 @@
       #problem .p-body { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; align-items: flex-end; gap: clamp(20px, 3vh, 44px); }
       #problem .stat-visual { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: clamp(18px, 2.2vw, 36px); }
       #problem .problem-note { grid-column: 2; grid-row: 2; }
-      #problem .panel__evidence { grid-template-columns: 1fr; }
+      /* Kill styles.css's .panel__evidence top margin (20px): it pushed the left
+         body BELOW the row-2 track top while the note (margin:0) sat at the top,
+         so the two bodies never lined up even though the grid was correct. */
+      #problem .panel__evidence { grid-template-columns: 1fr; margin: 0; }
       #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
       #problem .stat-read { transform: none; }
       /* Reserve a real box for the mote grid inside the right column so the
