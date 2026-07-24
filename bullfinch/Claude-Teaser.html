@@ -363,11 +363,14 @@
       #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
       #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
 
-      /* Piet: tighten the alley between the device and the copy, and pull the
-         copy into a narrower measure (it ran the full width of the screen). */
+      /* Piet: the two items are centred as a pair — the copy column starts at
+         EXACTLY 50vw (so "Is It" sits dead centre) and the device box is
+         centred in the left half (see .case-fixed-layer below). Column 1 is
+         50vw minus the panel's own left pad, gap 0, so the track edge lands on
+         the screen's centre line. */
       #product.panel--media {
-        grid-template-columns: minmax(260px, .5fr) minmax(360px, 1fr);
-        gap: clamp(12px, 1.2vw, 24px);
+        grid-template-columns: calc(50vw - var(--pad-x)) 1fr;
+        gap: 0;
       }
       #product .panel__inner { grid-column: 2; max-width: min(760px, 42vw); padding-top: 0; }
       /* Sized down to hold "Is It Really This Easy?" on ONE line in the
@@ -377,11 +380,13 @@
       #product .panel__evidence p { padding: 9px 0; border-top: 1px solid var(--rule); text-align: justify; text-align-last: left; }
       #product .panel__evidence p:first-child { border-top: 0; }
       #product .panel__numeric { margin-top: 18px; }
+      /* Centred in the LEFT HALF: a 40vw box inside 0-50vw leaves 5vw either
+         side, so the device balances the copy across the centre line. */
       .case-fixed-layer.panel__model {
         width: min(40vw, 720px);
         max-width: 40vw;
         height: 100dvh;
-        left: 0;
+        left: 5vw;
         top: 0;
         transform: none;
       }
