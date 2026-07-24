@@ -522,9 +522,13 @@
       #problem .problem-note { grid-column: 2; grid-row: 2; }
       /* Kill styles.css's .panel__evidence top margin (20px): it pushed the left
          body BELOW the row-2 track top while the note (margin:0) sat at the top,
-         so the two bodies never lined up even though the grid was correct. */
-      #problem .panel__evidence { grid-template-columns: 1fr; margin: 0; }
-      #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
+         so the two bodies never lined up even though the grid was correct.
+         align-self:end (overriding styles.css's align-self:start) RIGHT-anchors
+         the body + numeric so their right edges line up with the headline's
+         right edge -- the whole left column reads as one right-aligned rail. */
+      #problem .panel__evidence { grid-template-columns: 1fr; margin: 0; align-self: end; }
+      #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin: 0; }
+      #problem .panel__numeric { align-self: end; }
       #problem .stat-read { transform: none; }
       /* Reserve a real box for the mote grid inside the right column so the
          WebGL grid lands in its own space (flex pushes the readout to its
