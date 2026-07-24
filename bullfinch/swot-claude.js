@@ -243,12 +243,22 @@
     // Trees form by 0.08 of the pin and the species data finishes WITH the
     // formation — so the whole lower bar must be done by ~0.08 too, not
     // trailing after (Piet: finishes at the SAME time as the data).
+    // 03 (#opportunity): the lower panel (audience grid + partners strip) no
+    // longer snap-crops in the first 0.08. It reveals as a STAGGERED CASCADE —
+    // eyebrow/verdict, then each audience cell in turn, then the partners label
+    // and each logo one by one — finishing at ~0.22 of the pin, IN LOCKSTEP
+    // with the tree species data (which the HTML tree trigger now counts up on
+    // this same on-screen window). Both land together instead of the bar
+    // snapping while the data is still counting.
     var fastBar = panel.id === "opportunity";
-    var FAST_S = [0.00, 0.01, 0.02, 0.02, 0.03, 0.03];
-    var writeWindow = fastBar ? 0.045 : 0.16;
-    var writeStagger = fastBar ? 0.005 : 0.03;
+    var FAST_S = [0.03, 0.05, 0.00, 0.06, 0.00, 0.16, 0.00];
+    var writeWindow = fastBar ? 0.06 : 0.16;
+    var writeStagger = fastBar ? 0.024 : 0.03;
 
     for (var si = 0; si < WRITE_ORDER.length; si++) {
+      // #opportunity's partners strip is owned by the per-logo cascade below,
+      // so skip the block-level .trust-line clip here (avoids a double clip).
+      if (fastBar && WRITE_ORDER[si].sel === ".trust-line") continue;
       var group = panel.querySelectorAll(WRITE_ORDER[si].sel);
       if (!group.length) continue;
       var s = fastBar ? FAST_S[si] : WRITE_ORDER[si].s;
@@ -260,6 +270,24 @@
         group[gi].style.clipPath = horizontal
           ? "inset(0 " + hidden + " 0 0)"
           : "inset(0 0 " + hidden + " 0)";
+      }
+    }
+
+    // 03 partners strip: the "Partners and recognition" label writes first,
+    // then each logo clips on in quick succession through ~0.22, so the strip
+    // BUILDS logo-by-logo (a detection cascade) instead of one block crop, and
+    // lands with the audience cells and the tree data.
+    if (fastBar) {
+      var trustLabel = panel.querySelector(".trust-label");
+      if (trustLabel) {
+        var lw = smooth01(mapRange(p, 0.11, 0.17)) * (1 - leave);
+        trustLabel.style.clipPath = "inset(0 " + ((1 - lw) * 100).toFixed(2) + "% 0 0)";
+      }
+      var logos = panel.querySelectorAll(".trust-strip > div");
+      for (var li = 0; li < logos.length; li++) {
+        var le = smooth01(mapRange(p, 0.13 + li * 0.009, 0.13 + 0.05 + li * 0.009));
+        var lww = le * (1 - leave);
+        logos[li].style.clipPath = "inset(0 0 " + ((1 - lww) * 100).toFixed(2) + "% 0)";
       }
     }
 

@@ -742,7 +742,7 @@
     <script src="scene-claude-teaser.js?v=claude-13"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-12"></script>
+    <script src="swot-claude.js?v=claude-14"></script>
     <script src="stat-field-gpt.js?v=claude-13"></script>
     <script>
       (function () {
@@ -1085,7 +1085,17 @@
             window.bullfinchCanopy.setTreeProgress(treeP);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
             document.documentElement.style.setProperty("--tree-crisp-offset", (treeP * .84).toFixed(4));
-            writeTreeData(treeP);
+            // Tree DATA (species names + counting metrics) writes on the
+            // #opportunity PIN, on-screen, over [0.03, 0.22] and un-writes on
+            // leave [0.80, 1.0] — so it counts up in a readable window and lands
+            // IN LOCKSTEP with the lower panel (audience cells + partner logos,
+            // swot-claude.js), instead of finishing off-screen during the
+            // free-scroll gap before 03 arrives. Tree FORMATION stays on treeP.
+            var pinP3 = (p3.end > p3.start) ? (y - p3.start) / (p3.end - p3.start) : 0;
+            var dataReveal = smootherstep((pinP3 - 0.03) / 0.19);
+            var dataLeave = smootherstep((pinP3 - 0.80) / 0.20);
+            var dataProg = dataReveal * (1 - dataLeave);
+            writeTreeData(0.80 + dataProg * 0.20);
             document.body.classList.toggle("is-tree-stage", treeP > 0.05);
           },
           onLeaveBack: function () {
