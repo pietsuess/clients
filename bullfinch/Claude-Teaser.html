@@ -669,33 +669,50 @@
       }
 
       /* Rising overlay headlines — ride bottom -> off-top across a scroll band,
-         driven by --rise-y / --rise-op from dedicated scrubs (see inline JS). */
+         driven by --rise-y from dedicated scrubs (see inline JS).
+         NO FADE: they are fully opaque the whole ride and are simply off-screen
+         at both ends of their band, so nothing ever ghosts in or out. Left
+         aligned on the page gutter, sized to hold ONE line where the copy
+         allows and two only when it must. */
       .rise-headline {
         position: fixed;
-        left: 50%;
+        left: var(--pad-x, 64px);
+        right: var(--pad-x, 64px);
         top: 50%;
-        width: min(90vw, 900px);
-        transform: translate(-50%, -50%) translateY(var(--rise-y, 52vh));
-        opacity: var(--rise-op, 0);
+        transform: translateY(-50%) translateY(var(--rise-y, 58vh));
+        opacity: 1;
         z-index: 6;
         pointer-events: none;
-        text-align: center;
-        will-change: transform, opacity;
+        text-align: left;
+        will-change: transform;
       }
+      /* Font size is derived from the line's character budget rather than a
+         viewport clamp, so the break count is deterministic at every width:
+         size = available width / (chars-per-line * ~0.53em), capped. */
       .rise-headline p {
-        margin: 0 auto;
-        max-width: 22ch;
+        margin: 0;
         font-family: var(--font-display);
         font-weight: 500;
-        font-size: clamp(27px, 3.7vw, 52px);
         line-height: 1.08;
         letter-spacing: -0.02em;
         color: var(--ink);
-        text-wrap: balance;
+        text-align: left;
       }
+      /* A — 60 chars, ONE line. */
+      #rise-a p {
+        max-width: 66ch;
+        font-size: min(40px, calc(min(88vw, 1240px) / 34));
+      }
+      /* B — 92 chars, TWO lines of ~46. */
+      #rise-b p {
+        max-width: 50ch;
+        font-size: min(40px, calc(min(88vw, 1240px) / 26));
+      }
+      /* Phones: A drops to two lines, B to three — one/two lines at this width
+         would put the type under 15px. Desktop keeps the 1/2-line rule. */
       @media (max-width: 720px) {
-        .rise-headline { width: min(90vw, 520px); }
-        .rise-headline p { font-size: clamp(24px, 6.4vw, 34px); max-width: 18ch; }
+        #rise-a p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
+        #rise-b p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
       }
     </style>
   </head>
@@ -1210,27 +1227,38 @@
 
         // Two rising overlay headlines. Each rides from just below the viewport
         // (bottom) up and off the top across a scroll band, then stays gone.
-        //   A: hero leaving  ->  <1% grid assembled   (image 1 -> image 2)
-        //   B: section 02 copy -> section 03 trees formed (image 26 -> image 27)
+        //
+        // NO FADE (Piet): they never ghost in or out. The travel is built so the
+        // block is entirely BELOW the fold at p=0 and entirely ABOVE it at p=1,
+        // so the band edges do the hiding, not opacity.
+        //
+        // BANDS — each headline rides one of the EMPTY free-scroll gaps between
+        // pins, so it never shares the screen with choreographed text or
+        // graphics; only the background motes are moving under it:
+        //   A: hero UNPINS -> 01 PINS. Hero copy is fully erased (by 0.86 of the
+        //      hero pin) and the forest diagonal has finished; the 01 copy is
+        //      still hidden (panels write on only inside their own pin). The
+        //      motes rising into the <1% grid are the only motion.
+        //   B: 02 UNPINS -> 03 PINS. The 02 copy has un-written and the case
+        //      graphic has faded out (both complete at 1.0 of the 02 pin); the
+        //      03 copy + tree data don't start until 0.03 of the 03 pin. The
+        //      motes gathering into the grove are the only motion.
         (function () {
           function drive(el, p) {
             if (!el) return;
-            var y = 52 - p * 118;                 // +52vh (below) -> -66vh (above top)
-            el.style.setProperty("--rise-y", y.toFixed(2) + "vh");
-            var op;
-            if (p <= 0) op = 0;
-            else if (p < 0.14) op = p / 0.14;     // fade up off the bottom
-            else if (p < 0.80) op = 1;
-            else op = Math.max(0, 1 - (p - 0.80) / 0.16);  // gone before the top
-            el.style.setProperty("--rise-op", op.toFixed(3));
+            // +58vh (clear below the fold) -> -70vh (clear above the top).
+            el.style.setProperty("--rise-y", (58 - p * 128).toFixed(2) + "vh");
           }
+          // A zero-length band would make the scrub degenerate; keep a floor in
+          // case a layout ever collapses the gap between two pins.
+          function bandEnd(start, end) { return end > start + 40 ? end : start + 40; }
           var riseA = document.getElementById("rise-a");
           var riseB = document.getElementById("rise-b");
           drive(riseA, 0); drive(riseB, 0);
           ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return heroPin ? heroPin.start : p1.start; },
-            end: function () { return at(p1, 0.30); },
+            start: function () { return heroPin ? heroPin.end : p1.start; },
+            end: function () { return bandEnd(heroPin ? heroPin.end : p1.start, p1.start); },
             scrub: true,
             invalidateOnRefresh: true,
             onUpdate: function (self) { drive(riseA, self.progress); },
@@ -1239,8 +1267,8 @@
           });
           ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return at(p2, 0.30); },
-            end: function () { return at(p3, 0.08); },
+            start: function () { return p2.end; },
+            end: function () { return bandEnd(p2.end, p3.start); },
             scrub: true,
             invalidateOnRefresh: true,
             onUpdate: function (self) { drive(riseB, self.progress); },
