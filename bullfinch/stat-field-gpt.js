@@ -81,7 +81,10 @@
       var inT = mapRange(p, .06 + i * .05, .16 + i * .05);
       var outT = mapRange(p, .86 + (items.length - 1 - i) * .018, .92 + (items.length - 1 - i) * .018);
       el.style.opacity = inT * (1 - outT);
-      el.style.transform = "translateY(" + (22 * (1 - inT) - 24 * outT) + "px)";
+      // No translateY: the readout label/number/rest reveal by opacity IN PLACE.
+      // The old translateY (22px in, 24px out) was a vertical slide during the
+      // 01 pin (Piet: "the text section slides up"). Killed — nothing moves.
+      el.style.transform = "none";
     }
     paint(ease(mapRange(p, .26, .60)));
   }

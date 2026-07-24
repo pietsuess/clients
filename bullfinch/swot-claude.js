@@ -195,7 +195,12 @@
     { sel: ".panel__evidence p",  s: 0.16, dir: "y" },
     { sel: ".audience-item",      s: 0.16, dir: "y" },
     { sel: ".panel__numeric",     s: 0.24, dir: "x" },
-    { sel: ".trust-line",         s: 0.29, dir: "x" }
+    { sel: ".trust-line",         s: 0.29, dir: "x" },
+    // .problem-note (01 only) used to have NO clip, so it sat visible and rode
+    // the section up during the pre-pin entry scroll (Piet's "the note slides
+    // up"). It is now a normal write-on block: hidden until the pin, wiped on
+    // top-down IN PLACE with the rest of 01, un-wiped on leave. No translation.
+    { sel: ".problem-note",       s: 0.26, dir: "y" }
   ];
 
   function applyPanelProgress(panel, p) {

@@ -742,8 +742,8 @@
     <script src="scene-claude-teaser.js?v=claude-11"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-11"></script>
-    <script src="stat-field-gpt.js?v=forest-journey-8"></script>
+    <script src="swot-claude.js?v=claude-12"></script>
+    <script src="stat-field-gpt.js?v=claude-12"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -954,6 +954,12 @@
 
         var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
         if (!p1 || !p2 || !p3) return;
+        // The hero (00) pin — the mote assembly is anchored to its START so the
+        // motes begin rising into the grid on the FIRST scroll pixel out of 00,
+        // continuously, rather than sitting grounded through the whole 00->01
+        // gap and then swooping up late (Piet's shots 1-2: empty page, motes
+        // unmoved, then everything fires backwards).
+        var heroPin = pinFor(document.querySelector(".hero"));
         var treeDataLines = Array.prototype.slice.call(s03.querySelectorAll(".tree-readout span"));
         // Pre-parse the numeric readouts (Confidence / Genus Score / Count) so
         // they can COUNT UP in place as each tree forms — the data reads as if
@@ -1001,7 +1007,11 @@
         // hero pin.)
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return p1.start; },
+          // Start on the first pixel OUT of the hero (00), not at 01's pin, so
+          // the motes rise continuously across the whole 00->01 leave and are
+          // fully assembled just as the 01 copy finishes writing on — one
+          // continuous stage, no grounded dead-gap, no last-second swoop.
+          start: function () { return heroPin ? heroPin.start : p1.start; },
           end: function () { return at(p1, 0.30); },
           scrub: true,
           invalidateOnRefresh: true,
