@@ -317,6 +317,18 @@
   openFieldCamera.lookAt(0, lerp(-1.0, -1.5, openCameraProgress), 0);
   openFieldCamera.updateProjectionMatrix();
   openFieldCamera.updateMatrixWorld(true);
+  // The LANDED (closing) camera pose — (CAM_END) gazing down to y=-1.5. The
+  // closing field is distributed through THIS camera in screen space (below),
+  // exactly like the 02 starfield, so it fills the frame top-to-bottom instead
+  // of clumping low (a uniform WORLD volume reads bottom-heavy through a
+  // down-tilted camera because the near-ground fills more of the frame).
+  var closingCamera = new THREE.PerspectiveCamera(55, viewAspect, 0.1, 200);
+  closingCamera.position.set(CAM_END.x, CAM_END.y, CAM_END.z);
+  closingCamera.lookAt(0, -1.5, 0);
+  closingCamera.updateProjectionMatrix();
+  closingCamera.updateMatrixWorld(true);
+  var closeProbe = new THREE.Vector3();
+  var closeDir = new THREE.Vector3();
   var openProbe = new THREE.Vector3();
   var openDirection = new THREE.Vector3();
   // Per-mote ray samples are KEPT so the homes can be re-projected through
@@ -399,14 +411,19 @@
   var CLOSING_VISIBLE_MOTES = Math.round(PARTICLE_POOL * 0.62);
   for (var ci = 2; ci < PARTICLE_POOL; ci++) {
     if (ci < CLOSING_VISIBLE_MOTES + 2) {
-      // Piet: completely INSIDE the mote field at the close. Wider spread,
-      // depth running from deep space right up to the landed camera (z 3.0),
-      // so near motes read huge and the volume surrounds the viewer.
-      closingFieldHome[ci * 3]     = (Math.random() - 0.5) * 2 * FIELD_HALF_X * 1.35;
-      // Concentrated on the landed camera's visible band (view centre is
-      // world y=-1.5 at z=0) so the frame fills TOP to bottom, no low clump.
-      closingFieldHome[ci * 3 + 1] = -2.8 + Math.random() * 5.4;
-      closingFieldHome[ci * 3 + 2] = -4.0 + Math.random() * 6.4;   // up to z 2.4, right at the camera
+      // Completely INSIDE the mote field at the close, and EVEN top-to-bottom:
+      // pick a screen point (NDC) filling the frame and cast a ray of varied
+      // depth through the landed camera. Even screen coverage (not even WORLD
+      // coverage) is what reads as balanced; the varied ray distance keeps near
+      // motes huge and far ones deep, so the volume still surrounds the viewer.
+      var cScreenX = (Math.random() - 0.5) * 2.4;   // full width, slightly past both edges
+      var cScreenY = -1.0 + 2.15 * Math.random();   // fill top-to-bottom (same band as the 02 field)
+      var cDist = 1.4 + Math.random() * 8.6;         // right at the camera -> deep
+      closeProbe.set(cScreenX, cScreenY, 0.35).unproject(closingCamera);
+      closeDir.copy(closeProbe).sub(closingCamera.position).normalize();
+      closingFieldHome[ci * 3]     = closingCamera.position.x + closeDir.x * cDist;
+      closingFieldHome[ci * 3 + 1] = closingCamera.position.y + closeDir.y * cDist;
+      closingFieldHome[ci * 3 + 2] = closingCamera.position.z + closeDir.z * cDist;
     } else {
       var closingAngle = Math.random() * Math.PI * 2;
       var closingRadius = 8 + Math.random() * 9;
@@ -1441,14 +1458,21 @@
 
   // ---- Visibility ------------------------------------------------------
   var visible = !document.hidden;
+  var lastVisVW = window.innerWidth, lastVisVH = window.innerHeight;
   document.addEventListener("visibilitychange", function () {
     visible = !document.hidden;
-    // Returning from a backgrounded tab / woken screen: the viewport may have
-    // changed while we were hidden, leaving the WebGL buffer, ScrollTrigger pin
-    // measurements, and Lenis stale (which shows as a black bar / broken scroll
-    // at the bottom). Re-sync them once layout settles.
+    // Returning from a backgrounded tab / woken screen: ONLY re-sync if the
+    // viewport actually changed while we were hidden. A plain tab-switch with
+    // no resize must NOT call ScrollTrigger.refresh() — refresh re-snaps the
+    // scrubbed closing field to the settled scroll position, which makes the
+    // motes visibly POP to a new layout (Piet's nav-away/back glitch). The
+    // resize re-sync (black bar / broken scroll) is only needed on real size
+    // changes, so gate it on the dimensions.
     if (visible) {
       setTimeout(function () {
+        if (window.innerWidth === lastVisVW && window.innerHeight === lastVisVH) return;
+        lastVisVW = window.innerWidth;
+        lastVisVH = window.innerHeight;
         onResize();
         if (window.lenis && window.lenis.resize) window.lenis.resize();
         if (window.ScrollTrigger && window.ScrollTrigger.refresh) {
