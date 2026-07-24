@@ -739,11 +739,11 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-11"></script>
+    <script src="scene-claude-teaser.js?v=claude-13"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-12"></script>
-    <script src="stat-field-gpt.js?v=claude-12"></script>
+    <script src="stat-field-gpt.js?v=claude-13"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -1029,7 +1029,12 @@
         ScrollTrigger.create({
           trigger: document.body,
           start: function () { return at(p1, 0.80); },
-          end: function () { return p1.end; },
+          // Finish the spread when 02 is actually REACHED (its pin start), not at
+          // 01's unpin. Ending at p1.end left the motes fully spread a whole
+          // viewport early, then sitting dead while #product free-scrolled up to
+          // its pin (Piet: "a long in between till the png seq arrives"). Running
+          // to p2.start keeps the spread moving continuously right into 02.
+          end: function () { return p2.start; },
           scrub: true,
           invalidateOnRefresh: true,
           onUpdate: function (self) {

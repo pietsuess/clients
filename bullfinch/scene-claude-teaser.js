@@ -1670,15 +1670,27 @@
         positions[yi] = lerp(groundY, starFieldHome[yi], openFieldP);
         positions[xi + 2] = lerp(groundZ, starFieldHome[xi + 2], openFieldP);
         var statSlot = statSlotByMote[i];
-        if (statSlot >= 0 && statFormP > 0) {
-          // Randomized late arrivals prevent the grid from announcing itself
-          // too early. The same per-mote delay and arc run backwards on upward
-          // scroll, so assembly and disassembly remain exact physical inverses.
-          var statMove = smoothstep(statAssemblyDelay[i], 1.0, statFormP);
-          var statArc = Math.sin(statMove * Math.PI);
-          positions[xi] = lerp(positions[xi], statGridHome[xi], statMove) + statArcX[i] * statArc;
-          positions[yi] = lerp(positions[yi], statGridHome[yi], statMove) + statArcY[i] * statArc;
-          positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statMove);
+        if (statSlot >= 0) {
+          if (openFieldP > 0) {
+            // LEAVE (01 -> 02): glide the grid dot DIRECTLY to its 02 cloud
+            // station (mirrors the seed at i=0), so the grid SPREADS in place.
+            // The old path released the dot to the ground-based ambient home
+            // first, so the whole grid sagged to the floor before rising —
+            // Piet: "the mote field goes below instead of just spreading."
+            positions[xi]     = lerp(statGridHome[xi], starFieldHome[xi], openFieldP);
+            positions[yi]     = lerp(statGridHome[yi], starFieldHome[yi], openFieldP);
+            positions[xi + 2] = lerp(statGridHome[xi + 2], starFieldHome[xi + 2], openFieldP);
+          } else if (statFormP > 0) {
+            // ENTRY / HOLD: ground -> grid assembly. Randomized late arrivals
+            // prevent the grid from announcing itself too early; the same
+            // per-mote delay and arc run backwards on upward scroll, so assembly
+            // and disassembly stay exact physical inverses.
+            var statMove = smoothstep(statAssemblyDelay[i], 1.0, statFormP);
+            var statArc = Math.sin(statMove * Math.PI);
+            positions[xi] = lerp(positions[xi], statGridHome[xi], statMove) + statArcX[i] * statArc;
+            positions[yi] = lerp(positions[yi], statGridHome[yi], statMove) + statArcY[i] * statArc;
+            positions[xi + 2] = lerp(positions[xi + 2], statGridHome[xi + 2], statMove);
+          }
         }
         // Density gate. Red seed (i=0) is always on. Second red dot (i=1) is
         // hidden until the convergence wave begins at uConnect ~ 0.84.

@@ -92,7 +92,13 @@
   ScrollTrigger.create({
     trigger: panel,
     start: "top top",
-    end: mobileLike ? "+=100%" : "+=200%",
+    // Must match #problem's ACTUAL pin length in swot-claude.js (+=150% desktop
+    // / +=100% mobile). It was +=200%, so the readout's out-wipe (starts at
+    // 0.86 = 172% of the old range) did not begin until AFTER the panel had
+    // already unpinned at 150% — the still-visible readout then rode up the page
+    // (Piet: "the graphic and text for 100% is still sliding up"). Aligned, it
+    // un-writes IN PLACE before the panel releases.
+    end: mobileLike ? "+=100%" : "+=150%",
     scrub: true,
     invalidateOnRefresh: true,
     onUpdate: function (self) { drive(self.progress); },
