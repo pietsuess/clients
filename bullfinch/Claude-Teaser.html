@@ -363,13 +363,13 @@
       #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
       #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
 
-      /* Piet: the two items are centred as a pair — the copy column starts at
-         EXACTLY 50vw (so "Is It" sits dead centre) and the device box is
-         centred in the left half (see .case-fixed-layer below). Column 1 is
-         50vw minus the panel's own left pad, gap 0, so the track edge lands on
-         the screen's centre line. */
+      /* Piet: the copy sits closer to the device than dead centre — the device
+         ink ends at ~33.5vw, so starting the copy at 41.5vw halves the alley
+         that a 50vw (true centre) start left behind. Column 1 is that offset
+         minus the panel's own left pad, gap 0, so the track edge lands exactly
+         on 41.5vw. */
       #product.panel--media {
-        grid-template-columns: calc(50vw - var(--pad-x)) 1fr;
+        grid-template-columns: calc(41.5vw - var(--pad-x)) 1fr;
         gap: 0;
       }
       #product .panel__inner { grid-column: 2; max-width: min(760px, 42vw); padding-top: 0; }
