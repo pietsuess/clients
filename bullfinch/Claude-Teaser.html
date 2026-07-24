@@ -714,6 +714,86 @@
         #rise-a p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
         #rise-b p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
       }
+
+      /* ===== Phone pass ==================================================
+         Same ideas as the main site: single column, nothing fixed wider than
+         the viewport (a fixed box escapes body{overflow-x:hidden} and makes
+         the whole page scroll sideways), no in-page horizontal scrollers,
+         no nowrap headlines. Pin lengths, nav-on-scroll, hover gating and the
+         visualViewport splash sizing already come from swot-claude/styles.css.
+         MUST stay last in source order — it overrides the 900px block. */
+      @media (max-width: 720px) {
+        /* 01 — the two-row / two-column rail collapses to one left column:
+           headline, dot grid, body, note. */
+        #problem.panel--media {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto;
+          row-gap: clamp(16px, 3vh, 28px);
+        }
+        #problem .p-head,
+        #problem .p-body,
+        #problem .stat-visual,
+        #problem .problem-note { grid-column: 1; grid-row: auto; }
+        #problem .p-head,
+        #problem .p-body { align-items: flex-start; text-align: left; }
+        #problem .stat-visual { justify-content: flex-start; }
+        #problem .eyebrow-anchor { margin-left: 0; }
+        #problem .panel__verdict {
+          margin-left: 0;
+          text-align: left;
+          font-size: clamp(30px, 8.4vw, 46px);
+        }
+        #problem .panel__verdict .vs-line--2 { margin-right: 0; }
+        #problem .panel__evidence p,
+        #problem .panel__numeric { text-align: justify; text-align-last: left; }
+        #problem .stat-label,
+        #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
+        #problem .stat-line { left: 0; right: auto; text-align: left; }
+        #problem .stat-num { justify-content: flex-start; align-items: flex-end; }
+        #problem #statGrid { width: clamp(110px, 33vw, 150px); height: clamp(110px, 33vw, 150px); }
+
+        /* 02 — the case graphic goes full-bleed across the top (92vw, never
+           wider than the screen) and the copy stacks under it. */
+        #product.panel--media { grid-template-columns: 1fr; align-content: end; }
+        #product .panel__inner { grid-column: 1; }
+        .case-fixed-layer.panel__model {
+          width: 92vw;
+          max-width: 92vw;
+          height: 42dvh;
+          left: 50%;
+          top: 7vh;
+          transform: translateX(-50%);
+        }
+
+        /* 03 — readouts shrink so a nowrap block centred on an outer trunk
+           can't hang off the screen edge; the ground panel unstacks. */
+        .tree-readout__common { font-size: 11px; }
+        .tree-readout__latin { font-size: 9px; }
+        .tree-readout__metric { font-size: 7px; }
+        #opportunity .panel__verdict { white-space: normal; font-size: clamp(21px, 6vw, 30px); }
+        .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+        .audience-item {
+          min-height: 0;
+          padding: 8px 10px 9px;
+          border-left: 0;
+          border-top: 1px solid var(--rule);
+        }
+        .audience-item:nth-child(odd) { padding-left: 0; }
+        .audience-item:nth-child(-n + 2) { border-top: 0; }
+        .audience-item h3 { font-size: 13px; }
+        .audience-item p { font-size: 11px; }
+        .trust-line { grid-template-columns: 1fr; }
+        .trust-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+        .trust-strip div { height: 46px; padding: 6px 8px; }
+        .trust-strip div:nth-child(3n + 1) { border-left: 0; }
+
+        /* Closing — nothing nowrapped, actions wrap instead of overflowing. */
+        .closing__title { font-size: clamp(34px, 10vw, 54px); }
+        .closing__line { white-space: normal; }
+        .closing__actions { flex-wrap: wrap; gap: 12px 22px; }
+        .closing__actions a { font-size: 13px; }
+      }
     </style>
   </head>
   <body>
