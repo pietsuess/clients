@@ -363,12 +363,16 @@
       #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
       #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
 
+      /* Piet: tighten the alley between the device and the copy, and pull the
+         copy into a narrower measure (it ran the full width of the screen). */
       #product.panel--media {
-        grid-template-columns: minmax(420px, .9fr) minmax(420px, 1.1fr);
-        gap: clamp(26px, 3.2vw, 58px);
+        grid-template-columns: minmax(260px, .5fr) minmax(360px, 1fr);
+        gap: clamp(12px, 1.2vw, 24px);
       }
-      #product .panel__inner { grid-column: 2; max-width: none; padding-top: 0; }
-      #product .panel__verdict { font-size: clamp(38px, 4.2vw, 70px); }
+      #product .panel__inner { grid-column: 2; max-width: min(760px, 42vw); padding-top: 0; }
+      /* Sized down to hold "Is It Really This Easy?" on ONE line in the
+         narrower column. */
+      #product .panel__verdict { font-size: clamp(34px, 3.4vw, 56px); text-wrap: balance; }
       #product .panel__evidence { display: grid; grid-template-columns: 1fr; gap: 0; max-width: none; }
       #product .panel__evidence p { padding: 9px 0; border-top: 1px solid var(--rule); text-align: justify; text-align-last: left; }
       #product .panel__evidence p:first-child { border-top: 0; }
@@ -1052,7 +1056,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-19"></script>
+    <script src="scene-claude-teaser.js?v=claude-20"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>

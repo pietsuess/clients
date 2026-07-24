@@ -561,6 +561,7 @@
     "uniform float uStatForm;",
     "uniform float uStatFill;",
     "uniform vec3 uStatMuted;",
+    "uniform float uDim;",
     "void main(){",
     "  vec2 c = gl_PointCoord - vec2(0.5);",
     "  float d = length(c);",
@@ -579,7 +580,10 @@
     "  // wave. vGlow still tints the dot itself red on contact (color mix",
     "  // above), but renders no halo. This also stops the invisible",
     "  // convergence dot (alpha 0, permanent pulse) leaking a floating ring.",
-    "  float alpha = vAlpha * aa;",
+    "  // Piet: loose BACKGROUND motes sit back at uDim; motes that have become",
+    "  // content (the <1% grid, the grove) come back to full strength.",
+    "  float dim = mix(uDim, 1.0, max(uTreeForm, uStatForm));",
+    "  float alpha = vAlpha * aa * dim;",
     "  gl_FragColor = vec4(col, alpha);",
     "}",
   ].join("\n");
@@ -597,6 +601,9 @@
       uStatForm:    { value: 0 },
       uStatFill:    { value: 0 },
       uStatMuted:   { value: readCssColor("--ink-soft") },
+      // Background mote strength. Piet (teaser): the loose field sits back at
+      // 50% so the copy reads; grid/grove motes are exempt (see fragment).
+      uDim:         { value: 0.5 },
     },
     vertexShader: partVertex,
     fragmentShader: partFragment,
