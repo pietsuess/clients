@@ -2234,6 +2234,11 @@
       fillFinalLocked = true;
     }
     if (!finalFieldLocked) return;
+    // Piet: at the end every ordinary mote settles to 25% opacity so the
+    // terminal red mote (index 1, untouched below) and the lines (their own
+    // aRevealedAlpha buffer) carry the finale. Dim eases in over the back
+    // half of the settle and reverses cleanly on upward scroll.
+    var closingDim = smoothstep(0.6, 1.0, finalFieldP);
     for (var i = 2; i < PARTICLE_POOL; i++) {
       var stagger = (i % 11) * 0.015;
       var w = tClamp01(finalFieldP * 1.15 - stagger);
@@ -2243,6 +2248,7 @@
       positions[i3 + 1] = lerp(finalFieldCapture[i3 + 1], closingFieldHome[i3 + 1], e);
       positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], closingFieldHome[i3 + 2], e);
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
+      alphas[i] = lerp(alphas[i], 0.25, closingDim);
     }
     if (fillFinalLocked && fillPosAttr && fillAlphaAttr) {
       var fp = fillPosAttr.array;
@@ -2255,7 +2261,7 @@
         fp[f3]     = lerp(fillFinalCapture[f3],     fillStartArr[f3],     fe);
         fp[f3 + 1] = lerp(fillFinalCapture[f3 + 1], fillStartArr[f3 + 1], fe);
         fp[f3 + 2] = lerp(fillFinalCapture[f3 + 2], fillStartArr[f3 + 2], fe);
-        fa[f] = 1;
+        fa[f] = lerp(1, 0.25, closingDim);
       }
       fillPosAttr.needsUpdate = true;
       fillAlphaAttr.needsUpdate = true;
