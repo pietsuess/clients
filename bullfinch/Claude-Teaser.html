@@ -498,9 +498,10 @@
              the counter climbs (the original Claude behaviour). Codex's
              colours + forest reveal are untouched. ===================== */
       /* Left/right body tops are aligned in JS (alignProblemTops, end of body):
-         each column is independently vertically centered, so a static margin
-         only moves the body HALF as far. The script measures the real gap and
-         applies 2x to whichever body is higher. Widths already match below. */
+         each column is independently vertically centered, so the script pulls
+         the LOWER column UP (margin-bottom, 2x the gap) to meet the higher
+         body -- leftover space lands at the empty bottom, not the reading
+         area. Widths already match below. */
       #problem .panel__evidence { grid-template-columns: 1fr; }
       #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
       #problem .panel__stat--problem {
@@ -1860,15 +1861,19 @@
         var note = document.querySelector("#problem .problem-note");
         if (!evidence || !leftP || !note) return;
         function run() {
-          if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) {
-            evidence.style.marginTop = ""; note.style.marginTop = ""; return;
-          }
-          evidence.style.marginTop = "0px";
-          note.style.marginTop = "0px";
+          evidence.style.marginBottom = "";
+          note.style.marginBottom = "";
+          if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) return;
+          // Both columns are vertically CENTERED, so adding margin-BOTTOM to a
+          // block pulls that column's content UP by half the margin (the column
+          // grows downward, re-centering lifts it). We align to whichever body
+          // sits HIGHER and pull the lower column up to meet it -- the leftover
+          // space lands at the BOTTOM of that column (already empty) instead of
+          // voiding the reading area. Factor 2 undoes the half-shift.
           var gap = layoutTop(note) - layoutTop(leftP);  // >0: right note lower
           if (Math.abs(gap) < 1) return;
-          if (gap > 0) evidence.style.marginTop = (gap * 2) + "px";
-          else note.style.marginTop = (-gap * 2) + "px";
+          if (gap > 0) note.style.marginBottom = (gap * 2) + "px";       // pull right col up
+          else evidence.style.marginBottom = (-gap * 2) + "px";          // pull left col up
         }
         var t;
         function schedule() { clearTimeout(t); t = setTimeout(run, 120); }
