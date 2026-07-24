@@ -1671,7 +1671,7 @@
         // Index 1 is reserved for the closing convergence point. Keep it out
         // of the opening and middle sections; the final line pass reveals it.
         if (i === 1) {
-          alphas[i] = smoothstep(0.0, 0.15, waveProgress[7] || 0);
+          alphas[i] = smoothstep(0.45, 0.72, waveProgress[7] || 0);
           continue;
         }
         if (i === 0) {
