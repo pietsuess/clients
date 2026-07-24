@@ -497,21 +497,39 @@
              BLACK dots, ONE RED centre rendered on top, filling to ALL RED as
              the counter climbs (the original Claude behaviour). Codex's
              colours + forest reveal are untouched. ===================== */
-      /* Left/right body tops are aligned in JS (alignProblemTops, end of body):
-         each column is independently vertically centered, so the script pulls
-         the LOWER column UP (margin-bottom, 2x the gap) to meet the higher
-         body -- leftover space lands at the empty bottom, not the reading
-         area. Widths already match below. */
-      #problem .panel__evidence { grid-template-columns: 1fr; }
-      #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
+      /* 01 = a true TWO-ROW grid (Piet, Opt 1): the headline-top aligns with the
+         dot-grid-top (HEADER band, row 1) and BOTH body paragraphs align (BODY
+         band, row 2). Each column is a subgrid that shares the article's two row
+         tracks, so the alignment is deterministic -- no JS, no margin math. The
+         two-row block is vertically centered in the section as a whole. */
+      #problem.panel--media {
+        grid-template-rows: auto auto;
+        place-items: stretch;
+        align-content: center;
+        row-gap: clamp(38px, 7vh, 104px);
+      }
+      #problem .panel__inner {
+        grid-row: 1 / 3;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: subgrid;
+        align-items: start;
+      }
+      #problem .p-head { display: flex; flex-direction: column; align-items: flex-end; grid-row: 1; }
+      #problem .p-body { display: flex; flex-direction: column; align-items: flex-end; gap: clamp(20px, 3vh, 44px); grid-row: 2; }
       #problem .panel__stat--problem {
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: center;
-        gap: clamp(20px, 2.6vh, 34px);
+        grid-row: 1 / 3;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: subgrid;
+        align-items: start;
+        gap: 0;
         text-align: left;
       }
-      #problem .stat-visual { display: flex; align-items: center; gap: clamp(18px, 2.2vw, 36px); }
+      #problem .stat-visual { grid-row: 1; display: flex; align-items: center; gap: clamp(18px, 2.2vw, 36px); }
+      #problem .problem-note { grid-row: 2; }
+      #problem .panel__evidence { grid-template-columns: 1fr; }
+      #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin-right: auto; }
       #problem .stat-read { transform: none; }
       /* Reserve a real box for the mote grid inside the right column so the
          WebGL grid lands in its own space (flex pushes the readout to its
@@ -604,12 +622,16 @@
       <section class="swot" id="swot" aria-label="Bullfinch Earth story">
         <article class="panel panel--media" id="problem" data-panel="1">
           <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-            <h2 class="panel__verdict"><span class="vs-line">Dedicated Inventories</span><span class="vs-line vs-line--2">Are So</span><span class="vs-line">19th Century</span></h2>
-            <div class="panel__evidence">
-              <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
+            <div class="p-head">
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+              <h2 class="panel__verdict"><span class="vs-line">Dedicated Inventories</span><span class="vs-line vs-line--2">Are So</span><span class="vs-line">19th Century</span></h2>
             </div>
-            <p class="panel__numeric">ONE FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
+            <div class="p-body">
+              <div class="panel__evidence">
+                <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
+              </div>
+              <p class="panel__numeric">ONE FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
+            </div>
           </div>
           <div class="panel__stat panel__stat--problem" aria-label="Today, manual forestry measures data for less than 1% of trees">
             <div class="stat-visual">
@@ -1843,46 +1865,6 @@
           autoStart();
         } else {
           loadedFrames[0].addEventListener("load", autoStart, { once: true });
-        }
-      })();
-    </script>
-    <script>
-      /* 01: align the top of the left body ("Inventory data...") with the top
-         of the right note ("Bullfinch fully automates..."). Both #problem
-         columns are independently vertically CENTERED, so a margin on one body
-         re-centers its column and cancels half the shift -- the required
-         margin is exactly 2x the measured gap. layoutTop() sums offsetTop up
-         the chain (LAYOUT position, unaffected by the write-on transforms), so
-         it can be measured at any scroll state. Re-runs on resize + font load. */
-      (function alignProblemTops() {
-        function layoutTop(el) { var y = 0; while (el) { y += el.offsetTop; el = el.offsetParent; } return y; }
-        var evidence = document.querySelector("#problem .panel__evidence");
-        var leftP = evidence && evidence.querySelector("p");
-        var note = document.querySelector("#problem .problem-note");
-        if (!evidence || !leftP || !note) return;
-        function run() {
-          evidence.style.marginBottom = "";
-          note.style.marginBottom = "";
-          if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches) return;
-          // Both columns are vertically CENTERED, so adding margin-BOTTOM to a
-          // block pulls that column's content UP by half the margin (the column
-          // grows downward, re-centering lifts it). We align to whichever body
-          // sits HIGHER and pull the lower column up to meet it -- the leftover
-          // space lands at the BOTTOM of that column (already empty) instead of
-          // voiding the reading area. Factor 2 undoes the half-shift.
-          var gap = layoutTop(note) - layoutTop(leftP);  // >0: right note lower
-          if (Math.abs(gap) < 1) return;
-          if (gap > 0) note.style.marginBottom = (gap * 2) + "px";       // pull right col up
-          else evidence.style.marginBottom = (-gap * 2) + "px";          // pull left col up
-        }
-        var t;
-        function schedule() { clearTimeout(t); t = setTimeout(run, 120); }
-        run();
-        window.addEventListener("resize", schedule);
-        window.addEventListener("orientationchange", schedule);
-        if (document.fonts && document.fonts.ready) document.fonts.ready.then(run);
-        if (window.ScrollTrigger && window.ScrollTrigger.addEventListener) {
-          window.ScrollTrigger.addEventListener("refreshInit", run);
         }
       })();
     </script>
