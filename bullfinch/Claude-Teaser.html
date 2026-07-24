@@ -692,10 +692,10 @@
       .rise-headline p {
         margin: 0;
         font-family: var(--font-display);
-        font-weight: 500;
+        font-weight: 700;
         line-height: 1.08;
         letter-spacing: -0.02em;
-        color: var(--ink);
+        color: #fff;
         text-align: left;
       }
       /* A — 60 chars, ONE line. */
@@ -1257,8 +1257,10 @@
           drive(riseA, 0); drive(riseB, 0);
           ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return heroPin ? heroPin.end : p1.start; },
-            end: function () { return bandEnd(heroPin ? heroPin.end : p1.start, p1.start); },
+            // Widened both ways (Piet): in a touch before the hero unpins (its
+            // copy is erased by 0.86) and out a touch after 01 pins.
+            start: function () { return heroPin ? at(heroPin, 0.90) : p1.start; },
+            end: function () { return bandEnd(heroPin ? at(heroPin, 0.90) : p1.start, at(p1, 0.08)); },
             scrub: true,
             invalidateOnRefresh: true,
             onUpdate: function (self) { drive(riseA, self.progress); },
