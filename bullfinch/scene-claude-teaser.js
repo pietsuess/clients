@@ -789,11 +789,12 @@
   //   x = 0.0   (centred horizontally)
   //   y = -2.5  (forest floor — below the canopy plane, revealed by tilt-down)
   //   z = 0.0   (on the focal axis the camera looks down through)
-  // DEAD CENTRE of the landed view: the camera ends at (0, 0.5, 3) looking at
-  // (0, -1.5, 0), so a dot AT (0, -1.5, 0) projects to the exact middle of
-  // the viewport on every aspect ratio.
+  // The camera ends at (0, 0.5, 3) looking at (0, -1.5, 0); a dot AT the lookAt
+  // projects to the exact middle of the viewport. We seat it a touch BELOW that
+  // (y = -1.9) so it lands in the open space between the closing actions row and
+  // the footer, reading as centred in that gap rather than the whole viewport.
   var FINAL_RED_X = 0.0;
-  var FINAL_RED_Y = -1.5;
+  var FINAL_RED_Y = -1.9;
   var FINAL_RED_Z = 0.0;
   positions[FINAL_RED_IDX * 3]     = FINAL_RED_X;
   positions[FINAL_RED_IDX * 3 + 1] = FINAL_RED_Y;
