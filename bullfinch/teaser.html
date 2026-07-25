@@ -445,8 +445,18 @@
            straight on the grove with no box behind it (Piet). No backdrop
            blur anywhere: nothing defocuses the trees. */
       }
-      .ground-heading,
-      .audience-grid { background: color-mix(in srgb, var(--bg) 88%, transparent); }
+      /* The WHOLE ground panel runs open on the grove (Piet) — no box behind
+         any of it, so every rule, label and logo in it goes light. */
+      .ground-heading { border-top-color: rgba(255, 255, 255, .26); }
+      .audience-grid {
+        border-top-color: rgba(255, 255, 255, .26);
+        border-bottom-color: rgba(255, 255, 255, .26);
+      }
+      .audience-item { border-left-color: rgba(255, 255, 255, .26); }
+      #opportunity .panel__eyebrow { color: rgba(255, 255, 255, .72); }
+      #opportunity .panel__verdict { color: #fff; }
+      .audience-item h3 { color: rgba(255, 255, 255, .94); }
+      .audience-item p { color: rgba(255, 255, 255, .74); }
       .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
       .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
       #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
