@@ -440,10 +440,13 @@
            (03 eyebrow, TIMBER COMPANIES, PARTNERS label, the headline). */
         padding: 0 clamp(18px, 1.8vw, 34px);
         justify-content: flex-end;
-        /* The panel keeps its own background — the copy below needs it. Only
-           the backdrop BLUR is gone (Piet), so nothing defocuses the grove. */
-        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        /* No background on the panel itself — it now sits on the blocks that
+           need it (heading + audience grid), so the PARTNERS bar below can run
+           straight on the grove with no box behind it (Piet). No backdrop
+           blur anywhere: nothing defocuses the trees. */
       }
+      .ground-heading,
+      .audience-grid { background: color-mix(in srgb, var(--bg) 88%, transparent); }
       .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
       .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
       #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
@@ -463,6 +466,12 @@
       .trust-strip div:first-child { border-left: 0; }
       .trust-strip img { max-width: 100%; max-height: 42px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
       body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
+      /* PARTNERS bar runs on the open grove: light rules, light label, logos
+         knocked out to white. */
+      .trust-line { border-bottom-color: rgba(255, 255, 255, .26); }
+      .trust-strip div { border-left-color: rgba(255, 255, 255, .26); }
+      .trust-label { color: rgba(255, 255, 255, .72); }
+      .trust-strip img { filter: grayscale(1) brightness(0) invert(1); opacity: .8; }
       .trust-label {
         min-height: 44px;
         margin: 0;
