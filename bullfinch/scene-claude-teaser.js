@@ -2419,11 +2419,12 @@
   //   stop 4  the trees (in 03)     halfway from the green to the night
   //   then the existing finalPalette takes it the rest of the way down.
   //
-  // Green: pushed off yellow toward a truer leaf green and up in saturation.
+  // Green: off the yellow, but EARTHY forest rather than electric — saturation
+  // pulled back and the hue held on the olive/sage side.
   var greenPalette = {
-    canopy: new THREE.Color("#C7E6A2"),
-    understory: new THREE.Color("#7BB554"),
-    base: new THREE.Color("#C8E5A8")
+    canopy: new THREE.Color("#C4D6A4"),
+    understory: new THREE.Color("#6F8F55"),
+    base: new THREE.Color("#C6D6A6")
   };
   function mixStop(a, b, t) {
     return {
@@ -2437,7 +2438,9 @@
     mixStop(dayPalette, greenPalette, 0.18),
     mixStop(dayPalette, greenPalette, 0.55),
     greenPalette,
-    mixStop(greenPalette, finalPalette, 0.5)
+    // Only 30% toward the night: at 50% the grove card went nearly black
+    // before the closing had even started.
+    mixStop(greenPalette, finalPalette, 0.30)
   ];
   var journeyP = 0;   // 0..4, the COMMITTED position along the ramp
   var wipeStop = 0;   // >0 while a bar is mid-wipe toward that stop
