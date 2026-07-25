@@ -683,10 +683,17 @@
          at both ends of their band, so nothing ever ghosts in or out. Left
          aligned on the page gutter, sized to hold ONE line where the copy
          allows and two only when it must. */
+      /* The block is a full-bleed BANNER STRIP: edge-to-edge background, with
+         the copy held at the page gutter by the strip's own padding. Same
+         translucent-bg + blur treatment as the 03 ground panel. */
       .rise-headline {
         position: fixed;
-        left: var(--pad-x, 64px);
-        right: var(--pad-x, 64px);
+        left: 0;
+        right: 0;
+        padding: clamp(14px, 2.4vh, 28px) var(--pad-x, 64px);
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+        -webkit-backdrop-filter: blur(5px) saturate(.95);
+        backdrop-filter: blur(5px) saturate(.95);
         top: 50%;
         transform: translateY(-50%) translateY(var(--rise-y, 58vh));
         opacity: 1;
@@ -701,7 +708,7 @@
       .rise-headline p {
         margin: 0;
         font-family: var(--font-display);
-        font-weight: 700;
+        font-weight: 500;
         line-height: 1.08;
         letter-spacing: -0.02em;
         color: var(--accent);
