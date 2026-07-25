@@ -2438,9 +2438,7 @@
     mixStop(dayPalette, greenPalette, 0.18),
     mixStop(dayPalette, greenPalette, 0.55),
     greenPalette,
-    // Only 30% toward the night: at 50% the grove card went nearly black
-    // before the closing had even started.
-    mixStop(greenPalette, finalPalette, 0.30)
+    mixStop(greenPalette, finalPalette, 0.5)
   ];
   var journeyP = 0;   // 0..4, the COMMITTED position along the ramp
   var wipeStop = 0;   // >0 while a bar is mid-wipe toward that stop
