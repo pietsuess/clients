@@ -2438,7 +2438,10 @@
     mixStop(dayPalette, greenPalette, 0.18),
     mixStop(dayPalette, greenPalette, 0.55),
     greenPalette,
-    mixStop(greenPalette, finalPalette, 0.5)
+    // Barely off the green. Piet: 03 must READ as the green section — at 0.5
+    // the grove card went olive-dark and lost the colour entirely. The drop to
+    // night is the closing's job, not this stop's.
+    mixStop(greenPalette, finalPalette, 0.12)
   ];
   var journeyP = 0;   // 0..4, the COMMITTED position along the ramp
   var wipeStop = 0;   // >0 while a bar is mid-wipe toward that stop
