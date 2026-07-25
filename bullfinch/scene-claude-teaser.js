@@ -2339,26 +2339,54 @@
     shaft: readCssColor("--gl-final-shaft"), mote: readCssColor("--gl-final-mote"),
     line: readCssRgba("--gl-final-line"), base: readCssColor("--gl-final-base")
   };
-  // Section 02 product tint: the backdrop plane + clear color pull toward a
-  // light green while the device section is on screen (eased in/out by the
-  // swot p2 trigger) so 01 and 03 stay beige. Slight canopy/understory split
-  // preserves the vertical gradient. Piet will taste-tune the hue.
-  var productPalette = {
-    canopy: new THREE.Color("#DFEDC0"),
-    understory: new THREE.Color("#94B873"),
-    base: new THREE.Color("#DAE9B6")
+  // ---- JOURNEY COLOUR RAMP (Piet) --------------------------------------
+  // The page no longer tints per-section. It walks ONE ramp, and the sliding
+  // headline bars are what move it: each bar's ride carries the background
+  // from one stop to the next, so the colour change is something you watch
+  // arrive rather than something that crossfades on its own.
+  //
+  //   stop 0  day/beige         (hero + 01, where we start)
+  //   stop 1  bar A (hero -> 01)    first small step off the beige
+  //   stop 2  bar C (01 -> 02)      halfway to the green
+  //   stop 3  bar B (02 -> 03)      the green, full strength
+  //   stop 4  the trees (in 03)     halfway from the green to the night
+  //   then the existing finalPalette takes it the rest of the way down.
+  //
+  // Green: pushed off yellow toward a truer leaf green and up in saturation.
+  var greenPalette = {
+    canopy: new THREE.Color("#C7E6A2"),
+    understory: new THREE.Color("#7BB554"),
+    base: new THREE.Color("#C8E5A8")
   };
+  function mixStop(a, b, t) {
+    return {
+      canopy: a.canopy.clone().lerp(b.canopy, t),
+      understory: a.understory.clone().lerp(b.understory, t),
+      base: a.base.clone().lerp(b.base, t)
+    };
+  }
+  var journeyStops = [
+    { canopy: dayPalette.canopy, understory: dayPalette.understory, base: dayPalette.base },
+    mixStop(dayPalette, greenPalette, 0.18),
+    mixStop(dayPalette, greenPalette, 0.55),
+    greenPalette,
+    mixStop(greenPalette, finalPalette, 0.5)
+  ];
+  var journeyP = 0;   // 0..4, position along the ramp
   var paletteScratch = new THREE.Color();
   var tintScratch = new THREE.Color();
   var finalPaletteP = 0;
-  var productTintP = 0;
   function applyScenePalette() {
-    // Product tint applies over the day palette; the closing night palette
-    // then lerps on top. The two bands never overlap in scroll, but composing
-    // keeps any call order safe.
-    tintScratch.lerpColors(dayPalette.canopy, productPalette.canopy, productTintP);
+    // Walk the journey ramp to the current stop pair, then let the closing
+    // night palette lerp on top. The two never overlap in scroll, but
+    // composing keeps any call order safe.
+    var seg = Math.min(Math.floor(journeyP), journeyStops.length - 2);
+    var segT = journeyP - seg;
+    if (segT < 0) segT = 0; else if (segT > 1) segT = 1;
+    var sa = journeyStops[seg], sb = journeyStops[seg + 1];
+    tintScratch.lerpColors(sa.canopy, sb.canopy, segT);
     uniforms.uCanopy.value.lerpColors(tintScratch, finalPalette.canopy, finalPaletteP);
-    tintScratch.lerpColors(dayPalette.understory, productPalette.understory, productTintP);
+    tintScratch.lerpColors(sa.understory, sb.understory, segT);
     uniforms.uUnderstory.value.lerpColors(tintScratch, finalPalette.understory, finalPaletteP);
     uniforms.uLightShaft.value.lerpColors(dayPalette.shaft, finalPalette.shaft, finalPaletteP);
     uniforms.uLine.value.lerpColors(dayPalette.line.color, finalPalette.line.color, finalPaletteP);
@@ -2366,7 +2394,7 @@
     paletteScratch.lerpColors(dayPalette.mote, finalPalette.mote, finalPaletteP);
     partMat.uniforms.uColor.value.copy(paletteScratch);
     arrowMat.uniforms.uColor.value.copy(paletteScratch);
-    tintScratch.lerpColors(dayPalette.base, productPalette.base, productTintP);
+    tintScratch.lerpColors(sa.base, sb.base, segT);
     bgColor.lerpColors(tintScratch, finalPalette.base, finalPaletteP);
     renderer.setClearColor(bgColor, 1);
   }
@@ -2374,10 +2402,16 @@
     finalPaletteP = tClamp01(p);
     applyScenePalette();
   }
-  function setProductTintProgress(p) {
-    productTintP = tClamp01(p);
+  // Position along the journey ramp, 0..4. The headline bars own this now.
+  function setJourneyProgress(v) {
+    v = v < 0 ? 0 : (v > journeyStops.length - 1 ? journeyStops.length - 1 : v);
+    if (v === journeyP) return;
+    journeyP = v;
     applyScenePalette();
   }
+  // Retired: 02 no longer tints on its own (swot-claude.js still calls this on
+  // the 02 pin). The green now arrives with the bar that rides 02 -> 03.
+  function setProductTintProgress() {}
   function setFinalPalette(active) { setFinalPaletteProgress(active ? 1 : 0); }
   window.bullfinchCanopy = {
     setProgress: setProgress,
@@ -2387,6 +2421,7 @@
     setFinalPalette: setFinalPalette,
     setFinalPaletteProgress: setFinalPaletteProgress,
     setProductTintProgress: setProductTintProgress,
+    setJourneyProgress: setJourneyProgress,
     setSeedReveal: setSeedReveal,
     setStatProgress: function (p) { statFormP = tClamp01(p); },
     setStatFillProgress: function (p) { statFillP = tClamp01(p); },
