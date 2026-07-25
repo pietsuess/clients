@@ -1071,7 +1071,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-22"></script>
+    <script src="scene-claude-teaser.js?v=claude-23"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>
@@ -1351,14 +1351,25 @@
           // A zero-length band would make the scrub degenerate; keep a floor in
           // case a layout ever collapses the gap between two pins.
           function bandEnd(start, end) { return end > start + 40 ? end : start + 40; }
-          // Each bar CARRIES the background from one journey stop to the next
-          // (see the ramp in scene-claude-teaser.js): A -> 1, C -> 2, B -> 3,
-          // and the grove itself -> 4. The colour moves with the bar, so the
-          // change is something you watch arrive.
-          function journey(stop, p) {
-            if (window.bullfinchCanopy && window.bullfinchCanopy.setJourneyProgress) {
-              window.bullfinchCanopy.setJourneyProgress(stop - 1 + p);
+          // Each bar WIPES the background from one journey stop to the next
+          // (ramp in scene-claude-teaser.js): A -> 1, C -> 2, B -> 3, and the
+          // grove itself -> 4. Not a crossfade: the bar's top edge is a hard
+          // boundary, new colour behind it (below), old colour ahead of it
+          // (above), so the colour arrives with the bar and nowhere else.
+          function journey(stop, el, p) {
+            var c = window.bullfinchCanopy;
+            if (!c) return;
+            if (p <= 0) { if (c.setJourneyProgress) c.setJourneyProgress(stop - 1); return; }
+            if (p >= 1) { if (c.setJourneyProgress) c.setJourneyProgress(stop); return; }
+            // Stop 4 has no bar to wipe with — the grove carries it, so that
+            // one eases instead.
+            if (!c.setJourneyWipe || !el) {
+              if (c.setJourneyProgress) c.setJourneyProgress(stop - 1 + p);
+              return;
             }
+            // Screen fraction of the bar's TOP edge, 0 bottom -> 1 top.
+            var h = window.innerHeight || 1;
+            c.setJourneyWipe(stop, 1 - el.getBoundingClientRect().top / h);
           }
           var riseA = document.getElementById("rise-a");
           var riseB = document.getElementById("rise-b");
@@ -1372,9 +1383,9 @@
             end: function () { return bandEnd(heroPin ? at(heroPin, 0.90) : p1.start, at(p1, 0.08)); },
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { drive(riseA, self.progress); journey(1, self.progress); },
-            onLeaveBack: function () { drive(riseA, 0); journey(1, 0); },
-            onLeave: function () { drive(riseA, 1); journey(1, 1); },
+            onUpdate: function (self) { drive(riseA, self.progress); journey(1, riseA, self.progress); },
+            onLeaveBack: function () { drive(riseA, 0); journey(1, riseA, 0); },
+            onLeave: function () { drive(riseA, 1); journey(1, riseA, 1); },
           });
           // C: 01 releasing -> the open field before 02 pins. Starts as the 01
           // copy is already un-writing (0.80 -> 1.0), so the block only clears
@@ -1386,9 +1397,9 @@
             end: function () { return bandEnd(at(p1, 0.86), p2.start); },
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { drive(riseC, self.progress); journey(2, self.progress); },
-            onLeaveBack: function () { drive(riseC, 0); journey(2, 0); },
-            onLeave: function () { drive(riseC, 1); journey(2, 1); },
+            onUpdate: function (self) { drive(riseC, self.progress); journey(2, riseC, self.progress); },
+            onLeaveBack: function () { drive(riseC, 0); journey(2, riseC, 0); },
+            onLeave: function () { drive(riseC, 1); journey(2, riseC, 1); },
           });
           ScrollTrigger.create({
             trigger: document.body,
@@ -1396,9 +1407,9 @@
             end: function () { return bandEnd(p2.end, p3.start); },
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { drive(riseB, self.progress); journey(3, self.progress); },
-            onLeaveBack: function () { drive(riseB, 0); journey(3, 0); },
-            onLeave: function () { drive(riseB, 1); journey(3, 1); },
+            onUpdate: function (self) { drive(riseB, self.progress); journey(3, riseB, self.progress); },
+            onLeaveBack: function () { drive(riseB, 0); journey(3, riseB, 0); },
+            onLeave: function () { drive(riseB, 1); journey(3, riseB, 1); },
           });
           // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
           // trees are standing, the ramp walks from the green halfway to the
@@ -1409,9 +1420,9 @@
             end: function () { return at(p3, 0.30); },
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { journey(4, self.progress); },
-            onLeaveBack: function () { journey(4, 0); },
-            onLeave: function () { journey(4, 1); },
+            onUpdate: function (self) { journey(4, null, self.progress); },
+            onLeaveBack: function () { journey(4, null, 0); },
+            onLeave: function () { journey(4, null, 1); },
           });
         })();
 

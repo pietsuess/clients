@@ -120,6 +120,21 @@
     // density still follows scroll directly.
     uMoteDensity:  { value: 0.08 },
     uConnect:      { value: 0 },
+    // ---- Bar WIPE (Piet) ------------------------------------------------
+    // The background colour is not crossfaded. A headline bar rides up the
+    // screen and the new colour exists ONLY above its top edge — a hard
+    // boundary that travels with the bar. uWipeY is that edge in screen
+    // space (0 = bottom, 1 = top); uCanopyTo/uUnderstoryTo are the incoming
+    // colours. With no wipe running the *To pair equals the *From pair, so
+    // the boundary is a no-op.
+    uWipeY:        { value: 1.0 },
+    uCanopyTo:     { value: readCssColor("--gl-canopy") },
+    uUnderstoryTo: { value: readCssColor("--gl-understory") },
+    uRes:          { value: new THREE.Vector2(1, 1) },
+    // The flat page colour under everything. A clear colour can't hold a
+    // boundary, so an opaque full-screen quad carries it instead.
+    uBase:         { value: readCssColor(baseRaw ? "--gl-base" : "--bg") },
+    uBaseTo:       { value: readCssColor(baseRaw ? "--gl-base" : "--bg") },
   };
 
   var noiseGLSL = [
@@ -152,17 +167,28 @@
     "uniform float uLayerTint;",
     "uniform vec3  uCanopy;",
     "uniform vec3  uUnderstory;",
+    "uniform vec3  uCanopyTo;",
+    "uniform vec3  uUnderstoryTo;",
+    "uniform float uWipeY;",
+    "uniform vec2  uRes;",
     "varying vec2 vUv;",
     noiseGLSL,
     "void main(){",
+    // Hard wipe boundary in SCREEN space (the plane's own UVs are bigger than
+    // the frustum, so gl_FragCoord is the only honest measure). The bar sweeps
+    // bottom -> top and leaves the new colour BEHIND it, so 1 = at or below
+    // the bar's top edge = already wiped.
+    "  float wipe = step(gl_FragCoord.y / uRes.y, uWipeY);",
     // Tint grade across 4 anchors:
     //   0.00–0.33  canopy            -> mix(canopy, under, 0.35)
     //   0.33–0.66  mix(c,u,0.35)     -> mix(canopy, under, 0.70)
     //   0.66–1.00  mix(c,u,0.70)     -> understory
-    "  vec3 a0 = uCanopy;",
-    "  vec3 a1 = mix(uCanopy, uUnderstory, 0.35);",
-    "  vec3 a2 = mix(uCanopy, uUnderstory, 0.70);",
-    "  vec3 a3 = uUnderstory;",
+    "  vec3 cCanopy = mix(uCanopy, uCanopyTo, wipe);",
+    "  vec3 cUnder  = mix(uUnderstory, uUnderstoryTo, wipe);",
+    "  vec3 a0 = cCanopy;",
+    "  vec3 a1 = mix(cCanopy, cUnder, 0.35);",
+    "  vec3 a2 = mix(cCanopy, cUnder, 0.70);",
+    "  vec3 a3 = cUnder;",
     "  float t = clamp(uLayerTint, 0.0, 1.0);",
     "  vec3 tinted;",
     "  if (t < 0.3333) {",
@@ -204,6 +230,10 @@
       uLayerTint:  uniforms.uLayerTint,
       uCanopy:     uniforms.uCanopy,
       uUnderstory: uniforms.uUnderstory,
+      uCanopyTo:     uniforms.uCanopyTo,
+      uUnderstoryTo: uniforms.uUnderstoryTo,
+      uWipeY:        uniforms.uWipeY,
+      uRes:          uniforms.uRes,
     },
     vertexShader: planeVertex,
     fragmentShader: backdropFragment,
@@ -214,6 +244,39 @@
   backdrop.position.set(0, 0, -12);
   backdrop.renderOrder = -10;
   camera.add(backdrop);
+
+  // ---- Layer A0: the flat page colour, with the wipe boundary -----------
+  // Sits behind the backdrop plane and paints the base colour opaquely, so
+  // the bar's hard edge applies to the page colour itself and not just to
+  // the atmospheric tint above it.
+  var baseMat = new THREE.ShaderMaterial({
+    transparent: false,
+    depthWrite: false,
+    depthTest: false,
+    side: THREE.DoubleSide,
+    uniforms: {
+      uBase:   uniforms.uBase,
+      uBaseTo: uniforms.uBaseTo,
+      uWipeY:  uniforms.uWipeY,
+      uRes:    uniforms.uRes,
+    },
+    vertexShader: planeVertex,
+    fragmentShader: [
+      "uniform vec3  uBase;",
+      "uniform vec3  uBaseTo;",
+      "uniform float uWipeY;",
+      "uniform vec2  uRes;",
+      "varying vec2 vUv;",
+      "void main(){",
+      "  float wipe = step(gl_FragCoord.y / uRes.y, uWipeY);",
+      "  gl_FragColor = vec4(mix(uBase, uBaseTo, wipe), 1.0);",
+      "}",
+    ].join("\n"),
+  });
+  var basePlane = new THREE.Mesh(backdropGeo, baseMat);
+  basePlane.position.set(0, 0, -12.5);
+  basePlane.renderOrder = -20;
+  camera.add(basePlane);
 
   // ---- Layer B: three diagonal light shafts (additive) -----------------
   var shaftFragment = [
@@ -1465,8 +1528,12 @@
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     partMat.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+    // Drawing-buffer pixels — gl_FragCoord is in that space, not CSS px.
+    var dpr = renderer.getPixelRatio();
+    uniforms.uRes.value.set(w * dpr, h * dpr);
   }
   window.addEventListener("resize", onResize);
+  onResize();
 
   // ---- Visibility ------------------------------------------------------
   var visible = !document.hidden;
@@ -2372,41 +2439,71 @@
     greenPalette,
     mixStop(greenPalette, finalPalette, 0.5)
   ];
-  var journeyP = 0;   // 0..4, position along the ramp
+  var journeyP = 0;   // 0..4, the COMMITTED position along the ramp
+  var wipeStop = 0;   // >0 while a bar is mid-wipe toward that stop
   var paletteScratch = new THREE.Color();
   var tintScratch = new THREE.Color();
   var finalPaletteP = 0;
+  var rampBelow = { canopy: new THREE.Color(), understory: new THREE.Color(), base: new THREE.Color() };
+  var rampAbove = { canopy: new THREE.Color(), understory: new THREE.Color(), base: new THREE.Color() };
+  function rampAt(v, out) {
+    var seg = Math.floor(v);
+    if (seg < 0) seg = 0;
+    if (seg > journeyStops.length - 2) seg = journeyStops.length - 2;
+    var t = v - seg;
+    if (t < 0) t = 0; else if (t > 1) t = 1;
+    var a = journeyStops[seg], b = journeyStops[seg + 1];
+    out.canopy.lerpColors(a.canopy, b.canopy, t);
+    out.understory.lerpColors(a.understory, b.understory, t);
+    out.base.lerpColors(a.base, b.base, t);
+  }
   function applyScenePalette() {
-    // Walk the journey ramp to the current stop pair, then let the closing
-    // night palette lerp on top. The two never overlap in scroll, but
-    // composing keeps any call order safe.
-    var seg = Math.min(Math.floor(journeyP), journeyStops.length - 2);
-    var segT = journeyP - seg;
-    if (segT < 0) segT = 0; else if (segT > 1) segT = 1;
-    var sa = journeyStops[seg], sb = journeyStops[seg + 1];
-    tintScratch.lerpColors(sa.canopy, sb.canopy, segT);
-    uniforms.uCanopy.value.lerpColors(tintScratch, finalPalette.canopy, finalPaletteP);
-    tintScratch.lerpColors(sa.understory, sb.understory, segT);
-    uniforms.uUnderstory.value.lerpColors(tintScratch, finalPalette.understory, finalPaletteP);
+    // While a bar is wiping, BELOW its edge is the old stop and ABOVE is the
+    // new one — no blend between them, the bar's edge is the transition. With
+    // no wipe running both sides are the same committed colour. The closing
+    // night palette then lerps on top of both.
+    if (wipeStop > 0) {
+      rampAt(wipeStop - 1, rampBelow);
+      rampAt(wipeStop, rampAbove);
+    } else {
+      rampAt(journeyP, rampBelow);
+      rampAt(journeyP, rampAbove);
+    }
+    uniforms.uCanopy.value.lerpColors(rampBelow.canopy, finalPalette.canopy, finalPaletteP);
+    uniforms.uCanopyTo.value.lerpColors(rampAbove.canopy, finalPalette.canopy, finalPaletteP);
+    uniforms.uUnderstory.value.lerpColors(rampBelow.understory, finalPalette.understory, finalPaletteP);
+    uniforms.uUnderstoryTo.value.lerpColors(rampAbove.understory, finalPalette.understory, finalPaletteP);
     uniforms.uLightShaft.value.lerpColors(dayPalette.shaft, finalPalette.shaft, finalPaletteP);
     uniforms.uLine.value.lerpColors(dayPalette.line.color, finalPalette.line.color, finalPaletteP);
     uniforms.uLineAlpha.value = lerp(dayPalette.line.alpha, finalPalette.line.alpha, finalPaletteP);
     paletteScratch.lerpColors(dayPalette.mote, finalPalette.mote, finalPaletteP);
     partMat.uniforms.uColor.value.copy(paletteScratch);
     arrowMat.uniforms.uColor.value.copy(paletteScratch);
-    tintScratch.lerpColors(sa.base, sb.base, segT);
-    bgColor.lerpColors(tintScratch, finalPalette.base, finalPaletteP);
+    uniforms.uBase.value.lerpColors(rampBelow.base, finalPalette.base, finalPaletteP);
+    uniforms.uBaseTo.value.lerpColors(rampAbove.base, finalPalette.base, finalPaletteP);
+    // The opaque base quad is what you actually see; the clear colour just
+    // keeps anything outside it consistent.
+    bgColor.copy(uniforms.uBase.value);
     renderer.setClearColor(bgColor, 1);
   }
   function setFinalPaletteProgress(p) {
     finalPaletteP = tClamp01(p);
     applyScenePalette();
   }
-  // Position along the journey ramp, 0..4. The headline bars own this now.
+  // Committed position along the journey ramp, 0..4. Ends any wipe.
   function setJourneyProgress(v) {
     v = v < 0 ? 0 : (v > journeyStops.length - 1 ? journeyStops.length - 1 : v);
-    if (v === journeyP) return;
+    if (v === journeyP && wipeStop === 0) return;
     journeyP = v;
+    wipeStop = 0;
+    uniforms.uWipeY.value = 1.0;
+    applyScenePalette();
+  }
+  // A bar is mid-ride: everything ABOVE screen fraction y (0 bottom, 1 top)
+  // is already at `stop`, everything below is still at stop - 1.
+  function setJourneyWipe(stop, y) {
+    wipeStop = stop;
+    uniforms.uWipeY.value = y < 0 ? 0 : (y > 1 ? 1 : y);
     applyScenePalette();
   }
   // Retired: 02 no longer tints on its own (swot-claude.js still calls this on
@@ -2422,6 +2519,7 @@
     setFinalPaletteProgress: setFinalPaletteProgress,
     setProductTintProgress: setProductTintProgress,
     setJourneyProgress: setJourneyProgress,
+    setJourneyWipe: setJourneyWipe,
     setSeedReveal: setSeedReveal,
     setStatProgress: function (p) { statFormP = tClamp01(p); },
     setStatFillProgress: function (p) { statFillP = tClamp01(p); },
