@@ -1771,14 +1771,31 @@
           continue;
         }
         if (i === 0) {
-          // Piet: the seed is PINNED to the grid-centre cell from the very
-          // start — zero drift, zero assembly flight. Its FIRST movement is
-          // the grid disassembly (openFieldP), a single glide to its station
-          // high in the 02 cloud; then it rises out as the trees form.
-          positions[xi]     = lerp(statGridHome[0], starFieldHome[0], openFieldP);
-          positions[yi]     = lerp(statGridHome[1], starFieldHome[1], openFieldP)
-                            + smoothstep(0.0, 0.45, treeFormP) * 9.0;
-          positions[xi + 2] = lerp(statGridHome[2], starFieldHome[2], openFieldP);
+          // Piet: across 00 -> 01 the seed STARTS IN THE FLOOR ARRAY and rises
+          // into its centre cell with everything else — it is no longer pinned
+          // to the grid centre from the first frame. It keeps
+          // statAssemblyDelay[0] = 0 and zero arc, so it still leads the
+          // assembly and arrives first, straight, and the grid still visibly
+          // gathers around it. From the 01 leave onward its path is unchanged:
+          // one glide to its station high in the 02 cloud, then out as the
+          // trees form.
+          if (openFieldP > 0) {
+            positions[xi]     = lerp(statGridHome[0], starFieldHome[0], openFieldP);
+            positions[yi]     = lerp(statGridHome[1], starFieldHome[1], openFieldP)
+                              + smoothstep(0.0, 0.45, treeFormP) * 9.0;
+            positions[xi + 2] = lerp(statGridHome[2], starFieldHome[2], openFieldP);
+          } else {
+            var seedPhase = density * Math.PI * 2;
+            positions[xi]     = groundFieldHome[0] + Math.sin(seedPhase + swayPhase[0]) * density * 0.08;
+            positions[yi]     = groundFieldHome[1] + Math.cos(seedPhase * 0.7 + swayPhase[0]) * density * 0.035;
+            positions[xi + 2] = groundFieldHome[2] - density * 0.45;
+            if (statFormP > 0) {
+              var seedMove = smoothstep(statAssemblyDelay[0], 1.0, statFormP);
+              positions[xi]     = lerp(positions[xi], statGridHome[0], seedMove);
+              positions[yi]     = lerp(positions[yi], statGridHome[1], seedMove);
+              positions[xi + 2] = lerp(positions[xi + 2], statGridHome[2], seedMove);
+            }
+          }
           alphas[i] = seedReveal;
           continue;
         }
@@ -1846,9 +1863,11 @@
 
       // Seed reveal: scale the first red dot from 0 -> full (RED_MOTE_SIZE).
       // aSize is shared with redGeo, so one needsUpdate refreshes both draws.
-      // Seed renders at exactly one grid cell's size — it IS a cell of the
-      // grid, just red, from the very first frame.
-      var seedTargetSize = statDotWorldSize * seedReveal;
+      // Seed grows from an ordinary floor mote to exactly one grid cell as the
+      // grid forms, on the same lerp the other grid members use — it now
+      // starts in the floor array, so arriving already cell-sized would have
+      // made it the one oversized dot on the forest floor.
+      var seedTargetSize = lerp(BASE_MOTE_SIZE, statDotWorldSize, statFormP) * seedReveal;
       if (sizes[0] !== seedTargetSize) {
         sizes[0] = seedTargetSize;
         partGeo.attributes.aSize.needsUpdate = true;
