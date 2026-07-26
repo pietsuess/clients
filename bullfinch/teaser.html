@@ -515,6 +515,18 @@
         opacity: .9;
       }
 
+      /* The nav is FIXED and lives outside #opportunity, so the 03 ground-ink
+         overrides above cannot reach it — over the light green band its olive
+         --ink-quiet goes near-invisible. Re-map the two ink vars on .site-nav
+         itself for the grove stage: that carries the 01-04 links, the hover
+         label and the fullscreen toggle in one move, since all three already
+         read from these vars. */
+      body.is-tree-stage .site-nav {
+        --ink: #EFE7D3;
+        --ink-quiet: rgba(239, 231, 211, .74);
+      }
+      .site-nav a { transition: color 240ms ease; }
+
       /* Heading block sits LOW, just above the dead-centre red dot. */
       .closing { padding-top: clamp(90px, 15vh, 210px); }
       .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
@@ -635,11 +647,28 @@
       .footer-team-link svg { width: 15px; height: 15px; flex: none; }
 
       /* The lateral screen: parks off-screen right, slides in on open. */
+      /* The team screen is only ever reached from the footer link, i.e. from
+         the dark closing — so it carries the is-final-contrast ink palette
+         rather than the page's parchment one. That is what lets the misty
+         woods plate read as a photograph instead of a ghost: dark scrim,
+         light type. Scrim is heavier at the edges than through the middle so
+         the sun shafts still come through behind the text column. */
       .team-screen {
         position: fixed;
         inset: 0;
         z-index: 78;   /* above site-nav (50), below the bio modal (80) */
-        background: var(--bg);
+        --ink: #f4efd9;
+        --ink-soft: #d2d8c5;
+        --ink-quiet: #a8b7a8;
+        --rule: rgba(244, 239, 217, 0.2);
+        color: var(--ink);
+        background-color: #0e1f16;
+        background-image:
+          linear-gradient(105deg, rgba(14, 31, 22, 0.93) 0%, rgba(14, 31, 22, 0.76) 44%, rgba(14, 31, 22, 0.89) 100%),
+          url("assets/misty-woods.avif");
+        background-size: cover, cover;
+        background-position: center, center;
+        background-repeat: no-repeat, no-repeat;
         transform: translateX(100%);
         visibility: hidden;
         transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
