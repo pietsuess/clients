@@ -1182,9 +1182,15 @@
         activeLineSet[bIdx] = 1;
       }
 
-      // Contact spark: fire only when the line reaches the target mote.
+      // Contact spark: fire only when the line reaches the target mote AND the
+      // network is actually on screen. The strokes keep advancing behind the
+      // gate through 00-03 so the web is already drawn when the closing opens
+      // it — but that meant every landing still lit its target mote, so motes
+      // were pulsing with nothing connecting them (Piet). The convergence wave
+      // draws during the closing with the gate already open, so the finale
+      // keeps its contact sparks.
       var prev = edgePrevStroke[n];
-      if (prev < 0.999 && strokeProgress >= 0.999) {
+      if (prev < 0.999 && strokeProgress >= 0.999 && networkTaper > 0.01) {
         glows[bIdx] = 1.0;
         lineSpark[n * 2]     = 1.0;
         lineSpark[n * 2 + 1] = 1.0;
