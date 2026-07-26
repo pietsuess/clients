@@ -746,6 +746,25 @@
         body.is-team-open #page { transform: translateX(-5%); }
       }
 
+      /* Bio modal: neutral grey glass, not a second green panel. The shared
+         styles.css version mixes var(--bg) into both the backdrop and the
+         card, so over the team screen it came out as an opaque green slab on
+         a green veil and the woods plate behind it disappeared. Grey the
+         tints off the palette entirely, and pull the backdrop blur back so
+         there is still a photograph to see through. Overridden here rather
+         than in styles.css because index.html and GPT-Teaser.html share it. */
+      .bio-modal__backdrop {
+        background: rgba(16, 19, 17, 0.46);
+        -webkit-backdrop-filter: blur(7px) saturate(0.9);
+        backdrop-filter: blur(7px) saturate(0.9);
+      }
+      .bio-modal__panel {
+        background: rgba(128, 134, 129, 0.2);
+        border-color: rgba(239, 231, 211, 0.24);
+        -webkit-backdrop-filter: blur(20px) saturate(1.04);
+        backdrop-filter: blur(20px) saturate(1.04);
+      }
+
       /* Rising overlay headlines — ride bottom -> off-top across a scroll band,
          driven by --rise-y from dedicated scrubs (see inline JS).
          NO FADE: they are fully opaque the whole ride and are simply off-screen
