@@ -1144,11 +1144,15 @@
     var dt = dtIn || 0;
     camera.getWorldDirection(tmpCamDir);
     activeLineSet.fill(0);
-    // D2 taper: the cascade web stays prominent while the motes are close
-    // (01–02), then drops to a faint background web as the grove forms and the
-    // closing field spreads — no bold lines slicing across the trees or the
-    // finale. The convergence wave (7) keeps its own gate and stays prominent.
-    var networkTaper = (1 - 0.85 * treeFormP) * (1 - 0.9 * finalFieldP);
+    // Piet: NO lines between motes anywhere until the very last screen. The
+    // cascade web used to run from 01 onward and merely taper faint through the
+    // grove and the finale; now it is gated to exactly the same closing window
+    // as the convergence wave, so 00-03 are motes only and the whole network —
+    // cascade and convergence together — arrives with the closing.
+    // The strokes still ADVANCE on their own waves behind the gate, so by the
+    // time it opens the web is already drawn and simply comes up, rather than
+    // scribbling itself in over the finale.
+    var networkTaper = smoothstep(0.72, 1.0, finalFieldP);
     for (var n = 0; n < EDGE_COUNT; n++) {
       var aIdx = edgeA[n];
       var bIdx = edgeB[n];
