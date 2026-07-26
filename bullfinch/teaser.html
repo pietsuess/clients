@@ -816,42 +816,27 @@
         left: 0;
         right: 0;
         padding: clamp(14px, 2.4vh, 28px) var(--pad-x, 64px);
-        /* Barely any tint — a sheet of glass is not a tinted panel, it is the
-           backdrop rearranged. Everything that reads as "glass" below is
-           refraction and specular, not opacity. */
-        background: color-mix(in srgb, var(--bg) 22%, transparent);
+        /* A flat white veil rather than a tint of the page colour: the strip
+           should look lit from within, not tinted. Even across the whole bar
+           so it never reads as a highlight sitting on top of it. */
+        background: color-mix(in srgb, #ffffff 20%, transparent);
         /* Two declarations on purpose. The first is a plain heavy frost and is
            the floor. The second adds the feDisplacementMap ripple; browsers
            that don't take reference filters in backdrop-filter drop the whole
            second declaration as invalid and keep the first, so the strips are
            never left bare. Blur runs BEFORE the warp so the displacement pushes
            an already-soft image and reads as thickness, not as a sharp edge. */
-        -webkit-backdrop-filter: blur(8px) saturate(1.18) brightness(1.05);
-        backdrop-filter: blur(8px) saturate(1.18) brightness(1.05);
-        -webkit-backdrop-filter: blur(5px) saturate(1.2) brightness(1.05) url(#glass-warp);
-        backdrop-filter: blur(5px) saturate(1.2) brightness(1.05) url(#glass-warp);
-        /* NO hairline top-light / bottom-dark border. A cast-glass block has no
-           drawn edge — what reads as its edge is a THICK zone where the
-           refraction compresses (see ::before / ::after). All that lives on the
-           body of the strip is one broad, low-contrast vertical bloom, the way
-           the reference block carries a soft column of light down its middle,
-           plus the faint green cast of real glass. */
-        background-image:
-          linear-gradient(
-            100deg,
-            transparent 0%,
-            color-mix(in srgb, #ffffff 13%, transparent) 26%,
-            color-mix(in srgb, #ffffff 5%, transparent) 44%,
-            transparent 68%
-          ),
-          linear-gradient(
-            to bottom,
-            color-mix(in srgb, #cfe6d6 14%, transparent) 0%,
-            transparent 30%,
-            transparent 70%,
-            color-mix(in srgb, #cfe6d6 12%, transparent) 100%
-          );
-        box-shadow: 0 20px 44px -30px color-mix(in srgb, var(--ink) 42%, transparent);
+        /* Lit, evenly, as if the light is coming THROUGH the pane. The lift is
+           done with brightness() on the backdrop plus a flat white veil — not
+           with a gradient — so there is no drawn highlight anywhere on the
+           strip. Every previous version put painted light somewhere and it
+           always read as a graphic. */
+        -webkit-backdrop-filter: blur(8px) saturate(1.06) brightness(1.34);
+        backdrop-filter: blur(8px) saturate(1.06) brightness(1.34);
+        -webkit-backdrop-filter: blur(5px) saturate(1.08) brightness(1.34) url(#glass-warp);
+        backdrop-filter: blur(5px) saturate(1.08) brightness(1.34) url(#glass-warp);
+        background-image: none;
+        box-shadow: 0 22px 46px -34px color-mix(in srgb, var(--ink) 30%, transparent);
         top: 50%;
         transform: translateY(-50%) translateY(var(--rise-y, 58vh));
         opacity: 1;
@@ -860,13 +845,13 @@
         text-align: left;
         will-change: transform;
       }
-      /* The EDGE ZONE — this is the whole illusion. On the reference block the
-         edge is not a line, it is a deep band where you are looking through
-         the most glass: the scene behind it gets squeezed, bent hardest, and
-         broken into fine caustic striations, and it fades into the clear
-         middle rather than stopping at a border. So: a tall band, the heavy
-         #glass-edge displacement, a contrast/saturation push, hairline
-         striations, and a mask that dissolves it inward. */
+      /* The EDGE ZONE. Nothing is PAINTED here any more — no striations, no
+         falloff, no green cast. Those were the "highlights" that kept reading
+         as drawn. The bands now differ from the body of the strip by optics
+         only: they bend their slice of the backdrop far harder (#glass-edge)
+         and are masked so they dissolve inward instead of ending at a line.
+         If the edge needs more presence, raise the displacement scale on
+         #glass-edge — do not paint light onto it. */
       .rise-headline::before,
       .rise-headline::after {
         content: "";
@@ -875,48 +860,21 @@
         right: 0;
         height: clamp(18px, 3vh, 34px);
         pointer-events: none;
-        -webkit-backdrop-filter: blur(2px) contrast(1.1) saturate(1.3);
-        backdrop-filter: blur(2px) contrast(1.1) saturate(1.3);
-        -webkit-backdrop-filter: blur(1.5px) contrast(1.12) saturate(1.32) url(#glass-edge);
-        backdrop-filter: blur(1.5px) contrast(1.12) saturate(1.32) url(#glass-edge);
+        background: none;
+        -webkit-backdrop-filter: blur(2px) brightness(1.34) saturate(1.06);
+        backdrop-filter: blur(2px) brightness(1.34) saturate(1.06);
+        -webkit-backdrop-filter: blur(1.5px) brightness(1.34) saturate(1.08) url(#glass-edge);
+        backdrop-filter: blur(1.5px) brightness(1.34) saturate(1.08) url(#glass-edge);
       }
       .rise-headline::before {
         top: 0;
-        /* Fine striations riding a bright-to-clear falloff. The 3px repeat is
-           the banding you get looking along a cast edge, not a texture. */
-        background-image:
-          repeating-linear-gradient(
-            to bottom,
-            color-mix(in srgb, #ffffff 22%, transparent) 0px,
-            transparent 1px,
-            transparent 3px
-          ),
-          linear-gradient(
-            to bottom,
-            color-mix(in srgb, #ffffff 34%, transparent) 0%,
-            color-mix(in srgb, #cfe6d6 16%, transparent) 42%,
-            transparent 100%
-          );
-        -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .55) 46%, transparent 100%);
-        mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .55) 46%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
       }
       .rise-headline::after {
         bottom: 0;
-        background-image:
-          repeating-linear-gradient(
-            to top,
-            color-mix(in srgb, #ffffff 16%, transparent) 0px,
-            transparent 1px,
-            transparent 3px
-          ),
-          linear-gradient(
-            to top,
-            color-mix(in srgb, #cfe6d6 26%, transparent) 0%,
-            color-mix(in srgb, #ffffff 10%, transparent) 44%,
-            transparent 100%
-          );
-        -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .55) 46%, transparent 100%);
-        mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .55) 46%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
+        mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
       }
 
       /* Font size is derived from the line's character budget rather than a
