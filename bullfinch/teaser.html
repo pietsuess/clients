@@ -497,19 +497,27 @@
       .audience-item h3 { color: var(--ground-ink); }
       .audience-item p { color: rgba(239, 231, 211, .82); }
       .trust-label { color: var(--ground-ink); }
-      /* Logos: several of these files ship with an OPAQUE white background
-         (the Northern Hardwoods one especially). brightness(0) + invert(1)
-         turned that whole rectangle solid white — a white box, not a knocked
-         out mark. Inverting and SCREENING instead drops the now-black
-         background out and leaves the mark light, and it is harmless to the
-         logos that already have real transparency. */
-      .trust-strip img {
-        filter: grayscale(1) invert(1) brightness(1.25);
-        mix-blend-mode: screen;
-        opacity: .92;
-      }
+      /* Logos: the six files do NOT share one polarity, so a blanket invert()
+         cannot work — it lights the dark marks and blacks out the light ones.
+         weyerhaeuser / longview / uksa are dark ink, so they invert.
+         fba and okanagan-angel-summit are already REVERSED (white ink), so
+         they must NOT invert — they only need grayscale and a brightness lift
+         to pull okanagan's mid-grey mountains up off the green.
+         nhri shipped opaque white-backed with no alpha; the white is now
+         stripped to transparency in the asset itself. Do not try to solve
+         that one in CSS: mix-blend-mode cannot knock the box out here,
+         because the green comes from the WebGL canvas in a separate stacking
+         context and the img only ever blends inside its own panel layer. */
+      .trust-strip img,
       body.is-final-contrast .trust-strip img {
         filter: grayscale(1) invert(1) brightness(1.25);
+        opacity: .92;
+      }
+      .trust-strip img[src*="fba"],
+      .trust-strip img[src*="okanagan"],
+      body.is-final-contrast .trust-strip img[src*="fba"],
+      body.is-final-contrast .trust-strip img[src*="okanagan"] {
+        filter: grayscale(1) brightness(1.6);
       }
 
       /* Heading block sits LOW, just above the dead-centre red dot. */
