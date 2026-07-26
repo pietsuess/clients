@@ -227,15 +227,17 @@
       #page { z-index: 3; }
       .hero { background: transparent; }
       .hero__inner {
-        --hero-logo-size: clamp(54px, 5.1vw, 78px);
+        --hero-logo-size: clamp(108px, 10.2vw, 156px);
         --hero-logo-gap: clamp(14px, 1.8vw, 28px);
-        --hero-copy-inset: calc(var(--hero-logo-size) + var(--hero-logo-gap));
+        /* The mark now sits ABOVE the wordmark, so nothing is indented past
+           it any more — the whole hero block runs off one left edge. */
+        --hero-copy-inset: 0px;
         width: calc(100vw - clamp(48px, 8vw, 144px));
         max-width: none;
       }
       .hero__title { width: 100%; max-width: none; }
       .hero-is { min-height: 0; }
-      .hero-brand-row { display: flex; align-items: center; gap: var(--hero-logo-gap); }
+      .hero-brand-row { display: block; }
       .hero-is__label,
       .hero-is__prefix,
       .hero-is__cycle { display: block; }
@@ -286,11 +288,21 @@
         text-align-last: left;
       }
 
+      /* Optical left-align, not box left-align. The mark's leftmost tip is at
+         5.76% of the viewBox width (path min x 55.76 in "50 35 100 70"), and
+         the settled state scales .74 about centre, which pulls that tip in to
+         17.26% of the box. Pull the box back by that much so the TIP lands on
+         the B of BULLFINCH, not the invisible box edge. Same reasoning below
+         the mark: its ink stops at 70% of the box height once scaled, so the
+         negative bottom margin removes the dead air before the wordmark. */
       .corner-logo-sequence {
         position: relative;
         z-index: 1;
+        display: block;
         width: var(--hero-logo-size);
         height: var(--hero-logo-size);
+        margin-left: calc(var(--hero-logo-size) * -0.1726);
+        margin-bottom: calc(var(--hero-logo-size) * -0.24);
         flex: 0 0 auto;
         pointer-events: none;
       }
@@ -526,6 +538,20 @@
         --ink-quiet: rgba(239, 231, 211, .74);
       }
       .site-nav a { transition: color 240ms ease; }
+
+      /* Instagram sits beside the fullscreen toggle and matches it exactly —
+         same 16px box, same --ink-quiet resting state, so it picks up the
+         grove-stage remap above for free. */
+      .nav-social {
+        width: 16px;
+        height: 16px;
+        display: inline-grid;
+        place-items: center;
+        color: var(--ink-quiet);
+      }
+      .nav-social svg { display: block; }
+      .nav-social[href] { cursor: pointer; }
+      .nav-social:hover, .nav-social:focus-visible { color: var(--ink); }
 
       /* Heading block sits LOW, just above the dead-centre red dot. */
       .closing { padding-top: clamp(90px, 15vh, 210px); }
@@ -935,6 +961,18 @@
             <path d="M9 20H4v-5" />
           </svg>
         </button>
+        <!-- Instagram. No href yet — Bullfinch's profile URL is still to come,
+             so this renders as the mark only rather than pointing somewhere
+             wrong. Add href="https://www.instagram.com/<handle>/" plus
+             target="_blank" rel="noopener" and it becomes a live link with no
+             other change. -->
+        <a class="nav-social" data-social="instagram" aria-label="Bullfinch Earth on Instagram">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+            <rect x="3.4" y="3.4" width="17.2" height="17.2" rx="4.6" />
+            <circle cx="12" cy="12" r="4.05" />
+            <circle cx="17.1" cy="6.9" r="1.05" fill="currentColor" stroke="none" />
+          </svg>
+        </a>
       </nav>
     </header>
     <main id="page">

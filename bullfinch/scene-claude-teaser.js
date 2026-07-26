@@ -1706,7 +1706,20 @@
       camParY = 0;
     }
 
-    var flatTreeView = smoothstep(0.05, 0.25, treeFormP);
+    // Flattening IN (grove formation) and releasing OUT (grove dispersal) are
+    // deliberately asymmetric. Formation keeps its quick [0.05, 0.25] band on
+    // treeFormP so the camera is level before the trees assemble. Release used
+    // to ride the same band in reverse, which meant it only began once
+    // treeFormP had already fallen under 0.25 — the last quarter of the
+    // dispersal — so the camera snapped back to the scripted tilt in a fraction
+    // of the scroll the spread itself takes, and read as a bump (Piet). Drive
+    // the release off finalFieldP across the WHOLE dispersal band instead:
+    // starts sooner, finishes later, and moves with the downward spread rather
+    // than against its tail.
+    var flatTreeView = Math.min(
+      smoothstep(0.05, 0.25, treeFormP),
+      1 - smoothstep(0.0, 1.0, finalFieldP)
+    );
     camera.position.x = dollyX + camParX;
     camera.position.y = lerp(dollyY + camParY, TREE_CAMERA_Y, flatTreeView);
     camera.position.z = dollyZ;
@@ -2144,7 +2157,11 @@
       x = tClamp01((x - a) / (b - a));
       return x * x * (3 - 2 * x);
     }
-    return 2.2 * ss(0.05, 0.6, treeFormP);
+    // Same asymmetry as flatTreeView above: the pull-IN on dispersal is a
+    // 2.2-unit z move, and riding treeFormP's tail crammed it into the back
+    // 60% of the spread. Release it across the whole dispersal band so the
+    // zoom and the tilt travel together.
+    return 2.2 * Math.min(ss(0.05, 0.6, treeFormP), 1 - ss(0.0, 1.0, finalFieldP));
   }
 
   // Runs every frame from the animate loop, after the organic mote update
