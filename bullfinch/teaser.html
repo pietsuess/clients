@@ -831,10 +831,11 @@
         .audience-item {
           min-height: 0;
           padding: 8px 10px 9px;
-          border-left: 0;
-          border-top: 1px solid var(--rule);
+          /* Beige to match the open panel — var(--rule) here would put dark
+             hairlines back on a panel that has no background any more. */
+          border-top: 1px solid rgba(239, 231, 211, .62);
         }
-        .audience-item:nth-child(odd) { padding-left: 0; }
+        .audience-item:nth-child(odd) { padding-left: 0; border-left: 0; }
         .audience-item:nth-child(-n + 2) { border-top: 0; }
         .audience-item h3 { font-size: 13px; }
         .audience-item p { font-size: 11px; }
