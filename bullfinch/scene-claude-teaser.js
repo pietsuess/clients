@@ -1013,6 +1013,16 @@
   // Fragment shader:
   //   - Tint red near the parent end (aEndpoint=0). Fades to neutral toward child.
   //   - Spark briefly boosts alpha + tint when an edge first lands.
+  // GL lines are ONE DEVICE PIXEL wide and nothing can change that — WebGL
+  // ignores THREE's linewidth. On a phone the renderer runs at DPR 1.35 (see
+  // setPixelRatio above) and the browser then upscales that canvas to a DPR-3
+  // screen, so a hairline is smeared across ~2.2 screen pixels and the closing
+  // palette's 0.36 alpha lands nearer 0.16 — invisible against the dark final
+  // base. That is why the closing showed arrowheads and no lines: the heads are
+  // real triangles and survive the same treatment. Compensated in the shader,
+  // baked in at compile time, so the palettes and the desktop look are
+  // untouched and the correction reaches every place uLineAlpha is set.
+  var LINE_GAIN = mobileLike ? 2.4 : 1.0;
   var lineFragment = [
     "varying float vAlpha;",
     "varying float vEndpoint;",
@@ -1024,7 +1034,7 @@
     // Tint factor: 0.35 at parent end (aEndpoint=0), 0.0 at child end.
     "  float parentTint = (1.0 - vEndpoint) * 0.35;",
     "  vec3 col = mix(uLine, uAccent, parentTint + vSpark * 0.45);",
-    "  float alpha = vAlpha * uLineAlpha * (1.0 + vSpark * 0.6);",
+    "  float alpha = min(1.0, vAlpha * uLineAlpha * " + LINE_GAIN.toFixed(2) + " * (1.0 + vSpark * 0.6));",
     "  if (alpha <= 0.002) discard;",
     "  gl_FragColor = vec4(col, alpha);",
     "}",
@@ -1988,6 +1998,7 @@
   var TREE_MAX_HEIGHT = 4.05;   // preserve crowns and keep all trunks above the content strip
   var TREE_BASE_Y = -2.5;       // legacy forest floor (grove now centers on the text)
   var TREE_CENTER_OFFSET_Y = 0.32; // aligned bases sit above the compact audience strip
+  var TREE_MOBILE_LIFT = 0.38;  // phones only — see baseY, lifts the grove out from behind 03
   var TREE_CZ = -1.5;
   var TREE_CAMERA_Y = 0.82;     // level side elevation, no upward or downward view
   var treeFormTarget = 0;       // driven by the DOM-anchored trigger (setTreeProgress)
@@ -2259,7 +2270,15 @@
     var lookY2 = lerp(lerp(-1.0, -1.5, lt2), TREE_CAMERA_Y, treeView);
     var tRay = (TREE_CZ - camZ) / (-camZ);          // camZ in [3,10]; never 0
     var groveCenterY = camY2 + tRay * (lookY2 - camY2);
-    var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y;
+    // Portrait phones make the grove SHORT: S is derived from the horizontal
+    // measured zone, and a narrow viewport gives a small halfW, so the trees
+    // come out well under TREE_MAX_HEIGHT and leave a band of empty sky above
+    // them — while the 03 panel, which is bottom-anchored and stacks to several
+    // rows at this width, climbs up over their trunks. Lift the whole grove into
+    // that empty band. Proportional to S rather than a fixed world offset so it
+    // tracks however tall the grove actually came out.
+    var baseY = groveCenterY - S * 0.5 + TREE_CENTER_OFFSET_Y +
+                (mobileLike ? S * TREE_MOBILE_LIFT : 0);
 
     // Publish each trunk's viewport X as a CSS var so the DOM species
     // readouts sit CENTRED over the peaks of their trees on any viewport.

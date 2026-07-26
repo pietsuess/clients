@@ -970,6 +970,31 @@
          visualViewport splash sizing already come from swot-claude/styles.css.
          MUST stay last in source order — it overrides the 900px block. */
       @media (max-width: 720px) {
+        /* 00 — the hero.
+           --hero-copy-inset exists on desktop so the headline clears the mark
+           sitting to its LEFT. At this width .hero-brand-row is display:block
+           and the mark sits ABOVE the wordmark, so the inset is ~68px of dead
+           gutter — which is what pushed BULLFINCH IS onto two lines and left
+           everything under it reading as a narrow column pinned to the left
+           edge. Zeroed here.
+
+           The label is then sized off the real available measure rather than a
+           vw clamp: 12 characters at ~0.565em each (Geist uppercase ~0.62em
+           advance, less the -.055em tracking) is ~6.8em, so width / 7.2 keeps
+           one line with margin to spare from 320px up. nowrap enforces it. */
+        .hero { padding-top: 10vh; padding-bottom: 22vh; }
+        .hero__inner { --hero-copy-inset: 0px; }
+        .hero-is__label {
+          margin-left: 0;
+          white-space: nowrap;
+          font-size: min(52px, calc((100vw - 48px) / 7.2));
+        }
+        .hero-is__prefix,
+        .hero-is__cycle { margin-left: 0; }
+        /* Was calc(50vw - inset) — literally half the screen. Full measure, so
+           it reads as the same column as BULLFINCH IS above it. */
+        .hero__subtitle { margin-left: 0; max-width: none; }
+
         /* 01 — the two-row / two-column rail collapses to one left column:
            headline, dot grid, body, note. */
         #problem.panel--media {
@@ -990,9 +1015,17 @@
           text-align: left;
           font-size: clamp(30px, 8.4vw, 46px);
         }
-        #problem .panel__verdict .vs-line--2 { margin-right: 0; }
-        #problem .panel__evidence p,
-        #problem .panel__numeric { text-align: justify; text-align-last: left; }
+        /* The verdict steps across the measure instead of stacking flush left:
+           DEDICATED INVENTORIES on the gutter, ARE SO indented, 19TH CENTURY
+           out to the right edge. Desktop gets the same shape from the 5.9em
+           right margin on line 2; at this width there is no room for that, so
+           the indent moves to the left and line 3 is right-aligned outright. */
+        #problem .panel__verdict .vs-line--2 { margin-right: 0; margin-left: 2.4em; }
+        #problem .panel__verdict .vs-line:last-child { text-align: right; }
+        #problem .panel__evidence p { text-align: justify; text-align-last: left; }
+        /* Centred on whatever lines it breaks to, rather than justified out to
+           the gutter — the three terms read as a caption here, not as body. */
+        #problem .panel__numeric { text-align: center; text-align-last: center; }
         #problem .stat-label,
         #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
         #problem .stat-line { left: 0; right: auto; text-align: left; }
@@ -1002,16 +1035,26 @@
         /* 02 — the case graphic goes full-bleed across the top (92vw, never
            wider than the screen) and the copy stacks under it. */
         #product.panel--media { grid-template-columns: 1fr; align-content: end; }
-        #product .panel__inner { grid-column: 1; }
-        /* Model sat low enough that its red base landed on the 02 eyebrow,
-           which wraps to two lines at this width. Raised and shortened so it
-           clears the copy block. */
+        /* THE narrow-column bug: the desktop rule caps this column at
+           min(760px, 42vw), and 42vw on a phone is ~164px. Moving it to
+           grid-column 1 never touched the cap, so every line of 02 was setting
+           in a 164px ribbon down the left. Uncapped, and pushed to the bottom
+           of the screen so the device owns the top half. */
+        #product .panel__inner {
+          grid-column: 1;
+          max-width: none;
+          padding-bottom: clamp(14px, 3vh, 30px);
+        }
+        /* Full-bleed and taller. The device is the whole argument of this
+           section and it was reading as a thumbnail. It still clears the copy
+           block because the copy is bottom-aligned: device ends at ~48dvh, the
+           copy starts below it. */
         .case-fixed-layer.panel__model {
-          width: 92vw;
-          max-width: 92vw;
-          height: 30dvh;
+          width: 100vw;
+          max-width: 100vw;
+          height: 44dvh;
           left: 50%;
-          top: 3vh;
+          top: 2vh;
           transform: translateX(-50%);
         }
         /* Justify at this measure opens rivers between words (see the 00 hero
@@ -1026,32 +1069,15 @@
         .tree-readout__common { font-size: 11px; }
         .tree-readout__latin { font-size: 9px; }
         .tree-readout__metric { font-size: 7px; }
-        /* At this width the readouts sit on the pale top of the green field
-           rather than over dark canopy, so the HUD green washes out. Darkened
-           here only — desktop keeps the bright green, where the grove is
-           behind it. */
-        #opportunity .tree-readouts { color: #0A4A1E; }
-        .tree-readout__common { color: #0A4A1E; }
+        /* The readouts keep the bright HUD green at every width. An earlier
+           pass darkened them to #0A4A1E here on a contrast reading; Piet wants
+           the green. Do not darken them again. */
 
-        /* The 03 copy is cream (--ground-ink) and desktop earns that by sitting
-           on the grove. Stacked at this width it crosses BOTH the pale top of
-           the green field (2.97:1) and the dark trunks, so no flat ink colour
-           works for the whole block. Scrim instead, mobile only. Keeps the
-           PARTNERS bar clear at the top of the gradient so it still runs
-           essentially straight on the grove. */
-        #opportunity .panel__inner::before {
-          content: "";
-          position: absolute;
-          inset: -12px -8px -12px -8px;
-          background: linear-gradient(
-            180deg,
-            rgba(17, 39, 27, 0) 0%,
-            rgba(17, 39, 27, .52) 16%,
-            rgba(17, 39, 27, .74) 100%
-          );
-          z-index: -1;
-          pointer-events: none;
-        }
+        /* NO SCRIM. A dark gradient behind the ground panel was added here on
+           the same pass and it read as a box sitting on the logo strip. Piet
+           has rejected boxes behind the PARTNERS bar twice now. The copy earns
+           its legibility from the grove alone — if it needs help, lift the
+           grove or shorten the panel, do not paint a plate behind it. */
 
         /* The corner mark landed on the Okanagan logo. Partner marks do not get
            sat on; the mark is decorative, so it goes at this width. */
@@ -1068,6 +1094,13 @@
         }
         .audience-item:nth-child(odd) { padding-left: 0; border-left: 0; }
         .audience-item:nth-child(-n + 2) { border-top: 0; }
+        /* Five items over two columns is three rows with a widowed fifth, and
+           that third row is what pushed the panel up into the grove. Dropped to
+           a clean 2x2. Remote sensing goes because it is the one audience that
+           buys the data rather than walks the stand — the other four are the
+           people actually wearing the device. Mobile only; desktop keeps all
+           five across one row. */
+        .audience-item:nth-child(5) { display: none; }
         .audience-item h3 { font-size: 13px; }
         .audience-item p { font-size: 11px; }
         .trust-line { grid-template-columns: 1fr; }
@@ -1374,7 +1407,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-30"></script>
+    <script src="scene-claude-teaser.js?v=claude-31"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>
