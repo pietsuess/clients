@@ -554,6 +554,18 @@
   // ordinary randomised statAssemblyDelay / statArc handed out in the main
   // loop above, so it rises in the middle of the pack and simply happens to be
   // the red one. Do not re-pin it here.
+  //
+  // Its floor home has to be reassigned though. The ground band spreads motes
+  // across the frame by INDEX — bandT = (i + 0.5) / PARTICLE_POOL — so index 0
+  // samples NDC x = -1.16, which is off the left edge of the screen. Putting
+  // the seed "in the floor array" with that home would have parked it out of
+  // frame. Resample it just left of centre, mid-band, so it sits among the
+  // motes you can actually see.
+  var seedBandProbe = new THREE.Vector3(-0.12, -0.84, 0.35).unproject(camera);
+  var seedBandDir = seedBandProbe.sub(camera.position).normalize();
+  groundFieldHome[0] = camera.position.x + seedBandDir.x * 7.2;
+  groundFieldHome[1] = camera.position.y + seedBandDir.y * 7.2;
+  groundFieldHome[2] = camera.position.z + seedBandDir.z * 7.2;
   positions[0] = groundFieldHome[0];
   positions[1] = groundFieldHome[1];
   positions[2] = groundFieldHome[2];
@@ -2564,7 +2576,23 @@
   // the 02 pin). The green now arrives with the bar that rides 02 -> 03.
   function setProductTintProgress() {}
   function setFinalPalette(active) { setFinalPaletteProgress(active ? 1 : 0); }
+  // Temporary: one-shot readout for diagnosing where the seed actually is.
+  // Call bullfinchCanopy.debugSeed() in the console. Remove once settled.
+  function debugSeed() {
+    return {
+      seedPos: [positions[0].toFixed(2), positions[1].toFixed(2), positions[2].toFixed(2)].join(", "),
+      floorHome: [groundFieldHome[0].toFixed(2), groundFieldHome[1].toFixed(2), groundFieldHome[2].toFixed(2)].join(", "),
+      gridHome: [statGridHome[0].toFixed(2), statGridHome[1].toFixed(2), statGridHome[2].toFixed(2)].join(", "),
+      statFormP: statFormP.toFixed(3),
+      openFieldP: openFieldP.toFixed(3),
+      seedDelay: statAssemblyDelay[0].toFixed(3),
+      seedAlpha: alphas[0].toFixed(2),
+      seedSize: sizes[0].toFixed(1),
+      camera: [camera.position.x.toFixed(2), camera.position.y.toFixed(2), camera.position.z.toFixed(2)].join(", ")
+    };
+  }
   window.bullfinchCanopy = {
+    debugSeed: debugSeed,
     setProgress: setProgress,
     setLayerTint: setProgress,
     setWaveProgress: setWaveProgress,
