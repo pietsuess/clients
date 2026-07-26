@@ -445,18 +445,6 @@
            straight on the grove with no box behind it (Piet). No backdrop
            blur anywhere: nothing defocuses the trees. */
       }
-      /* The WHOLE ground panel runs open on the grove (Piet) — no box behind
-         any of it, so every rule, label and logo in it goes light. */
-      .ground-heading { border-top-color: rgba(255, 255, 255, .26); }
-      .audience-grid {
-        border-top-color: rgba(255, 255, 255, .26);
-        border-bottom-color: rgba(255, 255, 255, .26);
-      }
-      .audience-item { border-left-color: rgba(255, 255, 255, .26); }
-      #opportunity .panel__eyebrow { color: rgba(255, 255, 255, .72); }
-      #opportunity .panel__verdict { color: #fff; }
-      .audience-item h3 { color: rgba(255, 255, 255, .94); }
-      .audience-item p { color: rgba(255, 255, 255, .74); }
       .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
       .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
       #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
@@ -476,12 +464,6 @@
       .trust-strip div:first-child { border-left: 0; }
       .trust-strip img { max-width: 100%; max-height: 42px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
       body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
-      /* PARTNERS bar runs on the open grove: light rules, light label, logos
-         knocked out to white. */
-      .trust-line { border-bottom-color: rgba(255, 255, 255, .26); }
-      .trust-strip div { border-left-color: rgba(255, 255, 255, .26); }
-      .trust-label { color: rgba(255, 255, 255, .72); }
-      .trust-strip img { filter: grayscale(1) brightness(0) invert(1); opacity: .8; }
       .trust-label {
         min-height: 44px;
         margin: 0;
@@ -494,6 +476,40 @@
         color: var(--ink-quiet);
         text-align: left;
         text-align-last: left;
+      }
+
+      /* ===== 03 ground panel: OPEN on the grove ==========================
+         No box behind any of it, so every rule, label, heading and logo in
+         the panel goes light. MUST stay after the block definitions above —
+         these are same-specificity overrides and lose on source order
+         otherwise (that is why the first pass at this did nothing). */
+      #opportunity { --ground-ink: #EFE7D3; }   /* off-white beige, not white */
+      .ground-heading { border-top-color: rgba(239, 231, 211, .62); }
+      .audience-grid {
+        border-top-color: rgba(239, 231, 211, .62);
+        border-bottom-color: rgba(239, 231, 211, .62);
+      }
+      .audience-item { border-left-color: rgba(239, 231, 211, .62); }
+      .trust-line { border-bottom-color: rgba(239, 231, 211, .62); }
+      .trust-strip div { border-left-color: rgba(239, 231, 211, .62); }
+      #opportunity .panel__eyebrow { color: var(--ground-ink); }
+      #opportunity .panel__verdict { color: var(--ground-ink); }
+      .audience-item h3 { color: var(--ground-ink); }
+      .audience-item p { color: rgba(239, 231, 211, .82); }
+      .trust-label { color: var(--ground-ink); }
+      /* Logos: several of these files ship with an OPAQUE white background
+         (the Northern Hardwoods one especially). brightness(0) + invert(1)
+         turned that whole rectangle solid white — a white box, not a knocked
+         out mark. Inverting and SCREENING instead drops the now-black
+         background out and leaves the mark light, and it is harmless to the
+         logos that already have real transparency. */
+      .trust-strip img {
+        filter: grayscale(1) invert(1) brightness(1.25);
+        mix-blend-mode: screen;
+        opacity: .92;
+      }
+      body.is-final-contrast .trust-strip img {
+        filter: grayscale(1) invert(1) brightness(1.25);
       }
 
       /* Heading block sits LOW, just above the dead-centre red dot. */
