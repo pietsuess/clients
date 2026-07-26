@@ -560,6 +560,47 @@
       }
       .site-nav a { transition: color 240ms ease; }
 
+      /* ---- 02 on the half-green field --------------------------------------
+         Section 02 sits at journey stop 2 — mixStop(day, green, 0.55), the
+         "halfway to the green" step in scene-claude-teaser.js. Ink
+         compensation existed only at the two ENDS of the ramp: dark ink on
+         beige at 00/01, and the --ground-ink light flip on the full green at
+         03. Stop 2 got nothing, so 02 rendered the default dark palette on a
+         half-green field.
+
+         Measured against that field (~#B9C397; the backdrop tint is uniform
+         across the frame, graded by uLayerTint, NOT a vertical gradient):
+           nav links + WEAR · WALK · DATA   2.80:1  ->  5.06:1
+           02 · THE BULLFINCH WAY eyebrow   4.21:1  ->  6.37:1
+           Wear / Walk / Data leads         1.68:1  ->  4.19:1
+           headline + body copy             8.61:1  (already fine, untouched)
+
+         Darkened rather than flipped light on purpose: 02 must keep reading as
+         a LIGHT section, because the dark-to-light flip is 03's move and the
+         bars are what announce it. Red on green is the trap here — the hues
+         are far apart but their luminance is nearly identical, so the brand
+         #FF5560 measures 1.68:1 and effectively disappears while still
+         reading as red. */
+      #product {
+        --ink-quiet: #3B4A3E;
+        --ink-soft: #2C3B30;
+        --rule: rgba(22, 37, 27, 0.30);
+      }
+      /* Deepened only where it sits on this field. The brand accent is
+         untouched everywhere else, including the section mark beside the
+         eyebrow, which is a graphic rather than text. */
+      #product .panel__evidence .lead { color: #A11B26; }
+
+      /* The nav is fixed and outside #product, so the block above cannot reach
+         it — exactly the reason body.is-tree-stage exists for 03. This window
+         runs from bar C committing stop 2 to the 03 pin, where is-tree-stage
+         takes over; the two never overlap, so neither depends on source order
+         to win. */
+      body.is-midramp-stage .site-nav {
+        --ink: #16251b;
+        --ink-quiet: #3B4A3E;
+      }
+
       /* Instagram sits beside the fullscreen toggle and matches it exactly —
          same 16px box, same --ink-quiet resting state, so it picks up the
          grove-stage remap above for free. */
@@ -962,20 +1003,59 @@
            wider than the screen) and the copy stacks under it. */
         #product.panel--media { grid-template-columns: 1fr; align-content: end; }
         #product .panel__inner { grid-column: 1; }
+        /* Model sat low enough that its red base landed on the 02 eyebrow,
+           which wraps to two lines at this width. Raised and shortened so it
+           clears the copy block. */
         .case-fixed-layer.panel__model {
           width: 92vw;
           max-width: 92vw;
-          height: 42dvh;
+          height: 30dvh;
           left: 50%;
-          top: 7vh;
+          top: 3vh;
           transform: translateX(-50%);
         }
+        /* Justify at this measure opens rivers between words (see the 00 hero
+           and the 02 leads). Hyphenation closes them without dropping the
+           justified setting. */
+        .panel__evidence p,
+        .hero__sub,
+        .audience-item p { hyphens: auto; }
 
         /* 03 — readouts shrink so a nowrap block centred on an outer trunk
            can't hang off the screen edge; the ground panel unstacks. */
         .tree-readout__common { font-size: 11px; }
         .tree-readout__latin { font-size: 9px; }
         .tree-readout__metric { font-size: 7px; }
+        /* At this width the readouts sit on the pale top of the green field
+           rather than over dark canopy, so the HUD green washes out. Darkened
+           here only — desktop keeps the bright green, where the grove is
+           behind it. */
+        #opportunity .tree-readouts { color: #0A4A1E; }
+        .tree-readout__common { color: #0A4A1E; }
+
+        /* The 03 copy is cream (--ground-ink) and desktop earns that by sitting
+           on the grove. Stacked at this width it crosses BOTH the pale top of
+           the green field (2.97:1) and the dark trunks, so no flat ink colour
+           works for the whole block. Scrim instead, mobile only. Keeps the
+           PARTNERS bar clear at the top of the gradient so it still runs
+           essentially straight on the grove. */
+        #opportunity .panel__inner::before {
+          content: "";
+          position: absolute;
+          inset: -12px -8px -12px -8px;
+          background: linear-gradient(
+            180deg,
+            rgba(17, 39, 27, 0) 0%,
+            rgba(17, 39, 27, .52) 16%,
+            rgba(17, 39, 27, .74) 100%
+          );
+          z-index: -1;
+          pointer-events: none;
+        }
+
+        /* The corner mark landed on the Okanagan logo. Partner marks do not get
+           sat on; the mark is decorative, so it goes at this width. */
+        #opportunity .section-mark--corner { display: none; }
         #opportunity .panel__verdict { white-space: normal; font-size: clamp(21px, 6vw, 30px); }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
         .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
@@ -1633,6 +1713,21 @@
             onUpdate: function (self) { drive(riseB, self.progress); journey(3, riseB, self.progress); },
             onLeaveBack: function () { drive(riseB, 0); journey(3, riseB, 0); },
             onLeave: function () { drive(riseB, 1); journey(3, riseB, 1); },
+          });
+          // The half-green stage. The nav is fixed and outside #product, so it
+          // cannot inherit that section's darkened ink vars — this carries the
+          // 01-04 links, the hover label, the fullscreen toggle and Instagram
+          // in one move, the same way is-tree-stage does for 03. Window runs
+          // from bar C committing stop 2 through to the 03 pin, where
+          // is-tree-stage takes over, so the two never overlap.
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return at(p1, 0.93); },
+            end: function () { return p3.start; },
+            invalidateOnRefresh: true,
+            onToggle: function (self) {
+              document.body.classList.toggle("is-midramp-stage", self.isActive);
+            },
           });
           // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
           // trees are standing, the ramp walks from the green halfway to the
