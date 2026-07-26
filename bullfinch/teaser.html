@@ -497,27 +497,22 @@
       .audience-item h3 { color: var(--ground-ink); }
       .audience-item p { color: rgba(239, 231, 211, .82); }
       .trust-label { color: var(--ground-ink); }
-      /* Logos: the six files do NOT share one polarity, so a blanket invert()
-         cannot work — it lights the dark marks and blacks out the light ones.
-         weyerhaeuser / longview / uksa are dark ink, so they invert.
-         fba and okanagan-angel-summit are already REVERSED (white ink), so
-         they must NOT invert — they only need grayscale and a brightness lift
-         to pull okanagan's mid-grey mountains up off the green.
-         nhri shipped opaque white-backed with no alpha; the white is now
-         stripped to transparency in the asset itself. Do not try to solve
-         that one in CSS: mix-blend-mode cannot knock the box out here,
-         because the green comes from the WebGL canvas in a separate stacking
-         context and the img only ever blends inside its own panel layer. */
+      /* Logos: DO NOT put a filter back on these. The six source files had
+         three different polarities (dark ink, reversed white ink, and one
+         opaque white-backed scan with no alpha), so no single filter chain
+         could ever light them all — that is what produced the black boxes.
+         All six are now pre-baked in assets/logos/reversed/ as pure-white ink on
+         real alpha (untouched originals stay in assets/logos/, because
+         GPT-Teaser.html still points at those), which also fixes the
+         optical-weight mismatch: they read as one strip, not six treatments.
+         Rebake with the same recipe if a logo is added — do not reach for
+         invert(), and do not reach for mix-blend-mode either, because the
+         green is the WebGL canvas in a separate stacking context and the img
+         only ever blends inside its own panel layer. */
       .trust-strip img,
       body.is-final-contrast .trust-strip img {
-        filter: grayscale(1) invert(1) brightness(1.25);
-        opacity: .92;
-      }
-      .trust-strip img[src*="fba"],
-      .trust-strip img[src*="okanagan"],
-      body.is-final-contrast .trust-strip img[src*="fba"],
-      body.is-final-contrast .trust-strip img[src*="okanagan"] {
-        filter: grayscale(1) brightness(1.6);
+        filter: none;
+        opacity: .9;
       }
 
       /* Heading block sits LOW, just above the dead-centre red dot. */
@@ -1011,12 +1006,12 @@
             <div class="trust-line">
               <p class="trust-label">Partners and recognition</p>
               <div class="trust-strip" aria-label="Bullfinch Earth partners and recognition">
-                <div><img src="assets/logos/weyerhaeuser.svg" alt="Weyerhaeuser"></div>
-                <div><img src="assets/logos/nhri.png" alt="New Hampshire Rapid Initiative"></div>
-                <div><img src="assets/logos/longview.png" alt="Long View Forest"></div>
-                <div><img src="assets/logos/uksa.png" alt="UK Space Agency"></div>
-                <div><img src="assets/logos/fba.png" alt="Forest Business Accelerator"></div>
-                <div><img src="assets/logos/okanagan-angel-summit.svg" alt="Okanagan Angel Summit"></div>
+                <div><img src="assets/logos/reversed/weyerhaeuser.png" alt="Weyerhaeuser"></div>
+                <div><img src="assets/logos/reversed/nhri.png" alt="Northern Hardwoods Research Institute"></div>
+                <div><img src="assets/logos/reversed/longview.png" alt="Long View Forest"></div>
+                <div><img src="assets/logos/reversed/uksa.png" alt="UK Space Agency"></div>
+                <div><img src="assets/logos/reversed/fba.png" alt="Forest Business Accelerator"></div>
+                <div><img src="assets/logos/reversed/okanagan-angel-summit.png" alt="Okanagan Angel Summit"></div>
               </div>
             </div>
           </div>
