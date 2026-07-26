@@ -227,17 +227,23 @@
       #page { z-index: 3; }
       .hero { background: transparent; }
       .hero__inner {
-        --hero-logo-size: clamp(108px, 10.2vw, 156px);
+        /* --hero-logo-size still drives the COPY INSET and is deliberately
+           unchanged — the headline block sits exactly where it always did.
+           The visible mark is a separate size so it can double without
+           dragging the type with it. */
+        --hero-logo-size: clamp(54px, 5.1vw, 78px);
+        --hero-mark-size: calc(var(--hero-logo-size) * 2);
         --hero-logo-gap: clamp(14px, 1.8vw, 28px);
-        /* The mark now sits ABOVE the wordmark, so nothing is indented past
-           it any more — the whole hero block runs off one left edge. */
-        --hero-copy-inset: 0px;
+        --hero-copy-inset: calc(var(--hero-logo-size) + var(--hero-logo-gap));
         width: calc(100vw - clamp(48px, 8vw, 144px));
         max-width: none;
       }
       .hero__title { width: 100%; max-width: none; }
       .hero-is { min-height: 0; }
+      /* Stacked, not a row — but the wordmark keeps the inset the flex logo
+         used to give it, so BULLFINCH IS does not move. */
       .hero-brand-row { display: block; }
+      .hero-is__label { margin-left: var(--hero-copy-inset); }
       .hero-is__label,
       .hero-is__prefix,
       .hero-is__cycle { display: block; }
@@ -299,10 +305,14 @@
         position: relative;
         z-index: 1;
         display: block;
-        width: var(--hero-logo-size);
-        height: var(--hero-logo-size);
-        margin-left: calc(var(--hero-logo-size) * -0.1726);
-        margin-bottom: calc(var(--hero-logo-size) * -0.24);
+        width: var(--hero-mark-size);
+        height: var(--hero-mark-size);
+        /* Sits at the SAME inset as the wordmark, minus the optical offset, so
+           the mark's tip lands on the B without pulling the box out past the
+           page gutter — a negative margin there was overhanging the hero column
+           and body{overflow-x:hidden} was clipping the animation. */
+        margin-left: calc(var(--hero-copy-inset) - var(--hero-mark-size) * 0.1726);
+        margin-bottom: calc(var(--hero-mark-size) * -0.24);
         flex: 0 0 auto;
         pointer-events: none;
       }
@@ -806,31 +816,44 @@
         left: 0;
         right: 0;
         padding: clamp(14px, 2.4vh, 28px) var(--pad-x, 64px);
-        /* Thinner tint than the old 82% frost — the strip has to read as GLASS
-           now, so the warped backdrop needs to come through it. */
-        background: color-mix(in srgb, var(--bg) 52%, transparent);
-        /* Two declarations on purpose. The first is the old flat frost and is
+        /* Barely any tint — a sheet of glass is not a tinted panel, it is the
+           backdrop rearranged. Everything that reads as "glass" below is
+           refraction and specular, not opacity. */
+        background: color-mix(in srgb, var(--bg) 22%, transparent);
+        /* Two declarations on purpose. The first is a plain heavy frost and is
            the floor. The second adds the feDisplacementMap ripple; browsers
            that don't take reference filters in backdrop-filter drop the whole
            second declaration as invalid and keep the first, so the strips are
-           never left unblurred. Blur runs BEFORE the warp so the displacement
-           pushes an already-soft image and reads as thick glass, not as a
-           sharpened edge. */
-        -webkit-backdrop-filter: blur(5px) saturate(.95);
-        backdrop-filter: blur(5px) saturate(.95);
-        -webkit-backdrop-filter: blur(3px) saturate(1.06) url(#glass-warp);
-        backdrop-filter: blur(3px) saturate(1.06) url(#glass-warp);
-        /* Cheap glass tells: a lit top edge, a shadowed bottom one, and a
-           single diagonal sheen across the strip. No ring, no glow. */
-        border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
-        border-bottom: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
-        background-image: linear-gradient(
-          104deg,
-          color-mix(in srgb, var(--bg) 26%, transparent) 0%,
-          transparent 34%,
-          transparent 62%,
-          color-mix(in srgb, var(--bg) 20%, transparent) 100%
-        );
+           never left bare. Blur runs BEFORE the warp so the displacement pushes
+           an already-soft image and reads as thickness, not as a sharp edge. */
+        -webkit-backdrop-filter: blur(13px) saturate(1.18) brightness(1.06);
+        backdrop-filter: blur(13px) saturate(1.18) brightness(1.06);
+        -webkit-backdrop-filter: blur(9px) saturate(1.2) brightness(1.06) url(#glass-warp);
+        backdrop-filter: blur(9px) saturate(1.2) brightness(1.06) url(#glass-warp);
+        /* Specular: a bright hairline along the top where light catches the
+           edge, a darker one underneath where the sheet ends, one diagonal
+           sheen, and inset shadows that give the pane thickness. */
+        border-top: 1px solid color-mix(in srgb, #ffffff 46%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+        background-image:
+          linear-gradient(
+            to bottom,
+            color-mix(in srgb, #ffffff 30%, transparent) 0%,
+            transparent 22%,
+            transparent 78%,
+            color-mix(in srgb, var(--ink) 10%, transparent) 100%
+          ),
+          linear-gradient(
+            104deg,
+            color-mix(in srgb, #ffffff 16%, transparent) 0%,
+            transparent 26%,
+            transparent 58%,
+            color-mix(in srgb, #ffffff 12%, transparent) 100%
+          );
+        box-shadow:
+          inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent),
+          inset 0 -1px 0 color-mix(in srgb, var(--ink) 14%, transparent),
+          0 14px 34px -20px color-mix(in srgb, var(--ink) 46%, transparent);
         top: 50%;
         transform: translateY(-50%) translateY(var(--rise-y, 58vh));
         opacity: 1;
@@ -839,10 +862,41 @@
         text-align: left;
         will-change: transform;
       }
+      /* Edge lensing. On a real pane the refraction concentrates in the first
+         few millimetres of the edge, where you are looking through the most
+         glass. These two bands blur and lift their slice of the backdrop
+         harder than the body of the strip does, which is what sells thickness
+         even where the displacement filter is unsupported. */
+      .rise-headline::before,
+      .rise-headline::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: clamp(10px, 1.5vh, 18px);
+        pointer-events: none;
+      }
+      .rise-headline::before {
+        top: 0;
+        -webkit-backdrop-filter: blur(20px) brightness(1.16) saturate(1.25);
+        backdrop-filter: blur(20px) brightness(1.16) saturate(1.25);
+        -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+      }
+      .rise-headline::after {
+        bottom: 0;
+        -webkit-backdrop-filter: blur(20px) brightness(0.94) saturate(1.25);
+        backdrop-filter: blur(20px) brightness(0.94) saturate(1.25);
+        -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+        mask-image: linear-gradient(to top, #000 0%, transparent 100%);
+      }
+
       /* Font size is derived from the line's character budget rather than a
          viewport clamp, so the break count is deterministic at every width:
          size = available width / (chars-per-line * ~0.53em), capped. */
       .rise-headline p {
+        position: relative;   /* above the two edge-lens bands */
+        z-index: 1;
         margin: 0;
         font-family: var(--font-display);
         font-weight: 500;
@@ -964,9 +1018,9 @@
          filters in backdrop-filter simply keep the old flat frost. -->
     <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false">
       <filter id="glass-warp" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="2" seed="7" result="noise" />
-        <feGaussianBlur in="noise" stdDeviation="2.4" result="softNoise" />
-        <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="17" xChannelSelector="R" yChannelSelector="G" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.024" numOctaves="3" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="1.5" result="softNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="52" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
     <div class="rise-headline" id="rise-a" aria-hidden="true"><p>Using wearable sensors, Bullfinch provides ground-truth data.</p></div>
