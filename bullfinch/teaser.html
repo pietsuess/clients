@@ -800,14 +800,37 @@
       /* The block is a full-bleed BANNER STRIP: edge-to-edge background, with
          the copy held at the page gutter by the strip's own padding. Same
          translucent-bg + blur treatment as the 03 ground panel. */
+      .glass-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
       .rise-headline {
         position: fixed;
         left: 0;
         right: 0;
         padding: clamp(14px, 2.4vh, 28px) var(--pad-x, 64px);
-        background: color-mix(in srgb, var(--bg) 82%, transparent);
+        /* Thinner tint than the old 82% frost — the strip has to read as GLASS
+           now, so the warped backdrop needs to come through it. */
+        background: color-mix(in srgb, var(--bg) 52%, transparent);
+        /* Two declarations on purpose. The first is the old flat frost and is
+           the floor. The second adds the feDisplacementMap ripple; browsers
+           that don't take reference filters in backdrop-filter drop the whole
+           second declaration as invalid and keep the first, so the strips are
+           never left unblurred. Blur runs BEFORE the warp so the displacement
+           pushes an already-soft image and reads as thick glass, not as a
+           sharpened edge. */
         -webkit-backdrop-filter: blur(5px) saturate(.95);
         backdrop-filter: blur(5px) saturate(.95);
+        -webkit-backdrop-filter: blur(3px) saturate(1.06) url(#glass-warp);
+        backdrop-filter: blur(3px) saturate(1.06) url(#glass-warp);
+        /* Cheap glass tells: a lit top edge, a shadowed bottom one, and a
+           single diagonal sheen across the strip. No ring, no glow. */
+        border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+        background-image: linear-gradient(
+          104deg,
+          color-mix(in srgb, var(--bg) 26%, transparent) 0%,
+          transparent 34%,
+          transparent 62%,
+          color-mix(in srgb, var(--bg) 20%, transparent) 100%
+        );
         top: 50%;
         transform: translateY(-50%) translateY(var(--rise-y, 58vh));
         opacity: 1;
@@ -933,6 +956,19 @@
     <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
     <div class="forest-photo" aria-hidden="true"></div>
     <div class="text-veil" aria-hidden="true"></div>
+    <!-- Wonky-glass displacement for the rising banner strips. Low-frequency
+         fractal noise, blurred so the warp is a slow ripple rather than fizz,
+         then used to push the backdrop around. Referenced from CSS via
+         backdrop-filter: url(#glass-warp) — see .rise-headline, which keeps a
+         plain-blur declaration ahead of it so browsers without reference
+         filters in backdrop-filter simply keep the old flat frost. -->
+    <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="glass-warp" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.006 0.013" numOctaves="2" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="2.4" result="softNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="17" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
     <div class="rise-headline" id="rise-a" aria-hidden="true"><p>Using wearable sensors, Bullfinch provides ground-truth data.</p></div>
     <div class="rise-headline" id="rise-c" aria-hidden="true"><p>Automatically capture ecological data with no extra trips</p></div>
     <div class="rise-headline" id="rise-b" aria-hidden="true"><p>Our mission is to provide the ground truth data humanity needs to protect and restore Nature.</p></div>
