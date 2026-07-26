@@ -548,11 +548,12 @@
   starFieldHome[0] = 0.35;
   starFieldHome[1] = 1.5;   // high in the cloud, near the top — short exit at trees
   starFieldHome[2] = 1.4;
-  // The seed seats at the grid centre FIRST, with no assembly swirl — the grid
-  // assembles around it, so the cascade visibly originates from the centre dot.
-  statAssemblyDelay[0] = 0.0;
-  statArcX[0] = 0;
-  statArcY[0] = 0;
+  // The seed used to seat at the grid centre FIRST with no delay and no swirl,
+  // so the grid assembled around it. That is exactly what made it read as a
+  // lone red dot hanging in mid-air ahead of the field (Piet). It now keeps the
+  // ordinary randomised statAssemblyDelay / statArc handed out in the main
+  // loop above, so it rises in the middle of the pack and simply happens to be
+  // the red one. Do not re-pin it here.
   positions[0] = groundFieldHome[0];
   positions[1] = groundFieldHome[1];
   positions[2] = groundFieldHome[2];
@@ -1796,9 +1797,12 @@
             positions[yi]     = groundFieldHome[1] + Math.cos(seedPhase * 0.7 + swayPhase[0]) * density * 0.035;
             positions[xi + 2] = groundFieldHome[2] - density * 0.45;
             if (statFormP > 0) {
+              // Identical to the ordinary grid path below, arc included, so the
+              // seed cannot be picked out of the rising field by its motion.
               var seedMove = smoothstep(statAssemblyDelay[0], 1.0, statFormP);
-              positions[xi]     = lerp(positions[xi], statGridHome[0], seedMove);
-              positions[yi]     = lerp(positions[yi], statGridHome[1], seedMove);
+              var seedArc = Math.sin(seedMove * Math.PI);
+              positions[xi]     = lerp(positions[xi], statGridHome[0], seedMove) + statArcX[0] * seedArc;
+              positions[yi]     = lerp(positions[yi], statGridHome[1], seedMove) + statArcY[0] * seedArc;
               positions[xi + 2] = lerp(positions[xi + 2], statGridHome[2], seedMove);
             }
           }
