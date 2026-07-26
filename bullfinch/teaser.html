@@ -299,8 +299,15 @@
          the settled state scales .74 about centre, which pulls that tip in to
          17.26% of the box. Pull the box back by that much so the TIP lands on
          the B of BULLFINCH, not the invisible box edge. Same reasoning below
-         the mark: its ink stops at 70% of the box height once scaled, so the
-         negative bottom margin removes the dead air before the wordmark. */
+         VERTICALLY the two states are nowhere near each other, which is what
+         made the animation crash into the headline: the settled SVG's ink
+         stops at 70% of the box height, but the intro SEQUENCE frames carry
+         ink to 90% of their own frame (measured: 291x290 of 360x360) and then
+         render at scale(1.28), which puts their ink bottom at 101% of the box.
+         A negative bottom margin sized for the settled mark therefore pulled
+         the ANIMATION straight through BULLFINCH. So the box now reserves its
+         full height — the sequence stays clear — and the dead air under the
+         settled mark is closed by nudging that state down instead. */
       .corner-logo-sequence {
         position: relative;
         z-index: 1;
@@ -312,7 +319,7 @@
            page gutter — a negative margin there was overhanging the hero column
            and body{overflow-x:hidden} was clipping the animation. */
         margin-left: calc(var(--hero-copy-inset) - var(--hero-mark-size) * 0.1726);
-        margin-bottom: calc(var(--hero-mark-size) * -0.24);
+        margin-bottom: 0;
         flex: 0 0 auto;
         pointer-events: none;
       }
@@ -327,7 +334,11 @@
       }
       .corner-logo-static { opacity: 0; }
       .corner-logo-sequence.is-settled canvas { opacity: 0; transform: scale(.74); }
-      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: scale(.74); }
+      /* translateY closes the gap the removed negative margin used to close,
+         but on the SETTLED state only — so the intro sequence, whose ink runs
+         much lower in its frame, is never dragged into the wordmark. Ink bottom
+         lands at ~88% of the box, leaving a small deliberate gap. */
+      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: translateY(18%) scale(.74); }
       .site-nav {
         justify-content: flex-start;
         padding-left: var(--pad-x);
