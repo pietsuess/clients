@@ -988,17 +988,39 @@
            advance, less the -.055em tracking) is ~6.8em, so width / 7.2 keeps
            one line with margin to spare from 320px up. nowrap enforces it. */
         .hero { padding-top: 10vh; padding-bottom: 22vh; }
-        .hero__inner { --hero-copy-inset: 0px; }
+        /* The inset cannot be zero, and zeroing it is what cropped the logo
+           animation off the left edge. .corner-logo-sequence sets
+           margin-left: calc(inset - mark * 0.1726) — the inset is what absorbs
+           that negative optical offset and keeps the box inside the hero
+           column. At inset 0 the box hung ~19px left of the gutter and
+           body{overflow-x:hidden} clipped it, which is the exact landmine that
+           rule's own comment warns about.
+
+           So the inset is now the SMALLEST value that clears both overhangs
+           rather than the desktop's mark-width gutter:
+             optical offset   mark * 0.1726  (tip sits 17.26% into the box)
+             intro scale      mark * 0.14    (canvas is scale(1.28) about
+                                              centre, so it bleeds 14% each side
+                                              — this is the one that actually
+                                              crops, the settled state is .74)
+           0.32 covers the sum with a hair to spare, so the intro sequence lands
+           flush on the gutter and the mark's TIP still falls on the B of
+           BULLFINCH, which is the whole point of the optical offset. */
+        .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.32); }
+        /* Subtracts the inset it actually has to live with, so the one-line
+           guarantee holds against the real measure and not an assumed zero. */
         .hero-is__label {
-          margin-left: 0;
+          margin-left: var(--hero-copy-inset);
           white-space: nowrap;
-          font-size: min(52px, calc((100vw - 48px) / 7.2));
+          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.32) / 7.2));
         }
-        .hero-is__prefix,
-        .hero-is__cycle { margin-left: 0; }
-        /* Was calc(50vw - inset) — literally half the screen. Full measure, so
-           it reads as the same column as BULLFINCH IS above it. */
-        .hero__subtitle { margin-left: 0; max-width: none; }
+        /* Everything in the hero shares the one inset, so the whole block sets
+           to a single left edge that the mark's tip lands on. These inherit it
+           from the base rules and are left alone deliberately — they are listed
+           here only to say so. */
+        /* Was max-width: calc(50vw - inset) — literally half the screen, which
+           is what read as a narrow column pinned to the left. Full measure. */
+        .hero__subtitle { max-width: none; }
 
         /* ---- Hamburger ---------------------------------------------------
            No duplicate markup: the SAME <nav class="site-nav__links"> that is
