@@ -1160,8 +1160,28 @@
         #problem .panel__verdict .vs-line:last-child { text-align: right; }
         #problem .panel__evidence p { text-align: justify; text-align-last: left; }
         /* Centred on whatever lines it breaks to, rather than justified out to
-           the gutter — the three terms read as a caption here, not as body. */
-        #problem .panel__numeric { text-align: center; text-align-last: center; }
+           the gutter — the three terms read as a caption here, not as body.
+
+           text-align alone did nothing, because the BOX was the problem, not
+           the text inside it. .p-body is a COLUMN flex container, so align-* is
+           the horizontal axis, and the 900px block still carries
+           #problem .panel__numeric { align-self: end }. A flex item that isn't
+           stretched is sized to fit-content, so on a wider phone — where this
+           46-character string still fits one line — the box is exactly as wide
+           as its own text and pinned to the right edge. Centring text inside a
+           box that is the same width as the text is a no-op, which is why it
+           read as right-of-centre rather than flush right.
+
+           stretch puts the box back on the full column; then text-align has
+           something to centre within, at every width and whether it wraps or
+           not. width:100% belts it in case anything reintroduces a non-stretch
+           align-self above this. */
+        #problem .panel__numeric {
+          align-self: stretch;
+          width: 100%;
+          text-align: center;
+          text-align-last: center;
+        }
         #problem .stat-label,
         #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
         #problem .stat-line { left: 0; right: auto; text-align: left; }
