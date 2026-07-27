@@ -352,6 +352,11 @@
       .site-nav__hover-label { left: var(--pad-x); top: 50px; transform: translateY(-2px); }
       .site-nav__hover-label.is-visible { transform: translateY(0); }
       .corner-wordmark { display: none; }
+      /* Desktop defaults for the phone hamburger: the button does not exist,
+         and the utility wrapper dissolves so its children remain direct flex
+         children of .site-nav__links. Both are re-declared in the 720px block. */
+      .nav-toggle { display: none; }
+      .site-nav__utility { display: contents; }
 
       #problem.panel--media {
         display: grid;
@@ -995,6 +1000,115 @@
            it reads as the same column as BULLFINCH IS above it. */
         .hero__subtitle { margin-left: 0; max-width: none; }
 
+        /* ---- Hamburger ---------------------------------------------------
+           No duplicate markup: the SAME <nav class="site-nav__links"> that is
+           a row of numbers on desktop becomes the full-screen sheet here. That
+           keeps the delegated [data-scroll-target] click handler, the
+           .is-current scroll-spy and the aria-labels all working untouched.
+           The section names come from the data-nav-label attributes that
+           already feed the desktop hover label, pulled in via ::after — on a
+           phone there is no hover, so those names were otherwise unreachable
+           and the nav was four bare numbers. */
+        .nav-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: auto;
+          padding: 0;
+          width: 44px;               /* full tap target, icon is 22px */
+          height: 44px;
+          margin-right: -11px;       /* so the ICON, not the target, sits on the gutter */
+          background: none;
+          border: 0;
+          color: inherit;            /* inherits the stage ink remaps */
+          cursor: pointer;
+          position: relative;
+          z-index: 1;                /* above the sheet, which is z-index -1 below */
+        }
+        .nav-toggle__bar {
+          transform-box: view-box;
+          transform-origin: 12px 12px;
+          transition:
+            transform 340ms cubic-bezier(.2, .75, .18, 1),
+            opacity 180ms ease;
+        }
+        body.is-nav-open .nav-toggle__bar--t { transform: translateY(5px) rotate(45deg); }
+        body.is-nav-open .nav-toggle__bar--m { opacity: 0; }
+        body.is-nav-open .nav-toggle__bar--b { transform: translateY(-5px) rotate(-45deg); }
+
+        .site-nav__links {
+          /* Negative z-index keeps the sheet inside .site-nav's stacking
+             context (z-index 50, so still over the whole page) but paints it
+             UNDER the toggle button, which stays tappable to close. */
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: center;
+          gap: 0;
+          margin-left: 0;
+          padding:
+            calc(78px + env(safe-area-inset-top))
+            var(--pad-x)
+            calc(30px + env(safe-area-inset-bottom));
+          /* The sheet carries its own ground and its own ink, so it is immune
+             to the is-tree-stage / is-midramp-stage remaps that the header bar
+             needs. Redeclaring the two vars here rather than hard-coding
+             colours means .site-nav a and .site-nav a.is-current keep working
+             as written, including the lit current-section state. */
+          background: #10271B;
+          --ink: #FFFFFF;
+          --ink-quiet: rgba(239, 231, 211, .74);
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(-10px);
+          transition:
+            opacity 280ms ease,
+            transform 380ms cubic-bezier(.2, .75, .18, 1);
+          /* Scroll containment WITHOUT locking body overflow — this page is one
+             long ScrollTrigger timeline with pins, and toggling overflow on
+             <body> re-measures every one of them. See the touchmove handler. */
+          touch-action: none;
+          overscroll-behavior: contain;
+        }
+        body.is-nav-open .site-nav__links {
+          opacity: 1;
+          transform: none;
+          pointer-events: auto;
+        }
+        .site-nav__links a[data-scroll-target] {
+          display: block;
+          padding: clamp(13px, 2.2vh, 20px) 0;
+          border-top: 1px solid rgba(239, 231, 211, .20);
+          /* The anchor's own text is the number, and it keeps the nav's mono
+             eyebrow setting. The section name below it is the ::after. */
+          font-size: 11px;
+          letter-spacing: .18em;
+        }
+        .site-nav__links a[data-scroll-target]:first-of-type { border-top: 0; }
+        .site-nav__links a[data-scroll-target]::after {
+          content: attr(data-nav-label);
+          display: block;
+          margin-top: 7px;
+          font-family: var(--font-display);
+          font-size: clamp(25px, 7.4vw, 38px);
+          font-weight: 500;
+          letter-spacing: -.025em;
+          line-height: 1.04;
+          text-transform: none;
+          color: currentColor;
+        }
+        .site-nav__utility {
+          display: flex;
+          align-items: center;
+          gap: 26px;
+          margin-top: clamp(26px, 5vh, 46px);
+          padding-top: clamp(16px, 2.6vh, 24px);
+          border-top: 1px solid rgba(239, 231, 211, .20);
+        }
+
         /* 01 — the two-row / two-column rail collapses to one left column:
            headline, dot grid, body, note. */
         #problem.panel--media {
@@ -1157,11 +1271,26 @@
         </svg>
       </a>
       <div class="site-nav__hover-label" id="site-nav-hover-label" aria-hidden="true"></div>
-      <nav class="site-nav__links" aria-label="Primary">
+      <!-- Phones only (display:none above 720px). Three rules that scissor into
+           an X; stroke is currentColor so the is-tree-stage / is-midramp-stage
+           ink remaps carry it without a second set of rules. -->
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-controls="site-nav-links" aria-expanded="false" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+          <line class="nav-toggle__bar nav-toggle__bar--t" x1="3" y1="7" x2="21" y2="7" />
+          <line class="nav-toggle__bar nav-toggle__bar--m" x1="3" y1="12" x2="21" y2="12" />
+          <line class="nav-toggle__bar nav-toggle__bar--b" x1="3" y1="17" x2="21" y2="17" />
+        </svg>
+      </button>
+      <nav class="site-nav__links" id="site-nav-links" aria-label="Primary">
         <a href="#problem" data-scroll-target="#problem" data-nav-label="The gap" aria-label="01 The gap">01</a>
         <a href="#product" data-scroll-target="#product" data-nav-label="How it works" aria-label="02 How it works">02</a>
         <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Who needs Bullfinch" aria-label="03 Who needs Bullfinch">03</a>
         <a href="#closing" data-scroll-target="#closing" data-nav-label="Go deeper" aria-label="04 Go deeper">04</a>
+        <!-- display:contents above 720px, so the desktop nav is byte-identical
+             to what it was — these two stay direct flex children of
+             .site-nav__links. In the phone sheet it becomes a real flex row so
+             the two icons sit side by side at the bottom instead of stacking. -->
+        <div class="site-nav__utility">
         <button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Enter full screen">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
             <path d="M4 9V4h5" />
@@ -1182,6 +1311,7 @@
             <circle cx="17.1" cy="6.9" r="1.05" fill="currentColor" stroke="none" />
           </svg>
         </a>
+        </div>
       </nav>
     </header>
     <main id="page">
@@ -1407,7 +1537,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-31"></script>
+    <script src="scene-claude-teaser.js?v=claude-32"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>
@@ -2328,6 +2458,47 @@
             item.addEventListener("mouseleave", hideLabel);
             item.addEventListener("blur", hideLabel);
           });
+        }
+
+        // ---- Phone hamburger --------------------------------------------
+        // The sheet IS .site-nav__links (see the 720px block) — this only
+        // toggles a body class and dismisses. Navigation itself still runs
+        // through the delegated [data-scroll-target] listener above, so there
+        // is nothing here that can get out of step with it.
+        var navToggle = document.getElementById("nav-toggle");
+        var navSheet = document.getElementById("site-nav-links");
+        if (navToggle && navSheet) {
+          var setNavOpen = function (open) {
+            document.body.classList.toggle("is-nav-open", open);
+            navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            navToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+          };
+          navToggle.addEventListener("click", function () {
+            setNavOpen(!document.body.classList.contains("is-nav-open"));
+          });
+          // Anything actionable dismisses: the four section links, the
+          // fullscreen toggle and the Instagram mark.
+          navSheet.addEventListener("click", function (event) {
+            if (event.target.closest("[data-scroll-target], #fullscreen-toggle, .nav-social")) {
+              setNavOpen(false);
+            }
+          });
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") setNavOpen(false);
+          });
+          // A fixed overlay does NOT stop a touchmove from scrolling the
+          // document underneath on iOS, and body{overflow:hidden} is not an
+          // option here (it would re-measure every ScrollTrigger pin on the
+          // page). Swallow the gesture on the sheet instead.
+          navSheet.addEventListener("touchmove", function (event) {
+            if (document.body.classList.contains("is-nav-open")) event.preventDefault();
+          }, { passive: false });
+          // Rotating to landscape past 720px would otherwise strand the sheet
+          // open behind a desktop nav that has no visible way to close it.
+          var phoneWidth = window.matchMedia("(max-width: 720px)");
+          var onPhoneWidth = function (mql) { if (!mql.matches) setNavOpen(false); };
+          if (phoneWidth.addEventListener) phoneWidth.addEventListener("change", onPhoneWidth);
+          else if (phoneWidth.addListener) phoneWidth.addListener(onPhoneWidth);
         }
       })();
     </script>

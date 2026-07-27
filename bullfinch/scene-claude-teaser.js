@@ -1013,16 +1013,6 @@
   // Fragment shader:
   //   - Tint red near the parent end (aEndpoint=0). Fades to neutral toward child.
   //   - Spark briefly boosts alpha + tint when an edge first lands.
-  // GL lines are ONE DEVICE PIXEL wide and nothing can change that — WebGL
-  // ignores THREE's linewidth. On a phone the renderer runs at DPR 1.35 (see
-  // setPixelRatio above) and the browser then upscales that canvas to a DPR-3
-  // screen, so a hairline is smeared across ~2.2 screen pixels and the closing
-  // palette's 0.36 alpha lands nearer 0.16 — invisible against the dark final
-  // base. That is why the closing showed arrowheads and no lines: the heads are
-  // real triangles and survive the same treatment. Compensated in the shader,
-  // baked in at compile time, so the palettes and the desktop look are
-  // untouched and the correction reaches every place uLineAlpha is set.
-  var LINE_GAIN = mobileLike ? 2.4 : 1.0;
   var lineFragment = [
     "varying float vAlpha;",
     "varying float vEndpoint;",
@@ -1034,7 +1024,7 @@
     // Tint factor: 0.35 at parent end (aEndpoint=0), 0.0 at child end.
     "  float parentTint = (1.0 - vEndpoint) * 0.35;",
     "  vec3 col = mix(uLine, uAccent, parentTint + vSpark * 0.45);",
-    "  float alpha = min(1.0, vAlpha * uLineAlpha * " + LINE_GAIN.toFixed(2) + " * (1.0 + vSpark * 0.6));",
+    "  float alpha = vAlpha * uLineAlpha * (1.0 + vSpark * 0.6);",
     "  if (alpha <= 0.002) discard;",
     "  gl_FragColor = vec4(col, alpha);",
     "}",
@@ -1054,6 +1044,26 @@
   });
   var lineSegments = new THREE.LineSegments(lineGeo, lineMat);
   lineSegments.renderOrder = 5;        // lines under dots, above backdrop
+  // WHY THE CLOSING SHOWED ARROWHEADS AND NO LINES ON PHONES.
+  // lineVerts is all zeros when lineGeo is built — the real endpoints are
+  // written every frame by updateEdgePositionsAnimated. So THREE computes this
+  // geometry's bounding sphere ONCE, from those zeros: a zero-radius point at
+  // the world origin, and it never recomputes. Every frame after that, the
+  // frustum test asks whether the origin is visible, not whether the network
+  // is. On desktop the origin stays inside the wide frustum and the object
+  // survives by luck. A portrait phone has camera.aspect ~0.46, so the frustum
+  // is far narrower horizontally, and by the closing the camera has dollied
+  // and tilted off the origin — the test fails and THREE culls the ENTIRE
+  // LineSegments object. The arrowheads ride the same endpoints and the same
+  // alpha gate, which is why they kept drawing: drawingArrows already sets
+  // frustumCulled = false. So does every other object here that is written per
+  // frame (redParticles, shockwave, clickShockwave, fillPoints). This one was
+  // the omission.
+  // NOTE: `particles` (the main mote field, added ~line 693) has the same
+  // omission and is only saved by its initial positions being spread wide
+  // enough to give it a big bounding sphere. Left alone because it demonstrably
+  // works, but it is the same latent bug.
+  lineSegments.frustumCulled = false;
   scene.add(lineSegments);
 
   // Arrowheads ride at the live drawing endpoint. The line grows toward the
