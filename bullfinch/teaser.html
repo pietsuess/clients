@@ -683,6 +683,41 @@
 
       /* Heading block sits LOW, just above the dead-centre red dot. */
       .closing { padding-top: clamp(90px, 15vh, 210px); }
+
+      /* ===== Closing canopy plate (DEV) ==================================
+         A canopy photograph under the whole last screen.
+
+         FIXED and body-level, never a child of .closing — parented to the
+         section it rode up with it, which is scrolling into place rather
+         than arriving in place. Only its opacity moves.
+
+         Plain full-bleed cover, pinned to the TOP of the viewport — cover
+         crops the overflow off the bottom, so the sky edge of the
+         photograph is the top edge of the screen. No mask, and no attempt
+         to line the canopy opening up with the red dot: the offset version
+         turned it into a floating rectangle. */
+      .closing-canopy {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image: url("assets/forest-canopy-closing.jpg");
+        background-size: cover;
+        background-position: center top;
+        background-repeat: no-repeat;
+        /* Desaturated and darkened into the closing's own green. */
+        /* Lifted from brightness .42 / opacity .55: the scene now leaves a
+           0.42 veil of page colour ON TOP of this (so the motes have
+           something to sit on), and the old values were tuned for sitting
+           in front of the canvas rather than behind it. */
+        filter: saturate(0.55) brightness(0.5) contrast(1.05) hue-rotate(-6deg);
+        /* Fades UP in place across the closing settle. Nothing translates. */
+        opacity: calc(var(--final-field-p, 0) * 0.75);
+      }
+      /* No class gate. --final-field-p is 0 everywhere except the closing,
+         so the opacity calc alone keeps it invisible — and unlike
+         is-final-contrast (which nothing in this build actually toggles) it
+         cannot get stuck. */
       .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
       .closing__logo { height: clamp(34px, 4.5vh, 46px); }
       .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
@@ -1535,7 +1570,17 @@
       }
     </style>
   </head>
-  <body>
+  <body data-canvas-transparent>
+    <!-- Closing canopy plate (DEV). FIRST child of <body>, before the canvas:
+         both are z-index 0, so DOM order is what puts this underneath. A
+         negative z-index would not work — body is its own stacking context
+         and carries the page background-color, so the plate would paint
+         behind that and never be seen.
+         data-canvas-transparent above is what makes it visible at all: the
+         scene clears with alpha 0 and dissolves its opaque base plane over
+         the closing, so this shows through BEHIND the motes. That flag is
+         opt-in and only this page sets it. -->
+    <div class="closing-canopy" aria-hidden="true"></div>
     <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
     <div class="forest-photo" aria-hidden="true"></div>
     <div class="text-veil" aria-hidden="true"></div>
@@ -2341,14 +2386,13 @@
         // section 03, holds them at full strength through its reading window,
         // then reverses them into the final starfield. No second trigger can
         // overwrite the tree state.
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: function () { return at(p2, 0.58); },
-          endTrigger: closing,
-          end: "top 44%",
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) {
+        // Named so it can run on BOTH onUpdate and onRefresh. A resize
+        // refreshes ScrollTrigger, which re-measures this trigger and can
+        // fire onLeaveBack even though the page has not moved — that zeroed
+        // --final-field-p while sitting on the closing, which is why the
+        // photograph (and the network with it) vanished on resize. Running
+        // the same computation on refresh re-asserts the true value.
+        function applyTreeField(self) {
             var y = window.pageYOffset || document.documentElement.scrollTop || 0;
             var formStart = at(p2, 0.58);
             var formEnd = at(p3, 0.08);
@@ -2368,6 +2412,12 @@
             }
             window.bullfinchCanopy.setTreeProgress(treeP);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            // Published HERE, not from the scene. An earlier version had the
+            // scene publish it; the scene was then reverted and the closing
+            // canopy plate silently went to opacity 0 because its var no
+            // longer existed. This handler already owns fieldP, so the plate
+            // now depends only on the page it lives in.
+            document.documentElement.style.setProperty("--final-field-p", fieldP.toFixed(3));
             document.documentElement.style.setProperty("--tree-crisp-offset", (treeP * .84).toFixed(4));
             // Tree DATA (species names + counting metrics) writes on the
             // #opportunity PIN, on-screen, over [0.03, 0.22] and un-writes on
@@ -2381,11 +2431,22 @@
             var dataProg = dataReveal * (1 - dataLeave);
             writeTreeData(0.80 + dataProg * 0.20);
             document.body.classList.toggle("is-tree-stage", treeP > 0.05);
-          },
+        }
+
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return at(p2, 0.58); },
+          endTrigger: closing,
+          end: "top 44%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: applyTreeField,
+          onRefresh: applyTreeField,
           onLeaveBack: function () {
             window.bullfinchCanopy.setTreeProgress(0);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
             writeTreeData(0);
+            document.documentElement.style.setProperty("--final-field-p", "0");
             document.documentElement.style.setProperty("--tree-crisp-offset", "0");
             document.body.classList.remove("is-tree-stage");
           },
