@@ -498,9 +498,11 @@ body.is-mote-hovering {
   text-transform: uppercase;
 }
 body.has-entered .hero__scroll-cue {
+  /* Lands with the hero, not a beat after it. The 980ms hold this used to carry
+     read as "nothing to do here" on 00 -- people did not know to scroll. */
   opacity: 0.72;
   transform: translate(-50%, 0);
-  transition-delay: 980ms;
+  transition-delay: 120ms;
 }
 body.has-reached-01 .hero__scroll-cue {
   opacity: 0;
