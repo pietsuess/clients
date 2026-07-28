@@ -975,15 +975,15 @@
 
            <div class="reveal-media reveal-media--left"
                 data-reveal-media="1"          pin: 1 | 2 | 3
-                data-reveal-from="0.06"        wipe OPEN across this band,
-                data-reveal-to="0.42"          as a fraction of that pin
-                data-reveal-out-from="0.78"    wipe SHUT across this one
-                data-reveal-out-to="0.97"      (both out-* are optional)
+                data-reveal-from="0"           wipe OPEN across this band,
+                data-reveal-to="0.30"          as a fraction of that pin
+                data-reveal-out-from="0.88"    wipe SHUT across this one,
+                data-reveal-out-to="1"         reversing back the way it came
                 style="--reveal-image: url('assets/x.jpg')"></div>
 
          The JS block near the p1/p2/p3 triggers wires every [data-reveal-media]
-         on the page and writes --reveal-in and --reveal-out 0->1. Everything
-         else is CSS. */
+         on the page. Both bands drive the SAME --reveal-in, the out band with
+         its progress inverted. Everything else is CSS. */
       .reveal-media {
         /* Opacity alone could not carry this. At 0.5 the photo's midtones stay
            near mid-luminance, and 01 sets DARK ink on beige, so the headline
@@ -998,7 +998,6 @@
            holds the RIGHT half of foresters-measuring.jpg (Piet). */
         --reveal-focus: 100%;
         --reveal-in: 0;
-        --reveal-out: 0;
         /* FIXED, not absolute. Absolute meant the photograph was parented to
            the panel, so when the pin released it rode the section up off the
            screen — it scrolled out instead of animating out (house rule). Fixed
@@ -1014,19 +1013,13 @@
         background-repeat: no-repeat;
         opacity: var(--reveal-opacity);
         filter: var(--reveal-wash);
-        /* THE WIPE, both ways. A hard crop edge — not a fade, so the image
-           reads as being uncovered and then covered again rather than
-           dissolving. Two independent edges:
-             --reveal-in   0->1  opens the RIGHT crop, edge travels left->right
-             --reveal-out  0->1  closes the LEFT crop, edge travels left->right
-           Same direction on both, so the exit continues the entrance's motion
-           instead of reversing it. */
-        clip-path: inset(
-          0
-          calc((1 - var(--reveal-in)) * 100%)
-          0
-          calc(var(--reveal-out) * 100%)
-        );
+        /* THE WIPE. A hard crop edge — not a fade, so the image reads as being
+           uncovered rather than dissolved in. ONE edge, the right crop, and it
+           retraces its own path: --reveal-in runs 0->1 to open it left->right,
+           then 1->0 on the way out so it closes right->left, back the way it
+           came. (An earlier version closed the LEFT edge instead, which carried
+           the motion onward in the same direction — Piet wants it reversed.) */
+        clip-path: inset(0 calc((1 - var(--reveal-in)) * 100%) 0 0);
         pointer-events: none;
         will-change: clip-path;
       }
@@ -1488,7 +1481,7 @@
 
       <section class="swot" id="swot" aria-label="Bullfinch Earth story">
         <article class="panel panel--media" id="problem" data-panel="1">
-          <div class="reveal-media reveal-media--left" data-reveal-media="1" data-reveal-from="0.06" data-reveal-to="0.42" style="--reveal-image: url('assets/foresters-measuring.jpg')" aria-hidden="true"></div>
+          <div class="reveal-media reveal-media--left" data-reveal-media="1" data-reveal-from="0" data-reveal-to="0.30" data-reveal-out-from="0.88" data-reveal-out-to="1" style="--reveal-image: url('assets/foresters-measuring.jpg')" aria-hidden="true"></div>
           <div class="panel__inner">
             <div class="p-head">
               <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
@@ -2048,7 +2041,10 @@
                 var v = parseFloat(el.getAttribute(attr));
                 return isNaN(v) ? fallback : v;
               }
-              function scrubProp(a, b, prop) {
+              // Both scrubs drive the SAME property. The out pass inverts its
+              // progress, so the crop edge retraces its own path rather than
+              // continuing across.
+              function scrubIn(a, b, invert) {
                 ScrollTrigger.create({
                   trigger: document.body,
                   start: function () { return at(pin, a); },
@@ -2056,12 +2052,13 @@
                   scrub: true,
                   invalidateOnRefresh: true,
                   onUpdate: function (self) {
-                    el.style.setProperty(prop, self.progress.toFixed(4));
+                    var p = invert ? 1 - self.progress : self.progress;
+                    el.style.setProperty("--reveal-in", p.toFixed(4));
                   },
                 });
               }
-              scrubProp(band("data-reveal-from", 0.06), band("data-reveal-to", 0.42), "--reveal-in");
-              scrubProp(band("data-reveal-out-from", 0.78), band("data-reveal-out-to", 0.97), "--reveal-out");
+              scrubIn(band("data-reveal-from", 0.0), band("data-reveal-to", 0.30), false);
+              scrubIn(band("data-reveal-out-from", 0.88), band("data-reveal-out-to", 1.0), true);
             }
           );
           // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
