@@ -936,7 +936,13 @@
   // beside, behind, and toward the camera, far out — so the convergence reads
   // as the whole inhabited field draining into one point from every direction
   // in X, Y and Z, not a small flat ring.
-  var convRBase = 5.2;
+  // Ring radius for the 25 feeder dots. 5.2 world units is far outside the
+  // closing camera's frame — every feeder sat off screen, so all you saw of
+  // the convergence was 25 straight rays entering from beyond the edges. That
+  // is the starburst, and it is NOT the cascade (the cascade is scaled in
+  // above). Small enough now that the whole ring is visible and the lines
+  // read as a constellation drawing inward.
+  var convRBase = 2.0;
   for (var tr = 0; tr < terminalDots.length; tr++) {
     var tIdx = terminalDots[tr];
     var fu = (tr + 0.5) / Math.max(1, terminalDots.length);
@@ -994,7 +1000,9 @@
       var rr = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
       if (rr > netMaxR) netMaxR = rr;
     }
-    var NET_CLOSING_RADIUS = 3.4;
+    // Kept just outside the feeder ring (convRBase) so the web reads as the
+    // thing the ring sits inside, and still lands within the frame.
+    var NET_CLOSING_RADIUS = 2.8;
     var netScale = netMaxR > 0.001 ? Math.min(1, NET_CLOSING_RADIUS / netMaxR) : 1;
     for (var pm = 0; pm < PARTICLE_POOL; pm++) {
       if (!connectedSet[pm] || pm === FINAL_RED_IDX || isTerminalDot[pm]) continue;
