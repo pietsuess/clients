@@ -975,14 +975,16 @@
 
            <div class="reveal-media reveal-media--left"
                 data-reveal-media="1"          pin: 1 | 2 | 3
-                data-reveal-from="0.06"        fraction of that pin's scroll
-                data-reveal-to="0.42"
+                data-reveal-from="0.06"        wipe OPEN across this band,
+                data-reveal-to="0.42"          as a fraction of that pin
+                data-reveal-out-from="0.78"    wipe SHUT across this one
+                data-reveal-out-to="0.97"      (both out-* are optional)
                 style="--reveal-image: url('assets/x.jpg')"></div>
 
          The JS block near the p1/p2/p3 triggers wires every [data-reveal-media]
-         on the page and writes --reveal-p 0->1. Everything else is CSS. */
+         on the page and writes --reveal-in and --reveal-out 0->1. Everything
+         else is CSS. */
       .reveal-media {
-        --reveal-p: 0;
         /* Opacity alone could not carry this. At 0.5 the photo's midtones stay
            near mid-luminance, and 01 sets DARK ink on beige, so the headline
            was ~2:1 against the trunk and the mono numeric (--ink-quiet) all but
@@ -995,7 +997,14 @@
         /* Which slice of the source to show. 100% = right edge, so the crop
            holds the RIGHT half of foresters-measuring.jpg (Piet). */
         --reveal-focus: 100%;
-        position: absolute;
+        --reveal-in: 0;
+        --reveal-out: 0;
+        /* FIXED, not absolute. Absolute meant the photograph was parented to
+           the panel, so when the pin released it rode the section up off the
+           screen — it scrolled out instead of animating out (house rule). Fixed
+           to the viewport, it never moves: it wipes open, it holds dead still
+           while 01 is on screen, and it wipes shut again. Nothing translates. */
+        position: fixed;
         top: 0;
         bottom: 0;
         z-index: 0;                 /* under the copy, over the panel ground */
@@ -1005,9 +1014,19 @@
         background-repeat: no-repeat;
         opacity: var(--reveal-opacity);
         filter: var(--reveal-wash);
-        /* THE WIPE. A hard crop edge travelling left to right — not a fade, so
-           the image reads as being uncovered rather than dissolved in. */
-        clip-path: inset(0 calc((1 - var(--reveal-p)) * 100%) 0 0);
+        /* THE WIPE, both ways. A hard crop edge — not a fade, so the image
+           reads as being uncovered and then covered again rather than
+           dissolving. Two independent edges:
+             --reveal-in   0->1  opens the RIGHT crop, edge travels left->right
+             --reveal-out  0->1  closes the LEFT crop, edge travels left->right
+           Same direction on both, so the exit continues the entrance's motion
+           instead of reversing it. */
+        clip-path: inset(
+          0
+          calc((1 - var(--reveal-in)) * 100%)
+          0
+          calc(var(--reveal-out) * 100%)
+        );
         pointer-events: none;
         will-change: clip-path;
       }
@@ -2013,27 +2032,36 @@
           });
 
           // ---- Reveal media (DEV) ----------------------------------------
-          // Wires every [data-reveal-media] on the page to its section's pin
-          // and scrubs --reveal-p from 0 to 1 across the window named in its
-          // data-reveal-from/to. Adding another photograph is markup only.
+          // Wires every [data-reveal-media] on the page to its section's pin.
+          // TWO scrubs per photograph, both writing their own custom property:
+          // one opens the right crop edge, one closes the left crop edge later
+          // in the same pin. The element itself is position:fixed and never
+          // moves — it animates out in place rather than scrolling away.
+          // Adding another photograph is markup only.
           var revealPins = { "1": p1, "2": p2, "3": p3 };
           Array.prototype.forEach.call(
             document.querySelectorAll("[data-reveal-media]"),
             function (el) {
               var pin = revealPins[el.getAttribute("data-reveal-media")];
               if (!pin) return;
-              var from = parseFloat(el.getAttribute("data-reveal-from")) || 0.05;
-              var to = parseFloat(el.getAttribute("data-reveal-to")) || 0.45;
-              ScrollTrigger.create({
-                trigger: document.body,
-                start: function () { return at(pin, from); },
-                end: function () { return at(pin, to); },
-                scrub: true,
-                invalidateOnRefresh: true,
-                onUpdate: function (self) {
-                  el.style.setProperty("--reveal-p", self.progress.toFixed(4));
-                },
-              });
+              function band(attr, fallback) {
+                var v = parseFloat(el.getAttribute(attr));
+                return isNaN(v) ? fallback : v;
+              }
+              function scrubProp(a, b, prop) {
+                ScrollTrigger.create({
+                  trigger: document.body,
+                  start: function () { return at(pin, a); },
+                  end: function () { return at(pin, b); },
+                  scrub: true,
+                  invalidateOnRefresh: true,
+                  onUpdate: function (self) {
+                    el.style.setProperty(prop, self.progress.toFixed(4));
+                  },
+                });
+              }
+              scrubProp(band("data-reveal-from", 0.06), band("data-reveal-to", 0.42), "--reveal-in");
+              scrubProp(band("data-reveal-out-from", 0.78), band("data-reveal-out-to", 0.97), "--reveal-out");
             }
           );
           // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
