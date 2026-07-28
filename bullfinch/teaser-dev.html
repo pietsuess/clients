@@ -708,15 +708,21 @@
       .closing-canopy {
         --canopy-w: 220vmax;
         --canopy-h: calc(var(--canopy-w) * 1437 / 1800);
-        /* Where the opening sits inside the photograph. */
-        --canopy-focus-x: 50%;
-        --canopy-focus-y: 34%;
+        /* Where the opening sits inside the photograph — the point all the
+           trunks converge on. Measured off the image, not assumed centre.
+           If the photograph is swapped, re-measure these two and the 0.30
+           in `top` below (which must match --canopy-focus-y). */
+        --canopy-focus-x: 51%;
+        --canopy-focus-y: 30%;
         position: fixed;
         z-index: 0;
         width: var(--canopy-w);
         height: var(--canopy-h);
-        left: calc(var(--final-red-x, 50%) - var(--canopy-w) * 0.5);
-        top: calc(var(--final-red-y, 58%) - var(--canopy-h) * 0.34);
+        /* The dot's viewport position. Nothing publishes --final-red-x/y in
+           this build, so these fall back to where the closing composition
+           puts the dot: horizontally centred, 58% down. */
+        left: calc(var(--final-red-x, 50%) - var(--canopy-w) * 0.51);
+        top: calc(var(--final-red-y, 58%) - var(--canopy-h) * 0.30);
         pointer-events: none;
         background-image: url("assets/forest-canopy-closing.jpg");
         /* Plate is already the image's aspect, so this is a plain fill. */
@@ -2433,6 +2439,12 @@
             }
             window.bullfinchCanopy.setTreeProgress(treeP);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            // Published HERE, not from the scene. An earlier version had the
+            // scene publish it; the scene was then reverted and the closing
+            // canopy plate silently went to opacity 0 because its var no
+            // longer existed. This handler already owns fieldP, so the plate
+            // now depends only on the page it lives in.
+            document.documentElement.style.setProperty("--final-field-p", fieldP.toFixed(3));
             document.documentElement.style.setProperty("--tree-crisp-offset", (treeP * .84).toFixed(4));
             // Tree DATA (species names + counting metrics) writes on the
             // #opportunity PIN, on-screen, over [0.03, 0.22] and un-writes on
@@ -2451,6 +2463,7 @@
             window.bullfinchCanopy.setTreeProgress(0);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
             writeTreeData(0);
+            document.documentElement.style.setProperty("--final-field-p", "0");
             document.documentElement.style.setProperty("--tree-crisp-offset", "0");
             document.body.classList.remove("is-tree-stage");
           },
