@@ -1236,7 +1236,13 @@
     // The strokes still ADVANCE on their own waves behind the gate, so by the
     // time it opens the web is already drawn and simply comes up, rather than
     // scribbling itself in over the finale.
-    var networkTaper = smoothstep(0.72, 1.0, finalFieldP);
+    // Was smoothstep(0.72, 1.0). At 0.72 the motes are still mid-flight to
+    // their closing homes, so the web came up WHILE its own endpoints were
+    // travelling — long wonky strokes and stray arrowheads all over the
+    // transition. The field is effectively settled by 0.9 (the per-mote
+    // stagger tops out around finalFieldP * 1.15), so the network now waits
+    // for it and simply fades up in place on the last screen.
+    var networkTaper = smoothstep(0.9, 1.0, finalFieldP);
     for (var n = 0; n < EDGE_COUNT; n++) {
       var aIdx = edgeA[n];
       var bIdx = edgeB[n];
@@ -1309,7 +1315,7 @@
       // grove (no statForm/openField gating) but TAPER faint once the trees
       // and closing form (networkTaper above). Only the convergence wave stays
       // gated to the closing so it lands with the finale.
-      arrowVisible *= (wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : networkTaper);
+      arrowVisible *= (wave === 7 ? smoothstep(0.9, 1.0, finalFieldP) : networkTaper);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -1339,7 +1345,7 @@
 
       // Geometry does the drawing. Alpha is simply on while the segment has
       // length, avoiding the previous fade-in behavior.
-      var journeyGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : networkTaper;
+      var journeyGate = wave === 7 ? smoothstep(0.9, 1.0, finalFieldP) : networkTaper;
       var visible = strokeProgress > 0.001 ? journeyGate : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
@@ -2435,8 +2441,10 @@
   // Once the grove has done its job, the same motes leave the tree targets and
   // return to the original full-volume field. The existing final convergence
   // then draws that field into the central red point.
+  var finalRedVec = new THREE.Vector3();
   function updateFinalField() {
     finalFieldP = finalFieldTarget;
+    document.documentElement.style.setProperty("--final-field-p", finalFieldP.toFixed(3));
     // Continuously retain the fully assembled grove while this transition is
     // at zero. Both scroll directions therefore use the same starting state.
     if (finalFieldP <= 0) {
@@ -2471,6 +2479,21 @@
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
       alphas[i] = lerp(alphas[i], 0.25, closingDim);
     }
+
+    // Publish the terminal red dot's VIEWPORT position. The DOM closing plate
+    // lines the photograph's canopy opening up with this rather than guessing
+    // a percentage, so the sky centre meets the dot on any viewport.
+    finalRedVec.set(
+      positions[FINAL_RED_IDX * 3],
+      positions[FINAL_RED_IDX * 3 + 1],
+      positions[FINAL_RED_IDX * 3 + 2]
+    ).project(camera);
+    document.documentElement.style.setProperty(
+      "--final-red-x", ((finalRedVec.x * 0.5 + 0.5) * 100).toFixed(2) + "%"
+    );
+    document.documentElement.style.setProperty(
+      "--final-red-y", ((-finalRedVec.y * 0.5 + 0.5) * 100).toFixed(2) + "%"
+    );
     if (fillFinalLocked && fillPosAttr && fillAlphaAttr) {
       var fp = fillPosAttr.array;
       var fa = fillAlphaAttr.array;

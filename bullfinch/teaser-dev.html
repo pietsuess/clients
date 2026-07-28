@@ -688,45 +688,63 @@
          A canopy photograph under the whole last screen, so the finale sits
          in a forest rather than in flat dark green.
 
-         ::before, not a new element: .closing is already position:relative
-         with overflow:hidden, and its content is z-index 2, so the plate
-         drops in behind everything the section owns with no markup change.
+         FIXED, not absolute, and NOT a child of .closing. The first version
+         was .closing::before, which meant it was parented to the section and
+         rode up with it — it slid into position instead of arriving in place
+         (house rule). It now holds dead still and only its opacity moves.
+
+         ANCHORING. The photograph's own subject is the canopy opening the
+         trunks radiate from, at roughly (50%, 34%) of the frame. That point
+         has to land on the terminal red dot, not on the middle of the
+         viewport. The scene publishes the dot's viewport position each frame
+         as --final-red-x / --final-red-y, so the plate is sized to the
+         image's real aspect (1800x1437) and offset by exactly that fraction
+         of itself. Sky centre meets the dot on any viewport.
 
          It cannot go UNDER the mote canvas — the canvas is fixed at root
-         z-index 0 and .closing is z-index 1 above it, and mix-blend-mode
-         cannot reach a WebGL canvas from a panel element. So the plate is
-         kept low enough in opacity that the motes and the network read
-         straight through it, and its own darks are crushed toward the page
-         green so it joins the ground instead of sitting on top as a photo.
-         Masked off at the top and bottom edges so it has no seam. */
-      .closing::before {
-        content: "";
-        position: absolute;
-        inset: 0;
+         z-index 0 and blend modes cannot reach WebGL from a DOM element — so
+         it is held low in opacity with its darks crushed toward the page
+         green, and the motes and network read straight through it. */
+      .closing-canopy {
+        --canopy-w: 220vmax;
+        --canopy-h: calc(var(--canopy-w) * 1437 / 1800);
+        /* Where the opening sits inside the photograph. */
+        --canopy-focus-x: 50%;
+        --canopy-focus-y: 34%;
+        position: fixed;
         z-index: 0;
+        width: var(--canopy-w);
+        height: var(--canopy-h);
+        left: calc(var(--final-red-x, 50%) - var(--canopy-w) * 0.5);
+        top: calc(var(--final-red-y, 58%) - var(--canopy-h) * 0.34);
         pointer-events: none;
         background-image: url("assets/forest-canopy-closing.jpg");
-        background-size: cover;
-        background-position: 50% 42%;
+        /* Plate is already the image's aspect, so this is a plain fill. */
+        background-size: 100% 100%;
         background-repeat: no-repeat;
         /* Desaturated and darkened into the closing's own green. */
         filter: saturate(0.55) brightness(0.42) contrast(1.05) hue-rotate(-6deg);
-        opacity: 0.5;
-        -webkit-mask-image: linear-gradient(
-          to bottom,
-          transparent 0%,
-          #000 22%,
-          #000 74%,
-          transparent 100%
+        /* Fades UP in place across the closing settle. Nothing translates. */
+        opacity: calc(var(--final-field-p, 0) * 0.55);
+        /* Soft round falloff centred on the opening, so the plate dissolves
+           outward from the dot and has no edge anywhere. */
+        -webkit-mask-image: radial-gradient(
+          ellipse at var(--canopy-focus-x) var(--canopy-focus-y),
+          #000 0%,
+          #000 16%,
+          transparent 42%
         );
-        mask-image: linear-gradient(
-          to bottom,
-          transparent 0%,
-          #000 22%,
-          #000 74%,
-          transparent 100%
+        mask-image: radial-gradient(
+          ellipse at var(--canopy-focus-x) var(--canopy-focus-y),
+          #000 0%,
+          #000 16%,
+          transparent 42%
         );
       }
+      /* No class gate. --final-field-p is 0 everywhere except the closing,
+         so the opacity calc alone keeps it invisible — and unlike
+         is-final-contrast (which nothing in this build actually toggles) it
+         cannot get stuck. */
       .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
       .closing__logo { height: clamp(34px, 4.5vh, 46px); }
       .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
@@ -1679,6 +1697,9 @@
         <path d="m6 9 6 6 6-6" />
       </svg>
     </div>
+    <!-- Closing canopy plate (DEV). Body-level and fixed so it cannot ride
+         the closing section up the screen. See .closing-canopy. -->
+    <div class="closing-canopy" aria-hidden="true"></div>
     <!-- Hero scroll cue (DEV). Moved OUT of .hero — see the note at the old
          site. Body-level, so its z-index is measured against the root. -->
     <div class="hero__scroll-cue" aria-hidden="true">
@@ -1912,7 +1933,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-33"></script>
+    <script src="scene-claude-teaser.js?v=claude-34"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>
