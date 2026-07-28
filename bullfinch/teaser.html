@@ -6,6 +6,8 @@
     <meta name="robots" content="noindex, nofollow" />
     <meta name="googlebot" content="noindex, nofollow" />
 
+    <!-- DEV FORK of teaser.html. Image-reveal test bed only — fixes belong in
+         teaser.html and get carried here, never the other way round. -->
     <title>Bullfinch Earth - Nature from the Ground Up</title>
     <meta name="description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
 
@@ -381,6 +383,46 @@
          left edge of "Dedicated" (line 1) to the left edge of "19th" (line 3). */
       #problem .panel__verdict .vs-line { display: block; }
       #problem .panel__verdict .vs-line--2 { margin-right: 5.9em; }
+      /* ONE RED. There were three in play (Piet: "two reds going on"):
+           --accent      #FF5560   styles.css, the CSS marks — the pink one,
+                                   which is the section-mark dot in 01
+           --gl-accent   #DA3A40   teaser.css, the WebGL points — the deeper
+                                   one, which is the whole stat dot grid
+           #A11B26                 the 02 Wear/Walk/Data leads, added when
+                                   #FF5560 measured 1.68:1 on the half-green
+         The mark and the grid sit on screen together in 01, so the split was
+         visible in a single frame. A darkened token (#B32A31) was tried and
+         rejected on sight — it read as maroon and took the brand with it.
+
+         WHY THE TWO NEVER MATCHED, even when both tokens said #FF5560:
+         the scene's materials are raw THREE.ShaderMaterials, which write
+         gl_FragColor straight out with no colour-space conversion. But
+         THREE.Color (r160, ColorManagement on by default) converts the hex
+         sRGB -> linear on the way IN. So the dot grid has been drawing the
+         LINEAR form of the brand red and displaying it as if it were sRGB,
+         which lands at rgb(255, 23, 30) — a punchier, more vermilion red than
+         the CSS #FF5560 pink sitting right next to it.
+
+         Piet picked the punchy one. So --gl-accent KEEPS #FF5560, because the
+         pipeline above is what turns it into the colour he wants, and --accent
+         is set to that colour directly so the DOM marks, the 01 punchline and
+         the 02 leads all match what the grid is already doing.
+         The two tokens are deliberately DIFFERENT hex values that resolve to
+         the SAME screen colour. Do not "fix" them to match each other.
+
+         NOTE: every other scene colour goes through the same unconverted path,
+         so the whole WebGL palette sits darker than its CSS hex. That is the
+         real bug; it is not being touched here because the scene has been
+         art-directed by eye under it and correcting it would move every
+         backdrop, grove and closing colour at once. */
+      :root {
+        --accent: #FF171E;
+        --gl-accent: #FF5560;
+      }
+      #problem .panel__verdict .vs-line:last-child {
+        color: var(--accent);
+        font-weight: 700;
+      }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
       #problem .panel__evidence p { text-align: right; text-align-last: right; }
       #problem .panel__numeric { text-align: right; text-align-last: right; }
@@ -591,10 +633,29 @@
         --ink-soft: #2C3B30;
         --rule: rgba(22, 37, 27, 0.30);
       }
-      /* Deepened only where it sits on this field. The brand accent is
-         untouched everywhere else, including the section mark beside the
-         eyebrow, which is a graphic rather than text. */
-      #product .panel__evidence .lead { color: #A11B26; }
+      /* Folded into the single brand red (see :root above). This WAS #A11B26,
+         a one-off picked purely for contrast on this field, and it was the
+         third red on the page.
+         ⚠️ OPEN: brand red on the ~#B9C397 half-green measures 1.68:1 — the
+         hue reads but the luminance does not. The answer is NOT another red.
+         Either these three words stop being red on this section, or 02's
+         ground gets darker under them. Piet to call it. */
+      #product .panel__evidence .lead {
+        color: var(--accent);
+        /* 1.5em of the paragraph it sits in (was 2em, cut 25%), so it keeps
+           tracking the body clamp at this width rather than pinning a px
+           size. Display font, not body, because
+           at this size the body face reads as oversized copy instead of as a
+           heading. Block so the <br> after it is not also breaking — the word
+           owns its own line and the description hangs under it. */
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.5em;
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        margin-right: 0;
+        margin-bottom: 0.12em;
+      }
 
       /* The nav is fixed and outside #product, so the block above cannot reach
          it — exactly the reason body.is-tree-stage exists for 03. This window
@@ -967,6 +1028,155 @@
         #rise-c p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
       }
 
+      /* ===== Idle scroll hint (DEV) ======================================
+         The hero cue (.hero__scroll-cue) retires at has-reached-01 and never
+         comes back, so a reader who stops mid-page gets nothing. This one is
+         the opposite: it is absent while you are moving and appears only once
+         you have been still. Same visual language as the hero cue so it reads
+         as the same object returning, not a new one. */
+      .idle-cue {
+        position: fixed;
+        left: 50%;
+        bottom: max(28px, env(safe-area-inset-bottom));
+        z-index: 6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        color: var(--ink-soft);
+        opacity: 0;
+        transform: translate(-50%, 8px);
+        pointer-events: none;
+        transition:
+          color 260ms ease,
+          opacity 520ms ease,
+          transform 520ms cubic-bezier(.2, .75, .18, 1);
+      }
+      .idle-cue__label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+      body.is-idle .idle-cue { opacity: 0.72; transform: translate(-50%, 0); }
+      .idle-cue svg { animation: scrollCueFloat 2.2s ease-in-out infinite; }
+      /* Same ink problem the nav has: this is fixed and outside the sections,
+         so it cannot inherit their vars. Carried by the same two stage classes
+         so it stays legible on the half-green and on the grove. */
+      body.is-midramp-stage .idle-cue { color: #2C3B30; }
+      body.is-tree-stage .idle-cue,
+      body.is-final-contrast .idle-cue { color: #EFE7D3; }
+      @media (prefers-reduced-motion: reduce) {
+        .idle-cue svg { animation: none; }
+      }
+
+      /* ===== Hero cue, ungated (DEV) =====================================
+         styles.css only shows .hero__scroll-cue once body.has-entered lands,
+         i.e. after the splash sequence finishes. This shows it from first
+         paint instead — on 00 nobody knows to scroll, so the cue cannot be
+         waiting on anything. It still retires at has-reached-01, hence
+         :not() rather than a flat override: no gate on the way in, the
+         existing exit on the way out.
+         Specificity note: styles.css's rule is body.has-entered + class
+         (0,2,1); body:not(.has-reached-01) + class matches that and wins on
+         order, and simply stops matching once 01 is reached. */
+      body:not(.has-reached-01) .hero__scroll-cue {
+        opacity: 0.72;
+        transform: translate(-50%, 0);
+        transition-delay: 0ms;
+      }
+      /* styles.css gives it z-index 6, which was fine when it was buried in
+         .hero's own stacking context and meaningless anywhere else. Now that
+         it is body-level it is measured against the root, where .forest-photo
+         (2), .tree-readouts (4) and the rise banners all sit. 46 keeps it
+         under the nav (50). */
+      .hero__scroll-cue { z-index: 46; }
+      /* Fixed and outside the sections, same ink problem as .idle-cue. */
+      body.is-midramp-stage .hero__scroll-cue { color: #2C3B30; }
+      body.is-tree-stage .hero__scroll-cue,
+      body.is-final-contrast .hero__scroll-cue { color: #EFE7D3; }
+
+      /* ===== Reveal media (DEV) ==========================================
+         A photograph that wipes open under a section as its pin scrubs.
+         Deliberately GENERIC so adding the next one is markup only:
+
+           <div class="reveal-media reveal-media--left"
+                data-reveal-media="1"          pin: 1 | 2 | 3
+                data-reveal-from="0"           wipe OPEN across this band,
+                data-reveal-to="0.30"          as a fraction of that pin
+                data-reveal-out-from="0.88"    wipe SHUT across this one,
+                data-reveal-out-to="1"         reversing back the way it came
+                style="--reveal-image: url('assets/x.jpg')"></div>
+
+         The JS block near the p1/p2/p3 triggers wires every [data-reveal-media]
+         on the page. Both bands drive the SAME --reveal-in, the out band with
+         its progress inverted. Everything else is CSS. */
+      .reveal-media {
+        /* Opacity alone could not carry this. At 0.5 the photo's midtones stay
+           near mid-luminance, and 01 sets DARK ink on beige, so the headline
+           was ~2:1 against the trunk and the mono numeric (--ink-quiet) all but
+           vanished. Wash the photograph up toward the page beige FIRST — pull
+           saturation, raise brightness, flatten contrast — so it lands as a
+           pale ground with a narrow luminance range, then set opacity. Dark ink
+           reads against it everywhere instead of only over the light gaps. */
+        --reveal-opacity: 0.34;
+        --reveal-wash: saturate(0.5) brightness(1.28) contrast(0.72);
+        /* Which slice of the source to show. 100% = right edge, so the crop
+           holds the RIGHT half of foresters-measuring.jpg (Piet). */
+        --reveal-focus: 100%;
+        --reveal-in: 0;
+        /* FIXED, not absolute. Absolute meant the photograph was parented to
+           the panel, so when the pin released it rode the section up off the
+           screen — it scrolled out instead of animating out (house rule). Fixed
+           to the viewport, it never moves: it wipes open, it holds dead still
+           while 01 is on screen, and it wipes shut again. Nothing translates. */
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        z-index: 0;                 /* under the copy, over the panel ground */
+        background-image: var(--reveal-image);
+        background-size: cover;
+        background-position: var(--reveal-focus) 50%;
+        background-repeat: no-repeat;
+        opacity: var(--reveal-opacity);
+        filter: var(--reveal-wash);
+        /* THE WIPE. A hard crop edge — not a fade, so the image reads as being
+           uncovered rather than dissolved in. ONE edge, the right crop, and it
+           retraces its own path: --reveal-in runs 0->1 to open it left->right,
+           then 1->0 on the way out so it closes right->left, back the way it
+           came. (An earlier version closed the LEFT edge instead, which carried
+           the motion onward in the same direction — Piet wants it reversed.) */
+        clip-path: inset(0 calc((1 - var(--reveal-in)) * 100%) 0 0);
+        pointer-events: none;
+        will-change: clip-path;
+      }
+      /* Full-bleed to the left page edge: the 01 copy is a RIGHT-aligned rail
+         in column 1, so the photograph fills the empty half it leans against
+         instead of sitting in a box of its own. */
+      .reveal-media--left { left: 0; right: 50%; }
+      .reveal-media--right { left: 50%; right: 0; }
+      /* The copy has to sit above it. .panel__inner is display:contents at
+         900px+, so these two are the real grid items and they carry no
+         stacking of their own. */
+      #problem { position: relative; }
+      #problem .p-head,
+      #problem .p-body { position: relative; z-index: 1; }
+      /* Same move 02 needed on the half-green field: a section that no longer
+         sits on flat beige has to compensate its ink. The washed photograph
+         still costs roughly a stop, and it is the QUIET inks that die — the
+         eyebrow and the mono numeric, which were already the palest thing on
+         the page. The headline and body are near-black and hold on their own.
+         Deepened, not flipped light: 01 stays a light section. */
+      #problem {
+        --ink-quiet: #2F3B31;
+        --ink-soft: #24302A;
+        --rule: rgba(22, 37, 27, 0.34);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal-media { clip-path: none; }
+      }
+
       /* ===== Phone pass ==================================================
          Same ideas as the main site: single column, nothing fixed wider than
          the viewport (a fixed box escapes body{overflow-x:hidden} and makes
@@ -1129,6 +1339,23 @@
           margin-top: clamp(26px, 5vh, 46px);
           padding-top: clamp(16px, 2.6vh, 24px);
           border-top: 1px solid rgba(239, 231, 211, .20);
+        }
+
+        /* There is no left half at this width — 01 collapses to one column —
+           so the split goes horizontal instead: full width, TOP half of the
+           viewport (Piet). Still fixed, still the same left-to-right crop
+           wipe; only the box it wipes inside changes.
+
+           Opacity comes back up from the 0.32 it needed when it sat behind the
+           whole copy block. In its own band above the type it can carry more
+           of the photograph without costing legibility. */
+        .reveal-media--left,
+        .reveal-media--right {
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 50%;
+          --reveal-opacity: 0.5;
         }
 
         /* 01 — the two-row / two-column rail collapses to one left column:
@@ -1356,6 +1583,21 @@
         </div>
       </nav>
     </header>
+    <!-- Idle scroll hint (DEV). Shown by body.is-idle only. -->
+    <div class="idle-cue" aria-hidden="true">
+      <span class="idle-cue__label">Scroll</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
+    <!-- Hero scroll cue (DEV). Moved OUT of .hero — see the note at the old
+         site. Body-level, so its z-index is measured against the root. -->
+    <div class="hero__scroll-cue" aria-hidden="true">
+      <span class="hero__scroll-cue-label">Scroll</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
     <main id="page">
       <section class="hero" aria-label="Hero">
         <div class="hero__inner">
@@ -1383,16 +1625,17 @@
           </h1>
           <p class="hero__subtitle hero__line hero__line--2">Bullfinch Earth measures, monitors, and maps every stem, passively, while foresters do their normal jobs</p>
         </div>
-        <div class="hero__scroll-cue" aria-hidden="true">
-          <span class="hero__scroll-cue-label">Scroll</span>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </div>
+        <!-- .hero__scroll-cue used to live here. It is position:fixed but it
+             was a child of .hero, which sets `isolation: isolate` — so it was
+             trapped in the hero's stacking context and every later fixed
+             layer (.forest-photo z2, .tree-readouts z4, the rise banners)
+             painted over it regardless of its own z-index. Moved to a
+             body-level sibling of .idle-cue, above. -->
       </section>
 
       <section class="swot" id="swot" aria-label="Bullfinch Earth story">
         <article class="panel panel--media" id="problem" data-panel="1">
+          <div class="reveal-media reveal-media--left" data-reveal-media="1" data-reveal-from="0" data-reveal-to="0.30" data-reveal-out-from="0.88" data-reveal-out-to="1" style="--reveal-image: url('assets/foresters-measuring.jpg')" aria-hidden="true"></div>
           <div class="panel__inner">
             <div class="p-head">
               <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
@@ -1430,7 +1673,8 @@
               <p><span class="lead">Walk</span><br>Just press “Start Bullfinching” and go do your thing</p>
               <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
             </div>
-            <p class="panel__numeric">WEAR &middot; WALK &middot; DATA</p>
+            <!-- The WEAR · WALK · DATA summary line was removed: it only
+                 repeated the three leads sitting directly above it. -->
           </div>
         </article>
 
@@ -1934,6 +2178,44 @@
               document.body.classList.toggle("is-midramp-stage", self.isActive);
             },
           });
+
+          // ---- Reveal media (DEV) ----------------------------------------
+          // Wires every [data-reveal-media] on the page to its section's pin.
+          // TWO scrubs per photograph, both writing their own custom property:
+          // one opens the right crop edge, one closes the left crop edge later
+          // in the same pin. The element itself is position:fixed and never
+          // moves — it animates out in place rather than scrolling away.
+          // Adding another photograph is markup only.
+          var revealPins = { "1": p1, "2": p2, "3": p3 };
+          Array.prototype.forEach.call(
+            document.querySelectorAll("[data-reveal-media]"),
+            function (el) {
+              var pin = revealPins[el.getAttribute("data-reveal-media")];
+              if (!pin) return;
+              function band(attr, fallback) {
+                var v = parseFloat(el.getAttribute(attr));
+                return isNaN(v) ? fallback : v;
+              }
+              // Both scrubs drive the SAME property. The out pass inverts its
+              // progress, so the crop edge retraces its own path rather than
+              // continuing across.
+              function scrubIn(a, b, invert) {
+                ScrollTrigger.create({
+                  trigger: document.body,
+                  start: function () { return at(pin, a); },
+                  end: function () { return at(pin, b); },
+                  scrub: true,
+                  invalidateOnRefresh: true,
+                  onUpdate: function (self) {
+                    var p = invert ? 1 - self.progress : self.progress;
+                    el.style.setProperty("--reveal-in", p.toFixed(4));
+                  },
+                });
+              }
+              scrubIn(band("data-reveal-from", 0.0), band("data-reveal-to", 0.30), false);
+              scrubIn(band("data-reveal-out-from", 0.88), band("data-reveal-out-to", 1.0), true);
+            }
+          );
           // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
           // trees are standing, the ramp walks from the green halfway to the
           // closing night palette, which then takes over on its own trigger.
@@ -2451,7 +2733,19 @@
             }
           }
           if (window.lenis && typeof window.lenis.scrollTo === "function") {
-            window.lenis.scrollTo(destination);
+            // Lenis's default is ~1.2s on its own easing, which lands as a
+            // jump on a page where every section is a scrubbed pin — you
+            // arrive without having seen the choreography you flew through.
+            // Longer, and eased at BOTH ends (in-out cubic): leaves slowly,
+            // arrives slowly, carries speed only in the middle.
+            window.lenis.scrollTo(destination, {
+              duration: 2.6,
+              easing: function (t) {
+                return t < 0.5
+                  ? 4 * t * t * t
+                  : 1 - Math.pow(-2 * t + 2, 3) / 2;
+              },
+            });
           } else {
             if (typeof destination === "number") {
               window.scrollTo({ top: destination, behavior: "smooth" });
@@ -2483,6 +2777,45 @@
         });
         window.addEventListener("scroll", updateScrollIndicator, { passive: true });
         updateScrollIndicator();
+
+        // ---- Idle scroll hint (DEV) --------------------------------------
+        // Appears after a stretch of no scrolling, anywhere on the page, and
+        // leaves the moment you move again. Gated on two things:
+        //  - has-reached-01, so it never fights the hero cue, which owns the
+        //    same spot on screen until the first panel settles
+        //  - not already at the bottom, where there is nothing left to hint at
+        (function () {
+          var IDLE_MS = 2600;
+          var BOTTOM_SLACK = 120;
+          var idleTimer = null;
+          function atBottom() {
+            return window.innerHeight + window.scrollY >=
+              document.documentElement.scrollHeight - BOTTOM_SLACK;
+          }
+          function goIdle() {
+            if (!document.body.classList.contains("has-reached-01")) return;
+            if (atBottom()) return;
+            document.body.classList.add("is-idle");
+          }
+          function wake() {
+            document.body.classList.remove("is-idle");
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(goIdle, IDLE_MS);
+          }
+          // SCROLL POSITION ONLY. Not wheel, not keydown, not pointer — a
+          // mouse moving across the page is not scrolling, and waking on it
+          // meant the hint could never appear on a desktop where the cursor
+          // drifts. And not the bare scroll event either: momentum and the
+          // pinned sections fire it with an unchanged scrollY. The hint sleeps
+          // unless the page has actually MOVED.
+          var lastY = window.scrollY;
+          window.addEventListener("scroll", function () {
+            if (window.scrollY === lastY) return;
+            lastY = window.scrollY;
+            wake();
+          }, { passive: true });
+          wake();
+        })();
 
         var navLabel = document.getElementById("site-nav-hover-label");
         var navItems = document.querySelectorAll("[data-nav-label]");
