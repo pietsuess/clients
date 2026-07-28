@@ -391,14 +391,18 @@
            #A11B26                 the 02 Wear/Walk/Data leads, added when
                                    #FF5560 measured 1.68:1 on the half-green
          The mark and the grid sit on screen together in 01, so the split was
-         visible in a single frame. Collapsed onto the deeper #DA3A40: it is
-         the one carrying the most area already, it holds up as type on beige
-         where #FF5560 does not, and it stays legible on the 02 green.
+         visible in a single frame. Collapsed onto ONE token, then darkened to
+         #B32A31 — a shade under the deeper of the two — because that is the
+         only value that works everywhere the red has to appear: as the mark
+         and the dot grid, as the 01 punchline on beige, and as the 02 leads on
+         the half-green field, where the bright brand red measured 1.68:1.
+         Darkening the single token was the fix; adding a second red back was
+         not (Piet).
          Both tokens are set here so it cannot matter which stylesheet wins,
          and the scene reads --gl-accent off :root at init. */
       :root {
-        --accent: #DA3A40;
-        --gl-accent: #DA3A40;
+        --accent: #B32A31;
+        --gl-accent: #B32A31;
       }
       #problem .panel__verdict .vs-line:last-child {
         color: var(--accent);
@@ -615,13 +619,12 @@
         --rule: rgba(22, 37, 27, 0.30);
       }
       /* Folded into the single red (see :root above). This WAS #A11B26, chosen
-         purely for contrast on the half-green field, and it was the third red
-         on the page.
-         ⚠️ THE ONE PLACE UNIFYING COSTS SOMETHING: on that ~#B9C397 field the
-         old #A11B26 measured 4.19:1 and #DA3A40 measures ~2.5:1, at lead-copy
-         size. If Piet wants these three words back at full legibility the fix
-         is to darken the SINGLE token rather than reintroduce a second red —
-         #B32A31 keeps the family and buys back most of it. */
+         purely for contrast on this field, and it was the third red on the
+         page. This is the tightest spot the one token has to survive: on the
+         ~#B9C397 half-green, #B32A31 measures ~3.6:1 at lead-copy size —
+         short of the old dedicated 4.19:1, comfortably past the 2.5:1 the
+         undarkened token gave, and it now matches the mark, the dot grid and
+         the 01 punchline exactly. */
       #product .panel__evidence .lead { color: var(--accent); }
 
       /* The nav is fixed and outside #product, so the block above cannot reach
