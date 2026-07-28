@@ -391,16 +391,32 @@
            #A11B26                 the 02 Wear/Walk/Data leads, added when
                                    #FF5560 measured 1.68:1 on the half-green
          The mark and the grid sit on screen together in 01, so the split was
-         visible in a single frame. Collapsed onto the BRAND red, #FF5560.
-         A darkened token (#B32A31) was tried and rejected on sight — it read
-         as maroon and took the brand with it. The red is the brand's; it is
-         not a variable to be tuned for a contrast ratio. Where it lands on a
-         ground it cannot hold, the ground changes or the red is not used for
-         type there — the red itself does not move.
-         Both tokens are set here so it cannot matter which stylesheet wins,
-         and the scene reads --gl-accent off :root at init. */
+         visible in a single frame. A darkened token (#B32A31) was tried and
+         rejected on sight — it read as maroon and took the brand with it.
+
+         WHY THE TWO NEVER MATCHED, even when both tokens said #FF5560:
+         the scene's materials are raw THREE.ShaderMaterials, which write
+         gl_FragColor straight out with no colour-space conversion. But
+         THREE.Color (r160, ColorManagement on by default) converts the hex
+         sRGB -> linear on the way IN. So the dot grid has been drawing the
+         LINEAR form of the brand red and displaying it as if it were sRGB,
+         which lands at rgb(255, 23, 30) — a punchier, more vermilion red than
+         the CSS #FF5560 pink sitting right next to it.
+
+         Piet picked the punchy one. So --gl-accent KEEPS #FF5560, because the
+         pipeline above is what turns it into the colour he wants, and --accent
+         is set to that colour directly so the DOM marks, the 01 punchline and
+         the 02 leads all match what the grid is already doing.
+         The two tokens are deliberately DIFFERENT hex values that resolve to
+         the SAME screen colour. Do not "fix" them to match each other.
+
+         NOTE: every other scene colour goes through the same unconverted path,
+         so the whole WebGL palette sits darker than its CSS hex. That is the
+         real bug; it is not being touched here because the scene has been
+         art-directed by eye under it and correcting it would move every
+         backdrop, grove and closing colour at once. */
       :root {
-        --accent: #FF5560;
+        --accent: #FF171E;
         --gl-accent: #FF5560;
       }
       #problem .panel__verdict .vs-line:last-child {
