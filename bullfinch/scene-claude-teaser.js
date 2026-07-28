@@ -81,7 +81,13 @@
   // Falls back to --bg for the standard scene.
   var baseRaw = getComputedStyle(document.documentElement).getPropertyValue("--gl-base").trim();
   var bgColor = readCssColor(baseRaw ? "--gl-base" : "--bg");
-  renderer.setClearColor(bgColor, 1);
+  // OPT-IN, per page. With <body data-canvas-transparent> the canvas clears
+  // to nothing instead of to the page colour, so a DOM layer underneath it
+  // can be seen through the mote field. Only teaser-dev sets this; every
+  // other page that loads this scene is byte-identical in behaviour.
+  var transparentBackdrop = document.body && document.body.hasAttribute("data-canvas-transparent");
+  var clearAlpha = transparentBackdrop ? 0 : 1;
+  renderer.setClearColor(bgColor, clearAlpha);
 
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(
@@ -249,16 +255,23 @@
   // Sits behind the backdrop plane and paints the base colour opaquely, so
   // the bar's hard edge applies to the page colour itself and not just to
   // the atmospheric tint above it.
+  // uBaseAlpha exists ONLY so a page can let a DOM layer show through the
+  // canvas. It stays 1 everywhere unless <body data-canvas-transparent> is
+  // set (teaser-dev), in which case it fades over the closing — see
+  // transparentBackdrop below. transparent:true costs nothing while the
+  // alpha is 1.
+  uniforms.uBaseAlpha = { value: 1 };
   var baseMat = new THREE.ShaderMaterial({
-    transparent: false,
+    transparent: true,
     depthWrite: false,
     depthTest: false,
     side: THREE.DoubleSide,
     uniforms: {
-      uBase:   uniforms.uBase,
-      uBaseTo: uniforms.uBaseTo,
-      uWipeY:  uniforms.uWipeY,
-      uRes:    uniforms.uRes,
+      uBase:      uniforms.uBase,
+      uBaseTo:    uniforms.uBaseTo,
+      uWipeY:     uniforms.uWipeY,
+      uRes:       uniforms.uRes,
+      uBaseAlpha: uniforms.uBaseAlpha,
     },
     vertexShader: planeVertex,
     fragmentShader: [
@@ -266,10 +279,11 @@
       "uniform vec3  uBaseTo;",
       "uniform float uWipeY;",
       "uniform vec2  uRes;",
+      "uniform float uBaseAlpha;",
       "varying vec2 vUv;",
       "void main(){",
       "  float wipe = step(gl_FragCoord.y / uRes.y, uWipeY);",
-      "  gl_FragColor = vec4(mix(uBase, uBaseTo, wipe), 1.0);",
+      "  gl_FragColor = vec4(mix(uBase, uBaseTo, wipe), uBaseAlpha);",
       "}",
     ].join("\n"),
   });
@@ -1567,7 +1581,7 @@
       partMat.uniforms.uColor.value.lerpColors(initial.part, target.part, eased);
       arrowMat.uniforms.uColor.value.lerpColors(initial.arrow, target.arrow, eased);
       bgColor.lerpColors(initial.bg, target.bg, eased);
-      renderer.setClearColor(bgColor, 1);
+      renderer.setClearColor(bgColor, clearAlpha);
       if (t < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
@@ -2396,6 +2410,13 @@
   // then draws that field into the central red point.
   function updateFinalField() {
     finalFieldP = finalFieldTarget;
+    // Only on a page that asked for it: dissolve the opaque base plane over
+    // the closing so whatever the page has put BEHIND the canvas shows
+    // through the motes. Everywhere else uBaseAlpha stays 1 and this scene
+    // renders exactly as it always has.
+    if (transparentBackdrop) {
+      uniforms.uBaseAlpha.value = 1 - smoothstep(0.45, 1.0, finalFieldP);
+    }
     // Continuously retain the fully assembled grove while this transition is
     // at zero. Both scroll directions therefore use the same starting state.
     if (finalFieldP <= 0) {
@@ -2589,7 +2610,7 @@
     // The opaque base quad is what you actually see; the clear colour just
     // keeps anything outside it consistent.
     bgColor.copy(uniforms.uBase.value);
-    renderer.setClearColor(bgColor, 1);
+    renderer.setClearColor(bgColor, clearAlpha);
   }
   function setFinalPaletteProgress(p) {
     finalPaletteP = tClamp01(p);
