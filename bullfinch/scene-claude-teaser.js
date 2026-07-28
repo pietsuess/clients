@@ -936,100 +936,23 @@
   // beside, behind, and toward the camera, far out — so the convergence reads
   // as the whole inhabited field draining into one point from every direction
   // in X, Y and Z, not a small flat ring.
-  // ---- Feeder ring, laid out in SCREEN space -----------------------------
-  // This ring was placed in WORLD units (5.2, then 2.0) and both were
-  // guesses, because how much screen a world unit buys depends entirely on
-  // how close the closing camera ends up to the dot. Whenever the ring fell
-  // outside the frame the convergence read as rays entering from beyond the
-  // edges rather than as a constellation collapsing inward.
-  //
-  // So place it the same way the ambient closing field is placed (see
-  // closingFieldHome above): pick the position ON SCREEN, then unproject it
-  // through closingCamera. RING_NDC is in normalized device coords, which
-  // span -1..1 across the viewport — 0.5 therefore puts the ring a quarter
-  // of the way out from the dot, on any aspect, guaranteed on screen.
-  var RING_NDC = 0.5;
-  var redWorld = new THREE.Vector3(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
-  var redNDC = redWorld.clone().project(closingCamera);
-  var ringProbe = new THREE.Vector3();
-  var ringWorldR = 0;
+  var convRBase = 5.2;
   for (var tr = 0; tr < terminalDots.length; tr++) {
     var tIdx = terminalDots[tr];
+    var fu = (tr + 0.5) / Math.max(1, terminalDots.length);
+    var fy = 1 - 2 * fu;
+    var frr = Math.sqrt(Math.max(0, 1 - fy * fy));
     var fphi = tr * 2.39996323;                      // golden angle
-    // Same 0.7-1.3 jitter the world version had, so the ring is not a
-    // mechanical circle.
-    var ringR = RING_NDC * (0.7 + 0.6 * (((tr * 13) % 7) / 6));
-    ringProbe.set(
-      redNDC.x + Math.cos(fphi) * ringR,
-      redNDC.y + Math.sin(fphi) * ringR,
-      redNDC.z
-    ).unproject(closingCamera);
-    positions[tIdx * 3]     = ringProbe.x;
-    positions[tIdx * 3 + 1] = ringProbe.y;
-    positions[tIdx * 3 + 2] = ringProbe.z;
-    var rwr = ringProbe.distanceTo(redWorld);
-    if (rwr > ringWorldR) ringWorldR = rwr;
+    var convR = convRBase * (0.7 + 0.6 * (((tr * 13) % 7) / 6));
+    positions[tIdx * 3]     = FINAL_RED_X + Math.cos(fphi) * frr * convR * 1.25;
+    positions[tIdx * 3 + 1] = FINAL_RED_Y + fy * convR * 0.85;
+    positions[tIdx * 3 + 2] = Math.min(2.6, FINAL_RED_Z + Math.sin(fphi) * frr * convR);
     // These exact on-screen feeder positions are also their final star targets.
     // The later field expansion must not overwrite them with off-screen random
     // points and recreate the long lines seen in the failed closing frames.
     closingFieldHome[tIdx * 3]     = positions[tIdx * 3];
     closingFieldHome[tIdx * 3 + 1] = positions[tIdx * 3 + 1];
     closingFieldHome[tIdx * 3 + 2] = positions[tIdx * 3 + 2];
-  }
-
-  // ---- Bring the CASCADE in with its terminals ---------------------------
-  // The loop above pins the terminal dots to a small sphere around the final
-  // red dot, but it only moved the terminals. Their cascade parents stayed
-  // out in the original field (radius 8-17), so every parent->terminal edge
-  // became a spoke running from the dot to somewhere past the frame — the
-  // closing read as a starburst of rays rather than a network resolving into
-  // a point.
-  //
-  // Fix: give every cascade-connected mote a closing home that is the SAME
-  // web, scaled down about its own centroid and re-centred on the red dot.
-  // Topology is untouched (a uniform scale cannot reorder neighbours), so the
-  // descending tree keeps its shape, arrives on screen, and its edges stay
-  // short. Across the closing lerp the whole network visibly collapses into
-  // the dot instead of stretching away from it.
-  var isTerminalDot = new Uint8Array(PARTICLE_POOL);
-  for (var td = 0; td < terminalDots.length; td++) isTerminalDot[terminalDots[td]] = 1;
-
-  var netCx = 0, netCy = 0, netCz = 0, netN = 0;
-  for (var cm = 0; cm < PARTICLE_POOL; cm++) {
-    if (!connectedSet[cm] || cm === FINAL_RED_IDX || isTerminalDot[cm]) continue;
-    netCx += positions[cm * 3];
-    netCy += positions[cm * 3 + 1];
-    netCz += positions[cm * 3 + 2];
-    netN++;
-  }
-  if (netN) {
-    netCx /= netN; netCy /= netN; netCz /= netN;
-    // Scale so the widest arm of the web lands just inside the terminal
-    // sphere's neighbourhood — close enough to read as one object with the
-    // convergence, not so tight that the branches collapse onto each other.
-    var netMaxR = 0;
-    for (var rm = 0; rm < PARTICLE_POOL; rm++) {
-      if (!connectedSet[rm] || rm === FINAL_RED_IDX || isTerminalDot[rm]) continue;
-      var rdx = positions[rm * 3] - netCx;
-      var rdy = positions[rm * 3 + 1] - netCy;
-      var rdz = positions[rm * 3 + 2] - netCz;
-      var rr = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
-      if (rr > netMaxR) netMaxR = rr;
-    }
-    // Derived from the feeder ring rather than hardcoded, so the web tracks
-    // whatever the ring measured out to in world units and cannot drift off
-    // frame the way a guessed constant did. Just outside the ring, so the
-    // ring reads as sitting inside the web.
-    var NET_CLOSING_RADIUS = (ringWorldR > 0.001 ? ringWorldR : 2.0) * 1.35;
-    var netScale = netMaxR > 0.001 ? Math.min(1, NET_CLOSING_RADIUS / netMaxR) : 1;
-    for (var pm = 0; pm < PARTICLE_POOL; pm++) {
-      if (!connectedSet[pm] || pm === FINAL_RED_IDX || isTerminalDot[pm]) continue;
-      closingFieldHome[pm * 3]     = FINAL_RED_X + (positions[pm * 3]     - netCx) * netScale;
-      closingFieldHome[pm * 3 + 1] = FINAL_RED_Y + (positions[pm * 3 + 1] - netCy) * netScale;
-      // Keep the web in front of the closing camera's far plane the same way
-      // the terminals are clamped.
-      closingFieldHome[pm * 3 + 2] = Math.min(2.6, FINAL_RED_Z + (positions[pm * 3 + 2] - netCz) * netScale);
-    }
   }
 
   var EDGE_COUNT = finalEdges.length;
@@ -1262,13 +1185,7 @@
     // The strokes still ADVANCE on their own waves behind the gate, so by the
     // time it opens the web is already drawn and simply comes up, rather than
     // scribbling itself in over the finale.
-    // Was smoothstep(0.72, 1.0). At 0.72 the motes are still mid-flight to
-    // their closing homes, so the web came up WHILE its own endpoints were
-    // travelling — long wonky strokes and stray arrowheads all over the
-    // transition. The field is effectively settled by 0.9 (the per-mote
-    // stagger tops out around finalFieldP * 1.15), so the network now waits
-    // for it and simply fades up in place on the last screen.
-    var networkTaper = smoothstep(0.9, 1.0, finalFieldP);
+    var networkTaper = smoothstep(0.72, 1.0, finalFieldP);
     for (var n = 0; n < EDGE_COUNT; n++) {
       var aIdx = edgeA[n];
       var bIdx = edgeB[n];
@@ -1341,7 +1258,7 @@
       // grove (no statForm/openField gating) but TAPER faint once the trees
       // and closing form (networkTaper above). Only the convergence wave stays
       // gated to the closing so it lands with the finale.
-      arrowVisible *= (wave === 7 ? smoothstep(0.9, 1.0, finalFieldP) : networkTaper);
+      arrowVisible *= (wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : networkTaper);
       var av = n * 9;
       tmpDir.set(bx - ax, by - ay, bz - az);
       if (tmpDir.lengthSq() < 0.000001) tmpDir.set(0, 1, 0);
@@ -1371,7 +1288,7 @@
 
       // Geometry does the drawing. Alpha is simply on while the segment has
       // length, avoiding the previous fade-in behavior.
-      var journeyGate = wave === 7 ? smoothstep(0.9, 1.0, finalFieldP) : networkTaper;
+      var journeyGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : networkTaper;
       var visible = strokeProgress > 0.001 ? journeyGate : 0.0;
       lineAlphaA[n * 2]     = visible;
       lineAlphaA[n * 2 + 1] = visible;
@@ -2467,10 +2384,8 @@
   // Once the grove has done its job, the same motes leave the tree targets and
   // return to the original full-volume field. The existing final convergence
   // then draws that field into the central red point.
-  var finalRedVec = new THREE.Vector3();
   function updateFinalField() {
     finalFieldP = finalFieldTarget;
-    document.documentElement.style.setProperty("--final-field-p", finalFieldP.toFixed(3));
     // Continuously retain the fully assembled grove while this transition is
     // at zero. Both scroll directions therefore use the same starting state.
     if (finalFieldP <= 0) {
@@ -2505,21 +2420,6 @@
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
       alphas[i] = lerp(alphas[i], 0.25, closingDim);
     }
-
-    // Publish the terminal red dot's VIEWPORT position. The DOM closing plate
-    // lines the photograph's canopy opening up with this rather than guessing
-    // a percentage, so the sky centre meets the dot on any viewport.
-    finalRedVec.set(
-      positions[FINAL_RED_IDX * 3],
-      positions[FINAL_RED_IDX * 3 + 1],
-      positions[FINAL_RED_IDX * 3 + 2]
-    ).project(camera);
-    document.documentElement.style.setProperty(
-      "--final-red-x", ((finalRedVec.x * 0.5 + 0.5) * 100).toFixed(2) + "%"
-    );
-    document.documentElement.style.setProperty(
-      "--final-red-y", ((-finalRedVec.y * 0.5 + 0.5) * 100).toFixed(2) + "%"
-    );
     if (fillFinalLocked && fillPosAttr && fillAlphaAttr) {
       var fp = fillPosAttr.array;
       var fa = fillAlphaAttr.array;
