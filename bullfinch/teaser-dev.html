@@ -2386,14 +2386,13 @@
         // section 03, holds them at full strength through its reading window,
         // then reverses them into the final starfield. No second trigger can
         // overwrite the tree state.
-        ScrollTrigger.create({
-          trigger: document.body,
-          start: function () { return at(p2, 0.58); },
-          endTrigger: closing,
-          end: "top 44%",
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) {
+        // Named so it can run on BOTH onUpdate and onRefresh. A resize
+        // refreshes ScrollTrigger, which re-measures this trigger and can
+        // fire onLeaveBack even though the page has not moved — that zeroed
+        // --final-field-p while sitting on the closing, which is why the
+        // photograph (and the network with it) vanished on resize. Running
+        // the same computation on refresh re-asserts the true value.
+        function applyTreeField(self) {
             var y = window.pageYOffset || document.documentElement.scrollTop || 0;
             var formStart = at(p2, 0.58);
             var formEnd = at(p3, 0.08);
@@ -2432,7 +2431,17 @@
             var dataProg = dataReveal * (1 - dataLeave);
             writeTreeData(0.80 + dataProg * 0.20);
             document.body.classList.toggle("is-tree-stage", treeP > 0.05);
-          },
+        }
+
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return at(p2, 0.58); },
+          endTrigger: closing,
+          end: "top 44%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: applyTreeField,
+          onRefresh: applyTreeField,
           onLeaveBack: function () {
             window.bullfinchCanopy.setTreeProgress(0);
             if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
