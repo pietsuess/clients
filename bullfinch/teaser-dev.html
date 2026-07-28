@@ -640,7 +640,22 @@
          hue reads but the luminance does not. The answer is NOT another red.
          Either these three words stop being red on this section, or 02's
          ground gets darker under them. Piet to call it. */
-      #product .panel__evidence .lead { color: var(--accent); }
+      #product .panel__evidence .lead {
+        color: var(--accent);
+        /* 2em of the paragraph it sits in, so it stays exactly double whatever
+           the body copy resolves to at this width rather than pinning a px
+           size that stops tracking the clamp. Display font, not body, because
+           at this size the body face reads as oversized copy instead of as a
+           heading. Block so the <br> after it is not also breaking — the word
+           owns its own line and the description hangs under it. */
+        display: block;
+        font-family: var(--font-display);
+        font-size: 2em;
+        line-height: 1.02;
+        letter-spacing: -0.025em;
+        margin-right: 0;
+        margin-bottom: 0.12em;
+      }
 
       /* The nav is fixed and outside #product, so the block above cannot reach
          it — exactly the reason body.is-tree-stage exists for 03. This window
