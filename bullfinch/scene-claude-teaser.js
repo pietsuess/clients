@@ -1185,7 +1185,13 @@
     // The strokes still ADVANCE on their own waves behind the gate, so by the
     // time it opens the web is already drawn and simply comes up, rather than
     // scribbling itself in over the finale.
-    var networkTaper = smoothstep(0.72, 1.0, finalFieldP);
+    // The CASCADE (waves 1-6) never draws. It is a branching tree, so its
+    // segments share motes and meet at angles — which is what read as bent,
+    // wonky lines in among the convergence. Only wave 7, the straight feeder
+    // lines into the terminal red dot, is ever visible.
+    // The cascade is still BUILT: it is what chooses the terminal dots and
+    // their positions. It is only its rendering that is off.
+    var networkTaper = 0.0;
     for (var n = 0; n < EDGE_COUNT; n++) {
       var aIdx = edgeA[n];
       var bIdx = edgeB[n];
@@ -1222,8 +1228,12 @@
       // were pulsing with nothing connecting them (Piet). The convergence wave
       // draws during the closing with the gate already open, so the finale
       // keeps its contact sparks.
+      // Gated on the CONVERGENCE now that networkTaper is hard 0 — otherwise
+      // killing the cascade's rendering would also have killed wave 7's
+      // landing sparks on the red dot.
+      var contactGate = wave === 7 ? smoothstep(0.72, 1.0, finalFieldP) : 0.0;
       var prev = edgePrevStroke[n];
-      if (prev < 0.999 && strokeProgress >= 0.999 && networkTaper > 0.01) {
+      if (prev < 0.999 && strokeProgress >= 0.999 && contactGate > 0.01) {
         glows[bIdx] = 1.0;
         lineSpark[n * 2]     = 1.0;
         lineSpark[n * 2 + 1] = 1.0;
