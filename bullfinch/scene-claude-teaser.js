@@ -2415,7 +2415,14 @@
     // through the motes. Everywhere else uBaseAlpha stays 1 and this scene
     // renders exactly as it always has.
     if (transparentBackdrop) {
-      uniforms.uBaseAlpha.value = 1 - smoothstep(0.45, 1.0, finalFieldP);
+      // Do NOT go to 0. The motes and lines draw at low alpha (the closing
+      // dims ordinary motes to 0.25), which reads as solid against a solid
+      // backdrop but composites at a quarter strength over the DOM once
+      // there is nothing behind them. BASE_FLOOR leaves a veil for them to
+      // sit on — enough to keep the field and the network reading, thin
+      // enough that the photograph comes through it.
+      var BASE_FLOOR = 0.42;
+      uniforms.uBaseAlpha.value = 1 - (1 - BASE_FLOOR) * smoothstep(0.45, 1.0, finalFieldP);
     }
     // Continuously retain the fully assembled grove while this transition is
     // at zero. Both scroll directions therefore use the same starting state.

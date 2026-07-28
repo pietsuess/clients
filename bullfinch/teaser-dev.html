@@ -706,9 +706,13 @@
         background-position: center top;
         background-repeat: no-repeat;
         /* Desaturated and darkened into the closing's own green. */
-        filter: saturate(0.55) brightness(0.42) contrast(1.05) hue-rotate(-6deg);
+        /* Lifted from brightness .42 / opacity .55: the scene now leaves a
+           0.42 veil of page colour ON TOP of this (so the motes have
+           something to sit on), and the old values were tuned for sitting
+           in front of the canvas rather than behind it. */
+        filter: saturate(0.55) brightness(0.5) contrast(1.05) hue-rotate(-6deg);
         /* Fades UP in place across the closing settle. Nothing translates. */
-        opacity: calc(var(--final-field-p, 0) * 0.55);
+        opacity: calc(var(--final-field-p, 0) * 0.75);
       }
       /* No class gate. --final-field-p is 0 everywhere except the closing,
          so the opacity calc alone keeps it invisible — and unlike
@@ -1909,7 +1913,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-38"></script>
+    <script src="scene-claude-teaser.js?v=claude-39"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>
