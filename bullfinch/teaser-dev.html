@@ -685,71 +685,28 @@
       .closing { padding-top: clamp(90px, 15vh, 210px); }
 
       /* ===== Closing canopy plate (DEV) ==================================
-         A canopy photograph under the whole last screen, so the finale sits
-         in a forest rather than in flat dark green.
+         A canopy photograph under the whole last screen.
 
-         FIXED, not absolute, and NOT a child of .closing. The first version
-         was .closing::before, which meant it was parented to the section and
-         rode up with it — it slid into position instead of arriving in place
-         (house rule). It now holds dead still and only its opacity moves.
+         FIXED and body-level, never a child of .closing — parented to the
+         section it rode up with it, which is scrolling into place rather
+         than arriving in place. Only its opacity moves.
 
-         ANCHORING. The photograph's own subject is the canopy opening the
-         trunks radiate from, at roughly (50%, 34%) of the frame. That point
-         has to land on the terminal red dot, not on the middle of the
-         viewport. The scene publishes the dot's viewport position each frame
-         as --final-red-x / --final-red-y, so the plate is sized to the
-         image's real aspect (1800x1437) and offset by exactly that fraction
-         of itself. Sky centre meets the dot on any viewport.
-
-         It cannot go UNDER the mote canvas — the canvas is fixed at root
-         z-index 0 and blend modes cannot reach WebGL from a DOM element — so
-         it is held low in opacity with its darks crushed toward the page
-         green, and the motes and network read straight through it. */
+         Plain full-bleed cover, centred on the viewport. No mask, and no
+         attempt to line the canopy opening up with the red dot: the offset
+         version turned it into a floating rectangle. */
       .closing-canopy {
-        /* 100vw: the photograph at its natural width, no upscale beyond the
-           viewport. It will not reach every edge once it is offset to put
-           the canopy opening on the dot — the radial mask fades it out well
-           before then anyway. */
-        --canopy-w: 100vw;
-        --canopy-h: calc(var(--canopy-w) * 1437 / 1800);
-        /* Where the opening sits inside the photograph — the point all the
-           trunks converge on. Measured off the image, not assumed centre.
-           If the photograph is swapped, re-measure these two and the 0.30
-           in `top` below (which must match --canopy-focus-y). */
-        --canopy-focus-x: 51%;
-        --canopy-focus-y: 30%;
         position: fixed;
+        inset: 0;
         z-index: 0;
-        width: var(--canopy-w);
-        height: var(--canopy-h);
-        /* The dot's viewport position. Nothing publishes --final-red-x/y in
-           this build, so these fall back to where the closing composition
-           puts the dot: horizontally centred, 58% down. */
-        left: calc(var(--final-red-x, 50%) - var(--canopy-w) * 0.51);
-        top: calc(var(--final-red-y, 58%) - var(--canopy-h) * 0.30);
         pointer-events: none;
         background-image: url("assets/forest-canopy-closing.jpg");
-        /* Plate is already the image's aspect, so this is a plain fill. */
-        background-size: 100% 100%;
+        background-size: cover;
+        background-position: center center;
         background-repeat: no-repeat;
         /* Desaturated and darkened into the closing's own green. */
         filter: saturate(0.55) brightness(0.42) contrast(1.05) hue-rotate(-6deg);
         /* Fades UP in place across the closing settle. Nothing translates. */
         opacity: calc(var(--final-field-p, 0) * 0.55);
-        /* Soft round falloff centred on the opening, so the plate dissolves
-           outward from the dot and has no edge anywhere. */
-        -webkit-mask-image: radial-gradient(
-          ellipse at var(--canopy-focus-x) var(--canopy-focus-y),
-          #000 0%,
-          #000 16%,
-          transparent 42%
-        );
-        mask-image: radial-gradient(
-          ellipse at var(--canopy-focus-x) var(--canopy-focus-y),
-          #000 0%,
-          #000 16%,
-          transparent 42%
-        );
       }
       /* No class gate. --final-field-p is 0 everywhere except the closing,
          so the opacity calc alone keeps it invisible — and unlike
