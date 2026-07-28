@@ -983,7 +983,15 @@
          on the page and writes --reveal-p 0->1. Everything else is CSS. */
       .reveal-media {
         --reveal-p: 0;
-        --reveal-opacity: 0.5;
+        /* Opacity alone could not carry this. At 0.5 the photo's midtones stay
+           near mid-luminance, and 01 sets DARK ink on beige, so the headline
+           was ~2:1 against the trunk and the mono numeric (--ink-quiet) all but
+           vanished. Wash the photograph up toward the page beige FIRST — pull
+           saturation, raise brightness, flatten contrast — so it lands as a
+           pale ground with a narrow luminance range, then set opacity. Dark ink
+           reads against it everywhere instead of only over the light gaps. */
+        --reveal-opacity: 0.34;
+        --reveal-wash: saturate(0.5) brightness(1.28) contrast(0.72);
         /* Which slice of the source to show. 100% = right edge, so the crop
            holds the RIGHT half of foresters-measuring.jpg (Piet). */
         --reveal-focus: 100%;
@@ -996,6 +1004,7 @@
         background-position: var(--reveal-focus) 50%;
         background-repeat: no-repeat;
         opacity: var(--reveal-opacity);
+        filter: var(--reveal-wash);
         /* THE WIPE. A hard crop edge travelling left to right — not a fade, so
            the image reads as being uncovered rather than dissolved in. */
         clip-path: inset(0 calc((1 - var(--reveal-p)) * 100%) 0 0);
@@ -1013,6 +1022,17 @@
       #problem { position: relative; }
       #problem .p-head,
       #problem .p-body { position: relative; z-index: 1; }
+      /* Same move 02 needed on the half-green field: a section that no longer
+         sits on flat beige has to compensate its ink. The washed photograph
+         still costs roughly a stop, and it is the QUIET inks that die — the
+         eyebrow and the mono numeric, which were already the palest thing on
+         the page. The headline and body are near-black and hold on their own.
+         Deepened, not flipped light: 01 stays a light section. */
+      #problem {
+        --ink-quiet: #2F3B31;
+        --ink-soft: #24302A;
+        --rule: rgba(22, 37, 27, 0.34);
+      }
       @media (prefers-reduced-motion: reduce) {
         .reveal-media { clip-path: none; }
       }
