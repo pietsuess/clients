@@ -1,0 +1,2967 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+
+    <!-- DEV FORK of teaser.html. Image-reveal test bed only — fixes belong in
+         teaser.html and get carried here, never the other way round. -->
+    <title>Bullfinch Earth - Nature from the Ground Up (dev)</title>
+    <meta name="description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bullfinch Earth - Nature from the Ground Up" />
+    <meta property="og:description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Bullfinch Earth - Nature from the Ground Up" />
+    <meta name="twitter:description" content="Bullfinch Earth measures, monitors, and maps every stem while foresters do their normal jobs." />
+    <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
+
+    <script>
+      (function () {
+        if ("scrollRestoration" in history) {
+          history.scrollRestoration = "manual";
+        }
+        window.scrollTo(0, 0);
+        document.documentElement.setAttribute("data-theme", "dark");
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
+    />
+
+    <link rel="stylesheet" href="styles.css?v=v4-6" />
+    <style>
+      :root,
+      [data-theme="dark"] {
+        --bg: #e7dfc4;
+        --bg-elev: #d8d5ab;
+        --ink: #16251b;
+        --ink-soft: #425748;
+        --ink-quiet: #607164;
+        --rule: rgba(22, 37, 27, 0.18);
+        --gl-canopy: #e7dfc4;
+        --gl-understory: #aeb782;
+        --gl-base: #e7dfc4;
+        --gl-mote: #23331f;
+        --gl-line: rgba(35, 51, 31, 0.4);
+        --gl-light-shaft: #f6e7ad;
+        /* Closing night: lifted off black (Piet) — still night forest, but the
+           motes and the red dot sit on a colour rather than a void. */
+        --gl-final-base: #2E5540;
+        --gl-final-canopy: #3A6A4C;
+        --gl-final-understory: #1F3D2C;
+        --gl-final-mote: #aeb398;
+        --gl-final-line: rgba(226, 221, 191, 0.36);
+        --gl-final-shaft: #8fa777;
+        --text-veil-bg-strong: 10%;
+        --text-veil-bg-soft: 5%;
+        --text-veil-blur: 9px;
+        --text-veil-saturate: 0.98;
+        --text-veil-opacity: 0.44;
+        --stat-crisp-offset: 0;
+        --tree-crisp-offset: 0;
+      }
+      body.is-final-contrast {
+        --bg: #11271b;
+        --bg-elev: #183424;
+        --ink: #f4efd9;
+        --ink-soft: #d2d8c5;
+        --ink-quiet: #a8b7a8;
+        --rule: rgba(244, 239, 217, 0.2);
+      }
+      [data-theme="dark"] .bullfinch-mark__dark { fill: var(--ink); }
+      .site-nav a { color: var(--ink-quiet); }
+      .panel__numeric { color: var(--ink-quiet); }
+    </style>
+
+    <style>
+      /* Section marks — one per section, beside each eyebrow (bottom-right
+         corner on mobile). Updated Bullfinch Earth Marks choreography: people
+         cluster spins as it gathers, nature fronds wipe bottom-to-top, tech
+         rotates / slides / wipes. Animations are CSS keyframes (gather / reveal
+         / peopleSpin), paused and scrubbed by each panel's scroll progress. */
+      @property --build { syntax: "<number>"; inherits: true; initial-value: 1; }
+      @property --glow  { syntax: "<number>"; inherits: true; initial-value: 0; }
+      @property --pang  { syntax: "<angle>";  inherits: true; initial-value: 0deg; }
+      @property --rev   { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+      /* Wrapper hugs the eyebrow text and anchors the mark to the end of the
+         label. The mark lives OUTSIDE the eyebrow <p>, so swot.js's opacity
+         reveal on the eyebrow does NOT fade the mark — the mark carries its own
+         reveal in its keyframes. The wrapper takes over the eyebrow's bottom
+         margin so the box stays text-height (mark centres on the text line) and
+         the gap to the verdict is unchanged. */
+      .eyebrow-anchor {
+        position: relative;
+        width: -moz-fit-content;
+        width: fit-content;
+        margin: 0 0 32px 0;
+      }
+      .eyebrow-anchor .panel__eyebrow {
+        margin: 0;
+      }
+
+      /* The mark is taken OUT OF FLOW (absolute), so it adds no layout height
+         and cannot shift the verdict or the section's vertical rhythm. It sits
+         centred on the eyebrow line, just to its right. --mark-box is the SVG's
+         real rendered size (the glyph fills only the middle ~40% of its 0..100
+         viewBox, and .panel clips overflow, so the box itself must be large). */
+      .section-mark {
+        --mark-box: 128px;
+        --mo: 2.5;
+        --spin: 2;
+        --glowk: 0;   /* no red glow halo — it read as a ghost tip on the red piece */
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: calc(var(--mark-box) * -0.13); /* seat ink ~14px off the label */
+        width: var(--mark-box);
+        height: var(--mark-box);
+        pointer-events: none;
+        --build: 0;
+        --rev: 0;
+      }
+      .section-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+      }
+      .section-mark .mw { fill: var(--ink); }
+      .section-mark .rfill { fill: var(--accent); }
+      .section-mark .red {
+        filter: drop-shadow(0 0 calc(var(--glow, 0) * var(--glowk, 1) * 3px) var(--accent));
+      }
+      .section-mark .a-move {
+        transform-box: fill-box;
+        transform: translate(calc(var(--ox, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)),
+                             calc(var(--oy, 0px) * (1 - var(--p, var(--build, 1))) * var(--mo, 1)));
+      }
+      .section-mark .a-grow {
+        transform-box: fill-box;
+        transform: scale(var(--p, var(--build, 1)));
+      }
+      .section-mark .a-rot {
+        transform-box: fill-box;
+        transform: rotate(calc(var(--rot, 0deg) * (1 - var(--p, var(--build, 1))) * var(--spin, 1)));
+      }
+      /* people: whole cluster spins around its centroid (own paused keyframe) */
+      .section-mark .grp-spin {
+        transform-box: view-box;
+        transform: rotate(var(--pang, 0deg));
+      }
+      .section-mark .fade {
+        opacity: clamp(0, calc(var(--p, var(--build, 1)) * 1.6), 1);
+      }
+      /* nature: fronds wipe bottom-to-top; middles slide out from behind */
+      .section-mark .n-reveal { clip-path: inset(calc((1 - var(--rp, 1)) * 100%) 0% 0% 0%); }
+      .section-mark .n-slide {
+        transform-box: fill-box;
+        transform: translateX(calc(var(--sx, 0px) * (1 - var(--sp, 1))));
+      }
+
+      @keyframes gather {
+        0%   { --build: 0; --glow: 0; animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+        56%  { --build: 1; --glow: 0.7; }
+        100% { --build: 1; --glow: 0.95; }
+      }
+      @keyframes peopleSpin {
+        0%   { --pang: 360deg; }
+        44%  { --pang: 180deg; }
+        80%  { --pang: 33deg; animation-timing-function: cubic-bezier(0.17, 0.31, 0.5, 1); }
+        100% { --pang: -12deg; }
+      }
+      @keyframes reveal {
+        0%   { --rev: 0; }
+        100% { --rev: 1; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .section-mark, .section-mark .grp-spin { animation: none; }
+      }
+
+      /* Mobile: the mark is moved out of the eyebrow (see script) and parked in
+         the panel's bottom-right corner. Its containing block is .panel__inner
+         (full-height, no transform), so bottom/right track the screen corner
+         while the panel is the one on screen. */
+      @media (max-width: 720px) {
+        .section-mark--corner {
+          --mark-box: 104px;
+          left: auto;
+          top: auto;
+          /* negative offsets cancel the glyph's transparent padding so the ink
+             tucks into the corner rather than floating ~30px in from it */
+          right: calc(var(--mark-box) * -0.16);
+          bottom: calc(var(--mark-box) * -0.16);
+          transform: none;
+          margin-left: 0;
+          z-index: 5; /* sit above .panel__inner (z-index:2) and panel media */
+        }
+      }
+    </style>
+    <style>
+      /* Full-width forest journey, preserving the original interactive parts. */
+      .forest-photo {
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        width: 100vw;
+        height: 100dvh;
+        background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
+        clip-path: polygon(var(--forest-edge-top, -100vh) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, -100vh) + 100vh) 100%);
+        filter: saturate(.82) contrast(.96) brightness(1.04);
+        will-change: clip-path;
+      }
+      .canopy-canvas { z-index: 0; }
+      .text-veil {
+        z-index: 1;
+        opacity: clamp(0, calc(var(--text-veil-opacity) - var(--stat-crisp-offset) - var(--tree-crisp-offset)), 1);
+      }
+      #page { z-index: 3; }
+      .hero { background: transparent; }
+      .hero__inner {
+        /* --hero-logo-size still drives the COPY INSET and is deliberately
+           unchanged — the headline block sits exactly where it always did.
+           The visible mark is a separate size so it can double without
+           dragging the type with it. */
+        --hero-logo-size: clamp(54px, 5.1vw, 78px);
+        --hero-mark-size: calc(var(--hero-logo-size) * 2);
+        --hero-logo-gap: clamp(14px, 1.8vw, 28px);
+        --hero-copy-inset: calc(var(--hero-logo-size) + var(--hero-logo-gap));
+        width: calc(100vw - clamp(48px, 8vw, 144px));
+        max-width: none;
+      }
+      .hero__title { width: 100%; max-width: none; }
+      .hero-is { min-height: 0; }
+      /* Stacked, not a row — but the wordmark keeps the inset the flex logo
+         used to give it, so BULLFINCH IS does not move. */
+      .hero-brand-row { display: block; }
+      .hero-is__label { margin-left: var(--hero-copy-inset); }
+      .hero-is__label,
+      .hero-is__prefix,
+      .hero-is__cycle { display: block; }
+      .hero-is__label { font-size: clamp(50px, 7.2vw, 112px); letter-spacing: -.055em; line-height: .86; }
+      .hero-is__prefix { margin-top: .16em; margin-left: var(--hero-copy-inset); font-size: clamp(25px, 3.8vw, 60px); letter-spacing: -.04em; line-height: .92; }
+      .hero-is__cycle {
+        position: relative;
+        height: 1.05em;
+        margin-top: .05em;
+        font-size: clamp(25px, 3.8vw, 60px);
+        letter-spacing: -.042em;
+        line-height: 1;
+        white-space: nowrap;
+        margin-left: var(--hero-copy-inset);
+      }
+      .hero-is__term {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        transform: translateY(.45em);
+        transition: opacity 440ms ease, transform 560ms cubic-bezier(.2,.75,.18,1);
+        color: var(--accent);
+      }
+      .hero-is__term.is-active { opacity: 1; transform: translateY(0); }
+      .hero-brand-row,
+      .hero-is__prefix,
+      .hero-is__cycle,
+      .hero__subtitle {
+        opacity: 0;
+        transform: translate3d(-42px, 18px, 0);
+        transition: opacity 680ms ease, transform 900ms cubic-bezier(.18,.72,.16,1);
+      }
+      body.has-hero-arrived .hero-brand-row,
+      body.has-hero-arrived .hero-is__prefix,
+      body.has-hero-arrived .hero-is__cycle,
+      body.has-hero-arrived .hero__subtitle { opacity: 1; transform: translate3d(0, 0, 0); }
+      body.has-hero-arrived .hero-is__prefix { transition-delay: 110ms; }
+      body.has-hero-arrived .hero-is__cycle { transition-delay: 190ms; }
+      body.has-hero-arrived .hero__subtitle { transition-delay: 290ms; }
+      .hero__subtitle {
+        max-width: calc(50vw - var(--hero-copy-inset));
+        margin-left: var(--hero-copy-inset);
+        margin-top: clamp(8px, 1.2vh, 14px);
+        font-size: clamp(16px, 1.45vw, 23px);
+        color: var(--ink);
+        text-align: justify;
+        text-align-last: left;
+      }
+
+      /* Optical left-align, not box left-align. The mark's leftmost tip is at
+         5.76% of the viewBox width (path min x 55.76 in "50 35 100 70"), and
+         the settled state scales .74 about centre, which pulls that tip in to
+         17.26% of the box. Pull the box back by that much so the TIP lands on
+         the B of BULLFINCH, not the invisible box edge. Same reasoning below
+         VERTICALLY the two states are nowhere near each other, which is what
+         made the animation crash into the headline: the settled SVG's ink
+         stops at 70% of the box height, but the intro SEQUENCE frames carry
+         ink to 90% of their own frame (measured: 291x290 of 360x360) and then
+         render at scale(1.28), which puts their ink bottom at 101% of the box.
+         A negative bottom margin sized for the settled mark therefore pulled
+         the ANIMATION straight through BULLFINCH. So the box now reserves its
+         full height — the sequence stays clear — and the dead air under the
+         settled mark is closed by nudging that state down instead. */
+      .corner-logo-sequence {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: var(--hero-mark-size);
+        height: var(--hero-mark-size);
+        /* Sits at the SAME inset as the wordmark, minus the optical offset, so
+           the mark's tip lands on the B without pulling the box out past the
+           page gutter — a negative margin there was overhanging the hero column
+           and body{overflow-x:hidden} was clipping the animation. */
+        margin-left: calc(var(--hero-copy-inset) - var(--hero-mark-size) * 0.1726);
+        margin-bottom: 0;
+        flex: 0 0 auto;
+        pointer-events: none;
+      }
+      .corner-logo-sequence canvas,
+      .corner-logo-static {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        transition: opacity 180ms linear, transform 900ms cubic-bezier(.2,.75,.18,1);
+        transform: scale(1.28);
+      }
+      .corner-logo-static { opacity: 0; }
+      .corner-logo-sequence.is-settled canvas { opacity: 0; transform: scale(.74); }
+      /* translateY closes the gap the removed negative margin used to close,
+         but on the SETTLED state only — so the intro sequence, whose ink runs
+         much lower in its frame, is never dragged into the wordmark. Ink bottom
+         lands at ~88% of the box, leaving a small deliberate gap. */
+      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: translateY(18%) scale(.74); }
+      .site-nav {
+        justify-content: flex-start;
+        padding-left: var(--pad-x);
+        padding-right: var(--pad-x);
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
+      .site-nav__brand { display: none; }
+      .site-nav__links { margin-left: 0; }
+      .site-nav__hover-label { left: var(--pad-x); top: 50px; transform: translateY(-2px); }
+      .site-nav__hover-label.is-visible { transform: translateY(0); }
+      .corner-wordmark { display: none; }
+      /* Desktop defaults for the phone hamburger: the button does not exist,
+         and the utility wrapper dissolves so its children remain direct flex
+         children of .site-nav__links. Both are re-declared in the 720px block. */
+      .nav-toggle { display: none; }
+      .site-nav__utility { display: contents; }
+
+      #problem.panel--media {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: 1fr;
+        gap: clamp(54px, 7vw, 118px);
+        place-items: center stretch;
+      }
+      #problem .panel__inner {
+        position: relative;
+        grid-column: 1;
+        width: 100%;
+        height: auto;
+        max-width: none;
+        transform: none;
+        text-align: right;
+        align-items: flex-end;
+      }
+      #problem .eyebrow-anchor { margin-left: auto; }
+      #problem .panel__verdict { max-width: none; margin-left: auto; font-size: clamp(44px, 3.7vw, 62px); text-align: right; }
+      /* Three-line staircase: "Are So" seats on the diagonal running from the
+         left edge of "Dedicated" (line 1) to the left edge of "19th" (line 3). */
+      #problem .panel__verdict .vs-line { display: block; }
+      #problem .panel__verdict .vs-line--2 { margin-right: 5.9em; }
+      #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
+      #problem .panel__evidence p { text-align: right; text-align-last: right; }
+      #problem .panel__numeric { text-align: right; text-align-last: right; }
+      #problem .panel__stat {
+        position: relative;
+        z-index: 6;
+        grid-column: 2;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        gap: clamp(18px, 2.2vw, 36px);
+        min-height: 220px;
+        text-align: right;
+      }
+      #problem .stat-grid { display: none; }
+      #problem .stat-read { min-width: 0; transform: translateX(clamp(70px, 6vw, 105px)); }
+      #problem .stat-label { margin-left: auto; }
+      #problem .stat-line { left: auto; right: 0; text-align: right; }
+      #problem .stat-num { justify-content: flex-end; align-items: flex-end; gap: 10px; }
+      #problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
+      #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
+
+      /* Piet: the copy sits closer to the device than dead centre — the device
+         ink ends at ~33.5vw, so starting the copy at 41.5vw halves the alley
+         that a 50vw (true centre) start left behind. Column 1 is that offset
+         minus the panel's own left pad, gap 0, so the track edge lands exactly
+         on 41.5vw. */
+      #product.panel--media {
+        grid-template-columns: calc(41.5vw - var(--pad-x)) 1fr;
+        gap: 0;
+      }
+      #product .panel__inner { grid-column: 2; max-width: min(760px, 42vw); padding-top: 0; }
+      /* Sized down to hold "Is It Really This Easy?" on ONE line in the
+         narrower column. */
+      #product .panel__verdict { font-size: clamp(34px, 3.4vw, 56px); text-wrap: balance; }
+      #product .panel__evidence { display: grid; grid-template-columns: 1fr; gap: 0; max-width: none; }
+      #product .panel__evidence p { padding: 9px 0; border-top: 1px solid var(--rule); text-align: justify; text-align-last: left; }
+      #product .panel__evidence p:first-child { border-top: 0; }
+      #product .panel__numeric { margin-top: 18px; }
+      /* Centred in the LEFT HALF: a 40vw box inside 0-50vw leaves 5vw either
+         side, so the device balances the copy across the centre line. */
+      .case-fixed-layer.panel__model {
+        width: min(40vw, 720px);
+        max-width: 40vw;
+        height: 100dvh;
+        left: 5vw;
+        top: 0;
+        transform: none;
+      }
+      .case-fixed-layer .panel__model-canvas { width: 100%; height: 100%; }
+      body.is-tree-stage .case-fixed-layer.panel__model,
+      body.is-final-contrast .case-fixed-layer.panel__model { opacity: 0 !important; }
+
+      #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
+      #opportunity .tree-readouts {
+        --tree-data-p: 0;
+        /* FIXED to the viewport: the data populates in its FINAL RESTING
+           PLACE while the trees form — it must never ride up with the
+           section's scroll (write-on/count-up only, no travel). Each readout
+           is centred over its tree's peak via the --tree-x-N vars the scene
+           publishes from the real projected trunk positions. */
+        position: fixed;
+        z-index: 4;
+        top: clamp(48px, 6vh, 68px);
+        left: 0;
+        width: 100vw;
+        height: 0;
+        display: block;
+        color: #2BFF6B;
+        text-align: center;
+        pointer-events: none;
+      }
+      .tree-readout { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .tree-readout:nth-child(1) { left: var(--tree-x-0, 17%); }
+      .tree-readout:nth-child(2) { left: var(--tree-x-1, 50%); }
+      .tree-readout:nth-child(3) { left: var(--tree-x-2, 83%); }
+      .tree-readout span {
+        --write: 0;
+        clip-path: inset(0 calc((1 - var(--write)) * 100%) 0 0);
+        white-space: nowrap;
+      }
+      .tree-readout__common { font: 600 clamp(14px, 1.15vw, 19px)/1.05 var(--font-display); color: #2BFF6B; }
+      .tree-readout__latin { font: italic 400 clamp(10px, .78vw, 13px)/1.1 var(--font-body); }
+      .tree-readout__metric { font: 500 clamp(8px, .59vw, 10px)/1.25 var(--font-mono); letter-spacing: .03em; }
+      #opportunity .panel__inner {
+        position: absolute;
+        z-index: 5;
+        left: var(--pad-x);
+        right: var(--pad-x);
+        bottom: 14px;
+        width: auto;
+        max-width: none;
+        height: auto;
+        /* Inner gutter so nothing sits crammed against the container edges
+           (03 eyebrow, TIMBER COMPANIES, PARTNERS label, the headline). */
+        padding: 0 clamp(18px, 1.8vw, 34px);
+        justify-content: flex-end;
+        /* No background on the panel itself — it now sits on the blocks that
+           need it (heading + audience grid), so the PARTNERS bar below can run
+           straight on the grove with no box behind it (Piet). No backdrop
+           blur anywhere: nothing defocuses the trees. */
+      }
+      .ground-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 28px; padding: 9px 0 10px; border-top: 1px solid var(--rule); }
+      .ground-heading .eyebrow-anchor { margin: 0; flex: 0 0 auto; }
+      #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
+      .audience-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+      .audience-item { min-height: 66px; padding: 8px 13px 9px; border-left: 1px solid var(--rule); }
+      .audience-item:first-child { border-left: 0; padding-left: 0; }
+      .audience-item h3 { margin: 0 0 6px; font-size: clamp(12px, .95vw, 16px); font-weight: 600; line-height: 1.08; }
+      .audience-item p { margin: 0; font-size: clamp(9px, .68vw, 12px); line-height: 1.25; text-align: justify; text-align-last: left; }
+      .trust-line { display: grid; grid-template-columns: minmax(160px, .9fr) 6fr; border-bottom: 1px solid var(--rule); }
+      .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .trust-strip div { height: 58px; padding: 8px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
+      .trust-strip div:first-child { border-left: 0; }
+      .trust-strip img { max-width: 100%; max-height: 42px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
+      body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
+      .trust-label {
+        min-height: 44px;
+        margin: 0;
+        padding-right: 14px;
+        display: flex;
+        align-items: center;
+        font: 500 clamp(9px, .68vw, 11px)/1 var(--font-mono);
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--ink-quiet);
+        text-align: left;
+        text-align-last: left;
+      }
+
+      /* ===== 03 ground panel: OPEN on the grove ==========================
+         No box behind any of it, so every rule, label, heading and logo in
+         the panel goes light. MUST stay after the block definitions above —
+         these are same-specificity overrides and lose on source order
+         otherwise (that is why the first pass at this did nothing). */
+      #opportunity { --ground-ink: #EFE7D3; }   /* off-white beige, not white */
+      .ground-heading { border-top-color: rgba(239, 231, 211, .62); }
+      .audience-grid {
+        border-top-color: rgba(239, 231, 211, .62);
+        border-bottom-color: rgba(239, 231, 211, .62);
+      }
+      .audience-item { border-left-color: rgba(239, 231, 211, .62); }
+      .trust-line { border-bottom-color: rgba(239, 231, 211, .62); }
+      .trust-strip div { border-left-color: rgba(239, 231, 211, .62); }
+      #opportunity .panel__eyebrow { color: var(--ground-ink); }
+      #opportunity .panel__verdict { color: var(--ground-ink); }
+      .audience-item h3 { color: var(--ground-ink); }
+      .audience-item p { color: rgba(239, 231, 211, .82); }
+      .trust-label { color: var(--ground-ink); }
+      /* Logos: DO NOT put a filter back on these. The six source files had
+         three different polarities (dark ink, reversed white ink, and one
+         opaque white-backed scan with no alpha), so no single filter chain
+         could ever light them all — that is what produced the black boxes.
+         All six are now pre-baked in assets/logos/reversed/ as pure-white ink on
+         real alpha (untouched originals stay in assets/logos/, because
+         GPT-Teaser.html still points at those), which also fixes the
+         optical-weight mismatch: they read as one strip, not six treatments.
+         Rebake with the same recipe if a logo is added — do not reach for
+         invert(), and do not reach for mix-blend-mode either, because the
+         green is the WebGL canvas in a separate stacking context and the img
+         only ever blends inside its own panel layer. */
+      .trust-strip img,
+      body.is-final-contrast .trust-strip img {
+        filter: none;
+        opacity: .9;
+      }
+
+      /* The nav is FIXED and lives outside #opportunity, so the 03 ground-ink
+         overrides above cannot reach it — over the light green band its olive
+         --ink-quiet goes near-invisible. Re-map the two ink vars on .site-nav
+         itself for the grove stage: that carries the 01-04 links, the hover
+         label and the fullscreen toggle in one move, since all three already
+         read from these vars. */
+      body.is-tree-stage .site-nav {
+        --ink: #EFE7D3;
+        --ink-quiet: rgba(239, 231, 211, .74);
+      }
+      .site-nav a { transition: color 240ms ease; }
+
+      /* ---- 02 on the half-green field --------------------------------------
+         Section 02 sits at journey stop 2 — mixStop(day, green, 0.55), the
+         "halfway to the green" step in scene-claude-teaser.js. Ink
+         compensation existed only at the two ENDS of the ramp: dark ink on
+         beige at 00/01, and the --ground-ink light flip on the full green at
+         03. Stop 2 got nothing, so 02 rendered the default dark palette on a
+         half-green field.
+
+         Measured against that field (~#B9C397; the backdrop tint is uniform
+         across the frame, graded by uLayerTint, NOT a vertical gradient):
+           nav links + WEAR · WALK · DATA   2.80:1  ->  5.06:1
+           02 · THE BULLFINCH WAY eyebrow   4.21:1  ->  6.37:1
+           Wear / Walk / Data leads         1.68:1  ->  4.19:1
+           headline + body copy             8.61:1  (already fine, untouched)
+
+         Darkened rather than flipped light on purpose: 02 must keep reading as
+         a LIGHT section, because the dark-to-light flip is 03's move and the
+         bars are what announce it. Red on green is the trap here — the hues
+         are far apart but their luminance is nearly identical, so the brand
+         #FF5560 measures 1.68:1 and effectively disappears while still
+         reading as red. */
+      #product {
+        --ink-quiet: #3B4A3E;
+        --ink-soft: #2C3B30;
+        --rule: rgba(22, 37, 27, 0.30);
+      }
+      /* Deepened only where it sits on this field. The brand accent is
+         untouched everywhere else, including the section mark beside the
+         eyebrow, which is a graphic rather than text. */
+      #product .panel__evidence .lead { color: #A11B26; }
+
+      /* The nav is fixed and outside #product, so the block above cannot reach
+         it — exactly the reason body.is-tree-stage exists for 03. This window
+         runs from bar C committing stop 2 to the 03 pin, where is-tree-stage
+         takes over; the two never overlap, so neither depends on source order
+         to win. */
+      body.is-midramp-stage .site-nav {
+        --ink: #16251b;
+        --ink-quiet: #3B4A3E;
+      }
+
+      /* Instagram sits beside the fullscreen toggle and matches it exactly —
+         same 16px box, same --ink-quiet resting state, so it picks up the
+         grove-stage remap above for free. */
+      .nav-social {
+        width: 16px;
+        height: 16px;
+        display: inline-grid;
+        place-items: center;
+        color: var(--ink-quiet);
+      }
+      .nav-social svg { display: block; }
+      .nav-social[href] { cursor: pointer; }
+      .nav-social:hover, .nav-social:focus-visible { color: var(--ink); }
+
+      /* Heading block sits LOW, just above the dead-centre red dot. */
+      .closing { padding-top: clamp(90px, 15vh, 210px); }
+      .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
+      .closing__logo { height: clamp(34px, 4.5vh, 46px); }
+      .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
+      .closing__line { white-space: nowrap; }
+      .closing__actions { display: flex; width: auto; justify-content: center; gap: clamp(22px, 3vw, 42px); margin-top: 6px; }
+      .closing__actions a { justify-content: center; color: var(--ink); font-size: clamp(13px, 1vw, 16px); }
+      .site-footer { padding: 10px var(--pad-x) max(68px, calc(env(safe-area-inset-bottom) + 68px)); gap: 10px; }
+      .site-footer__wordmark { display: none; }
+      .site-footer__line { opacity: 1; transform: none; }
+      .site-footer__top { bottom: max(10px, env(safe-area-inset-bottom)); }
+
+      @media (max-width: 900px) {
+        .hero-is__cycle { white-space: normal; height: 2.1em; max-width: 14ch; }
+        #problem .panel__evidence { grid-template-columns: 1fr; }
+        #product.panel--media { grid-template-columns: 1fr 1fr; }
+        #product .panel__inner { grid-column: 2; }
+        #problem.panel--media { grid-template-columns: 1fr 1fr; }
+        .audience-grid { grid-template-columns: repeat(5, 210px); overflow-x: auto; }
+        .trust-strip { grid-template-columns: repeat(6, 150px); overflow-x: auto; }
+      }
+    </style>
+    <style>
+      /* ===== Claude fork of Codex GPT-Teaser — scoped fixes only =====
+         (1) 01: the "Bullfinch fully automates" paragraph now sits BELOW the
+             graphic in the right column; both paragraphs are block-justified,
+             last line left. (2) the <1% field is a real dot grid again —
+             BLACK dots, ONE RED centre rendered on top, filling to ALL RED as
+             the counter climbs (the original Claude behaviour). Codex's
+             colours + forest reveal are untouched. ===================== */
+      /* 01 = a true TWO-ROW grid (Piet, Opt 1): the headline-top aligns with the
+         dot-grid-top (HEADER band, row 1) and BOTH body paragraphs align (BODY
+         band, row 2). The two column wrappers are display:contents, so their four
+         groups (p-head/p-body, stat-visual/problem-note) become DIRECT cells of
+         the article grid -- ordinary shared row tracks, deterministic, no JS and
+         no subgrid quirks. The two-row block is vertically centered as a whole.
+         (Safe: for #problem the per-child write-on clips cover the reveal, so the
+         redundant .panel__inner container clip can no-op; the section-mark anchors
+         to .eyebrow-anchor, not .panel__inner.) */
+      #problem.panel--media {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        align-content: center;
+        align-items: start;
+        column-gap: clamp(54px, 7vw, 118px);
+        row-gap: clamp(38px, 7vh, 104px);
+      }
+      #problem .panel__inner { display: contents; }
+      #problem .panel__stat--problem { display: contents; }
+      #problem .p-head { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+      #problem .p-body { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; align-items: flex-end; gap: clamp(20px, 3vh, 44px); }
+      #problem .stat-visual { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: clamp(18px, 2.2vw, 36px); }
+      #problem .problem-note { grid-column: 2; grid-row: 2; }
+      /* Kill styles.css's .panel__evidence top margin (20px): it pushed the left
+         body BELOW the row-2 track top while the note (margin:0) sat at the top,
+         so the two bodies never lined up even though the grid was correct.
+         align-self:end (overriding styles.css's align-self:start) RIGHT-anchors
+         the body + numeric so their right edges line up with the headline's
+         right edge -- the whole left column reads as one right-aligned rail. */
+      #problem .panel__evidence { grid-template-columns: 1fr; margin: 0; align-self: end; }
+      #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin: 0; }
+      #problem .panel__numeric { align-self: end; }
+      #problem .stat-read { transform: none; }
+      /* Reserve a real box for the mote grid inside the right column so the
+         WebGL grid lands in its own space (flex pushes the readout to its
+         right) instead of being flung left across the 01 headline. The dots
+         are drawn by the particle scene; this box is just its anchor. */
+      #problem #statGrid {
+        display: block;
+        visibility: hidden;
+        flex: 0 0 auto;
+        width: clamp(152px, 12vw, 190px);
+        height: clamp(152px, 12vw, 190px);
+      }
+      .problem-note {
+        margin: 0;
+        max-width: 50ch;   /* widened to match the left paragraph's measure */
+        color: var(--ink-soft);
+        font-size: clamp(14px, 1.05vw, 16px);
+        line-height: 1.5;
+        text-align: justify;
+        text-align-last: left;
+      }
+
+      /* ===== Team link (closing footer) + lateral Team screen ============= */
+      /* The link sits in the footer, in flow above the absolutely-positioned
+         up-arrow. Clicking pulls the view right to reveal the Team screen. */
+      /* Dead closing actions are still real buttons (role=button), just not
+         wired anywhere yet — keep the interactive pointer. */
+      .closing__actions a[role="button"] { cursor: pointer; }
+
+      .footer-team-link {
+        position: relative;
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 2px;   /* sits above the wordmark line; footer gap spaces it */
+        padding: 6px 2px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        text-decoration: none;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        transition: color 220ms ease, gap 220ms ease;
+      }
+      .footer-team-link:hover,
+      .footer-team-link:focus-visible {
+        color: var(--ink);
+        gap: 12px;
+      }
+      .footer-team-link svg { width: 15px; height: 15px; flex: none; }
+
+      /* The lateral screen: parks off-screen right, slides in on open. */
+      /* The team screen is only ever reached from the footer link, i.e. from
+         the dark closing — so it carries the is-final-contrast ink palette
+         rather than the page's parchment one. That is what lets the misty
+         woods plate read as a photograph instead of a ghost: dark scrim,
+         light type. Scrim is heavier at the edges than through the middle so
+         the sun shafts still come through behind the text column. */
+      .team-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 78;   /* above site-nav (50), below the bio modal (80) */
+        --ink: #f4efd9;
+        --ink-soft: #d2d8c5;
+        --ink-quiet: #a8b7a8;
+        --rule: rgba(244, 239, 217, 0.2);
+        color: var(--ink);
+        background-color: #0e1f16;
+        background-image:
+          linear-gradient(105deg, rgba(14, 31, 22, 0.93) 0%, rgba(14, 31, 22, 0.76) 44%, rgba(14, 31, 22, 0.89) 100%),
+          url("assets/misty-woods.avif");
+        background-size: cover, cover;
+        background-position: center, center;
+        background-repeat: no-repeat, no-repeat;
+        transform: translateX(100%);
+        visibility: hidden;
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0s linear 620ms;
+        will-change: transform;
+        overflow-y: auto;
+      }
+      body.is-team-open .team-screen {
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0s linear 0s;
+      }
+      /* the current page recedes left as the team screen pulls in from the right */
+      body.is-team-open #page {
+        transform: translateX(-8%);
+        filter: brightness(0.5);
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 620ms ease;
+      }
+      #page {
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 620ms ease;
+      }
+
+      .team-screen__back {
+        position: absolute;
+        top: clamp(24px, 4vh, 40px);
+        left: var(--pad-x);
+        z-index: 4;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 4px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        background: none;
+        border: 0;
+        cursor: pointer;
+        transition: color 220ms ease, gap 220ms ease;
+      }
+      .team-screen__back:hover,
+      .team-screen__back:focus-visible { color: var(--ink); gap: 14px; }
+      .team-screen__back svg { width: 16px; height: 16px; flex: none; }
+
+      /* Mirror .panel + .panel--media so the layout matches section 06 exactly. */
+      .team-screen__stage {
+        min-height: 100vh;
+        min-height: 100svh;
+        padding: 32px var(--pad-x);
+        display: grid;
+        place-items: center;
+        grid-template-columns: minmax(240px, min(38vw, 520px)) minmax(0, var(--col-narrow));
+        gap: clamp(48px, 7vw, 112px);
+        isolation: isolate;
+      }
+      /* This panel__video is never scroll-revealed here, so force it visible. */
+      .team-screen .panel__video {
+        opacity: 1;
+        transform: none;
+      }
+
+      @media (max-width: 720px) {
+        .team-screen__stage {
+          grid-template-columns: 1fr;
+          gap: clamp(28px, 6vw, 44px);
+          padding: clamp(84px, 12vh, 110px) var(--pad-x) clamp(40px, 8vh, 72px);
+          place-items: stretch;
+          align-content: center;
+        }
+        body.is-team-open #page { transform: translateX(-5%); }
+      }
+
+      /* Bio modal: neutral grey glass, not a second green panel. The shared
+         styles.css version mixes var(--bg) into both the backdrop and the
+         card, so over the team screen it came out as an opaque green slab on
+         a green veil and the woods plate behind it disappeared. Grey the
+         tints off the palette entirely, and pull the backdrop blur back so
+         there is still a photograph to see through. Overridden here rather
+         than in styles.css because index.html and GPT-Teaser.html share it. */
+      .bio-modal__backdrop {
+        background: rgba(16, 19, 17, 0.46);
+        -webkit-backdrop-filter: blur(7px) saturate(0.9);
+        backdrop-filter: blur(7px) saturate(0.9);
+      }
+      .bio-modal__panel {
+        background: rgba(128, 134, 129, 0.2);
+        border-color: rgba(239, 231, 211, 0.24);
+        -webkit-backdrop-filter: blur(20px) saturate(1.04);
+        backdrop-filter: blur(20px) saturate(1.04);
+      }
+
+      /* Rising overlay headlines — ride bottom -> off-top across a scroll band,
+         driven by --rise-y from dedicated scrubs (see inline JS).
+         NO FADE: they are fully opaque the whole ride and are simply off-screen
+         at both ends of their band, so nothing ever ghosts in or out. Left
+         aligned on the page gutter, sized to hold ONE line where the copy
+         allows and two only when it must. */
+      /* The block is a full-bleed BANNER STRIP: edge-to-edge background, with
+         the copy held at the page gutter by the strip's own padding. Same
+         translucent-bg + blur treatment as the 03 ground panel. */
+      .glass-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+      .rise-headline {
+        position: fixed;
+        left: 0;
+        right: 0;
+        padding: clamp(14px, 2.4vh, 28px) var(--pad-x, 64px);
+        /* A flat white veil rather than a tint of the page colour: the strip
+           should look lit from within, not tinted. Even across the whole bar
+           so it never reads as a highlight sitting on top of it. */
+        background: color-mix(in srgb, #ffffff 20%, transparent);
+        /* Two declarations on purpose. The first is a plain heavy frost and is
+           the floor. The second adds the feDisplacementMap ripple; browsers
+           that don't take reference filters in backdrop-filter drop the whole
+           second declaration as invalid and keep the first, so the strips are
+           never left bare. Blur runs BEFORE the warp so the displacement pushes
+           an already-soft image and reads as thickness, not as a sharp edge. */
+        /* Lit, evenly, as if the light is coming THROUGH the pane. The lift is
+           done with brightness() on the backdrop plus a flat white veil — not
+           with a gradient — so there is no drawn highlight anywhere on the
+           strip. Every previous version put painted light somewhere and it
+           always read as a graphic. */
+        -webkit-backdrop-filter: blur(8px) saturate(1.06) brightness(1.34);
+        backdrop-filter: blur(8px) saturate(1.06) brightness(1.34);
+        -webkit-backdrop-filter: blur(5px) saturate(1.08) brightness(1.34) url(#glass-warp);
+        backdrop-filter: blur(5px) saturate(1.08) brightness(1.34) url(#glass-warp);
+        background-image: none;
+        box-shadow: 0 22px 46px -34px color-mix(in srgb, var(--ink) 30%, transparent);
+        top: 50%;
+        transform: translateY(-50%) translateY(var(--rise-y, 58vh));
+        opacity: 1;
+        z-index: 6;
+        pointer-events: none;
+        text-align: left;
+        will-change: transform;
+      }
+      /* The EDGE ZONE. Nothing is PAINTED here any more — no striations, no
+         falloff, no green cast. Those were the "highlights" that kept reading
+         as drawn. The bands now differ from the body of the strip by optics
+         only: they bend their slice of the backdrop far harder (#glass-edge)
+         and are masked so they dissolve inward instead of ending at a line.
+         If the edge needs more presence, raise the displacement scale on
+         #glass-edge — do not paint light onto it. */
+      .rise-headline::before,
+      .rise-headline::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: clamp(18px, 3vh, 34px);
+        pointer-events: none;
+        background: none;
+        -webkit-backdrop-filter: blur(2px) brightness(1.34) saturate(1.06);
+        backdrop-filter: blur(2px) brightness(1.34) saturate(1.06);
+        -webkit-backdrop-filter: blur(1.5px) brightness(1.34) saturate(1.08) url(#glass-edge);
+        backdrop-filter: blur(1.5px) brightness(1.34) saturate(1.08) url(#glass-edge);
+      }
+      .rise-headline::before {
+        top: 0;
+        -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
+      }
+      .rise-headline::after {
+        bottom: 0;
+        -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
+        mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
+      }
+
+      /* Font size is derived from the line's character budget rather than a
+         viewport clamp, so the break count is deterministic at every width:
+         size = available width / (chars-per-line * ~0.53em), capped. */
+      .rise-headline p {
+        position: relative;   /* above the two edge-lens bands */
+        z-index: 1;
+        margin: 0;
+        font-family: var(--font-display);
+        font-weight: 500;
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        color: var(--accent);
+        text-align: left;
+      }
+      /* A — 60 chars, ONE line. C — 56 chars, ONE line. */
+      #rise-a p,
+      #rise-c p {
+        max-width: 66ch;
+        font-size: min(40px, calc(min(88vw, 1240px) / 34));
+      }
+      /* B — 92 chars, TWO lines of ~46. */
+      #rise-b p {
+        max-width: 50ch;
+        font-size: min(40px, calc(min(88vw, 1240px) / 26));
+      }
+      /* Phones: A drops to two lines, B to three — one/two lines at this width
+         would put the type under 15px. Desktop keeps the 1/2-line rule. */
+      @media (max-width: 720px) {
+        #rise-a p,
+        #rise-b p,
+        #rise-c p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
+      }
+
+      /* ===== Reveal media (DEV) ==========================================
+         A photograph that wipes open under a section as its pin scrubs.
+         Deliberately GENERIC so adding the next one is markup only:
+
+           <div class="reveal-media reveal-media--left"
+                data-reveal-media="1"          pin: 1 | 2 | 3
+                data-reveal-from="0.06"        fraction of that pin's scroll
+                data-reveal-to="0.42"
+                style="--reveal-image: url('assets/x.jpg')"></div>
+
+         The JS block near the p1/p2/p3 triggers wires every [data-reveal-media]
+         on the page and writes --reveal-p 0->1. Everything else is CSS. */
+      .reveal-media {
+        --reveal-p: 0;
+        --reveal-opacity: 0.5;
+        /* Which slice of the source to show. 100% = right edge, so the crop
+           holds the RIGHT half of foresters-measuring.jpg (Piet). */
+        --reveal-focus: 100%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        z-index: 0;                 /* under the copy, over the panel ground */
+        background-image: var(--reveal-image);
+        background-size: cover;
+        background-position: var(--reveal-focus) 50%;
+        background-repeat: no-repeat;
+        opacity: var(--reveal-opacity);
+        /* THE WIPE. A hard crop edge travelling left to right — not a fade, so
+           the image reads as being uncovered rather than dissolved in. */
+        clip-path: inset(0 calc((1 - var(--reveal-p)) * 100%) 0 0);
+        pointer-events: none;
+        will-change: clip-path;
+      }
+      /* Full-bleed to the left page edge: the 01 copy is a RIGHT-aligned rail
+         in column 1, so the photograph fills the empty half it leans against
+         instead of sitting in a box of its own. */
+      .reveal-media--left { left: 0; right: 50%; }
+      .reveal-media--right { left: 50%; right: 0; }
+      /* The copy has to sit above it. .panel__inner is display:contents at
+         900px+, so these two are the real grid items and they carry no
+         stacking of their own. */
+      #problem { position: relative; }
+      #problem .p-head,
+      #problem .p-body { position: relative; z-index: 1; }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal-media { clip-path: none; }
+      }
+
+      /* ===== Phone pass ==================================================
+         Same ideas as the main site: single column, nothing fixed wider than
+         the viewport (a fixed box escapes body{overflow-x:hidden} and makes
+         the whole page scroll sideways), no in-page horizontal scrollers,
+         no nowrap headlines. Pin lengths, nav-on-scroll, hover gating and the
+         visualViewport splash sizing already come from swot-claude/styles.css.
+         MUST stay last in source order — it overrides the 900px block. */
+      @media (max-width: 720px) {
+        /* 00 — the hero.
+           --hero-copy-inset exists on desktop so the headline clears the mark
+           sitting to its LEFT. At this width .hero-brand-row is display:block
+           and the mark sits ABOVE the wordmark, so the inset is ~68px of dead
+           gutter — which is what pushed BULLFINCH IS onto two lines and left
+           everything under it reading as a narrow column pinned to the left
+           edge. Zeroed here.
+
+           The label is then sized off the real available measure rather than a
+           vw clamp: 12 characters at ~0.565em each (Geist uppercase ~0.62em
+           advance, less the -.055em tracking) is ~6.8em, so width / 7.2 keeps
+           one line with margin to spare from 320px up. nowrap enforces it. */
+        .hero { padding-top: 10vh; padding-bottom: 22vh; }
+        /* The inset cannot be zero, and zeroing it is what cropped the logo
+           animation off the left edge. .corner-logo-sequence sets
+           margin-left: calc(inset - mark * 0.1726) — the inset is what absorbs
+           that negative optical offset and keeps the box inside the hero
+           column. At inset 0 the box hung ~19px left of the gutter and
+           body{overflow-x:hidden} clipped it, which is the exact landmine that
+           rule's own comment warns about.
+
+           So the inset is now the SMALLEST value that clears both overhangs
+           rather than the desktop's mark-width gutter:
+             optical offset   mark * 0.1726  (tip sits 17.26% into the box)
+             intro scale      mark * 0.14    (canvas is scale(1.28) about
+                                              centre, so it bleeds 14% each side
+                                              — this is the one that actually
+                                              crops, the settled state is .74)
+           0.32 covers the sum with a hair to spare, so the intro sequence lands
+           flush on the gutter and the mark's TIP still falls on the B of
+           BULLFINCH, which is the whole point of the optical offset. */
+        .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.32); }
+        /* Subtracts the inset it actually has to live with, so the one-line
+           guarantee holds against the real measure and not an assumed zero. */
+        .hero-is__label {
+          margin-left: var(--hero-copy-inset);
+          white-space: nowrap;
+          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.32) / 7.2));
+        }
+        /* Everything in the hero shares the one inset, so the whole block sets
+           to a single left edge that the mark's tip lands on. These inherit it
+           from the base rules and are left alone deliberately — they are listed
+           here only to say so. */
+        /* Was max-width: calc(50vw - inset) — literally half the screen, which
+           is what read as a narrow column pinned to the left. Full measure. */
+        .hero__subtitle { max-width: none; }
+
+        /* ---- Hamburger ---------------------------------------------------
+           No duplicate markup: the SAME <nav class="site-nav__links"> that is
+           a row of numbers on desktop becomes the full-screen sheet here. That
+           keeps the delegated [data-scroll-target] click handler, the
+           .is-current scroll-spy and the aria-labels all working untouched.
+           The section names come from the data-nav-label attributes that
+           already feed the desktop hover label, pulled in via ::after — on a
+           phone there is no hover, so those names were otherwise unreachable
+           and the nav was four bare numbers. */
+        .nav-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: auto;
+          padding: 0;
+          width: 44px;               /* full tap target, icon is 22px */
+          height: 44px;
+          margin-right: -11px;       /* so the ICON, not the target, sits on the gutter */
+          background: none;
+          border: 0;
+          color: inherit;            /* inherits the stage ink remaps */
+          cursor: pointer;
+          position: relative;
+          z-index: 1;                /* above the sheet, which is z-index -1 below */
+        }
+        .nav-toggle__bar {
+          transform-box: view-box;
+          transform-origin: 12px 12px;
+          transition:
+            transform 340ms cubic-bezier(.2, .75, .18, 1),
+            opacity 180ms ease;
+        }
+        body.is-nav-open .nav-toggle__bar--t { transform: translateY(5px) rotate(45deg); }
+        body.is-nav-open .nav-toggle__bar--m { opacity: 0; }
+        body.is-nav-open .nav-toggle__bar--b { transform: translateY(-5px) rotate(-45deg); }
+
+        .site-nav__links {
+          /* Negative z-index keeps the sheet inside .site-nav's stacking
+             context (z-index 50, so still over the whole page) but paints it
+             UNDER the toggle button, which stays tappable to close. */
+          position: fixed;
+          inset: 0;
+          z-index: -1;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: center;
+          gap: 0;
+          margin-left: 0;
+          padding:
+            calc(78px + env(safe-area-inset-top))
+            var(--pad-x)
+            calc(30px + env(safe-area-inset-bottom));
+          /* The sheet carries its own ground and its own ink, so it is immune
+             to the is-tree-stage / is-midramp-stage remaps that the header bar
+             needs. Redeclaring the two vars here rather than hard-coding
+             colours means .site-nav a and .site-nav a.is-current keep working
+             as written, including the lit current-section state. */
+          background: #10271B;
+          --ink: #FFFFFF;
+          --ink-quiet: rgba(239, 231, 211, .74);
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(-10px);
+          transition:
+            opacity 280ms ease,
+            transform 380ms cubic-bezier(.2, .75, .18, 1);
+          /* Scroll containment WITHOUT locking body overflow — this page is one
+             long ScrollTrigger timeline with pins, and toggling overflow on
+             <body> re-measures every one of them. See the touchmove handler. */
+          touch-action: none;
+          overscroll-behavior: contain;
+        }
+        body.is-nav-open .site-nav__links {
+          opacity: 1;
+          transform: none;
+          pointer-events: auto;
+        }
+        .site-nav__links a[data-scroll-target] {
+          display: block;
+          padding: clamp(13px, 2.2vh, 20px) 0;
+          border-top: 1px solid rgba(239, 231, 211, .20);
+          /* The anchor's own text is the number, and it keeps the nav's mono
+             eyebrow setting. The section name below it is the ::after. */
+          font-size: 11px;
+          letter-spacing: .18em;
+        }
+        .site-nav__links a[data-scroll-target]:first-of-type { border-top: 0; }
+        .site-nav__links a[data-scroll-target]::after {
+          content: attr(data-nav-label);
+          display: block;
+          margin-top: 7px;
+          font-family: var(--font-display);
+          font-size: clamp(25px, 7.4vw, 38px);
+          font-weight: 500;
+          letter-spacing: -.025em;
+          line-height: 1.04;
+          text-transform: none;
+          color: currentColor;
+        }
+        .site-nav__utility {
+          display: flex;
+          align-items: center;
+          gap: 26px;
+          margin-top: clamp(26px, 5vh, 46px);
+          padding-top: clamp(16px, 2.6vh, 24px);
+          border-top: 1px solid rgba(239, 231, 211, .20);
+        }
+
+        /* There is no left half at this width — 01 is one column — so the
+           photograph goes full-bleed and drops back, and the wipe still runs
+           left to right across the whole panel. */
+        .reveal-media--left,
+        .reveal-media--right { left: 0; right: 0; --reveal-opacity: 0.32; }
+
+        /* 01 — the two-row / two-column rail collapses to one left column:
+           headline, dot grid, body, note. */
+        #problem.panel--media {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto;
+          row-gap: clamp(16px, 3vh, 28px);
+        }
+        #problem .p-head,
+        #problem .p-body,
+        #problem .stat-visual,
+        #problem .problem-note { grid-column: 1; grid-row: auto; }
+        #problem .p-head,
+        #problem .p-body { align-items: flex-start; text-align: left; }
+        #problem .stat-visual { justify-content: flex-start; }
+        #problem .eyebrow-anchor { margin-left: 0; }
+        #problem .panel__verdict {
+          margin-left: 0;
+          text-align: left;
+          font-size: clamp(30px, 8.4vw, 46px);
+        }
+        /* The verdict steps across the measure instead of stacking flush left:
+           DEDICATED INVENTORIES on the gutter, ARE SO indented, 19TH CENTURY
+           out to the right edge. Desktop gets the same shape from the 5.9em
+           right margin on line 2; at this width there is no room for that, so
+           the indent moves to the left and line 3 is right-aligned outright. */
+        #problem .panel__verdict .vs-line--2 { margin-right: 0; margin-left: 2.4em; }
+        #problem .panel__verdict .vs-line:last-child { text-align: right; }
+        #problem .panel__evidence p { text-align: justify; text-align-last: left; }
+        /* Centred on whatever lines it breaks to, rather than justified out to
+           the gutter — the three terms read as a caption here, not as body.
+
+           text-align alone did nothing, because the BOX was the problem, not
+           the text inside it. .p-body is a COLUMN flex container, so align-* is
+           the horizontal axis, and the 900px block still carries
+           #problem .panel__numeric { align-self: end }. A flex item that isn't
+           stretched is sized to fit-content, so on a wider phone — where this
+           46-character string still fits one line — the box is exactly as wide
+           as its own text and pinned to the right edge. Centring text inside a
+           box that is the same width as the text is a no-op, which is why it
+           read as right-of-centre rather than flush right.
+
+           stretch puts the box back on the full column; then text-align has
+           something to centre within, at every width and whether it wraps or
+           not. width:100% belts it in case anything reintroduces a non-stretch
+           align-self above this. */
+        #problem .panel__numeric {
+          align-self: stretch;
+          width: 100%;
+          text-align: center;
+          text-align-last: center;
+        }
+        #problem .stat-label,
+        #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
+        #problem .stat-line { left: 0; right: auto; text-align: left; }
+        #problem .stat-num { justify-content: flex-start; align-items: flex-end; }
+        #problem #statGrid { width: clamp(110px, 33vw, 150px); height: clamp(110px, 33vw, 150px); }
+
+        /* 02 — the case graphic goes full-bleed across the top (92vw, never
+           wider than the screen) and the copy stacks under it. */
+        #product.panel--media { grid-template-columns: 1fr; align-content: end; }
+        /* THE narrow-column bug: the desktop rule caps this column at
+           min(760px, 42vw), and 42vw on a phone is ~164px. Moving it to
+           grid-column 1 never touched the cap, so every line of 02 was setting
+           in a 164px ribbon down the left. Uncapped, and pushed to the bottom
+           of the screen so the device owns the top half. */
+        #product .panel__inner {
+          grid-column: 1;
+          max-width: none;
+          padding-bottom: clamp(14px, 3vh, 30px);
+        }
+        /* Full-bleed and taller. The device is the whole argument of this
+           section and it was reading as a thumbnail. It still clears the copy
+           block because the copy is bottom-aligned: device ends at ~48dvh, the
+           copy starts below it. */
+        .case-fixed-layer.panel__model {
+          width: 100vw;
+          max-width: 100vw;
+          height: 44dvh;
+          left: 50%;
+          top: 2vh;
+          transform: translateX(-50%);
+        }
+        /* Justify at this measure opens rivers between words (see the 00 hero
+           and the 02 leads). Hyphenation closes them without dropping the
+           justified setting. */
+        .panel__evidence p,
+        .hero__sub,
+        .audience-item p { hyphens: auto; }
+
+        /* 03 — readouts shrink so a nowrap block centred on an outer trunk
+           can't hang off the screen edge; the ground panel unstacks. */
+        .tree-readout__common { font-size: 11px; }
+        .tree-readout__latin { font-size: 9px; }
+        .tree-readout__metric { font-size: 7px; }
+        /* The readouts keep the bright HUD green at every width. An earlier
+           pass darkened them to #0A4A1E here on a contrast reading; Piet wants
+           the green. Do not darken them again. */
+
+        /* NO SCRIM. A dark gradient behind the ground panel was added here on
+           the same pass and it read as a box sitting on the logo strip. Piet
+           has rejected boxes behind the PARTNERS bar twice now. The copy earns
+           its legibility from the grove alone — if it needs help, lift the
+           grove or shorten the panel, do not paint a plate behind it. */
+
+        /* The corner mark landed on the Okanagan logo. Partner marks do not get
+           sat on; the mark is decorative, so it goes at this width. */
+        #opportunity .section-mark--corner { display: none; }
+        #opportunity .panel__verdict { white-space: normal; font-size: clamp(21px, 6vw, 30px); }
+        .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+        .audience-item {
+          min-height: 0;
+          padding: 8px 10px 9px;
+          /* Beige to match the open panel — var(--rule) here would put dark
+             hairlines back on a panel that has no background any more. */
+          border-top: 1px solid rgba(239, 231, 211, .62);
+        }
+        .audience-item:nth-child(odd) { padding-left: 0; border-left: 0; }
+        .audience-item:nth-child(-n + 2) { border-top: 0; }
+        /* Five items over two columns is three rows with a widowed fifth, and
+           that third row is what pushed the panel up into the grove. Dropped to
+           a clean 2x2. Remote sensing goes because it is the one audience that
+           buys the data rather than walks the stand — the other four are the
+           people actually wearing the device. Mobile only; desktop keeps all
+           five across one row. */
+        .audience-item:nth-child(5) { display: none; }
+        .audience-item h3 { font-size: 13px; }
+        .audience-item p { font-size: 11px; }
+        .trust-line { grid-template-columns: 1fr; }
+        .trust-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; }
+        .trust-strip div { height: 46px; padding: 6px 8px; }
+        .trust-strip div:nth-child(3n + 1) { border-left: 0; }
+
+        /* Closing — nothing nowrapped, actions wrap instead of overflowing. */
+        .closing__title { font-size: clamp(34px, 10vw, 54px); }
+        .closing__line { white-space: normal; }
+        .closing__actions { flex-wrap: wrap; gap: 12px 22px; }
+        .closing__actions a { font-size: 13px; }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canopy" class="canopy-canvas" aria-hidden="true"></canvas>
+    <div class="forest-photo" aria-hidden="true"></div>
+    <div class="text-veil" aria-hidden="true"></div>
+    <!-- Wonky-glass displacement for the rising banner strips. Low-frequency
+         fractal noise, blurred so the warp is a slow ripple rather than fizz,
+         then used to push the backdrop around. Referenced from CSS via
+         backdrop-filter: url(#glass-warp) — see .rise-headline, which keeps a
+         plain-blur declaration ahead of it so browsers without reference
+         filters in backdrop-filter simply keep the old flat frost. -->
+    <svg class="glass-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="glass-warp" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012 0.024" numOctaves="3" seed="7" result="noise" />
+        <feGaussianBlur in="noise" stdDeviation="1.5" result="softNoise" />
+        <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="52" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+      <!-- The EDGE of a cast-glass block bends far harder than its middle and
+           bends mostly VERTICALLY — the reference block's edges compress the
+           whole scene into a thin caustic band. Higher frequency on Y, much
+           bigger scale, used only by the two edge bands. -->
+      <filter id="glass-edge" x="-30%" y="-40%" width="160%" height="180%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.055" numOctaves="2" seed="11" result="enoise" />
+        <feGaussianBlur in="enoise" stdDeviation="0.8" result="esoft" />
+        <feDisplacementMap in="SourceGraphic" in2="esoft" scale="74" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+    <div class="rise-headline" id="rise-a" aria-hidden="true"><p>Using wearable sensors, Bullfinch provides ground-truth data.</p></div>
+    <div class="rise-headline" id="rise-c" aria-hidden="true"><p>Automatically capture ecological data with no extra trips</p></div>
+    <div class="rise-headline" id="rise-b" aria-hidden="true"><p>Our mission is to provide the ground truth data humanity needs to protect and restore Nature.</p></div>
+    <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
+      <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
+    </div>
+    <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
+    <header class="site-nav" aria-label="Website navigation">
+      <a class="site-nav__brand" href="./" data-restart-splash data-nav-label="Bullfinch Earth" aria-label="Restart Bullfinch Earth">
+        <svg class="site-nav__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+          <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+          <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+        </svg>
+      </a>
+      <div class="site-nav__hover-label" id="site-nav-hover-label" aria-hidden="true"></div>
+      <!-- Phones only (display:none above 720px). Three rules that scissor into
+           an X; stroke is currentColor so the is-tree-stage / is-midramp-stage
+           ink remaps carry it without a second set of rules. -->
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-controls="site-nav-links" aria-expanded="false" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+          <line class="nav-toggle__bar nav-toggle__bar--t" x1="3" y1="7" x2="21" y2="7" />
+          <line class="nav-toggle__bar nav-toggle__bar--m" x1="3" y1="12" x2="21" y2="12" />
+          <line class="nav-toggle__bar nav-toggle__bar--b" x1="3" y1="17" x2="21" y2="17" />
+        </svg>
+      </button>
+      <nav class="site-nav__links" id="site-nav-links" aria-label="Primary">
+        <a href="#problem" data-scroll-target="#problem" data-nav-label="The gap" aria-label="01 The gap">01</a>
+        <a href="#product" data-scroll-target="#product" data-nav-label="How it works" aria-label="02 How it works">02</a>
+        <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Who needs Bullfinch" aria-label="03 Who needs Bullfinch">03</a>
+        <a href="#closing" data-scroll-target="#closing" data-nav-label="Go deeper" aria-label="04 Go deeper">04</a>
+        <!-- display:contents above 720px, so the desktop nav is byte-identical
+             to what it was — these two stay direct flex children of
+             .site-nav__links. In the phone sheet it becomes a real flex row so
+             the two icons sit side by side at the bottom instead of stacking. -->
+        <div class="site-nav__utility">
+        <button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Enter full screen">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+            <path d="M4 9V4h5" />
+            <path d="M15 4h5v5" />
+            <path d="M20 15v5h-5" />
+            <path d="M9 20H4v-5" />
+          </svg>
+        </button>
+        <!-- Instagram. No href yet — Bullfinch's profile URL is still to come,
+             so this renders as the mark only rather than pointing somewhere
+             wrong. Add href="https://www.instagram.com/<handle>/" plus
+             target="_blank" rel="noopener" and it becomes a live link with no
+             other change. -->
+        <a class="nav-social" data-social="instagram" aria-label="Bullfinch Earth on Instagram">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
+            <rect x="3.4" y="3.4" width="17.2" height="17.2" rx="4.6" />
+            <circle cx="12" cy="12" r="4.05" />
+            <circle cx="17.1" cy="6.9" r="1.05" fill="currentColor" stroke="none" />
+          </svg>
+        </a>
+        </div>
+      </nav>
+    </header>
+    <main id="page">
+      <section class="hero" aria-label="Hero">
+        <div class="hero__inner">
+          <h1 class="hero__title hero-is">
+            <span class="hero-brand-row">
+              <span class="corner-logo-sequence" id="corner-logo-sequence-wrap" aria-hidden="true">
+                <canvas id="corner-logo-sequence" width="360" height="360"></canvas>
+                <svg class="corner-logo-static bullfinch-mark" viewBox="50 35 100 70">
+                  <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+                  <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+                </svg>
+              </span>
+              <span class="hero-is__label">BULLFINCH IS</span>
+            </span>
+            <span class="hero-is__prefix">GROUND TRUTH FOR</span>
+            <span class="hero-is__cycle" aria-label="Forestry, Wildfire Risk and Mitigation, Carbon Projects, ESG, Invasive Species Detection, Biodiversity, and Natural Asset Valuation">
+              <span class="hero-is__term is-active">FORESTRY</span>
+              <span class="hero-is__term">WILDFIRE RISK &amp; MITIGATION</span>
+              <span class="hero-is__term">CARBON PROJECTS</span>
+              <span class="hero-is__term">ESG</span>
+              <span class="hero-is__term">INVASIVE SPECIES DETECTION</span>
+              <span class="hero-is__term">BIODIVERSITY</span>
+              <span class="hero-is__term">NATURAL ASSET VALUATION</span>
+            </span>
+          </h1>
+          <p class="hero__subtitle hero__line hero__line--2">Bullfinch Earth measures, monitors, and maps every stem, passively, while foresters do their normal jobs</p>
+        </div>
+        <div class="hero__scroll-cue" aria-hidden="true">
+          <span class="hero__scroll-cue-label">Scroll</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </section>
+
+      <section class="swot" id="swot" aria-label="Bullfinch Earth story">
+        <article class="panel panel--media" id="problem" data-panel="1">
+          <div class="reveal-media reveal-media--left" data-reveal-media="1" data-reveal-from="0.06" data-reveal-to="0.42" style="--reveal-image: url('assets/foresters-measuring.jpg')" aria-hidden="true"></div>
+          <div class="panel__inner">
+            <div class="p-head">
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+              <h2 class="panel__verdict"><span class="vs-line">Dedicated Inventories</span><span class="vs-line vs-line--2">Are So</span><span class="vs-line">19th Century</span></h2>
+            </div>
+            <div class="p-body">
+              <div class="panel__evidence">
+                <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
+              </div>
+              <p class="panel__numeric">ONE FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
+            </div>
+          </div>
+          <div class="panel__stat panel__stat--problem" aria-label="Today, manual forestry measures data for less than 1% of trees">
+            <div class="stat-visual">
+              <div class="stat-grid" id="statGrid" aria-hidden="true"></div>
+              <div class="stat-read">
+                <div class="stat-label">
+                  <span class="stat-line" id="statToday">TODAY</span>
+                  <span class="stat-line" id="statBull">BULLFINCH</span>
+                </div>
+                <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
+                <p class="stat-rest">of trees measured</p>
+              </div>
+            </div>
+            <p class="problem-note">Bullfinch fully automates the forest inventory process – no training, no stopping, no dedicated trip. Just do your job and the data flows. Continuously. Every time you’re in the field. For any reason.</p>
+          </div>
+        </article>
+
+        <article class="panel panel--media" id="product" data-panel="2">
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">02 &middot; THE BULLFINCH WAY</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Is It Really This Easy?</h2>
+            <div class="panel__evidence">
+              <p><span class="lead">Wear</span><br>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
+              <p><span class="lead">Walk</span><br>Just press “Start Bullfinching” and go do your thing</p>
+              <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
+            </div>
+            <p class="panel__numeric">WEAR &middot; WALK &middot; DATA</p>
+          </div>
+        </article>
+
+        <article class="panel" id="opportunity" data-panel="3">
+          <div class="tree-readouts" aria-label="Tree identification results">
+            <div class="tree-readout">
+              <span class="tree-readout__common">Douglas Fir</span>
+              <span class="tree-readout__latin">Pseudotsuga menziesii</span>
+              <span class="tree-readout__metric">Confidence: 0.876</span>
+              <span class="tree-readout__metric">Genus Score: 0.876</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
+            <div class="tree-readout">
+              <span class="tree-readout__common">Norway spruce</span>
+              <span class="tree-readout__latin">Picea abies</span>
+              <span class="tree-readout__metric">Confidence: 0.823</span>
+              <span class="tree-readout__metric">Genus Score: 0.823</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
+            <div class="tree-readout">
+              <span class="tree-readout__common">Balsam Poplar</span>
+              <span class="tree-readout__latin">Populus balsamifera</span>
+              <span class="tree-readout__metric">Confidence: 0.777</span>
+              <span class="tree-readout__metric">Genus Score: 0.777</span>
+              <span class="tree-readout__metric">Count: 1</span>
+            </div>
+          </div>
+          <div class="panel__inner">
+            <div class="ground-heading">
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; FROM THE GROUND UP</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
+              <h2 class="panel__verdict">Who Need to Bullfinch?</h2>
+            </div>
+            <div class="audience-grid">
+              <article class="audience-item"><h3>Timber companies</h3><p>Actually know what you’re bringing to market</p></article>
+              <article class="audience-item"><h3>Consulting foresters</h3><p>More billable projects per season</p></article>
+              <article class="audience-item"><h3>Carbon &amp; MRV</h3><p>Ground truth that registries trust</p></article>
+              <article class="audience-item"><h3>Wildfire &amp; Insurance</h3><p>Below-canopy fuel data at scale</p></article>
+              <article class="audience-item"><h3>Remote sensing</h3><p>greater accuracy &amp; visibility below the canopy</p></article>
+            </div>
+            <div class="trust-line">
+              <p class="trust-label">Partners and recognition</p>
+              <div class="trust-strip" aria-label="Bullfinch Earth partners and recognition">
+                <div><img src="assets/logos/reversed/weyerhaeuser.png" alt="Weyerhaeuser"></div>
+                <div><img src="assets/logos/reversed/nhri.png" alt="Northern Hardwoods Research Institute"></div>
+                <div><img src="assets/logos/reversed/longview.png" alt="Long View Forest"></div>
+                <div><img src="assets/logos/reversed/uksa.png" alt="UK Space Agency"></div>
+                <div><img src="assets/logos/reversed/fba.png" alt="Forest Business Accelerator"></div>
+                <div><img src="assets/logos/reversed/okanagan-angel-summit.png" alt="Okanagan Angel Summit"></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <section class="closing" id="closing" aria-label="Closing">
+        <div class="closing__inner">
+          <svg class="closing__logo bullfinch-mark" viewBox="50 35 100 70" role="img" aria-label="Bullfinch Earth">
+            <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+            <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+          </svg>
+          <h2 class="closing__title">
+            <span class="closing__line closing__line--1">Nature from the</span>
+            <span class="closing__line closing__line--2">Ground Up</span>
+          </h2>
+          <div class="contact-actions closing__actions">
+            <a role="button" tabindex="0">Contact Us</a>
+            <a role="button" tabindex="0">Request a Demo</a>
+            <a href="index-pointcloud.html">Explore Deeper</a>
+          </div>
+        </div>
+
+        <footer class="site-footer" id="site-footer">
+          <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
+          <button class="footer-team-link" type="button" data-team-open aria-controls="team-screen" aria-expanded="false">
+            Meet the Team
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+          <p class="site-footer__line">BULLFINCH EARTH<br />The FICO of Forests</p>
+          <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 15 6-6 6 6" />
+            </svg>
+          </button>
+        </footer>
+      </section>
+    </main>
+
+    <section class="team-screen" id="team-screen" aria-label="Bullfinch Earth team" aria-hidden="true">
+      <button class="team-screen__back" type="button" data-team-close aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M11 6l-6 6 6 6" />
+        </svg>
+        Back
+      </button>
+      <div class="team-screen__stage">
+        <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
+          <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
+            <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+            <figcaption>Seth Sternberg &middot; CEO</figcaption>
+          </figure>
+          <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
+            <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
+            <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
+          </figure>
+          <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+            <img src="assets/graham-headshot.png" alt="Graham Smith" />
+            <figcaption>Graham Smith &middot; CCO</figcaption>
+          </figure>
+        </div>
+        <div class="panel__inner">
+          <div class="eyebrow-anchor"><p class="panel__eyebrow">06 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true" style="--build:1;--rev:1;--glow:.95;--pang:-12deg"></span></div>
+          <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
+          <div class="panel__evidence">
+            <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
+            <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim, the Mars guy.</button> CTO and PhD astrophysicist, Oxford and Cambridge, who built cameras now operating on Mars with NASA JPL.</p>
+            <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry and field operations, plus finance and customer depth.</p>
+          </div>
+          <p class="panel__numeric">MARS CAMERAS &middot; 400M+ PRODUCTS &middot; BC FIELD OPS</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="bio-modal" id="team-bio-modal" hidden role="dialog" aria-modal="true" aria-labelledby="team-bio-title">
+      <div class="bio-modal__backdrop" data-bio-close></div>
+      <section class="bio-modal__panel" role="document">
+        <button class="bio-modal__close" type="button" aria-label="Close team bio" data-bio-close>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+        <img class="bio-modal__photo" id="team-bio-photo" src="" alt="" />
+        <div class="bio-modal__content">
+          <p class="bio-modal__eyebrow">Team bio</p>
+          <h2 class="bio-modal__title" id="team-bio-title"></h2>
+          <p class="bio-modal__body" id="team-bio-body"></p>
+        </div>
+      </section>
+    </div>
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="theme.js"></script>
+    <script src="scroll.js"></script>
+    <script src="scene-claude-teaser.js?v=claude-32"></script>
+    <script src="case-animation.js?v=forest-journey-4"></script>
+    <script src="field-film.js?v=v4-4"></script>
+    <script src="swot-claude.js?v=claude-14"></script>
+    <script src="stat-field-claude.js?v=claude-14"></script>
+    <script>
+      (function () {
+        var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
+        var active = 0;
+        if (terms.length > 1) {
+          window.setInterval(function () {
+            terms[active].classList.remove("is-active");
+            active = (active + 1) % terms.length;
+            terms[active].classList.add("is-active");
+          }, 2100);
+        }
+
+        var canvas = document.getElementById("corner-logo-sequence");
+        var wrap = document.getElementById("corner-logo-sequence-wrap");
+        if (canvas && wrap) {
+          var ctx = canvas.getContext("2d");
+          var frames = [];
+          var loaded = 0;
+          var framesReady = false;
+          var arrivalReady = document.body.classList.contains("has-hero-arrived");
+          var sequenceStarted = false;
+          var first = 7;
+          var last = 28;
+          function draw(img) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          }
+          function play() {
+            if (sequenceStarted) return;
+            sequenceStarted = true;
+            var index = frames.length - 1;
+            var lastTick = 0;
+            function tick(time) {
+              if (!lastTick || time - lastTick >= 46) {
+                draw(frames[index]);
+                index -= 1;
+                lastTick = time;
+              }
+              if (index >= 0) requestAnimationFrame(tick);
+              else wrap.classList.add("is-settled");
+            }
+            requestAnimationFrame(tick);
+          }
+          function maybePlay() {
+            if (framesReady && arrivalReady) play();
+          }
+          document.addEventListener("bullfinch:heroarrival", function () {
+            arrivalReady = true;
+            maybePlay();
+          });
+          for (var n = first; n <= last; n++) {
+            (function (frameNumber) {
+              var img = new Image();
+              var slot = frameNumber - first;
+              img.onload = function () {
+                frames[slot] = img;
+                loaded += 1;
+                if (loaded === last - first + 1) {
+                  framesReady = true;
+                  maybePlay();
+                }
+              };
+              img.src = "logo-seq/Logo_To_Ball_" + String(frameNumber).padStart(5, "0") + ".png";
+            })(n);
+          }
+        }
+
+        window.addEventListener("load", function () {
+          if (window.ScrollTrigger) {
+            var forestArrival = 0;
+            var forestScroll = 0;
+            var heroArrivalStarted = false;
+            var heroTextReleased = false;
+            function paintForestEdge() {
+              var settled = window.innerWidth * 0.45;
+              var fullForest = -window.innerHeight - 2;
+              var arrivalEdge = fullForest + (settled - fullForest) * forestArrival;
+              var edgeTop = arrivalEdge + forestScroll * (window.innerWidth - settled);
+              document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");
+            }
+            function startHeroArrival() {
+              if (heroArrivalStarted) return;
+              heroArrivalStarted = true;
+              var started = performance.now();
+              var duration = 1500;
+              function arrive(now) {
+                var raw = Math.min(1, (now - started) / duration);
+                forestArrival = raw * raw * (3 - 2 * raw);
+                if (raw >= .52 && !heroTextReleased) {
+                  heroTextReleased = true;
+                  document.body.classList.add("has-hero-arrived");
+                  document.dispatchEvent(new CustomEvent("bullfinch:heroarrival"));
+                }
+                paintForestEdge();
+                if (raw < 1) requestAnimationFrame(arrive);
+              }
+              requestAnimationFrame(arrive);
+            }
+            paintForestEdge();
+            window.setTimeout(startHeroArrival, 120);
+            // Forest is a HERO (00) element. It wipes OFF as you scroll 00 -> 01
+            // (forestScroll 0 -> 1 = covering right-half -> gone), driven by the
+            // HERO PIN's progress in swot-claude so it moves in LOCKSTEP with the
+            // hero words erasing and the motes rising into the grid. By section
+            // 01 forestScroll is 1 (gone) so 01 sits on clean beige.
+            window.__bfSetForestWipe = function (v) {
+              forestScroll = v < 0 ? 0 : (v > 1 ? 1 : v);
+              paintForestEdge();
+            };
+            var root = document.documentElement;
+            var grade = {
+              bg: ["#e7dfc4", "#11271b"],
+              elevated: ["#d8d5ab", "#183424"],
+              ink: ["#16251b", "#f4efd9"],
+              soft: ["#425748", "#d2d8c5"],
+              quiet: ["#607164", "#a8b7a8"],
+              rule: ["rgba(22,37,27,.18)", "rgba(244,239,217,.2)"]
+            };
+            function setFinalGrade(p) {
+              p = p < 0 ? 0 : (p > 1 ? 1 : p);
+              root.style.setProperty("--bg", gsap.utils.interpolate(grade.bg[0], grade.bg[1], p));
+              root.style.setProperty("--bg-elev", gsap.utils.interpolate(grade.elevated[0], grade.elevated[1], p));
+              root.style.setProperty("--ink", gsap.utils.interpolate(grade.ink[0], grade.ink[1], p));
+              root.style.setProperty("--ink-soft", gsap.utils.interpolate(grade.soft[0], grade.soft[1], p));
+              root.style.setProperty("--ink-quiet", gsap.utils.interpolate(grade.quiet[0], grade.quiet[1], p));
+              root.style.setProperty("--rule", gsap.utils.interpolate(grade.rule[0], grade.rule[1], p));
+              if (window.bullfinchCanopy && window.bullfinchCanopy.setFinalPaletteProgress) {
+                window.bullfinchCanopy.setFinalPaletteProgress(p);
+              }
+            }
+            ScrollTrigger.create({
+              trigger: "#closing",
+              start: "top 85%",
+              end: "top 55%",
+              scrub: true,
+              onUpdate: function (self) { setFinalGrade(self.progress); },
+              onRefresh: function (self) { setFinalGrade(self.progress || 0); }
+            });
+
+            // Closing is the ONE element allowed to SLIDE IN (Piet's explicit
+            // carve-out — everything else on the page uses capture-style
+            // write-on). Its logo, headline lines and actions each settle up
+            // from below on a staggered band. NO fade: always fully opaque.
+            var closeReduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            var closeEls = [
+              { el: document.querySelector(".closing__logo"),          band: [0.00, 0.46] },
+              { el: document.querySelector(".closing__line--1"),       band: [0.12, 0.60] },
+              { el: document.querySelector(".closing__line--2"),       band: [0.22, 0.70] },
+              { el: document.querySelector(".closing__actions"),       band: [0.38, 0.92] }
+            ].filter(function (c) { return c.el; });
+            if (!closeReduced && closeEls.length) {
+              closeEls.forEach(function (c) {
+                c.el.style.transform = "translateY(26px)";
+                c.el.style.willChange = "transform";
+              });
+              function revealClosing(p) {
+                p = p < 0 ? 0 : (p > 1 ? 1 : p);
+                closeEls.forEach(function (c) {
+                  var a = c.band[0], b = c.band[1];
+                  var t = (p - a) / (b - a);
+                  t = t < 0 ? 0 : (t > 1 ? 1 : t);
+                  var e = t * t * (3 - 2 * t);      // smoothstep — SLIDE into place
+                  c.el.style.transform = "translateY(" + (26 * (1 - e)).toFixed(2) + "px)";
+                });
+              }
+              ScrollTrigger.create({
+                trigger: "#closing",
+                start: "top 82%",
+                end: "top 34%",
+                scrub: true,
+                onUpdate: function (self) { revealClosing(self.progress); },
+                onRefresh: function (self) { revealClosing(self.progress || 0); }
+              });
+            }
+          }
+        });
+      })();
+    </script>
+    <script>
+      // One continuous field: low motes, bottom-up grove, then final field.
+      window.addEventListener("load", function () {
+        if (!(window.ScrollTrigger && window.bullfinchCanopy && window.bullfinchCanopy.setTreeProgress)) return;
+        var s01 = document.getElementById("problem");
+        var s02 = document.getElementById("product");
+        var s03 = document.getElementById("opportunity");
+        var closing = document.getElementById("closing");
+        if (!s03 || !closing) return;
+
+        function smootherstep(x) {
+          x = x < 0 ? 0 : (x > 1 ? 1 : x);
+          return x * x * x * (x * (x * 6 - 15) + 10);
+        }
+        // The PIN ScrollTrigger swot.js created for a panel (skip our own
+        // non-pinning triggers on the same element).
+        function pinFor(el) {
+          var all = ScrollTrigger.getAll();
+          for (var i = 0; i < all.length; i++) {
+            if (all[i].trigger === el && all[i].pin) return all[i];
+          }
+          return null;
+        }
+        function at(pt, f) { return pt.start + (pt.end - pt.start) * f; }
+        function setStatStage(p) {
+          if (window.bullfinchCanopy.setStatProgress) window.bullfinchCanopy.setStatProgress(p);
+          document.documentElement.style.setProperty("--stat-crisp-offset", (p * .84).toFixed(4));
+          document.body.classList.toggle("is-stat-stage", p > 0.04);
+        }
+
+        var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
+        if (!p1 || !p2 || !p3) return;
+        // The hero (00) pin — the mote assembly is anchored to its START so the
+        // motes begin rising into the grid on the FIRST scroll pixel out of 00,
+        // continuously, rather than sitting grounded through the whole 00->01
+        // gap and then swooping up late (Piet's shots 1-2: empty page, motes
+        // unmoved, then everything fires backwards).
+        var heroPin = pinFor(document.querySelector(".hero"));
+        var treeDataLines = Array.prototype.slice.call(s03.querySelectorAll(".tree-readout span"));
+        // Pre-parse the numeric readouts (Confidence / Genus Score / Count) so
+        // they can COUNT UP in place as each tree forms — the data reads as if
+        // it's being generated live, not printed. Prefix + target + precision
+        // are captured once; textContent is rewritten each frame.
+        treeDataLines.forEach(function (line) {
+          if (!line.classList.contains("tree-readout__metric")) return;
+          var m = line.textContent.match(/^(.*?)([\d.]+)\s*$/);
+          if (!m) return;
+          line.dataset.prefix = m[1];
+          line.dataset.target = m[2];
+          line.dataset.decimals = m[2].indexOf(".") >= 0
+            ? String(m[2].length - m[2].indexOf(".") - 1)
+            : "0";
+        });
+        function writeTreeData(p) {
+          treeDataLines.forEach(function (line, index) {
+            var lineIndex = index % 5;
+            // Data populates only once the trees are ASSEMBLED: writes run
+            // over the last stretch of formation (0.80 -> 1.0), never while
+            // the grove is still gathering.
+            var start = .80 + lineIndex * .03;
+            var write = (p - start) / .08;
+            write = write < 0 ? 0 : (write > 1 ? 1 : write);
+            line.style.setProperty("--write", write.toFixed(4));
+            if (line.dataset.target !== undefined) {
+              var val = parseFloat(line.dataset.target) * write;
+              line.textContent = line.dataset.prefix + val.toFixed(parseInt(line.dataset.decimals, 10));
+            }
+          });
+        }
+
+        // Two rising overlay headlines. Each rides from just below the viewport
+        // (bottom) up and off the top across a scroll band, then stays gone.
+        //
+        // NO FADE (Piet): they never ghost in or out. The travel is built so the
+        // block is entirely BELOW the fold at p=0 and entirely ABOVE it at p=1,
+        // so the band edges do the hiding, not opacity.
+        //
+        // BANDS — each headline rides one of the EMPTY free-scroll gaps between
+        // pins, so it never shares the screen with choreographed text or
+        // graphics; only the background motes are moving under it:
+        //   A: hero UNPINS -> 01 PINS. Hero copy is fully erased (by 0.86 of the
+        //      hero pin) and the forest diagonal has finished; the 01 copy is
+        //      still hidden (panels write on only inside their own pin). The
+        //      motes rising into the <1% grid are the only motion.
+        //   B: 02 UNPINS -> 03 PINS. The 02 copy has un-written and the case
+        //      graphic has faded out (both complete at 1.0 of the 02 pin); the
+        //      03 copy + tree data don't start until 0.03 of the 03 pin. The
+        //      motes gathering into the grove are the only motion.
+        (function () {
+          function drive(el, p) {
+            if (!el) return;
+            // +58vh (clear below the fold) -> -70vh (clear above the top).
+            el.style.setProperty("--rise-y", (58 - p * 128).toFixed(2) + "vh");
+          }
+          // A zero-length band would make the scrub degenerate; keep a floor in
+          // case a layout ever collapses the gap between two pins.
+          function bandEnd(start, end) { return end > start + 40 ? end : start + 40; }
+          // Each bar WIPES the background from one journey stop to the next
+          // (ramp in scene-claude-teaser.js): A -> 1, C -> 2, B -> 3, and the
+          // grove itself -> 4. Not a crossfade: the bar's top edge is a hard
+          // boundary, new colour behind it (below), old colour ahead of it
+          // (above), so the colour arrives with the bar and nowhere else.
+          function journey(stop, el, p) {
+            var c = window.bullfinchCanopy;
+            if (!c) return;
+            if (p <= 0) { if (c.setJourneyProgress) c.setJourneyProgress(stop - 1); return; }
+            if (p >= 1) { if (c.setJourneyProgress) c.setJourneyProgress(stop); return; }
+            // Stop 4 has no bar to wipe with — the grove carries it, so that
+            // one eases instead.
+            if (!c.setJourneyWipe || !el) {
+              if (c.setJourneyProgress) c.setJourneyProgress(stop - 1 + p);
+              return;
+            }
+            // Screen fraction of the bar's TOP edge, 0 bottom -> 1 top.
+            var h = window.innerHeight || 1;
+            c.setJourneyWipe(stop, 1 - el.getBoundingClientRect().top / h);
+          }
+          var riseA = document.getElementById("rise-a");
+          var riseB = document.getElementById("rise-b");
+          var riseC = document.getElementById("rise-c");
+          drive(riseA, 0); drive(riseB, 0); drive(riseC, 0);
+          ScrollTrigger.create({
+            trigger: document.body,
+            // Widened both ways (Piet): in a touch before the hero unpins (its
+            // copy is erased by 0.86) and out a touch after 01 pins.
+            start: function () { return heroPin ? at(heroPin, 0.90) : p1.start; },
+            end: function () { return bandEnd(heroPin ? at(heroPin, 0.90) : p1.start, at(p1, 0.08)); },
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) { drive(riseA, self.progress); journey(1, riseA, self.progress); },
+            onLeaveBack: function () { drive(riseA, 0); journey(1, riseA, 0); },
+            onLeave: function () { drive(riseA, 1); journey(1, riseA, 1); },
+          });
+          // C: 01 releasing -> the open field before 02 pins. Starts as the 01
+          // copy is already un-writing (0.80 -> 1.0), so the block only clears
+          // the bottom of the screen once that copy is essentially gone, and it
+          // is off the top by the time 02 pins and writes on.
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return at(p1, 0.86); },
+            end: function () { return bandEnd(at(p1, 0.86), p2.start); },
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) { drive(riseC, self.progress); journey(2, riseC, self.progress); },
+            onLeaveBack: function () { drive(riseC, 0); journey(2, riseC, 0); },
+            onLeave: function () { drive(riseC, 1); journey(2, riseC, 1); },
+          });
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return p2.end; },
+            end: function () { return bandEnd(p2.end, p3.start); },
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) { drive(riseB, self.progress); journey(3, riseB, self.progress); },
+            onLeaveBack: function () { drive(riseB, 0); journey(3, riseB, 0); },
+            onLeave: function () { drive(riseB, 1); journey(3, riseB, 1); },
+          });
+          // The half-green stage. The nav is fixed and outside #product, so it
+          // cannot inherit that section's darkened ink vars — this carries the
+          // 01-04 links, the hover label, the fullscreen toggle and Instagram
+          // in one move, the same way is-tree-stage does for 03. Window runs
+          // from bar C committing stop 2 through to the 03 pin, where
+          // is-tree-stage takes over, so the two never overlap.
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return at(p1, 0.93); },
+            end: function () { return p3.start; },
+            invalidateOnRefresh: true,
+            onToggle: function (self) {
+              document.body.classList.toggle("is-midramp-stage", self.isActive);
+            },
+          });
+
+          // ---- Reveal media (DEV) ----------------------------------------
+          // Wires every [data-reveal-media] on the page to its section's pin
+          // and scrubs --reveal-p from 0 to 1 across the window named in its
+          // data-reveal-from/to. Adding another photograph is markup only.
+          var revealPins = { "1": p1, "2": p2, "3": p3 };
+          Array.prototype.forEach.call(
+            document.querySelectorAll("[data-reveal-media]"),
+            function (el) {
+              var pin = revealPins[el.getAttribute("data-reveal-media")];
+              if (!pin) return;
+              var from = parseFloat(el.getAttribute("data-reveal-from")) || 0.05;
+              var to = parseFloat(el.getAttribute("data-reveal-to")) || 0.45;
+              ScrollTrigger.create({
+                trigger: document.body,
+                start: function () { return at(pin, from); },
+                end: function () { return at(pin, to); },
+                scrub: true,
+                invalidateOnRefresh: true,
+                onUpdate: function (self) {
+                  el.style.setProperty("--reveal-p", self.progress.toFixed(4));
+                },
+              });
+            }
+          );
+          // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
+          // trees are standing, the ramp walks from the green halfway to the
+          // closing night palette, which then takes over on its own trigger.
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return p3.start; },
+            end: function () { return at(p3, 0.30); },
+            scrub: true,
+            invalidateOnRefresh: true,
+            onUpdate: function (self) { journey(4, null, self.progress); },
+            onLeaveBack: function () { journey(4, null, 0); },
+            onLeave: function () { journey(4, null, 1); },
+          });
+        })();
+
+        // Opening forest-floor motes resolve into the <1% grid. Piet: start
+        // populating the MOMENT the hero begins to leave — the assembly runs
+        // from the first scroll pixel all the way to 01's pin, so it reads
+        // slow and deliberate instead of a last-second swoop. The same
+        // trigger reverses the grid back into the ground.
+        // R2: the grid assembly (motes rising to form the <1% grid) runs on the
+        // #problem pin's ENTRY band [0 -> 0.30], the SAME window the 01 copy
+        // (swot WRITE_ORDER) and the TODAY readout (stat-field-gpt, fades in
+        // 0.06->0.26) populate. So arriving at 01, the motes rise INTO the grid
+        // exactly as the text writes on — grid and text together, no grid-alone
+        // moment. The seed already sits at grid centre; the dots assemble around
+        // it. (The forest diagonal + hero words are the 00->01 leave, on the
+        // hero pin.)
+        ScrollTrigger.create({
+          trigger: document.body,
+          // Start on the first pixel OUT of the hero (00), not at 01's pin, so
+          // the motes rise continuously across the whole 00->01 leave and are
+          // fully assembled just as the 01 copy finishes writing on — one
+          // continuous stage, no grounded dead-gap, no last-second swoop.
+          start: function () { return heroPin ? heroPin.start : p1.start; },
+          end: function () { return at(p1, 0.30); },
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { setStatStage(self.progress); },
+          onLeaveBack: function () { setStatStage(0); },
+        });
+
+        // Leaving the inventory section releases the grid into an open cloud.
+        // The ENTIRE release completes inside 01's pin (the panel un-write
+        // starts at 0.88, so the motes spread exactly as the copy leaves) —
+        // running past the unpin made the DOM grid anchor ride up the page
+        // while the motes chased their 02 stations downward.
+        // Piet: ONE slow spread — it starts as the 01 copy starts leaving and
+        // finishes exactly as we REACH 02. Never a fast split then a dead sit.
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return at(p1, 0.80); },
+          // Finish the spread when 02 is actually REACHED (its pin start), not at
+          // 01's unpin. Ending at p1.end left the motes fully spread a whole
+          // viewport early, then sitting dead while #product free-scrolled up to
+          // its pin (Piet: "a long in between till the png seq arrives"). Running
+          // to p2.start keeps the spread moving continuously right into 02.
+          end: function () { return p2.start; },
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) {
+            // R1: ONE scrub over ONE range ([0.80, 1.0] of the 01 pin) runs the
+            // 01->02 handoff SIMULTANEOUSLY — grid releases into the 02 cloud and
+            // the seed fades out in place (R5) — in lockstep with the 01 copy
+            // un-write (swot uses the same [0.80,1.0] band and smoothstep below).
+            var p = self.progress; p = p * p * (3 - 2 * p);   // smoothstep, matches swot leave
+            setStatStage(1 - p);
+            if (window.bullfinchCanopy.setOpenFieldProgress) window.bullfinchCanopy.setOpenFieldProgress(p);
+            if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1 - p);   // R5: seed gone by 02
+          },
+          onLeaveBack: function () {
+            // Scrolled back above the transition: seed visible again for 01.
+            if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1);
+          },
+        });
+
+        // One controller owns the entire grove story. It forms the trees before
+        // section 03, holds them at full strength through its reading window,
+        // then reverses them into the final starfield. No second trigger can
+        // overwrite the tree state.
+        ScrollTrigger.create({
+          trigger: document.body,
+          start: function () { return at(p2, 0.58); },
+          endTrigger: closing,
+          end: "top 44%",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) {
+            var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            var formStart = at(p2, 0.58);
+            var formEnd = at(p3, 0.08);
+            var disperseStart = at(p3, 0.76);
+            var disperseEnd = self.end;
+            var treeP;
+            var fieldP;
+            if (y <= formEnd) {
+              treeP = smootherstep((y - formStart) / Math.max(1, formEnd - formStart));
+              fieldP = 0;
+            } else if (y < disperseStart) {
+              treeP = 1;
+              fieldP = 0;
+            } else {
+              fieldP = smootherstep((y - disperseStart) / Math.max(1, disperseEnd - disperseStart));
+              treeP = 1 - fieldP;
+            }
+            window.bullfinchCanopy.setTreeProgress(treeP);
+            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(fieldP);
+            document.documentElement.style.setProperty("--tree-crisp-offset", (treeP * .84).toFixed(4));
+            // Tree DATA (species names + counting metrics) writes on the
+            // #opportunity PIN, on-screen, over [0.03, 0.22] and un-writes on
+            // leave [0.80, 1.0] — so it counts up in a readable window and lands
+            // IN LOCKSTEP with the lower panel (audience cells + partner logos,
+            // swot-claude.js), instead of finishing off-screen during the
+            // free-scroll gap before 03 arrives. Tree FORMATION stays on treeP.
+            var pinP3 = (p3.end > p3.start) ? (y - p3.start) / (p3.end - p3.start) : 0;
+            var dataReveal = smootherstep((pinP3 - 0.03) / 0.19);
+            var dataLeave = smootherstep((pinP3 - 0.80) / 0.20);
+            var dataProg = dataReveal * (1 - dataLeave);
+            writeTreeData(0.80 + dataProg * 0.20);
+            document.body.classList.toggle("is-tree-stage", treeP > 0.05);
+          },
+          onLeaveBack: function () {
+            window.bullfinchCanopy.setTreeProgress(0);
+            if (window.bullfinchCanopy.setFinalFieldProgress) window.bullfinchCanopy.setFinalFieldProgress(0);
+            writeTreeData(0);
+            document.documentElement.style.setProperty("--tree-crisp-offset", "0");
+            document.body.classList.remove("is-tree-stage");
+          },
+        });
+        ScrollTrigger.refresh();
+      });
+    </script>
+    <script>
+      // Section marks: build the SVG for each .section-mark, then drive its
+      // assemble/disassemble with scroll position. One mark per section (the
+      // hero and the closing section deliberately have none).
+      (function () {
+        "use strict";
+        function f(n) { return Math.round(n * 100) / 100; }
+        function sailPath(x, y, w, h) {
+          return "M" + f(x) + "," + f(y + 0.4427 * h) +
+                 " C" + f(x) + "," + f(y + 0.1412 * h) + " " + f(x + 0.595 * w) + "," + f(y) + " " + f(x + w) + "," + f(y) +
+                 " L" + f(x + w) + "," + f(y + h) + " L" + f(x) + "," + f(y + h) + " Z";
+        }
+        function shapeEl(s) {
+          var cls = s.k === "r" ? "rfill red" : "mw";
+          if (s.t === "c") return '<circle class="' + cls + '" cx="' + s.cx + '" cy="' + s.cy + '" r="' + s.r + '"/>';
+          if (s.t === "q") return '<rect class="' + cls + '" x="' + f(s.x) + '" y="' + f(s.y) + '" width="' + f(s.w) + '" height="' + f(s.h) + '" rx="' + (s.rx != null ? s.rx : 2.5) + '" ry="' + (s.rx != null ? s.rx : 2.5) + '"/>';
+          return '<path class="' + cls + '" d="' + sailPath(s.x, s.y, s.w, s.h) + '"/>';
+        }
+        function ctr(s) { return s.t === "c" ? [s.cx, s.cy] : [s.x + s.w / 2, s.y + s.h / 2]; }
+
+        var SRC = {
+          people: function () { return [
+            { t: "c", cx: 40.22, cy: 40.76, r: 8.35, k: "w", o: 0 },
+            { t: "c", cx: 47.22, cy: 59.24, r: 8.35, k: "w", o: 1 },
+            { t: "c", cx: 59.78, cy: 43.93, r: 8.35, k: "r", o: 2 }]; },
+          nature: function () { return [
+            { t: "s", x: 24.518, y: 34.74, w: 18.41, h: 30.521, k: "w", o: 0 },
+            { t: "s", x: 46.77, y: 41.152, w: 14.542, h: 24.182, k: "r", o: 1 },
+            { t: "s", x: 65.155, y: 48.14, w: 10.327, h: 17.121, k: "w", o: 2 }]; },
+          tech: function () { return [
+            { t: "q", x: 25.158, y: 30.174, w: 14, h: 15, rx: 1.453, k: "w", o: 0 },
+            { t: "q", x: 43.0, y: 45.174, w: 14, h: 24.651, rx: 1.453, k: "w", o: 1 },
+            { t: "q", x: 60.842, y: 36.948, w: 14, h: 32.878, rx: 1.453, k: "r", o: 2 }]; }
+        };
+        var SIG = {
+          people: { type: "move", dir: "radial" },
+          nature: { type: "grow", origin: "bottom center" },
+          tech: { type: "rot", origin: "center", angle: "auto" }
+        };
+        function animShape(cat, s) {
+          // every shape rides --build directly → all dots stay in sync
+          var inner = shapeEl(s), p = "var(--build,1)", m = SIG[cat];
+          if (m.type === "move") {
+            var c = ctr(s), dx = c[0] - s._cx, dy = c[1] - s._cy, mag = Math.hypot(dx, dy);
+            if (mag < 5) { dx = 0; dy = -1; mag = 1; }
+            return '<g class="fade" style="--p:' + p + '"><g class="a-move" style="--ox:' + f(dx / mag * 22) + "px;--oy:" + f(dy / mag * 22) + "px;--p:" + p + '">' + inner + "</g></g>";
+          }
+          if (m.type === "grow") {
+            return '<g class="a-grow" style="transform-origin:' + m.origin + ";--p:" + p + '">' + inner + "</g>";
+          }
+          var ang = (m.angle === "auto") ? (s.o % 2 ? 90 : -90) : m.angle;
+          return '<g class="fade" style="--p:' + p + '"><g class="a-rot" style="transform-origin:' + m.origin + ";--rot:" + ang + "deg;--p:" + p + '">' + inner + "</g></g>";
+        }
+        function mark(cat) {
+          var shapes = SRC[cat]();
+          var cx = 0, cy = 0;
+          shapes.forEach(function (s) { var c = ctr(s); cx += c[0]; cy += c[1]; });
+          cx /= shapes.length; cy /= shapes.length;
+          shapes.forEach(function (s) { s._cx = cx; s._cy = cy; });
+
+          // nature: all three fronds wipe bottom-to-top in a slight cascade
+          if (cat === "nature") {
+            var nwin = { 0: [0, 0.5], 1: [0.2, 0.55], 2: [0.4, 0.6] };
+            var nhtml = shapes.map(function (s) {
+              var w = nwin[s.o];
+              var rp = "clamp(0,calc((var(--rev,1) - " + w[0] + ") / " + w[1] + "),1)";
+              return '<g class="n-reveal" style="--rp:' + rp + '">' + shapeEl(s) + "</g>";
+            }).join("");
+            return '<svg viewBox="0 0 100 100" aria-hidden="true">' + nhtml + "</svg>";
+          }
+
+          // tech: top-left square rotates in, middle slides in from left, red wipes up
+          if (cat === "tech") {
+            var thtml = shapes.map(function (s) {
+              if (s.o === 0) {
+                var pr = "clamp(0,calc(var(--rev,1) / 0.5),1)";
+                return '<g class="fade" style="--p:' + pr + '"><g class="a-rot" style="transform-origin:center;--rot:-90deg;--p:' + pr + '">' + shapeEl(s) + "</g></g>";
+              }
+              if (s.o === 1) {
+                var sp = "clamp(0,calc((var(--rev,1) - 0.42) / 0.33),1)";
+                return '<g class="n-slide fade" style="--sx:-26px;--sp:' + sp + ";--p:" + sp + '">' + shapeEl(s) + "</g>";
+              }
+              var rp = "clamp(0,calc((var(--rev,1) - 0.6) / 0.4),1)";
+              return '<g class="n-reveal" style="--rp:' + rp + '">' + shapeEl(s) + "</g>";
+            }).join("");
+            return '<svg viewBox="0 0 100 100" aria-hidden="true">' + thtml + "</svg>";
+          }
+
+          // people: spin the whole cluster around its centroid as it gathers
+          var inner = shapes.map(function (s) { return animShape(cat, s); }).join("");
+          if (cat === "people") {
+            inner = '<g class="grp-spin" style="transform-origin:' + f(cx) + "px " + f(cy) + 'px">' + inner + "</g>";
+          }
+          return '<svg viewBox="0 0 100 100" aria-hidden="true">' + inner + "</svg>";
+        }
+
+        var marks = Array.prototype.slice.call(document.querySelectorAll(".section-mark"));
+        if (!marks.length) return;
+        marks.forEach(function (el) {
+          var cat = el.getAttribute("data-mark");
+          if (SRC[cat]) el.innerHTML = mark(cat);
+        });
+
+        // On mobile the mark leaves the eyebrow and parks in the panel's
+        // bottom-right corner. It has to move out of the eyebrow in the DOM
+        // because the eyebrow carries a scroll transform, which would otherwise
+        // trap the mark's positioning context inside the label.
+        var isMobile = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        if (isMobile) {
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel");
+            if (!panel) return;
+            // Anchor to the PANEL (always exactly one viewport tall with the
+            // same padding), not .panel__inner — on media panels the inner
+            // column stops short of the bottom, which would raise the mark.
+            el.classList.add("section-mark--corner");
+            panel.appendChild(el);
+          });
+        }
+
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced) {
+          marks.forEach(function (el) {
+            el.style.setProperty("--build", "1");
+            el.style.setProperty("--rev", "1");
+            el.style.setProperty("--pang", "-12deg");
+          });
+          return;
+        }
+
+        // Drive the original mark geometry directly from scroll. The second
+        // half is the exact inverse of the first, so every piece animates out
+        // instead of being carried away assembled with its panel.
+        function markState(p) {
+          var x;
+          if (p < 0.34) x = p / 0.34;
+          else if (p < 0.62) x = 1;
+          else x = 1 - (p - 0.62) / 0.32;
+          x = clamp01(x);
+          return x * x * (3 - 2 * x);
+        }
+        function applyMarkAmount(el, x) {
+          el.style.setProperty("--build", x.toFixed(4));
+          el.style.setProperty("--rev", x.toFixed(4));
+          el.style.setProperty("--glow", (x * .95).toFixed(4));
+          el.style.setProperty("--pang", (360 - 372 * x).toFixed(2) + "deg");
+        }
+        function applyMarkState(el, p) { applyMarkAmount(el, markState(p)); }
+
+        if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
+          // Mirror swot.js's panel pin range so progress lines up with the pin.
+          var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+          marks.forEach(function (el) {
+            var panel = el.closest(".panel");
+            if (!panel) return;
+            var scrub = function (p) {
+              applyMarkState(el, clamp01(p));
+            };
+            ScrollTrigger.create({
+              trigger: panel,
+              start: "top top",
+              // Match each panel's actual pin length so the mark reaches the
+              // reverse half before the panel releases.
+              end: panel.id === "proof"
+                ? (mobileLike ? "+=220%" : "+=380%")
+                : (mobileLike ? "+=100%" : "+=150%"),
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: function (self) { scrub(self.progress); },
+              onRefresh: function (self) { scrub(self.progress || 0); }
+            });
+            scrub(0);
+          });
+        } else {
+          // Fallback (no GSAP / pins): drive from viewport position — centre of
+          // the screen = assembled (currentTime d), edges = disassembled (0).
+          var loop = function () {
+            var vh = window.innerHeight || document.documentElement.clientHeight;
+            marks.forEach(function (el) {
+              var r = el.getBoundingClientRect();
+              var c = r.top + r.height / 2;
+              var m = clamp01(1 - Math.abs((c - vh / 2) / vh) / 0.42);
+              applyMarkAmount(el, m);
+            });
+            requestAnimationFrame(loop);
+          };
+          requestAnimationFrame(loop);
+        }
+      })();
+    </script>
+    <script>
+      // The teaser has no splash element, so fullscreen must not be trapped
+      // inside the legacy splash initializer.
+      (function () {
+        var toggle = document.getElementById("fullscreen-toggle");
+        if (!toggle) return;
+        function active() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        }
+        function sync() {
+          var on = Boolean(active());
+          document.body.classList.toggle("is-fullscreen", on);
+          toggle.setAttribute("aria-label", on ? "Exit full screen" : "Enter full screen");
+          toggle.setAttribute("aria-pressed", on ? "true" : "false");
+        }
+        toggle.addEventListener("click", function () {
+          if (active()) {
+            var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+            if (exit) exit.call(document);
+          } else {
+            var request = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen || document.documentElement.msRequestFullscreen;
+            if (request) request.call(document.documentElement);
+          }
+        });
+        ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (name) {
+          document.addEventListener(name, sync);
+        });
+        sync();
+      })();
+    </script>
+    <script>
+      // Market bullseye (section 05): FULLY SCROLL-DRIVEN, in two phases. Phase
+      // 1: a growing clip reveals the complete faint circles outward from the
+      // centre. Phase 2 (only once the circles are whole): a second clip grows
+      // with STICKY HOLDS so the red fills the chart region by region, dwelling
+      // on each completed market so none slips past. One label + one leader sit
+      // on a FIXED spot per region (they don't chase the growing edge). The TAM
+      // is the stickiest hold; then the whole bullseye SHRINKS back in as you
+      // scroll away (an animation, not a passive scroll-off), and scrolling back
+      // up reverses it. Safe by default: no motion / no GSAP leaves the chart
+      // static and complete, red on the TAM.
+      (function () {
+        var svg = document.querySelector("#proof .bullseye");
+        var panel = document.getElementById("proof");
+        if (!svg || !panel) return;
+        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced || typeof ScrollTrigger === "undefined" || typeof gsap === "undefined") return;
+
+        var clipS = svg.querySelector("#be-clip-s-c");
+        var clipR = svg.querySelector("#be-clip-r-c");
+        var sweep = svg.querySelector(".be-sweep");
+        var leader = svg.querySelector(".be-leader");
+        var cap = svg.querySelector(".be-cap");
+        var capName = svg.querySelector(".be-cap-name");
+        var capVal = svg.querySelector(".be-cap-val");
+        var bcap = document.querySelector("#proof .bullseye-cap");
+        if (!clipS || !clipR || !sweep || !leader || !cap) return;
+
+        var CX = 180, CY = 190;
+        // Each region: the red band that fills it (mid-radius + thickness), its
+        // outer boundary, and the label shown while it is being filled. The
+        // leader parks at the top of the band (fixed per region).
+        var REGIONS = [
+          { band: { r: 13,   w: 26 }, outer: 26,  name: "BEACHHEAD", num: 188,  dec: 0, suf: "M" },
+          { band: { r: 44.5, w: 37 }, outer: 63,  name: "SOM",       num: 1.05, dec: 2, suf: "B" },
+          { band: { r: 81.5, w: 37 }, outer: 100, name: "SAM",       num: 2.7,  dec: 1, suf: "B" },
+          { band: { r: 125,  w: 50 }, outer: 150, name: "TAM",       num: 6,    dec: 0, suf: "B" }
+        ];
+
+        // Phase 1 — the circles build (scaffold reveal radius), then hold full
+        // to the end (they only retract if you scroll back up).
+        var SKF = [
+          { p: 0.08, f: 0 }, { p: 0.20, f: 150 }, { p: 1.00, f: 150 }
+        ];
+        // Phase 2 — red reveal radius. The build runs in the FIRST part of the
+        // (long) pin; the TAM then fills and holds full across the entire back
+        // half, so the finished $6B sits there for a long stretch and is hard to
+        // scroll past. (Scrolling back up retracts everything.)
+        var RKF = [
+          { p: 0.22, f: 0 },
+          { p: 0.27, f: 26 },  { p: 0.33, f: 26 },   // beachhead fills, brief hold
+          { p: 0.37, f: 63 },  { p: 0.43, f: 63 },   // SOM, brief hold
+          { p: 0.47, f: 100 }, { p: 0.52, f: 100 },  // SAM, brief hold
+          { p: 0.56, f: 150 }, { p: 1.00, f: 150 }   // TAM fills (~0.56), then holds full to the end
+        ];
+        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+        function interp(KF, p) {
+          if (p <= KF[0].p) return KF[0].f;
+          for (var i = 0; i < KF.length - 1; i++) {
+            var a = KF[i], b = KF[i + 1];
+            if (p <= b.p) return a.f + (b.f - a.f) * ((p - a.p) / (b.p - a.p));
+          }
+          return KF[KF.length - 1].f;
+        }
+        function regionFor(f) {
+          if (f <= 0) return -1;
+          for (var i = 0; i < REGIONS.length; i++) if (f <= REGIONS[i].outer + 0.001) return i;
+          return REGIONS.length - 1;
+        }
+
+        var lastRegion = -2;
+        var countRAF = null;
+        function fmt(n, dec, suf) { return "$" + n.toFixed(dec) + suf; }
+        function countUp(target, dec, suf) {
+          // Tick the value up to its number when a region becomes active.
+          if (countRAF) cancelAnimationFrame(countRAF);
+          var dur = 700, start = null;
+          function step(ts) {
+            if (start === null) start = ts;
+            var t = Math.min(1, (ts - start) / dur);
+            var e = 1 - Math.pow(1 - t, 3);
+            if (capVal) capVal.textContent = fmt(target * e, dec, suf);
+            if (t < 1) { countRAF = requestAnimationFrame(step); }
+            else { countRAF = null; if (capVal) capVal.textContent = fmt(target, dec, suf); }
+          }
+          countRAF = requestAnimationFrame(step);
+        }
+        function setRegion(idx) {
+          if (idx < 0) return;
+          var r = REGIONS[idx];
+          sweep.setAttribute("r", r.band.r);
+          sweep.style.strokeWidth = r.band.w;
+          if (capName) capName.textContent = r.name;
+          countUp(r.num, r.dec, r.suf);     // value counts up to its number
+          // park the leader on a FIXED spot for this region (top of its band)
+          leader.setAttribute("x2", CX);
+          leader.setAttribute("y2", (CY - r.band.r).toFixed(2));
+          // re-trigger the "comes up" nudge as each region begins
+          cap.classList.remove("is-step");
+          void cap.getBoundingClientRect();
+          cap.classList.add("is-step");
+        }
+        function drive(p) {
+          var sBuilt = interp(SKF, p);
+          var rBuilt = interp(RKF, p);
+          var reg = regionFor(rBuilt);
+          if (reg !== lastRegion) {
+            if (reg >= 0) setRegion(reg);
+            lastRegion = reg;
+          }
+          // ANIMATED EXIT: over the last stretch the whole bullseye SHRINKS back
+          // in (the reverse of the build) as you scroll away — it never just
+          // scrolls off full. The label/region stay on the TAM while it
+          // collapses; scrolling back up grows it again.
+          var exitT = clamp01((p - 0.94) / 0.06);
+          var k = 1 - exitT;
+          clipS.setAttribute("r", (sBuilt * k).toFixed(2));
+          clipR.setAttribute("r", (rBuilt * k).toFixed(2));
+          var vis = clamp01((rBuilt - 1) / 10) * k; // label + line appear with the red, shrink out on exit
+          leader.style.opacity = (0.9 * vis).toFixed(3);
+          cap.style.opacity = vis.toFixed(3);
+          if (bcap) bcap.style.opacity = vis.toFixed(3); // the "$20K / area" caption rides the same fade (no persisting)
+        }
+
+        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+        ScrollTrigger.create({
+          trigger: panel,
+          start: "top top",
+          end: mobileLike ? "+=220%" : "+=380%", // MUST match #proof's pin length in swot.js
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: function (self) { drive(self.progress); },
+          onRefresh: function (self) { drive(self.progress || 0); }
+        });
+        drive(0);
+      })();
+    </script>
+    <script>
+      if (window.location.protocol === "file:") {
+        document.body.classList.add("is-file-protocol");
+      }
+    </script>
+    <script>
+      (function () {
+        function scrollToTarget(selector) {
+          var target = document.querySelector(selector);
+          if (!target) return;
+          var destination = target;
+          if (selector === "#page") {
+            destination = 0;
+          } else if (selector === "#closing") {
+            destination = target.offsetTop + window.innerHeight * 0.42;
+          } else if (target.classList && target.classList.contains("panel") && typeof ScrollTrigger !== "undefined") {
+            ScrollTrigger.refresh();
+            var panelTrigger = ScrollTrigger.getAll().find(function (trigger) {
+              return trigger.trigger === target && trigger.pin === target;
+            });
+            if (panelTrigger) {
+              destination = panelTrigger.start + (panelTrigger.end - panelTrigger.start) * 0.68;
+            } else {
+              destination = target.offsetTop + window.innerHeight * 1.36;
+            }
+          }
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(destination);
+          } else {
+            if (typeof destination === "number") {
+              window.scrollTo({ top: destination, behavior: "smooth" });
+            } else {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        }
+
+        function updateScrollIndicator() {
+          // One-way: once scrolled, stay revealed. The nav (and the fullscreen
+          // toggle inside it) is gated on has-scrolled, so removing it when
+          // scroll returns to the top (or a fullscreen toggle resets scroll)
+          // made the nav + toggle vanish. resetSplash clears it on restart.
+          if (window.scrollY > 8) document.body.classList.add("has-scrolled");
+        }
+
+        document.addEventListener("click", function (event) {
+          var restart = event.target.closest("[data-restart-splash]");
+          if (restart) {
+            event.preventDefault();
+            window.location.replace(window.location.pathname + window.location.search);
+            return;
+          }
+          var trigger = event.target.closest("[data-scroll-target]");
+          if (!trigger) return;
+          event.preventDefault();
+          scrollToTarget(trigger.getAttribute("data-scroll-target"));
+        });
+        window.addEventListener("scroll", updateScrollIndicator, { passive: true });
+        updateScrollIndicator();
+
+        var navLabel = document.getElementById("site-nav-hover-label");
+        var navItems = document.querySelectorAll("[data-nav-label]");
+        if (navLabel && navItems.length) {
+          navItems.forEach(function (item) {
+            function showLabel() {
+              navLabel.textContent = item.getAttribute("data-nav-label") || "";
+              navLabel.classList.add("is-visible");
+            }
+            function hideLabel() {
+              navLabel.classList.remove("is-visible");
+            }
+            item.addEventListener("mouseenter", showLabel);
+            item.addEventListener("focus", showLabel);
+            item.addEventListener("mouseleave", hideLabel);
+            item.addEventListener("blur", hideLabel);
+          });
+        }
+
+        // ---- Phone hamburger --------------------------------------------
+        // The sheet IS .site-nav__links (see the 720px block) — this only
+        // toggles a body class and dismisses. Navigation itself still runs
+        // through the delegated [data-scroll-target] listener above, so there
+        // is nothing here that can get out of step with it.
+        var navToggle = document.getElementById("nav-toggle");
+        var navSheet = document.getElementById("site-nav-links");
+        if (navToggle && navSheet) {
+          var setNavOpen = function (open) {
+            document.body.classList.toggle("is-nav-open", open);
+            navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+            navToggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+          };
+          navToggle.addEventListener("click", function () {
+            setNavOpen(!document.body.classList.contains("is-nav-open"));
+          });
+          // Anything actionable dismisses: the four section links, the
+          // fullscreen toggle and the Instagram mark.
+          navSheet.addEventListener("click", function (event) {
+            if (event.target.closest("[data-scroll-target], #fullscreen-toggle, .nav-social")) {
+              setNavOpen(false);
+            }
+          });
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") setNavOpen(false);
+          });
+          // A fixed overlay does NOT stop a touchmove from scrolling the
+          // document underneath on iOS, and body{overflow:hidden} is not an
+          // option here (it would re-measure every ScrollTrigger pin on the
+          // page). Swallow the gesture on the sheet instead.
+          navSheet.addEventListener("touchmove", function (event) {
+            if (document.body.classList.contains("is-nav-open")) event.preventDefault();
+          }, { passive: false });
+          // Rotating to landscape past 720px would otherwise strand the sheet
+          // open behind a desktop nav that has no visible way to close it.
+          var phoneWidth = window.matchMedia("(max-width: 720px)");
+          var onPhoneWidth = function (mql) { if (!mql.matches) setNavOpen(false); };
+          if (phoneWidth.addEventListener) phoneWidth.addEventListener("change", onPhoneWidth);
+          else if (phoneWidth.addListener) phoneWidth.addListener(onPhoneWidth);
+        }
+      })();
+    </script>
+    <script>
+      (function () {
+        var modal = document.getElementById("team-bio-modal");
+        var title = document.getElementById("team-bio-title");
+        var body = document.getElementById("team-bio-body");
+        var photo = document.getElementById("team-bio-photo");
+        if (!modal || !title || !body || !photo) return;
+
+        var bios = {
+          seth: {
+            title: "Seth Sternberg · CEO",
+            photo: "assets/seth-headshot.png",
+            body: "Seth brings 25+ years across wearables, AR/VR, IoT, AI, and sensor fusion, with more than 400M licensed products in market. He has worked as both product leader and software engineer, and holds a mathematics degree from the University of Maryland.",
+          },
+          graham: {
+            title: "Graham Smith · CCO",
+            photo: "assets/graham-headshot.png",
+            body: "Graham brings 10 years managing forestry and construction projects in ecologically sensitive British Columbia sites, plus five years as an account manager in finance. He anchors Bullfinch in field reality, customer relationships, and commercial translation.",
+          },
+          tim: {
+            title: "Tim Goodsall, PhD · CTO",
+            photo: "assets/tim-headshot_scaled.png",
+            body: "Tim is a PhD astrophysicist and hardware engineer with 15+ years in remote sensing and instrumentation, including NASA/JPL missions such as Mars 2020, InSight, Euclid, and OCO-3. He brings deep imaging, sensing, and field-hardened hardware experience.",
+          },
+        };
+        var lastTrigger = null;
+        var currentBioKey = null;
+        var bioOrder = ["seth", "tim", "graham"];
+
+        function openBio(key, trigger) {
+          var bio = bios[key];
+          if (!bio) return;
+          lastTrigger = trigger || document.activeElement;
+          currentBioKey = key;
+          title.textContent = bio.title;
+          body.textContent = bio.body;
+          photo.src = bio.photo;
+          photo.alt = bio.title;
+          modal.hidden = false;
+          document.body.classList.add("is-bio-open");
+          var closeButton = modal.querySelector("[data-bio-close]");
+          if (closeButton) closeButton.focus();
+        }
+
+        function closeBio() {
+          modal.hidden = true;
+          currentBioKey = null;
+          document.body.classList.remove("is-bio-open");
+          if (lastTrigger && typeof lastTrigger.focus === "function") {
+            lastTrigger.focus();
+          }
+        }
+
+        function moveBio(direction) {
+          if (!currentBioKey) return;
+          var currentIndex = bioOrder.indexOf(currentBioKey);
+          if (currentIndex === -1) return;
+          var nextIndex = (currentIndex + direction + bioOrder.length) % bioOrder.length;
+          openBio(bioOrder[nextIndex], lastTrigger);
+        }
+
+        document.addEventListener("click", function (event) {
+          var trigger = event.target.closest("[data-bio-person]");
+          if (trigger) {
+            event.preventDefault();
+            openBio(trigger.getAttribute("data-bio-person"), trigger);
+            return;
+          }
+          if (event.target.closest("[data-bio-close]")) {
+            event.preventDefault();
+            closeBio();
+          }
+        });
+
+        document.addEventListener("keydown", function (event) {
+          var trigger = event.target.closest && event.target.closest("[data-bio-person]");
+          if (trigger && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openBio(trigger.getAttribute("data-bio-person"), trigger);
+            return;
+          }
+          if (!modal.hidden) {
+            if (event.key === "Escape") {
+              closeBio();
+            } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+              event.preventDefault();
+              moveBio(1);
+            } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+              event.preventDefault();
+              moveBio(-1);
+            }
+          }
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        var splash = document.getElementById("splash");
+        var button = document.getElementById("splash-button");
+        var sequence = document.getElementById("splash-sequence");
+        var fullscreenToggle = document.getElementById("fullscreen-toggle");
+        if (!splash || !button || !sequence) return;
+        var sequenceCtx = sequence.getContext("2d");
+        if (!sequenceCtx) return;
+
+        // Center the splash logo against the VISUAL viewport (what's actually
+        // visible), not the layout viewport. Before fullscreen the visual
+        // viewport is smaller than the layout one in BOTH dimensions and
+        // anchored top-left, so CSS centering put the logo low AND right; once
+        // fullscreen they match and it looked centered. Pin the splash to the
+        // visual viewport's size + offset so it's centered in every state.
+        function sizeSplash() {
+          var vv = window.visualViewport;
+          if (vv) {
+            splash.style.width = vv.width + "px";
+            splash.style.height = vv.height + "px";
+            splash.style.left = vv.offsetLeft + "px";
+            splash.style.top = vv.offsetTop + "px";
+            splash.style.right = "auto";
+            splash.style.bottom = "auto";
+          } else {
+            splash.style.height = window.innerHeight + "px";
+          }
+        }
+        sizeSplash();
+        window.addEventListener("resize", sizeSplash);
+        window.addEventListener("orientationchange", sizeSplash);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", sizeSplash);
+          window.visualViewport.addEventListener("scroll", sizeSplash);
+        }
+
+        var frames = [];
+        var frameVersion = "v=3";
+        for (var i = 7; i <= 28; i++) {
+          frames.push("logo-seq/Logo_To_Ball_" + String(i).padStart(5, "0") + ".png?" + frameVersion);
+        }
+        var loadedFrames = frames.map(function (src) {
+          var img = new Image();
+          img.decoding = "async";
+          img.src = src;
+          return img;
+        });
+        var isPlaying = false;
+
+        function drawFrame(index) {
+          var img = loadedFrames[index];
+          if (!img || !img.complete || !img.naturalWidth) return;
+          sequenceCtx.clearRect(0, 0, sequence.width, sequence.height);
+          sequenceCtx.drawImage(img, 0, 0, sequence.width, sequence.height);
+        }
+
+        loadedFrames[0].addEventListener("load", function () { drawFrame(0); }, { once: true });
+        if (loadedFrames[0].complete) drawFrame(0);
+
+        function resetSplash() {
+          isPlaying = false;
+          splash.hidden = false;
+          splash.classList.remove("is-playing", "is-sequence-done", "is-leaving");
+          document.body.classList.remove("has-entered", "has-scrolled", "has-reached-01");
+          if (window.lenis && typeof window.lenis.scrollTo === "function") {
+            window.lenis.scrollTo(0, { immediate: true });
+          } else {
+            window.scrollTo(0, 0);
+          }
+          drawFrame(0);
+          autoStart();   // restart plays on its own too -- never wait for a click
+        }
+
+        // Auto-enter: the intro plays by itself, no click required. A brief beat
+        // on the static logo, then the sequence hands off into the site. (The
+        // click listener below still works as an optional skip / restart.)
+        function autoStart() {
+          if (isPlaying || splash.hidden) return;
+          window.setTimeout(playSequence, 650);
+        }
+
+        function enter() {
+          splash.classList.add("is-leaving");
+          window.setTimeout(function () {
+            splash.hidden = true;
+          }, 180);
+        }
+
+        function beginHandoff() {
+          document.body.classList.add("has-entered");
+          splash.classList.add("is-sequence-done");
+          document.dispatchEvent(new CustomEvent("bullfinch:splashcomplete"));
+          window.setTimeout(enter, 860);
+        }
+
+        function playSequence() {
+          if (isPlaying) return;
+          isPlaying = true;
+          drawFrame(0);
+          splash.classList.add("is-playing");
+          var start = performance.now();
+          var frameDuration = 1000 / 12;
+          var holdLastFrame = 180;
+          function tick(now) {
+            var frameIndex = Math.min(frames.length - 1, Math.floor((now - start) / frameDuration));
+            drawFrame(frameIndex);
+            if (frameIndex < frames.length - 1) {
+              requestAnimationFrame(tick);
+            } else {
+              window.setTimeout(beginHandoff, holdLastFrame);
+            }
+          }
+          requestAnimationFrame(tick);
+        }
+
+        function isFullscreen() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        }
+
+        function updateFullscreenToggle() {
+          var active = Boolean(isFullscreen());
+          document.body.classList.toggle("is-fullscreen", active);
+          if (fullscreenToggle) {
+            fullscreenToggle.setAttribute("aria-label", active ? "Exit full screen" : "Enter full screen");
+            fullscreenToggle.setAttribute("aria-pressed", active ? "true" : "false");
+          }
+        }
+
+        function exitFullscreen() {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+          if (exit) {
+            try {
+              exit.call(document);
+            } catch (e) {}
+          }
+        }
+
+        function enterFullscreen() {
+          var root = document.documentElement;
+          var request = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+          if (request) {
+            try {
+              request.call(root);
+            } catch (e) {}
+          }
+        }
+
+        function toggleFullscreen() {
+          if (isFullscreen()) {
+            exitFullscreen();
+          } else {
+            enterFullscreen();
+          }
+        }
+
+        // Only restore the splash on an actual back/forward-cache restore.
+        // Resetting on every pageshow also fired when exiting fullscreen on
+        // mobile, which wiped `has-entered` and hid the nav + fullscreen toggle.
+        window.addEventListener("pageshow", function (event) {
+          if (event.persisted) resetSplash();
+        });
+        document.addEventListener("fullscreenchange", updateFullscreenToggle);
+        document.addEventListener("webkitfullscreenchange", updateFullscreenToggle);
+        document.addEventListener("MSFullscreenChange", updateFullscreenToggle);
+        if (fullscreenToggle) fullscreenToggle.addEventListener("click", toggleFullscreen);
+        updateFullscreenToggle();
+
+        // Entering/exiting fullscreen changes the viewport. Re-sync the WebGL
+        // buffer, ScrollTrigger pin spacing, and Lenis once it settles, or the
+        // page keeps the old (taller) scroll height and leaves a black strip /
+        // dead scroll space at the bottom.
+        function refreshLayoutAfterViewportChange() {
+          window.dispatchEvent(new Event("resize"));
+          if (window.lenis && window.lenis.resize) window.lenis.resize();
+          if (window.ScrollTrigger && window.ScrollTrigger.refresh) window.ScrollTrigger.refresh();
+        }
+        ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (ev) {
+          document.addEventListener(ev, function () {
+            setTimeout(refreshLayoutAfterViewportChange, 200);
+          });
+        });
+
+        // Advance on a click ANYWHERE on the splash, not just the logo button.
+        // Entering the presentation no longer forces fullscreen -- it just
+        // starts the animation. Fullscreen stays available on demand via the
+        // dedicated #fullscreen-toggle button.
+        splash.addEventListener("click", function () {
+          playSequence();
+        });
+
+        // Kick the auto-enter once the first frame is decodable (or right away
+        // if it is already cached), so the page enters itself on load.
+        if (loadedFrames[0].complete) {
+          autoStart();
+        } else {
+          loadedFrames[0].addEventListener("load", autoStart, { once: true });
+        }
+      })();
+    </script>
+    <script>
+      // Lateral Team screen: the closing footer link pulls the view right to
+      // reveal the team panel; Back / Escape returns. Bio links inside reuse the
+      // existing document-delegated bio modal, so no extra wiring is needed.
+      (function () {
+        "use strict";
+        var screen = document.getElementById("team-screen");
+        var openBtn = document.querySelector("[data-team-open]");
+        if (!screen || !openBtn) return;
+        var lastFocus = null;
+
+        function openTeam() {
+          lastFocus = document.activeElement;
+          document.body.classList.add("is-team-open");
+          screen.setAttribute("aria-hidden", "false");
+          openBtn.setAttribute("aria-expanded", "true");
+          screen.scrollTop = 0;
+          var back = screen.querySelector("[data-team-close]");
+          if (back) back.focus();
+        }
+        function closeTeam() {
+          document.body.classList.remove("is-team-open");
+          screen.setAttribute("aria-hidden", "true");
+          openBtn.setAttribute("aria-expanded", "false");
+          if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+        }
+
+        openBtn.addEventListener("click", function (e) { e.preventDefault(); openTeam(); });
+        document.addEventListener("click", function (e) {
+          if (e.target.closest("[data-team-close]")) { e.preventDefault(); closeTeam(); }
+        });
+        document.addEventListener("keydown", function (e) {
+          // Only close on Escape when the team screen is the topmost layer
+          // (the bio modal handles its own Escape while it is open).
+          var bio = document.getElementById("team-bio-modal");
+          var bioOpen = bio && !bio.hidden;
+          if (e.key === "Escape" && document.body.classList.contains("is-team-open") && !bioOpen) {
+            closeTeam();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
