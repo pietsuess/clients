@@ -642,15 +642,15 @@
          ground gets darker under them. Piet to call it. */
       #product .panel__evidence .lead {
         color: var(--accent);
-        /* 2em of the paragraph it sits in, so it stays exactly double whatever
-           the body copy resolves to at this width rather than pinning a px
-           size that stops tracking the clamp. Display font, not body, because
+        /* 1.5em of the paragraph it sits in (was 2em, cut 25%), so it keeps
+           tracking the body clamp at this width rather than pinning a px
+           size. Display font, not body, because
            at this size the body face reads as oversized copy instead of as a
            heading. Block so the <br> after it is not also breaking — the word
            owns its own line and the description hangs under it. */
         display: block;
         font-family: var(--font-display);
-        font-size: 2em;
+        font-size: 1.5em;
         line-height: 1.02;
         letter-spacing: -0.025em;
         margin-right: 0;
@@ -1070,6 +1070,32 @@
       @media (prefers-reduced-motion: reduce) {
         .idle-cue svg { animation: none; }
       }
+
+      /* ===== Hero cue, ungated (DEV) =====================================
+         styles.css only shows .hero__scroll-cue once body.has-entered lands,
+         i.e. after the splash sequence finishes. This shows it from first
+         paint instead — on 00 nobody knows to scroll, so the cue cannot be
+         waiting on anything. It still retires at has-reached-01, hence
+         :not() rather than a flat override: no gate on the way in, the
+         existing exit on the way out.
+         Specificity note: styles.css's rule is body.has-entered + class
+         (0,2,1); body:not(.has-reached-01) + class matches that and wins on
+         order, and simply stops matching once 01 is reached. */
+      body:not(.has-reached-01) .hero__scroll-cue {
+        opacity: 0.72;
+        transform: translate(-50%, 0);
+        transition-delay: 0ms;
+      }
+      /* styles.css gives it z-index 6, which was fine when it was buried in
+         .hero's own stacking context and meaningless anywhere else. Now that
+         it is body-level it is measured against the root, where .forest-photo
+         (2), .tree-readouts (4) and the rise banners all sit. 46 keeps it
+         under the nav (50). */
+      .hero__scroll-cue { z-index: 46; }
+      /* Fixed and outside the sections, same ink problem as .idle-cue. */
+      body.is-midramp-stage .hero__scroll-cue { color: #2C3B30; }
+      body.is-tree-stage .hero__scroll-cue,
+      body.is-final-contrast .hero__scroll-cue { color: #EFE7D3; }
 
       /* ===== Reveal media (DEV) ==========================================
          A photograph that wipes open under a section as its pin scrubs.
@@ -1564,6 +1590,14 @@
         <path d="m6 9 6 6 6-6" />
       </svg>
     </div>
+    <!-- Hero scroll cue (DEV). Moved OUT of .hero — see the note at the old
+         site. Body-level, so its z-index is measured against the root. -->
+    <div class="hero__scroll-cue" aria-hidden="true">
+      <span class="hero__scroll-cue-label">Scroll</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </div>
     <main id="page">
       <section class="hero" aria-label="Hero">
         <div class="hero__inner">
@@ -1591,12 +1625,12 @@
           </h1>
           <p class="hero__subtitle hero__line hero__line--2">Bullfinch Earth measures, monitors, and maps every stem, passively, while foresters do their normal jobs</p>
         </div>
-        <div class="hero__scroll-cue" aria-hidden="true">
-          <span class="hero__scroll-cue-label">Scroll</span>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </div>
+        <!-- .hero__scroll-cue used to live here. It is position:fixed but it
+             was a child of .hero, which sets `isolation: isolate` — so it was
+             trapped in the hero's stacking context and every later fixed
+             layer (.forest-photo z2, .tree-readouts z4, the rise banners)
+             painted over it regardless of its own z-index. Moved to a
+             body-level sibling of .idle-cue, above. -->
       </section>
 
       <section class="swot" id="swot" aria-label="Bullfinch Earth story">
@@ -1639,7 +1673,8 @@
               <p><span class="lead">Walk</span><br>Just press “Start Bullfinching” and go do your thing</p>
               <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
             </div>
-            <p class="panel__numeric">WEAR &middot; WALK &middot; DATA</p>
+            <!-- The WEAR · WALK · DATA summary line was removed: it only
+                 repeated the three leads sitting directly above it. -->
           </div>
         </article>
 
@@ -2698,7 +2733,19 @@
             }
           }
           if (window.lenis && typeof window.lenis.scrollTo === "function") {
-            window.lenis.scrollTo(destination);
+            // Lenis's default is ~1.2s on its own easing, which lands as a
+            // jump on a page where every section is a scrubbed pin — you
+            // arrive without having seen the choreography you flew through.
+            // Longer, and eased at BOTH ends (in-out cubic): leaves slowly,
+            // arrives slowly, carries speed only in the middle.
+            window.lenis.scrollTo(destination, {
+              duration: 2.6,
+              easing: function (t) {
+                return t < 0.5
+                  ? 4 * t * t * t
+                  : 1 - Math.pow(-2 * t + 2, 3) / 2;
+              },
+            });
           } else {
             if (typeof destination === "number") {
               window.scrollTo({ top: destination, behavior: "smooth" });
