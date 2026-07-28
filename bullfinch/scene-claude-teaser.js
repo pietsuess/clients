@@ -936,23 +936,39 @@
   // beside, behind, and toward the camera, far out — so the convergence reads
   // as the whole inhabited field draining into one point from every direction
   // in X, Y and Z, not a small flat ring.
-  // Ring radius for the 25 feeder dots. 5.2 world units is far outside the
-  // closing camera's frame — every feeder sat off screen, so all you saw of
-  // the convergence was 25 straight rays entering from beyond the edges. That
-  // is the starburst, and it is NOT the cascade (the cascade is scaled in
-  // above). Small enough now that the whole ring is visible and the lines
-  // read as a constellation drawing inward.
-  var convRBase = 2.0;
+  // ---- Feeder ring, laid out in SCREEN space -----------------------------
+  // This ring was placed in WORLD units (5.2, then 2.0) and both were
+  // guesses, because how much screen a world unit buys depends entirely on
+  // how close the closing camera ends up to the dot. Whenever the ring fell
+  // outside the frame the convergence read as rays entering from beyond the
+  // edges rather than as a constellation collapsing inward.
+  //
+  // So place it the same way the ambient closing field is placed (see
+  // closingFieldHome above): pick the position ON SCREEN, then unproject it
+  // through closingCamera. RING_NDC is in normalized device coords, which
+  // span -1..1 across the viewport — 0.5 therefore puts the ring a quarter
+  // of the way out from the dot, on any aspect, guaranteed on screen.
+  var RING_NDC = 0.5;
+  var redWorld = new THREE.Vector3(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z);
+  var redNDC = redWorld.clone().project(closingCamera);
+  var ringProbe = new THREE.Vector3();
+  var ringWorldR = 0;
   for (var tr = 0; tr < terminalDots.length; tr++) {
     var tIdx = terminalDots[tr];
-    var fu = (tr + 0.5) / Math.max(1, terminalDots.length);
-    var fy = 1 - 2 * fu;
-    var frr = Math.sqrt(Math.max(0, 1 - fy * fy));
     var fphi = tr * 2.39996323;                      // golden angle
-    var convR = convRBase * (0.7 + 0.6 * (((tr * 13) % 7) / 6));
-    positions[tIdx * 3]     = FINAL_RED_X + Math.cos(fphi) * frr * convR * 1.25;
-    positions[tIdx * 3 + 1] = FINAL_RED_Y + fy * convR * 0.85;
-    positions[tIdx * 3 + 2] = Math.min(2.6, FINAL_RED_Z + Math.sin(fphi) * frr * convR);
+    // Same 0.7-1.3 jitter the world version had, so the ring is not a
+    // mechanical circle.
+    var ringR = RING_NDC * (0.7 + 0.6 * (((tr * 13) % 7) / 6));
+    ringProbe.set(
+      redNDC.x + Math.cos(fphi) * ringR,
+      redNDC.y + Math.sin(fphi) * ringR,
+      redNDC.z
+    ).unproject(closingCamera);
+    positions[tIdx * 3]     = ringProbe.x;
+    positions[tIdx * 3 + 1] = ringProbe.y;
+    positions[tIdx * 3 + 2] = ringProbe.z;
+    var rwr = ringProbe.distanceTo(redWorld);
+    if (rwr > ringWorldR) ringWorldR = rwr;
     // These exact on-screen feeder positions are also their final star targets.
     // The later field expansion must not overwrite them with off-screen random
     // points and recreate the long lines seen in the failed closing frames.
@@ -1000,9 +1016,11 @@
       var rr = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
       if (rr > netMaxR) netMaxR = rr;
     }
-    // Kept just outside the feeder ring (convRBase) so the web reads as the
-    // thing the ring sits inside, and still lands within the frame.
-    var NET_CLOSING_RADIUS = 2.8;
+    // Derived from the feeder ring rather than hardcoded, so the web tracks
+    // whatever the ring measured out to in world units and cannot drift off
+    // frame the way a guessed constant did. Just outside the ring, so the
+    // ring reads as sitting inside the web.
+    var NET_CLOSING_RADIUS = (ringWorldR > 0.001 ? ringWorldR : 2.0) * 1.35;
     var netScale = netMaxR > 0.001 ? Math.min(1, NET_CLOSING_RADIUS / netMaxR) : 1;
     for (var pm = 0; pm < PARTICLE_POOL; pm++) {
       if (!connectedSet[pm] || pm === FINAL_RED_IDX || isTerminalDot[pm]) continue;
