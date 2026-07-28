@@ -1666,8 +1666,12 @@
         <path d="m6 9 6 6 6-6" />
       </svg>
     </div>
-    <!-- Closing canopy plate (DEV). Body-level and fixed so it cannot ride
-         the closing section up the screen. See .closing-canopy. -->
+    <!-- Closing canopy plate (DEV). Sits directly after the mote canvas.
+         It CANNOT go behind the canvas: the renderer clears with alpha 1
+         (setClearColor(bgColor, 1)), so the canvas is fully opaque and
+         anything underneath it is invisible. Here it is behind every piece
+         of DOM on the page — nav, headline, actions, footer — and in front
+         of the motes only. -->
     <div class="closing-canopy" aria-hidden="true"></div>
     <!-- Hero scroll cue (DEV). Moved OUT of .hero — see the note at the old
          site. Body-level, so its z-index is measured against the root. -->
