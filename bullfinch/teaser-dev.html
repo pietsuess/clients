@@ -1092,6 +1092,42 @@
          (2), .tree-readouts (4) and the rise banners all sit. 46 keeps it
          under the nav (50). */
       .hero__scroll-cue { z-index: 46; }
+
+      /* ===== Nav: one travelling underline ===============================
+         The numbers were carrying the browser's default <a> underline, so
+         every one of them was underlined all the time and "current" was
+         only a colour change. Underline comes off the links entirely and
+         becomes a single rail that slides to whichever number is current. */
+      .site-nav__links { position: relative; }
+      .site-nav__links a[data-scroll-target] { text-decoration: none; }
+      .site-nav__rail {
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        height: 1px;
+        width: var(--rail-w, 0px);
+        background: var(--ink);
+        transform: translateX(var(--rail-x, 0px));
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          transform 620ms cubic-bezier(.22, .68, .16, 1),
+          width 620ms cubic-bezier(.22, .68, .16, 1),
+          opacity 260ms ease,
+          background-color 200ms ease;
+      }
+      .site-nav__rail.is-live { opacity: 1; }
+      /* First placement must not animate in from x=0, or the rail flies
+         across the nav on load. */
+      .site-nav__rail.is-instant { transition: none; }
+      @media (max-width: 720px) {
+        /* .site-nav__links becomes the phone sheet — a stacked column with
+           its own borders. A horizontal rail has nothing to track there. */
+        .site-nav__rail { display: none; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .site-nav__rail { transition: opacity 260ms ease; }
+      }
       /* Fixed and outside the sections, same ink problem as .idle-cue. */
       body.is-midramp-stage .hero__scroll-cue { color: #2C3B30; }
       body.is-tree-stage .hero__scroll-cue,
@@ -1551,6 +1587,11 @@
         </svg>
       </button>
       <nav class="site-nav__links" id="site-nav-links" aria-label="Primary">
+        <!-- 00 targets #page, which scrollToTarget special-cases to 0. The
+             scroll-spy in swot-claude.js is generic over
+             [data-scroll-target] with a resolvable section, so it picks this
+             up with no JS change. -->
+        <a href="#page" data-scroll-target="#page" data-nav-label="Start" aria-label="00 Start">00</a>
         <a href="#problem" data-scroll-target="#problem" data-nav-label="The gap" aria-label="01 The gap">01</a>
         <a href="#product" data-scroll-target="#product" data-nav-label="How it works" aria-label="02 How it works">02</a>
         <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Who needs Bullfinch" aria-label="03 Who needs Bullfinch">03</a>
@@ -1559,6 +1600,10 @@
              to what it was — these two stay direct flex children of
              .site-nav__links. In the phone sheet it becomes a real flex row so
              the two icons sit side by side at the bottom instead of stacking. -->
+        <!-- The single travelling underline. One element for the whole nav,
+             so it slides between numbers instead of each number owning its
+             own rule. Positioned by JS from the .is-current link. -->
+        <span class="site-nav__rail" aria-hidden="true"></span>
         <div class="site-nav__utility">
         <button id="fullscreen-toggle" class="fullscreen-toggle" type="button" aria-label="Enter full screen">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true">
@@ -3151,7 +3196,13 @@
         }
         ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (ev) {
           document.addEventListener(ev, function () {
-            setTimeout(refreshLayoutAfterViewportChange, 200);
+            // TWO passes. macOS animates into fullscreen for roughly a second,
+            // so a single refresh at 200ms measures a viewport that is still
+            // moving and the pinned panels keep the old height — which is why
+            // 01's reveal photograph came up short at the bottom, and why
+            // clicking a nav item fixed it (scrollToTarget refreshes too).
+            setTimeout(refreshLayoutAfterViewportChange, 250);
+            setTimeout(refreshLayoutAfterViewportChange, 1000);
           });
         });
 
@@ -3212,6 +3263,66 @@
             closeTeam();
           }
         });
+      })();
+    </script>
+
+    <script>
+      /* Travelling nav underline.
+         The scroll-spy in swot-claude.js already toggles .is-current on the
+         links — this only follows it, rather than duplicating the section
+         maths. A MutationObserver on the class attribute is the cheap way to
+         hear about that without patching the shared file. */
+      (function () {
+        var nav = document.getElementById("site-nav-links");
+        if (!nav) return;
+        var rail = nav.querySelector(".site-nav__rail");
+        if (!rail) return;
+        var placed = false;
+
+        function place() {
+          // The rail is display:none in the phone sheet; nothing to measure.
+          if (!rail.offsetParent && placed) return;
+          var current = nav.querySelector("a[data-scroll-target].is-current");
+          if (!current) {
+            rail.classList.remove("is-live");
+            return;
+          }
+          var navBox = nav.getBoundingClientRect();
+          var box = current.getBoundingClientRect();
+          if (!box.width) return;
+          // First placement jumps; every later one travels.
+          if (!placed) rail.classList.add("is-instant");
+          rail.style.setProperty("--rail-x", (box.left - navBox.left) + "px");
+          rail.style.setProperty("--rail-w", box.width + "px");
+          rail.classList.add("is-live");
+          if (!placed) {
+            // Next frame, after the instant placement has painted.
+            requestAnimationFrame(function () {
+              rail.classList.remove("is-instant");
+            });
+            placed = true;
+          }
+        }
+
+        var queued = false;
+        function schedule() {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(function () {
+            queued = false;
+            place();
+          });
+        }
+
+        new MutationObserver(schedule).observe(nav, {
+          attributes: true,
+          attributeFilter: ["class"],
+          subtree: true,
+        });
+        window.addEventListener("resize", schedule);
+        // Webfonts land after first paint and change the number widths.
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+        schedule();
       })();
     </script>
   </body>
