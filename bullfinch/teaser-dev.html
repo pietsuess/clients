@@ -2740,10 +2740,18 @@
             if (idleTimer) clearTimeout(idleTimer);
             idleTimer = setTimeout(goIdle, IDLE_MS);
           }
-          ["scroll", "wheel", "touchstart", "touchmove", "keydown", "pointerdown"]
-            .forEach(function (evt) {
-              window.addEventListener(evt, wake, { passive: true });
-            });
+          // SCROLL POSITION ONLY. Not wheel, not keydown, not pointer — a
+          // mouse moving across the page is not scrolling, and waking on it
+          // meant the hint could never appear on a desktop where the cursor
+          // drifts. And not the bare scroll event either: momentum and the
+          // pinned sections fire it with an unchanged scrollY. The hint sleeps
+          // unless the page has actually MOVED.
+          var lastY = window.scrollY;
+          window.addEventListener("scroll", function () {
+            if (window.scrollY === lastY) return;
+            lastY = window.scrollY;
+            wake();
+          }, { passive: true });
           wake();
         })();
 
