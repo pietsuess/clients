@@ -1275,9 +1275,12 @@
       lineVerts[vB + 1] = hy;
       lineVerts[vB + 2] = hz;
 
+      // 0.95 normally; solid on a transparent canvas, where the arrowhead's
+      // alpha is all it has once the browser composites over the DOM.
+      var arrowOn = transparentBackdrop ? 1.0 : 0.95;
       var arrowVisible = wave === 7
-        ? (strokeProgress > 0.001 ? 0.95 : 0.0)
-        : (strokeProgress > 0.001 && strokeProgress < 0.999 ? 0.95 : 0.0);
+        ? (strokeProgress > 0.001 ? arrowOn : 0.0)
+        : (strokeProgress > 0.001 && strokeProgress < 0.999 ? arrowOn : 0.0);
       // Claude fork: cascade lines PERSIST through the stat grid and the tree
       // grove (no statForm/openField gating) but TAPER faint once the trees
       // and closing form (networkTaper above). Only the convergence wave stays
@@ -2456,7 +2459,11 @@
       positions[i3 + 1] = lerp(finalFieldCapture[i3 + 1], closingFieldHome[i3 + 1], e);
       positions[i3 + 2] = lerp(finalFieldCapture[i3 + 2], closingFieldHome[i3 + 2], e);
       if (alphas[i] < 0.78 * e) alphas[i] = 0.78 * e;
-      alphas[i] = lerp(alphas[i], 0.25, closingDim);
+      // 0.25 was chosen when the motes sat on an OPAQUE backdrop, where a
+      // quarter alpha still reads as a solid speck. On a transparent canvas
+      // that same 0.25 is all the pixel has when the browser composites it
+      // over the DOM, so the field all but disappears. Hold them up.
+      alphas[i] = lerp(alphas[i], transparentBackdrop ? 0.72 : 0.25, closingDim);
     }
     if (fillFinalLocked && fillPosAttr && fillAlphaAttr) {
       var fp = fillPosAttr.array;
@@ -2609,6 +2616,14 @@
     uniforms.uLightShaft.value.lerpColors(dayPalette.shaft, finalPalette.shaft, finalPaletteP);
     uniforms.uLine.value.lerpColors(dayPalette.line.color, finalPalette.line.color, finalPaletteP);
     uniforms.uLineAlpha.value = lerp(dayPalette.line.alpha, finalPalette.line.alpha, finalPaletteP);
+    // Same problem the motes have on a transparent canvas: the palette's
+    // line alpha was picked to sit on an opaque backdrop, and it is all the
+    // pixel has once the browser composites the canvas over the DOM. Lift it
+    // toward solid as the closing forms. Assigned here, immediately after the
+    // palette sets it, so nothing downstream can overwrite the lift.
+    if (transparentBackdrop) {
+      uniforms.uLineAlpha.value = lerp(uniforms.uLineAlpha.value, 1.0, 0.75 * finalPaletteP);
+    }
     paletteScratch.lerpColors(dayPalette.mote, finalPalette.mote, finalPaletteP);
     partMat.uniforms.uColor.value.copy(paletteScratch);
     arrowMat.uniforms.uColor.value.copy(paletteScratch);
