@@ -691,9 +691,11 @@
          section it rode up with it, which is scrolling into place rather
          than arriving in place. Only its opacity moves.
 
-         Plain full-bleed cover, centred on the viewport. No mask, and no
-         attempt to line the canopy opening up with the red dot: the offset
-         version turned it into a floating rectangle. */
+         Plain full-bleed cover, pinned to the TOP of the viewport — cover
+         crops the overflow off the bottom, so the sky edge of the
+         photograph is the top edge of the screen. No mask, and no attempt
+         to line the canopy opening up with the red dot: the offset version
+         turned it into a floating rectangle. */
       .closing-canopy {
         position: fixed;
         inset: 0;
@@ -701,7 +703,7 @@
         pointer-events: none;
         background-image: url("assets/forest-canopy-closing.jpg");
         background-size: cover;
-        background-position: center center;
+        background-position: center top;
         background-repeat: no-repeat;
         /* Desaturated and darkened into the closing's own green. */
         filter: saturate(0.55) brightness(0.42) contrast(1.05) hue-rotate(-6deg);
