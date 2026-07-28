@@ -383,6 +383,27 @@
          left edge of "Dedicated" (line 1) to the left edge of "19th" (line 3). */
       #problem .panel__verdict .vs-line { display: block; }
       #problem .panel__verdict .vs-line--2 { margin-right: 5.9em; }
+      /* ONE RED. There were three in play (Piet: "two reds going on"):
+           --accent      #FF5560   styles.css, the CSS marks — the pink one,
+                                   which is the section-mark dot in 01
+           --gl-accent   #DA3A40   teaser.css, the WebGL points — the deeper
+                                   one, which is the whole stat dot grid
+           #A11B26                 the 02 Wear/Walk/Data leads, added when
+                                   #FF5560 measured 1.68:1 on the half-green
+         The mark and the grid sit on screen together in 01, so the split was
+         visible in a single frame. Collapsed onto the deeper #DA3A40: it is
+         the one carrying the most area already, it holds up as type on beige
+         where #FF5560 does not, and it stays legible on the 02 green.
+         Both tokens are set here so it cannot matter which stylesheet wins,
+         and the scene reads --gl-accent off :root at init. */
+      :root {
+        --accent: #DA3A40;
+        --gl-accent: #DA3A40;
+      }
+      #problem .panel__verdict .vs-line:last-child {
+        color: var(--accent);
+        font-weight: 700;
+      }
       #problem .panel__evidence { max-width: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(30px, 5vw, 90px); }
       #problem .panel__evidence p { text-align: right; text-align-last: right; }
       #problem .panel__numeric { text-align: right; text-align-last: right; }
@@ -593,10 +614,15 @@
         --ink-soft: #2C3B30;
         --rule: rgba(22, 37, 27, 0.30);
       }
-      /* Deepened only where it sits on this field. The brand accent is
-         untouched everywhere else, including the section mark beside the
-         eyebrow, which is a graphic rather than text. */
-      #product .panel__evidence .lead { color: #A11B26; }
+      /* Folded into the single red (see :root above). This WAS #A11B26, chosen
+         purely for contrast on the half-green field, and it was the third red
+         on the page.
+         ⚠️ THE ONE PLACE UNIFYING COSTS SOMETHING: on that ~#B9C397 field the
+         old #A11B26 measured 4.19:1 and #DA3A40 measures ~2.5:1, at lead-copy
+         size. If Piet wants these three words back at full legibility the fix
+         is to darken the SINGLE token rather than reintroduce a second red —
+         #B32A31 keeps the family and buys back most of it. */
+      #product .panel__evidence .lead { color: var(--accent); }
 
       /* The nav is fixed and outside #product, so the block above cannot reach
          it — exactly the reason body.is-tree-stage exists for 03. This window
