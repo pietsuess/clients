@@ -1213,11 +1213,22 @@
           border-top: 1px solid rgba(239, 231, 211, .20);
         }
 
-        /* There is no left half at this width — 01 is one column — so the
-           photograph goes full-bleed and drops back, and the wipe still runs
-           left to right across the whole panel. */
+        /* There is no left half at this width — 01 collapses to one column —
+           so the split goes horizontal instead: full width, TOP half of the
+           viewport (Piet). Still fixed, still the same left-to-right crop
+           wipe; only the box it wipes inside changes.
+
+           Opacity comes back up from the 0.32 it needed when it sat behind the
+           whole copy block. In its own band above the type it can carry more
+           of the photograph without costing legibility. */
         .reveal-media--left,
-        .reveal-media--right { left: 0; right: 0; --reveal-opacity: 0.32; }
+        .reveal-media--right {
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 50%;
+          --reveal-opacity: 0.5;
+        }
 
         /* 01 — the two-row / two-column rail collapses to one left column:
            headline, dot grid, body, note. */
