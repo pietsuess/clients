@@ -473,8 +473,17 @@
         transform: none;
       }
       .case-fixed-layer .panel__model-canvas { width: 100%; height: 100%; }
+      /* The device is scrubbed by swot-claude.js writing an inline opacity
+         every frame, and this !important beat that inline value the instant
+         is-tree-stage landed (treeP > 0.05) — one frame, device gone. The
+         transition lives HERE, on the stage rules only, so it animates on
+         the way IN without putting a lag on the per-frame scrub that runs
+         the rest of the time. */
       body.is-tree-stage .case-fixed-layer.panel__model,
-      body.is-final-contrast .case-fixed-layer.panel__model { opacity: 0 !important; }
+      body.is-final-contrast .case-fixed-layer.panel__model {
+        opacity: 0 !important;
+        transition: opacity 520ms cubic-bezier(.4, 0, .5, 1);
+      }
 
       #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
       #opportunity .tree-readouts {
