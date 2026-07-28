@@ -391,18 +391,17 @@
            #A11B26                 the 02 Wear/Walk/Data leads, added when
                                    #FF5560 measured 1.68:1 on the half-green
          The mark and the grid sit on screen together in 01, so the split was
-         visible in a single frame. Collapsed onto ONE token, then darkened to
-         #B32A31 — a shade under the deeper of the two — because that is the
-         only value that works everywhere the red has to appear: as the mark
-         and the dot grid, as the 01 punchline on beige, and as the 02 leads on
-         the half-green field, where the bright brand red measured 1.68:1.
-         Darkening the single token was the fix; adding a second red back was
-         not (Piet).
+         visible in a single frame. Collapsed onto the BRAND red, #FF5560.
+         A darkened token (#B32A31) was tried and rejected on sight — it read
+         as maroon and took the brand with it. The red is the brand's; it is
+         not a variable to be tuned for a contrast ratio. Where it lands on a
+         ground it cannot hold, the ground changes or the red is not used for
+         type there — the red itself does not move.
          Both tokens are set here so it cannot matter which stylesheet wins,
          and the scene reads --gl-accent off :root at init. */
       :root {
-        --accent: #B32A31;
-        --gl-accent: #B32A31;
+        --accent: #FF5560;
+        --gl-accent: #FF5560;
       }
       #problem .panel__verdict .vs-line:last-child {
         color: var(--accent);
@@ -618,13 +617,13 @@
         --ink-soft: #2C3B30;
         --rule: rgba(22, 37, 27, 0.30);
       }
-      /* Folded into the single red (see :root above). This WAS #A11B26, chosen
-         purely for contrast on this field, and it was the third red on the
-         page. This is the tightest spot the one token has to survive: on the
-         ~#B9C397 half-green, #B32A31 measures ~3.6:1 at lead-copy size —
-         short of the old dedicated 4.19:1, comfortably past the 2.5:1 the
-         undarkened token gave, and it now matches the mark, the dot grid and
-         the 01 punchline exactly. */
+      /* Folded into the single brand red (see :root above). This WAS #A11B26,
+         a one-off picked purely for contrast on this field, and it was the
+         third red on the page.
+         ⚠️ OPEN: brand red on the ~#B9C397 half-green measures 1.68:1 — the
+         hue reads but the luminance does not. The answer is NOT another red.
+         Either these three words stop being red on this section, or 02's
+         ground gets darker under them. Piet to call it. */
       #product .panel__evidence .lead { color: var(--accent); }
 
       /* The nav is fixed and outside #product, so the block above cannot reach
