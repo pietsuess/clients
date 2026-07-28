@@ -706,7 +706,11 @@
          it is held low in opacity with its darks crushed toward the page
          green, and the motes and network read straight through it. */
       .closing-canopy {
-        --canopy-w: 220vmax;
+        /* 100vw: the photograph at its natural width, no upscale beyond the
+           viewport. It will not reach every edge once it is offset to put
+           the canopy opening on the dot — the radial mask fades it out well
+           before then anyway. */
+        --canopy-w: 100vw;
         --canopy-h: calc(var(--canopy-w) * 1437 / 1800);
         /* Where the opening sits inside the photograph — the point all the
            trunks converge on. Measured off the image, not assumed centre.
