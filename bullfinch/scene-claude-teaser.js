@@ -955,6 +955,57 @@
     closingFieldHome[tIdx * 3 + 2] = positions[tIdx * 3 + 2];
   }
 
+  // ---- Bring the CASCADE in with its terminals ---------------------------
+  // The loop above pins the terminal dots to a small sphere around the final
+  // red dot, but it only moved the terminals. Their cascade parents stayed
+  // out in the original field (radius 8-17), so every parent->terminal edge
+  // became a spoke running from the dot to somewhere past the frame — the
+  // closing read as a starburst of rays rather than a network resolving into
+  // a point.
+  //
+  // Fix: give every cascade-connected mote a closing home that is the SAME
+  // web, scaled down about its own centroid and re-centred on the red dot.
+  // Topology is untouched (a uniform scale cannot reorder neighbours), so the
+  // descending tree keeps its shape, arrives on screen, and its edges stay
+  // short. Across the closing lerp the whole network visibly collapses into
+  // the dot instead of stretching away from it.
+  var isTerminalDot = new Uint8Array(PARTICLE_POOL);
+  for (var td = 0; td < terminalDots.length; td++) isTerminalDot[terminalDots[td]] = 1;
+
+  var netCx = 0, netCy = 0, netCz = 0, netN = 0;
+  for (var cm = 0; cm < PARTICLE_POOL; cm++) {
+    if (!connectedSet[cm] || cm === FINAL_RED_IDX || isTerminalDot[cm]) continue;
+    netCx += positions[cm * 3];
+    netCy += positions[cm * 3 + 1];
+    netCz += positions[cm * 3 + 2];
+    netN++;
+  }
+  if (netN) {
+    netCx /= netN; netCy /= netN; netCz /= netN;
+    // Scale so the widest arm of the web lands just inside the terminal
+    // sphere's neighbourhood — close enough to read as one object with the
+    // convergence, not so tight that the branches collapse onto each other.
+    var netMaxR = 0;
+    for (var rm = 0; rm < PARTICLE_POOL; rm++) {
+      if (!connectedSet[rm] || rm === FINAL_RED_IDX || isTerminalDot[rm]) continue;
+      var rdx = positions[rm * 3] - netCx;
+      var rdy = positions[rm * 3 + 1] - netCy;
+      var rdz = positions[rm * 3 + 2] - netCz;
+      var rr = Math.sqrt(rdx * rdx + rdy * rdy + rdz * rdz);
+      if (rr > netMaxR) netMaxR = rr;
+    }
+    var NET_CLOSING_RADIUS = 3.4;
+    var netScale = netMaxR > 0.001 ? Math.min(1, NET_CLOSING_RADIUS / netMaxR) : 1;
+    for (var pm = 0; pm < PARTICLE_POOL; pm++) {
+      if (!connectedSet[pm] || pm === FINAL_RED_IDX || isTerminalDot[pm]) continue;
+      closingFieldHome[pm * 3]     = FINAL_RED_X + (positions[pm * 3]     - netCx) * netScale;
+      closingFieldHome[pm * 3 + 1] = FINAL_RED_Y + (positions[pm * 3 + 1] - netCy) * netScale;
+      // Keep the web in front of the closing camera's far plane the same way
+      // the terminals are clamped.
+      closingFieldHome[pm * 3 + 2] = Math.min(2.6, FINAL_RED_Z + (positions[pm * 3 + 2] - netCz) * netScale);
+    }
+  }
+
   var EDGE_COUNT = finalEdges.length;
   // 0.03 in uConnect units — short enough that even the last edge (threshold
   // ~0.95) finishes drawing well before scroll 1.0. Prevents partial lines
