@@ -683,6 +683,50 @@
 
       /* Heading block sits LOW, just above the dead-centre red dot. */
       .closing { padding-top: clamp(90px, 15vh, 210px); }
+
+      /* ===== Closing canopy plate (DEV) ==================================
+         A canopy photograph under the whole last screen, so the finale sits
+         in a forest rather than in flat dark green.
+
+         ::before, not a new element: .closing is already position:relative
+         with overflow:hidden, and its content is z-index 2, so the plate
+         drops in behind everything the section owns with no markup change.
+
+         It cannot go UNDER the mote canvas — the canvas is fixed at root
+         z-index 0 and .closing is z-index 1 above it, and mix-blend-mode
+         cannot reach a WebGL canvas from a panel element. So the plate is
+         kept low enough in opacity that the motes and the network read
+         straight through it, and its own darks are crushed toward the page
+         green so it joins the ground instead of sitting on top as a photo.
+         Masked off at the top and bottom edges so it has no seam. */
+      .closing::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image: url("assets/forest-canopy-closing.jpg");
+        background-size: cover;
+        background-position: 50% 42%;
+        background-repeat: no-repeat;
+        /* Desaturated and darkened into the closing's own green. */
+        filter: saturate(0.55) brightness(0.42) contrast(1.05) hue-rotate(-6deg);
+        opacity: 0.5;
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          #000 22%,
+          #000 74%,
+          transparent 100%
+        );
+        mask-image: linear-gradient(
+          to bottom,
+          transparent 0%,
+          #000 22%,
+          #000 74%,
+          transparent 100%
+        );
+      }
       .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
       .closing__logo { height: clamp(34px, 4.5vh, 46px); }
       .closing__title { max-width: none; font-size: clamp(44px, 5.2vw, 78px); line-height: .92; text-transform: uppercase; }
