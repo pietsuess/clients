@@ -1137,6 +1137,23 @@
          under the nav (50). */
       .hero__scroll-cue { z-index: 46; }
 
+      /* Cue was reading as decoration, not an instruction. Both parts up 25%
+         (label 10 -> 12.5px, arrow 18 -> 22.5px) and the word joins the
+         arrow's float instead of sitting still under it. Same 2.2s clock and
+         easing as scrollCueFloat so they move as one object; the label rides
+         a shorter throw (2px vs 4px) so the arrow still leads. The svg keeps
+         its own animation — sizing here, motion there. */
+      .hero__scroll-cue-label {
+        font-size: 12.5px;
+        animation: scrollCueLabelFloat 2.2s ease-in-out infinite;
+      }
+      .hero__scroll-cue svg { width: 22.5px; height: 22.5px; }
+
+      @keyframes scrollCueLabelFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(2px); }
+      }
+
       /* ===== Nav: one travelling underline ===============================
          The numbers were carrying the browser's default <a> underline, so
          every one of them was underlined all the time and "current" was
