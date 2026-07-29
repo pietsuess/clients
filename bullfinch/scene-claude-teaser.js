@@ -57,6 +57,12 @@
     return new THREE.Color(raw).convertLinearToSRGB();
   }
 
+  function readCssNumber(name, fallback) {
+    var raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    var n = parseFloat(raw);
+    return isFinite(n) ? n : fallback;
+  }
+
   // Parse rgba(...) -> { color: THREE.Color, alpha: number }
   function readCssRgba(name) {
     var raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -96,6 +102,7 @@
   // other page that loads this scene is byte-identical in behaviour.
   var transparentBackdrop = document.body && document.body.hasAttribute("data-canvas-transparent");
   var customTreeGradient = document.body && document.body.hasAttribute("data-tree-gradient");
+  var fastTreeSpin = document.body && document.body.hasAttribute("data-tree-spin-fast");
   var clearAlpha = transparentBackdrop ? 0 : 1;
   renderer.setClearColor(bgColor, clearAlpha);
 
@@ -659,6 +666,10 @@
     "uniform vec3  uAccent;",
     "uniform vec3  uTreeBase;",
     "uniform vec3  uTreeTop;",
+    "uniform vec3  uTreeTip;",
+    "uniform float uTreeRampLo;",
+    "uniform float uTreeRampHi;",
+    "uniform float uTreeTipStart;",
     "uniform float uCustomTreeGradient;",
     "uniform float uTreeForm;",
     "uniform float uStatForm;",
@@ -680,7 +691,17 @@
     "  // Grove height gradient. Dev can opt into its own floor/canopy pair",
     "  // without changing the stat grid, closing dot, or ambient mote palette.",
     "  vec3 legacyTreeCol = mix(col, uAccent, clamp(vTreeTint * uTreeForm, 0.0, 1.0));",
-    "  vec3 customTreeCol = mix(uTreeBase, uTreeTop, clamp(vTreeTint, 0.0, 1.0));",
+    // vTreeTint is linear normalised height, and a straight mix spends most of
+    // the trunk in the mid-green nobody wanted. smoothstep(lo, hi) crushes
+    // everything below lo to pure base and everything above hi to pure top, so
+    // the medium band only exists across (hi - lo). Centring that band below
+    // 0.5 is what "skew the bright transition lower" means — bright arrives
+    // sooner up the stem. Then the last stretch pushes on past the readout
+    // green into uTreeTip so the crown goes white-green.
+    "  float tg = smoothstep(uTreeRampLo, uTreeRampHi, clamp(vTreeTint, 0.0, 1.0));",
+    "  vec3 customTreeCol = mix(uTreeBase, uTreeTop, tg);",
+    "  float tipT = smoothstep(uTreeTipStart, 1.0, clamp(vTreeTint, 0.0, 1.0));",
+    "  customTreeCol = mix(customTreeCol, uTreeTip, tipT);",
     "  float customTreeMix = uCustomTreeGradient * uTreeForm * (1.0 - vRed);",
     "  col = mix(legacyTreeCol, customTreeCol, customTreeMix);",
     "  // NO glow rings — Piet: never any red rings except the closing pulse",
@@ -707,6 +728,14 @@
       uAccent:      uniforms.uAccent,
       uTreeBase:    { value: readCssScreenColor("--gl-tree-base", readCssColor("--gl-mote")) },
       uTreeTop:     { value: readCssScreenColor("--gl-tree-top", uniforms.uAccent.value) },
+      // Crown colour past the readout green, plus the three curve knobs. All
+      // CSS-authored so the next tuning pass is a one-line change in
+      // teaser-dev.html rather than a shader edit. Defaults reproduce the
+      // tightened look; only the dev page defines the vars.
+      uTreeTip:     { value: readCssScreenColor("--gl-tree-tip", readCssScreenColor("--gl-tree-top", uniforms.uAccent.value)) },
+      uTreeRampLo:  { value: readCssNumber("--gl-tree-ramp-lo", 0.18) },
+      uTreeRampHi:  { value: readCssNumber("--gl-tree-ramp-hi", 0.62) },
+      uTreeTipStart:{ value: readCssNumber("--gl-tree-tip-start", 0.80) },
       uCustomTreeGradient: { value: customTreeGradient ? 1 : 0 },
       uPixelRatio:  { value: renderer.getPixelRatio() },
       uTime:        uniforms.uTime,
@@ -2068,7 +2097,11 @@
   var treeMeans = null;          // the three cluster centre Xs (normalized), for DOM label anchoring
   var treeLabelVec = new THREE.Vector3();
   var treeSpinPrevT = 0;         // last elapsed sample, for the local dt
-  var TREE_SPIN_BASE = 0.032;    // faster turntable motion (was 0.0175)
+  // 0.032 is the shipped rate. teaser-dev opts into 2.5x via
+  // <body data-tree-spin-fast>; this file is SHARED with teaser.html, so a
+  // bare edit here would have changed prod too. Same opt-in shape as
+  // data-canvas-transparent and data-tree-gradient.
+  var TREE_SPIN_BASE = fastTreeSpin ? 0.08 : 0.032;
   var TREE_SPIN_RATE = [1.0, 1.34, 0.77]; // per-tree rate multipliers (desync)
   var TREE_SPIN_PHASE = [0.0, 2.1, 4.2];  // per-tree starting angle (rad)
   var treeSpinInit = false;      // seed the phases once
