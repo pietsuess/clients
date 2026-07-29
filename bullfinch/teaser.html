@@ -728,7 +728,7 @@
            Nothing translates: the scale is a centred push-in, so the plate
            stays full-bleed and no edge ever enters frame. */
         opacity: calc(var(--final-photo-p, 0) * 0.75);
-        transform: scale(calc(1.05 - var(--final-photo-p, 0) * 0.05));
+        transform: scale(calc(1.15 - var(--final-photo-p, 0) * 0.15));
         will-change: opacity, transform;
       }
       /* No class gate. --final-photo-p is 0 everywhere except the closing
@@ -2496,6 +2496,9 @@
         // Separate trigger, not extra math inside applyTreeField: that handler
         // stops updating at its own end, which would freeze the photo mid-fade.
         // The scene is untouched here. Do not fold this back into fieldP.
+        // smootherstep, not linear: the picture eases IN to its finish rather
+        // than hitting full strength on a hard edge. Opacity and scale both
+        // read this one value, so they arrive together.
         function applyClosingPhoto(self) {
           var p = smootherstep(self.progress);
           document.documentElement.style.setProperty("--final-photo-p", p.toFixed(3));
@@ -2503,7 +2506,9 @@
 
         ScrollTrigger.create({
           trigger: closing,
-          start: "top 30%",
+          // Starts only once the closing owns the whole screen. "top 30%" let
+          // it begin while the closing was still arriving from below.
+          start: "top top",
           endTrigger: document.body,
           end: "bottom bottom",
           scrub: true,
