@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="googlebot" content="noindex, nofollow" />
+
+    <title>Bullfinch Earth - Compressed Teaser Study</title>
+    <meta name="description" content="Bullfinch Earth maps forests while foresters do their normal jobs." />
+    <link rel="icon" type="image/svg+xml" href="bullfinch-mark.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&amp;family=Geist+Mono:wght@400..600&amp;family=Inter:wght@400..700&amp;display=swap"
+    />
+
+    <style>
+      :root {
+        --paper: #e7dfc4;
+        --paper-deep: #d8d5ab;
+        --forest: #16251b;
+        --forest-soft: #425748;
+        --forest-quiet: #607164;
+        --night: #11271b;
+        --night-soft: #183424;
+        --cream: #f4efd9;
+        --cream-soft: #d2d8c5;
+        --green: #2bff6b;
+        --red: #ff5560;
+        --rule: rgba(22, 37, 27, 0.2);
+        --pad: clamp(24px, 4.45vw, 72px);
+        --display: "Geist", "Inter", system-ui, sans-serif;
+        --body: "Inter", system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body, h1, h2, h3, p, figure { margin: 0; }
+      body {
+        min-width: 320px;
+        overflow-x: hidden;
+        color: var(--forest);
+        background: var(--paper);
+        font-family: var(--body);
+        -webkit-font-smoothing: antialiased;
+      }
+      img, svg, video { display: block; max-width: 100%; }
+      a { color: inherit; }
+      button { font: inherit; }
+      :focus-visible { outline: 2px solid var(--red); outline-offset: 4px; }
+
+      .site-nav {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        min-height: 78px;
+        padding: 0 var(--pad);
+        border-bottom: 1px solid rgba(22, 37, 27, 0.16);
+        background: rgba(231, 223, 196, 0.94);
+        backdrop-filter: blur(12px);
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        width: max-content;
+        text-decoration: none;
+      }
+      .brand svg { width: 38px; height: 30px; }
+      .brand__name {
+        font: 600 12px/1 var(--mono);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      .chapter-nav { display: flex; gap: clamp(18px, 2.2vw, 36px); }
+      .chapter-nav a,
+      .social-link {
+        font: 500 10px/1 var(--mono);
+        letter-spacing: 0.13em;
+        text-decoration: none;
+        text-transform: uppercase;
+        color: var(--forest-quiet);
+      }
+      .chapter-nav a:hover,
+      .chapter-nav a:focus-visible,
+      .social-link:hover,
+      .social-link:focus-visible { color: var(--forest); }
+      .social-link {
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .social-link svg { width: 15px; height: 15px; }
+
+      .chapter {
+        position: relative;
+        min-height: 100svh;
+        padding: clamp(110px, 13vh, 150px) var(--pad) clamp(58px, 8vh, 90px);
+        border-bottom: 1px solid var(--rule);
+      }
+      .chapter__eyebrow {
+        font: 500 11px/1.2 var(--mono);
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+        color: var(--forest-quiet);
+      }
+      .chapter__title {
+        max-width: 15ch;
+        font: 500 clamp(46px, 6.5vw, 108px)/0.9 var(--display);
+        letter-spacing: -0.055em;
+        text-wrap: balance;
+      }
+      .chapter__title .accent { color: var(--red); }
+      .chapter__intro {
+        max-width: 58ch;
+        color: var(--forest-soft);
+        font-size: clamp(16px, 1.2vw, 20px);
+        line-height: 1.55;
+        text-align: justify;
+        text-align-last: left;
+      }
+      .rule-label {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font: 500 10px/1 var(--mono);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--forest-quiet);
+      }
+      .rule-label::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+      /* 00: the team is part of the first impression, not a footer detour. */
+      .hero {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        gap: clamp(44px, 6vh, 76px);
+      }
+      .hero__lead {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.55fr);
+        align-items: end;
+        gap: clamp(40px, 7vw, 120px);
+      }
+      .hero__copy { display: grid; gap: 28px; }
+      .hero__side { display: grid; gap: 24px; align-self: end; }
+      .hero__proof {
+        padding-top: 18px;
+        border-top: 1px solid var(--forest);
+        font: 500 clamp(12px, 1vw, 15px)/1.5 var(--mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .team-rail {
+        display: grid;
+        grid-template-columns: auto repeat(3, minmax(0, 1fr));
+        border-top: 1px solid var(--forest);
+        border-bottom: 1px solid var(--forest);
+      }
+      .team-rail__label {
+        min-width: clamp(150px, 15vw, 230px);
+        padding: 20px 24px 20px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 28px;
+      }
+      .team-rail__label strong {
+        font: 500 clamp(20px, 2vw, 31px)/1.05 var(--display);
+        letter-spacing: -0.035em;
+      }
+      .person {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        align-items: center;
+        gap: 16px;
+        padding: 16px clamp(14px, 1.6vw, 26px);
+        border-left: 1px solid var(--rule);
+      }
+      .person img {
+        width: 84px;
+        aspect-ratio: 0.89;
+        object-fit: cover;
+        object-position: center top;
+        background: var(--paper-deep);
+      }
+      .person__name { font: 600 clamp(14px, 1.15vw, 18px)/1.15 var(--display); }
+      .person__role {
+        margin-top: 7px;
+        color: var(--forest-quiet);
+        font: 500 9px/1.4 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .person__proof { margin-top: 10px; color: var(--forest-soft); font-size: 12px; line-height: 1.35; }
+
+      /* 01: one problem statement, one image, one proof point. */
+      .problem { background: var(--paper-deep); }
+      .problem__grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+        min-height: calc(100svh - 220px);
+        align-items: center;
+        gap: clamp(48px, 8vw, 140px);
+      }
+      .problem__copy { display: grid; gap: clamp(28px, 4vh, 50px); }
+      .problem__image { position: relative; align-self: stretch; min-height: 520px; }
+      .problem__image img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.72); }
+      .problem__stat {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: min(52%, 310px);
+        padding: 22px;
+        color: var(--cream);
+        background: var(--night);
+      }
+      .problem__stat strong {
+        display: block;
+        font: 500 clamp(54px, 6vw, 94px)/0.8 var(--display);
+        letter-spacing: -0.06em;
+      }
+      .problem__stat span {
+        display: block;
+        margin-top: 15px;
+        font: 500 10px/1.4 var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* 02: the single demonstration chapter. */
+      .product { background: var(--paper); }
+      .product__heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.55fr);
+        align-items: end;
+        gap: 50px;
+        margin-bottom: clamp(36px, 5vh, 60px);
+      }
+      .product__heading-copy { display: grid; gap: 20px; }
+      .product__heading .chapter__title { font-size: clamp(44px, 5.3vw, 86px); }
+      .product__promise {
+        padding-top: 18px;
+        border-top: 1px solid var(--forest);
+        color: var(--forest-soft);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .demo-grid {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.68fr) minmax(520px, 1.32fr);
+        gap: 16px;
+      }
+      .demo-card { position: relative; overflow: hidden; background: var(--night); color: var(--cream); }
+      .demo-card__bar {
+        min-height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 0 18px;
+        border-bottom: 1px solid rgba(244, 239, 217, 0.22);
+        font: 500 9px/1 var(--mono);
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        color: var(--cream-soft);
+      }
+      .demo-card__status { display: inline-flex; align-items: center; gap: 7px; color: var(--green); }
+      .demo-card__status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+      .field-demo { min-height: 530px; }
+      .field-demo video { width: 100%; height: 404px; object-fit: cover; background: #0b1610; }
+      .field-demo__caption {
+        position: relative;
+        padding: 18px 20px 20px;
+        background: rgba(10, 24, 16, 0.88);
+      }
+      .field-demo__caption strong { display: block; font: 500 22px/1.05 var(--display); }
+      .field-demo__caption span { display: block; margin-top: 7px; color: var(--cream-soft); font-size: 12px; }
+
+      .map-demo { min-height: 530px; background: #8da55d; color: var(--forest); }
+      .map-demo .demo-card__bar { color: var(--cream); background: var(--night); }
+      .map-stage { position: relative; height: 476px; overflow: hidden; }
+      .map-stage > svg { width: 100%; height: 100%; }
+      .map-controls {
+        position: absolute;
+        left: 18px;
+        top: 18px;
+        width: min(255px, calc(100% - 36px));
+        padding: 16px;
+        color: var(--cream);
+        background: rgba(17, 39, 27, 0.92);
+      }
+      .map-controls__title {
+        margin-bottom: 14px;
+        font: 600 10px/1 var(--mono);
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+      .map-field { padding: 11px 0; border-top: 1px solid rgba(244, 239, 217, 0.2); }
+      .map-field:last-child { padding-bottom: 0; }
+      .map-field__label { display: block; color: var(--cream-soft); font: 500 9px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+      .map-field__value { display: flex; justify-content: space-between; gap: 12px; margin-top: 7px; font-size: 13px; }
+      .map-field__value b { color: var(--green); font-family: var(--mono); font-size: 11px; }
+      .map-key {
+        position: absolute;
+        right: 18px;
+        bottom: 18px;
+        display: grid;
+        gap: 7px;
+        padding: 12px;
+        color: var(--cream);
+        background: rgba(17, 39, 27, 0.92);
+        font: 500 8px/1 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .map-key span { display: flex; align-items: center; gap: 7px; }
+      .key-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+      .key-route { width: 14px; height: 2px; background: var(--red); }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: 16px;
+        border-top: 1px solid var(--forest);
+        border-bottom: 1px solid var(--forest);
+      }
+      .step { padding: 16px 18px; border-left: 1px solid var(--rule); }
+      .step:first-child { border-left: 0; padding-left: 0; }
+      .step strong { display: block; color: var(--red); font: 500 22px/1 var(--display); }
+      .step span { display: block; margin-top: 7px; color: var(--forest-soft); font-size: 12px; line-height: 1.4; }
+
+      /* 03: audiences, proof and action share one final chapter. */
+      .final { color: var(--cream); background: var(--night); border: 0; padding-bottom: 0; }
+      .final .chapter__eyebrow,
+      .final .chapter__intro { color: var(--cream-soft); }
+      .final__top {
+        display: grid;
+        grid-template-columns: minmax(0, 0.82fr) minmax(520px, 1.18fr);
+        align-items: end;
+        gap: clamp(50px, 8vw, 130px);
+      }
+      .final__copy { display: grid; gap: 28px; }
+      .audiences { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgba(244, 239, 217, 0.35); }
+      .audience { min-height: 116px; padding: 18px 20px; border-right: 1px solid rgba(244, 239, 217, 0.2); border-bottom: 1px solid rgba(244, 239, 217, 0.2); }
+      .audience:nth-child(even) { border-right: 0; }
+      .audience h3 { font: 500 18px/1.1 var(--display); }
+      .audience p { margin-top: 10px; color: var(--cream-soft); font-size: 12px; line-height: 1.4; }
+      .final__cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+        margin: clamp(48px, 7vh, 84px) 0;
+        padding: 30px 0;
+        border-top: 1px solid rgba(244, 239, 217, 0.35);
+        border-bottom: 1px solid rgba(244, 239, 217, 0.35);
+      }
+      .final__cta h3 { max-width: 18ch; font: 500 clamp(27px, 3vw, 46px)/0.98 var(--display); letter-spacing: -0.035em; }
+      .cta-link {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50px;
+        padding: 0 24px;
+        color: var(--night);
+        background: var(--red);
+        font: 600 10px/1 var(--mono);
+        letter-spacing: 0.14em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+      .cta-link:hover { background: var(--cream); }
+      .trust-line { border-top: 1px solid rgba(244, 239, 217, 0.35); }
+      .trust-line__label { padding: 16px 0; font: 500 9px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream-soft); }
+      .trust-strip { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 1px solid rgba(244, 239, 217, 0.2); }
+      .trust-strip div { min-height: 86px; display: grid; place-items: center; padding: 17px; border-left: 1px solid rgba(244, 239, 217, 0.2); }
+      .trust-strip div:first-child { border-left: 0; }
+      .trust-strip img { max-height: 34px; width: auto; opacity: 0.9; }
+      .trust-strip img[alt="UK Space Agency"] { transform: scale(0.72); }
+      .site-footer {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: end;
+        gap: 30px;
+        min-height: 110px;
+        padding: 22px 0 max(22px, env(safe-area-inset-bottom));
+        color: var(--cream-soft);
+        font: 500 9px/1.45 var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .site-footer__mark { width: 40px; }
+      .site-footer__centre { text-align: center; }
+      .site-footer__top { justify-self: end; color: var(--cream-soft); text-decoration: none; }
+
+      @media (max-width: 1080px) {
+        .site-nav { grid-template-columns: 1fr auto; }
+        .chapter-nav { display: none; }
+        .hero__lead, .product__heading, .final__top { grid-template-columns: 1fr; }
+        .hero__side { max-width: 600px; }
+        .team-rail { grid-template-columns: repeat(3, 1fr); }
+        .team-rail__label { grid-column: 1 / -1; width: 100%; min-width: 0; flex-direction: row; align-items: center; padding-right: 0; }
+        .person:first-of-type { border-left: 0; }
+        .problem__grid { grid-template-columns: 1fr 1fr; gap: 46px; }
+        .demo-grid { grid-template-columns: 0.82fr 1.18fr; }
+        .field-demo video { height: 368px; }
+        .map-stage { height: 440px; }
+        .field-demo, .map-demo { min-height: 494px; }
+      }
+
+      @media (max-width: 760px) {
+        .site-nav { min-height: 66px; }
+        .brand__name, .social-link span { display: none; }
+        .chapter { min-height: 0; padding-top: 100px; }
+        .hero__lead, .problem__grid, .product__heading, .demo-grid, .final__top { grid-template-columns: 1fr; }
+        .hero { min-height: 100svh; }
+        .team-rail { grid-template-columns: 1fr; }
+        .person { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; }
+        .problem__image { min-height: 460px; }
+        .product__heading { gap: 25px; }
+        .demo-grid { gap: 12px; }
+        .field-demo video { height: 358px; }
+        .map-stage { height: 430px; }
+        .map-controls { width: 220px; }
+        .steps { grid-template-columns: 1fr; }
+        .step, .step:first-child { padding: 14px 0; border-left: 0; border-top: 1px solid var(--rule); }
+        .step:first-child { border-top: 0; }
+        .trust-strip { grid-template-columns: repeat(2, 1fr); }
+        .trust-strip div:nth-child(odd) { border-left: 0; }
+        .trust-strip div { border-bottom: 1px solid rgba(244, 239, 217, 0.2); }
+        .final__cta { align-items: flex-start; flex-direction: column; }
+        .site-footer { grid-template-columns: 1fr auto; }
+        .site-footer__centre { display: none; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="site-nav" aria-label="Teaser chapters">
+      <a class="brand" href="#start" aria-label="Bullfinch Earth, back to start">
+        <svg viewBox="50 35 100 70" aria-hidden="true">
+          <path fill="#16251b" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+          <path fill="#ff5560" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+        </svg>
+        <span class="brand__name">Bullfinch Earth</span>
+      </a>
+      <div class="chapter-nav" aria-label="Jump to chapter">
+        <a href="#start">00 Team</a>
+        <a href="#problem">01 Problem</a>
+        <a href="#product">02 Product</a>
+        <a href="#opportunity">03 Fit</a>
+      </div>
+      <a class="social-link" href="https://ca.linkedin.com/company/bullfinchearth" target="_blank" rel="noopener noreferrer" aria-label="Bullfinch Earth on LinkedIn">
+        <span>LinkedIn</span>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.34 7.63H1.8V19h3.54V7.63ZM3.57 2A2.05 2.05 0 1 0 3.57 6.1 2.05 2.05 0 0 0 3.57 2ZM19.2 7.37c-1.7 0-2.84.93-3.3 1.82h-.05V7.63h-3.4V19H16v-5.63c0-1.48.28-2.92 2.12-2.92 1.81 0 1.83 1.7 1.83 3.02V19h3.55v-6.24c0-3.07-.66-5.39-4.3-5.39Z"/></svg>
+      </a>
+    </nav>
+
+    <main>
+      <section class="chapter hero" id="start" aria-labelledby="start-title">
+        <div class="hero__lead">
+          <div class="hero__copy">
+            <p class="chapter__eyebrow">00 · Ground truth from the ground up</p>
+            <h1 class="chapter__title" id="start-title">Forests mapped while the work gets <span class="accent">done.</span></h1>
+          </div>
+          <div class="hero__side">
+            <p class="chapter__intro">Bullfinch Earth measures, monitors, and maps every stem, passively, while foresters do their normal jobs.</p>
+            <p class="hero__proof">Built by people who ship sensors, read Mars, and know the forest.</p>
+          </div>
+        </div>
+
+        <div class="team-rail" aria-label="Bullfinch Earth leadership team">
+          <div class="team-rail__label">
+            <span class="chapter__eyebrow">Meet the team</span>
+            <strong>Credibility up front.</strong>
+          </div>
+          <article class="person">
+            <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+            <div><h2 class="person__name">Seth Sternberg</h2><p class="person__role">CEO · The sensor guy</p><p class="person__proof">400M+ shipped products across AR, VR, IoT, and sensor fusion.</p></div>
+          </article>
+          <article class="person">
+            <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
+            <div><h2 class="person__name">Tim Goodsall, PhD</h2><p class="person__role">CTO · The Mars guy</p><p class="person__proof">Built cameras now operating on Mars with NASA JPL.</p></div>
+          </article>
+          <article class="person">
+            <img src="assets/graham-headshot.png" alt="Graham Smith" />
+            <div><h2 class="person__name">Graham Smith</h2><p class="person__role">CCO · The field guy</p><p class="person__proof">A decade of BC forestry, field operations, and customer depth.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="chapter problem" id="problem" aria-labelledby="problem-title">
+        <div class="problem__grid">
+          <div class="problem__copy">
+            <p class="chapter__eyebrow">01 · The old way</p>
+            <h2 class="chapter__title" id="problem-title">Dedicated inventories are so 19th century.</h2>
+            <p class="chapter__intro">Inventory data drives forest operations, conservation, wildfire risk, and carbon MRV. It is still collected manually, through slow dedicated trips that usually measure less than one percent of what is actually there.</p>
+            <p class="rule-label">The problem, in one frame</p>
+          </div>
+          <figure class="problem__image">
+            <img src="assets/foresters-measuring.jpg" alt="Foresters taking manual tree measurements in the field" />
+            <figcaption class="problem__stat"><strong>&lt;1%</strong><span>of trees usually measured</span></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="chapter product" id="product" aria-labelledby="product-title">
+        <div class="product__heading">
+          <div class="product__heading-copy">
+            <p class="chapter__eyebrow">02 · The Bullfinch way</p>
+            <h2 class="chapter__title" id="product-title">Is it really this easy?</h2>
+          </div>
+          <p class="product__promise">One demonstration replaces several transitions: the wearable working in the field beside the map it creates.</p>
+        </div>
+
+        <div class="demo-grid">
+          <figure class="demo-card field-demo">
+            <div class="demo-card__bar"><span>Wearable · Field view</span><span class="demo-card__status">Recording</span></div>
+            <video controls playsinline preload="metadata" aria-label="Bullfinch wearable sensor in use in the field">
+              <source src="assets/field-placeholder.mp4" type="video/mp4" />
+            </video>
+            <figcaption class="field-demo__caption"><strong>Wear it. Keep working.</strong><span>The sensor stays out of the way while field work continues.</span></figcaption>
+          </figure>
+
+          <figure class="demo-card map-demo" id="map-demo">
+            <div class="demo-card__bar"><span>Coverage map · Interaction study</span><span class="demo-card__status">24 stems mapped</span></div>
+            <div class="map-stage">
+              <svg viewBox="0 0 760 476" role="img" aria-labelledby="map-title map-desc">
+                <title id="map-title">Prototype forest coverage map</title>
+                <desc id="map-desc">A selected forest area, plotted trees, and a forester marker following a walking route.</desc>
+                <rect width="760" height="476" fill="#8da55d"/>
+                <g fill="none" stroke="#607744" stroke-width="1.4" opacity="0.64">
+                  <path d="M-40 93C73 33 136 154 250 91s171-80 273-22 160 66 281 7"/>
+                  <path d="M-48 131C74 73 139 192 261 127s173-75 274-18 153 62 280 4"/>
+                  <path d="M-45 177C63 111 159 229 274 167s181-72 281-10 143 54 263-7"/>
+                  <path d="M-34 223C82 159 165 269 284 211s181-61 283-3 141 48 253-16"/>
+                  <path d="M-55 283C58 217 171 326 291 264s187-53 286 4 139 42 249-29"/>
+                  <path d="M-56 346C71 274 180 383 306 319s186-45 289 13 134 31 241-38"/>
+                  <path d="M-45 405C76 341 186 441 323 375s185-36 288 21 133 20 237-41"/>
+                </g>
+                <path d="M300 78 609 102 678 352 531 423 255 374 238 177Z" fill="rgba(244,239,217,.13)" stroke="#f4efd9" stroke-width="2" stroke-dasharray="8 7"/>
+                <g fill="#16251b" opacity="0.52">
+                  <circle cx="291" cy="120" r="5"/><circle cx="334" cy="105" r="6"/><circle cx="382" cy="130" r="4"/><circle cx="444" cy="109" r="6"/><circle cx="506" cy="133" r="5"/><circle cx="567" cy="122" r="5"/><circle cx="615" cy="155" r="6"/>
+                  <circle cx="270" cy="194" r="5"/><circle cx="323" cy="175" r="6"/><circle cx="369" cy="201" r="5"/><circle cx="427" cy="177" r="4"/><circle cx="477" cy="205" r="6"/><circle cx="545" cy="184" r="5"/><circle cx="631" cy="218" r="5"/>
+                  <circle cx="286" cy="261" r="6"/><circle cx="341" cy="242" r="4"/><circle cx="398" cy="275" r="6"/><circle cx="452" cy="244" r="5"/><circle cx="512" cy="273" r="4"/><circle cx="576" cy="255" r="6"/><circle cx="644" cy="291" r="5"/>
+                  <circle cx="310" cy="326" r="5"/><circle cx="366" cy="347" r="6"/><circle cx="421" cy="321" r="4"/><circle cx="475" cy="352" r="6"/><circle cx="532" cy="326" r="5"/><circle cx="595" cy="354" r="5"/>
+                </g>
+                <g fill="#2bff6b">
+                  <circle cx="334" cy="105" r="4"/><circle cx="382" cy="130" r="3"/><circle cx="444" cy="109" r="4"/><circle cx="506" cy="133" r="3"/><circle cx="323" cy="175" r="4"/><circle cx="369" cy="201" r="3"/><circle cx="427" cy="177" r="3"/><circle cx="477" cy="205" r="4"/><circle cx="341" cy="242" r="3"/><circle cx="398" cy="275" r="4"/><circle cx="452" cy="244" r="3"/><circle cx="512" cy="273" r="3"/><circle cx="366" cy="347" r="4"/><circle cx="421" cy="321" r="3"/><circle cx="475" cy="352" r="4"/>
+                </g>
+                <path id="walk-route" d="M277 351C312 317 332 284 374 275S441 246 459 211 493 167 548 146 581 122 600 116" fill="none" stroke="#ff5560" stroke-width="4" stroke-linecap="round" stroke-dasharray="7 9"/>
+                <g id="walker" transform="translate(277 351)">
+                  <circle r="12" fill="#f4efd9" stroke="#16251b" stroke-width="3"/>
+                  <circle r="4" fill="#ff5560"/>
+                  <animateMotion id="walker-motion" dur="5s" begin="indefinite" fill="freeze" path="M0 0C35-34 55-67 97-76s67-29 85-64 34-44 89-65 33-24 52-30"/>
+                </g>
+              </svg>
+              <div class="map-controls" aria-label="Coverage inputs">
+                <p class="map-controls__title">Plan a Bullfinch walk</p>
+                <div class="map-field"><span class="map-field__label">Walk area</span><span class="map-field__value">North Block 04 <b>128 ha</b></span></div>
+                <div class="map-field"><span class="map-field__label">Coverage target</span><span class="map-field__value">Full inventory <b>100%</b></span></div>
+                <div class="map-field"><span class="map-field__label">Forester</span><span class="map-field__value">In field <b>Live</b></span></div>
+              </div>
+              <div class="map-key" aria-hidden="true"><span><i class="key-dot"></i>Mapped stem</span><span><i class="key-route"></i>Forester route</span></div>
+            </div>
+          </figure>
+        </div>
+
+        <div class="steps" aria-label="How Bullfinch works">
+          <div class="step"><strong>Wear</strong><span>Attach Bullfinch securely to a vest.</span></div>
+          <div class="step"><strong>Walk</strong><span>Set the area and do the field work already planned.</span></div>
+          <div class="step"><strong>Data</strong><span>Receive complete stem maps and stand data automatically.</span></div>
+        </div>
+      </section>
+
+      <section class="chapter final" id="opportunity" aria-labelledby="opportunity-title">
+        <div class="final__top">
+          <div class="final__copy">
+            <p class="chapter__eyebrow">03 · Who it is for</p>
+            <h2 class="chapter__title" id="opportunity-title">Better field data. More useful forests.</h2>
+            <p class="chapter__intro">Ground truth at operational scale for the people making decisions below the canopy.</p>
+          </div>
+          <div class="audiences">
+            <article class="audience"><h3>Timber companies</h3><p>Know what you are bringing to market.</p></article>
+            <article class="audience"><h3>Consulting foresters</h3><p>Complete more billable projects each season.</p></article>
+            <article class="audience"><h3>Carbon and MRV</h3><p>Ground truth that registries can trust.</p></article>
+            <article class="audience"><h3>Wildfire and insurance</h3><p>Below-canopy fuel data at scale.</p></article>
+          </div>
+        </div>
+
+        <div class="final__cta">
+          <h3>See what one walk can reveal.</h3>
+          <a class="cta-link" href="mailto:hello@bullfinch.earth?subject=Bullfinch%20Earth%20demo%20request">Request a demo</a>
+        </div>
+
+        <div class="trust-line">
+          <p class="trust-line__label">Partners and recognition</p>
+          <div class="trust-strip" aria-label="Bullfinch Earth partners and recognition">
+            <div><img src="assets/logos/reversed/weyerhaeuser.png" alt="Weyerhaeuser" /></div>
+            <div><img src="assets/logos/reversed/nhri.png" alt="Northern Hardwoods Research Institute" /></div>
+            <div><img src="assets/logos/reversed/longview.png" alt="Long View Forest" /></div>
+            <div><img src="assets/logos/reversed/uksa.png" alt="UK Space Agency" /></div>
+            <div><img src="assets/logos/reversed/fba.png" alt="Forest Business Accelerator" /></div>
+            <div><img src="assets/logos/reversed/okanagan-angel-summit.png" alt="Okanagan Angel Summit" /></div>
+          </div>
+        </div>
+
+        <footer class="site-footer">
+          <svg class="site-footer__mark" viewBox="50 35 100 70" aria-label="Bullfinch Earth">
+            <path fill="#f4efd9" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+            <path fill="#ff5560" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+          </svg>
+          <p class="site-footer__centre">Bullfinch Earth<br />The FICO of forests</p>
+          <a class="site-footer__top" href="#start">Back to top ↑</a>
+        </footer>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        var map = document.getElementById("map-demo");
+        var motion = document.getElementById("walker-motion");
+        if (!map || !motion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var played = false;
+        var observer = new IntersectionObserver(function (entries) {
+          if (!played && entries[0].isIntersecting) {
+            played = true;
+            motion.beginElement();
+            observer.disconnect();
+          }
+        }, { threshold: 0.45 });
+        observer.observe(map);
+      })();
+    </script>
+  </body>
+</html>
