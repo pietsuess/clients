@@ -2224,11 +2224,32 @@
       var take = 0;
       var TREE_TINT = customTreeGradient ? 1.0 : 0.55;
       var TREE_TINT_POWER = customTreeGradient ? 1.0 : 2.2;
+      var TREE_GRADIENT_SLOPE = readCssNumber("--gl-tree-slope", 0.055);
+      var TREE_GRADIENT_WAVE = readCssNumber("--gl-tree-wave", 0.028);
+      var TREE_GRADIENT_DITHER = readCssNumber("--gl-tree-dither", 0.065);
+
+      // Dev-only contour breakup. A shallow diagonal and low wave stop the
+      // colour bands reading as level cuts; stable per-point noise dithers the
+      // remaining edge into the cloud. Legacy pages retain the original pure
+      // height ramp because customTreeGradient is false there.
+      function treeGradientTint(pointIndex) {
+        var tp = pointIndex * 3;
+        var ty = treeNorm[tp + 1];
+        if (!customTreeGradient) return Math.pow(ty, TREE_TINT_POWER) * TREE_TINT;
+        var treeId = clusterAssignment[pointIndex];
+        var localX = treeNorm[tp] - clusterMeans[treeId];
+        var tz = treeNorm[tp + 2];
+        var diagonal = localX * TREE_GRADIENT_SLOPE;
+        var wave = Math.sin(localX * 18.0 + tz * 7.0 + treeId * 1.7) * TREE_GRADIENT_WAVE;
+        var noise = Math.sin(treeNorm[tp] * 127.1 + ty * 311.7 + tz * 74.7 + treeId * 19.19) * 43758.5453;
+        var dither = (noise - Math.floor(noise) - 0.5) * TREE_GRADIENT_DITHER;
+        return tClamp01(ty + diagonal + wave + dither);
+      }
       for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
         moteNormIdx[mi] = idx[take];
         moteTreeIdx[mi] = clusterAssignment[idx[take]];
         moteFormSeed[mi] = treeNorm[idx[take] * 3 + 1];
-        treeTint[mi] = Math.pow(treeNorm[idx[take] * 3 + 1], TREE_TINT_POWER) * TREE_TINT;
+        treeTint[mi] = treeGradientTint(idx[take]);
       }
       partGeo.attributes.aTreeTint.needsUpdate = true;
 
@@ -2252,7 +2273,7 @@
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
         fillClusterCenter[fi] = treeClusterCenter[idx[take + fi]];
         fillTreeIdx[fi] = clusterAssignment[idx[take + fi]];
-        fillTint[fi] = Math.pow(treeNorm[si + 1], TREE_TINT_POWER) * TREE_TINT;
+        fillTint[fi] = treeGradientTint(idx[take + fi]);
         // Closing/star target (and the open-cloud fly-in origin): distributed
         // EVENLY in screen space through the landed camera, like the main
         // closing motes, and pushed WIDE so most of it sits off-frame — a
