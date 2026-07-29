@@ -720,11 +720,19 @@
            something to sit on), and the old values were tuned for sitting
            in front of the canvas rather than behind it. */
         filter: saturate(0.55) brightness(0.5) contrast(1.05) hue-rotate(-6deg);
-        /* Fades UP in place across the closing settle. Nothing translates. */
-        opacity: calc(var(--final-field-p, 0) * 0.75);
+        /* Fades UP in place across its OWN late window, not the scene's
+           disassembly. It used to ride --final-field-p, which is the same
+           progress that pulls the tree apart — so the photo was fully in
+           long before the scroll ended. --final-photo-p starts later and
+           only completes at the true bottom of the document.
+           Nothing translates: the scale is a centred push-in, so the plate
+           stays full-bleed and no edge ever enters frame. */
+        opacity: calc(var(--final-photo-p, 0) * 0.75);
+        transform: scale(calc(1.05 - var(--final-photo-p, 0) * 0.05));
+        will-change: opacity, transform;
       }
-      /* No class gate. --final-field-p is 0 everywhere except the closing,
-         so the opacity calc alone keeps it invisible — and unlike
+      /* No class gate. --final-photo-p is 0 everywhere except the closing
+         run-out, so the opacity calc alone keeps it invisible — and unlike
          is-final-contrast (which nothing in this build actually toggles) it
          cannot get stuck. */
       .closing__inner { max-width: none; gap: clamp(12px, 2vh, 20px); }
@@ -2475,6 +2483,35 @@
             document.documentElement.style.setProperty("--final-field-p", "0");
             document.documentElement.style.setProperty("--tree-crisp-offset", "0");
             document.body.classList.remove("is-tree-stage");
+          },
+        });
+
+        // Closing canopy photograph: its OWN window, deliberately not the
+        // scene's. --final-field-p ends at "closing top 44%" because that is
+        // where the tree has finished coming apart, and the photograph riding
+        // it meant the last image was already fully resolved with a screen of
+        // scroll still to go. This starts later (closing top 30%) and lands on
+        // "bottom bottom" — the actual end of the document — so the picture is
+        // still arriving on the final pixel of the scroll.
+        // Separate trigger, not extra math inside applyTreeField: that handler
+        // stops updating at its own end, which would freeze the photo mid-fade.
+        // The scene is untouched here. Do not fold this back into fieldP.
+        function applyClosingPhoto(self) {
+          var p = smootherstep(self.progress);
+          document.documentElement.style.setProperty("--final-photo-p", p.toFixed(3));
+        }
+
+        ScrollTrigger.create({
+          trigger: closing,
+          start: "top 30%",
+          endTrigger: document.body,
+          end: "bottom bottom",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: applyClosingPhoto,
+          onRefresh: applyClosingPhoto,
+          onLeaveBack: function () {
+            document.documentElement.style.setProperty("--final-photo-p", "0");
           },
         });
         ScrollTrigger.refresh();
