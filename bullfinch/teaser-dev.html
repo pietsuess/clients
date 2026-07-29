@@ -2506,9 +2506,14 @@
 
         ScrollTrigger.create({
           trigger: closing,
-          // Starts only once the closing owns the whole screen. "top 30%" let
-          // it begin while the closing was still arriving from below.
-          start: "top top",
+          // .closing is min-height:100vh and is the LAST section in <main>, so
+          // its top reaches the top of the viewport at exactly maximum scroll.
+          // "top top" -> "bottom bottom" is therefore a ZERO-LENGTH window:
+          // the photo went 0 -> 1 in one scroll position, which is the pop.
+          // The start has to sit while the closing is still rising or there is
+          // no runway at all. 65% is about where the closing reads as arrived
+          // and leaves 65vh of scroll that ends on the last pixel of the page.
+          start: "top 65%",
           endTrigger: document.body,
           end: "bottom bottom",
           scrub: true,
@@ -2737,8 +2742,51 @@
             if (request) request.call(document.documentElement);
           }
         });
+        // Entering/leaving fullscreen changes the viewport, and NOTHING here
+        // was re-measuring afterwards, so the pinned panels kept their
+        // windowed dimensions — 01 stranded in the top-left corner with dead
+        // page around it. The refresh used to live in the legacy splash
+        // initializer further down, which returns immediately on this page
+        // (there is no #splash in the teaser), so it has never once run.
+        // Keep this HERE, in the block that actually executes.
+        function refreshLayoutAfterViewportChange() {
+          window.dispatchEvent(new Event("resize"));
+          if (window.lenis && window.lenis.resize) window.lenis.resize();
+          if (window.ScrollTrigger && window.ScrollTrigger.refresh) window.ScrollTrigger.refresh();
+        }
+
+        // macOS animates into fullscreen, and the animation is as long as the
+        // OS says it is — a fixed timeout is a bet. Watch the viewport instead
+        // and re-measure once innerWidth/innerHeight have held still for
+        // 250ms. 4s cap so it can never spin.
+        var settleRaf = 0;
+        function settleThenRefresh() {
+          if (settleRaf) cancelAnimationFrame(settleRaf);
+          var lastW = window.innerWidth;
+          var lastH = window.innerHeight;
+          var stableSince = performance.now();
+          var deadline = stableSince + 4000;
+          function tick(now) {
+            if (window.innerWidth !== lastW || window.innerHeight !== lastH) {
+              lastW = window.innerWidth;
+              lastH = window.innerHeight;
+              stableSince = now;
+            }
+            if (now - stableSince >= 250 || now >= deadline) {
+              settleRaf = 0;
+              refreshLayoutAfterViewportChange();
+              return;
+            }
+            settleRaf = requestAnimationFrame(tick);
+          }
+          settleRaf = requestAnimationFrame(tick);
+        }
+
         ["fullscreenchange", "webkitfullscreenchange", "MSFullscreenChange"].forEach(function (name) {
-          document.addEventListener(name, sync);
+          document.addEventListener(name, function () {
+            sync();
+            settleThenRefresh();
+          });
         });
         sync();
       })();
@@ -3332,40 +3380,8 @@
             // clicking a nav item fixed it (scrollToTarget refreshes too).
             setTimeout(refreshLayoutAfterViewportChange, 250);
             setTimeout(refreshLayoutAfterViewportChange, 1000);
-            // ...and a third pass that does not guess. The two timeouts above
-            // are fixed bets against an animation whose length is the OS's
-            // business, not ours: on a big display the fullscreen transition
-            // outruns 1000ms and the pinned panels keep the pre-fullscreen
-            // width AND height, which is 01 sitting in the top-left corner
-            // with dead page around it. This watches the viewport instead —
-            // it re-measures only once innerWidth/innerHeight have held still
-            // for 250ms, and gives up after 4s so it can never spin.
-            settleThenRefresh();
           });
         });
-
-        var settleRaf = 0;
-        function settleThenRefresh() {
-          if (settleRaf) cancelAnimationFrame(settleRaf);
-          var lastW = window.innerWidth;
-          var lastH = window.innerHeight;
-          var stableSince = performance.now();
-          var deadline = stableSince + 4000;
-          function tick(now) {
-            if (window.innerWidth !== lastW || window.innerHeight !== lastH) {
-              lastW = window.innerWidth;
-              lastH = window.innerHeight;
-              stableSince = now;
-            }
-            if (now - stableSince >= 250 || now >= deadline) {
-              settleRaf = 0;
-              refreshLayoutAfterViewportChange();
-              return;
-            }
-            settleRaf = requestAnimationFrame(tick);
-          }
-          settleRaf = requestAnimationFrame(tick);
-        }
 
         // Advance on a click ANYWHERE on the splash, not just the logo button.
         // Entering the presentation no longer forces fullscreen -- it just
