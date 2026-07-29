@@ -3332,8 +3332,40 @@
             // clicking a nav item fixed it (scrollToTarget refreshes too).
             setTimeout(refreshLayoutAfterViewportChange, 250);
             setTimeout(refreshLayoutAfterViewportChange, 1000);
+            // ...and a third pass that does not guess. The two timeouts above
+            // are fixed bets against an animation whose length is the OS's
+            // business, not ours: on a big display the fullscreen transition
+            // outruns 1000ms and the pinned panels keep the pre-fullscreen
+            // width AND height, which is 01 sitting in the top-left corner
+            // with dead page around it. This watches the viewport instead —
+            // it re-measures only once innerWidth/innerHeight have held still
+            // for 250ms, and gives up after 4s so it can never spin.
+            settleThenRefresh();
           });
         });
+
+        var settleRaf = 0;
+        function settleThenRefresh() {
+          if (settleRaf) cancelAnimationFrame(settleRaf);
+          var lastW = window.innerWidth;
+          var lastH = window.innerHeight;
+          var stableSince = performance.now();
+          var deadline = stableSince + 4000;
+          function tick(now) {
+            if (window.innerWidth !== lastW || window.innerHeight !== lastH) {
+              lastW = window.innerWidth;
+              lastH = window.innerHeight;
+              stableSince = now;
+            }
+            if (now - stableSince >= 250 || now >= deadline) {
+              settleRaf = 0;
+              refreshLayoutAfterViewportChange();
+              return;
+            }
+            settleRaf = requestAnimationFrame(tick);
+          }
+          settleRaf = requestAnimationFrame(tick);
+        }
 
         // Advance on a click ANYWHERE on the splash, not just the logo button.
         // Entering the presentation no longer forces fullscreen -- it just
