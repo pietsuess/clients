@@ -53,6 +53,8 @@
         --gl-mote: #23331f;
         --gl-line: rgba(35, 51, 31, 0.4);
         --gl-light-shaft: #f6e7ad;
+        --gl-tree-base: #000000;
+        --gl-tree-top: #2BFF6B;
         /* Closing night: lifted off black (Piet) — still night forest, but the
            motes and the red dot sit on a colour rather than a void. */
         --gl-final-base: #2E5540;
@@ -552,6 +554,7 @@
       .trust-strip div { height: 58px; padding: 8px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
       .trust-strip div:first-child { border-left: 0; }
       .trust-strip img { max-width: 100%; max-height: 42px; filter: grayscale(1) brightness(.35) sepia(.25) hue-rotate(70deg); opacity: .8; }
+      .trust-strip img[alt="UK Space Agency"] { transform: scale(.85); }
       body.is-final-contrast .trust-strip img { filter: grayscale(1) brightness(0) invert(1); }
       .trust-label {
         min-height: 44px;
@@ -1604,7 +1607,7 @@
       }
     </style>
   </head>
-  <body data-canvas-transparent>
+  <body data-canvas-transparent data-tree-gradient>
     <!-- Closing canopy plate (DEV). FIRST child of <body>, before the canvas:
          both are z-index 0, so DOM order is what puts this underneath. A
          negative z-index would not work — body is its own stacking context
@@ -1947,7 +1950,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-40"></script>
+    <script src="scene-claude-teaser.js?v=claude-41"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
     <script src="swot-claude.js?v=claude-14"></script>

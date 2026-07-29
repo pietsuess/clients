@@ -48,6 +48,15 @@
     return new THREE.Color(raw || "#000000");
   }
 
+  // Tree-gradient colours are authored as the exact screen colours used by
+  // the DOM readouts. ShaderMaterial skips the normal sRGB output conversion,
+  // so undo THREE.Color's input conversion to keep the two greens identical.
+  function readCssScreenColor(name, fallback) {
+    var raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    if (!raw) return fallback.clone();
+    return new THREE.Color(raw).convertLinearToSRGB();
+  }
+
   // Parse rgba(...) -> { color: THREE.Color, alpha: number }
   function readCssRgba(name) {
     var raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -86,6 +95,7 @@
   // can be seen through the mote field. Only teaser-dev sets this; every
   // other page that loads this scene is byte-identical in behaviour.
   var transparentBackdrop = document.body && document.body.hasAttribute("data-canvas-transparent");
+  var customTreeGradient = document.body && document.body.hasAttribute("data-tree-gradient");
   var clearAlpha = transparentBackdrop ? 0 : 1;
   renderer.setClearColor(bgColor, clearAlpha);
 
@@ -647,6 +657,9 @@
     "varying float vStatRank;",
     "uniform vec3  uColor;",
     "uniform vec3  uAccent;",
+    "uniform vec3  uTreeBase;",
+    "uniform vec3  uTreeTop;",
+    "uniform float uCustomTreeGradient;",
     "uniform float uTreeForm;",
     "uniform float uStatForm;",
     "uniform float uStatFill;",
@@ -664,8 +677,12 @@
     "  vec3 statCol = mix(uColor, uAccent, statOn);",
     "  vec3 col = mix(mix(uColor, statCol, uStatForm), uAccent, vRed);",
     "  col = mix(col, uAccent, vGlow * 0.8);",
-    "  // Grove height gradient: base mote color -> accent up the canopy.",
-    "  col = mix(col, uAccent, clamp(vTreeTint * uTreeForm, 0.0, 1.0));",
+    "  // Grove height gradient. Dev can opt into its own floor/canopy pair",
+    "  // without changing the stat grid, closing dot, or ambient mote palette.",
+    "  vec3 legacyTreeCol = mix(col, uAccent, clamp(vTreeTint * uTreeForm, 0.0, 1.0));",
+    "  vec3 customTreeCol = mix(uTreeBase, uTreeTop, clamp(vTreeTint, 0.0, 1.0));",
+    "  float customTreeMix = uCustomTreeGradient * uTreeForm * (1.0 - vRed);",
+    "  col = mix(legacyTreeCol, customTreeCol, customTreeMix);",
     "  // NO glow rings — Piet: never any red rings except the closing pulse",
     "  // wave. vGlow still tints the dot itself red on contact (color mix",
     "  // above), but renders no halo. This also stops the invisible",
@@ -688,6 +705,9 @@
     uniforms: {
       uColor:       { value: readCssColor("--gl-mote") },
       uAccent:      uniforms.uAccent,
+      uTreeBase:    { value: readCssScreenColor("--gl-tree-base", readCssColor("--gl-mote")) },
+      uTreeTop:     { value: readCssScreenColor("--gl-tree-top", uniforms.uAccent.value) },
+      uCustomTreeGradient: { value: customTreeGradient ? 1 : 0 },
       uPixelRatio:  { value: renderer.getPixelRatio() },
       uTime:        uniforms.uTime,
       uPointScale:  { value: 0.78 },
@@ -2169,12 +2189,13 @@
       // The opening seed and closing endpoint are narrative anchors, not tree
       // material. Only the ordinary field motes join the grove.
       var take = 0;
-      var TREE_TINT = 0.55;   // max blend toward the accent at the canopy top
+      var TREE_TINT = customTreeGradient ? 1.0 : 0.55;
+      var TREE_TINT_POWER = customTreeGradient ? 1.0 : 2.2;
       for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
         moteNormIdx[mi] = idx[take];
         moteTreeIdx[mi] = clusterAssignment[idx[take]];
         moteFormSeed[mi] = treeNorm[idx[take] * 3 + 1];
-        treeTint[mi] = Math.pow(treeNorm[idx[take] * 3 + 1], 2.2) * TREE_TINT;
+        treeTint[mi] = Math.pow(treeNorm[idx[take] * 3 + 1], TREE_TINT_POWER) * TREE_TINT;
       }
       partGeo.attributes.aTreeTint.needsUpdate = true;
 
@@ -2198,7 +2219,7 @@
         fillNorm[fi * 3 + 2] = treeNorm[si + 2];
         fillClusterCenter[fi] = treeClusterCenter[idx[take + fi]];
         fillTreeIdx[fi] = clusterAssignment[idx[take + fi]];
-        fillTint[fi] = Math.pow(treeNorm[si + 1], 2.2) * TREE_TINT;
+        fillTint[fi] = Math.pow(treeNorm[si + 1], TREE_TINT_POWER) * TREE_TINT;
         // Closing/star target (and the open-cloud fly-in origin): distributed
         // EVENLY in screen space through the landed camera, like the main
         // closing motes, and pushed WIDE so most of it sits off-frame — a
