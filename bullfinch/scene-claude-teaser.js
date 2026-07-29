@@ -103,6 +103,7 @@
   var transparentBackdrop = document.body && document.body.hasAttribute("data-canvas-transparent");
   var customTreeGradient = document.body && document.body.hasAttribute("data-tree-gradient");
   var fastTreeSpin = document.body && document.body.hasAttribute("data-tree-spin-fast");
+  var repairTreeClusters = document.body && document.body.hasAttribute("data-tree-cluster-repair");
   var clearAlpha = transparentBackdrop ? 0 : 1;
   renderer.setClearColor(bgColor, clearAlpha);
 
@@ -2207,6 +2208,66 @@
           counts[best] += 1;
         }
         for (var kc = 0; kc < 3; kc++) if (counts[kc]) clusterMeans[kc] = sums[kc] / counts[kc];
+      }
+
+      // The three source trees overlap slightly in X, so x-only k-means can
+      // put a boundary vertex on the wrong turntable. Once the trees rotate,
+      // that point swings away from its real neighbours as a fly-away mote.
+      // Dev opts into a conservative repair: inspect only vertices close to a
+      // cluster boundary, and reassign only when all eight nearest 3D
+      // neighbours unanimously belong to the adjacent tree. Use the original
+      // assignment snapshot throughout so repairs cannot cascade.
+      if (repairTreeClusters) {
+        var originalAssignment = clusterAssignment.slice();
+        var clusterBoundaries = [
+          (clusterMeans[0] + clusterMeans[1]) * 0.5,
+          (clusterMeans[1] + clusterMeans[2]) * 0.5
+        ];
+        var CLUSTER_REPAIR_MARGIN = 0.015;
+        var CLUSTER_REPAIR_NEIGHBOURS = 8;
+        for (var rp = 0; rp < treeCount; rp++) {
+          var rpx = treeNorm[rp * 3];
+          var nearBoundary = false;
+          for (var rb = 0; rb < clusterBoundaries.length; rb++) {
+            if (Math.abs(rpx - clusterBoundaries[rb]) <= CLUSTER_REPAIR_MARGIN) {
+              nearBoundary = true;
+              break;
+            }
+          }
+          if (!nearBoundary) continue;
+
+          var nearestDist = new Float64Array(CLUSTER_REPAIR_NEIGHBOURS);
+          var nearestCluster = new Uint8Array(CLUSTER_REPAIR_NEIGHBOURS);
+          for (var rn = 0; rn < CLUSTER_REPAIR_NEIGHBOURS; rn++) nearestDist[rn] = Infinity;
+          var rpy = treeNorm[rp * 3 + 1];
+          var rpz = treeNorm[rp * 3 + 2];
+          for (var rq = 0; rq < treeCount; rq++) {
+            if (rq === rp) continue;
+            var rdx = treeNorm[rq * 3] - rpx;
+            var rdy = treeNorm[rq * 3 + 1] - rpy;
+            var rdz = treeNorm[rq * 3 + 2] - rpz;
+            var rd2 = rdx * rdx + rdy * rdy + rdz * rdz;
+            if (rd2 >= nearestDist[CLUSTER_REPAIR_NEIGHBOURS - 1]) continue;
+            var insertAt = CLUSTER_REPAIR_NEIGHBOURS - 1;
+            while (insertAt > 0 && rd2 < nearestDist[insertAt - 1]) {
+              nearestDist[insertAt] = nearestDist[insertAt - 1];
+              nearestCluster[insertAt] = nearestCluster[insertAt - 1];
+              insertAt--;
+            }
+            nearestDist[insertAt] = rd2;
+            nearestCluster[insertAt] = originalAssignment[rq];
+          }
+
+          var neighbourCounts = [0, 0, 0];
+          for (var rc = 0; rc < CLUSTER_REPAIR_NEIGHBOURS; rc++) neighbourCounts[nearestCluster[rc]]++;
+          var unanimousCluster = -1;
+          for (var ri = 0; ri < 3; ri++) {
+            if (neighbourCounts[ri] === CLUSTER_REPAIR_NEIGHBOURS) unanimousCluster = ri;
+          }
+          if (unanimousCluster >= 0 && unanimousCluster !== originalAssignment[rp]) {
+            clusterAssignment[rp] = unanimousCluster;
+          }
+        }
       }
       treeClusterCenter = new Float32Array(treeCount);
       for (var ka = 0; ka < treeCount; ka++) treeClusterCenter[ka] = clusterMeans[clusterAssignment[ka]];
