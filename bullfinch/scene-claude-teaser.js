@@ -2273,10 +2273,45 @@
       for (var ka = 0; ka < treeCount; ka++) treeClusterCenter[ka] = clusterMeans[clusterAssignment[ka]];
       treeMeans = clusterMeans;
 
+      // A second source-data defect is made of tiny detached islands rather
+      // than single cross-assigned points: three low points on the middle tree
+      // and one on the right. Keep the filter low on the trunk so sparse crown
+      // tips and legitimate outer branches are never candidates. A point is
+      // excluded only when even its fourth-nearest neighbour in the corrected
+      // tree is abnormally distant. The current pc9 asset yields exactly four.
+      var treePointExcluded = new Uint8Array(treeCount);
+      if (repairTreeClusters) {
+        var OUTLIER_MAX_HEIGHT = 0.22;
+        var OUTLIER_FOURTH_NEIGHBOUR = 0.085;
+        var outlierLimitSq = OUTLIER_FOURTH_NEIGHBOUR * OUTLIER_FOURTH_NEIGHBOUR;
+        for (var op = 0; op < treeCount; op++) {
+          if (treeNorm[op * 3 + 1] > OUTLIER_MAX_HEIGHT) continue;
+          var outlierNearest = new Float64Array(4);
+          for (var on = 0; on < 4; on++) outlierNearest[on] = Infinity;
+          for (var oq = 0; oq < treeCount; oq++) {
+            if (oq === op || clusterAssignment[oq] !== clusterAssignment[op]) continue;
+            var odx = treeNorm[oq * 3] - treeNorm[op * 3];
+            var ody = treeNorm[oq * 3 + 1] - treeNorm[op * 3 + 1];
+            var odz = treeNorm[oq * 3 + 2] - treeNorm[op * 3 + 2];
+            var od2 = odx * odx + ody * ody + odz * odz;
+            if (od2 >= outlierNearest[3]) continue;
+            var oi = 3;
+            while (oi > 0 && od2 < outlierNearest[oi - 1]) {
+              outlierNearest[oi] = outlierNearest[oi - 1];
+              oi--;
+            }
+            outlierNearest[oi] = od2;
+          }
+          if (outlierNearest[3] > outlierLimitSq) treePointExcluded[op] = 1;
+        }
+      }
+
       // Shuffle indices; first slice becomes mote targets, rest are fill.
-      var idx = new Array(treeCount);
-      for (var s0 = 0; s0 < treeCount; s0++) idx[s0] = s0;
-      for (var s1 = treeCount - 1; s1 > 0; s1--) {
+      var idx = [];
+      for (var s0 = 0; s0 < treeCount; s0++) {
+        if (!treePointExcluded[s0]) idx.push(s0);
+      }
+      for (var s1 = idx.length - 1; s1 > 0; s1--) {
         var s2 = (Math.random() * (s1 + 1)) | 0;
         var tmpI = idx[s1]; idx[s1] = idx[s2]; idx[s2] = tmpI;
       }
@@ -2306,7 +2341,7 @@
         var dither = (noise - Math.floor(noise) - 0.5) * TREE_GRADIENT_DITHER;
         return tClamp01(ty + diagonal + wave + dither);
       }
-      for (var mi = 2; mi < PARTICLE_POOL && take < treeCount; mi++, take++) {
+      for (var mi = 2; mi < PARTICLE_POOL && take < idx.length; mi++, take++) {
         moteNormIdx[mi] = idx[take];
         moteTreeIdx[mi] = clusterAssignment[idx[take]];
         moteFormSeed[mi] = treeNorm[idx[take] * 3 + 1];
@@ -2314,7 +2349,7 @@
       }
       partGeo.attributes.aTreeTint.needsUpdate = true;
 
-      fillCount = treeCount - take;
+      fillCount = idx.length - take;
       var fillPos  = new Float32Array(fillCount * 3);
       var fillA    = new Float32Array(fillCount);
       var fillRed  = new Float32Array(fillCount);
