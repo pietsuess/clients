@@ -132,20 +132,34 @@ a { color: inherit; }
 
 /* ---------- Offer (price block) ---------- */
 .offer {
-  margin-top: 2.2em;
-  padding-top: 1.6em;
-  border-top: 1px solid var(--line);
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 26px;
+  padding: clamp(44px, 7vw, 96px) var(--pad) clamp(40px, 6vw, 80px);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; gap: clamp(14px, 2vw, 22px);
 }
 .offer .price {
   font-family: 'Fraunces', serif; font-weight: 600;
-  font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1;
-  letter-spacing: -.02em; margin: 0; color: var(--accent);
+  font-size: clamp(3.2rem, 11vw, 7rem); line-height: .9;
+  letter-spacing: -.03em; margin: 0; color: var(--accent);
 }
 .offer .status {
-  font-size: .82rem; letter-spacing: .18em; text-transform: uppercase;
+  margin: 0;
+  font-size: clamp(.78rem, 1.1vw, .92rem); letter-spacing: .24em; text-transform: uppercase;
   color: var(--ink-soft); font-weight: 500;
 }
+.offer .cta {
+  margin-top: clamp(6px, 1.5vw, 14px);
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 30px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 500;
+  text-decoration: none; color: var(--ink);
+  transition: background .4s ease, color .4s ease, border-color .4s ease;
+}
+.offer .cta:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.offer .cta .arw { transition: transform .4s cubic-bezier(.16,1,.3,1); }
+.offer .cta:hover .arw { transform: translateY(3px); }
 
 /* ---------- Specs ---------- */
 .specs {
@@ -330,6 +344,12 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   <div class="scroll-cue"><span></span>Scroll</div>
 </section>
 
+<section class="offer">
+  <p class="price">$78,000</p>
+  <p class="status">Brand new · Never lived in</p>
+  <a class="cta" href="#details">See the details <span class="arw">&#8595;</span></a>
+</section>
+
 <section class="intro">
   <h2>Small footprint,<br>full craft.</h2>
   <div class="body">
@@ -338,10 +358,6 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
       <div>Form<span>Tiny home on wheels</span></div>
       <div>Cladding<span>Cedar · corrugated metal</span></div>
       <div>Location<span>Salt Spring Island, BC</span></div>
-    </div>
-    <div class="offer">
-      <p class="price">$78,000</p>
-      <p class="status">Brand new · Never lived in</p>
     </div>
   </div>
 </section>
@@ -477,7 +493,7 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
   </a>
 </div>
 
-<div class="section-label">
+<div class="section-label" id="details">
   <span class="idx">03</span>
   <h3>Details</h3>
   <span class="line"></span>
