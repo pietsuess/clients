@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tiny Home</title>
+<title>Custom-Built Tiny Home · Salt Spring Island</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="A handbuilt tiny home on wheels: cedar siding, corrugated skirt, carved cedar door.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -130,6 +130,77 @@ a { color: inherit; }
 .meta div { display: flex; flex-direction: column; gap: 4px; }
 .meta span { color: var(--ink-soft); font-weight: 400; letter-spacing: .04em; text-transform: none; font-size: .94rem; }
 
+/* ---------- Offer (price block) ---------- */
+.offer {
+  margin-top: 2.2em;
+  padding-top: 1.6em;
+  border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 26px;
+}
+.offer .price {
+  font-family: 'Fraunces', serif; font-weight: 600;
+  font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1;
+  letter-spacing: -.02em; margin: 0; color: var(--accent);
+}
+.offer .status {
+  font-size: .82rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-soft); font-weight: 500;
+}
+
+/* ---------- Specs ---------- */
+.specs {
+  padding: 0 var(--pad) clamp(48px, 8vw, 104px);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(28px, 4vw, 56px) clamp(28px, 5vw, 72px);
+  align-items: start;
+}
+.spec h4 {
+  font-family: 'Fraunces', serif; font-weight: 500;
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem); letter-spacing: -.005em;
+  margin: 0 0 .7em;
+  padding-bottom: .5em;
+  border-bottom: 1px solid var(--line);
+}
+.spec ul { list-style: none; margin: 0; padding: 0; }
+.spec li {
+  font-size: clamp(.96rem, 1.1vw, 1.06rem);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding: .42em 0;
+  text-wrap: pretty;
+}
+.spec li + li { border-top: 1px solid rgba(216,202,180,.5); }
+.spec li b { font-weight: 500; color: var(--ink); }
+.spec li .val { display: block; }
+.spec p {
+  font-size: clamp(.96rem, 1.1vw, 1.06rem);
+  line-height: 1.58; color: var(--ink-soft); margin: 0 0 .9em;
+  text-align: justify; text-align-last: left;
+}
+.spec p:last-child { margin-bottom: 0; }
+.spec .aside { color: var(--ink); font-weight: 500; }
+
+/* ---------- Closing note ---------- */
+.closing {
+  padding: clamp(40px, 6vw, 72px) var(--pad) clamp(8px, 2vw, 24px);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+  gap: clamp(20px, 6vw, 96px);
+  align-items: start;
+}
+.closing h3 {
+  font-family: 'Fraunces', serif; font-weight: 500;
+  font-size: clamp(1.3rem, 2.4vw, 2.1rem); letter-spacing: -.01em; margin: 0;
+}
+.closing p {
+  font-size: clamp(1.02rem, 1.35vw, 1.2rem); line-height: 1.62;
+  color: var(--ink-soft); margin: 0 0 1em;
+  text-align: justify; text-align-last: left;
+}
+.closing p:last-child { margin-bottom: 0; }
+
 /* ---------- Section label ---------- */
 .section-label {
   display: flex; align-items: center; gap: 22px;
@@ -230,7 +301,7 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
 
 /* ---------- Responsive ---------- */
 @media (max-width: 820px) {
-  .intro { grid-template-columns: 1fr; }
+  .intro, .closing { grid-template-columns: 1fr; }
   .row { flex-direction: column; }
   /* stacked: let each cell size to its image instead of collapsing flex-basis:0 height */
   .row .cell { flex: none; width: 100%; }
@@ -266,7 +337,11 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
     <div class="meta">
       <div>Form<span>Tiny home on wheels</span></div>
       <div>Cladding<span>Cedar · corrugated metal</span></div>
-      <div>Set<span>Exterior · interior</span></div>
+      <div>Location<span>Salt Spring Island, BC</span></div>
+    </div>
+    <div class="offer">
+      <p class="price">$78,000</p>
+      <p class="status">Brand new · Never lived in</p>
     </div>
   </div>
 </section>
@@ -401,6 +476,93 @@ footer .note { color: var(--ink-soft); font-size: .9rem; letter-spacing: .04em; 
     <span class="num"></span>
   </a>
 </div>
+
+<div class="section-label">
+  <span class="idx">03</span>
+  <h3>Details</h3>
+  <span class="line"></span>
+</div>
+
+<section class="specs">
+
+  <div class="spec">
+    <h4>The Build</h4>
+    <ul>
+      <li>Built by Salt Spring TASK Program under Red Seal carpenter supervision</li>
+      <li>Interior and exterior finishing completed by owner</li>
+      <li>Electrical by certified Red Seal Journeyman, BC Building Code compliant</li>
+    </ul>
+  </div>
+
+  <div class="spec">
+    <h4>The Wood</h4>
+    <p>Reclaimed old-growth Red Cedar and straight grain Fir, salvaged from a historic Salt Spring lodge demolished in the 1980s.</p>
+    <p class="aside">This material is irreplaceable and rare to find in a tiny home build.</p>
+  </div>
+
+  <div class="spec">
+    <h4>Dimensions</h4>
+    <ul>
+      <li><b>Exterior</b><span class="val">8' × 16' plus 3' bump out</span></li>
+      <li><b>Roof width</b><span class="val">10'</span></li>
+      <li><b>Overall height</b><span class="val">13'10"</span></li>
+      <li><b>Interior floor</b><span class="val">15'4" × 7'3"</span></li>
+      <li><b>Walls</b><span class="val">High 9'10" · Low 8'</span></li>
+      <li><b>Loft</b><span class="val">7'2" deep × 7'3" wide, 3'1" peak to 17" low end</span></li>
+      <li><b>Bump out</b><span class="val">3' deep × 4'4" wide × 5'5" high</span></li>
+    </ul>
+  </div>
+
+  <div class="spec">
+    <h4>Layout</h4>
+    <ul>
+      <li><b>Loft</b><span class="val">Sleeping area</span></li>
+      <li><b>Main floor</b><span class="val">Kitchen and living</span></li>
+      <li><b>Bump out</b><span class="val">Sitting nook with windows</span></li>
+      <li>Slate fire hearth</li>
+      <li>Oak floors throughout</li>
+    </ul>
+  </div>
+
+  <div class="spec">
+    <h4>Electrical</h4>
+    <ul>
+      <li>120V / 50 amp service</li>
+      <li>Main breaker swappable to 30 amp</li>
+      <li>Pre-wired for space heater</li>
+      <li>Full photo and measurement record of all wiring before walls closed</li>
+    </ul>
+  </div>
+
+  <div class="spec">
+    <h4>Structure &amp; Materials</h4>
+    <ul>
+      <li>2020 trailer, 10,400 lb carry capacity</li>
+      <li>Rockwool insulation, R-14</li>
+      <li>Double-pane windows, new 2024</li>
+      <li>New roofing</li>
+      <li>Jøtul F 1400 wood stove, refurbished, $1,600 value, negotiable</li>
+      <li>No plumbing</li>
+    </ul>
+  </div>
+
+  <div class="spec">
+    <h4>Transport</h4>
+    <ul>
+      <li>Requires transport permit, a simple online purchase, or hire a transport company</li>
+      <li>Qualifies to travel 24/7 without pilot car under BC transport regulations</li>
+    </ul>
+  </div>
+
+</section>
+
+<section class="closing">
+  <h3>Viewing</h3>
+  <div>
+    <p>North end of Salt Spring Island. Serious inquiries only.</p>
+    <p>Open to sale or other mutually beneficial arrangements. Well suited as a residence, studio, or commercial space.</p>
+  </div>
+</section>
 
 <footer>
   <div class="mark">Tiny&nbsp;Home</div>
