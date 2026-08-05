@@ -473,11 +473,30 @@
     var casePlaybackFrameSlots = 288 + 136;
     var caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
     var caseFadeOutStartProgress = (288 + 96 - 1) / casePlaybackFrameSlots;
+
+    // DEV opt-in (data-app-clip): the device sequence hands its slot to a
+    // screen recording of the app in action. The PNG sequence finishes playing
+    // at 288/424 of the pin (~0.679); the device only starts leaving AFTER that
+    // so the animation is never cut short. The clip then holds until the 02
+    // copy un-writes on its own beat (0.80 -> 1.0), and leaves with it, so the
+    // pin still releases empty — nothing scrolls out.
+    var appClip = document.body.hasAttribute("data-app-clip")
+      ? document.getElementById("app-clip")
+      : null;
+    if (appClip) caseFadeOutStartProgress = 0.70;
+
     function setProductCase(value, playbackProgress) {
       if (productMedia) productMedia.style.opacity = clamp01(value);
       if (window.bullfinchCaseAnimation && window.bullfinchCaseAnimation.setScrollProgress) {
         window.bullfinchCaseAnimation.setScrollProgress(playbackProgress);
       }
+    }
+
+    function setAppClip(p) {
+      if (!appClip) return;
+      var inP = smooth01(mapRange(p, 0.76, 0.85));
+      var outP = smooth01(mapRange(p, 0.92, 1.00));
+      appClip.style.opacity = clamp01(inP * (1 - outP));
     }
 
     function setWave(wave, progress) {
@@ -506,8 +525,13 @@
         onUpdate: function (self) {
           var p = self.progress;
           var fadeIn = smooth01(mapRange(p, 0.00, caseFadeInEndProgress));
-          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, 1.00));
+          // With the clip in play the device has to be fully gone before the
+          // clip is fully up, or the two are on screen together at half opacity
+          // and the swap reads as a crossfade of two objects rather than a
+          // handoff of one slot.
+          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? 0.78 : 1.00));
           setProductCase(fadeIn * (1 - fadeOut), p);
+          setAppClip(p);
           // 02 backdrop tint: ease the scene to light green while the device
           // section holds, back to beige before 03 arrives.
           if (window.bullfinchCanopy.setProductTintProgress) {
