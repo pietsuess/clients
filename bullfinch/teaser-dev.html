@@ -519,18 +519,32 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
       }
-      /* Deliberately loud: this is scaffolding, not design. It has to be
-         impossible to mistake for a finished element or to miss on a scroll
-         past. Goes when the real clip lands. */
+      /* The slide itself. --clip-y is written per frame by swot-claude.js:
+         116% (fully below the slot) at rest, 0 when seated. */
+      .app-clip-layer__slide {
+        transform: translateY(var(--clip-y, 116%));
+        will-change: transform;
+      }
+      /* Piet: the rising banners come out entirely. Markup is left in place so
+         the copy is not lost — it is simply not shown. */
+      body[data-app-clip] .rise-headline { display: none; }
+      /* PHONE. The recording is of a mobile app, so the frame is a phone held
+         upright — not a landscape video box. Deliberately loud because it is
+         scaffolding, not design; it goes when the real clip lands. */
       .app-clip-layer__box {
-        width: 100%;
-        aspect-ratio: 16 / 10;
+        height: min(74dvh, 78vh);
+        width: auto;
+        aspect-ratio: 9 / 19.5;
+        border-radius: clamp(20px, 1.8vw, 34px);
         border: 2px dashed currentColor;
         background: rgba(0, 0, 0, .35);
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0 6%;
+        text-align: center;
       }
       .app-clip-layer__label {
         font: 600 clamp(13px, 1.05vw, 18px)/1.3 var(--font-mono);
@@ -1606,12 +1620,14 @@
         .app-clip-layer {
           width: 100vw;
           max-width: 100vw;
-          height: 44dvh;
+          height: 48dvh;
           left: 50%;
           top: 2vh;
           transform: translateX(-50%);
           padding: 0 5vw;
         }
+        /* Must fit INSIDE the layer or overflow:hidden crops the phone. */
+        .app-clip-layer__box { height: 46dvh; }
         /* Justify at this measure opens rivers between words (see the 00 hero
            and the 02 leads). Hyphenation closes them without dropping the
            justified setting. */
@@ -1717,8 +1733,10 @@
          device with querySelector(".case-fixed-layer"), so this must never be
          the first match. Own class, no shared class, for the same reason. -->
     <div class="app-clip-layer" id="app-clip" aria-hidden="true">
-      <div class="app-clip-layer__box">
-        <span class="app-clip-layer__label">app screen recording</span>
+      <div class="app-clip-layer__slide">
+        <div class="app-clip-layer__box">
+          <span class="app-clip-layer__label">app screen recording</span>
+        </div>
       </div>
     </div>
     <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
@@ -2018,7 +2036,7 @@
     <script src="scene-claude-teaser.js?v=claude-46"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-15"></script>
+    <script src="swot-claude.js?v=claude-16"></script>
     <script src="stat-field-claude.js?v=claude-14"></script>
     <script>
       (function () {

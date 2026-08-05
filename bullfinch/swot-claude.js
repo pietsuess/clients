@@ -303,6 +303,10 @@
 
   var panels = document.querySelectorAll(".panel");
   var panelTriggers = [];
+  // DEV opt-in. 02 has to carry the device sequence AND the app clip after it,
+  // so its pin is lengthened to make real room rather than squeezing the clip
+  // into what was left over.
+  var appClipOn = document.body.hasAttribute("data-app-clip");
   panels.forEach(function (panel, panelIndex) {
     var isFirstPanel = panelIndex === 0;
     if (reduced) {
@@ -339,7 +343,9 @@
       // for a long stretch and is genuinely hard to scroll past.
       end: panel.id === "proof"
         ? (mobileLike ? "+=220%" : "+=380%")
-        : (mobileLike ? "+=100%" : "+=150%"),
+        : (appClipOn && panel.id === "product"
+            ? (mobileLike ? "+=200%" : "+=300%")
+            : (mobileLike ? "+=100%" : "+=150%")),
       pin: true,
       pinSpacing: true,
       scrub: true,
@@ -480,10 +486,15 @@
     // so the animation is never cut short. The clip then holds until the 02
     // copy un-writes on its own beat (0.80 -> 1.0), and leaves with it, so the
     // pin still releases empty — nothing scrolls out.
-    var appClip = document.body.hasAttribute("data-app-clip")
-      ? document.getElementById("app-clip")
-      : null;
-    if (appClip) caseFadeOutStartProgress = 0.70;
+    var appClip = appClipOn ? document.getElementById("app-clip") : null;
+    if (appClip) {
+      // Retime the PNG playback against the LONGER pin so the sequence still
+      // finishes well before the device leaves — 288 real frames done by ~0.46,
+      // device out by 0.56, which leaves the clip a third of the pin to hold.
+      casePlaybackFrameSlots = 626;
+      caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
+      caseFadeOutStartProgress = 0.48;
+    }
 
     function setProductCase(value, playbackProgress) {
       if (productMedia) productMedia.style.opacity = clamp01(value);
@@ -492,11 +503,16 @@
       }
     }
 
+    // NO FADE (Piet). The clip SLIDES UP into the slot the device just left and
+    // slides back down to leave. Opacity is binary — the moment it has any
+    // travel to do it is fully opaque, so it never ghosts.
     function setAppClip(p) {
       if (!appClip) return;
-      var inP = smooth01(mapRange(p, 0.76, 0.85));
-      var outP = smooth01(mapRange(p, 0.92, 1.00));
-      appClip.style.opacity = clamp01(inP * (1 - outP));
+      var inP = smooth01(mapRange(p, 0.54, 0.66));
+      var outP = smooth01(mapRange(p, 0.90, 1.00));
+      var travel = (1 - inP) * 116 + outP * 116;
+      appClip.style.opacity = p > 0.54 && p < 1 ? 1 : 0;
+      appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
     }
 
     function setWave(wave, progress) {
