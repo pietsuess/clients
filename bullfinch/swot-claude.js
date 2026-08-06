@@ -223,7 +223,13 @@
     // R1: the 01 copy un-writes over [0.80, 1.0] of the pin — the SAME range and
     // easing the HTML unified 01->02 trigger uses to spread the motes, fade the
     // seed and wipe the forest diagonal, so all four move together on one scrub.
-    var leave = smooth01(mapRange(p, 0.80, 1.00));
+    // 02 with the app clip runs a much longer pin and its last evidence pair
+    // is still writing on at ~0.78, so the generic 0.80 un-write would start
+    // erasing the copy before the reader has reached it. Held back to 0.90.
+    var clipPanel = appClipOn && panel.id === "product";
+    var leave = clipPanel
+      ? smooth01(mapRange(p, 0.90, 1.00))
+      : smooth01(mapRange(p, 0.80, 1.00));
 
     if (inner) {
       // The container itself carries chrome (03's frosted background + blur,
@@ -272,8 +278,17 @@
       if (!group.length) continue;
       var s = fastBar ? FAST_S[si] : WRITE_ORDER[si].s;
       var horizontal = WRITE_ORDER[si].dir === "x";
+      // Piet: Wear / Walk / Data come on ONE BY ONE across the whole of 02,
+      // including the stretch where the app clip is up — not bunched into the
+      // first third on the generic 0.03 stagger. Explicit starts, because the
+      // spacing is a read-the-copy decision, not an even division.
+      var spread = (clipPanel && WRITE_ORDER[si].sel === ".panel__evidence p")
+        ? [0.08, 0.36, 0.62]
+        : null;
       for (var gi = 0; gi < group.length; gi++) {
-        var e = smooth01(mapRange(p, s + gi * writeStagger, s + writeWindow + gi * writeStagger));
+        var gs = spread ? (spread[gi] !== undefined ? spread[gi] : s) : s + gi * writeStagger;
+        var gw = spread ? 0.14 : writeWindow;
+        var e = smooth01(mapRange(p, gs, gs + gw));
         var w = e * (1 - leave);
         var hidden = ((1 - w) * 100).toFixed(2) + "%";
         group[gi].style.clipPath = horizontal
@@ -500,9 +515,13 @@
       // Retime the PNG playback against the LONGER pin so the sequence still
       // finishes well before the device leaves — 288 real frames done by ~0.46,
       // device out by 0.56, which leaves the clip a third of the pin to hold.
-      casePlaybackFrameSlots = 626;
+      // The clip is going to be VIDEO, so it needs a long hold, not a beat.
+      // The device sequence is compressed into the front third to pay for it:
+      // 288 real frames done by ~0.34, device gone by 0.44, which leaves the
+      // clip from 0.42 to 1.00 — well over half the (already doubled) pin.
+      casePlaybackFrameSlots = 847;
       caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
-      caseFadeOutStartProgress = 0.48;
+      caseFadeOutStartProgress = 0.36;
     }
 
     function setProductCase(value, playbackProgress) {
@@ -512,15 +531,17 @@
       }
     }
 
-    // NO FADE (Piet). The clip SLIDES UP into the slot the device just left and
-    // slides back down to leave. Opacity is binary — the moment it has any
-    // travel to do it is fully opaque, so it never ghosts.
+    // NO FADE (Piet). The clip SLIDES UP into the slot the device just left,
+    // holds through the middle of the section while the copy writes on around
+    // it, then KEEPS GOING UP and off the top — one continuous direction of
+    // travel, never reversing back down the way it came. Opacity is binary so
+    // it never ghosts.
     function setAppClip(p) {
       if (!appClip) return;
-      var inP = smooth01(mapRange(p, 0.54, 0.66));
-      var outP = smooth01(mapRange(p, 0.90, 1.00));
-      var travel = (1 - inP) * 116 + outP * 116;
-      appClip.style.opacity = p > 0.54 && p < 1 ? 1 : 0;
+      var inP = smooth01(mapRange(p, 0.42, 0.54));
+      var outP = smooth01(mapRange(p, 0.88, 1.00));
+      var travel = (1 - inP) * 116 - outP * 116;
+      appClip.style.opacity = p > 0.42 && p < 1 ? 1 : 0;
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
     }
 
@@ -554,7 +575,7 @@
           // clip is fully up, or the two are on screen together at half opacity
           // and the swap reads as a crossfade of two objects rather than a
           // handoff of one slot.
-          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? 0.78 : 1.00));
+          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? 0.44 : 1.00));
           setProductCase(fadeIn * (1 - fadeOut), p);
           setAppClip(p);
           // 02 backdrop tint: ease the scene to light green while the device
