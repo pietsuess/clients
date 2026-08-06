@@ -530,6 +530,20 @@
       /* Piet: the rising banners come out entirely. Markup is left in place so
          the copy is not lost — it is simply not shown. */
       body[data-app-clip] .rise-headline { display: none; }
+      /* Team is a scroll stop now (see #team). The lateral overlay and the
+         footer link that opened it are redundant — hidden, not deleted, so the
+         old behaviour is one rule away if the stop does not hold up. */
+      body[data-team-stop] .team-screen,
+      body[data-team-stop] .footer-team-link { display: none; }
+      /* The people block is the media half of the panel. It carries no fixed
+         layer of its own, so it sits in the grid like any other panel media. */
+      #team .panel__people {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(14px, 1.6vw, 26px);
+        align-content: center;
+      }
+      #team .panel__inner { grid-column: 2; }
       /* PHONE. The recording is of a mobile app, so the frame is a phone held
          upright — not a landscape video box. Deliberately loud because it is
          scaffolding, not design; it goes when the real clip lands. */
@@ -1687,7 +1701,7 @@
       }
     </style>
   </head>
-  <body data-canvas-transparent data-tree-gradient data-tree-spin-fast data-tree-cluster-repair data-app-clip>
+  <body data-canvas-transparent data-tree-gradient data-tree-spin-fast data-tree-cluster-repair data-app-clip data-team-stop>
     <!-- Closing canopy plate (DEV). FIRST child of <body>, before the canvas:
          both are z-index 0, so DOM order is what puts this underneath. A
          negative z-index would not work — body is its own stacking context
@@ -1766,8 +1780,9 @@
         <a href="#page" data-scroll-target="#page" data-nav-label="Start" aria-label="00 Start">00</a>
         <a href="#problem" data-scroll-target="#problem" data-nav-label="The gap" aria-label="01 The gap">01</a>
         <a href="#product" data-scroll-target="#product" data-nav-label="How it works" aria-label="02 How it works">02</a>
-        <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Who needs Bullfinch" aria-label="03 Who needs Bullfinch">03</a>
-        <a href="#closing" data-scroll-target="#closing" data-nav-label="Go deeper" aria-label="04 Go deeper">04</a>
+        <a href="#team" data-scroll-target="#team" data-nav-label="The team" aria-label="03 The team">03</a>
+        <a href="#opportunity" data-scroll-target="#opportunity" data-nav-label="Who needs Bullfinch" aria-label="04 Who needs Bullfinch">04</a>
+        <a href="#closing" data-scroll-target="#closing" data-nav-label="Go deeper" aria-label="05 Go deeper">05</a>
         <!-- display:contents above 720px, so the desktop nav is byte-identical
              to what it was — these two stay direct flex children of
              .site-nav__links. In the phone sheet it becomes a real flex row so
@@ -1888,7 +1903,40 @@
           </div>
         </article>
 
-        <article class="panel" id="opportunity" data-panel="3">
+        <!-- TEAM AS A STOP (dev). Promoted out of the lateral overlay into the
+             scroll order between 02 and 03, so it is met on the way through
+             rather than hidden behind a footer link. Same content, same bio
+             buttons — the bio modal is driven by [data-bio-person], so it works
+             here unchanged. The overlay is hidden in CSS rather than deleted,
+             so this is one line to reverse. -->
+        <article class="panel panel--media" id="team" data-panel="3">
+          <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
+            <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
+              <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+              <figcaption>Seth Sternberg &middot; CEO</figcaption>
+            </figure>
+            <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
+              <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
+              <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
+            </figure>
+            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+              <img src="assets/graham-headshot.png" alt="Graham Smith" />
+              <figcaption>Graham Smith &middot; CCO</figcaption>
+            </figure>
+          </div>
+          <div class="panel__inner">
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+            <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
+            <div class="panel__evidence">
+              <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
+              <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim, the Mars guy.</button> CTO and PhD astrophysicist, Oxford and Cambridge, who built cameras now operating on Mars with NASA JPL.</p>
+              <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry and field operations, plus finance and customer depth.</p>
+            </div>
+            <p class="panel__numeric">MARS CAMERAS &middot; 400M+ PRODUCTS &middot; BC FIELD OPS</p>
+          </div>
+        </article>
+
+        <article class="panel" id="opportunity" data-panel="4">
           <div class="tree-readouts" aria-label="Tree identification results">
             <div class="tree-readout">
               <span class="tree-readout__common">Douglas Fir</span>
@@ -1914,7 +1962,7 @@
           </div>
           <div class="panel__inner">
             <div class="ground-heading">
-              <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; FROM THE GROUND UP</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">04 &middot; FROM THE GROUND UP</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
               <h2 class="panel__verdict">Who Need to Bullfinch?</h2>
             </div>
             <div class="audience-grid">
@@ -2248,6 +2296,11 @@
 
         var p1 = pinFor(s01), p2 = pinFor(s02), p3 = pinFor(s03);
         if (!p1 || !p2 || !p3) return;
+        // With the team promoted to a stop between 02 and 03, the gap the grove
+        // used to form across is now occupied. Formation moves onto the TEAM
+        // pin so the trees still arrive assembled at 03 instead of building up
+        // behind the team copy. Falls back to 02 if the stop is reverted.
+        var pTeam = pinFor(document.getElementById("team")) || p2;
         // The hero (00) pin — the mote assembly is anchored to its START so the
         // motes begin rising into the grid on the FIRST scroll pixel out of 00,
         // continuously, rather than sitting grounded through the whole 00->01
@@ -2555,7 +2608,7 @@
 
         ScrollTrigger.create({
           trigger: document.body,
-          start: function () { return at(p2, 0.58); },
+          start: function () { return at(pTeam, 0.58); },
           endTrigger: closing,
           end: "top 44%",
           scrub: true,
