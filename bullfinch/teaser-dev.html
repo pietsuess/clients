@@ -830,7 +830,11 @@
            0.42 veil of page colour ON TOP of this (so the motes have
            something to sit on), and the old values were tuned for sitting
            in front of the canvas rather than behind it. */
-        filter: saturate(0.55) brightness(0.5) contrast(1.05) hue-rotate(-6deg);
+        /* Piet: bring the last page's background through more. Two dials do
+           this — the scene's BASE_FLOOR veil, and the photo's own strength.
+           BASE_FLOOR lives behind data-canvas-transparent, which PROD also
+           sets, so it is left alone; these two are page-local. */
+        filter: saturate(0.55) brightness(var(--closing-photo-brightness, 0.64)) contrast(1.05) hue-rotate(-6deg);
         /* Fades UP in place across its OWN late window, not the scene's
            disassembly. It used to ride --final-field-p, which is the same
            progress that pulls the tree apart — so the photo was fully in
@@ -838,7 +842,7 @@
            only completes at the true bottom of the document.
            Nothing translates: the scale is a centred push-in, so the plate
            stays full-bleed and no edge ever enters frame. */
-        opacity: calc(var(--final-photo-p, 0) * 0.75);
+        opacity: calc(var(--final-photo-p, 0) * var(--closing-photo-max, 0.95));
         transform: scale(calc(1.15 - var(--final-photo-p, 0) * 0.15));
         will-change: opacity, transform;
       }
