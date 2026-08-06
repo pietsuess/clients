@@ -2840,11 +2840,18 @@
         // Drive the original mark geometry directly from scroll. The second
         // half is the exact inverse of the first, so every piece animates out
         // instead of being carried away assembled with its panel.
-        function markState(p) {
+        // 02 with the app clip runs a much longer pin, and the generic
+        // disassembly start (0.62) lands in the middle of the clip's hold — the
+        // icon was pulling itself apart while the section still had a third to
+        // run. On that panel it holds far longer and leaves WITH the copy.
+        var appClipOn = document.body.hasAttribute("data-app-clip");
+        function markState(p, longHold) {
+          var buildTo = longHold ? 0.20 : 0.34;
+          var holdTo = longHold ? 0.86 : 0.62;
           var x;
-          if (p < 0.34) x = p / 0.34;
-          else if (p < 0.62) x = 1;
-          else x = 1 - (p - 0.62) / 0.32;
+          if (p < buildTo) x = p / buildTo;
+          else if (p < holdTo) x = 1;
+          else x = 1 - (p - holdTo) / (1 - holdTo);
           x = clamp01(x);
           return x * x * (3 - 2 * x);
         }
@@ -2854,7 +2861,7 @@
           el.style.setProperty("--glow", (x * .95).toFixed(4));
           el.style.setProperty("--pang", (360 - 372 * x).toFixed(2) + "deg");
         }
-        function applyMarkState(el, p) { applyMarkAmount(el, markState(p)); }
+        function applyMarkState(el, p, longHold) { applyMarkAmount(el, markState(p, longHold)); }
 
         if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
           // Mirror swot.js's panel pin range so progress lines up with the pin.
@@ -2862,8 +2869,13 @@
           marks.forEach(function (el) {
             var panel = el.closest(".panel");
             if (!panel) return;
+            // MUST mirror the pin lengths in swot-claude.js. This list is a
+            // duplicate of them, so any pin change there has to be made here
+            // too — otherwise the mark runs its whole cycle over the wrong
+            // distance and finishes while the panel is still pinned.
+            var clipPanel = appClipOn && panel.id === "product";
             var scrub = function (p) {
-              applyMarkState(el, clamp01(p));
+              applyMarkState(el, clamp01(p), clipPanel);
             };
             ScrollTrigger.create({
               trigger: panel,
@@ -2872,7 +2884,9 @@
               // reverse half before the panel releases.
               end: panel.id === "proof"
                 ? (mobileLike ? "+=220%" : "+=380%")
-                : (mobileLike ? "+=100%" : "+=150%"),
+                : (clipPanel
+                    ? (mobileLike ? "+=280%" : "+=420%")
+                    : (mobileLike ? "+=100%" : "+=150%")),
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) { scrub(self.progress); },
