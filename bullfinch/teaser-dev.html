@@ -527,16 +527,6 @@
         transform: translateY(var(--clip-y, 116%));
         will-change: transform;
       }
-      /* Piet: the rising banners come out entirely.
-         NOT display:none. journey() drives the background colour wipe from
-         el.getBoundingClientRect().top, and a display:none element measures
-         zero — which pins the wipe at 1 for the whole band and reads as the
-         background PAUSING between stops. Opacity keeps the element measured
-         and travelling; only the paint is gone. */
-      body[data-app-clip] .rise-headline {
-        opacity: 0;
-        pointer-events: none;
-      }
       /* Team is a scroll stop now (see #team). The lateral overlay and the
          footer link that opened it are redundant — hidden, not deleted, so the
          old behaviour is one rule away if the stop does not hold up. */
@@ -1093,114 +1083,9 @@
         backdrop-filter: blur(20px) saturate(1.04);
       }
 
-      /* Rising overlay headlines — ride bottom -> off-top across a scroll band,
-         driven by --rise-y from dedicated scrubs (see inline JS).
-         NO FADE: they are fully opaque the whole ride and are simply off-screen
-         at both ends of their band, so nothing ever ghosts in or out. Left
-         aligned on the page gutter, sized to hold ONE line where the copy
-         allows and two only when it must. */
-      /* The block is a full-bleed BANNER STRIP: edge-to-edge background, with
-         the copy held at the page gutter by the strip's own padding. Same
-         translucent-bg + blur treatment as the 03 ground panel. */
+      /* .rise-headline is GONE (Piet) — the rising banner strips are deleted,
+         not hidden. #glass-warp and .glass-defs stay for the filter defs. */
       .glass-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
-      .rise-headline {
-        position: fixed;
-        left: 0;
-        right: 0;
-        padding: clamp(14px, 2.4vh, 28px) var(--pad-x, 64px);
-        /* A flat white veil rather than a tint of the page colour: the strip
-           should look lit from within, not tinted. Even across the whole bar
-           so it never reads as a highlight sitting on top of it. */
-        background: color-mix(in srgb, #ffffff 20%, transparent);
-        /* Two declarations on purpose. The first is a plain heavy frost and is
-           the floor. The second adds the feDisplacementMap ripple; browsers
-           that don't take reference filters in backdrop-filter drop the whole
-           second declaration as invalid and keep the first, so the strips are
-           never left bare. Blur runs BEFORE the warp so the displacement pushes
-           an already-soft image and reads as thickness, not as a sharp edge. */
-        /* Lit, evenly, as if the light is coming THROUGH the pane. The lift is
-           done with brightness() on the backdrop plus a flat white veil — not
-           with a gradient — so there is no drawn highlight anywhere on the
-           strip. Every previous version put painted light somewhere and it
-           always read as a graphic. */
-        -webkit-backdrop-filter: blur(8px) saturate(1.06) brightness(1.34);
-        backdrop-filter: blur(8px) saturate(1.06) brightness(1.34);
-        -webkit-backdrop-filter: blur(5px) saturate(1.08) brightness(1.34) url(#glass-warp);
-        backdrop-filter: blur(5px) saturate(1.08) brightness(1.34) url(#glass-warp);
-        background-image: none;
-        box-shadow: 0 22px 46px -34px color-mix(in srgb, var(--ink) 30%, transparent);
-        top: 50%;
-        transform: translateY(-50%) translateY(var(--rise-y, 58vh));
-        opacity: 1;
-        z-index: 6;
-        pointer-events: none;
-        text-align: left;
-        will-change: transform;
-      }
-      /* The EDGE ZONE. Nothing is PAINTED here any more — no striations, no
-         falloff, no green cast. Those were the "highlights" that kept reading
-         as drawn. The bands now differ from the body of the strip by optics
-         only: they bend their slice of the backdrop far harder (#glass-edge)
-         and are masked so they dissolve inward instead of ending at a line.
-         If the edge needs more presence, raise the displacement scale on
-         #glass-edge — do not paint light onto it. */
-      .rise-headline::before,
-      .rise-headline::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: clamp(18px, 3vh, 34px);
-        pointer-events: none;
-        background: none;
-        -webkit-backdrop-filter: blur(2px) brightness(1.34) saturate(1.06);
-        backdrop-filter: blur(2px) brightness(1.34) saturate(1.06);
-        -webkit-backdrop-filter: blur(1.5px) brightness(1.34) saturate(1.08) url(#glass-edge);
-        backdrop-filter: blur(1.5px) brightness(1.34) saturate(1.08) url(#glass-edge);
-      }
-      .rise-headline::before {
-        top: 0;
-        -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
-        mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
-      }
-      .rise-headline::after {
-        bottom: 0;
-        -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
-        mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, .5) 48%, transparent 100%);
-      }
-
-      /* Font size is derived from the line's character budget rather than a
-         viewport clamp, so the break count is deterministic at every width:
-         size = available width / (chars-per-line * ~0.53em), capped. */
-      .rise-headline p {
-        position: relative;   /* above the two edge-lens bands */
-        z-index: 1;
-        margin: 0;
-        font-family: var(--font-display);
-        font-weight: 500;
-        line-height: 1.08;
-        letter-spacing: -0.02em;
-        color: var(--accent);
-        text-align: left;
-      }
-      /* A — 60 chars, ONE line. C — 56 chars, ONE line. */
-      #rise-a p,
-      #rise-c p {
-        max-width: 66ch;
-        font-size: min(40px, calc(min(88vw, 1240px) / 34));
-      }
-      /* B — 92 chars, TWO lines of ~46. */
-      #rise-b p {
-        max-width: 50ch;
-        font-size: min(40px, calc(min(88vw, 1240px) / 26));
-      }
-      /* Phones: A drops to two lines, B to three — one/two lines at this width
-         would put the type under 15px. Desktop keeps the 1/2-line rule. */
-      @media (max-width: 720px) {
-        #rise-a p,
-        #rise-b p,
-        #rise-c p { max-width: 34ch; font-size: min(28px, calc(88vw / 17)); }
-      }
 
       /* ===== Idle scroll hint (DEV) ======================================
          The hero cue (.hero__scroll-cue) retires at has-reached-01 and never
@@ -1301,9 +1186,11 @@
         transform: translateX(var(--rail-x, 0px));
         opacity: 0;
         pointer-events: none;
+        /* RESTRAINT PASS: the rail used to SLIDE and RESIZE over 620ms at every
+           section handoff — two timed properties fighting the scrub inside each
+           colour stage. It now cuts to position and only fades, so it still
+           marks the current section without animating across the nav. */
         transition:
-          transform 620ms cubic-bezier(.22, .68, .16, 1),
-          width 620ms cubic-bezier(.22, .68, .16, 1),
           opacity 260ms ease,
           background-color 200ms ease;
       }
@@ -1775,9 +1662,10 @@
         <feDisplacementMap in="SourceGraphic" in2="esoft" scale="74" xChannelSelector="R" yChannelSelector="G" />
       </filter>
     </svg>
-    <div class="rise-headline" id="rise-a" aria-hidden="true"><p>Using wearable sensors, Bullfinch provides ground-truth data.</p></div>
-    <div class="rise-headline" id="rise-c" aria-hidden="true"><p>Automatically capture ecological data with no extra trips</p></div>
-    <div class="rise-headline" id="rise-b" aria-hidden="true"><p>Our mission is to provide the ground truth data humanity needs to protect and restore Nature.</p></div>
+    <!-- The three rising overlay headlines (#rise-a / #rise-c / #rise-b) are
+         GONE (Piet). They are not hidden and they are not coming back. The
+         background colour stages they used to carry now crossfade across the
+         same scroll gaps — see "Journey colour stages" in the inline JS. -->
     <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
       <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
     </div>
@@ -2123,7 +2011,9 @@
     <script src="scroll.js"></script>
     <script src="scene-claude-teaser.js?v=claude-46"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
-    <script src="field-film.js?v=v4-4"></script>
+    <!-- field-film.js dropped: it looks up #field-film, which is not on this
+         page, and returned immediately. -->
+
     <script src="swot-claude.js?v=claude-19"></script>
     <script src="stat-field-claude.js?v=claude-14"></script>
     <script>
@@ -2256,10 +2146,16 @@
                 window.bullfinchCanopy.setFinalPaletteProgress(p);
               }
             }
+            // RESTRAINT PASS: end moved 55% -> 68%. The canopy photograph starts
+            // pushing in at "top 65%", so the old window had the whole-frame
+            // night grade (6 root vars + ~10 scene uniforms) still moving while
+            // the photo faded and scaled on top of it — two systems re-grading
+            // the same frame at once. The palette now settles first, then the
+            // photo arrives against a still background.
             ScrollTrigger.create({
               trigger: "#closing",
               start: "top 85%",
-              end: "top 55%",
+              end: "top 68%",
               scrub: true,
               onUpdate: function (self) { setFinalGrade(self.progress); },
               onRefresh: function (self) { setFinalGrade(self.progress || 0); }
@@ -2379,102 +2275,78 @@
           });
         }
 
-        // Two rising overlay headlines. Each rides from just below the viewport
-        // (bottom) up and off the top across a scroll band, then stays gone.
+        // ---- Journey colour stages -------------------------------------
+        // Piet KILLED the rising overlay headlines. The five-stop background
+        // ramp survives, but each stage now CROSSFADES across the free-scroll
+        // gap between two pins instead of arriving behind a travelling bar.
         //
-        // NO FADE (Piet): they never ghost in or out. The travel is built so the
-        // block is entirely BELOW the fold at p=0 and entirely ABOVE it at p=1,
-        // so the band edges do the hiding, not opacity.
+        // There is no element to measure any more: setJourneyProgress is the
+        // only path in. setJourneyWipe (the hard step boundary in
+        // scene-claude-teaser.js) is deliberately never called from this page.
+        // Do NOT reinstate a bar to carry the colour.
         //
-        // BANDS — each headline rides one of the EMPTY free-scroll gaps between
-        // pins, so it never shares the screen with choreographed text or
-        // graphics; only the background motes are moving under it:
-        //   A: hero UNPINS -> 01 PINS. Hero copy is fully erased (by 0.86 of the
-        //      hero pin) and the forest diagonal has finished; the 01 copy is
-        //      still hidden (panels write on only inside their own pin). The
-        //      motes rising into the <1% grid are the only motion.
-        //   B: 02 UNPINS -> 03 PINS. The 02 copy has un-written and the case
-        //      graphic has faded out (both complete at 1.0 of the 02 pin); the
-        //      03 copy + tree data don't start until 0.03 of the 03 pin. The
-        //      motes gathering into the grove are the only motion.
+        // BANDS — each stage owns one of the EMPTY gaps between pins, so the
+        // colour never changes underneath choreographed copy:
+        //   1: hero UNPINS -> 01 PINS. Hero copy is fully erased by 0.86 of the
+        //      hero pin; the 01 copy has not started.
+        //   2: 01 releasing (its copy un-writes 0.80 -> 1.0) -> 02 PINS.
+        //   3: 02 UNPINS -> the TEAM stop pins. NOT 03: the team pin now sits
+        //      inside that old gap, and ending at p3 ran the whole colour
+        //      change underneath the team copy's write-on.
+        //   4: inside the 03 pin, carried by the grove standing up.
         (function () {
-          function drive(el, p) {
-            if (!el) return;
-            // +58vh (clear below the fold) -> -70vh (clear above the top).
-            el.style.setProperty("--rise-y", (58 - p * 128).toFixed(2) + "vh");
-          }
           // A zero-length band would make the scrub degenerate; keep a floor in
           // case a layout ever collapses the gap between two pins.
           function bandEnd(start, end) { return end > start + 40 ? end : start + 40; }
-          // Each bar WIPES the background from one journey stop to the next
-          // (ramp in scene-claude-teaser.js): A -> 1, C -> 2, B -> 3, and the
-          // grove itself -> 4. Not a crossfade: the bar's top edge is a hard
-          // boundary, new colour behind it (below), old colour ahead of it
-          // (above), so the colour arrives with the bar and nowhere else.
-          function journey(stop, el, p) {
+          // Eased both ends. The wipe used to get its soft start and stop for
+          // free from the bar clearing the fold; a linear fade over a short gap
+          // reads as a snap at both band edges without this.
+          function journey(stop, p) {
             var c = window.bullfinchCanopy;
-            if (!c) return;
-            if (p <= 0) { if (c.setJourneyProgress) c.setJourneyProgress(stop - 1); return; }
-            if (p >= 1) { if (c.setJourneyProgress) c.setJourneyProgress(stop); return; }
-            // Stop 4 has no bar to wipe with — the grove carries it, so that
-            // one eases instead.
-            if (!c.setJourneyWipe || !el) {
-              if (c.setJourneyProgress) c.setJourneyProgress(stop - 1 + p);
-              return;
-            }
-            // Screen fraction of the bar's TOP edge, 0 bottom -> 1 top.
-            var h = window.innerHeight || 1;
-            c.setJourneyWipe(stop, 1 - el.getBoundingClientRect().top / h);
+            if (!c || !c.setJourneyProgress) return;
+            if (p <= 0) { c.setJourneyProgress(stop - 1); return; }
+            if (p >= 1) { c.setJourneyProgress(stop); return; }
+            c.setJourneyProgress(stop - 1 + smootherstep(p));
           }
-          var riseA = document.getElementById("rise-a");
-          var riseB = document.getElementById("rise-b");
-          var riseC = document.getElementById("rise-c");
-          drive(riseA, 0); drive(riseB, 0); drive(riseC, 0);
-          ScrollTrigger.create({
-            trigger: document.body,
-            // Widened both ways (Piet): in a touch before the hero unpins (its
-            // copy is erased by 0.86) and out a touch after 01 pins.
-            start: function () { return heroPin ? at(heroPin, 0.90) : p1.start; },
-            end: function () { return bandEnd(heroPin ? at(heroPin, 0.90) : p1.start, at(p1, 0.08)); },
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) { drive(riseA, self.progress); journey(1, riseA, self.progress); },
-            onLeaveBack: function () { drive(riseA, 0); journey(1, riseA, 0); },
-            onLeave: function () { drive(riseA, 1); journey(1, riseA, 1); },
-          });
-          // C: 01 releasing -> the open field before 02 pins. Starts as the 01
-          // copy is already un-writing (0.80 -> 1.0), so the block only clears
-          // the bottom of the screen once that copy is essentially gone, and it
-          // is off the top by the time 02 pins and writes on.
-          ScrollTrigger.create({
-            trigger: document.body,
-            start: function () { return at(p1, 0.86); },
-            end: function () { return bandEnd(at(p1, 0.86), p2.start); },
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) { drive(riseC, self.progress); journey(2, riseC, self.progress); },
-            onLeaveBack: function () { drive(riseC, 0); journey(2, riseC, 0); },
-            onLeave: function () { drive(riseC, 1); journey(2, riseC, 1); },
-          });
-          ScrollTrigger.create({
-            trigger: document.body,
-            start: function () { return p2.end; },
-            end: function () { return bandEnd(p2.end, p3.start); },
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) { drive(riseB, self.progress); journey(3, riseB, self.progress); },
-            onLeaveBack: function () { drive(riseB, 0); journey(3, riseB, 0); },
-            onLeave: function () { drive(riseB, 1); journey(3, riseB, 1); },
-          });
+          function stage(stop, startFn, endFn) {
+            ScrollTrigger.create({
+              trigger: document.body,
+              start: startFn,
+              end: function () { return bandEnd(startFn(), endFn()); },
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: function (self) { journey(stop, self.progress); },
+              onLeaveBack: function () { journey(stop, 0); },
+              onLeave: function () { journey(stop, 1); },
+            });
+          }
+          stage(1,
+            function () { return heroPin ? at(heroPin, 0.90) : p1.start; },
+            function () { return at(p1, 0.08); });
+          stage(2,
+            function () { return at(p1, 0.86); },
+            function () { return p2.start; });
+          // pTeam falls back to p2 if the team stop is reverted; in that case
+          // the old 02 -> 03 gap is empty again and p3 is the right end.
+          stage(3,
+            function () { return p2.end; },
+            function () { return pTeam === p2 ? p3.start : pTeam.start; });
           // The half-green stage. The nav is fixed and outside #product, so it
           // cannot inherit that section's darkened ink vars — this carries the
           // 01-04 links, the hover label, the fullscreen toggle and social link
           // in one move, the same way is-tree-stage does for 03. Window runs
-          // from bar C committing stop 2 through to the 03 pin, where
-          // is-tree-stage takes over, so the two never overlap.
+          // from 02 pinning through to the 03 pin, where is-tree-stage takes
+          // over, so the two never overlap.
+          //
+          // Moved off at(p1, 0.93): that instant already carried the colour
+          // change, six copy un-writes, the photo crop closing, the mote
+          // release and the mark disassembly. The remap is a 240ms TIMED
+          // transition, so it was one of three timed moves fighting the scrub
+          // in the busiest moment on the page. At p2.start it lands on a
+          // boundary where nothing else is running.
           ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return at(p1, 0.93); },
+            start: function () { return p2.start; },
             end: function () { return p3.start; },
             invalidateOnRefresh: true,
             onToggle: function (self) {
@@ -2519,19 +2391,12 @@
               scrubIn(band("data-reveal-out-from", 0.88), band("data-reveal-out-to", 1.0), true);
             }
           );
-          // Stop 4 has no bar — the GROVE carries it. Once 03 pins and the
+          // Stop 4 is carried by the GROVE, not a gap. Once 03 pins and the
           // trees are standing, the ramp walks from the green halfway to the
           // closing night palette, which then takes over on its own trigger.
-          ScrollTrigger.create({
-            trigger: document.body,
-            start: function () { return p3.start; },
-            end: function () { return at(p3, 0.30); },
-            scrub: true,
-            invalidateOnRefresh: true,
-            onUpdate: function (self) { journey(4, null, self.progress); },
-            onLeaveBack: function () { journey(4, null, 0); },
-            onLeave: function () { journey(4, null, 1); },
-          });
+          stage(4,
+            function () { return p3.start; },
+            function () { return at(p3, 0.30); });
         })();
 
         // Opening forest-floor motes resolve into the <1% grid. Piet: start
@@ -2639,7 +2504,12 @@
             // swot-claude.js), instead of finishing off-screen during the
             // free-scroll gap before 03 arrives. Tree FORMATION stays on treeP.
             var pinP3 = (p3.end > p3.start) ? (y - p3.start) / (p3.end - p3.start) : 0;
-            var dataReveal = smootherstep((pinP3 - 0.03) / 0.19);
+            // RESTRAINT PASS: reveal pushed 0.03 -> 0.10. Grove formation
+            // completes at at(p3, 0.08), so the old start had the trees still
+            // gathering while the species counts ticked up. The data now begins
+            // once the grove is standing, and still lands in lockstep with the
+            // audience cells and partner logos (~0.22).
+            var dataReveal = smootherstep((pinP3 - 0.10) / 0.19);
             var dataLeave = smootherstep((pinP3 - 0.80) / 0.20);
             var dataProg = dataReveal * (1 - dataLeave);
             writeTreeData(0.80 + dataProg * 0.20);
@@ -2855,11 +2725,18 @@
           x = clamp01(x);
           return x * x * (3 - 2 * x);
         }
+        // RESTRAINT PASS (Piet, "transitions too busy"):
+        // --pang used to sweep 360deg -> -12deg on every mark, on entry AND on
+        // exit, four panels = eight spins, every one landing inside a colour
+        // stage or a copy write-on. It was the only motion in the mark that read
+        // as decoration rather than assembly. Now pinned at its rest angle: the
+        // pieces still translate in, scale up and clip their red fill.
+        // --glow is dropped outright — --glowk is 0 (see :135), so it was
+        // multiplied to nothing and animated per frame for no pixels at all.
         function applyMarkAmount(el, x) {
           el.style.setProperty("--build", x.toFixed(4));
           el.style.setProperty("--rev", x.toFixed(4));
-          el.style.setProperty("--glow", (x * .95).toFixed(4));
-          el.style.setProperty("--pang", (360 - 372 * x).toFixed(2) + "deg");
+          el.style.setProperty("--pang", "-12deg");
         }
         function applyMarkState(el, p, longHold) { applyMarkAmount(el, markState(p, longHold)); }
 
@@ -2882,11 +2759,13 @@
               start: "top top",
               // Match each panel's actual pin length so the mark reaches the
               // reverse half before the panel releases.
-              end: panel.id === "proof"
-                ? (mobileLike ? "+=220%" : "+=380%")
-                : (clipPanel
-                    ? (mobileLike ? "+=280%" : "+=420%")
-                    : (mobileLike ? "+=100%" : "+=150%")),
+              // #proof does not exist on this page — its 380/220 branch was
+              // dead and has been dropped. Still duplicated with
+              // swot-claude.js's pin lengths: change BOTH or the mark runs its
+              // cycle over the wrong distance.
+              end: clipPanel
+                ? (mobileLike ? "+=280%" : "+=420%")
+                : (mobileLike ? "+=100%" : "+=150%"),
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) { scrub(self.progress); },
@@ -2984,143 +2863,9 @@
         sync();
       })();
     </script>
-    <script>
-      // Market bullseye (section 05): FULLY SCROLL-DRIVEN, in two phases. Phase
-      // 1: a growing clip reveals the complete faint circles outward from the
-      // centre. Phase 2 (only once the circles are whole): a second clip grows
-      // with STICKY HOLDS so the red fills the chart region by region, dwelling
-      // on each completed market so none slips past. One label + one leader sit
-      // on a FIXED spot per region (they don't chase the growing edge). The TAM
-      // is the stickiest hold; then the whole bullseye SHRINKS back in as you
-      // scroll away (an animation, not a passive scroll-off), and scrolling back
-      // up reverses it. Safe by default: no motion / no GSAP leaves the chart
-      // static and complete, red on the TAM.
-      (function () {
-        var svg = document.querySelector("#proof .bullseye");
-        var panel = document.getElementById("proof");
-        if (!svg || !panel) return;
-        var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (reduced || typeof ScrollTrigger === "undefined" || typeof gsap === "undefined") return;
-
-        var clipS = svg.querySelector("#be-clip-s-c");
-        var clipR = svg.querySelector("#be-clip-r-c");
-        var sweep = svg.querySelector(".be-sweep");
-        var leader = svg.querySelector(".be-leader");
-        var cap = svg.querySelector(".be-cap");
-        var capName = svg.querySelector(".be-cap-name");
-        var capVal = svg.querySelector(".be-cap-val");
-        var bcap = document.querySelector("#proof .bullseye-cap");
-        if (!clipS || !clipR || !sweep || !leader || !cap) return;
-
-        var CX = 180, CY = 190;
-        // Each region: the red band that fills it (mid-radius + thickness), its
-        // outer boundary, and the label shown while it is being filled. The
-        // leader parks at the top of the band (fixed per region).
-        var REGIONS = [
-          { band: { r: 13,   w: 26 }, outer: 26,  name: "BEACHHEAD", num: 188,  dec: 0, suf: "M" },
-          { band: { r: 44.5, w: 37 }, outer: 63,  name: "SOM",       num: 1.05, dec: 2, suf: "B" },
-          { band: { r: 81.5, w: 37 }, outer: 100, name: "SAM",       num: 2.7,  dec: 1, suf: "B" },
-          { band: { r: 125,  w: 50 }, outer: 150, name: "TAM",       num: 6,    dec: 0, suf: "B" }
-        ];
-
-        // Phase 1 — the circles build (scaffold reveal radius), then hold full
-        // to the end (they only retract if you scroll back up).
-        var SKF = [
-          { p: 0.08, f: 0 }, { p: 0.20, f: 150 }, { p: 1.00, f: 150 }
-        ];
-        // Phase 2 — red reveal radius. The build runs in the FIRST part of the
-        // (long) pin; the TAM then fills and holds full across the entire back
-        // half, so the finished $6B sits there for a long stretch and is hard to
-        // scroll past. (Scrolling back up retracts everything.)
-        var RKF = [
-          { p: 0.22, f: 0 },
-          { p: 0.27, f: 26 },  { p: 0.33, f: 26 },   // beachhead fills, brief hold
-          { p: 0.37, f: 63 },  { p: 0.43, f: 63 },   // SOM, brief hold
-          { p: 0.47, f: 100 }, { p: 0.52, f: 100 },  // SAM, brief hold
-          { p: 0.56, f: 150 }, { p: 1.00, f: 150 }   // TAM fills (~0.56), then holds full to the end
-        ];
-        function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
-        function interp(KF, p) {
-          if (p <= KF[0].p) return KF[0].f;
-          for (var i = 0; i < KF.length - 1; i++) {
-            var a = KF[i], b = KF[i + 1];
-            if (p <= b.p) return a.f + (b.f - a.f) * ((p - a.p) / (b.p - a.p));
-          }
-          return KF[KF.length - 1].f;
-        }
-        function regionFor(f) {
-          if (f <= 0) return -1;
-          for (var i = 0; i < REGIONS.length; i++) if (f <= REGIONS[i].outer + 0.001) return i;
-          return REGIONS.length - 1;
-        }
-
-        var lastRegion = -2;
-        var countRAF = null;
-        function fmt(n, dec, suf) { return "$" + n.toFixed(dec) + suf; }
-        function countUp(target, dec, suf) {
-          // Tick the value up to its number when a region becomes active.
-          if (countRAF) cancelAnimationFrame(countRAF);
-          var dur = 700, start = null;
-          function step(ts) {
-            if (start === null) start = ts;
-            var t = Math.min(1, (ts - start) / dur);
-            var e = 1 - Math.pow(1 - t, 3);
-            if (capVal) capVal.textContent = fmt(target * e, dec, suf);
-            if (t < 1) { countRAF = requestAnimationFrame(step); }
-            else { countRAF = null; if (capVal) capVal.textContent = fmt(target, dec, suf); }
-          }
-          countRAF = requestAnimationFrame(step);
-        }
-        function setRegion(idx) {
-          if (idx < 0) return;
-          var r = REGIONS[idx];
-          sweep.setAttribute("r", r.band.r);
-          sweep.style.strokeWidth = r.band.w;
-          if (capName) capName.textContent = r.name;
-          countUp(r.num, r.dec, r.suf);     // value counts up to its number
-          // park the leader on a FIXED spot for this region (top of its band)
-          leader.setAttribute("x2", CX);
-          leader.setAttribute("y2", (CY - r.band.r).toFixed(2));
-          // re-trigger the "comes up" nudge as each region begins
-          cap.classList.remove("is-step");
-          void cap.getBoundingClientRect();
-          cap.classList.add("is-step");
-        }
-        function drive(p) {
-          var sBuilt = interp(SKF, p);
-          var rBuilt = interp(RKF, p);
-          var reg = regionFor(rBuilt);
-          if (reg !== lastRegion) {
-            if (reg >= 0) setRegion(reg);
-            lastRegion = reg;
-          }
-          // ANIMATED EXIT: over the last stretch the whole bullseye SHRINKS back
-          // in (the reverse of the build) as you scroll away — it never just
-          // scrolls off full. The label/region stay on the TAM while it
-          // collapses; scrolling back up grows it again.
-          var exitT = clamp01((p - 0.94) / 0.06);
-          var k = 1 - exitT;
-          clipS.setAttribute("r", (sBuilt * k).toFixed(2));
-          clipR.setAttribute("r", (rBuilt * k).toFixed(2));
-          var vis = clamp01((rBuilt - 1) / 10) * k; // label + line appear with the red, shrink out on exit
-          leader.style.opacity = (0.9 * vis).toFixed(3);
-          cap.style.opacity = vis.toFixed(3);
-          if (bcap) bcap.style.opacity = vis.toFixed(3); // the "$20K / area" caption rides the same fade (no persisting)
-        }
-
-        var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
-        ScrollTrigger.create({
-          trigger: panel,
-          start: "top top",
-          end: mobileLike ? "+=220%" : "+=380%", // MUST match #proof's pin length in swot.js
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: function (self) { drive(self.progress); },
-          onRefresh: function (self) { drive(self.progress || 0); }
-        });
-        drive(0);
-      })();
-    </script>
+    <!-- Market bullseye / $6B TAM chart REMOVED: it targeted #proof, which
+         does not exist on this page, so the whole IIFE early-returned. It was
+         still shipped and parsed on every load. -->
     <script>
       if (window.location.protocol === "file:") {
         document.body.classList.add("is-file-protocol");
