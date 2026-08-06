@@ -548,6 +548,12 @@
         border: 0;
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
+        /* styles.css ships .panel__video at opacity 0 / translateX(-72px) — it
+           is revealed by GSAP in reduced mode, or by setProductCase for 02.
+           Nothing owns it here, so it has to be asserted or the block sits
+           invisible. The reveal is the clip wrapper's job, not opacity's. */
+        opacity: 1;
+        transform: none;
       }
       #team .person { background: none; }
       /* The write-on wrapper. .panel__people itself carries
