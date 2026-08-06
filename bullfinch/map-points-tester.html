@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bullfinch Earth - Map Points Tester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap" rel="stylesheet">
+<!--
+  MAP POINTS TESTER — standalone, tuning only. Not wired into the teaser.
+
+  CONCEPT (Piet): every mote is ONE TREE ON AN OVERHEAD MAP. The field
+  populates left to right across the frame — random within that sweep, not a
+  marching line. Each mote runs its own little arrival: it grows PAST its
+  finished size and settles back to it, and fades in PAST its finished
+  brightness and settles back to it. Once the field is standing we zoom into
+  one section, where a number of the motes among the field read as more
+  highlighted.
+
+  Everything is scroll driven. Every number is a slider. Tune here, then the
+  settled values move into scene-claude-teaser.js behind a body flag.
+
+  Opens straight off the filesystem — no server. Only external request is
+  three.min.js from unpkg.
+-->
+<style>
+:root{
+  --ink:#FAFAFA; --ink-soft:#8E8E8E; --ink-quiet:#5A5A5A;
+  --rule:rgba(250,250,250,0.10);
+  --panel:rgba(10,10,10,0.86);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#050505;color:var(--ink)}
+body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+
+.scroll-space{height:600vh}
+canvas#stage{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+
+/* ===== chrome ===================================================== */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;background:var(--panel);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--rule);
+}
+.nav svg{width:32px;height:22px;display:block}
+.nav__mark-dark{fill:var(--ink)}
+.nav__mark-red{fill:#FF5560}
+.nav__brand{font-family:'Geist',sans-serif;font-weight:600;font-size:13px;letter-spacing:.02em}
+.nav__tag{
+  margin-left:auto;font-family:'Geist Mono',monospace;font-size:10px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-quiet);text-align:right;line-height:1.7;
+}
+
+.hud{
+  position:fixed;left:20px;bottom:20px;z-index:60;
+  font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-soft);line-height:2;pointer-events:none;
+  background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--rule);padding:10px 14px;
+}
+.hud b{color:var(--ink);font-weight:500}
+.hud__bar{
+  display:block;width:150px;height:2px;margin-top:6px;
+  background:rgba(250,250,250,0.14);position:relative;
+}
+.hud__bar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--ink)}
+.hud__bar u{position:absolute;top:-3px;bottom:-3px;width:1px;background:#FF5560;left:0}
+
+/* ===== slider panel ============================================== */
+.panel{
+  position:fixed;top:46px;right:0;bottom:0;width:326px;z-index:70;
+  background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-left:1px solid var(--rule);
+  overflow-y:auto;overscroll-behavior:contain;
+  font-family:'Geist Mono',monospace;font-size:11px;
+  transition:transform 260ms cubic-bezier(.22,.68,.16,1);
+}
+.panel.is-closed{transform:translateX(100%)}
+.panel__toggle{
+  position:fixed;top:56px;right:16px;z-index:80;
+  font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink);background:var(--panel);border:1px solid var(--rule);
+  padding:7px 12px;cursor:pointer;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.panel__toggle:hover{border-color:rgba(250,250,250,0.3)}
+
+.group{border-bottom:1px solid var(--rule);padding:14px 18px 16px}
+.group__title{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#FF5560;
+  margin-bottom:4px;
+}
+.group__note{
+  font-family:'Inter',sans-serif;font-size:10.5px;line-height:1.55;
+  color:var(--ink-quiet);margin-bottom:12px;
+}
+
+.row{margin-bottom:11px}
+.row__head{display:flex;align-items:baseline;gap:8px;margin-bottom:5px}
+.row__label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.row__val{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:2px;
+  background:rgba(250,250,250,0.18);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:11px;height:11px;border-radius:50%;
+  background:var(--ink);cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:11px;height:11px;border:0;border-radius:50%;background:var(--ink);cursor:pointer;
+}
+.swatches{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.swatch{
+  width:26px;height:20px;border:1px solid var(--rule);cursor:pointer;padding:0;
+}
+.swatch.is-on{border-color:var(--ink)}
+input[type=color]{
+  width:38px;height:22px;border:1px solid var(--rule);background:none;padding:0;cursor:pointer;
+}
+.btn{
+  font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink);background:none;border:1px solid var(--rule);padding:8px 12px;cursor:pointer;
+  width:100%;margin-top:4px;
+}
+.btn:hover{border-color:rgba(250,250,250,0.34)}
+.btn + .btn{margin-top:8px}
+.hint{
+  font-family:'Inter',sans-serif;font-size:10px;line-height:1.5;
+  color:var(--ink-quiet);margin-top:8px;
+}
+.field-pair{display:flex;gap:10px}
+.field-pair > *{flex:1}
+
+@media (max-width:900px){
+  .panel{width:100%;top:auto;height:62vh}
+  .panel.is-closed{transform:translateY(100%)}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <svg viewBox="50 35 100 70" aria-hidden="true">
+    <path class="nav__mark-dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+    <path class="nav__mark-red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+  </svg>
+  <div class="nav__brand">Bullfinch Earth</div>
+  <div class="nav__tag">Map Points Tester<br>Scroll to populate, then zoom</div>
+</header>
+
+<button class="panel__toggle" id="toggle">Hide tuning</button>
+
+<div class="hud">
+  <div>Scroll <b id="hud-scroll">0%</b></div>
+  <div>Populate <b id="hud-pop">0%</b> &nbsp; Zoom <b id="hud-zoom">0%</b></div>
+  <div>Stems <b id="hud-count">0</b> &nbsp; Highlit <b id="hud-hl">0</b></div>
+  <span class="hud__bar"><i id="hud-bar"></i><u id="hud-mark"></u></span>
+</div>
+
+<aside class="panel" id="panel"></aside>
+
+<div class="scroll-space"></div>
+<canvas id="stage"></canvas>
+
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ================================================================
+  // TUNING SCHEMA
+  // Every knob in one place. `k` is the key used by the shader/JS,
+  // `rebuild` marks the ones that need the point set regenerated
+  // (count, layout, which motes are highlit) rather than just a
+  // uniform write.
+  // ================================================================
+  var SCHEMA = [
+    {
+      title: "Field",
+      note: "The stand itself, seen from above. Every point is one stem.",
+      rows: [
+        { k: "count",       label: "Stem count",      min: 200,  max: 12000, step: 100,  val: 4200, rebuild: true, fmt: 0 },
+        { k: "fieldW",      label: "Field width",     min: 20,   max: 300,   step: 1,    val: 140,  rebuild: true, fmt: 0 },
+        { k: "fieldD",      label: "Field depth",     min: 20,   max: 300,   step: 1,    val: 95,   rebuild: true, fmt: 0 },
+        { k: "clustering",  label: "Clustering",      min: 0,    max: 1,     step: 0.01, val: 0.55, rebuild: true, fmt: 2 },
+        { k: "clusters",    label: "Cluster count",   min: 1,    max: 60,    step: 1,    val: 18,   rebuild: true, fmt: 0 },
+        { k: "clusterSpread", label: "Cluster spread", min: 0.02, max: 0.5,  step: 0.005, val: 0.11, rebuild: true, fmt: 3 }
+      ]
+    },
+    {
+      title: "Mote at rest",
+      note: "Finished size and brightness — what every mote settles back to.",
+      rows: [
+        { k: "size",     label: "Point size",     min: 0.05, max: 3,  step: 0.01, val: 0.62, fmt: 2 },
+        { k: "opacity",  label: "Brightness",     min: 0.05, max: 1,  step: 0.01, val: 0.62, fmt: 2 },
+        { k: "sizeFollowZoom", label: "Size follows zoom", min: 0, max: 1, step: 0.01, val: 0.35, fmt: 2 }
+      ]
+    },
+    {
+      title: "Populate — left to right",
+      note: "The sweep crosses the frame; the band is how much of the field is mid-arrival at once. Order jitter breaks the marching line so it reads scattered, not scanned.",
+      rows: [
+        { k: "revealBand",  label: "Sweep band",     min: 0.02, max: 1,  step: 0.01, val: 0.34, fmt: 2 },
+        { k: "orderJitter", label: "Order jitter",   min: 0,    max: 1,  step: 0.01, val: 0.28, rebuild: true, fmt: 2 },
+        { k: "arriveEase",  label: "Arrival ease",   min: 1,    max: 6,  step: 0.1,  val: 3,    fmt: 1 }
+      ]
+    },
+    {
+      title: "Overshoot — per mote",
+      note: "Each mote passes its finished size and brightness on the way in, then returns to them. Peak sets how far past; width sets how much of its own arrival the excursion takes.",
+      rows: [
+        { k: "sizeOver",    label: "Size peak",       min: 0, max: 3, step: 0.01, val: 0.85, fmt: 2 },
+        { k: "sizeOverW",   label: "Size width",      min: 0.05, max: 0.7, step: 0.01, val: 0.26, fmt: 2 },
+        { k: "sizeOverAt",  label: "Size peak at",    min: 0.1, max: 0.95, step: 0.01, val: 0.52, fmt: 2 },
+        { k: "brightOver",  label: "Bright peak",     min: 0, max: 3, step: 0.01, val: 1.1,  fmt: 2 },
+        { k: "brightOverW", label: "Bright width",    min: 0.05, max: 0.7, step: 0.01, val: 0.2, fmt: 2 },
+        { k: "brightOverAt",label: "Bright peak at",  min: 0.1, max: 0.95, step: 0.01, val: 0.44, fmt: 2 }
+      ]
+    },
+    {
+      title: "Camera",
+      note: "Straight down is the true plan view. Tilt is there to see how far it can lean before it stops reading as a map.",
+      rows: [
+        { k: "tilt",     label: "Tilt off vertical", min: 0, max: 55, step: 0.5, val: 0, fmt: 1, unit: "°" },
+        { k: "padding",  label: "Frame padding",     min: 1, max: 1.8, step: 0.01, val: 1.12, fmt: 2 },
+        { k: "rotate",   label: "Field rotation",    min: -30, max: 30, step: 0.5, val: 0, fmt: 1, unit: "°" }
+      ]
+    },
+    {
+      title: "Zoom to section",
+      note: "Where we go in. Centre is normalised on the field, so 0.5 / 0.5 is the middle.",
+      rows: [
+        { k: "targetX",   label: "Centre X",       min: 0, max: 1, step: 0.01, val: 0.68, rebuild: true, fmt: 2 },
+        { k: "targetZ",   label: "Centre Z",       min: 0, max: 1, step: 0.01, val: 0.42, rebuild: true, fmt: 2 },
+        { k: "regionR",   label: "Section radius", min: 0.03, max: 0.5, step: 0.005, val: 0.15, rebuild: true, fmt: 3 },
+        { k: "zoomEase",  label: "Zoom ease",      min: 1, max: 5, step: 0.1, val: 2.2, fmt: 1 }
+      ]
+    },
+    {
+      title: "Highlight",
+      note: "Inside the section, a number of the motes come forward. Fraction is how many of them, not all.",
+      rows: [
+        { k: "hlFraction", label: "Fraction highlit", min: 0.02, max: 1, step: 0.01, val: 0.3, rebuild: true, fmt: 2 },
+        { k: "hlSize",     label: "Size gain",        min: 0, max: 4, step: 0.05, val: 1.1, fmt: 2 },
+        { k: "hlBright",   label: "Brightness gain",  min: 0, max: 3, step: 0.05, val: 0.75, fmt: 2 },
+        { k: "hlMix",      label: "Accent mix",       min: 0, max: 1, step: 0.01, val: 0.45, fmt: 2 },
+        { k: "hlDim",      label: "Dim the rest",     min: 0, max: 0.9, step: 0.01, val: 0.35, fmt: 2 },
+        { k: "hlLead",     label: "Highlight lead",   min: 0, max: 1, step: 0.01, val: 0.18, fmt: 2 }
+      ]
+    },
+    {
+      title: "Scroll mapping",
+      note: "Where populate hands over to zoom, and how much the scroll is smoothed before it drives anything.",
+      rows: [
+        { k: "popFrom",  label: "Populate from", min: 0, max: 0.6, step: 0.01, val: 0.02, fmt: 2 },
+        { k: "popTo",    label: "Populate to",   min: 0.1, max: 0.95, step: 0.01, val: 0.52, fmt: 2 },
+        { k: "zoomFrom", label: "Zoom from",     min: 0.1, max: 0.95, step: 0.01, val: 0.6, fmt: 2 },
+        { k: "zoomTo",   label: "Zoom to",       min: 0.2, max: 1, step: 0.01, val: 0.95, fmt: 2 },
+        { k: "smooth",   label: "Smoothing",     min: 0.02, max: 1, step: 0.01, val: 0.12, fmt: 2 }
+      ]
+    }
+  ];
+
+  var V = {};
+  SCHEMA.forEach(function (g) { g.rows.forEach(function (r) { V[r.k] = r.val; }); });
+
+  // Colour is separate — swatches + pickers rather than sliders.
+  // NOTE (landmine): ShaderMaterials skip the sRGB -> linear convert, so the
+  // accent here is the GL accent #FF5560, never the CSS #FF171E.
+  var C = {
+    bg:     "#EFE7D3",
+    mote:   "#2E3A2E",
+    accent: "#FF5560"
+  };
+  var BG_PRESETS = [
+    { label: "Beige",  bg: "#EFE7D3", mote: "#2E3A2E" },
+    { label: "Green",  bg: "#C6D8BE", mote: "#1E2A1E" },
+    { label: "Night",  bg: "#050505", mote: "#C8C2B5" }
+  ];
+
+  // ================================================================
+  // RENDERER
+  // ================================================================
+  var canvas = document.getElementById("stage");
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  var scene = new THREE.Scene();
+  // Orthographic: a map has no perspective. Frustum height is set in fit().
+  var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 4000);
+  // Straight-down needs an up vector that is not parallel to the view, or
+  // lookAt degenerates. -Z is "north" on this map.
+  camera.up.set(0, 0, -1);
+
+  var uniforms = {
+    uSweep:        { value: 0 },
+    uRevealBand:   { value: V.revealBand },
+    uArriveEase:   { value: V.arriveEase },
+    uSize:         { value: V.size },
+    uOpacity:      { value: V.opacity },
+    uPxScale:      { value: 1 },
+    uSizeOver:     { value: V.sizeOver },
+    uSizeOverW:    { value: V.sizeOverW },
+    uSizeOverAt:   { value: V.sizeOverAt },
+    uBrightOver:   { value: V.brightOver },
+    uBrightOverW:  { value: V.brightOverW },
+    uBrightOverAt: { value: V.brightOverAt },
+    uHl:           { value: 0 },
+    uHlSize:       { value: V.hlSize },
+    uHlBright:     { value: V.hlBright },
+    uHlMix:        { value: V.hlMix },
+    uHlDim:        { value: V.hlDim },
+    uMote:         { value: new THREE.Color(C.mote) },
+    uAccent:       { value: new THREE.Color(C.accent) }
+  };
+
+  var VERT = [
+    "attribute float aOrder;",   // 0..1 position in the left-to-right sweep
+    "attribute float aHl;",      // 1 = one of the highlit stems in the section
+    "uniform float uSweep;",
+    "uniform float uRevealBand;",
+    "uniform float uArriveEase;",
+    "uniform float uSize;",
+    "uniform float uOpacity;",
+    "uniform float uPxScale;",
+    "uniform float uSizeOver;",
+    "uniform float uSizeOverW;",
+    "uniform float uSizeOverAt;",
+    "uniform float uBrightOver;",
+    "uniform float uBrightOverW;",
+    "uniform float uBrightOverAt;",
+    "uniform float uHl;",
+    "uniform float uHlSize;",
+    "uniform float uHlBright;",
+    "uniform float uHlMix;",
+    "uniform float uHlDim;",
+    "uniform vec3  uMote;",
+    "uniform vec3  uAccent;",
+    "varying float vAlpha;",
+    "varying vec3  vColor;",
+    "",
+    "float bump(float t, float at, float w) {",
+    "  float d = (t - at) / max(w, 0.02);",
+    "  return exp(-d * d);",
+    "}",
+    "",
+    "void main() {",
+    // Each mote's OWN arrival clock. The sweep crosses the field; a mote
+    // starts when the sweep reaches its order value and takes uRevealBand
+    // of sweep to finish, so many are mid-arrival at once.
+    "  float t = clamp((uSweep - aOrder) / max(uRevealBand, 0.001), 0.0, 1.0);",
+    // Settle curve: fast in, easing to its finished value.
+    "  float grow = 1.0 - pow(1.0 - t, uArriveEase);",
+    // Excursions PAST the finished value that return to it: both bumps are
+    // zero at t = 1, so the rest state is exactly uSize / uOpacity.
+    "  float sBump = bump(t, uSizeOverAt, uSizeOverW) * (1.0 - t);",
+    "  float bBump = bump(t, uBrightOverAt, uBrightOverW) * (1.0 - t);",
+    "  float hl = aHl * uHl;",
+    "  float dim = 1.0 - uHlDim * uHl * (1.0 - aHl);",
+    "",
+    "  float size = uSize * (1.0 + uHlSize * hl) * grow * (1.0 + uSizeOver * sBump);",
+    "  vec4 mv = modelViewMatrix * vec4(position, 1.0);",
+    "  gl_PointSize = max(size * uPxScale, 0.0);",
+    "  gl_Position = projectionMatrix * mv;",
+    "",
+    "  vAlpha = clamp(uOpacity * grow * (1.0 + uBrightOver * bBump) * (1.0 + uHlBright * hl) * dim, 0.0, 1.0);",
+    "  vColor = mix(uMote, uAccent, clamp(uHlMix * hl, 0.0, 1.0));",
+    "}"
+  ].join("\n");
+
+  var FRAG = [
+    "varying float vAlpha;",
+    "varying vec3  vColor;",
+    "void main() {",
+    "  vec2 c = gl_PointCoord - 0.5;",
+    "  float d = length(c);",
+    "  if (d > 0.5) discard;",
+    "  float a = smoothstep(0.5, 0.28, d) * vAlpha;",
+    "  gl_FragColor = vec4(vColor, a);",
+    "}"
+  ].join("\n");
+
+  var material = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: VERT,
+    fragmentShader: FRAG,
+    transparent: true,
+    depthWrite: false,
+    depthTest: false,
+    // Normal blending: on a light ground, additive would wash the motes out
+    // instead of darkening them. The teaser's night stops can go additive.
+    blending: THREE.NormalBlending
+  });
+
+  var points = null, geo = null;
+  var xNorm = null, zNorm = null, rnd = null; // kept so jitter can re-derive aOrder
+  var hlCount = 0;
+
+  function rebuild() {
+    if (points) { scene.remove(points); geo.dispose(); }
+
+    var n = Math.round(V.count);
+    var W = V.fieldW, D = V.fieldD;
+    var pos = new Float32Array(n * 3);
+    var order = new Float32Array(n);
+    var hl = new Float32Array(n);
+    xNorm = new Float32Array(n);
+    zNorm = new Float32Array(n);
+    rnd = new Float32Array(n);
+
+    // Cluster centres, so the stand reads like a stand and not like noise.
+    var nc = Math.max(1, Math.round(V.clusters));
+    var cx = new Float32Array(nc), cz = new Float32Array(nc);
+    for (var c = 0; c < nc; c++) { cx[c] = Math.random(); cz[c] = Math.random(); }
+
+    function gauss() {
+      // Box-Muller. Two uniforms in, one normal out.
+      var u = Math.max(1e-6, Math.random());
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * Math.random());
+    }
+
+    hlCount = 0;
+    for (var i = 0; i < n; i++) {
+      var ux = Math.random(), uz = Math.random();
+      var k = Math.floor(Math.random() * nc);
+      var gx = cx[k] + gauss() * V.clusterSpread;
+      var gz = cz[k] + gauss() * V.clusterSpread;
+      // Blend uniform scatter with the clustered draw, then keep it on the plot.
+      var nx = Math.min(1, Math.max(0, ux + (gx - ux) * V.clustering));
+      var nz = Math.min(1, Math.max(0, uz + (gz - uz) * V.clustering));
+
+      xNorm[i] = nx; zNorm[i] = nz; rnd[i] = Math.random();
+      pos[i * 3]     = (nx - 0.5) * W;
+      pos[i * 3 + 1] = 0;
+      pos[i * 3 + 2] = (nz - 0.5) * D;
+
+      // In the section, and drawn as one of the highlit ones.
+      var dx = (nx - V.targetX) * W, dz = (nz - V.targetZ) * D;
+      var rr = V.regionR * Math.max(W, D);
+      var inside = (dx * dx + dz * dz) <= rr * rr;
+      var pick = inside && Math.random() < V.hlFraction;
+      hl[i] = pick ? 1 : 0;
+      if (pick) hlCount++;
+    }
+
+    applyOrder(order);
+
+    geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute("aOrder", new THREE.BufferAttribute(order, 1));
+    geo.setAttribute("aHl", new THREE.BufferAttribute(hl, 1));
+    points = new THREE.Points(geo, material);
+    points.frustumCulled = false;
+    scene.add(points);
+
+    document.getElementById("hud-count").textContent = n.toLocaleString();
+    document.getElementById("hud-hl").textContent = hlCount.toLocaleString();
+    fit();
+  }
+
+  // Reveal order = x position, pulled toward pure randomness by the jitter
+  // knob. At 0 it is a clean left-to-right edge; at 1 the field fills in
+  // scattered with no direction at all.
+  function applyOrder(target) {
+    var arr = target || (geo && geo.getAttribute("aOrder").array);
+    if (!arr) return;
+    for (var i = 0; i < arr.length; i++) {
+      arr[i] = xNorm[i] + (rnd[i] - xNorm[i]) * V.orderJitter;
+    }
+    if (!target && geo) geo.getAttribute("aOrder").needsUpdate = true;
+  }
+
+  // ================================================================
+  // CAMERA — one fit for the whole plot, one for the section
+  // ================================================================
+  var frustumFull = 1, frustumZoom = 1, aspect = 1;
+
+  function fit() {
+    var w = window.innerWidth, h = window.innerHeight;
+    aspect = w / h;
+    renderer.setSize(w, h);
+
+    // Height needed to hold the whole plot, whichever axis binds.
+    frustumFull = Math.max(V.fieldD, V.fieldW / aspect) * V.padding;
+    frustumZoom = Math.max(2 * V.regionR * Math.max(V.fieldW, V.fieldD), 1) * V.padding;
+  }
+  window.addEventListener("resize", function () { fit(); });
+
+  function applyCamera(zoomP) {
+    var e = Math.pow(zoomP, 1); // eased before it gets here
+    var fh = frustumFull + (frustumZoom - frustumFull) * e;
+    var halfH = fh / 2, halfW = halfH * aspect;
+    camera.left = -halfW; camera.right = halfW;
+    camera.top = halfH; camera.bottom = -halfH;
+    camera.updateProjectionMatrix();
+
+    var tx = (V.targetX - 0.5) * V.fieldW * e;
+    var tz = (V.targetZ - 0.5) * V.fieldD * e;
+    var tilt = THREE.MathUtils.degToRad(V.tilt);
+    var dist = 600;
+    camera.position.set(
+      tx + dist * Math.sin(tilt) * 0,
+      dist * Math.cos(tilt),
+      tz + dist * Math.sin(tilt)
+    );
+    camera.lookAt(tx, 0, tz);
+
+    if (points) points.rotation.y = THREE.MathUtils.degToRad(V.rotate);
+
+    // Pixels per world unit, so a point can hold its screen size through the
+    // zoom (0) or grow with the ground (1).
+    var ppu = window.innerHeight / fh;
+    var ppuFull = window.innerHeight / frustumFull;
+    uniforms.uPxScale.value = ppuFull + (ppu - ppuFull) * V.sizeFollowZoom;
+  }
+
+  // ================================================================
+  // SCROLL
+  // ================================================================
+  var rawP = 0, smoothP = 0;
+  function readScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    rawP = max > 0 ? window.scrollY / max : 0;
+  }
+  window.addEventListener("scroll", readScroll, { passive: true });
+  readScroll();
+
+  function span(p, a, b) {
+    if (b <= a) return p >= b ? 1 : 0;
+    return Math.min(1, Math.max(0, (p - a) / (b - a)));
+  }
+  function smootherstep(x) {
+    x = x < 0 ? 0 : (x > 1 ? 1 : x);
+    return x * x * x * (x * (x * 6 - 15) + 10);
+  }
+
+  var elScroll = document.getElementById("hud-scroll");
+  var elPop = document.getElementById("hud-pop");
+  var elZoom = document.getElementById("hud-zoom");
+  var elBar = document.getElementById("hud-bar");
+  var elMark = document.getElementById("hud-mark");
+
+  function tick() {
+    smoothP += (rawP - smoothP) * V.smooth;
+
+    var pop = span(smoothP, V.popFrom, V.popTo);
+    var zoomRaw = span(smoothP, V.zoomFrom, V.zoomTo);
+    var zoom = Math.pow(smootherstep(zoomRaw), 1 / V.zoomEase);
+
+    // The sweep has to travel one band PAST 1 so the last mote finishes.
+    uniforms.uSweep.value = pop * (1 + V.revealBand);
+    // Highlight can lead the zoom slightly so the section is already
+    // separating as the camera arrives.
+    uniforms.uHl.value = smootherstep(span(smoothP, V.zoomFrom - V.hlLead * (V.zoomTo - V.zoomFrom), V.zoomTo));
+
+    applyCamera(zoom);
+    renderer.render(scene, camera);
+
+    elScroll.textContent = Math.round(smoothP * 100) + "%";
+    elPop.textContent = Math.round(pop * 100) + "%";
+    elZoom.textContent = Math.round(zoom * 100) + "%";
+    elBar.style.width = (smoothP * 100).toFixed(1) + "%";
+    elMark.style.left = (V.zoomFrom * 100).toFixed(1) + "%";
+
+    requestAnimationFrame(tick);
+  }
+
+  // ================================================================
+  // PANEL
+  // ================================================================
+  var panel = document.getElementById("panel");
+
+  function fmt(v, d, unit) {
+    return (d === 0 ? Math.round(v).toLocaleString() : v.toFixed(d)) + (unit || "");
+  }
+
+  SCHEMA.forEach(function (g) {
+    var wrap = document.createElement("div");
+    wrap.className = "group";
+    var h = document.createElement("div");
+    h.className = "group__title";
+    h.textContent = g.title;
+    wrap.appendChild(h);
+    if (g.note) {
+      var nt = document.createElement("p");
+      nt.className = "group__note";
+      nt.textContent = g.note;
+      wrap.appendChild(nt);
+    }
+    g.rows.forEach(function (r) {
+      var row = document.createElement("div");
+      row.className = "row";
+      var head = document.createElement("div");
+      head.className = "row__head";
+      var lab = document.createElement("span");
+      lab.className = "row__label";
+      lab.textContent = r.label;
+      var val = document.createElement("span");
+      val.className = "row__val";
+      val.textContent = fmt(r.val, r.fmt, r.unit);
+      head.appendChild(lab); head.appendChild(val);
+      var input = document.createElement("input");
+      input.type = "range";
+      input.min = r.min; input.max = r.max; input.step = r.step; input.value = r.val;
+      input.addEventListener("input", function () {
+        V[r.k] = parseFloat(input.value);
+        val.textContent = fmt(V[r.k], r.fmt, r.unit);
+        onChange(r);
+      });
+      row.appendChild(head); row.appendChild(input);
+      wrap.appendChild(row);
+    });
+    panel.appendChild(wrap);
+  });
+
+  // Colour group
+  (function () {
+    var wrap = document.createElement("div");
+    wrap.className = "group";
+    wrap.innerHTML =
+      '<div class="group__title">Colour</div>' +
+      '<p class="group__note">Presets match the teaser’s background stops. ' +
+      'The accent is the GL accent #FF5560 — shader materials skip the sRGB convert, ' +
+      'so it is deliberately not the CSS red.</p>';
+    var sw = document.createElement("div");
+    sw.className = "swatches";
+    BG_PRESETS.forEach(function (p, i) {
+      var b = document.createElement("button");
+      b.className = "swatch" + (i === 0 ? " is-on" : "");
+      b.style.background = p.bg;
+      b.title = p.label;
+      b.addEventListener("click", function () {
+        C.bg = p.bg; C.mote = p.mote;
+        applyColours();
+        Array.prototype.forEach.call(sw.children, function (el) { el.classList.remove("is-on"); });
+        b.classList.add("is-on");
+        bgPick.value = p.bg; motePick.value = p.mote;
+      });
+      sw.appendChild(b);
+    });
+    wrap.appendChild(sw);
+
+    var pair = document.createElement("div");
+    pair.className = "field-pair";
+    pair.style.marginTop = "12px";
+    var bgPick = colorRow("Ground", C.bg, function (v) { C.bg = v; applyColours(); });
+    var motePick = colorRow("Mote", C.mote, function (v) { C.mote = v; applyColours(); });
+    var accPick = colorRow("Accent", C.accent, function (v) { C.accent = v; applyColours(); });
+    pair.appendChild(bgPick.el); pair.appendChild(motePick.el); pair.appendChild(accPick.el);
+    wrap.appendChild(pair);
+    panel.appendChild(wrap);
+
+    bgPick = bgPick.input; motePick = motePick.input;
+
+    function colorRow(label, value, cb) {
+      var el = document.createElement("div");
+      var lab = document.createElement("div");
+      lab.className = "row__label";
+      lab.style.marginBottom = "5px";
+      lab.textContent = label;
+      var inp = document.createElement("input");
+      inp.type = "color"; inp.value = value;
+      inp.addEventListener("input", function () { cb(inp.value); });
+      el.appendChild(lab); el.appendChild(inp);
+      return { el: el, input: inp };
+    }
+  })();
+
+  // Actions
+  (function () {
+    var wrap = document.createElement("div");
+    wrap.className = "group";
+    wrap.innerHTML = '<div class="group__title">Settings</div>';
+
+    var copy = document.createElement("button");
+    copy.className = "btn";
+    copy.textContent = "Copy settings";
+    copy.addEventListener("click", function () {
+      var out = { values: V, colours: C };
+      var txt = JSON.stringify(out, null, 2);
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(
+          function () { copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy settings"; }, 1400); },
+          function () { console.log(txt); copy.textContent = "See console"; }
+        );
+      } else { console.log(txt); copy.textContent = "See console"; }
+    });
+
+    var reshuffle = document.createElement("button");
+    reshuffle.className = "btn";
+    reshuffle.textContent = "Reshuffle field";
+    reshuffle.addEventListener("click", rebuild);
+
+    var reset = document.createElement("button");
+    reset.className = "btn";
+    reset.textContent = "Reset to defaults";
+    reset.addEventListener("click", function () { location.reload(); });
+
+    wrap.appendChild(copy);
+    wrap.appendChild(reshuffle);
+    wrap.appendChild(reset);
+
+    var hint = document.createElement("p");
+    hint.className = "hint";
+    hint.textContent = "Copy settings puts the whole state on the clipboard as JSON — paste it back to me and I will move the numbers into the scene.";
+    wrap.appendChild(hint);
+    panel.appendChild(wrap);
+  })();
+
+  document.getElementById("toggle").addEventListener("click", function () {
+    var closed = panel.classList.toggle("is-closed");
+    this.textContent = closed ? "Show tuning" : "Hide tuning";
+  });
+
+  function applyColours() {
+    renderer.setClearColor(new THREE.Color(C.bg), 1);
+    uniforms.uMote.value.set(C.mote);
+    uniforms.uAccent.value.set(C.accent);
+    document.documentElement.style.background = C.bg;
+  }
+
+  var UNIFORM_OF = {
+    revealBand: "uRevealBand", arriveEase: "uArriveEase", size: "uSize", opacity: "uOpacity",
+    sizeOver: "uSizeOver", sizeOverW: "uSizeOverW", sizeOverAt: "uSizeOverAt",
+    brightOver: "uBrightOver", brightOverW: "uBrightOverW", brightOverAt: "uBrightOverAt",
+    hlSize: "uHlSize", hlBright: "uHlBright", hlMix: "uHlMix", hlDim: "uHlDim"
+  };
+
+  function onChange(r) {
+    if (r.rebuild) {
+      // Order jitter only needs the attribute re-derived, not a new field.
+      if (r.k === "orderJitter") applyOrder(null);
+      else rebuild();
+      return;
+    }
+    var u = UNIFORM_OF[r.k];
+    if (u) uniforms[u].value = V[r.k];
+    if (r.k === "padding") fit();
+  }
+
+  applyColours();
+  fit();
+  rebuild();
+  tick();
+})();
+</script>
+</body>
+</html>
