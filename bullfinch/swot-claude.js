@@ -200,7 +200,13 @@
     // the section up during the pre-pin entry scroll (Piet's "the note slides
     // up"). It is now a normal write-on block: hidden until the pin, wiped on
     // top-down IN PLACE with the rest of 01, un-wiped on leave. No translation.
-    { sel: ".problem-note",       s: 0.26, dir: "y" }
+    { sel: ".problem-note",       s: 0.26, dir: "y" },
+    // The team stop's headshots. Only #team has this wrapper, so every other
+    // panel skips it on the `if (!group.length) continue` above. It writes on
+    // just before the verdict so the faces are already there to be read by the
+    // time the line about them lands — and, critically, it means the block is
+    // hidden until the pin instead of riding the section up on entry.
+    { sel: ".panel__people-clip", s: 0.06, dir: "y" }
   ];
 
   function applyPanelProgress(panel, p) {
@@ -251,7 +257,10 @@
     // this same on-screen window). Both land together instead of the bar
     // snapping while the data is still counting.
     var fastBar = panel.id === "opportunity";
-    var FAST_S = [0.03, 0.05, 0.00, 0.06, 0.00, 0.16, 0.00];
+    // Parallel to WRITE_ORDER — one entry per selector, or the fast bar reads
+    // the wrong start times. Last entry is .panel__people-clip (03's fast bar
+    // has no people block, so the value is never used).
+    var FAST_S = [0.03, 0.05, 0.00, 0.06, 0.00, 0.16, 0.00, 0.00];
     var writeWindow = fastBar ? 0.06 : 0.16;
     var writeStagger = fastBar ? 0.024 : 0.03;
 

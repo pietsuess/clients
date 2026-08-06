@@ -535,15 +535,30 @@
          old behaviour is one rule away if the stop does not hold up. */
       body[data-team-stop] .team-screen,
       body[data-team-stop] .footer-team-link { display: none; }
-      /* The people block is the media half of the panel. It carries no fixed
-         layer of its own, so it sits in the grid like any other panel media. */
-      #team .panel__people {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: clamp(14px, 1.6vw, 26px);
-        align-content: center;
+      /* Piet: the team stop sits on the background we are TRAVELLING on — the
+         mote field — not on a plate of its own. .panel__video's frosted card,
+         its border and its blur come off, and the per-pane fills go with them.
+         The 1px --rule gutters stay: they are the only thing drawn, so the
+         three faces read as panes cut out of the scene rather than pasted on
+         top of it. Grid/gap are NOT restated here — .panel__people in
+         styles.css already owns that and already kills the .panel__video
+         crosshair. */
+      #team .panel__video {
+        background: none;
+        border: 0;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
       }
-      #team .panel__inner { grid-column: 2; }
+      #team .person { background: none; }
+      /* The write-on wrapper. .panel__people itself carries
+         `clip-path: none !important` from styles.css, so the reveal has to ride
+         a parent — otherwise the faces sit fully visible and RIDE THE SECTION
+         UP on entry, which is the .problem-note behaviour Piet rejected. */
+      #team .panel__people-clip {
+        width: 100%;
+        height: 100%;
+        display: grid;
+      }
       /* PHONE. The recording is of a mobile app, so the frame is a phone held
          upright — not a landscape video box. Deliberately loud because it is
          scaffolding, not design; it goes when the real clip lands. */
@@ -1910,19 +1925,21 @@
              here unchanged. The overlay is hidden in CSS rather than deleted,
              so this is one line to reverse. -->
         <article class="panel panel--media" id="team" data-panel="3">
-          <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
-            <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
-              <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
-              <figcaption>Seth Sternberg &middot; CEO</figcaption>
-            </figure>
-            <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
-              <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
-              <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
-            </figure>
-            <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
-              <img src="assets/graham-headshot.png" alt="Graham Smith" />
-              <figcaption>Graham Smith &middot; CCO</figcaption>
-            </figure>
+          <div class="panel__people-clip">
+            <div class="panel__video panel__people" aria-label="Bullfinch Earth team">
+              <figure class="person person--seth" role="button" tabindex="0" data-bio-person="seth">
+                <img src="assets/seth-headshot.png" alt="Seth Sternberg" />
+                <figcaption>Seth Sternberg &middot; CEO</figcaption>
+              </figure>
+              <figure class="person person--tim" role="button" tabindex="0" data-bio-person="tim">
+                <img src="assets/tim-headshot_scaled.png" alt="Tim Goodsall, PhD" />
+                <figcaption>Tim Goodsall, PhD &middot; CTO</figcaption>
+              </figure>
+              <figure class="person person--graham" role="button" tabindex="0" data-bio-person="graham">
+                <img src="assets/graham-headshot.png" alt="Graham Smith" />
+                <figcaption>Graham Smith &middot; CCO</figcaption>
+              </figure>
+            </div>
           </div>
           <div class="panel__inner">
             <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
@@ -2084,7 +2101,7 @@
     <script src="scene-claude-teaser.js?v=claude-46"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-16"></script>
+    <script src="swot-claude.js?v=claude-17"></script>
     <script src="stat-field-claude.js?v=claude-14"></script>
     <script>
       (function () {
@@ -2567,7 +2584,7 @@
         // the same computation on refresh re-asserts the true value.
         function applyTreeField(self) {
             var y = window.pageYOffset || document.documentElement.scrollTop || 0;
-            var formStart = at(p2, 0.58);
+            var formStart = at(pTeam, 0.58);
             var formEnd = at(p3, 0.08);
             var disperseStart = at(p3, 0.76);
             var disperseEnd = self.end;
