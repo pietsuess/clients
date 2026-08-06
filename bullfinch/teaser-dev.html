@@ -543,6 +543,12 @@
          top of it. Grid/gap are NOT restated here — .panel__people in
          styles.css already owns that and already kills the .panel__video
          crosshair. */
+      /* Face scale. .panel__video ships aspect-ratio 1.2/1; at that height each
+         pane is taller than the bio-modal photo, so object-fit:cover zooms
+         harder and the face in the 3-up ends up BIGGER than the version you
+         open. Opening has to be the bigger look. This is the dial — raise the
+         number to shorten the panes and shrink the faces further. */
+      #team .panel__video { aspect-ratio: var(--team-pane-aspect, 1.62) / 1; }
       #team .panel__video {
         background: none;
         border: 0;
@@ -2107,7 +2113,7 @@
     <script src="scene-claude-teaser.js?v=claude-46"></script>
     <script src="case-animation.js?v=forest-journey-4"></script>
     <script src="field-film.js?v=v4-4"></script>
-    <script src="swot-claude.js?v=claude-18"></script>
+    <script src="swot-claude.js?v=claude-19"></script>
     <script src="stat-field-claude.js?v=claude-14"></script>
     <script>
       (function () {

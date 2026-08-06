@@ -283,7 +283,7 @@
       // first third on the generic 0.03 stagger. Explicit starts, because the
       // spacing is a read-the-copy decision, not an even division.
       var spread = (clipPanel && WRITE_ORDER[si].sel === ".panel__evidence p")
-        ? [0.08, 0.36, 0.62]
+        ? [0.06, 0.34, 0.60]
         : null;
       for (var gi = 0; gi < group.length; gi++) {
         var gs = spread ? (spread[gi] !== undefined ? spread[gi] : s) : s + gi * writeStagger;
@@ -368,7 +368,7 @@
       end: panel.id === "proof"
         ? (mobileLike ? "+=220%" : "+=380%")
         : (appClipOn && panel.id === "product"
-            ? (mobileLike ? "+=200%" : "+=300%")
+            ? (mobileLike ? "+=280%" : "+=420%")
             : (mobileLike ? "+=100%" : "+=150%")),
       pin: true,
       pinSpacing: true,
@@ -515,13 +515,15 @@
       // Retime the PNG playback against the LONGER pin so the sequence still
       // finishes well before the device leaves — 288 real frames done by ~0.46,
       // device out by 0.56, which leaves the clip a third of the pin to hold.
-      // The clip is going to be VIDEO, so it needs a long hold, not a beat.
-      // The device sequence is compressed into the front third to pay for it:
-      // 288 real frames done by ~0.34, device gone by 0.44, which leaves the
-      // clip from 0.42 to 1.00 — well over half the (already doubled) pin.
-      casePlaybackFrameSlots = 847;
+      // The clip is paid for by a LONGER PIN, not by taking anything off the
+      // device. Against the 420% pin these fractions restore the device's
+      // original scroll distances: the sequence still plays over ~102% of a
+      // viewport (288 frames by 0.243), then HOLDS for ~40% of a viewport
+      // before it starts to leave — prod's hold was ~34%, and the version that
+      // squeezed it to 6% is what read as fading out too fast.
+      casePlaybackFrameSlots = 1185;
       caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
-      caseFadeOutStartProgress = 0.36;
+      caseFadeOutStartProgress = 0.338;
     }
 
     function setProductCase(value, playbackProgress) {
@@ -538,10 +540,10 @@
     // it never ghosts.
     function setAppClip(p) {
       if (!appClip) return;
-      var inP = smooth01(mapRange(p, 0.42, 0.54));
-      var outP = smooth01(mapRange(p, 0.88, 1.00));
+      var inP = smooth01(mapRange(p, 0.39, 0.46));
+      var outP = smooth01(mapRange(p, 0.86, 1.00));
       var travel = (1 - inP) * 116 - outP * 116;
-      appClip.style.opacity = p > 0.42 && p < 1 ? 1 : 0;
+      appClip.style.opacity = p > 0.39 && p < 1 ? 1 : 0;
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
     }
 
@@ -575,7 +577,7 @@
           // clip is fully up, or the two are on screen together at half opacity
           // and the swap reads as a crossfade of two objects rather than a
           // handoff of one slot.
-          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? 0.44 : 1.00));
+          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? 0.386 : 1.00));
           setProductCase(fadeIn * (1 - fadeOut), p);
           setAppClip(p);
           // 02 backdrop tint: ease the scene to light green while the device
