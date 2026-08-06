@@ -527,9 +527,16 @@
         transform: translateY(var(--clip-y, 116%));
         will-change: transform;
       }
-      /* Piet: the rising banners come out entirely. Markup is left in place so
-         the copy is not lost — it is simply not shown. */
-      body[data-app-clip] .rise-headline { display: none; }
+      /* Piet: the rising banners come out entirely.
+         NOT display:none. journey() drives the background colour wipe from
+         el.getBoundingClientRect().top, and a display:none element measures
+         zero — which pins the wipe at 1 for the whole band and reads as the
+         background PAUSING between stops. Opacity keeps the element measured
+         and travelling; only the paint is gone. */
+      body[data-app-clip] .rise-headline {
+        opacity: 0;
+        pointer-events: none;
+      }
       /* Team is a scroll stop now (see #team). The lateral overlay and the
          footer link that opened it are redundant — hidden, not deleted, so the
          old behaviour is one rule away if the stop does not hold up. */
