@@ -102,6 +102,11 @@
   // other page that loads this scene is byte-identical in behaviour.
   var transparentBackdrop = document.body && document.body.hasAttribute("data-canvas-transparent");
   var customTreeGradient = document.body && document.body.hasAttribute("data-tree-gradient");
+  // OPT-IN (dev): the 01 <1% mote grid is gone entirely — the map-points
+  // canvas in the 01 column replaces it (Piet). Motes keep the 00 floor,
+  // never assemble a grid, and rise straight to the 02 cloud on the leave.
+  // The red seed is dropped from 01. Prod (no flag) keeps the grid.
+  var mapPointsMode = document.body && document.body.hasAttribute("data-map-points");
   var fastTreeSpin = document.body && document.body.hasAttribute("data-tree-spin-fast");
   var repairTreeClusters = document.body && document.body.hasAttribute("data-tree-cluster-repair");
   var clearAlpha = transparentBackdrop ? 0 : 1;
@@ -926,6 +931,12 @@
   // visible focal resolution at the very end of scroll.
   // ======================================================================
   var FINAL_RED_IDX = 1;                       // second red mote, index 1
+  // DEV opt-in (data-map-points): the mark that replaces the dot at the very
+  // end. Absent on prod, where the block above is skipped entirely.
+  var closingMark = document.body.hasAttribute("data-map-points")
+    ? document.getElementById("closingMark")
+    : null;
+  var markProbe = new THREE.Vector3();
   isRedMote[FINAL_RED_IDX] = 1.0;
   sizes[FINAL_RED_IDX]     = RED_MOTE_SIZE;
   fallSpeed[FINAL_RED_IDX] = 0.0;              // does not fall
@@ -1722,6 +1733,9 @@
   }
 
   function updateStatGridTargets() {
+    // Map-points mode: no grid, no DOM anchor (#statGrid is gone on that
+    // page — the fallback would anchor to .stat-read and fling homes there).
+    if (mapPointsMode) return;
     // Runs EVERY frame (not just while the grid forms): the seed is pinned to
     // the DOM-anchored grid-centre cell from the very first frame, so its
     // home must be valid before statFormP ever rises.
@@ -1868,8 +1882,11 @@
       // The opening mote ground is spatially driven by scroll, not time. This
       // makes every position fully reversible when scroll direction changes.
       var density = uniforms.uMoteDensity.value;
-      partMat.uniforms.uStatForm.value = statFormP;
-      partMat.uniforms.uStatFill.value = statFillP;
+      // Map-points mode: the shader must never see a forming or filling grid —
+      // uStatFill would recolour the FLOOR motes mid-01 (the readout still
+      // drives setStatFillProgress for its own timing).
+      partMat.uniforms.uStatForm.value = mapPointsMode ? 0 : statFormP;
+      partMat.uniforms.uStatFill.value = mapPointsMode ? 0 : statFillP;
       updateStatGridTargets();
       // ALWAYS camera-relative while released (Piet: the cloud must never
       // travel up as the dolly descends — and never pop when nav-jumping
@@ -1915,7 +1932,8 @@
               positions[xi + 2] = lerp(positions[xi + 2], statGridHome[2], seedMove);
             }
           }
-          alphas[i] = seedReveal;
+          // Map-points mode: the red seed is dropped from 01 entirely (Piet).
+          alphas[i] = mapPointsMode ? 0 : seedReveal;
           continue;
         }
         var scrollPhase = density * Math.PI * 2;
@@ -1925,7 +1943,10 @@
         positions[xi] = lerp(groundX, starFieldHome[xi], openFieldP);
         positions[yi] = lerp(groundY, starFieldHome[yi], openFieldP);
         positions[xi + 2] = lerp(groundZ, starFieldHome[xi + 2], openFieldP);
-        var statSlot = statSlotByMote[i];
+        // Map-points mode: no mote is a grid member — everyone keeps the
+        // generic floor -> cloud path above, and the alpha/size grid
+        // branches below never fire.
+        var statSlot = mapPointsMode ? -1 : statSlotByMote[i];
         if (statSlot >= 0) {
           if (openFieldP > 0) {
             // LEAVE (01 -> 02): glide the grid dot DIRECTLY to its 02 cloud
@@ -1962,7 +1983,10 @@
           // disassembly. Their positions and colors change, not their count.
           // Grid members go FULLY opaque as the stat forms (block contrast);
           // non-grid motes keep the ambient 0.9.
-          alphas[i] = statSlot >= 0 ? lerp(0.9 * gate, 1.0, statFormP) : 0.9 * gate;
+          // Map-points mode: NO motes anywhere until the ending card (Piet) —
+          // no 00 floor, no 02 cloud, no 03 grove. updateFinalField raises
+          // these alphas as the closing forms, which is their first appearance.
+          alphas[i] = mapPointsMode ? 0 : (statSlot >= 0 ? lerp(0.9 * gate, 1.0, statFormP) : 0.9 * gate);
           var statSize = lerp(BASE_MOTE_SIZE, statDotWorldSize, statFormP);
           if (sizes[i] !== statSize) { sizes[i] = statSize; statSizeDirty = true; }
         }
@@ -1990,6 +2014,35 @@
       if (sizes[0] !== seedTargetSize) {
         sizes[0] = seedTargetSize;
         partGeo.attributes.aSize.needsUpdate = true;
+      }
+
+      // CLOSING MARK (Piet 2026-08-08 eve, dev only): the story does not end on
+      // a red dot any more — it ends on the Bullfinch mark. The dot still does
+      // all the work (it is what everything converges onto); once it lands, it
+      // hands over. The DOM mark is PROJECTED from the dot's world position
+      // every frame, never screen-anchored, so it sits exactly where the dot
+      // was and stays put through the camera's own move.
+      if (closingMark) {
+        var markIn = smoothstep(FINAL_CONVERGENCE_LAND, 1.0, previousConvergenceProgress);
+        if (markIn > 0) {
+          markProbe.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z).project(camera);
+          var mx = (markProbe.x * 0.5 + 0.5) * window.innerWidth;
+          var my = (1 - (markProbe.y * 0.5 + 0.5)) * window.innerHeight;
+          // Starts at the dot's own footprint and grows into a readable mark.
+          closingMark.style.transform =
+            "translate3d(" + mx.toFixed(1) + "px," + my.toFixed(1) + "px,0) " +
+            "translate(-50%,-50%) scale(" + (0.35 + markIn * 0.65).toFixed(3) + ")";
+          closingMark.style.opacity = markIn.toFixed(3);
+        } else if (closingMark.style.opacity !== "0") {
+          closingMark.style.opacity = "0";
+        }
+        // The dot itself retires as the mark takes over, so the two never
+        // overlap into a red blob behind the logo.
+        var redTarget = RED_MOTE_SIZE * (1 - markIn);
+        if (sizes[FINAL_RED_IDX] !== redTarget) {
+          sizes[FINAL_RED_IDX] = redTarget;
+          partGeo.attributes.aSize.needsUpdate = true;
+        }
       }
 
       // Tree grove formation (index-pointcloud variant): repositions locked
@@ -2549,7 +2602,9 @@
       positions[yi] = moteCapture[yi] + (mty - moteCapture[yi]) * e;
       positions[zi] = moteCapture[zi] + (mtz - moteCapture[zi]) * e;
       var aTree = 1.0;
-      if (aTree > alphas[i]) alphas[i] = aTree;
+      // Map-points mode: the grove still positions (the closing captures its
+      // shape) but never becomes visible.
+      if (!mapPointsMode && aTree > alphas[i]) alphas[i] = aTree;
     }
     // Fill dots FLY from the ambient field into the trees (same stagger
     // family as the motes) rather than fading in place.
@@ -2573,7 +2628,7 @@
       fp[f3 + 1] = fillStartArr[f3 + 1] + (fty - fillStartArr[f3 + 1]) * ef;
       fp[f3 + 2] = fillStartArr[f3 + 2] + (ftz - fillStartArr[f3 + 2]) * ef;
       // visible almost as soon as they start moving, so the flight is seen
-      fa[f] = Math.min(1, ef * 3.0) * fillAmp;
+      fa[f] = mapPointsMode ? 0 : Math.min(1, ef * 3.0) * fillAmp;
     }
     fillPosAttr.needsUpdate = true;
     fillAlphaAttr.needsUpdate = true;
@@ -2647,7 +2702,9 @@
         fp[f3]     = lerp(fillFinalCapture[f3],     fillStartArr[f3],     fe);
         fp[f3 + 1] = lerp(fillFinalCapture[f3 + 1], fillStartArr[f3 + 1], fe);
         fp[f3 + 2] = lerp(fillFinalCapture[f3 + 2], fillStartArr[f3 + 2], fe);
-        fa[f] = lerp(1, 0.25, closingDim);
+        // Map-points mode: fills were invisible before the closing, so they
+        // FADE IN with their own settle instead of snapping to full.
+        fa[f] = lerp(1, 0.25, closingDim) * (mapPointsMode ? fe : 1);
       }
       fillPosAttr.needsUpdate = true;
       fillAlphaAttr.needsUpdate = true;

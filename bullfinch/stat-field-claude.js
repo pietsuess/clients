@@ -18,6 +18,11 @@
 
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var mobileLike = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+  // data-map-points (dev): the 01 graphic is the map-points canvas, not the
+  // mote grid. The TODAY -> BULLFINCH flip syncs to the map's Act 4
+  // conversion window (0.66 -> 0.96 in map time = 0.528 -> 0.768 of the pin,
+  // since the acts occupy the pin's first 80%). Prod keeps the old window.
+  var mapMode = document.body.hasAttribute("data-map-points");
   var lblToday = document.getElementById("statToday");
   var lblBull = document.getElementById("statBull");
   var labelEl = panel.querySelector(".stat-label");
@@ -85,6 +90,22 @@
   }
 
   var items = [labelEl, numEl, restEl];
+  // MAP-LEAD (dev desktop, Piet 2026-08-09): the stat block is reparented to
+  // a viewport-fixed layer and the readout arrives DURING the 00 leave, with
+  // the photograph — beats that live on the HERO pin, which this file cannot
+  // see. teaser-dev.html owns the readout in/out opacity AND the TODAY ->
+  // BULLFINCH flip (via window.__statFlip, fed MAP time so the flip stays
+  // glued to the green conversion wherever map time starts). Here: zero the
+  // three elements, expose the flip, and stand down. Prod and phone keep the
+  // pin-anchored drive below untouched.
+  if (mapMode && !mobileLike) {
+    window.__statFlip = function (t) { paint(ease(t)); };
+    for (var mi = 0; mi < items.length; mi++) {
+      if (items[mi]) { items[mi].style.opacity = 0; items[mi].style.transform = "none"; }
+    }
+    paint(0);
+    return;
+  }
   function drive(p) {
     for (var i = 0; i < items.length; i++) {
       var el = items[i]; if (!el) continue;
@@ -96,7 +117,7 @@
       // 01 pin (Piet: "the text section slides up"). Killed — nothing moves.
       el.style.transform = "none";
     }
-    paint(ease(mapRange(p, .46, .74)));
+    paint(ease(mapRange(p, mapMode ? .528 : .46, mapMode ? .768 : .74)));
   }
   drive(0);
   ScrollTrigger.create({

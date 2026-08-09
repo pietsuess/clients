@@ -227,9 +227,28 @@
     // is still writing on at ~0.78, so the generic 0.80 un-write would start
     // erasing the copy before the reader has reached it. Held back to 0.90.
     var clipPanel = appClipOn && panel.id === "product";
+    // Leave start 0.94 of the 210% pin (Piet 2026-08-09): un-write band is
+    // ~12.6vh, just wider than 03's 12svh lead, so 03 pins right after the
+    // un-write begins — no dead air, and never two fully-written sections.
+    // The app clip's out band below MUST stay on this same number.
     var leave = clipPanel
-      ? smooth01(mapRange(p, 0.90, 1.00))
+      ? smooth01(mapRange(p, 0.94, 1.00))
       : smooth01(mapRange(p, 0.80, 1.00));
+    // 03 staggered exit (Piet 2026-08-09): the people items un-write ONE BY
+    // ONE from 0.70 through the unpin instead of all together on the 0.80
+    // band, dragging the exit across the run-out to 04. exitK counts
+    // elements in write order each scrub (same order every call).
+    var exitK = 0;
+    function itemLeave() {
+      if (panel.id !== "opportunity") return leave;
+      // Wider spread (Piet: "start sooner finish later") — first out at
+      // 0.60, cap at 0.92 so the tail finishes exactly at the unpin. An
+      // uncapped tail would put starts past 1.0 and those items would ride
+      // out assembled, never un-writing.
+      var s0 = Math.min(0.60 + exitK * 0.022, 0.92);
+      exitK++;
+      return smooth01(mapRange(p, s0, s0 + 0.08));
+    }
 
     if (inner) {
       // The container itself carries chrome (03's frosted background + blur,
@@ -240,7 +259,12 @@
       // container box, and an exact-box inset CROPPED them (the cut icon
       // Piet flagged). Only the bottom edge animates; at full reveal the
       // bottom is also negative so nothing that overhangs is ever clipped.
-      var innerW = smooth01(mapRange(p, 0.02, 0.12)) * (1 - leave);
+      // 03: the container chrome wipes LAST (0.92 -> 1.00), behind the
+      // staggered items, or its bottom-up clip would erase them mid-cascade.
+      var innerLeave = (panel.id === "opportunity")
+        ? smooth01(mapRange(p, 0.92, 1.00))
+        : leave;
+      var innerW = smooth01(mapRange(p, 0.02, 0.12)) * (1 - innerLeave);
       var innerHid = ((1 - innerW) * 140 - 40).toFixed(2);
       inner.style.clipPath = "inset(-40% -12% " + innerHid + "% -12%)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
@@ -269,27 +293,45 @@
     var FAST_S = [0.03, 0.05, 0.00, 0.06, 0.00, 0.16, 0.00, 0.00];
     var writeWindow = fastBar ? 0.06 : 0.16;
     var writeStagger = fastBar ? 0.024 : 0.03;
+    // DEV (data-map-points) 01 hold-back (Piet 2026-08-08 night): the LEFT
+    // copy waits — photo lands with the hero leave, TODAY readout arrives on
+    // its usual beat — then eyebrow/verdict/evidence/numeric write on over
+    // the dots animation (0.30 -> ~0.55 of the pin) while the photo steps
+    // back to its resting wash. Parallel to WRITE_ORDER; null = keep the
+    // generic start. The bottom note (over the map) keeps its own beat.
+    var PROBLEM_S = [0.30, 0.33, 0.37, null, 0.39, null, null, null];
+    var mapPanel = mapPointsOn && panel.id === "problem";
 
     for (var si = 0; si < WRITE_ORDER.length; si++) {
       // #opportunity's partners strip is owned by the per-logo cascade below,
       // so skip the block-level .trust-line clip here (avoids a double clip).
       if (fastBar && WRITE_ORDER[si].sel === ".trust-line") continue;
       var group = panel.querySelectorAll(WRITE_ORDER[si].sel);
+      // Map-lead dev (2026-08-09): teaser-dev reparents 01's stat block to a
+      // viewport-fixed layer OUTSIDE the article, taking .problem-note with
+      // it. This query is live, so find it by its block instead. Prod and
+      // phone never reparent and never reach the fallback.
+      if (!group.length && mapPanel) {
+        group = document.querySelectorAll(".panel__stat--problem " + WRITE_ORDER[si].sel);
+      }
       if (!group.length) continue;
       var s = fastBar ? FAST_S[si] : WRITE_ORDER[si].s;
+      if (mapPanel && PROBLEM_S[si] != null) s = PROBLEM_S[si];
       var horizontal = WRITE_ORDER[si].dir === "x";
       // Piet: Wear / Walk / Data come on ONE BY ONE across the whole of 02,
       // including the stretch where the app clip is up — not bunched into the
       // first third on the generic 0.03 stagger. Explicit starts, because the
       // spacing is a read-the-copy decision, not an even division.
+      // Pulled forward (Piet): the last of the three used to land at 0.60-0.74
+      // of a very long pin, well after the device had finished.
       var spread = (clipPanel && WRITE_ORDER[si].sel === ".panel__evidence p")
-        ? [0.06, 0.34, 0.60]
+        ? [0.0857, 0.3429, 0.60]
         : null;
       for (var gi = 0; gi < group.length; gi++) {
         var gs = spread ? (spread[gi] !== undefined ? spread[gi] : s) : s + gi * writeStagger;
-        var gw = spread ? 0.14 : writeWindow;
+        var gw = spread ? 0.24 : writeWindow;
         var e = smooth01(mapRange(p, gs, gs + gw));
-        var w = e * (1 - leave);
+        var w = e * (1 - itemLeave());
         var hidden = ((1 - w) * 100).toFixed(2) + "%";
         group[gi].style.clipPath = horizontal
           ? "inset(0 " + hidden + " 0 0)"
@@ -304,13 +346,13 @@
     if (fastBar) {
       var trustLabel = panel.querySelector(".trust-label");
       if (trustLabel) {
-        var lw = smooth01(mapRange(p, 0.11, 0.17)) * (1 - leave);
+        var lw = smooth01(mapRange(p, 0.11, 0.17)) * (1 - itemLeave());
         trustLabel.style.clipPath = "inset(0 " + ((1 - lw) * 100).toFixed(2) + "% 0 0)";
       }
       var logos = panel.querySelectorAll(".trust-strip > div");
       for (var li = 0; li < logos.length; li++) {
         var le = smooth01(mapRange(p, 0.13 + li * 0.009, 0.13 + 0.05 + li * 0.009));
-        var lww = le * (1 - leave);
+        var lww = le * (1 - itemLeave());
         logos[li].style.clipPath = "inset(0 0 " + ((1 - lww) * 100).toFixed(2) + "% 0)";
       }
     }
@@ -331,6 +373,7 @@
   // so its pin is lengthened to make real room rather than squeezing the clip
   // into what was left over.
   var appClipOn = document.body.hasAttribute("data-app-clip");
+  var mapPointsOn = document.body.hasAttribute("data-map-points");
   panels.forEach(function (panel, panelIndex) {
     var isFirstPanel = panelIndex === 0;
     if (reduced) {
@@ -368,7 +411,14 @@
       end: panel.id === "proof"
         ? (mobileLike ? "+=220%" : "+=380%")
         : (appClipOn && panel.id === "product"
-            ? (mobileLike ? "+=280%" : "+=420%")
+            // 420% -> 360% -> 300% -> 210% (Piet 2026-08-09: "a big wait zone
+            // that just needs to be cut, everything brought up to make it
+            // like that space never existed"). Every pre-leave dev fraction
+            // below is retimed so the absolute scroll distances are
+            // unchanged (Data still done ~176vh, video seats ~144vh); the
+            // leave fraction is 0.94, so the exit starts ~197vh —
+            // ~21vh after Data completes, zero dead tail into 03.
+            ? (mobileLike ? "+=280%" : "+=210%")
             : (mobileLike ? "+=100%" : "+=150%")),
       pin: true,
       pinSpacing: true,
@@ -511,19 +561,34 @@
     // copy un-writes on its own beat (0.80 -> 1.0), and leaves with it, so the
     // pin still releases empty — nothing scrolls out.
     var appClip = appClipOn ? document.getElementById("app-clip") : null;
+    // Dev playback scale. THE BUG Piet kept seeing ("the png seq fades way
+    // too soon"): case-animation.js maps playback over its OWN 424 slots, so
+    // the local casePlaybackFrameSlots retime never reached it — the sequence
+    // was still mid-play (frame ~140 of 288) when the device faded at 0.338.
+    // The scale pre-stretches the progress WE pass in, so frame 288 lands at
+    // ~102vh of the pin (0.283 of 360%), comfortably before the fade-out at
+    // 0.394. Clamped at the last real frame so the tail HOLDS it.
+    var casePlaybackCap = 1;
+    var caseFadeInStartProgress = 0;
+    var casePlaybackStart = 0;
+    var casePlaybackEnd = 1;
     if (appClip) {
-      // Retime the PNG playback against the LONGER pin so the sequence still
-      // finishes well before the device leaves — 288 real frames done by ~0.46,
-      // device out by 0.56, which leaves the clip a third of the pin to hold.
-      // The clip is paid for by a LONGER PIN, not by taking anything off the
-      // device. Against the 420% pin these fractions restore the device's
-      // original scroll distances: the sequence still plays over ~102% of a
-      // viewport (288 frames by 0.243), then HOLDS for ~40% of a viewport
-      // before it starts to leave — prod's hold was ~34%, and the version that
-      // squeezed it to 6% is what read as fading out too fast.
       casePlaybackFrameSlots = 1185;
       caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
-      caseFadeOutStartProgress = 0.338;
+      // The sequence must NOT sit frozen on its last frame (Piet). The fade-out
+      // now runs 0.32 -> 0.38 and lands exactly where playback ends, so the
+      // device is gone AS frame 480 arrives, never held after it.
+      // Fractions rebased to the 210% pin (same absolute scroll distances as
+      // the 360%-era values: ×360/210): only the post-build hold shrank.
+      caseFadeOutStartProgress = 0.5486;
+      // 480-frame re-render, no tail. The device holds off until ~36vh of
+      // the pin, fades up over the next ~25vh, and the sequence plays to
+      // ~137vh — finishing just as its fade-out ends.
+      caseFadeInStartProgress = 0.1714;
+      caseFadeInEndProgress = 0.2914;
+      casePlaybackStart = 0.1714;
+      casePlaybackEnd = 0.6514;
+      casePlaybackCap = 479 / 480;
     }
 
     function setProductCase(value, playbackProgress) {
@@ -533,18 +598,36 @@
       }
     }
 
-    // NO FADE (Piet). The clip SLIDES UP into the slot the device just left,
-    // holds through the middle of the section while the copy writes on around
-    // it, then KEEPS GOING UP and off the top — one continuous direction of
-    // travel, never reversing back down the way it came. Opacity is binary so
-    // it never ghosts.
+    // The clip SLIDES UP into the slot the device just left (0.32 -> 0.40,
+    // riding the png seq fade-out) and holds while the copy writes on around
+    // it. REAL VIDEO leave (Piet 2026-08-09): no more upward slide-off — the
+    // recording FADES OUT IN PLACE over 0.90 -> 1.00 (start pulled a little
+    // ahead of the 0.94 leave, Piet 2026-08-09), overlapping the band the 02
+    // copy un-writes (clipPanel leave in applyPanelProgress), so the rest of
+    // the transition begins exactly as the fade starts and 02 empties
+    // straight into 03.
+    // The video plays ONCE when the slide seats at 0.40; scrolling back out
+    // below the arrival rewinds it so it replays on re-entry.
+    var appClipVideo = appClip ? appClip.querySelector("video") : null;
+    var appClipPlayed = false;
     function setAppClip(p) {
       if (!appClip) return;
-      var inP = smooth01(mapRange(p, 0.39, 0.46));
-      var outP = smooth01(mapRange(p, 0.86, 1.00));
-      var travel = (1 - inP) * 116 - outP * 116;
-      appClip.style.opacity = p > 0.39 && p < 1 ? 1 : 0;
+      var inP = smooth01(mapRange(p, 0.5486, 0.6857));
+      var outP = smooth01(mapRange(p, 0.90, 1.00));
+      var travel = (1 - inP) * 116;
+      appClip.style.opacity = p > 0.5486 && p < 1 ? (1 - outP).toFixed(3) : 0;
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
+      if (appClipVideo) {
+        if (p >= 0.6857 && p < 1 && !appClipPlayed) {
+          appClipPlayed = true;
+          var played = appClipVideo.play();
+          if (played && played.catch) played.catch(function () {});
+        } else if (p < 0.5486 && appClipPlayed) {
+          appClipVideo.pause();
+          appClipVideo.currentTime = 0;
+          appClipPlayed = false;
+        }
+      }
     }
 
     function setWave(wave, progress) {
@@ -572,13 +655,14 @@
         invalidateOnRefresh: true,
         onUpdate: function (self) {
           var p = self.progress;
-          var fadeIn = smooth01(mapRange(p, 0.00, caseFadeInEndProgress));
+          var fadeIn = smooth01(mapRange(p, caseFadeInStartProgress, caseFadeInEndProgress));
           // With the clip in play the device has to be fully gone before the
           // clip is fully up, or the two are on screen together at half opacity
           // and the swap reads as a crossfade of two objects rather than a
           // handoff of one slot.
-          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? 0.386 : 1.00));
-          setProductCase(fadeIn * (1 - fadeOut), p);
+          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? casePlaybackEnd : 1.00));
+          setProductCase(fadeIn * (1 - fadeOut),
+                         Math.min(casePlaybackCap, mapRange(p, casePlaybackStart, casePlaybackEnd)));
           setAppClip(p);
           // 02 backdrop tint: ease the scene to light green while the device
           // section holds, back to beige before 03 arrives.
