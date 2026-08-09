@@ -2495,8 +2495,14 @@
       positions[FINAL_RED_IDX * 3]     = FINAL_RED_X;
       positions[FINAL_RED_IDX * 3 + 1] = FINAL_RED_Y;
       positions[FINAL_RED_IDX * 3 + 2] = FINAL_RED_Z;
-      if (sizes[FINAL_RED_IDX] !== RED_MOTE_SIZE) {
-        sizes[FINAL_RED_IDX] = RED_MOTE_SIZE;
+      // Respect the closing-mark handoff (Piet 2026-08-09): this restore runs
+      // AFTER the mark code's per-frame shrink and was resurrecting the red
+      // dot every frame once the tree dispersed — dot AND icon both showed.
+      // Same (1 - markIn) the handoff writes; one value, no fight.
+      var redRestore = RED_MOTE_SIZE *
+        (1 - smoothstep(FINAL_CONVERGENCE_LAND, 1.0, previousConvergenceProgress));
+      if (sizes[FINAL_RED_IDX] !== redRestore) {
+        sizes[FINAL_RED_IDX] = redRestore;
         partGeo.attributes.aSize.needsUpdate = true;
       }
       if (fillAlphaAttr && finalFieldP <= 0 && fillAlphaAttr.array[0] !== 0) {
