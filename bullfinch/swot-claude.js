@@ -88,27 +88,32 @@
       pinSpacing: true,
       scrub: true,
       anticipatePin: 1,
-      onUpdate: function (self) {
-        var p = self.progress;
-        for (var hi = 0; hi < HERO_PARTS.length; hi++) {
-          var el = hero.querySelector(HERO_PARTS[hi].sel);
-          if (!el) continue;
-          var out = smooth01(mapRange(p, 0.06 + hi * 0.13, 0.34 + hi * 0.13));
-          var hid = (out * 100).toFixed(2) + "%";
-          el.style.clipPath = HERO_PARTS[hi].dir === "x"
-            ? "inset(0 0 0 " + hid + ")"
-            : "inset(0 0 " + hid + " 0)";
-        }
-        setTextVeilOpacity((1 - smooth01(mapRange(p, 0.06, 0.60))) * 0.84);
-        // R1 (the 00 -> 01 leave): the forest diagonal wiping off is driven by
-        // THIS hero-pin progress, so the hero words erasing and the diagonal
-        // covering move together on one scrub. The grid assembly (motes coming
-        // up) is driven on the #problem pin's ENTRY band instead, so the motes
-        // rise INTO the grid exactly as the 01 copy + TODAY readout write on
-        // (R2: grid and text populate together, not grid-then-text).
-        if (window.__bfSetForestWipe) window.__bfSetForestWipe(p);
-      },
+      onUpdate: function (self) { applyHeroLeave(self.progress); },
+      // Refresh re-assert (Piet 2026-08-09 eve, client bug report): a
+      // ScrollTrigger.refresh() mid-page can run this scrub through p=0 on
+      // the revert pass, leaving the forest diagonal COVERING while standing
+      // in 03/04. onRefresh fires after recompute with the true progress.
+      onRefresh: function (self) { applyHeroLeave(self.progress || 0); },
     });
+    function applyHeroLeave(p) {
+      for (var hi = 0; hi < HERO_PARTS.length; hi++) {
+        var el = hero.querySelector(HERO_PARTS[hi].sel);
+        if (!el) continue;
+        var out = smooth01(mapRange(p, 0.06 + hi * 0.13, 0.34 + hi * 0.13));
+        var hid = (out * 100).toFixed(2) + "%";
+        el.style.clipPath = HERO_PARTS[hi].dir === "x"
+          ? "inset(0 0 0 " + hid + ")"
+          : "inset(0 0 " + hid + " 0)";
+      }
+      setTextVeilOpacity((1 - smooth01(mapRange(p, 0.06, 0.60))) * 0.84);
+      // R1 (the 00 -> 01 leave): the forest diagonal wiping off is driven by
+      // THIS hero-pin progress, so the hero words erasing and the diagonal
+      // covering move together on one scrub. The grid assembly (motes coming
+      // up) is driven on the #problem pin's ENTRY band instead, so the motes
+      // rise INTO the grid exactly as the 01 copy + TODAY readout write on
+      // (R2: grid and text populate together, not grid-then-text).
+      if (window.__bfSetForestWipe) window.__bfSetForestWipe(p);
+    }
   }
 
   // ===== Panel pin choreography ==========================================

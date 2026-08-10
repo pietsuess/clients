@@ -29,36 +29,18 @@
   var numEl = panel.querySelector(".stat-num");
   var restEl = panel.querySelector(".stat-rest");
 
-  var SEG_RECT = { a:[9,0,32,9], b:[41,9,9,31.5], c:[41,49.5,9,31.5], d:[9,81,32,9],
-                   e:[0,49.5,9,31.5], f:[0,9,9,31.5], g:[9,40.5,32,9] };
-  var SEG_ON = { "0":"abcdef", "1":"bc", "2":"abged", "3":"abgcd", "4":"fgbc",
-                 "5":"afgcd", "6":"afgecd", "7":"abc", "8":"abcdefg", "9":"abcdfg" };
-  var SVGNS = "http://www.w3.org/2000/svg";
-  var digitMaps = [];
+  /* Seven-segment SVG retired (client 2026-08-09): plain text digits in the
+     display face, same 3-slot 001 -> 100 behaviour. */
+  var digitEls = [];
   for (var dp = 0; dp < 3; dp++) {
-    var svg = document.createElementNS(SVGNS, "svg");
-    svg.setAttribute("class", "stat-digit");
-    svg.setAttribute("viewBox", "0 0 50 90");
-    var map = {};
-    Object.keys(SEG_RECT).forEach(function (seg) {
-      var r = SEG_RECT[seg];
-      var rect = document.createElementNS(SVGNS, "rect");
-      rect.setAttribute("x", r[0]); rect.setAttribute("y", r[1]);
-      rect.setAttribute("width", r[2]); rect.setAttribute("height", r[3]);
-      rect.setAttribute("rx", "2"); rect.setAttribute("class", "stat-seg");
-      svg.appendChild(rect); map[seg] = rect;
-    });
-    readoutEl.appendChild(svg); digitMaps.push(map);
+    var d = document.createElement("span");
+    d.className = "stat-digit";
+    d.textContent = "0";
+    readoutEl.appendChild(d); digitEls.push(d);
   }
   function setReadout(n) {
     var s = String(n); while (s.length < 3) s = "0" + s;
-    for (var i = 0; i < 3; i++) {
-      var lit = SEG_ON[s.charAt(i)] || "";
-      var m = digitMaps[i];
-      Object.keys(m).forEach(function (seg) {
-        m[seg].setAttribute("class", "stat-seg" + (lit.indexOf(seg) >= 0 ? " on" : ""));
-      });
-    }
+    for (var i = 0; i < 3; i++) digitEls[i].textContent = s.charAt(i);
   }
 
   function clamp01(x) { return Math.max(0, Math.min(1, x)); }

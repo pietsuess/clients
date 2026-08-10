@@ -79,7 +79,9 @@
         --text-veil-bg-soft: 5%;
         --text-veil-blur: 9px;
         --text-veil-saturate: 0.98;
-        --text-veil-opacity: 0.44;
+        /* Legibility pass (client 2026-08-09, "text unreadable"): veil back up
+           from 0.44 — calmer ground under the hero/canvas copy. */
+        --text-veil-opacity: 0.62;
         --stat-crisp-offset: 0;
         --tree-crisp-offset: 0;
       }
@@ -240,7 +242,14 @@
         background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
         clip-path: polygon(var(--forest-edge-top, -100vh) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, -100vh) + 100vh) 100%);
         filter: saturate(.82) contrast(.96) brightness(1.04);
+        transition: filter 400ms linear;
         will-change: clip-path;
+      }
+      /* Legibility pass (client 2026-08-09): the bright sun-through-trees
+         triangle sits under 03's cream copy ("Who Needs..."). Darken it only
+         while the tree stage owns the page — hero keeps the bright version. */
+      body.is-tree-stage .forest-photo {
+        filter: saturate(.82) contrast(.96) brightness(.72);
       }
       .canopy-canvas { z-index: 0; }
       .text-veil {
@@ -486,7 +495,8 @@
       #problem .stat-grid { display: none; }
       .panel__stat--problem .stat-read { min-width: 0; transform: translateX(clamp(70px, 6vw, 105px)); }
       .panel__stat--problem .stat-label { margin-left: auto; }
-      .panel__stat--problem .stat-line { left: auto; right: 0; text-align: right; }
+      /* TODAY/BULLFINCH left-align to the digits below (Piet 2026-08-09). */
+      .panel__stat--problem .stat-line { left: 0; right: auto; text-align: left; }
       .panel__stat--problem .stat-num { justify-content: flex-end; align-items: flex-end; gap: 10px; }
       .panel__stat--problem .stat-rest { margin-left: auto; text-align: right; text-align-last: right; }
       #problem .section-mark { left: auto; right: 100%; margin-left: 0; margin-right: calc(var(--mark-box) * -0.13); }
@@ -1294,7 +1304,9 @@
            pale ground with a narrow luminance range, then set opacity. Dark ink
            reads against it everywhere instead of only over the light gaps. */
         --reveal-opacity: 0.34;
-        --reveal-wash: saturate(0.5) brightness(1.28) contrast(0.72);
+        /* Legibility pass (client 2026-08-09): pushed further — brightness
+           1.28 -> 1.45, contrast 0.72 -> 0.60 — photo recedes, ink pops. */
+        --reveal-wash: saturate(0.5) brightness(1.45) contrast(0.60);
         /* Which slice of the source to show. 100% = right edge, so the crop
            holds the RIGHT half of foresters-measuring.jpg (Piet). */
         --reveal-focus: 100%;
@@ -1913,7 +1925,7 @@
               <div class="panel__evidence">
                 <p>Inventory data is the key input to forest operations, conservation, wildfire risk, and carbon MRV. Foresters are still collecting it manually, with tools &amp; techniques from the 19th Century. It’s slow, frustrating, and usually measures &lt;1% of what’s actually there.</p>
               </div>
-              <p class="panel__numeric">ONE FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
+              <p class="panel__numeric">EVERY FIELD VISIT &middot; EVERY STEM &middot; CONTINUOUS DATA</p>
             </div>
           </div>
           <div class="panel__stat panel__stat--problem" aria-label="Today, manual forestry measures data for less than 1% of trees">
@@ -1939,7 +1951,7 @@
             <div class="panel__evidence">
               <p><span class="lead">Wear</span><br>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
               <p><span class="lead">Walk</span><br>Just press “Start Bullfinching” and go do your thing</p>
-              <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 30x more data than manual cruising, every time you’re in the field</p>
+              <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 10x the data at less than half the cost, every time you’re in the field</p>
             </div>
             <!-- The WEAR · WALK · DATA summary line was removed: it only
                  repeated the three leads sitting directly above it. -->
@@ -1975,19 +1987,19 @@
             </div>
             <div class="team-half__copy">
               <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; TEAM</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
-              <h2 class="panel__verdict">Built by the people who ship sensors, read Mars, and know the forest.</h2>
+              <h2 class="panel__verdict">Built by the people born to Bullfinch.</h2>
               <div class="panel__evidence">
                 <p><button class="lead team-bio-link" type="button" data-bio-person="seth">Seth, the sensor guy.</button> CEO behind 400M+ shipped products across AR, VR, IoT, and sensor fusion, with names like Samsung, LG, AMD, Roku, and iRobot.</p>
                 <p><button class="lead team-bio-link" type="button" data-bio-person="tim">Tim, the Mars guy.</button> CTO and PhD astrophysicist, Oxford and Cambridge, who built cameras now operating on Mars with NASA JPL.</p>
-                <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry and field operations, plus finance and customer depth.</p>
+                <p><button class="lead team-bio-link" type="button" data-bio-person="graham">Graham, the field guy.</button> CCO with a decade of BC forestry relationships and field operations, plus finance and customer depth.</p>
               </div>
               <p class="panel__numeric">MARS CAMERAS &middot; 400M+ PRODUCTS &middot; BC FIELD OPS</p>
             </div>
           </div>
           <div class="panel__inner">
             <div class="ground-heading">
-              <div class="eyebrow-anchor"><p class="panel__eyebrow">03 &middot; THE APPLICATIONS</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
-              <h2 class="panel__verdict">Who Need to Bullfinch?</h2>
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">04 &middot; THE APPLICATIONS</p><span class="section-mark" data-mark="nature" aria-hidden="true"></span></div>
+              <h2 class="panel__verdict">Who Needs to Bullfinch?</h2>
             </div>
             <div class="audience-grid">
               <article class="audience-item"><h3>Timber companies</h3><p>Actually know what you’re bringing to market</p></article>
@@ -2032,7 +2044,7 @@
 
         <footer class="site-footer" id="site-footer">
           <img class="site-footer__wordmark" src="bullfinch-wordmark.svg" alt="Bullfinch" />
-          <p class="site-footer__line">BULLFINCH EARTH<br />The FICO of Forests</p>
+          <p class="site-footer__line">BULLFINCH EARTH<br />The Source of Ground Truth</p>
           <button class="site-footer__top" type="button" aria-label="Back to top" data-scroll-target="#page">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="m6 15 6-6 6 6" />
@@ -2420,8 +2432,8 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-34"></script>
-    <script src="stat-field-claude.js?v=claude-16"></script>
+    <script src="swot-claude.js?v=claude-35"></script>
+    <script src="stat-field-claude.js?v=claude-17"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -2758,8 +2770,8 @@
               // Both scrubs drive the SAME property. The out pass inverts its
               // progress, so the crop edge retraces its own path rather than
               // continuing across.
-              function scrubIn(pinArg, a, b, invert) {
-                ScrollTrigger.create({
+              function scrubIn(pinArg, a, b, invert, refreshGuard) {
+                return ScrollTrigger.create({
                   trigger: document.body,
                   start: function () { return at(pinArg, a); },
                   end: function () { return at(pinArg, b); },
@@ -2769,14 +2781,28 @@
                     var p = invert ? 1 - self.progress : self.progress;
                     el.style.setProperty("--reveal-in", p.toFixed(4));
                   },
+                  // Refresh re-assert (client bug 2026-08-09): a mid-page
+                  // refresh can run these scrubs through p=0 on the revert
+                  // pass — the OUT writer then leaves the photograph OPEN
+                  // under 03/04 for good. Re-assert truth after recompute;
+                  // the guard keeps the in-writer from overwriting the
+                  // out-writer's closed state (one effective writer).
+                  onRefresh: function (self) {
+                    if (refreshGuard && !refreshGuard(self)) return;
+                    var p = invert ? 1 - self.progress : self.progress;
+                    el.style.setProperty("--reveal-in", p.toFixed(4));
+                  },
                 });
               }
               // data-reveal-in-pin="hero": the IN wipe rides the hero pin
               // (01's left photo opens as 00 leaves); the OUT wipe always
               // stays on the section's own pin.
               var inPin = el.getAttribute("data-reveal-in-pin") === "hero" && heroPin ? heroPin : pin;
-              scrubIn(inPin, band("data-reveal-from", 0.0), band("data-reveal-to", 0.30), false);
-              scrubIn(pin, band("data-reveal-out-from", 0.88), band("data-reveal-out-to", 1.0), true);
+              var outTrig = null;
+              scrubIn(inPin, band("data-reveal-from", 0.0), band("data-reveal-to", 0.30), false,
+                function () { return !outTrig || outTrig.progress === 0; });
+              outTrig = scrubIn(pin, band("data-reveal-out-from", 0.88), band("data-reveal-out-to", 1.0), true,
+                function (self) { return self.progress > 0; });
             }
           );
           // 01 left photo opacity handoff (Piet): arrives STRONG (0.85, set in
@@ -2794,10 +2820,16 @@
               invalidateOnRefresh: true,
               onUpdate: function (self) {
                 var t = self.progress; t = t * t * (3 - 2 * t);
-                setLeftOpacity(0.85 + (0.24 - 0.85) * t);
+                setLeftOpacity(0.85 + (0.16 - 0.85) * t);
               },
               onLeaveBack: function () { setLeftOpacity(0.85); },
-              onLeave: function () { setLeftOpacity(0.24); },
+              onLeave: function () { setLeftOpacity(0.16); },
+              // Refresh re-assert (client bug 2026-08-09): spurious leave-backs
+              // on refresh reset this to 0.85 while standing past 01.
+              onRefresh: function (self) {
+                var t = self.progress; t = t * t * (3 - 2 * t);
+                setLeftOpacity(0.85 + (0.16 - 0.85) * t);
+              },
             });
           }
           // Stop 4 is carried by the GROVE, not a gap. Once 03 pins and the
@@ -2914,7 +2946,10 @@
           // live outside the article now and CSS vars only inherit down.
           var statBoxHost = statEl || s01;
           function setStatBox(p) {
-            var a = Math.max(0, Math.min(1, (p - 0.66) / 0.30));
+            // Legibility pass (client 2026-08-09): plate rises WITH the
+            // readout's arrival (start of map time), not at the green
+            // conversion — the digits sat on raw photo until 0.66.
+            var a = Math.max(0, Math.min(1, (p - 0.02) / 0.10));
             a = a * a * (3 - 2 * a);
             statBoxHost.style.setProperty("--stat-box-a", a.toFixed(3));
           }
@@ -3104,6 +3139,11 @@
         var gapReveal = document.getElementById("gapReveal");
         if (gapReveal) {
           function setGapReveal(v) { gapReveal.style.setProperty("--reveal-in", v); }
+          // Refresh re-asserts (client bug 2026-08-09): refresh fires spurious
+          // onLeaveBacks — the close trigger's ("1") re-opened this photograph
+          // permanently under 03/04. Same cross-guard as the reveal-media
+          // pairs: the open writer stands down whenever the close writer owns.
+          var gapCloseTrig = null;
           ScrollTrigger.create({
             trigger: document.body,
             // Held back (Piet): it used to start opening at 0.86 of 01's pin.
@@ -3114,8 +3154,12 @@
             onUpdate: function (self) { setGapReveal(self.progress.toFixed(4)); },
             onLeave: function () { setGapReveal("1"); },
             onLeaveBack: function () { setGapReveal("0"); },
+            onRefresh: function (self) {
+              if (gapCloseTrig && gapCloseTrig.progress > 0) return;
+              setGapReveal(self.progress.toFixed(4));
+            },
           });
-          ScrollTrigger.create({
+          gapCloseTrig = ScrollTrigger.create({
             trigger: document.body,
             start: function () { return at(p2, 0.88); },
             end: function () { return p2.end; },
@@ -3123,13 +3167,16 @@
             invalidateOnRefresh: true,
             onUpdate: function (self) { setGapReveal((1 - self.progress).toFixed(4)); },
             onLeaveBack: function () { setGapReveal("1"); },
+            onRefresh: function (self) {
+              if (self.progress > 0) setGapReveal((1 - self.progress).toFixed(4));
+            },
           });
           // Opacity hand-off (Piet): the photograph arrives STRONG so it can
           // actually be read, and only steps back to the pale ground value when
           // the device sequence fades up — the same window, so the picture
           // recedes exactly as the device takes over.
           var GAP_OPACITY_IN = 0.82;   // on arrival
-          var GAP_OPACITY_REST = 0.34; // behind the device, the old value
+          var GAP_OPACITY_REST = 0.22; // fainter in the background (Piet 2026-08-09, was 0.34)
           function setGapOpacity(v) {
             gapReveal.style.setProperty("--reveal-opacity", v.toFixed(3));
           }
@@ -3146,6 +3193,12 @@
             },
             onLeaveBack: function () { setGapOpacity(GAP_OPACITY_IN); },
             onLeave: function () { setGapOpacity(GAP_OPACITY_REST); },
+            // Refresh re-assert (client bug 2026-08-09): spurious leave-backs
+            // on refresh reset this to arrival strength while standing past 02.
+            onRefresh: function (self) {
+              var t = self.progress; t = t * t * (3 - 2 * t);
+              setGapOpacity(GAP_OPACITY_IN + (GAP_OPACITY_REST - GAP_OPACITY_IN) * t);
+            },
           });
           // Piet: the photograph EASES RIGHT across the wide frame's slack —
           // focus 100% (right crop) -> 0% (left crop) — STARTING the moment
