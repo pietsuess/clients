@@ -47,10 +47,14 @@
   function mapRange(x, a, b) { return clamp01((x - a) / (b - a)); }
   function smooth(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
   function ease(x) { x = clamp01(x); return 1 - Math.pow(1 - x, 3); }
-  function paint(fillProgress) {
+  /* labelOnly (2026-08-10): with the map TRAIL in 01, the digits count the
+     trees the walk has actually measured, so the trail renderer owns them and
+     this file owns the TODAY -> BULLFINCH label. One writer each. Everywhere
+     else (prod, phone) paint still drives both, as before. */
+  function paint(fillProgress, labelOnly) {
     var nLit = Math.max(1, Math.round(fillProgress * 100));
     var labelT = ease(clamp01(fillProgress / .5));
-    setReadout(nLit);
+    if (!labelOnly) setReadout(nLit);
     if (lblToday) {
       lblToday.style.opacity = 1 - labelT;
       lblToday.style.filter = "blur(" + (labelT * 6) + "px)";
@@ -81,7 +85,10 @@
   // three elements, expose the flip, and stand down. Prod and phone keep the
   // pin-anchored drive below untouched.
   if (mapMode && !mobileLike) {
-    window.__statFlip = function (t) { paint(ease(t)); };
+    window.__statFlip = function (t) { paint(ease(t), true); };
+    // The 01 trail renderer in teaser-dev.html sets the digits from its own
+    // measured-tree count. Exposed here because the spans are built above.
+    window.__statReadout = setReadout;
     for (var mi = 0; mi < items.length; mi++) {
       if (items[mi]) { items[mi].style.opacity = 0; items[mi].style.transform = "none"; }
     }

@@ -37,7 +37,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=v4-6" />
+    <link rel="stylesheet" href="styles.css?v=v4-9" />
     <style>
       :root,
       [data-theme="dark"] {
@@ -691,7 +691,7 @@
       .audience-item { min-height: 66px; padding: 8px 13px 9px; border-left: 1px solid var(--rule); }
       .audience-item:first-child { border-left: 0; padding-left: 0; }
       .audience-item h3 { margin: 0 0 6px; font-size: clamp(12px, .95vw, 16px); font-weight: 600; line-height: 1.08; }
-      .audience-item p { margin: 0; font-size: clamp(9px, .68vw, 12px); line-height: 1.25; text-align: justify; text-align-last: left; }
+      .audience-item p { margin: 0; font-size: clamp(10px, calc(.68vw + 1px), 13px); line-height: 1.25; text-align: justify; text-align-last: left; }
       .trust-line { display: grid; grid-template-columns: minmax(160px, .9fr) 6fr; border-bottom: 1px solid var(--rule); }
       .trust-strip { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
       .trust-strip div { height: 58px; padding: 8px 15px; display: flex; align-items: center; justify-content: center; border-left: 1px solid var(--rule); }
@@ -1004,20 +1004,27 @@
          directly on the dots, unreadable once the field is dense. A page-beige
          box fades in under EACH of them over the same window the dots convert
          to green (uAll, 0.66 -> 0.96 in map time — the scroll wiring writes
-         --stat-box-a from that band). Padding is constant so nothing shifts;
-         only the fill's alpha animates. No blur. */
+         --stat-box-a from that band). Padding is constant so nothing shifts.
+         BLURRED + TRANSPARENT (Piet 2026-08-10, reversing the earlier "no
+         blur"): the fill tops out at 0.08 instead of solid, and a backdrop
+         blur carries the legibility. Both ride the same var, so the plate
+         still fades in from nothing — dial the 0.08 and the 10px here. */
       .panel__stat--problem .stat-read,
       .panel__stat--problem .problem-note {
         /* Light green (Piet 2026-08-09) — was the page-beige 231,223,196,
            which read grey over the dots. Dial the RGB here + the note rule. */
-        background: rgba(225, 227, 178, var(--stat-box-a, 0));
+        background: rgba(225, 227, 178, calc(var(--stat-box-a, 0) * 0.08));
+        -webkit-backdrop-filter: blur(calc(var(--stat-box-a, 0) * 10px));
+        backdrop-filter: blur(calc(var(--stat-box-a, 0) * 10px));
         padding: clamp(12px, 1.2vw, 18px) clamp(14px, 1.4vw, 22px);
       }
       /* Note plate rides its own var (Piet 2026-08-09): the box comes up WITH
          the "Bullfinch fully automates" write-on (0.26-0.42 of the pin), not
          with the green conversion like the readout's. Same leave band. */
       .panel__stat--problem .problem-note {
-        background: rgba(225, 227, 178, var(--note-box-a, 0));
+        background: rgba(225, 227, 178, calc(var(--note-box-a, 0) * 0.08));
+        -webkit-backdrop-filter: blur(calc(var(--note-box-a, 0) * 10px));
+        backdrop-filter: blur(calc(var(--note-box-a, 0) * 10px));
       }
       /* 01 left photo ARRIVES STRONG (Piet): 0.85 on the hero leave, stepped
          back down to the 0.34 resting wash by the scroll wiring as the left
@@ -1034,6 +1041,44 @@
       #problem .panel__evidence p { text-align: justify; text-align-last: left; max-width: 50ch; margin: 0; }
       #problem .panel__numeric { align-self: end; }
       .panel__stat--problem .stat-read { transform: none; }
+      /* ---- readout plate, ported from map-trail-tester.html (2026-08-10) ----
+         Everything centred, overriding the 2026-08-09 left-align at the top of
+         the file. Sits before the 720px block below, so the phone rules there
+         still win. */
+      .panel__stat--problem .stat-read { text-align: center; }
+      .panel__stat--problem .stat-label { width: 100%; }
+      .panel__stat--problem .stat-line { left: 0; right: 0; text-align: center; }
+      .panel__stat--problem .stat-num { justify-content: center; }
+      .panel__stat--problem .stat-rest { text-align: center; text-align-last: center; }
+      /* TODAY / BULLFINCH justify to the plate: a single word has no spaces for
+         text-align:justify to stretch, so each letter is its own span (see the
+         markup) and flex space-between distributes the slack across the full
+         .stat-read width. letter-spacing is zeroed here - the base 0.02em would
+         hang a phantom gap after the final letter and break the right flush. */
+      .panel__stat--problem .stat-line {
+        display: flex;
+        justify-content: space-between;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+      .panel__stat--problem .stat-line > span { display: block; }
+      /* % matches the digits: same clamp as .stat-digit, same ink, and
+         margin-bottom 0 so flex-end puts it on the digits' baseline instead of
+         riding 0.1em high. Tighten with the two gaps below. */
+      .panel__stat--problem .stat-unit {
+        font-size: clamp(40px, 4.8vw, 66px);
+        line-height: 1;
+        margin-bottom: 0;
+        color: var(--ink);
+      }
+      .panel__stat--problem .stat-num { gap: 4px; }
+      .panel__stat--problem .stat-readout { gap: 4px; }
+      /* Vertical spacing of the three lines. .stat-label is an absolute stack,
+         so its height IS the gap under it: 1.3em -> 1.2em, exactly the 1.2
+         line-height box. The other two dials are the top margins, 10px -> 2px. */
+      .panel__stat--problem .stat-label { height: 1.2em; }
+      .panel__stat--problem .stat-num { margin-top: 2px; }
+      .panel__stat--problem .stat-rest { margin-top: 2px; }
       /* The plan-view map canvas: transparent, dots + white acre grid over the
          page's own ground. Fills the whole space between readout and note;
          the plot COVERS the frame (fillFrame) so it never reads as a cropped
@@ -1921,7 +1966,7 @@
         <article class="panel panel--media" id="problem" data-panel="1">
           <div class="panel__inner">
             <div class="p-head">
-              <div class="eyebrow-anchor"><p class="panel__eyebrow">01 &middot; THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
+              <div class="eyebrow-anchor"><p class="panel__eyebrow">THE OLD WAY</p><span class="section-mark" data-mark="people" aria-hidden="true"></span></div>
               <h2 class="panel__verdict"><span class="vs-line">Dedicated Inventories</span><span class="vs-line vs-line--2">Are So</span><span class="vs-line">19th Century</span></h2>
             </div>
             <div class="p-body">
@@ -1935,11 +1980,11 @@
             <div class="stat-visual">
               <div class="stat-read">
                 <div class="stat-label">
-                  <span class="stat-line" id="statToday">TODAY</span>
-                  <span class="stat-line" id="statBull">BULLFINCH</span>
+                  <span class="stat-line" id="statToday"><span>T</span><span>O</span><span>D</span><span>A</span><span>Y</span></span>
+                  <span class="stat-line" id="statBull"><span>B</span><span>U</span><span>L</span><span>L</span><span>F</span><span>I</span><span>N</span><span>C</span><span>H</span></span>
                 </div>
                 <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
-                <p class="stat-rest">of trees measured</p>
+                <p class="stat-rest">passed &amp; measured</p>
               </div>
               <canvas id="mapPoints" aria-hidden="true"></canvas>
             </div>
@@ -1949,7 +1994,7 @@
 
         <article class="panel panel--media" id="product" data-panel="2">
           <div class="panel__inner">
-            <div class="eyebrow-anchor"><p class="panel__eyebrow">02 &middot; THE BULLFINCH WAY</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
+            <div class="eyebrow-anchor"><p class="panel__eyebrow">THE BULLFINCH WAY</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
             <h2 class="panel__verdict">Is It Really This Easy?</h2>
             <div class="panel__evidence">
               <p><span class="lead">Wear</span><br>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
@@ -2083,351 +2128,331 @@
     <script src="scene-claude-teaser.js?v=claude-50"></script>
     <script>
       // ==================================================================
-      // MAP POINTS — the 01 column graphic. Lifted from map-points-tester.html
-      // with Piet's tuned values baked in (2026-08-08 paste). Standalone
-      // renderer on the #mapPoints canvas; scroll arrives from outside via
-      // window.__mapPoints.setProgress (acts, 0..1) and .setRelease (the
-      // 01 -> 02 handoff dispersal). Transparent ground — dots and the white
-      // acre grid draw over the page's own background. No captions here: the
-      // column's readout (top) and note (bottom) carry the words.
+      // MAP TRAIL - the 01 column graphic. Lifted from map-trail-tester.html
+      // (2026-08-10 paste), replacing the 19k-dot WebGL field that used to
+      // live here. A walker paces a red trail on the diagonal, stopping at
+      // nine plots for the OLD WAY (001%), then the SAME path is redrawn as
+      // BULLFINCH and everything inside sensor range converts (100%). White
+      // marching-squares terrain contours underneath. 2D canvas, no THREE.
+      //
+      // Scroll still arrives from outside via window.__mapPoints.setProgress
+      // (MAP time, 0..1) and .setRelease (the 01 -> 02 handoff fade), so the
+      // wiring below is unchanged. This renderer owns the canvas and the
+      // readout DIGITS only (window.__statReadout, which stat-field-claude
+      // exposes in map-lead mode). It does NOT touch the TODAY -> BULLFINCH
+      // label, --stat-box-a or --note-box-a: those keep their existing writers.
       // ==================================================================
       (function () {
         var canvas = document.getElementById("mapPoints");
-        if (!canvas || !window.THREE) return;
+        if (!canvas) return;
+        var ctx = canvas.getContext("2d");
 
-        // Piet's baked tuning. Acts run in MAP time 0..1 (the wiring maps the
-        // 01 pin's first 80% onto this, leaving [0.80, 1] for the release).
-        var V = {
-          count: 19000, fieldW: 400, fieldD: 400, scatter: 1,
-          clustering: 0.71, clusters: 80, clusterSpread: 0.5,
-          measured: 155, measFrom: 0.02, measTo: 0.29,
-          restFrom: 0.23, restTo: 0.62, restSize: 1.34, restBright: 0.34,
-          sweepAngle: 0, revealBand: 0.5, orderJitter: 0.16, arriveEase: 6.5,
-          sizeOver: 1.11, sizeOverW: 0.11, sizeOverAt: 0.17,
-          brightOver: 2.8, brightOverW: 0.3, brightOverAt: 0.34,
-          hlSize: 2.5, hlBright: 3, hlMix: 1, hlDim: 0, hlDimLead: 0.45,
-          gridOn: 1, gridCols: 10, gridRows: 8, gridOpacity: 0.8, gridInset: 0,
-          targetX: 0.5, targetZ: 0.5, regionR: 0.135, zoomTight: 1.75,
-          zoomFrom: 0.68, zoomTo: 0.95, zoomEase: 2.2,
-          allAmount: 1, allFrom: 0.66, allTo: 0.96,
-          tilt: 0, fillFrame: 1, padding: 1, rotate: 0,
-          sizeFollowZoom: 0.56, smooth: 0.67
-        };
-        var C = { mote: "#6a7f66", accent: "#27b300", grid: "#ffffff" };
-
-        var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setClearColor(0x000000, 0);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        var scene = new THREE.Scene();
-        var camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 4000);
-        camera.up.set(0, 0, -1);
-
-        var uniforms = {
-          uSweepHl:      { value: 0 },
-          uSweepRest:    { value: 0 },
-          uRevealBand:   { value: V.revealBand },
-          uArriveEase:   { value: V.arriveEase },
-          uSize:         { value: V.restSize },
-          uOpacity:      { value: V.restBright },
-          uPxScale:      { value: 1 },
-          uSizeOver:     { value: V.sizeOver },
-          uSizeOverW:    { value: V.sizeOverW },
-          uSizeOverAt:   { value: V.sizeOverAt },
-          uBrightOver:   { value: V.brightOver },
-          uBrightOverW:  { value: V.brightOverW },
-          uBrightOverAt: { value: V.brightOverAt },
-          uHlSize:       { value: V.hlSize },
-          uHlBright:     { value: V.hlBright },
-          uHlMix:        { value: V.hlMix },
-          uHlDim:        { value: V.hlDim },
-          uDimP:         { value: 0 },
-          uAll:          { value: 0 },
-          uPop:          { value: 0 },
-          uMote:         { value: new THREE.Color(C.mote) },
-          uAccent:       { value: new THREE.Color(C.accent) }
-        };
-
-        var VERT = [
-          "attribute float aOrder;",
-          "attribute float aHl;",
-          "uniform float uSweepHl;",
-          "uniform float uSweepRest;",
-          "uniform float uRevealBand;",
-          "uniform float uArriveEase;",
-          "uniform float uSize;",
-          "uniform float uOpacity;",
-          "uniform float uPxScale;",
-          "uniform float uSizeOver;",
-          "uniform float uSizeOverW;",
-          "uniform float uSizeOverAt;",
-          "uniform float uBrightOver;",
-          "uniform float uBrightOverW;",
-          "uniform float uBrightOverAt;",
-          "uniform float uHlSize;",
-          "uniform float uHlBright;",
-          "uniform float uHlMix;",
-          "uniform float uHlDim;",
-          "uniform float uDimP;",
-          "uniform float uAll;",
-          "uniform float uPop;",
-          "uniform vec3  uMote;",
-          "uniform vec3  uAccent;",
-          "varying float vAlpha;",
-          "varying vec3  vColor;",
-          "",
-          "float bump(float t, float at, float w) {",
-          "  float d = (t - at) / max(w, 0.02);",
-          "  return exp(-d * d);",
-          "}",
-          "",
-          "void main() {",
-          "  // Per-dot random (also drives the rest dots' scattered entry and",
-          "  // the staggered 100% conversion below).",
-          "  float rnd = fract(sin(dot(position.xz, vec2(12.9898, 78.233))) * 43758.5453);",
-          "  float sweep = mix(uSweepRest, uSweepHl, aHl);",
-          "  // Rest dots: entry order is 60% random scatter (Piet 2026-08-09),",
-          "  // not the ordered sweep — measured dots keep their trickle.",
-          "  float ord = mix(aOrder, rnd, (1.0 - aHl) * 0.6);",
-          "  float t = clamp((sweep - ord) / max(uRevealBand, 0.001), 0.0, 1.0);",
-          "  float grow = 1.0 - pow(1.0 - t, uArriveEase);",
-          "  float sBump = bump(t, uSizeOverAt, uSizeOverW) * (1.0 - t);",
-          "  float bBump = bump(t, uBrightOverAt, uBrightOverW) * (1.0 - t);",
-          "  // Staggered 100% (Piet 2026-08-09): each dot converts on its own",
-          "  // random threshold as uAll sweeps, popcorn not lockstep. Window",
-          "  // 0.20 of the band, 0.80 spread — smaller window = snappier flips.",
-          "  float allE = clamp((uAll - rnd * 0.80) / 0.20, 0.0, 1.0);",
-          "  allE = allE * allE * (3.0 - 2.0 * allE);",
-          "  float hlE = max(aHl, allE);",
-          "  float dim = 1.0 - uHlDim * uDimP * (1.0 - hlE);",
-          "",
-          "  // 100% pop (Piet): BRIEF time-based swell, driven by uPop from the",
-          "  // tick loop (450ms one-shot when the conversion commits) — NOT the",
-          "  // scrubbed uAll fade. Amplitude 0.30, dial it here.",
-          "  float pop = 1.0 + 0.30 * uPop;",
-          "  float size = uSize * (1.0 + uHlSize) * grow * (1.0 + uSizeOver * sBump) * pop;",
-          "  vec4 mv = modelViewMatrix * vec4(position, 1.0);",
-          "  gl_PointSize = max(size * uPxScale, 0.0);",
-          "  gl_Position = projectionMatrix * mv;",
-          "",
-          "  vAlpha = clamp(uOpacity * grow * (1.0 + uBrightOver * bBump) * (1.0 + uHlBright * hlE) * dim * (0.35 + 0.65 * hlE), 0.0, 1.0);",
-          "  vColor = mix(uMote, uAccent, clamp(uHlMix * hlE, 0.0, 1.0));",
-          "}"
-        ].join("\n");
-
-        var FRAG = [
-          "varying float vAlpha;",
-          "varying vec3  vColor;",
-          "void main() {",
-          "  vec2 c = gl_PointCoord - 0.5;",
-          "  float d = length(c);",
-          "  if (d > 0.5) discard;",
-          "  float a = smoothstep(0.5, 0.28, d) * vAlpha;",
-          "  gl_FragColor = vec4(vColor, a);",
-          "}"
-        ].join("\n");
-
-        var material = new THREE.ShaderMaterial({
-          uniforms: uniforms,
-          vertexShader: VERT,
-          fragmentShader: FRAG,
-          transparent: true,
-          depthWrite: false,
-          depthTest: false,
-          blending: THREE.NormalBlending
-        });
-
-        // Same seed as the tester, so what Piet tuned is what he gets.
-        var seed = 20260806;
-        function mulberry32(a) {
-          return function () {
-            a |= 0; a = (a + 0x6D2B79F5) | 0;
-            var t = Math.imul(a ^ (a >>> 15), 1 | a);
-            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-          };
+        var W = 0, H = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
+        function clamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+        function mapRange(x, a, b) { return clamp01((x - a) / (b - a)); }
+        function smooth(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
+        function rnd(i, salt) {
+          var s = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
+          return s - Math.floor(s);
         }
 
-        var rand = mulberry32(seed);
-        var n = Math.round(V.count);
-        var W = V.fieldW, D = V.fieldD;
-        var pos = new Float32Array(n * 3);
-        var order = new Float32Array(n);
-        var hl = new Float32Array(n);
-        var xNorm = new Float32Array(n);
-        var zNorm = new Float32Array(n);
-        var rnd = new Float32Array(n);
-        var pickRnd = new Float32Array(n);
-
-        var cols = Math.max(1, Math.round(Math.sqrt(n * (W / Math.max(D, 1)))));
-        var rows = Math.max(1, Math.ceil(n / cols));
-        var nc = Math.max(1, Math.round(V.clusters));
-        var cx = new Float32Array(nc), cz = new Float32Array(nc);
-        for (var c = 0; c < nc; c++) { cx[c] = rand(); cz[c] = rand(); }
-        function gauss() {
-          var u = Math.max(1e-6, rand());
-          return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+        /* Uneven y steps, unequal x deltas: the walker holds a heading, jogs
+           around something, drifts back. Corridor is about +-6% of the width. */
+        var CTRL = [
+          { y: -0.02, x: 0.500 }, { y: 0.03, x: 0.508 }, { y: 0.07, x: 0.506 },
+          { y: 0.09, x: 0.487 }, { y: 0.14, x: 0.479 }, { y: 0.16, x: 0.484 },
+          { y: 0.22, x: 0.497 }, { y: 0.245, x: 0.520 }, { y: 0.30, x: 0.526 },
+          { y: 0.33, x: 0.514 }, { y: 0.355, x: 0.512 }, { y: 0.42, x: 0.500 },
+          { y: 0.45, x: 0.478 }, { y: 0.47, x: 0.468 }, { y: 0.53, x: 0.474 },
+          { y: 0.56, x: 0.492 }, { y: 0.615, x: 0.498 }, { y: 0.64, x: 0.495 },
+          { y: 0.69, x: 0.515 }, { y: 0.715, x: 0.529 }, { y: 0.77, x: 0.522 },
+          { y: 0.80, x: 0.503 }, { y: 0.845, x: 0.494 }, { y: 0.87, x: 0.497 },
+          { y: 0.92, x: 0.510 }, { y: 0.96, x: 0.505 }, { y: 1.02, x: 0.498 }
+        ];
+        function spline(t) {
+          var n = CTRL.length - 1;
+          var seg = clamp01(t) * n;
+          var i = Math.min(n - 1, Math.floor(seg));
+          var f = seg - i;
+          var p0 = CTRL[Math.max(0, i - 1)], p1 = CTRL[i],
+              p2 = CTRL[i + 1], p3 = CTRL[Math.min(n, i + 2)];
+          function cr(a, b, c, dd) {
+            return 0.5 * ((2 * b) + (-a + c) * f + (2 * a - 5 * b + 4 * c - dd) * f * f +
+                          (-a + 3 * b - 3 * c + dd) * f * f * f);
+          }
+          return { x: cr(p0.x, p1.x, p2.x, p3.x), y: cr(p0.y, p1.y, p2.y, p3.y) };
         }
-        for (var i = 0; i < n; i++) {
-          var ux = rand(), uz = rand();
-          var k = Math.floor(rand() * nc);
-          var gx = cx[k] + gauss() * V.clusterSpread;
-          var gz = cz[k] + gauss() * V.clusterSpread;
-          var rx = Math.min(1, Math.max(0, ux + (gx - ux) * V.clustering));
-          var rz = Math.min(1, Math.max(0, uz + (gz - uz) * V.clustering));
-          var sc = V.scatter * 0.02;
-          var lx = ((i % cols) + 0.5) / cols;
-          var lz = (Math.floor(i / cols) + 0.5) / rows;
-          var nx = lx + (rx - lx) * sc;
-          var nz = lz + (rz - lz) * sc;
-          xNorm[i] = nx; zNorm[i] = nz;
-          rnd[i] = rand();
-          pickRnd[i] = rand();
-          pos[i * 3]     = (nx - 0.5) * W;
-          pos[i * 3 + 1] = 0;
-          pos[i * 3 + 2] = (nz - 0.5) * D;
+        /* The control points above describe the wander as sideways deviation
+           from a straight run. Here that run is rotated to the diagonal: the
+           baseline goes top-left corner to bottom-right, and each point's
+           deviation is applied perpendicular to it, so the character of the
+           walk is unchanged. */
+        var DIAG = 0.7071;
+        function trailAt(p) {
+          var s = spline(p);
+          var dev = s.x - 0.5, t = s.y;
+          return { x: (t + dev * DIAG) * W, y: (t - dev * DIAG) * H };
         }
-        // Sweep order: projection onto the sweep vector, jittered.
-        (function () {
-          var a = V.sweepAngle * Math.PI / 180;
-          var dx = Math.sin(a), dz = Math.cos(a);
-          var lo = Infinity, hi = -Infinity, i2, p2;
-          for (i2 = 0; i2 < n; i2++) {
-            p2 = xNorm[i2] * dx + zNorm[i2] * dz;
-            order[i2] = p2;
-            if (p2 < lo) lo = p2;
-            if (p2 > hi) hi = p2;
-          }
-          var span = (hi - lo) || 1;
-          for (i2 = 0; i2 < n; i2++) {
-            p2 = (order[i2] - lo) / span;
-            order[i2] = p2 + (rnd[i2] - p2) * V.orderJitter;
-          }
-        })();
-        // The measured set — spread plot-wide, independent of the zoom section.
-        var share = Math.min(1, V.measured / Math.max(n, 1));
-        for (var h = 0; h < n; h++) hl[h] = pickRnd[h] < share ? 1 : 0;
 
-        var geo = new THREE.BufferGeometry();
-        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-        geo.setAttribute("aOrder", new THREE.BufferAttribute(order, 1));
-        geo.setAttribute("aHl", new THREE.BufferAttribute(hl, 1));
-        var points = new THREE.Points(geo, material);
-        points.frustumCulled = false;
-        scene.add(points);
-
-        // Acre grid — white lines on the ground, zooms with the camera.
-        if (V.gridOn >= 0.5) {
-          var gW = V.fieldW * (1 - V.gridInset * 2);
-          var gD = V.fieldD * (1 - V.gridInset * 2);
-          var gc = Math.max(1, Math.round(V.gridCols));
-          var gr = Math.max(1, Math.round(V.gridRows));
-          var hw = gW / 2, hd = gD / 2;
-          var gv = [];
-          for (var gi = 0; gi <= gc; gi++) {
-            var gx2 = -hw + (gW * gi) / gc;
-            gv.push(gx2, 0, -hd, gx2, 0, hd);
+        var LINE_F = 0.012;
+        var COLS = 18, ROWS = 32, trees = [];
+        var OLD_STOPS = 9, BULL_RANGE_F = 0.17;
+        /* POPULATE IN (Piet 2026-08-10): neither the terrain nor the trees are
+           there on the first frame. The contours wash up over [0, CONTOUR_IN]
+           of map time; each tree grows in on its own random threshold spread
+           across [POP_FROM, POP_TO], taking POP_EASE to arrive. All four are
+           in map time, so they sit inside the walk's [0, 0.48]. */
+        var POP_FROM = 0, POP_TO = 0.30, POP_EASE = 0.05, CONTOUR_IN = 0.14;
+        function build() {
+          trees = [];
+          var gx = W / (COLS + 1), gy = H / (ROWS + 1);
+          for (var r = 0; r < ROWS; r++) {
+            for (var c = 0; c < COLS; c++) {
+              var i = r * COLS + c;
+              trees.push({
+                x: gx * (c + 1) + (rnd(i, 1) - 0.5) * gx * 0.85,
+                y: gy * (r + 1) + (rnd(i, 2) - 0.5) * gy * 0.85,
+                pIn: POP_FROM + rnd(i, 3) * (POP_TO - POP_FROM),
+                pOld: Infinity, pBull: Infinity, minD2: Infinity
+              });
+            }
           }
-          for (var gj = 0; gj <= gr; gj++) {
-            var gz2 = -hd + (gD * gj) / gr;
-            gv.push(-hw, 0, gz2, hw, 0, gz2);
+          var range = W * BULL_RANGE_F, STEPS = 900;
+          for (var s = 0; s <= STEPS; s++) {
+            var p = s / STEPS, pt = trailAt(p);
+            for (var k = 0; k < trees.length; k++) {
+              var tr = trees[k];
+              var dx = tr.x - pt.x, dy = tr.y - pt.y, d2 = dx * dx + dy * dy;
+              if (d2 < tr.minD2) tr.minD2 = d2;   // clearance from the whole walk
+              if (tr.pBull <= p) continue;
+              if (d2 < range * range) tr.pBull = p;
+            }
           }
-          var gg = new THREE.BufferGeometry();
-          gg.setAttribute("position", new THREE.BufferAttribute(new Float32Array(gv), 3));
-          var gridLines = new THREE.LineSegments(gg, new THREE.LineBasicMaterial({
-            color: new THREE.Color(C.grid),
-            transparent: true,
-            opacity: V.gridOpacity,
-            depthWrite: false,
-            depthTest: false
-          }));
-          gridLines.frustumCulled = false;
-          scene.add(gridLines);
+          // The measured trees must sit CLEAR of the red line, not under it:
+          // half the line width plus a dot radius plus a small gap.
+          var clear = W * (LINE_F / 2 + 0.007 + 0.004), clear2 = clear * clear;
+          for (var j = 0; j < OLD_STOPS; j++) {
+            var pStop = (j + 0.5) / OLD_STOPS, sp0 = trailAt(pStop);
+            var best = -1, bestD = Infinity;
+            for (var q = 0; q < trees.length; q++) {
+              if (trees[q].pOld !== Infinity) continue;
+              if (trees[q].minD2 < clear2) continue;
+              var ddx = trees[q].x - sp0.x, ddy = trees[q].y - sp0.y, d2b = ddx * ddx + ddy * ddy;
+              if (d2b < bestD) { bestD = d2b; best = q; }
+            }
+            if (best >= 0) trees[best].pOld = pStop;
+          }
         }
-        // Camera fit against the CANVAS box, not the window.
-        var frustumFull = 1, frustumZoom = 1, aspect = 1, cw = 2, ch = 2;
+
+        /* ---- terrain contours -------------------------------------------
+           A smooth scalar field (a few sines at different frequencies and
+           phases, so it reads as landform rather than a pattern) traced at
+           evenly spaced iso levels by marching squares. Dials: LEVELS is how
+           many lines, CONTOUR_STEP is the sampling grid in px (smaller = finer
+           curves, more work), CONTOUR_ALPHA is the ink.
+           The contours never change with progress, so unlike the tester (which
+           re-traced them on every scroll event) this bakes them into an
+           offscreen canvas once per fit and blits it. Same pixels; this
+           renderer paints under a scrub and the tester did not. */
+        var LEVELS = 11, CONTOUR_STEP = 14, CONTOUR_ALPHA = 0.55;
+        var contourCv = null;
+        function field(x, y) {
+          var u = x / W, v = y / H;
+          return Math.sin(u * 3.4 - v * 6.2 + 0.6) * 0.58
+               + Math.sin(u * 7.9 + v * 1.4 + 3.1) * 0.34
+               + Math.sin((u - v) * 4.8 + 5.4) * 0.39
+               + Math.sin(u * 11.3 + v * 9.7 + 1.2) * 0.12;
+        }
+        function bakeContours() {
+          contourCv = document.createElement("canvas");
+          contourCv.width = Math.max(1, Math.round(W * dpr));
+          contourCv.height = Math.max(1, Math.round(H * dpr));
+          var c2 = contourCv.getContext("2d");
+          c2.setTransform(dpr, 0, 0, dpr, 0, 0);
+          var cols = Math.ceil(W / CONTOUR_STEP), rows = Math.ceil(H / CONTOUR_STEP);
+          var g = new Float32Array((cols + 1) * (rows + 1));
+          for (var j = 0; j <= rows; j++) {
+            for (var i = 0; i <= cols; i++) {
+              g[j * (cols + 1) + i] = field(i * CONTOUR_STEP, j * CONTOUR_STEP);
+            }
+          }
+          function ix(a1, b1, xp, xq, lvl) { return xp + (xq - xp) * ((lvl - a1) / (b1 - a1)); }
+          c2.strokeStyle = "#ffffff";
+          c2.globalAlpha = CONTOUR_ALPHA;
+          c2.lineWidth = 1;
+          c2.lineCap = "round";
+          c2.beginPath();
+          var lo = -1.43, hi = 1.43;
+          for (var L = 0; L < LEVELS; L++) {
+            var lvl = lo + (hi - lo) * (L + 0.5) / LEVELS;
+            for (var jj = 0; jj < rows; jj++) {
+              for (var ii = 0; ii < cols; ii++) {
+                var x0 = ii * CONTOUR_STEP, y0 = jj * CONTOUR_STEP;
+                var x1 = x0 + CONTOUR_STEP, y1 = y0 + CONTOUR_STEP;
+                var a = g[jj * (cols + 1) + ii];
+                var b = g[jj * (cols + 1) + ii + 1];
+                var c = g[(jj + 1) * (cols + 1) + ii + 1];
+                var d = g[(jj + 1) * (cols + 1) + ii];
+                var code = (a > lvl ? 8 : 0) | (b > lvl ? 4 : 0) | (c > lvl ? 2 : 0) | (d > lvl ? 1 : 0);
+                if (code === 0 || code === 15) continue;
+                var top    = { x: ix(a, b, x0, x1, lvl), y: y0 };
+                var right  = { x: x1, y: ix(b, c, y0, y1, lvl) };
+                var bottom = { x: ix(d, c, x0, x1, lvl), y: y1 };
+                var left   = { x: x0, y: ix(a, d, y0, y1, lvl) };
+                var seg = null;
+                switch (code) {
+                  case 1: case 14: seg = [left, bottom]; break;
+                  case 2: case 13: seg = [bottom, right]; break;
+                  case 3: case 12: seg = [left, right]; break;
+                  case 4: case 11: seg = [top, right]; break;
+                  case 6: case 9:  seg = [top, bottom]; break;
+                  case 7: case 8:  seg = [left, top]; break;
+                  case 5:  c2.moveTo(left.x, left.y); c2.lineTo(top.x, top.y);
+                           c2.moveTo(bottom.x, bottom.y); c2.lineTo(right.x, right.y); break;
+                  case 10: c2.moveTo(left.x, left.y); c2.lineTo(bottom.x, bottom.y);
+                           c2.moveTo(top.x, top.y); c2.lineTo(right.x, right.y); break;
+                }
+                if (seg) { c2.moveTo(seg[0].x, seg[0].y); c2.lineTo(seg[1].x, seg[1].y); }
+              }
+            }
+          }
+          c2.stroke();
+        }
+
+        function drawPath(p, alpha) {
+          if (p <= 0.0005 || alpha <= 0.001) return;
+          var lw = W * LINE_F;
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = "#e03a2f";
+          ctx.lineWidth = lw;
+          ctx.lineJoin = ctx.lineCap = "round";
+          ctx.beginPath();
+          var N = 600, upto = Math.floor(N * p);
+          for (var i = 0; i <= upto; i++) {
+            var q = trailAt(i / N);
+            if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+          }
+          var head = trailAt(p);
+          ctx.lineTo(head.x, head.y);
+          ctx.stroke();
+          var back = trailAt(Math.max(0, p - 0.01));
+          var ang = Math.atan2(head.y - back.y, head.x - back.x);
+          var L = lw * 3.2, halfBase = L * 0.577;
+          var bx = head.x - Math.cos(ang) * L * 0.25;
+          var by = head.y - Math.sin(ang) * L * 0.25;
+          ctx.fillStyle = "#e03a2f";
+          ctx.beginPath();
+          ctx.moveTo(bx + Math.cos(ang) * L, by + Math.sin(ang) * L);
+          ctx.lineTo(bx + Math.cos(ang + Math.PI / 2) * halfBase, by + Math.sin(ang + Math.PI / 2) * halfBase);
+          ctx.lineTo(bx + Math.cos(ang - Math.PI / 2) * halfBase, by + Math.sin(ang - Math.PI / 2) * halfBase);
+          ctx.closePath();
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        // MAP time in, 1:1 with the tester's scroll fraction (Piet 2026-08-10):
+        // the walk owns [0, 0.48], the first path fades out over 0.48 -> 0.56,
+        // and the SAME path redraws as Bullfinch over 0.52 -> 1. The label flip
+        // band (0.48 -> 0.58) lives in setStatFlip in the wiring below.
+        var sp = 0;
+        function paint() {
+          if (!W || !H) return;
+          var pOld, pBull, oldAlpha;
+          if (sp < 0.48) { pOld = sp / 0.48; pBull = 0; oldAlpha = 1; }
+          else {
+            pOld = 1;
+            pBull = mapRange(sp, 0.52, 1);
+            oldAlpha = 1 - smooth(mapRange(sp, 0.48, 0.56));
+          }
+
+          ctx.clearRect(0, 0, W, H);
+          if (contourCv) {
+            var cIn = smooth(mapRange(sp, 0, CONTOUR_IN));
+            if (cIn > 0.001) {
+              ctx.globalAlpha = cIn;
+              ctx.drawImage(contourCv, 0, 0, W, H);
+              ctx.globalAlpha = 1;
+            }
+          }
+
+          var measured = 0;
+          for (var k = 0; k < trees.length; k++) {
+            var tr = trees[k];
+            var onBull = pBull > 0 && pBull >= tr.pBull;
+            var onOld = pOld > 0 && tr.pOld !== Infinity && pOld >= tr.pOld;
+            // A measured tree is always fully present: the walker cannot stop
+            // at something that has not populated yet.
+            var inT = (onBull || onOld) ? 1 : smooth(mapRange(sp, tr.pIn, tr.pIn + POP_EASE));
+            if (inT <= 0.001) continue;
+            if (onBull || onOld) {
+              measured++;
+              var pm = onBull ? tr.pBull : tr.pOld;
+              var pp = onBull ? pBull : pOld;
+              var pop = 1 + Math.sin(mapRange(pp, pm, pm + 0.03) * Math.PI) * 0.9;
+              ctx.fillStyle = "#3f7d3a";
+              ctx.globalAlpha = 1;
+              ctx.beginPath();
+              ctx.arc(tr.x, tr.y, W * 0.007 * pop, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              ctx.fillStyle = "#16251b";
+              ctx.globalAlpha = 0.26 * inT;
+              ctx.beginPath();
+              ctx.arc(tr.x, tr.y, W * 0.005 * inT, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          ctx.globalAlpha = 1;
+
+          drawPath(pOld, oldAlpha);
+          drawPath(pBull, 1);
+
+          // 001 -> 100 straight across the Bullfinch path's draw (Piet
+          // 2026-08-10). It used to count the trees actually inside sensor
+          // range, which a single diagonal tops out at about 41%, and then
+          // snapped to 100 at the end of the scrub.
+          var pct;
+          if (pBull > 0) pct = Math.round(1 + 99 * pBull);
+          else pct = pOld > 0.06 ? 1 : 0;
+          // stat-field-claude owns the digit spans and exposes the setter in
+          // map-lead mode. ONE writer each: the label flip stays over there.
+          if (window.__statReadout) window.__statReadout(pct);
+        }
+
+        var queued = false;
+        function schedule() {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(function () { queued = false; paint(); });
+        }
+
         function fit() {
-          cw = Math.max(2, canvas.clientWidth);
-          ch = Math.max(2, canvas.clientHeight);
-          aspect = cw / ch;
-          renderer.setSize(cw, ch, false);
-          var pick = V.fillFrame > 0.5 ? Math.min : Math.max;
-          frustumFull = pick(V.fieldD, V.fieldW / aspect) * V.padding;
-          var side = Math.max(2 * V.regionR * Math.max(V.fieldW, V.fieldD), 1) * V.zoomTight;
-          frustumZoom = Math.max(side, side / aspect) * V.padding;
+          var r = canvas.getBoundingClientRect();
+          if (r.width < 2 || r.height < 2) return;
+          W = r.width; H = r.height;
+          canvas.width = Math.round(W * dpr);
+          canvas.height = Math.round(H * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          bakeContours();
+          build();
+          paint();
         }
         window.addEventListener("resize", fit);
         fit();
 
-        function applyCamera(e) {
-          var fh = frustumFull + (frustumZoom - frustumFull) * e;
-          var halfH = fh / 2, halfW = halfH * aspect;
-          camera.left = -halfW; camera.right = halfW;
-          camera.top = halfH; camera.bottom = -halfH;
-          camera.updateProjectionMatrix();
-          var tx = (V.targetX - 0.5) * V.fieldW * e;
-          var tz = (V.targetZ - 0.5) * V.fieldD * e;
-          camera.position.set(tx, 900, tz);
-          camera.lookAt(tx, 0, tz);
-          var ppu = ch / fh;
-          var ppuFull = ch / frustumFull;
-          uniforms.uPxScale.value = ppuFull + (ppu - ppuFull) * V.sizeFollowZoom;
-        }
-
-        function span(p, a, b) {
-          if (b <= a) return p >= b ? 1 : 0;
-          return Math.min(1, Math.max(0, (p - a) / (b - a)));
-        }
-        function sstep(x) {
-          x = x < 0 ? 0 : (x > 1 ? 1 : x);
-          return x * x * x * (x * (x * 6 - 15) + 10);
-        }
-
-        var rawP = 0, smoothP = 0, active = false, needsFrame = true;
-        var popArmed = true, popT0 = 0;
-        function tick() {
-          requestAnimationFrame(tick);
-          if (!active && !needsFrame) return;
-          var prev = smoothP;
-          smoothP += (rawP - smoothP) * V.smooth;
-          if (Math.abs(rawP - smoothP) < 0.0005) smoothP = rawP;
-          needsFrame = active || Math.abs(prev - smoothP) > 0.00001;
-
-          var meas = span(smoothP, V.measFrom, V.measTo);
-          var rest = span(smoothP, V.restFrom, V.restTo);
-          var zoom = Math.pow(sstep(span(smoothP, V.zoomFrom, V.zoomTo)), 1 / V.zoomEase);
-          uniforms.uSweepHl.value = meas * (1 + V.revealBand);
-          uniforms.uSweepRest.value = rest * (1 + V.revealBand);
-          uniforms.uDimP.value = sstep(
-            span(smoothP, V.zoomFrom - V.hlDimLead * (V.zoomTo - V.zoomFrom), V.zoomTo)
-          );
-          uniforms.uAll.value = sstep(span(smoothP, V.allFrom, V.allTo)) * V.allAmount;
-          // Brief pop (Piet 2026-08-09): one-shot 450ms swell fired when the
-          // green conversion commits (uAll crosses 0.6 upward), re-armed when
-          // it falls back below 0.15 so a rewind re-pops. Time-based — NOT
-          // tied to the scrubbed fade.
-          if (uniforms.uAll.value > 0.6 && popArmed) { popT0 = performance.now(); popArmed = false; }
-          if (uniforms.uAll.value < 0.15) { popArmed = true; popT0 = 0; }
-          var popV = 0;
-          if (popT0) {
-            var popX = (performance.now() - popT0) / 450;
-            if (popX < 1) { popV = Math.sin(Math.PI * popX); needsFrame = true; }
-          }
-          uniforms.uPop.value = popV;
-          applyCamera(zoom);
-          renderer.render(scene, camera);
-        }
-        requestAnimationFrame(tick);
-
         window.__mapPoints = {
-          setProgress: function (p) { rawP = Math.max(0, Math.min(1, p)); needsFrame = true; },
-          // 01 leave: the whole map — dots, grid, everything — is ONE thing
+          // If the first fit() ran while the canvas still had no box (the stat
+          // block is reparented to .swot by the wiring below, after this IIFE),
+          // W stays 0 and paint() no-ops. Re-fit on the first progress that
+          // finds it unsized rather than waiting for a refresh or a resize.
+          setProgress: function (p) { sp = clamp01(p); if (!W || !H) fit(); schedule(); },
+          // 01 leave: the whole map - trail, trees, contours - is ONE thing
           // and it simply fades out in place (Piet). No burst, no dispersal.
           setRelease: function (p) {
-            canvas.style.opacity = String(1 - Math.max(0, Math.min(1, p)));
+            canvas.style.opacity = String(1 - clamp01(p));
           },
-          setActive: function (a) { active = !!a; needsFrame = true; },
-          refit: function () { fit(); needsFrame = true; }
+          setActive: function (a) { if (a) schedule(); },
+          refit: function () { fit(); }
         };
       })();
     </script>
@@ -2436,7 +2461,7 @@
          page, and returned immediately. -->
 
     <script src="swot-claude.js?v=claude-35"></script>
-    <script src="stat-field-claude.js?v=claude-17"></script>
+    <script src="stat-field-claude.js?v=claude-18"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -2877,6 +2902,19 @@
         // while the motes chased their 02 stations downward.
         // Piet: ONE slow spread — it starts as the 01 copy starts leaving and
         // finishes exactly as we REACH 02. Never a fast split then a dead sit.
+        // Map fade-out span (Piet 2026-08-10: "taking too long"). The release
+        // used to ramp across this trigger's ENTIRE band — [0.80 of the 01 pin]
+        // to [02's pin start] — because it reused the band's own progress. That
+        // band is deliberately long (ONE slow grid spread, see below), so the
+        // map dissolved for the whole handoff. It now completes inside the
+        // first MAP_FADE_SPAN of the band: same start, much shorter fade.
+        // ONE writer — both onUpdate and onRefresh call this.
+        var MAP_FADE_SPAN = 0.35;
+        function mapReleaseAt(scroll) {
+          var a = at(p1, 0.80), b = p2.start;
+          var t = (scroll - a) / Math.max(1, b - a);
+          return Math.max(0, Math.min(1, t / MAP_FADE_SPAN));
+        }
         ScrollTrigger.create({
           trigger: document.body,
           start: function () { return at(p1, 0.80); },
@@ -2899,10 +2937,7 @@
             if (window.bullfinchCanopy.setSeedReveal) window.bullfinchCanopy.setSeedReveal(1 - p);   // R5: seed gone by 02
             // Map fade-out. Fully transparent BEFORE 02 pins — Piet: it was
             // lingering into 02 and sliding up over it.
-            if (window.__mapPoints) {
-              var mapFade = (self.scroll() - at(p1, 0.80)) / Math.max(1, p2.start - at(p1, 0.80));
-              window.__mapPoints.setRelease(Math.max(0, Math.min(1, mapFade)));
-            }
+            if (window.__mapPoints) window.__mapPoints.setRelease(mapReleaseAt(self.scroll()));
           },
           onLeaveBack: function () {
             // Scrolled back above the transition: seed visible again for 01.
@@ -2915,8 +2950,7 @@
           // scroll position — clamps to 0 above the band, 1 below it.
           onRefresh: function (self) {
             if (!window.__mapPoints) return;
-            var mapFade = (self.scroll() - at(p1, 0.80)) / Math.max(1, p2.start - at(p1, 0.80));
-            window.__mapPoints.setRelease(Math.max(0, Math.min(1, mapFade)));
+            window.__mapPoints.setRelease(mapReleaseAt(self.scroll()));
           },
         });
 
@@ -2957,10 +2991,13 @@
             statBoxHost.style.setProperty("--stat-box-a", a.toFixed(3));
           }
           // TODAY -> BULLFINCH flip: in map-lead mode stat-field-claude hands
-          // the beat over (window.__statFlip) so it stays glued to the green
-          // conversion in MAP time no matter where the map trigger starts.
+          // the beat over (window.__statFlip) so it stays glued to the trail's
+          // handover in MAP time no matter where the map trigger starts.
+          // Band retimed 0.66/0.30 -> 0.48/0.10 with the trail renderer
+          // (2026-08-10): the walk ends and the Bullfinch path takes over at
+          // 0.48, so the label flips there, not at the old dot conversion.
           function setStatFlip(p) {
-            if (window.__statFlip) window.__statFlip(Math.max(0, Math.min(1, (p - 0.66) / 0.30)));
+            if (window.__statFlip) window.__statFlip(Math.max(0, Math.min(1, (p - 0.48) / 0.10)));
           }
           ScrollTrigger.create({
             trigger: document.body,
