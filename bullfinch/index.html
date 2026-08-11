@@ -37,7 +37,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=v4-9" />
+    <link rel="stylesheet" href="styles.css?v=v4-10" />
     <style>
       :root,
       [data-theme="dark"] {
@@ -609,21 +609,86 @@
       /* Combined 03 card, upper half: the PROPER team card — faces left,
          copy right, the old team stop's own two-column layout — anchored to
          the top and stopping clear of the WHO NEEDS band below. */
+      /* Piet 2026-08-10, "just fix it": 03 is a FLOW COLUMN now.
+         Both halves used to be absolute, the team pinned top-to-42% and the
+         WHO band pinned to the bottom, so neither knew the other existed and
+         the copy grew straight into the band at any window size that had not
+         been tested. In flow they cannot overlap at any width: the band is the
+         last item, the team half takes whatever is left and centres its row in
+         it. Balance is one number (the padding pair) instead of two guesses.
+         The panel is height:100svh, overflow:hidden, so this column has a
+         definite height to divide. */
       #opportunity .team-half {
-        position: absolute;
-        /* Piet 2026-08-09: team chunk moved DOWN (was 8vh top / 47% bottom)
-           so it sits closer to the WHO band, more air above. */
-        top: clamp(88px, 13vh, 150px);
-        left: var(--pad-x);
-        right: var(--pad-x);
-        bottom: 42%;
+        flex: 1 1 auto;
+        min-height: 0;
         display: grid;
         grid-template-columns: minmax(240px, min(38vw, 520px)) minmax(0, 1fr);
         gap: clamp(48px, 7vw, 112px);
-        align-items: center;
+        /* start + center, not center + center. align-content centres the ROW
+           in the free space; align-items then hangs both columns from the top
+           of that row, so the faces stay level with the eyebrow (Piet: the
+           pictures come up) instead of floating low against the taller copy. */
+        align-items: start;
+        /* Declared twice on purpose. `safe center` centres the row while it
+           fits and falls back to START the moment the content is taller than
+           the space, so a very short window pushes the overflow DOWNWARD only
+           instead of tucking the eyebrow up under the fixed nav. The plain
+           `center` above it is the fallback for anything that does not know
+           the safe keyword. */
+        align-content: center;
+        align-content: safe center;
       }
       #opportunity .panel__people-clip { width: 100%; }
       #opportunity .team-half__copy { min-width: 0; }
+      /* TEAM internal spacing, tightened (Piet 2026-08-10). These override the
+         @media (max-height: 800px) block in styles.css, which was tuned around
+         14px copy. Scoped to the team half so 01 and 02 keep their air.
+         The px values here are the DESKTOP TRUTH; the block further down
+         re-expresses them as ratios of --t so they shrink together. */
+      #opportunity .team-half__copy .panel__eyebrow { margin-bottom: 14px; }
+      #opportunity .team-half__copy .panel__evidence { margin-top: 22px; gap: 12px; }
+      #opportunity .team-half__copy .panel__numeric { margin-top: 18px; }
+      /* ===== 03 SCALES WITH THE WINDOW (Piet 2026-08-10) ==================
+         "original non-resized is great. But resize is a fail" then "can the
+         text shrink in that case?" Yes. One driver, --t, and everything in
+         the team column is a ratio of it, so the whole block shrinks as one
+         piece instead of five numbers fighting.
+
+         min(1.35vw, 2.4vh) resolves to 17px or more at anything from roughly
+         1260 x 710 up, so his window is held by construction: 17px copy,
+         14 / 22 / 12 / 18 margins, exactly the px values declared above. The
+         ratios below reproduce those numbers at --t = 17 (13.9, 22.1, 11.9,
+         18.0). Below that size everything walks down together to an 11px floor.
+
+         Why scaling the type fixes the LINE COUNT and not just the leading:
+         .panel__evidence is capped at 56ch, and a ch scales with the font. At
+         his size the cap binds and the bios wrap 3/2/2. Squeeze the window,
+         the column falls below 56ch, the cap stops binding and every bio picks
+         up a line (the 3/3/3 in the 1147 shot). Shrinking the type puts the cap
+         back in charge: the measure returns to 3/2/2 AND each line is shorter.
+
+         The band rows scale on the same principle, and the numbers are chosen
+         so they sit at their old fixed values (66 / 58 / 9-10) at 748 tall and
+         above. That replaces the max-height: 700px step this block used to
+         carry, so there is no breakpoint to fall off.
+
+         Gated to min-width 721 so NONE of it reaches the phone. The mobile
+         block owns 03's type below that and this would have overridden it
+         (an unscoped version of this rule shipped an hour ago and did exactly
+         that). Phone belongs to the mobile pass. */
+      @media (min-width: 721px) {
+        #opportunity .team-half__copy { --t: clamp(11px, min(1.35vw, 2.4vh), 17px); }
+        #opportunity .team-half__copy .panel__evidence p { font-size: var(--t); }
+        #opportunity .team-half__copy .panel__eyebrow { margin-bottom: calc(var(--t) * 0.82); }
+        #opportunity .team-half__copy .panel__evidence {
+          margin-top: calc(var(--t) * 1.3);
+          gap: calc(var(--t) * 0.7);
+        }
+        #opportunity .team-half__copy .panel__numeric { margin-top: calc(var(--t) * 1.06); }
+        #opportunity .audience-item { min-height: clamp(38px, 8.8vh, 66px); }
+        #opportunity .trust-strip div { height: clamp(34px, 7.75vh, 58px); }
+        #opportunity .ground-heading { padding: clamp(5px, 1.2vh, 9px) 0 clamp(6px, 1.34vh, 10px); }
+      }
       /* PHONE. The recording is of a mobile app, so the frame is a phone held
          upright — not a landscape video box. Real clip landed (2026-08-09):
          dashed scaffold border and label are gone, the frame's shape and
@@ -652,15 +717,23 @@
         text-transform: uppercase;
       }
 
-      #opportunity { position: relative; display: block; padding: 0 var(--pad-x) 18px; }
+      #opportunity {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        /* Top pad is the nav clearance the team half used to carry as `top`;
+           bottom pad is the offset the WHO band used to carry as `bottom`
+           (Piet 2026-08-09: raised from 14px, more air below). Dial this pair
+           to move the whole composition. */
+        padding: clamp(60px, 8.5vh, 120px) var(--pad-x) clamp(44px, 7vh, 84px);
+      }
       #opportunity .panel__inner {
-        position: absolute;
+        /* Was absolute bottom. Static in the column now; position:relative is
+           kept only so the z-index still means something against the fixed
+           forest layers. */
+        position: relative;
         z-index: 5;
-        left: var(--pad-x);
-        right: var(--pad-x);
-        /* Piet 2026-08-09: WHO band raised (was 14px) — closer to the team
-           chunk, more air below. */
-        bottom: clamp(44px, 7vh, 84px);
+        flex: 0 0 auto;
         width: auto;
         max-width: none;
         height: auto;
@@ -1997,9 +2070,9 @@
             <div class="eyebrow-anchor"><p class="panel__eyebrow">THE BULLFINCH WAY</p><span class="section-mark" data-mark="tech" aria-hidden="true"></span></div>
             <h2 class="panel__verdict">Is It Really This Easy?</h2>
             <div class="panel__evidence">
-              <p><span class="lead">Wear</span><br>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
-              <p><span class="lead">Walk</span><br>Just press “Start Bullfinching” and go do your thing</p>
-              <p><span class="lead">Data</span><br>Complete stem maps and stand data are delivered automatically. 10x the data at less than half the cost, every time you’re in the field</p>
+              <p><span class="lead">Wear</span>Bullfinch attaches securely to your vest and stays blissfully out of your way</p>
+              <p><span class="lead">Walk</span>Just press “Start Bullfinching” and go do your thing</p>
+              <p><span class="lead">Data</span>Complete stem maps and stand data are delivered automatically. 10x the data at less than half the cost, every time you’re in the field</p>
             </div>
             <!-- The WEAR · WALK · DATA summary line was removed: it only
                  repeated the three leads sitting directly above it. -->
@@ -2460,7 +2533,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-35"></script>
+    <script src="swot-claude.js?v=claude-37"></script>
     <script src="stat-field-claude.js?v=claude-18"></script>
     <script>
       (function () {

@@ -438,8 +438,92 @@
           document.body.classList.add("has-reached-01");
         }
       },
+      // Refresh re-assert (Piet 2026-08-10, "what happened to the image
+      // gating"): the hero got this on 08-09 and the panels never did. A
+      // resize auto-refreshes ScrollTrigger, which reverts the pins,
+      // remeasures and re-applies. A panel that ends up inactive after the
+      // recompute never gets another onUpdate, so the inline clip-paths it
+      // was last written with STAND. 03 stayed fully written (faces, copy,
+      // WHO band) on top of 02. Same shape as the tree-field and map-release
+      // onRefresh writers: re-assert the true value for the real position.
+      onRefresh: function (self) { applyPanelProgress(panel, self.progress || 0); },
     });
     panelTriggers.push(panelTrigger);
+  });
+
+  // ===== Resize keeps your place =========================================
+  // Piet 2026-08-10: "why does resize also move me on where we are on the
+  // scroll?" Every pin here is measured in viewport units (the generic
+  // "+=150%", 02's "+=210%", the bullseye's "+=380%") and #opportunity
+  // carries a -100svh - 12svh margin, so the LENGTH of the whole journey
+  // scales with the window. The browser only remembers a pixel offset, and
+  // ScrollTrigger's refresh reverts the pins to remeasure, which briefly
+  // collapses the document and lets a deep position get clamped to the
+  // shorter page. Same offset, different map, so you surface somewhere else.
+  //
+  // Record WHICH trigger we are in and HOW FAR through it before the
+  // recompute; put the scroll back at that same fraction of its new range
+  // after. Gated on the viewport actually changing size, the same guard the
+  // scene's visibilitychange re-sync uses: nav clicks, font-load refreshes
+  // and the fullscreen settle all call refresh() too and none of them should
+  // be second-guessed. (Nav clicks are safe either way. scrollToTarget calls
+  // refresh() and then lenis.scrollTo(destination) immediately after, so its
+  // destination lands last and wins.)
+  var lastRefreshW = window.innerWidth;
+  var lastRefreshH = window.innerHeight;
+  var scrollAnchor = null;
+
+  ScrollTrigger.addEventListener("refreshInit", function () {
+    scrollAnchor = null;
+    if (!panelTriggers.length) return;
+    if (window.innerWidth === lastRefreshW && window.innerHeight === lastRefreshH) return;
+    var first = panelTriggers[0];
+    var last = panelTriggers[panelTriggers.length - 1];
+    var y = first.scroll();
+    // In the hero, above 01: hold the same fraction of the run-up.
+    if (y < first.start) {
+      scrollAnchor = { mode: "pre", f: first.start > 0 ? y / first.start : 0 };
+      return;
+    }
+    // Past the last panel, in the closing: that section is not pinned, so
+    // hold the DISTANCE below the last end rather than a fraction.
+    if (y > last.end) {
+      scrollAnchor = { mode: "post", d: y - last.end };
+      return;
+    }
+    for (var i = 0; i < panelTriggers.length; i++) {
+      var t = panelTriggers[i];
+      if (y <= t.end) {
+        var span = t.end - t.start;
+        var f = span > 0 ? (y - t.start) / span : 0;
+        scrollAnchor = { mode: "in", t: t, f: Math.min(1, Math.max(0, f)) };
+        return;
+      }
+    }
+  });
+
+  ScrollTrigger.addEventListener("refresh", function () {
+    lastRefreshW = window.innerWidth;
+    lastRefreshH = window.innerHeight;
+    if (!scrollAnchor) return;
+    var a = scrollAnchor;
+    scrollAnchor = null;
+    var first = panelTriggers[0];
+    var last = panelTriggers[panelTriggers.length - 1];
+    var y;
+    if (a.mode === "pre") y = a.f * first.start;
+    else if (a.mode === "post") y = last.end + a.d;
+    else y = a.t.start + a.f * (a.t.end - a.t.start);
+    y = Math.max(0, Math.round(y));
+    if (window.lenis && typeof window.lenis.scrollTo === "function") {
+      window.lenis.scrollTo(y, { immediate: true });
+    } else {
+      window.scrollTo(0, y);
+    }
+    // Every onRefresh writer above already ran, against the pre-restore
+    // position. Re-run the scrubs at the position we just set, or the page
+    // holds the state of wherever the browser had dumped us.
+    ScrollTrigger.update();
   });
 
   // ===== Seed (first red dot) ============================================
