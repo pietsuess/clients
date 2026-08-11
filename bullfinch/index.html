@@ -1135,6 +1135,25 @@
         white-space: nowrap;
       }
       .panel__stat--problem .stat-line > span { display: block; }
+      /* TREES on its own line above the rest (Piet 2026-08-10), letter-justified
+         to the SAME WIDTH as the line under it. Same technique as TODAY /
+         BULLFINCH: one span per letter, flex space-between, letter-spacing
+         zeroed so the last letter sits flush. The width it stretches to is
+         "passed & measured" itself, which is why .stat-rest shrink-wraps here
+         (fit-content + auto margins) instead of being a full-width centred
+         box. Rendered position of the existing line is unchanged either way. */
+      .panel__stat--problem .stat-rest {
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .panel__stat--problem .stat-trees {
+        display: flex;
+        justify-content: space-between;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+      .panel__stat--problem .stat-trees > span { display: block; }
       /* % matches the digits: same clamp as .stat-digit, same ink, and
          margin-bottom 0 so flex-end puts it on the digits' baseline instead of
          riding 0.1em high. Tighten with the two gaps below. */
@@ -2057,7 +2076,7 @@
                   <span class="stat-line" id="statBull"><span>B</span><span>U</span><span>L</span><span>L</span><span>F</span><span>I</span><span>N</span><span>C</span><span>H</span></span>
                 </div>
                 <p class="stat-num"><span class="stat-readout" id="statReadout" aria-hidden="true"></span><span class="stat-unit">%</span></p>
-                <p class="stat-rest">passed &amp; measured</p>
+                <p class="stat-rest"><span class="stat-trees"><span>O</span><span>F</span><span></span><span>T</span><span>R</span><span>E</span><span>E</span><span>S</span></span>passed &amp; measured</p>
               </div>
               <canvas id="mapPoints" aria-hidden="true"></canvas>
             </div>
