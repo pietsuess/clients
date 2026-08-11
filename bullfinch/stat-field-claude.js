@@ -95,6 +95,21 @@
     paint(0);
     return;
   }
+  // PHONE, map mode (Piet 2026-08-11: "the 001% is not timing with the first
+  // arrow draw"). The phone does not reparent, so drive() below still owns the
+  // in/out opacity on the 01 pin. What it must NOT own any more is the number.
+  // It was painting the digits on its own band (0.528 -> 0.768 of the pin)
+  // while the trail drew the arrows on MAP time, so the two had no relation.
+  // Hand the digits and the label over exactly as desktop does: the trail
+  // renderer already calls window.__statReadout with 001 -> 100 across the
+  // Bullfinch draw, and the wiring calls window.__statFlip on the trail's own
+  // 0.48 -> 0.58 handover. One writer each, same as desktop.
+  var mapPhone = mapMode && mobileLike;
+  if (mapPhone) {
+    window.__statFlip = function (t) { paint(ease(t), true); };
+    window.__statReadout = setReadout;
+    paint(0);
+  }
   function drive(p) {
     for (var i = 0; i < items.length; i++) {
       var el = items[i]; if (!el) continue;
@@ -106,7 +121,10 @@
       // 01 pin (Piet: "the text section slides up"). Killed — nothing moves.
       el.style.transform = "none";
     }
-    paint(ease(mapRange(p, mapMode ? .528 : .46, mapMode ? .768 : .74)));
+    // On the phone in map mode the digits and the label belong to map time
+    // (see above), so this band must not write either of them. Everywhere else
+    // it still drives both.
+    if (!mapPhone) paint(ease(mapRange(p, mapMode ? .528 : .46, mapMode ? .768 : .74)));
   }
   drive(0);
   ScrollTrigger.create({
