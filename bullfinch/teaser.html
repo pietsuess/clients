@@ -1769,6 +1769,15 @@
         #problem .stat-label,
         #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
         #problem .stat-line { left: 0; right: auto; text-align: left; }
+        /* ONE MEASURE for the whole plate (Piet 2026-08-11: "the text in that
+           box is not justified properly on mobile"). TODAY / BULLFINCH justify
+           across .stat-label, which is width:100% of .stat-read, while OF TREES
+           justifies across .stat-rest, which shrink-wraps to "passed &
+           measured". Two different widths, so the lines did not line up.
+           Shrink .stat-read itself to its widest line and put .stat-rest back
+           on 100%: every line then justifies to the same edge. */
+        #problem .stat-read { width: fit-content; }
+        #problem .stat-rest { width: 100%; margin-right: 0; }
         #problem .stat-num { justify-content: flex-start; align-items: flex-end; }
 
         /* 02 — the case graphic goes full-bleed across the top (92vw, never
@@ -2609,7 +2618,7 @@
          page, and returned immediately. -->
 
     <script src="swot-claude.js?v=claude-37"></script>
-    <script src="stat-field-claude.js?v=claude-19"></script>
+    <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
         var terms = Array.prototype.slice.call(document.querySelectorAll(".hero-is__term"));
@@ -3394,6 +3403,17 @@
           // 0.10), still landing at 0.35 as the device settles. The forester
           // drifts right as the device lands on the left. Scrub-reversible.
           function setGapFocus(p) {
+            // PHONE (Piet 2026-08-11: "the guy has to be centre of the
+            // screen"). The pan exists because a 1.63:1 asset on a 16:9 screen
+            // has almost no horizontal slack. In a portrait viewport with
+            // background-size:cover the slack is enormous, so focus 100% lands
+            // on the far right edge of the plate and the forester is off
+            // screen. Centre, and hold it. This writes an INLINE style, so a
+            // CSS override could not have fixed it.
+            if (window.matchMedia && window.matchMedia("(max-width: 720px)").matches) {
+              gapReveal.style.setProperty("--reveal-focus", "50%");
+              return;
+            }
             var t = p * p * (3 - 2 * p);
             gapReveal.style.setProperty("--reveal-focus", ((1 - t) * 100).toFixed(2) + "%");
           }

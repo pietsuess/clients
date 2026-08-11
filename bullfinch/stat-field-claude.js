@@ -113,7 +113,15 @@
   function drive(p) {
     for (var i = 0; i < items.length; i++) {
       var el = items[i]; if (!el) continue;
-      var inT = mapRange(p, .32 + i * .05, .42 + i * .05);
+      // PHONE, map mode (Piet 2026-08-11: 001% still not on the first arrow).
+      // Handing the DIGITS to map time was only half of it: this band still
+      // held the whole block invisible until 0.32 of the pin, and the first
+      // arrow draws over map 0 -> 0.48, which is pin 0 -> 0.384. The number
+      // was arriving 83% of the way through the draw it is supposed to be
+      // counting. Up front, so the readout is lit as the arrow starts.
+      var inT = mapPhone
+        ? mapRange(p, .02 + i * .03, .10 + i * .03)
+        : mapRange(p, .32 + i * .05, .42 + i * .05);
       var outT = mapRange(p, .86 + (items.length - 1 - i) * .018, .92 + (items.length - 1 - i) * .018);
       el.style.opacity = inT * (1 - outT);
       // No translateY: the readout label/number/rest reveal by opacity IN PLACE.
