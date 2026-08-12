@@ -1749,19 +1749,18 @@
            flow and starting it AT 50svh makes the overlap structurally
            impossible instead of tuned. The note rides with it (it is inside
            this element), so it needs its own gutter back below. */
+        /* REVERTED 2026-08-12 (Piet: "so bad"). The absolute top:50dvh version
+           broke the block on the phone: readout gone, map reduced to a sliver
+           at the right edge. Back to display:contents, which is what neutralises
+           the UNSCOPED .panel__stat--problem { position: fixed; right: 0;
+           width: 50vw } at line 1055 — that rule has no media query on it, so on
+           the phone the mobile override is the only thing holding the block in
+           the page at all. Do not take display:contents off without replacing
+           every one of those properties. */
         #problem .panel__stat--problem {
-          position: absolute;
-          left: 0;
-          right: 0;
-          /* dvh, NOT svh. The photo is a FIXED element at bottom:50%, so its
-             edge is half the live viewport. svh is the small viewport, so with
-             the URL bar hidden svh < live and the map would start above the
-             photo again. dvh tracks the same box the fixed element does. */
-          top: 50dvh;
-          bottom: clamp(14px, 2.4vh, 26px);
+          position: static;
           width: auto;
-          display: flex;
-          flex-direction: column;
+          display: contents;
         }
         /* ===== MOBILE 01 READOUT + MAP (Piet 2026-08-12) ==================
            Map full bleed, up to the photo edge, with the readout floating ON
@@ -1769,23 +1768,14 @@
            into a column). Full bleed = 100vw pulled back out of the panel's
            --pad-x. The negative top margin eats the grid row-gap above so the
            canvas starts at the section edge instead of below a gutter. */
-        /* Full bleed comes from the absolute parent above (left:0/right:0 is
-           the panel's padding box, i.e. the screen edge), so no negative
-           margins here any more. It takes the space the note does not. */
         #problem .stat-visual {
           position: relative;
           display: block;
-          width: 100%;
-          margin: 0;
-          height: auto;
-          flex: 1 1 auto;
-          min-height: 0;
-        }
-        /* Back inside a gutter: it is no longer a child of the padded flow. */
-        #problem .problem-note {
-          flex: 0 0 auto;
-          padding: 0 var(--pad-x);
-          margin-top: clamp(10px, 2vh, 20px);
+          width: 100vw;
+          margin-left: calc(var(--pad-x) * -1);
+          margin-right: calc(var(--pad-x) * -1);
+          margin-top: calc(clamp(16px, 3vh, 28px) * -1);
+          height: clamp(300px, 46vh, 520px);
         }
         #problem #mapPoints { position: absolute; inset: 0; width: 100%; height: 100%; }
         /* TWO LINES, spanning the page (Piet: "make the % and its text span
