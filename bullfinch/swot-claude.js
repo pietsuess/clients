@@ -784,6 +784,18 @@
         onUpdate: function (self) {
           window.bullfinchCanopy.setConvergenceProgress(self.progress);
         },
+        // Piet 2026-08-11: on the phone the mark showed up and never left,
+        // including on the way back. previousConvergenceProgress in the scene
+        // has exactly ONE writer (the onUpdate above) and #closingMark's
+        // opacity is smoothstep(0.93, 1, that value), so anything that stops
+        // the scrub re-firing pins the mark on screen forever. A phone does
+        // that constantly: the URL bar collapsing and expanding is a viewport
+        // resize, every resize auto-refreshes ScrollTrigger, and with
+        // invalidateOnRefresh the scrub is rebuilt without replaying onUpdate.
+        // Same re-assert the hero, the panels and the map release all carry.
+        onRefresh: function (self) {
+          window.bullfinchCanopy.setConvergenceProgress(self.progress || 0);
+        },
       });
     }
   }
