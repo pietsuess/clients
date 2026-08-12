@@ -1741,10 +1741,27 @@
         #problem .problem-note { grid-column: 1; grid-row: auto; }
         /* The desktop full-bleed half-page map does not apply here — put the
            stat block back in the single-column flow. */
+        /* NO OVERLAP WITH THE PHOTOGRAPH (Piet 2026-08-12: "just make it so
+           they don't overlap"). The photo is .reveal-media--left, fixed, top:0
+           bottom:50% — its edge is 50svh, always. In flow the map landed
+           wherever the headline block happened to end, which was above that
+           line, so it drew over the picture. Taking the whole stat block out of
+           flow and starting it AT 50svh makes the overlap structurally
+           impossible instead of tuned. The note rides with it (it is inside
+           this element), so it needs its own gutter back below. */
         #problem .panel__stat--problem {
-          position: static;
+          position: absolute;
+          left: 0;
+          right: 0;
+          /* dvh, NOT svh. The photo is a FIXED element at bottom:50%, so its
+             edge is half the live viewport. svh is the small viewport, so with
+             the URL bar hidden svh < live and the map would start above the
+             photo again. dvh tracks the same box the fixed element does. */
+          top: 50dvh;
+          bottom: clamp(14px, 2.4vh, 26px);
           width: auto;
-          display: contents;
+          display: flex;
+          flex-direction: column;
         }
         /* ===== MOBILE 01 READOUT + MAP (Piet 2026-08-12) ==================
            Map full bleed, up to the photo edge, with the readout floating ON
@@ -1752,14 +1769,23 @@
            into a column). Full bleed = 100vw pulled back out of the panel's
            --pad-x. The negative top margin eats the grid row-gap above so the
            canvas starts at the section edge instead of below a gutter. */
+        /* Full bleed comes from the absolute parent above (left:0/right:0 is
+           the panel's padding box, i.e. the screen edge), so no negative
+           margins here any more. It takes the space the note does not. */
         #problem .stat-visual {
           position: relative;
           display: block;
-          width: 100vw;
-          margin-left: calc(var(--pad-x) * -1);
-          margin-right: calc(var(--pad-x) * -1);
-          margin-top: calc(clamp(16px, 3vh, 28px) * -1);
-          height: clamp(300px, 46vh, 520px);
+          width: 100%;
+          margin: 0;
+          height: auto;
+          flex: 1 1 auto;
+          min-height: 0;
+        }
+        /* Back inside a gutter: it is no longer a child of the padded flow. */
+        #problem .problem-note {
+          flex: 0 0 auto;
+          padding: 0 var(--pad-x);
+          margin-top: clamp(10px, 2vh, 20px);
         }
         #problem #mapPoints { position: absolute; inset: 0; width: 100%; height: 100%; }
         /* TWO LINES, spanning the page (Piet: "make the % and its text span
@@ -1800,7 +1826,18 @@
           max-width: none;
           margin: clamp(2px, 0.6vh, 6px) 0 0 0;
         }
-        #problem .stat-trees { flex: 1 1 0; min-width: 0; }
+        /* OF TREES sits at its own natural letter spacing here (Piet: "why
+           would i want them spread out now?"). The letter-justify is for a word
+           that OWNS a full-width line; on this two-up line the line itself is
+           what justifies, OF TREES left and passed & measured right, via
+           .stat-rest's space-between. */
+        #problem .stat-trees { display: inline; flex: 0 0 auto; }
+        /* The per-letter spans are display:block for the flex spread; inline
+           again here or they stack vertically. The empty one is the word gap
+           (it exists so space-between doubles the slack at the word boundary),
+           so it has to carry that gap as padding once it is not a flex slot. */
+        #problem .stat-trees > span { display: inline; }
+        #problem .stat-trees > span:empty { padding-left: .32em; }
         #problem .problem-note { position: static; max-width: 50ch; }
         #problem .p-head,
         #problem .p-body { align-items: flex-start; text-align: left; }
@@ -1943,7 +1980,32 @@
           gap: clamp(10px, 1.8vh, 18px);
           align-content: start;
         }
-        #opportunity .panel__video { --team-pane-aspect: 2.8; }
+        /* 2.8 -> 2.1: the panes were too short for a three-line caption, which
+           is what had the names sitting at different heights and running out
+           of their own boxes. */
+        #opportunity .panel__video { --team-pane-aspect: 2.1; }
+        /* The ROUND TOPS are in the source PNGs, not in CSS. seth-headshot and
+           the other two are cut with ~9% corner radii on transparency, which is
+           why the border-radius: 0 !important in styles.css never touched them.
+           Desktop panes are 1.62 wide so object-fit:cover crops the corners off
+           the frame; a ~110px phone pane barely crops at all, so they show.
+           Zoom past them. */
+        #opportunity .person img { transform: scale(1.22); transform-origin: 50% 22%; }
+        /* Tim's nowrap is a desktop fix for a wide pane. Here it just runs the
+           name out of the box. */
+        #opportunity .person--tim figcaption { white-space: normal; }
+        #opportunity .person figcaption {
+          left: 8px;
+          right: 8px;
+          bottom: 8px;
+          font-size: 8.5px;
+          letter-spacing: .06em;
+          line-height: 1.25;
+        }
+        /* Bio modal photo runs the full column (Piet 2026-08-12). styles.css
+           caps it at min(54vw, 220px), so in the one-column phone stack it sat
+           at half width against full-width text and read as shoved left. */
+        .bio-modal__photo { width: 100%; }
         /* Same one-driver scaling the desktop block uses, phone values. The
            desktop system is gated to min-width 721 so the two never meet. */
         #opportunity .team-half__copy { --t: clamp(11px, 3.4vw, 14px); }
@@ -2965,6 +3027,14 @@
               onUpdate: function (self) { journey(stop, self.progress); },
               onLeaveBack: function () { journey(stop, 0); },
               onLeave: function () { journey(stop, 1); },
+              // Piet 2026-08-12, phone: "why is there no colour change till the
+              // very end". journeyP is COMMITTED state in the scene and these
+              // four bands were its only writers, none of which re-fires after
+              // a refresh. A phone refreshes constantly (the URL bar collapsing
+              // is a viewport resize), so the ramp froze wherever it was, which
+              // on a mid-page refresh is the day palette. Re-assert here. The
+              // stages run in creation order, so stop 4 lands last and wins. */
+              onRefresh: function (self) { journey(stop, self.progress || 0); },
             });
           }
           stage(1,
