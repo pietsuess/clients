@@ -804,6 +804,12 @@
       .trust-strip div { border-left-color: rgba(239, 231, 211, .62); }
       #opportunity .panel__eyebrow { color: var(--ground-ink); }
       #opportunity .panel__verdict { color: var(--ground-ink); }
+      /* The three bios (Piet 2026-08-12: "team page is illegible"). This
+         ground-ink set predates the team half, which only moved into 03 on
+         08-08, so .panel__evidence p was still inheriting color: var(--ink) —
+         the dark page default, on the grove. Nothing was late; it was never
+         remapped at all. */
+      #opportunity .panel__evidence p { color: var(--ground-ink); }
       .audience-item h3 { color: var(--ground-ink); }
       .audience-item p { color: rgba(239, 231, 211, .82); }
       .trust-label { color: var(--ground-ink); }
@@ -1603,6 +1609,24 @@
           position: relative;
           z-index: 1;                /* above the sheet, which is z-index -1 below */
         }
+        /* NO BAR ON PHONE (Piet 2026-08-12: "lose the nav overlay since it's a
+           hamburger now"). This also fixes the open sheet, and it is the same
+           declaration doing both: backdrop-filter makes .site-nav a CONTAINING
+           BLOCK for position:fixed descendants, so .site-nav__links { position:
+           fixed; inset: 0 } was resolving against the 32px-tall bar instead of
+           the viewport. Its centred contents sat below a 78px top padding
+           inside a 32px box, which is why nothing in the menu was on screen.
+           Drop the frosted ground and the blur and the sheet gets the viewport
+           back. */
+        .site-nav,
+        /* The 04 inversion carries :has(a[...].is-current), which outweighs a
+           bare .site-nav, so it has to be named here or the dark bar comes
+           back on the closing. */
+        .site-nav:has(a[data-scroll-target="#closing"].is-current) {
+          background: none;
+          -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+        }
         .nav-toggle__bar {
           transform-box: view-box;
           transform-origin: 12px 12px;
@@ -1722,9 +1746,61 @@
           width: auto;
           display: contents;
         }
-        #problem .stat-visual { position: static; display: flex; flex-direction: column; }
-        #problem .stat-read { position: static; }
-        #problem #mapPoints { position: static; height: auto; flex: 1 1 auto; min-height: 0; }
+        /* ===== MOBILE 01 READOUT + MAP (Piet 2026-08-12) ==================
+           Map full bleed, up to the photo edge, with the readout floating ON
+           it (desktop's relationship, which the first mobile pass had unstacked
+           into a column). Full bleed = 100vw pulled back out of the panel's
+           --pad-x. The negative top margin eats the grid row-gap above so the
+           canvas starts at the section edge instead of below a gutter. */
+        #problem .stat-visual {
+          position: relative;
+          display: block;
+          width: 100vw;
+          margin-left: calc(var(--pad-x) * -1);
+          margin-right: calc(var(--pad-x) * -1);
+          margin-top: calc(clamp(16px, 3vh, 28px) * -1);
+          height: clamp(300px, 46vh, 520px);
+        }
+        #problem #mapPoints { position: absolute; inset: 0; width: 100%; height: 100%; }
+        /* TWO LINES, spanning the page (Piet: "make the % and its text span
+           the width of the page ... may only be 2 lines total, or 3").
+             001%      B U L L F I N C H
+             OF TREES  passed & measured
+           Row 1 is the number left, the flipping label spread to the right
+           edge. Row 2 is OF TREES spread across the slack with "passed &
+           measured" flush right. .stat-label has to be position:relative here
+           because .stat-line is absolute and needs it as its containing block
+           now that the label is a grid cell rather than the full plate. */
+        #problem .stat-read {
+          position: absolute;
+          top: clamp(10px, 2vh, 22px);
+          left: var(--pad-x);
+          right: var(--pad-x);
+          width: auto;
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          column-gap: clamp(12px, 4vw, 28px);
+          align-items: baseline;
+          text-align: left;
+        }
+        #problem .stat-num { grid-area: 1 / 1; margin: 0; justify-content: flex-start; }
+        #problem .stat-label {
+          grid-area: 1 / 2;
+          position: relative;
+          width: auto;
+          height: 1.2em;
+        }
+        #problem .stat-rest {
+          grid-area: 2 / 1 / 3 / 3;
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: clamp(10px, 3vw, 24px);
+          width: 100%;
+          max-width: none;
+          margin: clamp(2px, 0.6vh, 6px) 0 0 0;
+        }
+        #problem .stat-trees { flex: 1 1 0; min-width: 0; }
         #problem .problem-note { position: static; max-width: 50ch; }
         #problem .p-head,
         #problem .p-body { align-items: flex-start; text-align: left; }
@@ -1768,17 +1844,13 @@
         }
         #problem .stat-label,
         #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
-        #problem .stat-line { left: 0; right: auto; text-align: left; }
-        /* ONE MEASURE for the whole plate (Piet 2026-08-11: "the text in that
-           box is not justified properly on mobile"). TODAY / BULLFINCH justify
-           across .stat-label, which is width:100% of .stat-read, while OF TREES
-           justifies across .stat-rest, which shrink-wraps to "passed &
-           measured". Two different widths, so the lines did not line up.
-           Shrink .stat-read itself to its widest line and put .stat-rest back
-           on 100%: every line then justifies to the same edge. */
-        #problem .stat-read { width: fit-content; }
-        #problem .stat-rest { width: 100%; margin-right: 0; }
-        #problem .stat-num { justify-content: flex-start; align-items: flex-end; }
+        /* Both lines spread to their own cell's full width now (the 2-line
+           grid above), so the label rides the right edge of column 2. The
+           2026-08-11 "one measure" pair that shrink-wrapped .stat-read is gone
+           with it: the grid IS the shared measure. */
+        #problem .stat-line { left: 0; right: 0; text-align: left; }
+        #problem .stat-rest { margin-right: 0; }
+        #problem .stat-num { align-items: flex-end; }
 
         /* 02 — the case graphic goes full-bleed across the top (92vw, never
            wider than the screen) and the copy stacks under it. */
@@ -1832,11 +1904,6 @@
            viewport overflows sideways by a mile, the focus pan gets MORE room,
            not less. */
         .reveal-media--full { background-size: cover; }
-        /* The 01 photograph is a left half-screen plate because the desktop
-           copy is a right-aligned rail leaning on it. On the phone 01 stacks
-           and there is no empty half to fill, so a 195px-wide sliver is all it
-           was. Full width. */
-        .reveal-media--left { right: 0; }
         /* Justify at this measure opens rivers between words (see the 00 hero
            and the 02 leads). Hyphenation closes them without dropping the
            justified setting. */
@@ -3411,7 +3478,15 @@
             // screen. Centre, and hold it. This writes an INLINE style, so a
             // CSS override could not have fixed it.
             if (window.matchMedia && window.matchMedia("(max-width: 720px)").matches) {
-              gapReveal.style.setProperty("--reveal-focus", "50%");
+              // 62%, not 50%. Measured off the asset: worn-device-wide is
+              // 2816x1728 and the forester's body centres at x ~0.59 of it, so
+              // centring the IMAGE leaves HIM at about 82% of a portrait
+              // screen, half out of frame. background-position aligns the P%
+              // point of the image with the P% point of the box, so putting a
+              // subject at f on centre needs P = (f*imgW - boxW/2) /
+              // (imgW - boxW): 0.62 on a 393x852 phone, 0.62 on 393x932.
+              // Stable across portrait ratios. No pan here, one value.
+              gapReveal.style.setProperty("--reveal-focus", "62%");
               return;
             }
             var t = p * p * (3 - 2 * p);
