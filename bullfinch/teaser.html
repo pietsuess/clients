@@ -1732,7 +1732,11 @@
            headline, dot grid, body, note. */
         #problem.panel--media {
           grid-template-columns: 1fr;
-          grid-template-rows: auto;
+          /* Three rows: headline block, map, note. The map takes what is LEFT
+             rather than a fixed height, or the 50lvh floor on .panel__inner
+             pushes the total past the panel's 100svh and overflow:hidden eats
+             the note. */
+          grid-template-rows: auto minmax(0, 1fr) auto;
           row-gap: clamp(16px, 3vh, 28px);
         }
         #problem .p-head,
@@ -1768,6 +1772,37 @@
            into a column). Full bleed = 100vw pulled back out of the panel's
            --pad-x. The negative top margin eats the grid row-gap above so the
            canvas starts at the section edge instead of below a gutter. */
+        /* NO OVERLAP, done in flow (Piet 2026-08-12). The photo is
+           .reveal-media--left, fixed, top:0 bottom:50%, so its edge is 50dvh.
+           .panel__inner holds the headline and the body and is the grid item
+           directly above the map, so giving IT the floor puts the map at or
+           below that line. .panel is 24px padded at this width (styles.css
+           1149), hence the subtraction.
+           Deliberately NOT touching .panel__stat--problem: its display:contents
+           is the only thing neutralising the unscoped desktop rule at line 1055
+           (position:fixed, right:0, width:50vw), and changing it is exactly
+           what broke the block last time.
+           display:contents on .panel__inner is unscoped at line 1039, so it has
+           to be re-declared as a real box here, with the grid's own row-gap
+           restated as a flex gap between p-head and p-body. */
+        #problem .panel__inner {
+          display: flex;
+          flex-direction: column;
+          gap: clamp(16px, 3vh, 28px);
+          height: auto;
+          max-width: none;
+          /* styles.css 1200 puts .panel--media .panel__inner in grid-row 2.
+             That was inert while this was display:contents; with a real box it
+             would seat the headline in row 2 and auto-place the map into row 1
+             ABOVE it. Pin it to row 1. */
+          grid-column: 1;
+          grid-row: 1;
+          /* lvh, not dvh. .reveal-media--left is position:fixed, so its 50%
+             resolves against the initial containing block, which on mobile is
+             the LARGE viewport and does not shrink when the URL bar is showing.
+             dvh would sit above the photo edge in exactly that state. */
+          min-height: calc(50lvh - 24px);
+        }
         #problem .stat-visual {
           position: relative;
           display: block;
@@ -1775,7 +1810,9 @@
           margin-left: calc(var(--pad-x) * -1);
           margin-right: calc(var(--pad-x) * -1);
           margin-top: calc(clamp(16px, 3vh, 28px) * -1);
-          height: clamp(300px, 46vh, 520px);
+          /* Fills its 1fr row instead of a fixed clamp, for the same reason. */
+          height: 100%;
+          min-height: 0;
         }
         #problem #mapPoints { position: absolute; inset: 0; width: 100%; height: 100%; }
         /* TWO LINES, spanning the page (Piet: "make the % and its text span
