@@ -2138,7 +2138,20 @@
            fills the screen here, and because a 1.63:1 asset in a portrait
            viewport overflows sideways by a mile, the focus pan gets MORE room,
            not less. */
-        .reveal-media--full { background-size: cover; }
+        /* AND THE FOCUS HAS TO START THERE TOO (Piet 2026-08-12: "why is the
+           picture of the guy wearing the device popping into centre?").
+           setGapFocus early-returns a flat 62% on a phone (line 3777) but
+           NOTHING set that up front, so the photograph painted at the CSS
+           default --reveal-focus: 100% (line 1458, the right crop) through its
+           whole reveal over the back of 01, then jumped sideways the instant
+           02's pin trigger first ran onUpdate at p2.start. background-position
+           has no transition, so it reads as a pop.
+           Desktop never popped because its branch's first write is
+           (1 - 0) * 100 = 100%, which is already the CSS value.
+           62% is the measured figure from 2026-08-11: the forester centres at
+           x ~0.59 of a 2816x1728 asset, P = (f*imgW - boxW/2)/(imgW - boxW).
+           If that number ever changes, change it in BOTH places. */
+        .reveal-media--full { background-size: cover; --reveal-focus: 62%; }
         /* Scroll cue held on across 02's arrival band (Piet 2026-08-12) — see
            the is-gap-cue trigger in the script. Same two declarations as
            body.is-idle so it is the same object appearing, not a second one,
