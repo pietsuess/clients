@@ -1878,30 +1878,36 @@
            now that the label is a grid cell rather than the full plate. */
         #problem .stat-read {
           position: absolute;
-          top: clamp(10px, 2vh, 22px);
+          /* Flush with the top of the map band, was clamp(10px, 2vh, 22px). */
+          top: 0;
           left: var(--pad-x);
           right: var(--pad-x);
           width: auto;
-          /* Desktop's stacking order, full width (Piet 2026-08-12: the two-up
-             version "makes no sense"). Label, then the number, then the caption
-             line. Three lines, same reading order as every other viewport. */
-          display: block;
+          /* Two lines: the label owns the first, then the number with the
+             caption beside it (Piet 2026-08-12: "the bottom text in the % box
+             can clearly go in the same line as the 00%"). */
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          column-gap: clamp(12px, 4vw, 28px);
+          align-items: baseline;
           text-align: left;
         }
         #problem .stat-label {
+          grid-area: 1 / 1 / 2 / 3;
           position: relative;
           width: 100%;
           height: 1.2em;
         }
-        #problem .stat-num { margin: 0; justify-content: flex-start; }
+        #problem .stat-num { grid-area: 2 / 1; margin: 0; justify-content: flex-start; }
         #problem .stat-rest {
+          grid-area: 2 / 2;
           display: flex;
           align-items: baseline;
           justify-content: space-between;
           gap: clamp(10px, 3vw, 24px);
           width: 100%;
           max-width: none;
-          margin: clamp(2px, 0.6vh, 6px) 0 0 0;
+          margin: 0;
         }
         /* OF TREES sits at its own natural letter spacing here (Piet: "why
            would i want them spread out now?"). The letter-justify is for a word
