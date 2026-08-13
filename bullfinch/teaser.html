@@ -1569,12 +1569,50 @@
            flush on the gutter and the mark's TIP still falls on the B of
            BULLFINCH, which is the whole point of the optical offset. */
         .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.32); }
+        /* 00 text block centred horizontally (Piet 2026-08-12). .hero is a grid
+           with place-items:center, but .hero__inner carries width:100% from
+           styles.css 379 so it filled the column and the copy stayed pinned
+           left. fit-content lets the centring that is already there take hold;
+           the lines keep their own left alignment inside the block, and
+           --hero-copy-inset is untouched so the mark still lines up. */
+        .hero__inner {
+          width: fit-content;
+          max-width: 100%;
+          /* Every copy line carries margin-left: var(--hero-copy-inset), so a
+             fit-content box is inset on the left and flush on the right. Centring
+             that box would leave the TEXT sitting half an inset right of centre.
+             Mirror the inset on the right so the box is symmetrical and the copy
+             is what ends up centred. The inset itself is not zeroed: line 1541
+             records that zeroing it crops the logo animation off the left edge. */
+          padding-right: var(--hero-copy-inset);
+        }
+        /* The cycling terms are position:absolute, so this line measures as
+           zero-width and a fit-content parent would size itself off the other
+           lines and let the longest term hang out of the centred box. The 900px
+           block already wraps the terms inside max-width: 14ch, so reserving
+           exactly that much makes the box account for them. */
+        .hero-is__cycle { width: 14ch; }
+        /* Same problem from the other side: .hero__subtitle is max-width:none
+           here, so its max-content (one long sentence) would size the
+           fit-content parent to the full column and there would be nothing left
+           to centre. width:0 + min-width:100% makes it contribute nothing to the
+           parent's intrinsic width while still filling the box it ends up in, so
+           the headline lines set the width and the subtitle wraps inside it. No
+           measure is being invented. */
+        /* min-width is 100% MINUS the inset because this line also carries
+           margin-left: var(--hero-copy-inset); a flat 100% would push its right
+           edge one inset past the headline's. */
+        .hero__subtitle { width: 0; min-width: calc(100% - var(--hero-copy-inset)); }
         /* Subtracts the inset it actually has to live with, so the one-line
            guarantee holds against the real measure and not an assumed zero. */
         .hero-is__label {
           margin-left: var(--hero-copy-inset);
           white-space: nowrap;
-          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.32) / 7.2));
+          /* 0.32 -> 0.64: the inset is now mirrored as padding-right on
+             .hero__inner so the block can centre, so the headline has to be
+             sized against BOTH insets or it eats the slack and centring becomes
+             a 7px no-op. */
+          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.64) / 7.2));
         }
         /* Everything in the hero shares the one inset, so the whole block sets
            to a single left edge that the mark's tip lands on. These inherit it
@@ -1732,11 +1770,13 @@
            headline, dot grid, body, note. */
         #problem.panel--media {
           grid-template-columns: 1fr;
-          /* Three rows: headline block, map, note. The map takes what is LEFT
-             rather than a fixed height, or the 50lvh floor on .panel__inner
-             pushes the total past the panel's 100svh and overflow:hidden eats
-             the note. */
-          grid-template-rows: auto minmax(0, 1fr) auto;
+          /* TWO rows: headline block, then the map. The note shares row 2 with
+             the map and sits at its bottom, which is the same relationship the
+             desktop has (readout and note sit ON the dots). That is what lets
+             the map run from the photograph's edge all the way to the bottom of
+             the section instead of stopping short above the note (Piet: "not
+             touching the photo above, and it's too short below"). */
+          grid-template-rows: auto minmax(0, 1fr);
           row-gap: clamp(16px, 3vh, 28px);
         }
         #problem .p-head,
@@ -1810,9 +1850,21 @@
           margin-left: calc(var(--pad-x) * -1);
           margin-right: calc(var(--pad-x) * -1);
           margin-top: calc(clamp(16px, 3vh, 28px) * -1);
-          /* Fills its 1fr row instead of a fixed clamp, for the same reason. */
-          height: 100%;
+          /* Stretch, not a height: the row is 1fr and the note shares it, so
+             the map owns the whole band from the photo edge to the section
+             bottom. align-self beats the .panel--media place-items:center that
+             would otherwise shrink it to content. */
+          grid-row: 2;
+          align-self: stretch;
+          height: auto;
           min-height: 0;
+        }
+        /* Same cell as the map, parked at the bottom of it. */
+        #problem .problem-note {
+          grid-row: 2;
+          align-self: end;
+          position: relative;
+          z-index: 1;
         }
         #problem #mapPoints { position: absolute; inset: 0; width: 100%; height: 100%; }
         /* TWO LINES, spanning the page (Piet: "make the % and its text span
@@ -1830,21 +1882,19 @@
           left: var(--pad-x);
           right: var(--pad-x);
           width: auto;
-          display: grid;
-          grid-template-columns: auto minmax(0, 1fr);
-          column-gap: clamp(12px, 4vw, 28px);
-          align-items: baseline;
+          /* Desktop's stacking order, full width (Piet 2026-08-12: the two-up
+             version "makes no sense"). Label, then the number, then the caption
+             line. Three lines, same reading order as every other viewport. */
+          display: block;
           text-align: left;
         }
-        #problem .stat-num { grid-area: 1 / 1; margin: 0; justify-content: flex-start; }
         #problem .stat-label {
-          grid-area: 1 / 2;
           position: relative;
-          width: auto;
+          width: 100%;
           height: 1.2em;
         }
+        #problem .stat-num { margin: 0; justify-content: flex-start; }
         #problem .stat-rest {
-          grid-area: 2 / 1 / 3 / 3;
           display: flex;
           align-items: baseline;
           justify-content: space-between;
