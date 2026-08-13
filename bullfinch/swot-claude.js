@@ -650,6 +650,11 @@
       onUpdate: function () {
         setTextVeilOpacity(0);
       },
+      // Refresh re-assert (2026-08-13 audit), guarded to its own band so it
+      // never fights the panel-band veil writers outside it.
+      onRefresh: function (self) {
+        if (self.isActive) setTextVeilOpacity(0);
+      },
     });
   }
 
@@ -774,26 +779,32 @@
         },
         scrub: true,
         invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          var p = self.progress;
-          var fadeIn = smooth01(mapRange(p, caseFadeInStartProgress, caseFadeInEndProgress));
-          // With the clip in play the device has to be fully gone before the
-          // clip is fully up, or the two are on screen together at half opacity
-          // and the swap reads as a crossfade of two objects rather than a
-          // handoff of one slot.
-          var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? casePlaybackEnd : 1.00));
-          setProductCase(fadeIn * (1 - fadeOut),
-                         Math.min(casePlaybackCap, mapRange(p, casePlaybackStart, casePlaybackEnd)));
-          setAppClip(p);
-          // 02 backdrop tint: ease the scene to light green while the device
-          // section holds, back to beige before 03 arrives.
-          if (window.bullfinchCanopy.setProductTintProgress) {
-            window.bullfinchCanopy.setProductTintProgress(
-              smooth01(mapRange(p, 0.0, 0.15)) * (1 - smooth01(mapRange(p, 0.85, 1.0)))
-            );
-          }
-        },
+        // ONE writer — onUpdate and onRefresh both call this. This trigger
+        // owns the 02 device opacity, the app-clip slide AND the backdrop
+        // tint, and it had no onRefresh (2026-08-13 audit): any refresh froze
+        // all three mid-value until the next scroll tick. Same fault class as
+        // the four from 08-12.
+        onUpdate: function (self) { driveProductBand(self.progress); },
+        onRefresh: function (self) { driveProductBand(self.progress || 0); },
       });
+      function driveProductBand(p) {
+        var fadeIn = smooth01(mapRange(p, caseFadeInStartProgress, caseFadeInEndProgress));
+        // With the clip in play the device has to be fully gone before the
+        // clip is fully up, or the two are on screen together at half opacity
+        // and the swap reads as a crossfade of two objects rather than a
+        // handoff of one slot.
+        var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? casePlaybackEnd : 1.00));
+        setProductCase(fadeIn * (1 - fadeOut),
+                       Math.min(casePlaybackCap, mapRange(p, casePlaybackStart, casePlaybackEnd)));
+        setAppClip(p);
+        // 02 backdrop tint: ease the scene to light green while the device
+        // section holds, back to beige before 03 arrives.
+        if (window.bullfinchCanopy.setProductTintProgress) {
+          window.bullfinchCanopy.setProductTintProgress(
+            smooth01(mapRange(p, 0.0, 0.15)) * (1 - smooth01(mapRange(p, 0.85, 1.0)))
+          );
+        }
+      }
     }
 
     var finalPanelIdx = panelTriggers.length - 1;
@@ -848,10 +859,13 @@
         end: function () { return ScrollTrigger.maxScroll(window); },
         scrub: true,
         invalidateOnRefresh: true,
-        onUpdate: function (self) {
-          footerLine.style.transform = "translateY(" + (12 * (1 - self.progress)) + "px)";
-        },
+        onUpdate: function (self) { setFooterLine(self.progress); },
+        // Refresh re-assert (2026-08-13 audit) — same class as the rest.
+        onRefresh: function (self) { setFooterLine(self.progress || 0); },
       });
+      function setFooterLine(p) {
+        footerLine.style.transform = "translateY(" + (12 * (1 - p)) + "px)";
+      }
     }
   }
 
@@ -866,6 +880,12 @@
         scrub: true,
         onUpdate: function (self) {
           driver(self.progress);
+        },
+        // Refresh re-assert (2026-08-13 audit): this drives the ENTIRE canopy
+        // descent. Without it a refresh froze the whole mote field at a stale
+        // progress until the next scroll tick — a full-field pop on resume.
+        onRefresh: function (self) {
+          driver(self.progress || 0);
         },
       };
       // Global descent progress lands at 1.0 exactly when the closing section

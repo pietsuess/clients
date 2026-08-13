@@ -1673,6 +1673,20 @@
           -webkit-backdrop-filter: none;
           backdrop-filter: none;
         }
+        /* SECOND containing-block source (Piet 2026-08-13: "everything in it
+           is completely illegible or off screen or no background"). transform
+           does to fixed descendants exactly what backdrop-filter does, and
+           .site-nav carries one in BOTH states — translateY(-8px) hidden,
+           translateY(0) scrolled, and translateY(0) still counts. So the
+           sheet's inset:0 was resolving against the 32px bar again: ground a
+           strip behind the bar, links spilling below it at z -1. Every
+           transform writer is named so none of them outranks this. The bar
+           keeps its opacity fade-in and loses only the 8px slide, phone only. */
+        .site-nav,
+        body.has-scrolled .site-nav,
+        body.has-entered.has-scrolled .site-nav {
+          transform: none;
+        }
         .nav-toggle__bar {
           transform-box: view-box;
           transform-origin: 12px 12px;
@@ -3005,7 +3019,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-41"></script>
+    <script src="swot-claude.js?v=claude-42"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -3454,6 +3468,8 @@
           invalidateOnRefresh: true,
           onUpdate: function (self) { setStatStage(self.progress); },
           onLeaveBack: function () { setStatStage(0); },
+          // Refresh re-assert (2026-08-13 audit) — same class as the rest.
+          onRefresh: function (self) { setStatStage(self.progress || 0); },
         });
 
         // Leaving the inventory section releases the grid into an open cloud.
