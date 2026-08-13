@@ -1568,7 +1568,12 @@
            0.32 covers the sum with a hair to spare, so the intro sequence lands
            flush on the gutter and the mark's TIP still falls on the B of
            BULLFINCH, which is the whole point of the optical offset. */
-        .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.32); }
+        /* 0.32 -> 0.18 (Piet 2026-08-12: "it's all too small"). Centring costs
+           the inset TWICE, so the type was paying for it. Shrinking the inset
+           instead buys the size back: the floor is 0.1726, which is where
+           .corner-logo-sequence's margin-left reaches zero and the logo
+           animation starts clipping off the left edge (see line 353). */
+        .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.18); }
         /* 00 text block centred horizontally (Piet 2026-08-12). .hero is a grid
            with place-items:center, but .hero__inner carries width:100% from
            styles.css 379 so it filled the column and the copy stayed pinned
@@ -1612,7 +1617,7 @@
              .hero__inner so the block can centre, so the headline has to be
              sized against BOTH insets or it eats the slack and centring becomes
              a 7px no-op. */
-          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.64) / 7.2));
+          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.36) / 7.2));
         }
         /* Everything in the hero shares the one inset, so the whole block sets
            to a single left edge that the mark's tip lands on. These inherit it
@@ -2829,7 +2834,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-38"></script>
+    <script src="swot-claude.js?v=claude-39"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {

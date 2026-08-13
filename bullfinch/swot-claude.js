@@ -45,6 +45,15 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // Piet 2026-08-11, phone: "why is there so much popping around of elements".
+  // A mobile browser fires resize every time the URL bar slides in or out, and
+  // every one of those refreshes ScrollTrigger: pins re-measure, scrubs
+  // re-evaluate, and anything sized off the viewport re-lays out mid-scroll.
+  // ignoreMobileResize tells it to skip refreshes caused by a viewport HEIGHT
+  // change alone on touch devices, which is exactly that case; a real rotation
+  // or width change still refreshes.
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
   // ===== Splash handoff reveal of hero =================================
   var hasTeaserHero = Boolean(document.querySelector(".hero-is"));
   if (!hasTeaserHero) {
@@ -477,6 +486,13 @@
     scrollAnchor = null;
     if (!panelTriggers.length) return;
     if (window.innerWidth === lastRefreshW && window.innerHeight === lastRefreshH) return;
+    // Height-only change on a touch device is the URL bar, not a real resize.
+    // Restoring scroll for that is itself a visible jump, so leave it alone and
+    // let the page ride the bar. Width changes (rotation) still restore.
+    if (mobileLike && window.innerWidth === lastRefreshW) {
+      lastRefreshH = window.innerHeight;
+      return;
+    }
     var first = panelTriggers[0];
     var last = panelTriggers[panelTriggers.length - 1];
     var y = first.scroll();
