@@ -1552,7 +1552,11 @@
            vw clamp: 12 characters at ~0.565em each (Geist uppercase ~0.62em
            advance, less the -.055em tracking) is ~6.8em, so width / 7.2 keeps
            one line with margin to spare from 320px up. nowrap enforces it. */
-        .hero { padding-top: 10vh; padding-bottom: 22vh; }
+        /* Side padding 24 -> 16 (Piet 2026-08-13: "doesn't need so much
+           padding it's too small") — hero only, every other section keeps
+           --pad-x. This is one of the two levers that buy the block its size;
+           the label formula below subtracts the same 32px total. */
+        .hero { padding-top: 10vh; padding-bottom: 22vh; padding-left: 16px; padding-right: 16px; }
         /* The inset cannot be zero, and zeroing it is what cropped the logo
            animation off the left edge. .corner-logo-sequence sets
            margin-left: calc(inset - mark * 0.1726) — the inset is what absorbs
@@ -1571,12 +1575,12 @@
            0.32 covers the sum with a hair to spare, so the intro sequence lands
            flush on the gutter and the mark's TIP still falls on the B of
            BULLFINCH, which is the whole point of the optical offset. */
-        /* 0.32 -> 0.18 (Piet 2026-08-12: "it's all too small"). Centring costs
-           the inset TWICE, so the type was paying for it. Shrinking the inset
-           instead buys the size back: the floor is 0.1726, which is where
-           .corner-logo-sequence's margin-left reaches zero and the logo
-           animation starts clipping off the left edge (see line 353). */
-        .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.18); }
+        /* 0.32 -> 0.18 (Piet 2026-08-12: "it's all too small"), then
+           0.18 -> 0.1726 (Piet 2026-08-13: whole block bigger). 0.1726 IS the
+           floor: .corner-logo-sequence's margin-left is exactly zero there and
+           anything below clips the logo animation off the left edge
+           (see line 353). No further room in this lever. */
+        .hero__inner { --hero-copy-inset: calc(var(--hero-mark-size) * 0.1726); }
         /* 00 text block centred horizontally (Piet 2026-08-12). .hero is a grid
            with place-items:center, but .hero__inner carries width:100% from
            styles.css 379 so it filled the column and the copy stayed pinned
@@ -1620,8 +1624,17 @@
              .hero__inner so the block can centre, so the headline has to be
              sized against BOTH insets or it eats the slack and centring becomes
              a 7px no-op. */
-          font-size: min(52px, calc((100vw - 48px - var(--hero-mark-size) * 0.36) / 7.2));
+          /* 48 -> 32 (the new hero padding pair) and 0.36 -> 0.3452 (twice
+             the floor inset). On a 411px phone this is 45.0px -> 47.5px; the
+             one-line guarantee is the character math and still holds. */
+          font-size: min(56px, calc((100vw - 32px - var(--hero-mark-size) * 0.3452) / 7.2));
         }
+        /* The rest of the block rides up by the same ~6% so the balance
+           stays exactly as weighted: prefix/cycle floors 25 -> 26.5,
+           subtitle floor 16 -> 17. Caps untouched (desktop values). */
+        .hero-is__prefix,
+        .hero-is__cycle { font-size: clamp(26.5px, 3.8vw, 60px); }
+        .hero__subtitle { font-size: clamp(17px, 1.45vw, 23px); }
         /* Everything in the hero shares the one inset, so the whole block sets
            to a single left edge that the mark's tip lands on. These inherit it
            from the base rules and are left alone deliberately — they are listed
@@ -1808,7 +1821,16 @@
           left: 0;
           right: 0;
           top: 0;
-          bottom: 50%;
+          /* HEIGHT, not bottom:50% (Piet 2026-08-13: "every background image
+             is popping and resizing"). On Android the containing block for
+             position:fixed RESIZES with the URL bar — a percentage inset is
+             dvh in disguise, no matter what units the rest of the page uses.
+             The box breathed with the bar and cover re-scaled the photograph
+             every slide. 50lvh is static per device, and it is the exact edge
+             the 01 layout already assumes (the map floor, the mark, the
+             panel__inner min-height are all on 50lvh). */
+          bottom: auto;
+          height: 50lvh;
           --reveal-opacity: 0.5;
         }
 
@@ -2192,7 +2214,20 @@
            62% is the measured figure from 2026-08-11: the forester centres at
            x ~0.59 of a 2816x1728 asset, P = (f*imgW - boxW/2)/(imgW - boxW).
            If that number ever changes, change it in BOTH places. */
-        .reveal-media--full { background-size: cover; --reveal-focus: 62%; }
+        .reveal-media--full {
+          background-size: cover;
+          --reveal-focus: 62%;
+          /* Same Android fixed-ICB trap as --left: the base rule's top:0 +
+             bottom:0 is a dynamic height. Static full-screen box instead. */
+          bottom: auto;
+          height: 100lvh;
+        }
+        /* Third and last fixed photograph: inset:0 = dynamic box on Android,
+           cover re-scaled it at every bar slide. Same static-box fix. */
+        .closing-canopy {
+          bottom: auto;
+          height: 100lvh;
+        }
         /* Scroll cue held on across 02's arrival band (Piet 2026-08-12) — see
            the is-gap-cue trigger in the script. Same two declarations as
            body.is-idle so it is the same object appearing, not a second one,
