@@ -224,7 +224,13 @@
           /* negative offsets cancel the glyph's transparent padding so the ink
              tucks into the corner rather than floating ~30px in from it */
           right: calc(var(--mark-box) * -0.16);
-          bottom: calc(var(--mark-box) * -0.16);
+          /* Bar inset (Piet 2026-08-13: "the animated icons are missing...
+             maybe they are just off screen"). The panel is 100lvh, so a
+             corner tucked to its bottom edge sits BEHIND the URL bar whenever
+             the bar is showing. Lift by exactly the bar height — static, so
+             a bar slide never moves it. Fullscreen resolves to the old tuck.
+             01 is unaffected: its mark carries its own top/bottom overrides. */
+          bottom: calc((100lvh - 100svh) - var(--mark-box) * 0.16);
           transform: none;
           margin-left: 0;
           z-index: 5; /* sit above .panel__inner (z-index:2) and panel media */
@@ -2032,13 +2038,21 @@
              /21.6 is that with 3% of slack. The 13.6px cap (vs the inherited
              14px) holds the top end: at 430 the formula wants 14.4, and 14 put
              row 2 at exactly 354.0px in a 354.0px box — no slack at all. */
-          --plate-s: min(13.6px, calc((93vw - 88px) / 21.6));
+          /* Re-solved (Piet 2026-08-13: "of trees passed & measured just
+             doesn't work... one even line that properly fills that space...
+             shrink the percentage number a bit so the whole box is shorter").
+             Digits drop 2.857S -> 2.55S (the offered lever); the caption is
+             now ALL CAPS one even run (~15.2S with the .5em word gaps), so
+             content is 2.4725*2.55 + 15.2 = 21.5 S; /22.0 keeps ~2% slack —
+             fills by size, no space-between stretching, no overflow risk.
+             15px cap guards landscape. */
+          --plate-s: min(15px, calc((93vw - 88px) / 22.0));
         }
         /* Both ride --plate-s. The ID beats the .panel__stat--problem clamps
            these carry at line 1151 and 1166. */
         #problem .stat-rest { font-size: var(--plate-s); }
         #problem .stat-digit,
-        #problem .stat-unit { font-size: calc(var(--plate-s) * 2.857); }
+        #problem .stat-unit { font-size: calc(var(--plate-s) * 2.55); }
         #problem .stat-label {
           grid-area: 1 / 1 / 2 / 3;
           position: relative;
@@ -2057,8 +2071,15 @@
           flex-wrap: nowrap;
           white-space: nowrap;
           align-items: baseline;
-          justify-content: space-between;
-          gap: clamp(10px, 3vw, 24px);
+          /* ONE even line (Piet 2026-08-13: "one even line that properly
+             fills that space" / "they should be the same" case). No more
+             space-between islands: natural word gap, flush left, and the
+             line fills by SIZE (--plate-s solve above). Uppercase unifies
+             "passed & measured" with OF TREES — same font already, the split
+             was case alone. */
+          justify-content: flex-start;
+          gap: .5em;
+          text-transform: uppercase;
           width: 100%;
           max-width: none;
           margin: 0;
@@ -2192,10 +2213,21 @@
           left: 50%;
           top: 0;
           transform: translateX(-50%);
-          padding: 0 5vw;
+          padding: 0;
         }
-        /* Must fit INSIDE the layer or overflow:hidden crops the phone. */
-        .app-clip-layer__box { height: 100%; }
+        /* FULL-BLEED (Piet 2026-08-13 screenshot: "not quite"). The 9/19.5
+           phone frame is WIDTH-BOUND at 90vw — its aspect caps the height at
+           ~2106px on a 1080 screen, which is what left the dead band above
+           the Data line. "Full" therefore means the frame gives way: the box
+           fills the layer edge to edge and the video (already object-fit:
+           cover) crops its sides instead. Radius and frame chrome go with it
+           at this width. */
+        .app-clip-layer__box {
+          height: 100%;
+          width: 100%;
+          aspect-ratio: auto;
+          border-radius: 0;
+        }
         /* Clip stage (body class from driveProductBand, single writer): the
            rest of 02's copy fades OUT while the recording is up, leaving the
            Data entry alone at the bottom on the page ground. OPACITY only —
@@ -2212,6 +2244,19 @@
         body.is-clip-stage #product .panel__evidence p:nth-of-type(1),
         body.is-clip-stage #product .panel__evidence p:nth-of-type(2) {
           opacity: 0;
+        }
+        /* DATA TO THE VERY BOTTOM (Piet 2026-08-13). The copy block is grid-
+           centred (align-content: center, styles.css), so even with the rest
+           faded the Data line floated mid-low with a dead band under it.
+           --data-shift is measured by layoutProductCase (distance from Data's
+           natural bottom to the panel's content bottom); transform, so layout
+           never changes and the write-on clip wipes in place at the new spot.
+           The scrub owns clip-path only — transform has ONE writer, this rule. */
+        #product .panel__evidence p:nth-of-type(3) {
+          transition: transform 420ms ease;
+        }
+        body.is-clip-stage #product .panel__evidence p:nth-of-type(3) {
+          transform: translateY(var(--data-shift, 0px));
         }
 
         /* ===== MOBILE PASS, BACKGROUND PHOTOGRAPHS (Piet 2026-08-11: "the
@@ -3103,7 +3148,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-44"></script>
+    <script src="swot-claude.js?v=claude-45"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {

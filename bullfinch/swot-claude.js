@@ -590,6 +590,14 @@
     var dataPara = productInner.querySelector(".panel__evidence p:last-of-type");
     if (clipLayer && dataPara) {
       clipLayer.style.height = (panelH - padBottom - dataPara.offsetHeight) + "px";
+      // Data's slide to the panel's content bottom during the clip stage.
+      // The copy block is grid-centred, so its natural bottom is mid-panel;
+      // this measures the real distance (offsetTop chain: p -> .panel__inner
+      // -> panel, both positioned). CSS applies it as a transform under
+      // body.is-clip-stage — layout untouched, one writer.
+      var dataBottom = productInner.offsetTop + dataPara.offsetTop + dataPara.offsetHeight;
+      var shift = Math.max(0, (panelH - padBottom) - dataBottom);
+      productPanel.style.setProperty("--data-shift", shift + "px");
     }
   }
   layoutProductCase();
