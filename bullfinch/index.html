@@ -2172,7 +2172,12 @@
           max-width: 100vw;
           height: 44lvh;
           left: 50%;
-          top: 2vh;
+          /* 2vh -> 0 (Piet 2026-08-13: "the PNG sequence can be scaled up so
+             that the crop hits the top edge of the screen"). The draw is
+             top-seated in the box (case-animation.js y=0), so the box top IS
+             the art's crop line. layoutProductCase gives the height the 2vh
+             back, so the bottom still lands flush at the copy. */
+          top: 0;
           transform: translateX(-50%);
         }
         /* Placeholder tracks the device box on mobile too, so the swap still
@@ -2180,14 +2185,34 @@
         .app-clip-layer {
           width: 100vw;
           max-width: 100vw;
+          /* 48lvh fallback until layoutProductCase measures the Data line and
+             writes the real height (screen top -> top of the Data paragraph).
+             Piet 2026-08-13: recording almost full screen, Data stays put. */
           height: 48lvh;
           left: 50%;
-          top: 2vh;
+          top: 0;
           transform: translateX(-50%);
           padding: 0 5vw;
         }
         /* Must fit INSIDE the layer or overflow:hidden crops the phone. */
-        .app-clip-layer__box { height: 46lvh; }
+        .app-clip-layer__box { height: 100%; }
+        /* Clip stage (body class from driveProductBand, single writer): the
+           rest of 02's copy fades OUT while the recording is up, leaving the
+           Data entry alone at the bottom on the page ground. OPACITY only —
+           the write-on scrub owns clip-path, and opacity keeps layout so the
+           Data line sits exactly where it always did. */
+        #product .eyebrow-anchor,
+        #product .panel__verdict,
+        #product .panel__evidence p:nth-of-type(1),
+        #product .panel__evidence p:nth-of-type(2) {
+          transition: opacity 420ms ease;
+        }
+        body.is-clip-stage #product .eyebrow-anchor,
+        body.is-clip-stage #product .panel__verdict,
+        body.is-clip-stage #product .panel__evidence p:nth-of-type(1),
+        body.is-clip-stage #product .panel__evidence p:nth-of-type(2) {
+          opacity: 0;
+        }
 
         /* ===== MOBILE PASS, BACKGROUND PHOTOGRAPHS (Piet 2026-08-11: "the
            background pictures need work, they should be full screen when
@@ -3078,7 +3103,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-42"></script>
+    <script src="swot-claude.js?v=claude-44"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {

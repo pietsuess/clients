@@ -557,7 +557,12 @@
   var caseModel = document.querySelector(".case-fixed-layer.panel__model");
   function layoutProductCase() {
     if (!caseModel || !productPanel || !productInner) return;
-    if (!mobileLike) { caseModel.style.height = ""; return; }
+    if (!mobileLike) {
+      caseModel.style.height = "";
+      var clipReset = document.querySelector(".app-clip-layer");
+      if (clipReset) clipReset.style.height = "";
+      return;
+    }
     // Size from STABLE, scroll-independent values: the panel is 100svh and the
     // text is bottom-anchored within it, so model height = panel height minus
     // (text + padding + gap). This stays constant regardless of scroll
@@ -570,10 +575,22 @@
     // styles.css .panel), so the hardcoded 24 would have let the model
     // overlap the copy by the height of the bar. Static per device.
     var padBottom = parseFloat(getComputedStyle(productPanel).paddingBottom) || 24;
-    var gap = Math.round(panelH * 0.02);
-    var modelH = panelH - padBottom - textH - gap;
+    // No gap term any more (Piet 2026-08-13: PNG sequence scaled up, crop at
+    // the screen's top edge). The old 2% gap existed to cancel the box's 2vh
+    // top offset; the box is at top:0 now, so the height runs from the screen
+    // top to flush at the copy — same bottom edge as before, ~2vh more art.
+    var modelH = panelH - padBottom - textH;
     modelH = Math.max(150, Math.min(modelH, Math.round(panelH * 0.72)));
     caseModel.style.height = modelH + "px";
+    // Clip layer runs from the screen top to the TOP OF THE DATA LINE (Piet
+    // 2026-08-13: recording almost full screen, Data stays where it is). The
+    // Data paragraph's own position never changes — the others fade by
+    // opacity, which keeps layout — so its offsetHeight is the exact reserve.
+    var clipLayer = document.querySelector(".app-clip-layer");
+    var dataPara = productInner.querySelector(".panel__evidence p:last-of-type");
+    if (clipLayer && dataPara) {
+      clipLayer.style.height = (panelH - padBottom - dataPara.offsetHeight) + "px";
+    }
   }
   layoutProductCase();
   window.addEventListener("resize", layoutProductCase);
@@ -797,6 +814,15 @@
         setProductCase(fadeIn * (1 - fadeOut),
                        Math.min(casePlaybackCap, mapRange(p, casePlaybackStart, casePlaybackEnd)));
         setAppClip(p);
+        // Phone clip stage (Piet 2026-08-13: recording "almost fill the
+        // screen... just the last entry data and its text stay over it").
+        // Single writer: this function runs from onUpdate AND onRefresh, so
+        // the class can never freeze stale. CSS fades eyebrow/verdict/Wear/
+        // Walk by OPACITY only — the write-on scrub owns clip-path, opacity
+        // keeps layout, so the Data line never moves. Desktop never gets the
+        // class.
+        document.body.classList.toggle("is-clip-stage",
+          mobileLike && p >= 0.5486 && p < 1);
         // 02 backdrop tint: ease the scene to light green while the device
         // section holds, back to beige before 03 arrives.
         if (window.bullfinchCanopy.setProductTintProgress) {
