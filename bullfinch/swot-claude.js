@@ -563,9 +563,13 @@
     // (text + padding + gap). This stays constant regardless of scroll
     // position, so the model holds a FIXED spot (no "rising into place"), while
     // still leaving the full text on screen. Recompute only on layout changes.
-    var panelH = productPanel.offsetHeight;     // 100svh, stable
+    var panelH = productPanel.offsetHeight;     // 100lvh, stable
     var textH = productInner.offsetHeight;      // stable
-    var padBottom = 24;                         // mobile .panel padding-bottom
+    // READ the padding, do not assume it. The panel is 100lvh and its
+    // padding-bottom carries the URL-bar inset (24px + (100lvh - 100svh),
+    // styles.css .panel), so the hardcoded 24 would have let the model
+    // overlap the copy by the height of the bar. Static per device.
+    var padBottom = parseFloat(getComputedStyle(productPanel).paddingBottom) || 24;
     var gap = Math.round(panelH * 0.02);
     var modelH = panelH - padBottom - textH - gap;
     modelH = Math.max(150, Math.min(modelH, Math.round(panelH * 0.72)));

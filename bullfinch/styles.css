@@ -34,7 +34,7 @@ html {
 }
 body {
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100lvh;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -329,11 +329,14 @@ body.has-entered.has-scrolled .site-nav {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  /* Track the DYNAMIC viewport, not the small one. With 100svh, when the mobile
-     address bar hides (e.g. after waking the screen) the visible area is taller
-     than this fixed canvas, leaving a black bar at the bottom. dvh matches the
-     renderer buffer (window.innerHeight) and always covers the visible area. */
-  height: 100dvh;
+  /* lvh, matching .panel (2026-08-12). Was 100dvh, which tracks the URL bar
+     live — and scene-claude-teaser.js re-runs setSize + camera.aspect on every
+     one of those resizes, so the whole tree field rescaled each time the bar
+     slid. ignoreMobileResize does not touch that listener. lvh is static and
+     always covers the visible area in both bar states. The renderer buffer is
+     now sized off THIS box (canvas.clientHeight), not window.innerHeight, or
+     the buffer would be stretched into it. */
+  height: 100lvh;
   z-index: 0;
   pointer-events: none;
   transition: none;
@@ -341,7 +344,7 @@ body.has-entered.has-scrolled .site-nav {
 .text-veil {
   position: fixed;
   inset: 0;
-  height: 100dvh;
+  height: 100lvh; /* matches .canopy-canvas — see the note there */
   z-index: 1;
   pointer-events: none;
   opacity: var(--text-veil-opacity, 0.84);
@@ -365,7 +368,12 @@ body.is-mote-hovering {
 /* ---- Hero --------------------------------------------------------------- */
 .hero {
   min-height: 100vh;
-  min-height: 100svh;
+  /* lvh, same basis as .panel. NOT optional: body.swot-pinned #problem is
+     pulled up by calc(-100lvh - 8lvh) from the hero's bottom edge, so if the
+     hero measured in svh and the pull measured in lvh the whole pinned stack
+     would sit ~90px off where it does today. One basis keeps the existing
+     geometry proportionally identical. */
+  min-height: 100lvh;
   position: relative;
   display: grid;
   place-items: center;
@@ -538,8 +546,19 @@ body.has-reached-01 .hero__scroll-cue {
    verdict that grew one line too many cannot push the next panel down. */
 .panel {
   height: 100vh;
-  height: 100svh;
+  /* ONE VIEWPORT BASIS: lvh (2026-08-12, Piet: "THINGS SHIFTING AROUND when
+     they shouldn't be"). svh is the viewport with the mobile URL bar SHOWING,
+     so the moment the bar hides the screen grows ~90px and the panel does not
+     — a band of page ground at the bottom of every section. lvh is the
+     bar-hidden viewport: it can only ever CROP behind the bar, and a crop is
+     invisible in a design that bleeds. Both units are STATIC per device, so
+     nothing here re-measures when the bar slides. The swot-pinned margins in
+     teaser-dev.html MUST use the same unit or the sections stop stacking. */
+  height: 100lvh;
   padding: 32px var(--pad-x);
+  /* Bar inset, tablets included. Resolves to exactly 32px anywhere without a
+     dynamic toolbar, so desktop is untouched. See the phone rule for why. */
+  padding-bottom: calc(32px + (100lvh - 100svh));
   position: relative;
   overflow: hidden;
   display: grid;
@@ -1148,6 +1167,16 @@ body.is-file-protocol .panel__video-fallback {
   }
   .panel {
     padding: 24px var(--pad-x);
+    /* THE BAR INSET (2026-08-12). The BOX is 100lvh so no gap can ever open at
+       the bottom, but the bottom (100lvh - 100svh) of it is behind the URL bar
+       whenever the bar is showing — and 01's note, 02's copy and 03's band are
+       all bottom-anchored. Inset the CONTENT by exactly the bar's height and
+       the usable area is 100svh again: every panel's inner layout is back on
+       the numbers it has today, while the background still bleeds under the
+       bar. Both terms are STATIC per device, so this never moves when the bar
+       slides. Second declaration only, so a browser without lvh/svh keeps 24px
+       — same fallback idiom as .panel's height. */
+    padding-bottom: calc(24px + (100lvh - 100svh));
   }
   .panel--media {
     grid-template-columns: 1fr;
@@ -1289,11 +1318,14 @@ body.is-file-protocol .panel__video-fallback {
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  min-height: 100svh;
+  min-height: 100lvh; /* one basis with .panel — see the note there */
   /* Content sits in the upper portion; the footer is pushed to the bottom
      (margin-top: auto). The open space between them is the lower-centre zone
      the network converges into — see updateFinalRedAnchor in scene.js. */
   padding: clamp(72px, 15vh, 150px) var(--pad-x) 0;
+  /* Bar inset — the footer is pushed to the bottom with margin-top:auto, so
+     without this it lands under the URL bar. See the note on .panel. */
+  padding-bottom: calc(100lvh - 100svh);
   overflow: hidden;
   display: flex;
   flex-direction: column;

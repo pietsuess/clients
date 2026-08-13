@@ -37,7 +37,7 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
     />
 
-    <link rel="stylesheet" href="styles.css?v=v4-10" />
+    <link rel="stylesheet" href="styles.css?v=v4-11" />
     <style>
       :root,
       [data-theme="dark"] {
@@ -238,7 +238,7 @@
         inset: 0;
         z-index: 2;
         width: 100vw;
-        height: 100dvh;
+        height: 100lvh; /* one basis with .panel — see styles.css 557 */
         background: url("assets/sun-through-trees.jpg") center right / cover no-repeat;
         clip-path: polygon(var(--forest-edge-top, -100vh) 0, 100% 0, 100% 100%, calc(var(--forest-edge-top, -100vh) + 100vh) 100%);
         filter: saturate(.82) contrast(.96) brightness(1.04);
@@ -523,7 +523,8 @@
       .case-fixed-layer.panel__model {
         width: min(40vw, 720px);
         max-width: 40vw;
-        height: 100dvh;
+        height: 100lvh; /* one basis — the device is centred in this box, so a
+                           dvh box slid it up and down with the URL bar */
         left: 5vw;
         top: 0;
         transform: none;
@@ -555,7 +556,7 @@
         opacity: 0;
         width: min(40vw, 720px);
         max-width: 40vw;
-        height: 100dvh;
+        height: 100lvh; /* tracks .case-fixed-layer exactly — swap in place */
         left: 5vw;
         top: 0;
         display: flex;
@@ -616,7 +617,7 @@
          been tested. In flow they cannot overlap at any width: the band is the
          last item, the team half takes whatever is left and centres its row in
          it. Balance is one number (the padding pair) instead of two guesses.
-         The panel is height:100svh, overflow:hidden, so this column has a
+         The panel is height:100lvh, overflow:hidden, so this column has a
          definite height to divide. */
       #opportunity .team-half {
         flex: 1 1 auto;
@@ -695,7 +696,7 @@
          radius stay and the video COVERS it (1080x1920 source in a 9/19.5
          box — slight vertical crop, no bars). */
       .app-clip-layer__box {
-        height: min(74dvh, 78vh);
+        height: min(74lvh, 78vh);
         width: auto;
         aspect-ratio: 9 / 19.5;
         border-radius: clamp(20px, 1.8vw, 34px);
@@ -1338,14 +1339,16 @@
          page blank. */
       .swot { opacity: 0; }
       body.swot-ready .swot { opacity: 1; }
-      body.swot-pinned #problem    { margin-top: calc(-100vh -  8vh); margin-top: calc(-100svh -  8svh); }
-      body.swot-pinned #product    { margin-top: -100vh; margin-top: -100svh; }
-      body.swot-pinned #opportunity{ margin-top: calc(-100vh - 12vh); margin-top: calc(-100svh - 12svh); }
+      /* lvh, and it MUST stay the same unit as .panel's height (styles.css 557)
+         or the sections stop stacking. Was svh — see the note on .panel. */
+      body.swot-pinned #problem    { margin-top: calc(-100vh -  8vh); margin-top: calc(-100lvh -  8lvh); }
+      body.swot-pinned #product    { margin-top: -100vh; margin-top: -100lvh; }
+      body.swot-pinned #opportunity{ margin-top: calc(-100vh - 12vh); margin-top: calc(-100lvh - 12lvh); }
       /* 04 pulled up 45svh (Piet 2026-08-09): the run-out after 03's unpin
          was a full empty viewport of motes before anything of the closing
          showed. Same guarded class as the pin offsets (applies only after
          the triggers exist), so no reload-flash stacking. Dial this number. */
-      body.swot-pinned .closing { margin-top: -28vh; margin-top: -28svh; }
+      body.swot-pinned .closing { margin-top: -28vh; margin-top: -28lvh; }
       /* The closing mark. Position and opacity are written by the scene from
          the projected world position of the final red dot — nothing here may
          set top/left/transform or it will fight the projection. */
@@ -2107,7 +2110,7 @@
         .case-fixed-layer.panel__model {
           width: 100vw;
           max-width: 100vw;
-          height: 44dvh;
+          height: 44lvh;
           left: 50%;
           top: 2vh;
           transform: translateX(-50%);
@@ -2117,14 +2120,14 @@
         .app-clip-layer {
           width: 100vw;
           max-width: 100vw;
-          height: 48dvh;
+          height: 48lvh;
           left: 50%;
           top: 2vh;
           transform: translateX(-50%);
           padding: 0 5vw;
         }
         /* Must fit INSIDE the layer or overflow:hidden crops the phone. */
-        .app-clip-layer__box { height: 46dvh; }
+        .app-clip-layer__box { height: 46lvh; }
 
         /* ===== MOBILE PASS, BACKGROUND PHOTOGRAPHS (Piet 2026-08-11: "the
            background pictures need work, they should be full screen when
@@ -2180,7 +2183,10 @@
         /* The corner mark landed on the Okanagan logo. Partner marks do not get
            sat on; the mark is decorative, so it goes at this width. */
         #opportunity .section-mark--corner { display: none; }
-        #opportunity .panel__verdict { white-space: normal; font-size: clamp(21px, 6vw, 30px); }
+        /* Same missing height term as --t: 6vw alone held the headline at 30px
+           on a 667 screen and a 960 one. Inert above ~950 tall (3.1vh = 29.8),
+           so a tall phone keeps the size it has. */
+        #opportunity .panel__verdict { white-space: normal; font-size: clamp(19px, min(6vw, 3.1vh), 30px); }
 
         /* ===== MOBILE PASS, 03 TEAM (Piet 2026-08-11: "the text on team is
            f'd") =============================================================
@@ -2196,11 +2202,35 @@
           grid-template-columns: 1fr;
           gap: clamp(10px, 1.8vh, 18px);
           align-content: start;
+          /* THE OVERLAP BACKSTOP (Piet 2026-08-12: "why can't you keep things
+             from overlapping like this"). .team-half is flex: 1 1 auto with
+             min-height: 0 (line 621), so the panel shrinks it below its own
+             content whenever 03 is taller than the viewport — and
+             align-content: safe center then sends the overflow DOWNWARD, onto
+             .panel__inner, which is flex: 0 0 auto and never yields. Measured
+             at 500x852: box 443, content 499, 56px painted straight over THE
+             APPLICATIONS. The three dials below take that back; this clip is
+             the guarantee that it can never paint on the band again whatever
+             the device. */
+          overflow: hidden;
         }
         /* 2.8 -> 2.1: the panes were too short for a three-line caption, which
            is what had the names sitting at different heights and running out
            of their own boxes. */
         #opportunity .panel__video { --team-pane-aspect: 2.1; }
+        /* Height cap on the faces. The aspect is a WIDTH driver, so the 3-up
+           block was 171px tall on a 960 screen and 171px on an 852 — it never
+           gave anything back on a short phone. 18vh is above the aspect's own
+           height at 950+ (173 vs 171), so this is inert on a tall phone and
+           only bites where the block was overrunning. The max() term steepens
+           it below 700 tall, where 18lvh alone still left 26px overrunning and
+           the type had already hit its 11px/19px floors — the faces are the
+           only thing left to give there. lvh so a URL-bar slide cannot resize
+           the headshots mid-scroll, and continuous rather than a height media
+           query for the same reason. Inert at 700 and above. */
+        #opportunity .panel__people {
+          max-height: calc(18lvh - max(0px, (700px - 100lvh) * 1.2));
+        }
         /* The ROUND TOPS are in the source PNGs, not in CSS. seth-headshot and
            the other two are cut with ~9% corner radii on transparency, which is
            why the border-radius: 0 !important in styles.css never touched them.
@@ -2225,7 +2255,16 @@
         .bio-modal__photo { width: 100%; }
         /* Same one-driver scaling the desktop block uses, phone values. The
            desktop system is gated to min-width 721 so the two never meet. */
-        #opportunity .team-half__copy { --t: clamp(11px, 3.4vw, 14px); }
+        /* The vh term is the one the desktop branch has and this one never
+           got. Without it the copy is the same height on a 667 screen as on a
+           932, which is most of why the block overran the band. */
+        #opportunity .team-half__copy { --t: clamp(11px, min(3.4vw, 1.6vh), 14px); }
+        /* 32px OF DEAD SPACE. .eyebrow-anchor carries margin: 0 0 32px 0 (line
+           431) and .eyebrow-anchor .panel__eyebrow zeroes the eyebrow's own
+           margin, so the rule below it — which sets margin-bottom on the
+           EYEBROW — has been inert here since the team half arrived. The gap
+           under TEAM is the anchor's, and it was never scaled with --t. */
+        #opportunity .team-half__copy .eyebrow-anchor { margin-bottom: calc(var(--t) * 0.7); }
         #opportunity .team-half__copy .panel__evidence p {
           font-size: var(--t);
           line-height: 1.34;
@@ -2242,7 +2281,10 @@
         /* The team half only arrived in 03 on 08-08, so this panel's phone
            padding was set when 03 was the WHO band alone. It has two halves to
            seat now. */
+        /* The shorthand wipes .panel's bar inset, so 03 has to re-add it or the
+           applications band sits under the URL bar. See the note on .panel. */
         #opportunity { padding: clamp(38px, 5.2vh, 60px) var(--pad-x) clamp(30px, 4.4vh, 48px); }
+        #opportunity { padding-bottom: calc(clamp(30px, 4.4vh, 48px) + (100lvh - 100svh)); }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
         .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
         .audience-item {
@@ -2628,7 +2670,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js"></script>
     <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-50"></script>
+    <script src="scene-claude-teaser.js?v=claude-51"></script>
     <script>
       // ==================================================================
       // MAP TRAIL - the 01 column graphic. Lifted from map-trail-tester.html
@@ -2963,7 +3005,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-40"></script>
+    <script src="swot-claude.js?v=claude-41"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -3038,9 +3080,17 @@
             var forestScroll = 0;
             var heroArrivalStarted = false;
             var heroTextReleased = false;
+            var forestPhoto = document.querySelector(".forest-photo");
             function paintForestEdge() {
               var settled = window.innerWidth * 0.45;
-              var fullForest = -window.innerHeight - 2;
+              // ONE VIEWPORT BASIS (2026-08-12). The clip-path's diagonal term
+              // is 100vh and the box is 100lvh, so "fully hidden" has to be the
+              // LARGE viewport too. window.innerHeight is the DYNAMIC one: it
+              // shrinks when the URL bar shows, and this runs every frame of
+              // the hero scrub, so a bar slide used to walk the hidden edge
+              // back on screen and leave a sliver of forest at bottom-left.
+              var boxH = (forestPhoto && forestPhoto.offsetHeight) || window.innerHeight;
+              var fullForest = -boxH - 2;
               var arrivalEdge = fullForest + (settled - fullForest) * forestArrival;
               var edgeTop = arrivalEdge + forestScroll * (window.innerWidth - settled);
               document.documentElement.style.setProperty("--forest-edge-top", edgeTop.toFixed(2) + "px");

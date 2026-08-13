@@ -89,7 +89,20 @@
     window.innerWidth < 720 ||
     (window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobileLike ? 1.35 : 2));
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
+
+  // ONE VIEWPORT BASIS (2026-08-12, Piet: "THINGS SHIFTING AROUND when they
+  // shouldn't be"). The canvas box is 100lvh (styles.css 339) and does NOT
+  // move when the mobile URL bar slides; window.innerHeight DOES, and this
+  // file re-runs setSize + camera.aspect on every one of those resize events,
+  // so the whole field used to rescale each time the bar moved.
+  // ScrollTrigger's ignoreMobileResize never touched this listener.
+  // Everything below measures the canvas's OWN box instead, so the buffer,
+  // the camera aspect and every screen-space projection stay put. The ||
+  // fallbacks cover a canvas that is display:none or not yet laid out.
+  function viewW() { return canvas.clientWidth || window.innerWidth; }
+  function viewH() { return canvas.clientHeight || window.innerHeight; }
+
+  renderer.setSize(viewW(), viewH(), false);
 
   // Clear color: the point-cloud variant lifts the near-black base to an earthy
   // atmosphere floor (--gl-base) so the backdrop tint reads as forest, not void.
@@ -115,7 +128,7 @@
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(
     55,
-    window.innerWidth / window.innerHeight,
+    viewW() / viewH(),
     0.1,
     200
   );
@@ -401,7 +414,7 @@
   // so the visible horizontal extent tracks aspect: narrow portrait -> narrow
   // field, wide desktop -> wider. z is kept in front of the landed camera so
   // no dot ends up too close / behind it.
-  var viewAspect = window.innerWidth / Math.max(1, window.innerHeight);
+  var viewAspect = viewW() / Math.max(1, viewH());
   var FIELD_HALF_X = Math.max(2.2, Math.min(6.5, 4.2 * viewAspect));
   // Build the open volume through the camera used around section 02. This
   // removes the fixed world-space Y ceiling that projected every mote into the
@@ -1412,8 +1425,8 @@
       var pi = hi * 3;
       hoverVec.set(positions[pi], positions[pi + 1], positions[pi + 2]).project(camera);
       if (hoverVec.z < -1 || hoverVec.z > 1) continue;
-      var sx = (hoverVec.x * 0.5 + 0.5) * window.innerWidth;
-      var sy = (-hoverVec.y * 0.5 + 0.5) * window.innerHeight;
+      var sx = (hoverVec.x * 0.5 + 0.5) * viewW();
+      var sy = (-hoverVec.y * 0.5 + 0.5) * viewH();
       var dx = sx - clientX;
       var dy = sy - clientY;
       var distSq = dx * dx + dy * dy;
@@ -1588,8 +1601,8 @@
 
   if (hasFinePointer) {
     window.addEventListener("mousemove", function (e) {
-      mouseNX = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseNY = (e.clientY / window.innerHeight) * 2 - 1;
+      mouseNX = (e.clientX / viewW()) * 2 - 1;
+      mouseNY = (e.clientY / viewH()) * 2 - 1;
       updateHoveredMote(e.clientX, e.clientY);
     }, { passive: true });
     window.addEventListener("mouseleave", clearHoveredMote, { passive: true });
@@ -1652,9 +1665,14 @@
   });
 
   // ---- Resize ----------------------------------------------------------
+  var lastSizeW = 0, lastSizeH = 0;
   function onResize() {
-    var w = window.innerWidth;
-    var h = window.innerHeight;
+    var w = viewW();
+    var h = viewH();
+    // The canvas box is lvh, so a URL-bar slide fires resize but changes
+    // nothing here. Bail rather than re-allocating the drawing buffer for it.
+    if (w === lastSizeW && h === lastSizeH) return;
+    lastSizeW = w; lastSizeH = h;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
@@ -1705,7 +1723,7 @@
   var statDirection = new THREE.Vector3();
   var statWorld = new THREE.Vector3();
   function statScreenToWorld(px, py, zPlane) {
-    statProbe.set(px / window.innerWidth * 2 - 1, 1 - py / window.innerHeight * 2, .5).unproject(camera);
+    statProbe.set(px / viewW() * 2 - 1, 1 - py / viewH() * 2, .5).unproject(camera);
     statDirection.copy(statProbe).sub(camera.position).normalize();
     var distance = (zPlane - camera.position.z) / statDirection.z;
     return statWorld.copy(camera.position).addScaledVector(statDirection, distance);
@@ -1829,8 +1847,8 @@
     if (hasFinePointer) {
       var halfH = Math.tan((55 * Math.PI / 180) / 2) * Math.max(0.5, Math.abs(dollyZ));
       var halfW = halfH * camera.aspect;
-      var maxX = (18 / window.innerWidth) * halfW * 2 * parallaxAttenuation;
-      var maxY = (10 / window.innerHeight) * halfH * 2 * parallaxAttenuation;
+      var maxX = (18 / viewW()) * halfW * 2 * parallaxAttenuation;
+      var maxY = (10 / viewH()) * halfH * 2 * parallaxAttenuation;
       var targetX = mouseNX * maxX;
       var targetY = -mouseNY * maxY;
       camParX += (targetX - camParX) * 0.05;
@@ -2026,8 +2044,8 @@
         var markIn = smoothstep(FINAL_CONVERGENCE_LAND, 1.0, previousConvergenceProgress);
         if (markIn > 0) {
           markProbe.set(FINAL_RED_X, FINAL_RED_Y, FINAL_RED_Z).project(camera);
-          var mx = (markProbe.x * 0.5 + 0.5) * window.innerWidth;
-          var my = (1 - (markProbe.y * 0.5 + 0.5)) * window.innerHeight;
+          var mx = (markProbe.x * 0.5 + 0.5) * viewW();
+          var my = (1 - (markProbe.y * 0.5 + 0.5)) * viewH();
           // Starts at the dot's own footprint and grows into a readable mark.
           closingMark.style.transform =
             "translate3d(" + mx.toFixed(1) + "px," + my.toFixed(1) + "px,0) " +
