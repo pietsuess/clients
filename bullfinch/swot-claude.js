@@ -589,14 +589,17 @@
     var clipLayer = document.querySelector(".app-clip-layer");
     var dataPara = productInner.querySelector(".panel__evidence p:last-of-type");
     if (clipLayer && dataPara) {
-      clipLayer.style.height = (panelH - padBottom - dataPara.offsetHeight) + "px";
-      // Data's slide to the panel's content bottom during the clip stage.
-      // The copy block is grid-centred, so its natural bottom is mid-panel;
-      // this measures the real distance (offsetTop chain: p -> .panel__inner
-      // -> panel, both positioned). CSS applies it as a transform under
-      // body.is-clip-stage — layout untouched, one writer.
+      clipLayer.style.height = (panelH - padBottom) + "px";
+      // Data slides to sit OVER the recording's bottom edge (Piet
+      // 2026-08-13: "the data text over top of the screen recording without
+      // the crop"). The video is contained at full width, top-anchored, so
+      // its rendered bottom is width * 1920/1080 from the screen top; the
+      // Data line's bottom lands 16px above that (clamped to the content
+      // box on short screens). Transform via --data-shift, one writer.
+      var videoBottom = Math.round(window.innerWidth * 1920 / 1080);
+      var target = Math.min(panelH - padBottom, videoBottom - 16);
       var dataBottom = productInner.offsetTop + dataPara.offsetTop + dataPara.offsetHeight;
-      var shift = Math.max(0, (panelH - padBottom) - dataBottom);
+      var shift = Math.max(0, target - dataBottom);
       productPanel.style.setProperty("--data-shift", shift + "px");
     }
   }

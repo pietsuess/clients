@@ -1950,6 +1950,14 @@
           align-self: stretch;
           height: auto;
           min-height: 0;
+          /* BLEED TO THE TRUE BOTTOM (Piet 2026-08-13: "if I scroll up I can
+             create a gap at the bottom"). .panel's padding-bottom carries the
+             bar inset (24px + (100lvh - 100svh)), which is right for CONTENT
+             — but the map is a bleed, and stopping it at the padding line
+             painted a beige band under it whenever the bar hid. Give the map
+             the inset back; behind the bar is invisible, a band is not. The
+             note is positioned off the PANEL box, so it does not move. */
+          margin-bottom: calc(-24px - (100lvh - 100svh));
         }
         /* Same cell as the map, parked at the bottom of it. */
         #problem .problem-note {
@@ -2047,6 +2055,13 @@
              fills by size, no space-between stretching, no overflow risk.
              15px cap guards landscape. */
           --plate-s: min(15px, calc((93vw - 88px) / 22.0));
+        }
+        /* BRIGHTER BOX (Piet 2026-08-13: "not enough contrast so either the
+           box has to become brighter or the font has to change color" — box
+           chosen). Same hue and fade var as the base rule at ~1102, alpha
+           0.08 -> 0.45. Phone only; desktop keeps its glass. */
+        #problem .stat-read {
+          background: rgba(225, 227, 178, calc(var(--stat-box-a, 0) * 0.45));
         }
         /* Both ride --plate-s. The ID beats the .panel__stat--problem clamps
            these carry at line 1151 and 1166. */
@@ -2215,19 +2230,31 @@
           transform: translateX(-50%);
           padding: 0;
         }
-        /* FULL-BLEED (Piet 2026-08-13 screenshot: "not quite"). The 9/19.5
-           phone frame is WIDTH-BOUND at 90vw — its aspect caps the height at
-           ~2106px on a 1080 screen, which is what left the dead band above
-           the Data line. "Full" therefore means the frame gives way: the box
-           fills the layer edge to edge and the video (already object-fit:
-           cover) crops its sides instead. Radius and frame chrome go with it
-           at this width. */
+        /* NO CROP (Piet 2026-08-13: "the cropping is wrong I wanted the data
+           text to be over top of the screen recording without the crop").
+           The box fills the layer, the frame chrome goes (no radius, no dark
+           slab), and the video is CONTAINED — the whole 1080x1920 recording,
+           full width, anchored to the screen top. The Data line is shifted to
+           sit over its bottom edge (see layoutProductCase). */
         .app-clip-layer__box {
           height: 100%;
           width: 100%;
           aspect-ratio: auto;
           border-radius: 0;
+          background: none;
         }
+        .app-clip-layer__video {
+          object-fit: contain;
+          object-position: top center;
+        }
+        /* Data rides ABOVE the clip layer while the clip is up. The layer is
+           BODY-LEVEL at z3 and .swot is its own stacking context at z1, so a
+           z-index inside .swot can never beat the video — the whole section
+           steps above it instead. Everything else in .swot at that moment is
+           either opacity-0 (Wear/Walk/verdict) or clip-pathed away (01/03),
+           and .swot already sits above the veil by DOM order, so nothing else
+           changes. */
+        body.is-clip-stage .swot { z-index: 4; }
         /* Clip stage (body class from driveProductBand, single writer): the
            rest of 02's copy fades OUT while the recording is up, leaving the
            Data entry alone at the bottom on the page ground. OPACITY only —
@@ -3148,7 +3175,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-45"></script>
+    <script src="swot-claude.js?v=claude-46"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
