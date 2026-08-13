@@ -1845,8 +1845,26 @@
           /* lvh, not dvh. .reveal-media--left is position:fixed, so its 50%
              resolves against the initial containing block, which on mobile is
              the LARGE viewport and does not shrink when the URL bar is showing.
-             dvh would sit above the photo edge in exactly that state. */
-          min-height: calc(50lvh - 24px);
+             dvh would sit above the photo edge in exactly that state.
+             The subtraction is #problem's own padding-top (--p01-pad-top just
+             below), so the BOTTOM of this box still lands exactly on 50lvh and
+             the map still cannot climb over the photograph. */
+          min-height: calc(50lvh - var(--p01-pad-top));
+          /* styles.css 898 centres .panel__inner's contents. Shortening the
+             headline would therefore push the eyebrow DOWN rather than up.
+             Top-anchored, so the eyebrow holds the nav line and the block
+             gets shorter downwards (Piet 2026-08-12). */
+          justify-content: flex-start;
+        }
+        /* THE OLD WAY sits on the hamburger's line (Piet 2026-08-12: "the old
+           way heading can go up next to the navburger").
+           Measured, not derived: the hamburger ICON centres at y=22 (.site-nav
+           is padding-top 8px at line 377 — teaser-dev overrides styles.css's
+           env() padding, so there is no safe-area term to carry here either),
+           and the eyebrow's line box is 17.05px at 11px. 22 - 8.5 = 13.5. */
+        #problem {
+          --p01-pad-top: 13.5px;
+          padding-top: var(--p01-pad-top);
         }
         #problem .stat-visual {
           position: relative;
@@ -1872,6 +1890,29 @@
           z-index: 1;
         }
         #problem #mapPoints { position: absolute; inset: 0; width: 100%; height: 100%; }
+        /* ANIMATED MARK -> TOP-RIGHT OF THE MAP (Piet 2026-08-12: "on the 01
+           the animated icon is off screen" / "put it on the top right corner of
+           the map").
+           Why it was off screen: on mobile the script at line 3975 reparents
+           every .section-mark out of its eyebrow onto the .panel and adds
+           .section-mark--corner. But #problem .section-mark at line 502 is
+           UNSCOPED and carries right: 100% — an ID beats the corner class, so
+           01's mark parked a full panel-width off the left edge. Every other
+           panel's mark was fine because none of them has an ID override.
+           The containing block is #problem (position: relative, styles.css
+           543) and its padding box starts at the panel's top edge, so 50lvh is
+           the map's top edge — the same line .panel__inner bottoms out on.
+           -0.16 is the corner rule's own figure for cancelling the glyph's
+           transparent padding; --mark-box (104px) is inherited from it. */
+        #problem .section-mark {
+          left: auto;
+          right: calc(var(--mark-box) * -0.16);
+          top: calc(50lvh - var(--mark-box) * 0.16);
+          bottom: auto;
+          margin-left: 0;
+          margin-right: 0;
+          transform: none;
+        }
         /* TWO LINES, spanning the page (Piet: "make the % and its text span
            the width of the page ... may only be 2 lines total, or 3").
              001%      B U L L F I N C H
@@ -1883,8 +1924,28 @@
            now that the label is a grid cell rather than the full plate. */
         #problem .stat-read {
           position: absolute;
-          /* Flush with the top of the map band, was clamp(10px, 2vh, 22px). */
-          top: 0;
+          /* UP INTO THE PHOTOGRAPH (Piet 2026-08-12: "now that we have room the
+             % box can move up into the upper picture"). The headline block was
+             shortened this session, so the slack above the map is free. bottom:
+             100% seats the plate's bottom edge exactly on the map's top edge,
+             which is the photo edge (50lvh), with no invented offset. Was
+             top: 0, i.e. the first thing inside the map band.
+             top: auto is load-bearing. Line 1069 sets an UNSCOPED
+             top: clamp(28px, 5vh, 64px) on this element; with both top and
+             bottom resolved the height stops being content-driven and the
+             plate collapses to its own 24px of padding with every line
+             spilling out below it.
+             The max() is a SHORT-SCREEN GUARD. The headline block's height is
+             fixed content, so the caption bottoms out around 270px whatever
+             the viewport, while the photo edge is 50lvh — 426px on an 852
+             phone but 333px on a 667. Straight bottom:100% measured -16px of
+             clearance at 667 and -29px at 640, i.e. the plate sat ON
+             CONTINUOUS DATA. This slides it back down into the map band by
+             exactly the shortfall, and resolves to a flat 0 (true bottom:100%)
+             on anything 720lvh and taller. lvh, not vh or dvh: a URL-bar slide
+             must not move the plate. */
+          top: auto;
+          bottom: calc(100% - max(0px, 360px - 50lvh));
           left: var(--pad-x);
           right: var(--pad-x);
           width: auto;
@@ -1896,7 +1957,25 @@
           column-gap: clamp(12px, 4vw, 28px);
           align-items: baseline;
           text-align: left;
+          /* ONE DRIVER FOR ROW 2. At the inherited sizes (40px digits, 14px
+             caption) row 2 needs 341px and the plate only has 317px of content
+             box on a 393 phone, so "passed & measured" was the part that gave
+             and wrapped. Measured widths, in ems of the caption size S with the
+             digits held at their current 40:14 ratio to it:
+               digits + %   2.4725 * (2.857 S) + 12px of fixed flex gaps
+               caption      13.94 S + the .stat-rest gap (3vw)
+               column-gap   4vw
+             Solving 21.004 S <= 100vw - 88px - 7vw gives S = (93vw - 88px)/21;
+             /21.6 is that with 3% of slack. The 13.6px cap (vs the inherited
+             14px) holds the top end: at 430 the formula wants 14.4, and 14 put
+             row 2 at exactly 354.0px in a 354.0px box — no slack at all. */
+          --plate-s: min(13.6px, calc((93vw - 88px) / 21.6));
         }
+        /* Both ride --plate-s. The ID beats the .panel__stat--problem clamps
+           these carry at line 1151 and 1166. */
+        #problem .stat-rest { font-size: var(--plate-s); }
+        #problem .stat-digit,
+        #problem .stat-unit { font-size: calc(var(--plate-s) * 2.857); }
         #problem .stat-label {
           grid-area: 1 / 1 / 2 / 3;
           position: relative;
@@ -1904,9 +1983,16 @@
           height: 1.2em;
         }
         #problem .stat-num { grid-area: 2 / 1; margin: 0; justify-content: flex-start; }
+        /* ONE LINE WITH THE % (Piet 2026-08-12: "of trees passed & measured
+           needs to be one line with the %"). "passed & measured" is an
+           anonymous flex item — a bare text node — so it was wrapping inside
+           its own item and making row 2 two lines deep. nowrap on the flex
+           container reaches the anonymous item too. */
         #problem .stat-rest {
           grid-area: 2 / 2;
           display: flex;
+          flex-wrap: nowrap;
+          white-space: nowrap;
           align-items: baseline;
           justify-content: space-between;
           gap: clamp(10px, 3vw, 24px);
@@ -1931,18 +2017,33 @@
         #problem .p-body { align-items: flex-start; text-align: left; }
         #problem .stat-visual { justify-content: flex-start; }
         #problem .eyebrow-anchor { margin-left: 0; }
+        /* TWO LINES, always (Piet 2026-08-12: "the Dedicated Inventories
+           entire sentence and heading needs to be 2 lines"):
+             Dedicated Inventories
+             Are So 19th Century
+           Measured in Geist at the -0.012em tracking this block sets:
+           "Dedicated Inventories" is 9.939em and "Are So 19th Century" is
+           9.399em, so line 1 is the binding one: it needs
+           font-size <= (100vw - 48px) / 9.939, where 48px is .panel's two
+           24px gutters. The /10.1 divisor is that with 2% of slack. 8.3vw is
+           the normal driver and stays under 33px on a 393 phone, i.e. what the
+           headline already sets at today; the divisor only takes over on
+           narrow screens. The old clamp's 30px FLOOR is what forced the wrap —
+           below 346px it held the type above the width that fits. */
         #problem .panel__verdict {
           margin-left: 0;
           text-align: left;
-          font-size: clamp(30px, 8.4vw, 46px);
+          font-size: min(8.3vw, 46px, calc((100vw - 48px) / 10.1));
+          white-space: nowrap;
         }
-        /* The verdict steps across the measure instead of stacking flush left:
-           DEDICATED INVENTORIES on the gutter, ARE SO indented, 19TH CENTURY
-           out to the right edge. Desktop gets the same shape from the 5.9em
-           right margin on line 2; at this width there is no room for that, so
-           the indent moves to the left and line 3 is right-aligned outright. */
-        #problem .panel__verdict .vs-line--2 { margin-right: 0; margin-left: 2.4em; }
-        #problem .panel__verdict .vs-line:last-child { text-align: right; }
+        /* Lines 2 and 3 run together as one line. .vs-line is display:block
+           unscoped at line 436; inlining these two lets them share the
+           anonymous block after line 1. The markup has no whitespace between
+           the spans, so the word gap is a margin. */
+        #problem .panel__verdict .vs-line--2,
+        #problem .panel__verdict .vs-line:last-child { display: inline; }
+        #problem .panel__verdict .vs-line--2 { margin-left: 0; margin-right: 0.26em; }
+        #problem .panel__verdict .vs-line:last-child { text-align: left; }
         #problem .panel__evidence p { text-align: justify; text-align-last: left; }
         /* Centred on whatever lines it breaks to, rather than justified out to
            the gutter — the three terms read as a caption here, not as body.
@@ -1961,11 +2062,20 @@
            something to centre within, at every width and whether it wraps or
            not. width:100% belts it in case anything reintroduces a non-stretch
            align-self above this. */
+        /* ONE LINE (Piet 2026-08-12: "the bottom lines, Every field visit ...
+           need to be one line"). Measured: the 48-character string sets
+           31.68em wide in Geist Mono at the 0.06em tracking, so it needs
+           font-size <= (100vw - 48px) / 31.68, where 48px is .panel's two 24px
+           gutters. /32.4 is that with 2% of slack. It resolves above 10.5px
+           from 383px up, so a 393 phone keeps the size it has today and only
+           narrower screens step down. nowrap belts it. */
         #problem .panel__numeric {
           align-self: stretch;
           width: 100%;
           text-align: center;
           text-align-last: center;
+          font-size: min(10.5px, calc((100vw - 48px) / 32.4));
+          white-space: nowrap;
         }
         #problem .stat-label,
         #problem .stat-rest { margin-left: 0; text-align: left; text-align-last: left; }
@@ -2029,6 +2139,12 @@
            viewport overflows sideways by a mile, the focus pan gets MORE room,
            not less. */
         .reveal-media--full { background-size: cover; }
+        /* Scroll cue held on across 02's arrival band (Piet 2026-08-12) — see
+           the is-gap-cue trigger in the script. Same two declarations as
+           body.is-idle so it is the same object appearing, not a second one,
+           and the two can overlap harmlessly. Phone only: the desktop keeps
+           its --reveal-focus pan through this band, so it is not dead there. */
+        body.is-gap-cue .idle-cue { opacity: 0.72; transform: translate(-50%, 0); }
         /* Justify at this measure opens rivers between words (see the 00 hero
            and the 02 leads). Hyphenation closes them without dropping the
            justified setting. */
@@ -2834,7 +2950,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-39"></script>
+    <script src="swot-claude.js?v=claude-40"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -3603,10 +3719,24 @@
             gapReveal.style.setProperty("--reveal-opacity", v.toFixed(3));
           }
           setGapOpacity(GAP_OPACITY_IN);
+          // MIRRORS caseFadeIn* IN swot-claude.js. The photograph steps back
+          // from 0.82 to 0.22 over exactly the window the device fades up, so
+          // when one moves the other has to — and swot-claude cut the mobile
+          // lead-in to 0.0429 on 2026-08-12.
+          // CAPTURED ONCE, deliberately. swot-claude reads its mobileLike at
+          // module load (line 34) and fixes BOTH the pin lengths and the fade
+          // fractions off it, so a live matchMedia here would flip this band to
+          // the desktop numbers on a rotation while the device kept the mobile
+          // ones — the photograph would then hold full strength on top of the
+          // device it is supposed to be handing its slot to.
+          var gapStepMobile = window.matchMedia && window.matchMedia("(max-width: 720px)").matches;
+          function gapStepBand() {
+            return gapStepMobile ? [0.0429, 0.1329] : [0.1714, 0.2914];
+          }
           ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return at(p2, 0.1714); },
-            end: function () { return at(p2, 0.2914); },
+            start: function () { return at(p2, gapStepBand()[0]); },
+            end: function () { return at(p2, gapStepBand()[1]); },
             scrub: true,
             invalidateOnRefresh: true,
             onUpdate: function (self) {
@@ -3659,6 +3789,27 @@
             onUpdate: function (self) { setGapFocus(self.progress); },
             onLeaveBack: function () { setGapFocus(0); },
             onLeave: function () { setGapFocus(1); },
+          });
+          // SCROLL CUE ACROSS THE ARRIVAL BAND (Piet 2026-08-12, same note as
+          // the lead-in cut). .idle-cue is an IDLE hint — it needs 2600ms of no
+          // scrolling at all, so a reader easing through the photograph-full
+          // band never sees it and has nothing telling them to keep going.
+          // Show it outright from the moment 01 releases until the device has
+          // finished fading up. The CSS that acts on the class lives in the
+          // 720px block, so this is a phone-only cue with no desktop change.
+          // onRefresh is not optional: this writes a class that lives outside
+          // the trigger, and on a phone a URL-bar slide refreshes constantly —
+          // without it the cue freezes on or off wherever it stood.
+          function setGapCue(on) {
+            document.body.classList.toggle("is-gap-cue", !!on);
+          }
+          ScrollTrigger.create({
+            trigger: document.body,
+            start: function () { return p2.start; },
+            end: function () { return at(p2, gapStepBand()[1]); },
+            invalidateOnRefresh: true,
+            onToggle: function (self) { setGapCue(self.isActive); },
+            onRefresh: function (self) { setGapCue(self.isActive); },
           });
         }
 

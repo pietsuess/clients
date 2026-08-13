@@ -689,9 +689,21 @@
       // 480-frame re-render, no tail. The device holds off until ~36vh of
       // the pin, fades up over the next ~25vh, and the sequence plays to
       // ~137vh — finishing just as its fade-out ends.
-      caseFadeInStartProgress = 0.1714;
-      caseFadeInEndProgress = 0.2914;
-      casePlaybackStart = 0.1714;
+      // MOBILE LEAD-IN CUT (Piet 2026-08-12: "there's too much time before
+      // anything shows up after the device being worn photo is full ... it can
+      // be confusing as to what to do next"). These fractions were tuned
+      // against the 210% DESKTOP pin, where 0.1714 buys a 36vh lead-in. The
+      // mobile pin is 280%, so the same fraction buys 48vh — and on a phone
+      // setGapFocus early-returns a flat 62% with no pan (2026-08-11), so that
+      // band has literally zero motion in it. 12vh of lead-in on mobile, then
+      // the same ~25vh fade the desktop gets.
+      // casePlaybackEnd is deliberately NOT moved with the start: it has to
+      // stay above caseFadeOutStartProgress (0.5486) or the fade-out's
+      // mapRange runs backwards. The sequence just plays over a longer band on
+      // a phone, which is also the pin that has the most room for it.
+      caseFadeInStartProgress = mobileLike ? 0.0429 : 0.1714;
+      caseFadeInEndProgress = mobileLike ? 0.1329 : 0.2914;
+      casePlaybackStart = mobileLike ? 0.0429 : 0.1714;
       casePlaybackEnd = 0.6514;
       casePlaybackCap = 479 / 480;
     }
