@@ -2255,23 +2255,17 @@
            and .swot already sits above the veil by DOM order, so nothing else
            changes. */
         body.is-clip-stage .swot { z-index: 4; }
-        /* Clip stage (body class from driveProductBand, single writer): the
-           rest of 02's copy fades OUT while the recording is up, leaving the
-           Data entry alone at the bottom on the page ground. OPACITY only —
-           the write-on scrub owns clip-path, and opacity keeps layout so the
-           Data line sits exactly where it always did. */
-        #product .eyebrow-anchor,
-        #product .panel__verdict,
-        #product .panel__evidence p:nth-of-type(1),
-        #product .panel__evidence p:nth-of-type(2) {
-          transition: opacity 420ms ease;
-        }
-        body.is-clip-stage #product .eyebrow-anchor,
-        body.is-clip-stage #product .panel__verdict,
-        body.is-clip-stage #product .panel__evidence p:nth-of-type(1),
-        body.is-clip-stage #product .panel__evidence p:nth-of-type(2) {
-          opacity: 0;
-        }
+        /* Clip stage: NO FADE (Piet 2026-08-13: "the text should not fade
+           out... the screen should just cover it except for the data row").
+           .swot has to ride ABOVE the body-level clip layer for the Data row
+           (stacking landmine: no z-index inside .swot can beat a body-level
+           layer), so the copy cannot literally sit under the video. Instead
+           swot-claude.js cuts each line (visibility) the frame the video's
+           rising top edge first touches it, and restores it the same way on
+           the way back down — it reads as the screen covering the text.
+           Layout never moves, and the write-on scrub keeps sole ownership of
+           clip-path. */
+        #product .is-covered { visibility: hidden; }
         /* DATA TO THE VERY BOTTOM (Piet 2026-08-13). The copy block is grid-
            centred (align-content: center, styles.css), so even with the rest
            faded the Data line floated mid-low with a dead band under it.
@@ -3175,7 +3169,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-46"></script>
+    <script src="swot-claude.js?v=claude-47"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -4268,6 +4262,12 @@
           marks.forEach(function (el) {
             var panel = el.closest(".panel");
             if (!panel) return;
+            // 03 keeps its marks IN the eyebrows (Piet 2026-08-13: "there are
+            // no animated icons on team and applications"). Its corner slot is
+            // the Okanagan logo collision (the display:none guard in the 720
+            // block), and both of this panel's marks would land in that same
+            // one corner anyway.
+            if (panel.id === "opportunity") return;
             // Anchor to the PANEL (always exactly one viewport tall with the
             // same padding), not .panel__inner — on media panels the inner
             // column stops short of the bottom, which would raise the mark.

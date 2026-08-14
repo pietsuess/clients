@@ -555,6 +555,11 @@
   var productPanel = document.getElementById("product");
   var productInner = productPanel && productPanel.querySelector(".panel__inner");
   var caseModel = document.querySelector(".case-fixed-layer.panel__model");
+  // Clip-stage covering (Piet 2026-08-13: "the screen should just cover it
+  // except for the data row"): measured by layoutProductCase (mobile only),
+  // consumed per frame by setAppClip.
+  var productCoverEls = [];
+  var productClipH = 0;
   function layoutProductCase() {
     if (!caseModel || !productPanel || !productInner) return;
     if (!mobileLike) {
@@ -584,8 +589,9 @@
     caseModel.style.height = modelH + "px";
     // Clip layer runs from the screen top to the TOP OF THE DATA LINE (Piet
     // 2026-08-13: recording almost full screen, Data stays where it is). The
-    // Data paragraph's own position never changes — the others fade by
-    // opacity, which keeps layout — so its offsetHeight is the exact reserve.
+    // Data paragraph's own position never changes — the others are cut by the
+    // covering sweep (visibility, which keeps layout) — so its offsetHeight
+    // is the exact reserve.
     var clipLayer = document.querySelector(".app-clip-layer");
     var dataPara = productInner.querySelector(".panel__evidence p:last-of-type");
     if (clipLayer && dataPara) {
@@ -595,12 +601,28 @@
       // the crop"). The video is contained at full width, top-anchored, so
       // its rendered bottom is width * 1920/1080 from the screen top; the
       // Data line's bottom lands 16px above that (clamped to the content
-      // box on short screens). Transform via --data-shift, one writer.
+      // box on short screens). The shift may be NEGATIVE: on a tall phone
+      // Data's natural spot is BELOW the video's bottom edge, and the old
+      // Math.max(0, ...) floor was exactly why Data never rode up onto the
+      // recording (Piet 2026-08-13: "still wrong"). Transform via
+      // --data-shift, one writer.
       var videoBottom = Math.round(window.innerWidth * 1920 / 1080);
       var target = Math.min(panelH - padBottom, videoBottom - 16);
       var dataBottom = productInner.offsetTop + dataPara.offsetTop + dataPara.offsetHeight;
-      var shift = Math.max(0, target - dataBottom);
+      var shift = target - dataBottom;
       productPanel.style.setProperty("--data-shift", shift + "px");
+      productClipH = panelH - padBottom;
+      // The covering cut (see setAppClip): each non-Data line hides the frame
+      // the video's rising top edge reaches its bottom. Offset sums, not
+      // rects — transforms never move layout, and the sums are viewport-true
+      // while the panel is pinned.
+      productCoverEls = Array.prototype.slice.call(productPanel.querySelectorAll(
+        ".eyebrow-anchor, .panel__verdict, .panel__evidence p:nth-of-type(1), .panel__evidence p:nth-of-type(2)"
+      )).map(function (el) {
+        var y = el.offsetHeight, n = el;
+        while (n && n !== productPanel) { y += n.offsetTop; n = n.offsetParent; }
+        return { el: el, bottom: y };
+      });
     }
   }
   layoutProductCase();
@@ -771,6 +793,20 @@
       var travel = (1 - inP) * 116;
       appClip.style.opacity = p > 0.5486 && p < 1 ? (1 - outP).toFixed(3) : 0;
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
+      // NO FADE (Piet 2026-08-13: "the screen should just cover it except
+      // for the data row"): each line is cut the frame the video's rising
+      // top edge first touches it, and restored the same way scrolling back.
+      // .swot rides at z4 during the stage, so the copy can't literally sit
+      // under the body-level layer (stacking landmine) — the cut is what
+      // reads as covering. Same single writer as the slide (onUpdate AND
+      // onRefresh), so a refresh can never strand a line. productCoverEls is
+      // empty on desktop.
+      var edgeY = productClipH * travel / 100;
+      var coverOn = p > 0.5486 && p < 1;
+      for (var ci = 0; ci < productCoverEls.length; ci++) {
+        productCoverEls[ci].el.classList.toggle("is-covered",
+          coverOn && edgeY <= productCoverEls[ci].bottom);
+      }
       if (appClipVideo) {
         if (p >= 0.6857 && p < 1 && !appClipPlayed) {
           appClipPlayed = true;
