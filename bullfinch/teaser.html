@@ -2229,7 +2229,18 @@
           top: 0;
           transform: translateX(-50%);
           padding: 0;
+          /* THE TOP GAP (Piet 2026-08-14, "still wrong" x2): the base layer is
+             align-items:center, and the slide has no height of its own — the
+             box's height:100% is against that auto slide, so the whole chain
+             collapsed to the video's rendered height and flex CENTERED it in
+             the layer: a static (layerH - videoH)/2 khaki band above the
+             recording, and the Data target (measured from the screen top)
+             landed mid-cards instead of on the bottom edge. Pin the slide to
+             the top and give it the full height so contain + object-position
+             top actually anchors at y=0. */
+          align-items: flex-start;
         }
+        .app-clip-layer__slide { height: 100%; width: 100%; }
         /* NO CROP (Piet 2026-08-13: "the cropping is wrong I wanted the data
            text to be over top of the screen recording without the crop").
            The box fills the layer, the frame chrome goes (no radius, no dark
