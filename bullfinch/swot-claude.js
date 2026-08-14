@@ -596,18 +596,15 @@
     var dataPara = productInner.querySelector(".panel__evidence p:last-of-type");
     if (clipLayer && dataPara) {
       clipLayer.style.height = (panelH - padBottom) + "px";
-      // Data slides to sit OVER the recording's bottom edge (Piet
-      // 2026-08-13: "the data text over top of the screen recording without
-      // the crop"). The video is contained at full width, top-anchored, so
-      // its rendered bottom is width * 1920/1080 from the screen top; the
-      // Data line's bottom lands 16px above that (clamped to the content
-      // box on short screens). The shift may be NEGATIVE: on a tall phone
-      // Data's natural spot is BELOW the video's bottom edge, and the old
-      // Math.max(0, ...) floor was exactly why Data never rode up onto the
-      // recording (Piet 2026-08-13: "still wrong"). Transform via
-      // --data-shift, one writer.
-      var videoBottom = Math.round(window.innerWidth * 1920 / 1080);
-      var target = Math.min(panelH - padBottom, videoBottom - 16);
+      // Data sits BELOW the recording, in the ground space under its bottom
+      // edge (Piet 2026-08-14: "i actually don't mind this if the data entry
+      // text could be below in the space") — seated at the panel's content
+      // bottom, the original DATA-TO-THE-VERY-BOTTOM spot. The video is
+      // contained at full width, top-anchored, so on tall phones the space
+      // below it holds the block clear of the recording; on screens short
+      // enough that the video reaches the content bottom there is no below —
+      // the block sits at the bottom regardless. Signed shift, one writer.
+      var target = panelH - padBottom;
       var dataBottom = productInner.offsetTop + dataPara.offsetTop + dataPara.offsetHeight;
       var shift = target - dataBottom;
       productPanel.style.setProperty("--data-shift", shift + "px");
