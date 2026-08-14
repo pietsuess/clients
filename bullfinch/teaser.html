@@ -2278,6 +2278,14 @@
            Layout never moves, and the write-on scrub keeps sole ownership of
            clip-path. */
         #product .is-covered { visibility: hidden; }
+        /* 02's corner mark rides UP over the Data block while the clip is up
+           (Piet 2026-08-14: "keep it, move it") — lifted by the measured Data
+           height (--data-h, layoutProductCase) + 12px air, on the same 420ms
+           the Data ride uses. Drops back to the corner scrolling out. */
+        #product .section-mark--corner { transition: bottom 420ms ease; }
+        body.is-clip-stage #product .section-mark--corner {
+          bottom: calc((100lvh - 100svh) - var(--mark-box) * 0.16 + var(--data-h, 130px) + 12px);
+        }
         /* DATA TO THE VERY BOTTOM (Piet 2026-08-13). The copy block is grid-
            centred (align-content: center, styles.css), so even with the rest
            faded the Data line floated mid-low with a dead band under it.
@@ -2359,6 +2367,9 @@
         /* The corner mark landed on the Okanagan logo. Partner marks do not get
            sat on; the mark is decorative, so it goes at this width. */
         #opportunity .section-mark--corner { display: none; }
+        /* In-eyebrow marks sit a touch lower on the line (Piet 2026-08-14:
+           "a bit lower should fix it"). */
+        #opportunity .section-mark { top: calc(50% + 12px); }
         /* Same missing height term as --t: 6vw alone held the headline at 30px
            on a 667 screen and a 960 one. Inert above ~950 tall (3.1vh = 29.8),
            so a tall phone keeps the size it has. */
@@ -3181,7 +3192,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-48"></script>
+    <script src="swot-claude.js?v=claude-49"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -3946,6 +3957,10 @@
             invalidateOnRefresh: true,
             onUpdate: function (self) { setGapReveal((1 - self.progress).toFixed(4)); },
             onLeaveBack: function () { setGapReveal("1"); },
+            // Re-assert SHUT past the band (2026-08-14): without this a fast
+            // scroll could strand the wipe partially open and the worn-device
+            // photo ghosted under 03 (Piet: "are these backgrounds correct?").
+            onLeave: function () { setGapReveal("0"); },
             onRefresh: function (self) {
               if (self.progress > 0) setGapReveal((1 - self.progress).toFixed(4));
             },

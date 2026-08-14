@@ -608,6 +608,9 @@
       var dataBottom = productInner.offsetTop + dataPara.offsetTop + dataPara.offsetHeight;
       var shift = target - dataBottom;
       productPanel.style.setProperty("--data-shift", shift + "px");
+      // The 02 corner mark lifts over the Data block during the clip stage;
+      // the CSS lift reads this measured height (see the is-clip-stage rule).
+      productPanel.style.setProperty("--data-h", dataPara.offsetHeight + "px");
       productClipH = panelH - padBottom;
       // The covering cut (see setAppClip): each non-Data line hides the frame
       // the video's rising top edge reaches its bottom. Offset sums, not
