@@ -1223,6 +1223,78 @@
          wired anywhere yet — keep the interactive pointer. */
       .closing__actions a[role="button"] { cursor: pointer; }
 
+      /* ===== Form screens: Contact / Request a Demo (Piet 2026-08-14) =====
+         Slide in from the right as overlay panels, "similar to what we had
+         previously for teams" — geometry, easing and the misty-woods backdrop
+         are the archived .team-screen's (Archive/teaser-dev-superseded-
+         2026-08-06.html ~992). FIELDS, BUTTON LABELS, RESULT COPY and the
+         WHITE PAPER FILE are Piet's to supply — the bodies ship empty.
+         Android fixed-ICB landmine: explicit 100lvh height, no % insets. */
+      .form-screen {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100vw;
+        height: 100lvh;
+        z-index: 90;
+        color: #EFE7D3;
+        background-color: #0e1f16;
+        background-image:
+          linear-gradient(105deg, rgba(14, 31, 22, 0.93) 0%, rgba(14, 31, 22, 0.76) 44%, rgba(14, 31, 22, 0.89) 100%),
+          url("assets/misty-woods.avif");
+        background-size: cover, cover;
+        background-position: center, center;
+        background-repeat: no-repeat, no-repeat;
+        transform: translateX(100%);
+        visibility: hidden;
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0s linear 620ms;
+        will-change: transform;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      .form-screen.is-open {
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    visibility 0s linear 0s;
+      }
+      /* The page recedes left and dims, exactly as it did for the old team
+         screen. #page's transition is global but inert outside this class:
+         nothing else writes transform or filter to #page itself (pins write
+         to their own spacers inside it). */
+      body.is-form-open #page {
+        transform: translateX(-8%);
+        filter: brightness(0.5);
+      }
+      #page {
+        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 620ms ease;
+      }
+      .form-screen__inner {
+        padding: calc(46px + (100lvh - 100svh)) var(--pad-x);
+      }
+      .form-screen__title {
+        font-size: clamp(28px, 4.6vw, 56px);
+        line-height: 1.04;
+        letter-spacing: -0.01em;
+        margin: 0 0 18px;
+      }
+      .form-screen__close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        background: none;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+      }
+      .form-screen__botcheck { display: none; }
+
       /* Bio modal: neutral grey glass, not a second green panel. The shared
          styles.css version mixes var(--bg) into both the backdrop and the
          card, so over the team screen it came out as an opaque green slab on
@@ -2838,8 +2910,10 @@
           </h2>
           <div class="contact-actions closing__actions">
             <a role="button" tabindex="0" data-contact-trigger>Contact Us</a>
-            <a role="button" tabindex="0">Request a Demo</a>
-            <a href="index-pointcloud.html">Explore Deeper</a>
+            <a role="button" tabindex="0" data-demo-trigger>Request a Demo</a>
+            <!-- PIET: point href at the white paper file (+ add the download
+                 attribute); the "#" is guarded inert in JS until then. -->
+            <a href="#" data-whitepaper>Explore Deeper</a>
           </div>
         </div>
 
@@ -2855,6 +2929,49 @@
       </section>
     </main>
 
+    <!-- ===== Form screens (Piet 2026-08-14) ==============================
+         Field lists, submit-button labels, success/error copy and the white
+         paper file are PIET'S to supply — the marked slots ship empty.
+         Web3Forms: replace WEB3FORMS_ACCESS_KEY_HERE in BOTH forms with the
+         key created for support@bullfinch.earth. -->
+    <aside class="form-screen" id="contact-screen" role="dialog" aria-modal="true" aria-label="Contact">
+      <button class="form-screen__close" type="button" aria-label="Close" data-form-close>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+      <div class="form-screen__inner">
+        <h2 class="form-screen__title">Contact</h2>
+        <form data-web3form>
+          <input type="hidden" name="access_key" value="WEB3FORMS_ACCESS_KEY_HERE" />
+          <input type="hidden" name="form_name" value="Contact" />
+          <input type="checkbox" name="botcheck" class="form-screen__botcheck" tabindex="-1" aria-hidden="true" />
+          <!-- PIET: Contact form fields go here -->
+          <div class="form-screen__fields"></div>
+          <!-- PIET: submit button label goes between the tags -->
+          <button class="form-screen__submit" type="submit"></button>
+        </form>
+      </div>
+    </aside>
+    <aside class="form-screen" id="demo-screen" role="dialog" aria-modal="true" aria-label="Request a Demo">
+      <button class="form-screen__close" type="button" aria-label="Close" data-form-close>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+      <div class="form-screen__inner">
+        <h2 class="form-screen__title">Request a Demo</h2>
+        <form data-web3form>
+          <input type="hidden" name="access_key" value="WEB3FORMS_ACCESS_KEY_HERE" />
+          <input type="hidden" name="form_name" value="Request a Demo" />
+          <input type="checkbox" name="botcheck" class="form-screen__botcheck" tabindex="-1" aria-hidden="true" />
+          <!-- PIET: Request a Demo form fields go here -->
+          <div class="form-screen__fields"></div>
+          <!-- PIET: submit button label goes between the tags -->
+          <button class="form-screen__submit" type="submit"></button>
+        </form>
+      </div>
+    </aside>
     <div class="bio-modal" id="team-bio-modal" hidden role="dialog" aria-modal="true" aria-labelledby="team-bio-title">
       <div class="bio-modal__backdrop" data-bio-close></div>
       <section class="bio-modal__panel" role="document">
@@ -4767,6 +4884,78 @@
             }
           }
         });
+      })();
+    </script>
+    <script>
+      (function () {
+        // Form screens (Piet 2026-08-14): same delegation pattern as the bio
+        // modal above. This block is chrome + transport only — fields, button
+        // labels and result copy are Piet's slots in the markup.
+        var screens = {
+          contact: document.getElementById("contact-screen"),
+          demo: document.getElementById("demo-screen"),
+        };
+        if (!screens.contact || !screens.demo) return;
+        var lastTrigger = null;
+        function openForm(key, trigger) {
+          var screen = screens[key];
+          if (!screen) return;
+          lastTrigger = trigger || document.activeElement;
+          screen.classList.add("is-open");
+          document.body.classList.add("is-form-open");
+          var closeButton = screen.querySelector("[data-form-close]");
+          if (closeButton) closeButton.focus();
+        }
+        function closeForm() {
+          var open = document.querySelector(".form-screen.is-open");
+          if (!open) return;
+          open.classList.remove("is-open");
+          document.body.classList.remove("is-form-open");
+          if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus();
+        }
+        document.addEventListener("click", function (event) {
+          var contact = event.target.closest("[data-contact-trigger]");
+          if (contact) { event.preventDefault(); openForm("contact", contact); return; }
+          var demo = event.target.closest("[data-demo-trigger]");
+          if (demo) { event.preventDefault(); openForm("demo", demo); return; }
+          if (event.target.closest("[data-form-close]")) { event.preventDefault(); closeForm(); return; }
+          // White paper: inert until Piet points the href at the file.
+          var wp = event.target.closest("[data-whitepaper]");
+          if (wp && wp.getAttribute("href") === "#") event.preventDefault();
+        });
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") closeForm();
+          var t = event.target.closest &&
+            event.target.closest("[data-contact-trigger], [data-demo-trigger]");
+          if (t && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openForm(t.hasAttribute("data-contact-trigger") ? "contact" : "demo", t);
+          }
+        });
+        // Web3Forms transport to support@bullfinch.earth. Until Piet's real
+        // access key replaces the placeholder, submit is a guarded no-op.
+        Array.prototype.forEach.call(
+          document.querySelectorAll("form[data-web3form]"),
+          function (form) {
+            form.addEventListener("submit", function (event) {
+              event.preventDefault();
+              var key = form.querySelector('[name="access_key"]');
+              if (!key || key.value.indexOf("HERE") !== -1) return;
+              var button = form.querySelector('button[type="submit"]');
+              if (button) button.disabled = true;
+              fetch("https://api.web3forms.com/submit", {
+                method: "POST",
+                body: new FormData(form),
+              }).then(function (r) { return r.json(); }).then(function (res) {
+                form.classList.add(res.success ? "is-sent" : "is-error");
+              }).catch(function () {
+                form.classList.add("is-error");
+              }).then(function () {
+                if (button) button.disabled = false;
+              });
+            });
+          }
+        );
       })();
     </script>
     <script>
