@@ -1294,6 +1294,52 @@
         cursor: pointer;
       }
       .form-screen__botcheck { display: none; }
+      /* Demo field chrome (labels are DEMO copy, swapped when Piet supplies
+         the real field scopes). Palette + mono language from the site. */
+      .form-screen__field { display: block; margin: 0 0 18px; }
+      .form-screen__label {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: rgba(239, 231, 211, .78);
+        margin: 0 0 6px;
+      }
+      .form-screen__input,
+      .form-screen__textarea {
+        width: 100%;
+        background: rgba(239, 231, 211, .07);
+        border: 1px solid rgba(239, 231, 211, .28);
+        border-radius: 0;
+        color: #EFE7D3;
+        font: inherit;
+        padding: 12px 14px;
+        outline: none;
+      }
+      .form-screen__input:focus,
+      .form-screen__textarea:focus { border-color: rgba(239, 231, 211, .62); }
+      .form-screen__textarea { min-height: 120px; resize: vertical; }
+      .form-screen__submit {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #0e1f16;
+        background: #EFE7D3;
+        border: 0;
+        padding: 14px 26px;
+        margin-top: 6px;
+        cursor: pointer;
+      }
+      .form-screen__submit:disabled { opacity: .55; }
+      .form-screen__result { display: none; margin-top: 14px; }
+      form.is-sent .form-screen__result--ok { display: block; }
+      form.is-error .form-screen__result--err { display: block; }
+      form.is-sent .form-screen__fields,
+      form.is-sent .form-screen__submit { display: none; }
 
       /* Bio modal: neutral grey glass, not a second green panel. The shared
          styles.css version mixes var(--bg) into both the backdrop and the
@@ -2941,10 +2987,27 @@
           <input type="hidden" name="access_key" value="WEB3FORMS_ACCESS_KEY_HERE" />
           <input type="hidden" name="form_name" value="Contact" />
           <input type="checkbox" name="botcheck" class="form-screen__botcheck" tabindex="-1" aria-hidden="true" />
-          <!-- PIET: Contact form fields go here -->
-          <div class="form-screen__fields"></div>
-          <!-- PIET: submit button label goes between the tags -->
-          <button class="form-screen__submit" type="submit"></button>
+          <!-- DEMO FIELDS (Piet 2026-08-14: "build a form demo") — swap for
+               the real Contact field scope when Piet supplies it. -->
+          <div class="form-screen__fields">
+            <label class="form-screen__field">
+              <span class="form-screen__label">Name</span>
+              <input class="form-screen__input" type="text" name="name" autocomplete="name" required />
+            </label>
+            <label class="form-screen__field">
+              <span class="form-screen__label">Email</span>
+              <input class="form-screen__input" type="email" name="email" autocomplete="email" required />
+            </label>
+            <label class="form-screen__field">
+              <span class="form-screen__label">Message</span>
+              <textarea class="form-screen__textarea" name="message" required></textarea>
+            </label>
+          </div>
+          <!-- DEMO label -->
+          <button class="form-screen__submit" type="submit">Send</button>
+          <!-- DEMO result copy -->
+          <p class="form-screen__result form-screen__result--ok">Sent.</p>
+          <p class="form-screen__result form-screen__result--err">Something went wrong - try again.</p>
         </form>
       </div>
     </aside>
@@ -2960,10 +3023,28 @@
           <input type="hidden" name="access_key" value="WEB3FORMS_ACCESS_KEY_HERE" />
           <input type="hidden" name="form_name" value="Request a Demo" />
           <input type="checkbox" name="botcheck" class="form-screen__botcheck" tabindex="-1" aria-hidden="true" />
-          <!-- PIET: Request a Demo form fields go here -->
-          <div class="form-screen__fields"></div>
-          <!-- PIET: submit button label goes between the tags -->
-          <button class="form-screen__submit" type="submit"></button>
+          <!-- DEMO FIELDS (Piet 2026-08-14: "build a form demo ... for both
+               contact and request") — swap for the real Request a Demo field
+               scope when Piet supplies it. -->
+          <div class="form-screen__fields">
+            <label class="form-screen__field">
+              <span class="form-screen__label">Name</span>
+              <input class="form-screen__input" type="text" name="name" autocomplete="name" required />
+            </label>
+            <label class="form-screen__field">
+              <span class="form-screen__label">Email</span>
+              <input class="form-screen__input" type="email" name="email" autocomplete="email" required />
+            </label>
+            <label class="form-screen__field">
+              <span class="form-screen__label">Message</span>
+              <textarea class="form-screen__textarea" name="message" required></textarea>
+            </label>
+          </div>
+          <!-- DEMO label -->
+          <button class="form-screen__submit" type="submit">Send</button>
+          <!-- DEMO result copy -->
+          <p class="form-screen__result form-screen__result--ok">Sent.</p>
+          <p class="form-screen__result form-screen__result--err">Something went wrong - try again.</p>
         </form>
       </div>
     </aside>
