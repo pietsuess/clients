@@ -227,11 +227,12 @@
     var inner = panel.querySelector(".panel__inner");
     var media = panel.querySelector(".panel__video");
 
-    // PHONE 03 TWO-SCREEN RISE (Piet 2026-08-14: "could be a longer screen
-    // section, so that we scroll down to the applications section"): team
-    // holds the first screen, then both halves ride up one --opp-screen over
-    // 0.28 -> 0.52 of the doubled pin, seating the applications band before
-    // the 0.60 exit cascade begins. Lives in THIS writer so onUpdate and
+    // PHONE 03 OVERFLOW LIFT (Piet 2026-08-14: "scroll down slightly to the
+    // applications ... it sits right below ... carries on a bit off screen
+    // ... not this massive gap"): the halves keep natural heights, the
+    // applications band overruns the panel bottom, and the lift is exactly
+    // that measured overrun (--opp-lift, layoutOpportunitySplit), ridden
+    // over 0.28 -> 0.52 of the pin. Lives in THIS writer so onUpdate and
     // onRefresh both re-assert it (ScrollTrigger external-state landmine).
     if (mobileLike && panel.id === "opportunity") {
       panel.style.setProperty("--opp-rise",
@@ -435,12 +436,7 @@
       // for a long stretch and is genuinely hard to scroll past.
       end: panel.id === "proof"
         ? (mobileLike ? "+=220%" : "+=380%")
-        : (panel.id === "opportunity" && mobileLike
-            // Doubled (Piet 2026-08-14): 03 is TWO phone screens now — team
-            // holds the first, the column rides up to the applications band
-            // (see the --opp-rise writer in applyPanelProgress).
-            ? "+=200%"
-            : (appClipOn && panel.id === "product"
+        : (appClipOn && panel.id === "product"
             // 420% -> 360% -> 300% -> 210% (Piet 2026-08-09: "a big wait zone
             // that just needs to be cut, everything brought up to make it
             // like that space never existed"). Every pre-leave dev fraction
@@ -449,7 +445,7 @@
             // leave fraction is 0.94, so the exit starts ~197vh —
             // ~21vh after Data completes, zero dead tail into 03.
             ? (mobileLike ? "+=280%" : "+=210%")
-            : (mobileLike ? "+=100%" : "+=150%"))),
+            : (mobileLike ? "+=100%" : "+=150%")),
       pin: true,
       pinSpacing: true,
       scrub: true,
@@ -658,6 +654,30 @@
   window.addEventListener("load", layoutProductCase);
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(layoutProductCase);
+  }
+
+  // 03 overflow lift (Piet 2026-08-14): the applications band sits right
+  // under the team block and overruns the panel bottom; the lift is that
+  // overrun, measured here, ridden by the --opp-rise writer in
+  // applyPanelProgress. Same re-measure events as layoutProductCase.
+  var oppPanel = document.getElementById("opportunity");
+  function layoutOpportunitySplit() {
+    if (!oppPanel || !mobileLike) return;
+    var half = oppPanel.querySelector(".team-half");
+    var oppInner = oppPanel.querySelector(".panel__inner");
+    if (!half || !oppInner) return;
+    var cs = getComputedStyle(oppPanel);
+    var box = oppPanel.clientHeight -
+      (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    var lift = Math.max(0, half.offsetHeight + oppInner.offsetHeight - box);
+    oppPanel.style.setProperty("--opp-lift", lift + "px");
+  }
+  layoutOpportunitySplit();
+  window.addEventListener("resize", layoutOpportunitySplit);
+  window.addEventListener("orientationchange", layoutOpportunitySplit);
+  window.addEventListener("load", layoutOpportunitySplit);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(layoutOpportunitySplit);
   }
 
   // ===== Nav scroll-spy ==================================================

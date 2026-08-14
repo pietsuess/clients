@@ -2444,9 +2444,6 @@
         /* The corner mark landed on the Okanagan logo. Partner marks do not get
            sat on; the mark is decorative, so it goes at this width. */
         #opportunity .section-mark--corner { display: none; }
-        /* In-eyebrow marks sit a touch lower on the line (Piet 2026-08-14:
-           "a bit lower should fix it"). */
-        #opportunity .section-mark { top: calc(50% + 12px); }
         /* Same missing height term as --t: 6vw alone held the headline at 30px
            on a 667 screen and a 960 one. Inert above ~950 tall (3.1vh = 29.8),
            so a tall phone keeps the size it has. */
@@ -2549,21 +2546,19 @@
            applications band sits under the URL bar. See the note on .panel. */
         #opportunity { padding: clamp(38px, 5.2vh, 60px) var(--pad-x) clamp(30px, 4.4vh, 48px); }
         #opportunity { padding-bottom: calc(clamp(30px, 4.4vh, 48px) + (100lvh - 100svh)); }
-        /* TWO SCREENS IN ONE PIN (Piet 2026-08-14: "the team and application
-           section could be a longer screen section, so that we scroll down to
-           the applications section"). The panel stays 100lvh and pinned; each
-           half gets the full content-box height (--opp-screen), and both ride
-           up one screen on --opp-rise (written by applyPanelProgress over
-           0.28 -> 0.52 of the doubled phone pin). Continuous lvh maths only —
-           no height media queries. Transform makes each half a containing
+        /* OVERFLOW LIFT (Piet 2026-08-14: "I didn't want a gap between them.
+           I just wanted to have to scroll down slightly to the applications
+           ... so it sits right below ... but carries on a bit off screen").
+           NO stretched boxes — the halves keep their natural heights, so the
+           applications band starts right under the team block and overruns
+           the panel bottom. The lift is exactly that measured overrun
+           (--opp-lift px, layoutOpportunitySplit), ridden on --opp-rise over
+           0.28 -> 0.52 of the pin. Transform makes each half a containing
            block: nothing fixed lives inside either (bio modal is body-level,
            marks are eyebrow-absolute). */
-        #opportunity { --opp-screen: calc(100lvh - clamp(38px, 5.2vh, 60px) - clamp(30px, 4.4vh, 48px) - (100lvh - 100svh)); }
-        #opportunity .team-half { flex: 0 0 auto; min-height: var(--opp-screen); }
-        #opportunity .panel__inner { min-height: var(--opp-screen); }
         #opportunity .team-half,
         #opportunity .panel__inner {
-          transform: translateY(calc(var(--opp-rise, 0) * -1 * var(--opp-screen)));
+          transform: translateY(calc(var(--opp-rise, 0) * -1 * var(--opp-lift, 0px)));
         }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
         .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
@@ -3330,7 +3325,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-51"></script>
+    <script src="swot-claude.js?v=claude-52"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
