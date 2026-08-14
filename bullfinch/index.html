@@ -2227,7 +2227,12 @@
           height: 48lvh;
           left: 50%;
           top: 0;
-          transform: translateX(-50%);
+          /* --clip-rise (setAppClip): the shortfall rise — on screens where
+             the full-width recording + Data overrun the content box (iPhone
+             aspect) the layer seats past the top by exactly the overrun.
+             0px on screens that fit; the full-width rule itself never bends
+             (Piet 2026-08-14: no narrowing on certain devices). */
+          transform: translateX(-50%) translateY(calc(-1 * var(--clip-rise, 0px)));
           padding: 0;
           /* THE TOP GAP (Piet 2026-08-14, "still wrong" x2): the base layer is
              align-items:center, and the slide has no height of its own — the
@@ -2472,6 +2477,22 @@
            applications band sits under the URL bar. See the note on .panel. */
         #opportunity { padding: clamp(38px, 5.2vh, 60px) var(--pad-x) clamp(30px, 4.4vh, 48px); }
         #opportunity { padding-bottom: calc(clamp(30px, 4.4vh, 48px) + (100lvh - 100svh)); }
+        /* TWO SCREENS IN ONE PIN (Piet 2026-08-14: "the team and application
+           section could be a longer screen section, so that we scroll down to
+           the applications section"). The panel stays 100lvh and pinned; each
+           half gets the full content-box height (--opp-screen), and both ride
+           up one screen on --opp-rise (written by applyPanelProgress over
+           0.28 -> 0.52 of the doubled phone pin). Continuous lvh maths only —
+           no height media queries. Transform makes each half a containing
+           block: nothing fixed lives inside either (bio modal is body-level,
+           marks are eyebrow-absolute). */
+        #opportunity { --opp-screen: calc(100lvh - clamp(38px, 5.2vh, 60px) - clamp(30px, 4.4vh, 48px) - (100lvh - 100svh)); }
+        #opportunity .team-half { flex: 0 0 auto; min-height: var(--opp-screen); }
+        #opportunity .panel__inner { min-height: var(--opp-screen); }
+        #opportunity .team-half,
+        #opportunity .panel__inner {
+          transform: translateY(calc(var(--opp-rise, 0) * -1 * var(--opp-screen)));
+        }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
         .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
         .audience-item {
@@ -3192,7 +3213,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-49"></script>
+    <script src="swot-claude.js?v=claude-51"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {

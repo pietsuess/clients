@@ -227,6 +227,17 @@
     var inner = panel.querySelector(".panel__inner");
     var media = panel.querySelector(".panel__video");
 
+    // PHONE 03 TWO-SCREEN RISE (Piet 2026-08-14: "could be a longer screen
+    // section, so that we scroll down to the applications section"): team
+    // holds the first screen, then both halves ride up one --opp-screen over
+    // 0.28 -> 0.52 of the doubled pin, seating the applications band before
+    // the 0.60 exit cascade begins. Lives in THIS writer so onUpdate and
+    // onRefresh both re-assert it (ScrollTrigger external-state landmine).
+    if (mobileLike && panel.id === "opportunity") {
+      panel.style.setProperty("--opp-rise",
+        smooth01(mapRange(p, 0.28, 0.52)).toFixed(4));
+    }
+
     // CAPTURE-MODEL choreography (Claude fork): nothing fades, nothing slides.
     // Copy is revealed the way data is captured — each element WRITES ON in
     // place via a clip wipe on its own beat — then everything is UN-WRITTEN in
@@ -424,7 +435,12 @@
       // for a long stretch and is genuinely hard to scroll past.
       end: panel.id === "proof"
         ? (mobileLike ? "+=220%" : "+=380%")
-        : (appClipOn && panel.id === "product"
+        : (panel.id === "opportunity" && mobileLike
+            // Doubled (Piet 2026-08-14): 03 is TWO phone screens now — team
+            // holds the first, the column rides up to the applications band
+            // (see the --opp-rise writer in applyPanelProgress).
+            ? "+=200%"
+            : (appClipOn && panel.id === "product"
             // 420% -> 360% -> 300% -> 210% (Piet 2026-08-09: "a big wait zone
             // that just needs to be cut, everything brought up to make it
             // like that space never existed"). Every pre-leave dev fraction
@@ -433,7 +449,7 @@
             // leave fraction is 0.94, so the exit starts ~197vh —
             // ~21vh after Data completes, zero dead tail into 03.
             ? (mobileLike ? "+=280%" : "+=210%")
-            : (mobileLike ? "+=100%" : "+=150%")),
+            : (mobileLike ? "+=100%" : "+=150%"))),
       pin: true,
       pinSpacing: true,
       scrub: true,
@@ -560,6 +576,11 @@
   // consumed per frame by setAppClip.
   var productCoverEls = [];
   var productClipH = 0;
+  // Shortfall rise (Piet 2026-08-14: full width on EVERY device, no
+  // narrowing): where the full-width recording + the Data block overrun the
+  // content box (iPhone aspect), the layer rides up by exactly the overrun
+  // as it arrives. 0 on screens where it already fits — nothing moves there.
+  var productClipShortfall = 0;
   function layoutProductCase() {
     if (!caseModel || !productPanel || !productInner) return;
     if (!mobileLike) {
@@ -611,6 +632,12 @@
       // The 02 corner mark lifts over the Data block during the clip stage;
       // the CSS lift reads this measured height (see the is-clip-stage rule).
       productPanel.style.setProperty("--data-h", dataPara.offsetHeight + "px");
+      // Video bottom at full width is vw * 1920/1080 from the screen top;
+      // the Data block needs its height + 12px air above the content bottom.
+      // Whatever does not fit is the rise (see setAppClip / --clip-rise).
+      productClipShortfall = Math.max(0,
+        Math.round(window.innerWidth * 1920 / 1080) + 12 +
+        dataPara.offsetHeight - (panelH - padBottom));
       productClipH = panelH - padBottom;
       // The covering cut (see setAppClip): each non-Data line hides the frame
       // the video's rising top edge reaches its bottom. Offset sums, not
@@ -793,6 +820,12 @@
       var travel = (1 - inP) * 116;
       appClip.style.opacity = p > 0.5486 && p < 1 ? (1 - outP).toFixed(3) : 0;
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
+      // Shortfall rise: folded into the arrival, so the recording slides up
+      // from below and keeps going past the top by exactly the overrun —
+      // one continuous motion, seated with the Data block clear below it.
+      // 0 where the screen already fits (nothing moves on tall phones).
+      appClip.style.setProperty("--clip-rise",
+        (productClipShortfall * inP).toFixed(1) + "px");
       // NO FADE (Piet 2026-08-13: "the screen should just cover it except
       // for the data row"): each line is cut the frame the video's rising
       // top edge first touches it, and restored the same way scrolling back.
@@ -801,7 +834,7 @@
       // reads as covering. Same single writer as the slide (onUpdate AND
       // onRefresh), so a refresh can never strand a line. productCoverEls is
       // empty on desktop.
-      var edgeY = productClipH * travel / 100;
+      var edgeY = productClipH * travel / 100 - productClipShortfall * inP;
       var coverOn = p > 0.5486 && p < 1;
       for (var ci = 0; ci < productCoverEls.length; ci++) {
         productCoverEls[ci].el.classList.toggle("is-covered",
