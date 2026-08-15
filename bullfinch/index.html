@@ -1283,7 +1283,7 @@
       .form-screen__close {
         position: absolute;
         top: 18px;
-        right: 18px;
+        left: 18px;
         width: 44px;
         height: 44px;
         display: grid;
@@ -1294,7 +1294,18 @@
         cursor: pointer;
       }
       .form-screen__botcheck { display: none; }
-      .form-screen__form { max-width: 400px; }
+      .form-screen__form { width: 50vw; margin: 0 auto; }
+      @media (max-width: 720px) {
+        .form-screen__form { width: 100%; }
+      }
+      .form-screen__mark {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 44px;
+        height: auto;
+      }
+      .form-screen .bullfinch-mark__dark { fill: #EFE7D3; }
       /* Demo field chrome (labels are DEMO copy, swapped when Piet supplies
          the real field scopes). Palette + mono language from the site. */
       .form-screen__field { display: block; margin: 0 0 18px; }
@@ -2982,6 +2993,10 @@
           <path d="M6 6l12 12M18 6 6 18" />
         </svg>
       </button>
+      <svg class="form-screen__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+      </svg>
       <div class="form-screen__inner">
         <h2 class="form-screen__title">Contact</h2>
         <form class="form-screen__form" data-web3form>
@@ -3018,6 +3033,10 @@
           <path d="M6 6l12 12M18 6 6 18" />
         </svg>
       </button>
+      <svg class="form-screen__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+      </svg>
       <div class="form-screen__inner">
         <h2 class="form-screen__title">Request a Demo</h2>
         <form class="form-screen__form" data-web3form>
