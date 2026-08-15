@@ -371,12 +371,13 @@
         transform: scale(1.28);
       }
       .corner-logo-static { opacity: 0; }
-      .corner-logo-sequence.is-settled canvas { opacity: 0; transform: scale(.74); }
-      /* translateY closes the gap the removed negative margin used to close,
-         but on the SETTLED state only — so the intro sequence, whose ink runs
-         much lower in its frame, is never dragged into the wordmark. Ink bottom
-         lands at ~88% of the box, leaving a small deliberate gap. */
-      .corner-logo-sequence.is-settled .corner-logo-static { opacity: 1; transform: translateY(18%) scale(.74); }
+      /* Settle is JS-driven now (Piet 2026-08-15, logo-settle-tester pick:
+         "1 for sure"): the SVG snaps in INK-ALIGNED over the last frame (no
+         crossfade — the 180ms dissolve exposed that the two marks don't
+         match), then the one vector rides to the finished spot. Finished
+         geometry is unchanged: translateY(18%) scale(.74), expressed by the
+         script about the ink centre. The old .is-settled rules are gone with
+         the class. */
       .site-nav {
         justify-content: flex-start;
         /* Tighter bar (Piet): 24px vertical cut to 14, then 8. Dial this pair. */
@@ -3456,6 +3457,67 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           }
+          // V1 settle (logo-settle-tester pick): the SVG snaps in ink-aligned
+          // over the LAST FRAME — no crossfade — then the one vector rides to
+          // the finished spot on the live curve. Both states are expressed
+          // about the SVG's ink centre so a single transform transition
+          // carries the whole move.
+          function settleV1() {
+            var box = wrap.clientWidth;
+            var svgEl = wrap.querySelector(".corner-logo-static");
+            if (!box || !svgEl) return;
+            // Frame ink bbox measured at runtime so re-rendered PNGs stay
+            // aligned; offline-measured fallback for when getImageData is
+            // blocked (file:// canvas taint).
+            var ink = { x: 36, y: 75, w: 278, h: 189 };
+            try {
+              var oc = document.createElement("canvas");
+              oc.width = 360; oc.height = 360;
+              var octx = oc.getContext("2d");
+              octx.drawImage(frames[0], 0, 0, 360, 360);
+              var d = octx.getImageData(0, 0, 360, 360).data;
+              var minX = 360, minY = 360, maxX = -1, maxY = -1;
+              for (var py = 0; py < 360; py++) {
+                for (var px = 0; px < 360; px++) {
+                  if (d[(py * 360 + px) * 4 + 3] > 8) {
+                    if (px < minX) minX = px;
+                    if (px > maxX) maxX = px;
+                    if (py < minY) minY = py;
+                    if (py > maxY) maxY = py;
+                  }
+                }
+              }
+              if (maxX >= 0) ink = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+            } catch (err) {}
+            var c = box / 2;
+            function tr(r, k, ty) {
+              return { x: c + (r.x - c) * k, y: c + (r.y - c) * k + ty * box, w: r.w * k, h: r.h * k };
+            }
+            var s360 = box / 360;
+            var CB = { x: ink.x * s360, y: ink.y * s360, w: ink.w * s360, h: ink.h * s360 };
+            var bb = svgEl.getBBox();
+            // viewBox 50 35 100 70 in a square box, meet: content scale
+            // box/100, vertically centred.
+            var s100 = box / 100;
+            var oy = (box - 70 * s100) / 2;
+            var B = { x: (bb.x - 50) * s100, y: oy + (bb.y - 35) * s100, w: bb.width * s100, h: bb.height * s100 };
+            function to(T) {
+              return "translate(" + ((T.x + T.w / 2) - (B.x + B.w / 2)).toFixed(2) + "px," +
+                                    ((T.y + T.h / 2) - (B.y + B.h / 2)).toFixed(2) + "px) " +
+                     "scale(" + (T.w / B.w).toFixed(4) + ")";
+            }
+            svgEl.style.transition = "none";
+            svgEl.style.transformOrigin = (B.x + B.w / 2) + "px " + (B.y + B.h / 2) + "px";
+            svgEl.style.transform = to(tr(CB, 1.28, 0));   // ink-aligned to the frame at play scale
+            svgEl.style.opacity = "1";
+            canvas.style.visibility = "hidden";
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                svgEl.style.transition = "transform 900ms cubic-bezier(.2,.75,.18,1)";
+                svgEl.style.transform = to(tr(B, 0.74, 0.18));   // = translateY(18%) scale(.74), ink-centre form
+              });
+            });
+          }
           function play() {
             if (sequenceStarted) return;
             sequenceStarted = true;
@@ -3468,7 +3530,7 @@
                 lastTick = time;
               }
               if (index >= 0) requestAnimationFrame(tick);
-              else wrap.classList.add("is-settled");
+              else settleV1();
             }
             requestAnimationFrame(tick);
           }
