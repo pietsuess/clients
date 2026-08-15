@@ -1298,13 +1298,10 @@
       @media (max-width: 720px) {
         .form-screen__form { width: 100%; }
       }
-      .form-screen__mark {
-        position: absolute;
-        top: 18px;
-        right: 18px;
-        width: 44px;
-        height: auto;
-      }
+      .form-screen__actions { display: flex; align-items: center; }
+      /* margin-left:auto (not space-between) so the mark stays flush right
+         after is-sent hides the submit button */
+      .form-screen__mark { width: 44px; height: auto; margin-left: auto; }
       .form-screen .bullfinch-mark__dark { fill: #EFE7D3; }
       /* Demo field chrome (labels are DEMO copy, swapped when Piet supplies
          the real field scopes). Palette + mono language from the site. */
@@ -2993,13 +2990,9 @@
           <path d="M6 6l12 12M18 6 6 18" />
         </svg>
       </button>
-      <svg class="form-screen__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
-        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
-        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
-      </svg>
       <div class="form-screen__inner">
-        <h2 class="form-screen__title">Contact</h2>
         <form class="form-screen__form" data-web3form>
+          <h2 class="form-screen__title">Get in touch</h2>
           <input type="hidden" name="access_key" value="WEB3FORMS_ACCESS_KEY_HERE" />
           <input type="hidden" name="form_name" value="Contact" />
           <input type="checkbox" name="botcheck" class="form-screen__botcheck" tabindex="-1" aria-hidden="true" />
@@ -3019,8 +3012,14 @@
               <textarea class="form-screen__textarea" name="message" required></textarea>
             </label>
           </div>
-          <!-- DEMO label -->
-          <button class="form-screen__submit" type="submit">Send</button>
+          <div class="form-screen__actions">
+            <!-- DEMO label -->
+            <button class="form-screen__submit" type="submit">Send</button>
+            <svg class="form-screen__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+              <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+              <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+            </svg>
+          </div>
           <!-- DEMO result copy -->
           <p class="form-screen__result form-screen__result--ok">Sent.</p>
           <p class="form-screen__result form-screen__result--err">Something went wrong - try again.</p>
@@ -3033,13 +3032,9 @@
           <path d="M6 6l12 12M18 6 6 18" />
         </svg>
       </button>
-      <svg class="form-screen__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
-        <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
-        <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
-      </svg>
       <div class="form-screen__inner">
-        <h2 class="form-screen__title">Request a Demo</h2>
         <form class="form-screen__form" data-web3form>
+          <h2 class="form-screen__title">Request a Demo</h2>
           <input type="hidden" name="access_key" value="WEB3FORMS_ACCESS_KEY_HERE" />
           <input type="hidden" name="form_name" value="Request a Demo" />
           <input type="checkbox" name="botcheck" class="form-screen__botcheck" tabindex="-1" aria-hidden="true" />
@@ -3060,8 +3055,14 @@
               <textarea class="form-screen__textarea" name="message" required></textarea>
             </label>
           </div>
-          <!-- DEMO label -->
-          <button class="form-screen__submit" type="submit">Send</button>
+          <div class="form-screen__actions">
+            <!-- DEMO label -->
+            <button class="form-screen__submit" type="submit">Send</button>
+            <svg class="form-screen__mark bullfinch-mark" viewBox="50 35 100 70" aria-hidden="true">
+              <path class="bullfinch-mark__dark" d="M87.29,97.03c-10.83.15-20.43.03-31.53-.39l51.92-50.87c5.68-5.57,11.86-9.26,20.32-7.38,5.99,1.33,11.92,5.07,15.3,10.28-5.45.71-9.56,2.12-13.1,5.57l-42.92,42.8Z"/>
+              <path class="bullfinch-mark__red" d="M100.48,96.87c3.96-4.58,7.06-7.58,10.96-11.43l7.06-6.91,6.66-6.52,8.01-7.92c2.12-2.09,5.01-3.96,7.88-2.85,5.18,2,8.29,13.78,3.49,23.16-3.47,6.79-9.75,11.7-17.44,12.85l-26.62-.39Z"/>
+            </svg>
+          </div>
           <!-- DEMO result copy -->
           <p class="form-screen__result form-screen__result--ok">Sent.</p>
           <p class="form-screen__result form-screen__result--err">Something went wrong - try again.</p>
@@ -4993,21 +4994,29 @@
         };
         if (!screens.contact || !screens.demo) return;
         var lastTrigger = null;
+        var savedScrollY = 0;
         function openForm(key, trigger) {
           var screen = screens[key];
           if (!screen) return;
           lastTrigger = trigger || document.activeElement;
+          // iOS scrolls the DOCUMENT to reveal a focused input even inside a
+          // fixed overlay, so the page underneath drifts while the form is
+          // open. Save the position now, restore it on close.
+          savedScrollY = window.scrollY;
           screen.classList.add("is-open");
           document.body.classList.add("is-form-open");
           var closeButton = screen.querySelector("[data-form-close]");
-          if (closeButton) closeButton.focus();
+          if (closeButton) closeButton.focus({ preventScroll: true });
         }
         function closeForm() {
           var open = document.querySelector(".form-screen.is-open");
           if (!open) return;
           open.classList.remove("is-open");
           document.body.classList.remove("is-form-open");
-          if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus();
+          if (Math.abs(window.scrollY - savedScrollY) > 1) {
+            window.scrollTo({ top: savedScrollY, left: 0, behavior: "instant" });
+          }
+          if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus({ preventScroll: true });
         }
         document.addEventListener("click", function (event) {
           var contact = event.target.closest("[data-contact-trigger]");
