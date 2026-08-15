@@ -630,7 +630,9 @@
         flex: 1 1 auto;
         min-height: 0;
         display: grid;
-        grid-template-columns: minmax(240px, min(38vw, 520px)) minmax(0, 1fr);
+        /* 520 -> 640 cap, same session note: the faces were pinned at 520
+           while the viewport grew around them. */
+        grid-template-columns: minmax(240px, min(38vw, 640px)) minmax(0, 1fr);
         gap: clamp(48px, 7vw, 112px);
         /* start + center, not center + center. align-content centres the ROW
            in the free space; align-items then hangs both columns from the top
@@ -782,7 +784,10 @@
       /* Piet 2026-08-09: lift the animated icon off the band's border-top —
          it was sitting on the line. Dial this one number. */
       .ground-heading .section-mark { top: 38%; }
-      #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 46px); white-space: nowrap; }
+      /* 46 -> 56 cap (Piet 2026-08-15 "everything is smaller... should take
+         the full amount of screen"): at 1900-wide the 3vw term was being cut
+         at 46 while every other panel caps at 56+. */
+      #opportunity .panel__verdict { max-width: none; width: auto; font-size: clamp(27px, 3vw, 56px); white-space: nowrap; }
       /* Team heading wraps to two balanced lines (Piet 2026-08-09: it clipped
          at the right edge). The WHO NEEDS verdict keeps its nowrap. */
       #opportunity .team-half__copy .panel__verdict { white-space: normal; text-wrap: balance; }
