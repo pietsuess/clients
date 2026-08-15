@@ -647,6 +647,29 @@
         align-content: safe center;
       }
       #opportunity .panel__people-clip { width: 100%; }
+      /* 03 marks FAR RIGHT on the eyebrow line, PHONE ONLY (Piet 2026-08-15,
+         after two failed default placements): anchor spans the column instead
+         of hugging the label, mark hangs off its right edge. -0.26 seats the
+         glyph ink ~5px inside the content edge — the ink fills only the
+         middle ~40% of the box. Dial that one number. Desktop keeps the
+         default seat; on the APPLICATIONS row the far-right slot is the
+         headline's. */
+      @media (max-width: 720px) {
+        #opportunity .eyebrow-anchor { width: auto; }
+        #opportunity .ground-heading .eyebrow-anchor { align-self: stretch; }
+        #opportunity .section-mark {
+          left: auto;
+          right: 0;
+          margin-left: 0;
+          margin-right: calc(var(--mark-box) * -0.26);
+        }
+      }
+      /* Piet 2026-08-15: seat the headshot block more centred in its free
+         space — desktop only, dial the pair. Transform keeps grid flow and
+         the write-on band untouched. */
+      @media (min-width: 721px) {
+        #opportunity .panel__people-clip { transform: translate(24px, 24px); }
+      }
       #opportunity .team-half__copy { min-width: 0; }
       /* TEAM internal spacing, tightened (Piet 2026-08-10). These override the
          @media (max-height: 800px) block in styles.css, which was tuned around
@@ -2565,6 +2588,9 @@
           font-size: 8.5px;
           letter-spacing: .06em;
           line-height: 1.25;
+          /* Graham's "· CCO" was clipping ~4px short in a ~116px pane —
+             wrap like Tim's instead of cutting. */
+          white-space: normal;
         }
         /* Bio modal photo runs the full column (Piet 2026-08-12). styles.css
            caps it at min(54vw, 220px), so in the one-column phone stack it sat
