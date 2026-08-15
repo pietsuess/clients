@@ -2050,13 +2050,17 @@
           closingMark.style.transform =
             "translate3d(" + mx.toFixed(1) + "px," + my.toFixed(1) + "px,0) " +
             "translate(-50%,-50%) scale(" + (0.35 + markIn * 0.65).toFixed(3) + ")";
-          closingMark.style.opacity = markIn.toFixed(3);
+          // BLOOM handoff (Piet 2026-08-15): no opacity dissolve — a half-faded
+          // mark over a shrinking dot read as two mismatched objects. Solid
+          // from frame one at the dot's footprint; growth alone carries it.
+          closingMark.style.opacity = "1";
         } else if (closingMark.style.opacity !== "0") {
           closingMark.style.opacity = "0";
         }
         // The dot itself retires as the mark takes over, so the two never
-        // overlap into a red blob behind the logo.
-        var redTarget = RED_MOTE_SIZE * (1 - markIn);
+        // overlap into a red blob behind the logo. Fast (gone by markIn 0.25):
+        // the mark is solid now, so any dot poking past its edge is visible.
+        var redTarget = RED_MOTE_SIZE * (1 - smoothstep(0, 0.25, markIn));
         if (sizes[FINAL_RED_IDX] !== redTarget) {
           sizes[FINAL_RED_IDX] = redTarget;
           partGeo.attributes.aSize.needsUpdate = true;

@@ -2984,7 +2984,7 @@
          paper file are PIET'S to supply — the marked slots ship empty.
          Web3Forms: replace WEB3FORMS_ACCESS_KEY_HERE in BOTH forms with the
          key created for support@bullfinch.earth. -->
-    <aside class="form-screen" id="contact-screen" role="dialog" aria-modal="true" aria-label="Contact">
+    <aside class="form-screen" id="contact-screen" role="dialog" aria-modal="true" aria-label="Get in touch">
       <button class="form-screen__close" type="button" aria-label="Close" data-form-close>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
           <path d="M6 6l12 12M18 6 6 18" />
@@ -3090,9 +3090,9 @@
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <script src="theme.js"></script>
-    <script src="scroll.js"></script>
-    <script src="scene-claude-teaser.js?v=claude-51"></script>
+    <script src="theme.js?v=1"></script>
+    <script src="scroll.js?v=1"></script>
+    <script src="scene-claude-teaser.js?v=claude-52"></script>
     <script>
       // ==================================================================
       // MAP TRAIL - the 01 column graphic. Lifted from map-trail-tester.html
@@ -4280,6 +4280,7 @@
             onUpdate: function (self) { setGapFocus(self.progress); },
             onLeaveBack: function () { setGapFocus(0); },
             onLeave: function () { setGapFocus(1); },
+            onRefresh: function (self) { setGapFocus(self.progress); },
           });
           // SCROLL CUE ACROSS THE ARRIVAL BAND (Piet 2026-08-12, same note as
           // the lead-in cut). .idle-cue is an IDLE hint — it needs 2600ms of no
@@ -5030,6 +5031,21 @@
         });
         document.addEventListener("keydown", function (event) {
           if (event.key === "Escape") closeForm();
+          if (event.key === "Tab") {
+            var trap = document.querySelector(".form-screen.is-open");
+            if (trap) {
+              var items = Array.prototype.filter.call(
+                trap.querySelectorAll("button, a[href], input, textarea, select"),
+                function (el) { return el.tabIndex >= 0 && el.offsetParent !== null; }
+              );
+              if (items.length) {
+                var first = items[0], last = items[items.length - 1];
+                if (!trap.contains(document.activeElement)) { event.preventDefault(); first.focus(); }
+                else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+              }
+            }
+          }
           var t = event.target.closest &&
             event.target.closest("[data-contact-trigger], [data-demo-trigger]");
           if (t && (event.key === "Enter" || event.key === " ")) {
@@ -5044,6 +5060,7 @@
           function (form) {
             form.addEventListener("submit", function (event) {
               event.preventDefault();
+              form.classList.remove("is-error");
               var key = form.querySelector('[name="access_key"]');
               if (!key || key.value.indexOf("HERE") !== -1) return;
               var button = form.querySelector('button[type="submit"]');
