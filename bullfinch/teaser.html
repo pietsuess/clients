@@ -101,6 +101,16 @@
          not darker (Piet). Colour only — size, family and tracking untouched. */
       #opportunity .panel__numeric { color: #ffffff; }
       .bio-modal__body { color: #ffffff; }
+      .bio-modal__link {
+        display: inline-flex;
+        width: -moz-fit-content;
+        width: fit-content;
+        margin-top: 16px;
+        color: #ffffff;
+        opacity: .78;
+      }
+      .bio-modal__link:hover,
+      .bio-modal__link:focus-visible { opacity: 1; }
       /* "Team bio" eyebrow bright, not the grey --ink-quiet (Piet 2026-08-09). */
       .bio-modal__eyebrow { color: rgba(255, 255, 255, .78); }
     </style>
@@ -3114,6 +3124,13 @@
           <p class="bio-modal__eyebrow">Team bio</p>
           <h2 class="bio-modal__title" id="team-bio-title"></h2>
           <p class="bio-modal__body" id="team-bio-body"></p>
+          <!-- Bottom-left of the text block (Piet 2026-08-16), same in-badge
+               as the nav. Hidden for anyone without a linkedin: entry. -->
+          <a class="bio-modal__link" id="team-bio-link" href="#" target="_blank" rel="noopener" hidden>
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14ZM8.34 17.34v-7H6v7h2.34ZM7.17 9.38a1.36 1.36 0 1 0 0-2.72 1.36 1.36 0 0 0 0 2.72Zm10.83 7.96V13.5c0-2.11-1.13-3.34-2.83-3.34-1.18 0-1.97.65-2.29 1.27v-1.09h-2.34v7h2.34v-3.47c0-.91.17-1.79 1.3-1.79 1.11 0 1.12 1.04 1.12 1.85v3.41H18Z" />
+            </svg>
+          </a>
         </div>
       </section>
     </div>
@@ -4995,16 +5012,19 @@
             title: "Seth Sternberg · CEO",
             photo: "assets/seth-headshot.png",
             body: "Seth brings 25+ years across wearables, AR/VR, IoT, AI, and sensor fusion, with more than 400M licensed products in market. He has worked as both product leader and software engineer, and holds a mathematics degree from the University of Maryland.",
+            linkedin: "https://www.linkedin.com/in/sethsternberg/",
           },
           graham: {
             title: "Graham Smith · CCO",
             photo: "assets/graham-headshot.png",
             body: "Graham brings 10 years managing forestry and construction projects in ecologically sensitive British Columbia sites, plus five years as an account manager in finance. He anchors Bullfinch in field reality, customer relationships, and commercial translation.",
+            linkedin: "https://www.linkedin.com/in/gmarketing/",
           },
           tim: {
             title: "Tim Goodsall, PhD · CTO",
             photo: "assets/tim-headshot_scaled.png",
             body: "Tim is a PhD astrophysicist and hardware engineer with 15+ years in remote sensing and instrumentation, including NASA/JPL missions such as Mars 2020, InSight, Euclid, and OCO-3. He brings deep imaging, sensing, and field-hardened hardware experience.",
+            linkedin: "https://www.linkedin.com/in/timgoodsall/",
           },
         };
         var lastTrigger = null;
@@ -5020,6 +5040,16 @@
           body.textContent = bio.body;
           photo.src = bio.photo;
           photo.alt = bio.title;
+          var bioLink = document.getElementById("team-bio-link");
+          if (bioLink) {
+            if (bio.linkedin) {
+              bioLink.href = bio.linkedin;
+              bioLink.setAttribute("aria-label", bio.title + " on LinkedIn");
+              bioLink.hidden = false;
+            } else {
+              bioLink.hidden = true;
+            }
+          }
           modal.hidden = false;
           document.body.classList.add("is-bio-open");
           var closeButton = modal.querySelector("[data-bio-close]");
