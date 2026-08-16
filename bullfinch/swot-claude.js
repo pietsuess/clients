@@ -235,8 +235,10 @@
     // over 0.28 -> 0.52 of the pin. Lives in THIS writer so onUpdate and
     // onRefresh both re-assert it (ScrollTrigger external-state landmine).
     if (mobileLike && panel.id === "opportunity") {
+      // 0.28->0.52 became 0.12->0.78 with the 220% scroll-through pin: the
+      // walk IS the section now, not a settle at the top of it.
       panel.style.setProperty("--opp-rise",
-        smooth01(mapRange(p, 0.28, 0.52)).toFixed(4));
+        smooth01(mapRange(p, 0.12, 0.78)).toFixed(4));
     }
 
     // CAPTURE-MODEL choreography (Claude fork): nothing fades, nothing slides.
@@ -260,6 +262,11 @@
     var leave = clipPanel
       ? smooth01(mapRange(p, 0.94, 1.00))
       : smooth01(mapRange(p, 0.80, 1.00));
+    // 03 entry delay (Piet 2026-08-16: "one needs to be gone sooner or the
+    // other come in later" — 02's verdict was still up while 03's copy was
+    // already written). Every 03 write band starts 0.10 of the pin later;
+    // exits are untouched. One dial.
+    var oppDelay = (panel.id === "opportunity") ? 0.10 : 0;
     // 03 staggered exit (Piet 2026-08-09): the people items un-write ONE BY
     // ONE from 0.70 through the unpin instead of all together on the 0.80
     // band, dragging the exit across the run-out to 04. exitK counts
@@ -271,7 +278,11 @@
       // 0.60, cap at 0.92 so the tail finishes exactly at the unpin. An
       // uncapped tail would put starts past 1.0 and those items would ride
       // out assembled, never un-writing.
-      var s0 = Math.min(0.60 + exitK * 0.022, 0.92);
+      var s0 = mobileLike
+        // Phone scroll-through: exits wait for the walk (ends 0.78), then
+        // cascade through the tail of the 220% pin.
+        ? Math.min(0.82 + exitK * 0.014, 0.95)
+        : Math.min(0.60 + exitK * 0.022, 0.92);
       exitK++;
       return smooth01(mapRange(p, s0, s0 + 0.08));
     }
@@ -290,7 +301,7 @@
       var innerLeave = (panel.id === "opportunity")
         ? smooth01(mapRange(p, 0.92, 1.00))
         : leave;
-      var innerW = smooth01(mapRange(p, 0.02, 0.12)) * (1 - innerLeave);
+      var innerW = smooth01(mapRange(p, 0.02 + oppDelay, 0.12 + oppDelay)) * (1 - innerLeave);
       var innerHid = ((1 - innerW) * 140 - 40).toFixed(2);
       inner.style.clipPath = "inset(-40% -12% " + innerHid + "% -12%)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
@@ -356,7 +367,7 @@
       for (var gi = 0; gi < group.length; gi++) {
         var gs = spread ? (spread[gi] !== undefined ? spread[gi] : s) : s + gi * writeStagger;
         var gw = spread ? 0.24 : writeWindow;
-        var e = smooth01(mapRange(p, gs, gs + gw));
+        var e = smooth01(mapRange(p, gs + oppDelay, gs + oppDelay + gw));
         var w = e * (1 - itemLeave());
         var hidden = ((1 - w) * 100).toFixed(2) + "%";
         group[gi].style.clipPath = horizontal
@@ -372,12 +383,12 @@
     if (fastBar) {
       var trustLabel = panel.querySelector(".trust-label");
       if (trustLabel) {
-        var lw = smooth01(mapRange(p, 0.11, 0.17)) * (1 - itemLeave());
+        var lw = smooth01(mapRange(p, 0.11 + oppDelay, 0.17 + oppDelay)) * (1 - itemLeave());
         trustLabel.style.clipPath = "inset(0 " + ((1 - lw) * 100).toFixed(2) + "% 0 0)";
       }
       var logos = panel.querySelectorAll(".trust-strip > div");
       for (var li = 0; li < logos.length; li++) {
-        var le = smooth01(mapRange(p, 0.13 + li * 0.009, 0.13 + 0.05 + li * 0.009));
+        var le = smooth01(mapRange(p, 0.13 + oppDelay + li * 0.009, 0.13 + oppDelay + 0.05 + li * 0.009));
         var lww = le * (1 - itemLeave());
         logos[li].style.clipPath = "inset(0 0 " + ((1 - lww) * 100).toFixed(2) + "% 0)";
       }
@@ -445,7 +456,12 @@
             // leave fraction is 0.94, so the exit starts ~197vh —
             // ~21vh after Data completes, zero dead tail into 03.
             ? (mobileLike ? "+=280%" : "+=210%")
-            : (mobileLike ? "+=100%" : "+=150%")),
+            // 03 scroll-through on phone (Piet 2026-08-16 "a LONGER page
+            // that you scroll"): the lift walks the full content past the
+            // viewport, so the pin gets the length that walk needs.
+            : (panel.id === "opportunity" && mobileLike
+                ? "+=220%"
+                : (mobileLike ? "+=100%" : "+=150%"))),
       pin: true,
       pinSpacing: true,
       scrub: true,

@@ -101,6 +101,9 @@
          not darker (Piet). Colour only — size, family and tracking untouched. */
       #opportunity .panel__numeric { color: #ffffff; }
       .bio-modal__body { color: #ffffff; }
+      /* ink-soft grey was invisible on the frosted green (Piet 2026-08-16
+         "where is the X?"). */
+      .bio-modal__close { color: rgba(255, 255, 255, .85); }
       .bio-modal__link {
         display: inline-flex;
         width: -moz-fit-content;
@@ -614,8 +617,9 @@
         transform: none;
       }
       #opportunity .person { background: none; }
-      /* Tim's caption on ONE line in the 3-up (Piet 2026-08-09). */
-      #opportunity .person--tim figcaption { white-space: nowrap; }
+      /* Tim's one-line nowrap REMOVED (Piet 2026-08-16 "is cutoff"): at
+         narrower desktop windows the pane clips "· CTO" mid-letter. Default
+         wrapping still gives one line whenever the pane is wide enough. */
       /* The write-on wrapper. .panel__people itself carries
          `clip-path: none !important` from styles.css, so the reveal has to ride
          a parent — otherwise the faces sit fully visible and RIDE THE SECTION
@@ -2584,7 +2588,10 @@
            the headshots mid-scroll, and continuous rather than a height media
            query for the same reason. Inert at 700 and above. */
         #opportunity .panel__people {
-          max-height: calc(18lvh - max(0px, (700px - 100lvh) * 1.2));
+          /* 18lvh + short-screen steepening was the ONE-SCREEN compression
+             era. Scroll-through (Piet 2026-08-16) lets the section be taller
+             than the screen, so the faces get comfortable room back. */
+          max-height: 30lvh;
         }
         /* The ROUND TOPS are in the source PNGs, not in CSS. seth-headshot and
            the other two are cut with ~9% corner radii on transparency, which is
@@ -2616,7 +2623,8 @@
         /* The vh term is the one the desktop branch has and this one never
            got. Without it the copy is the same height on a 667 screen as on a
            932, which is most of why the block overran the band. */
-        #opportunity .team-half__copy { --t: clamp(11px, min(3.4vw, 1.6vh), 14px); }
+        /* Compression-era 11px/1.6vh floor relaxed for scroll-through. */
+        #opportunity .team-half__copy { --t: clamp(12px, min(3.6vw, 2.2vh), 16px); }
         /* 32px OF DEAD SPACE. .eyebrow-anchor carries margin: 0 0 32px 0 (line
            431) and .eyebrow-anchor .panel__eyebrow zeroes the eyebrow's own
            margin, so the rule below it — which sets margin-bottom on the
@@ -2650,7 +2658,7 @@
            applications band starts right under the team block and overruns
            the panel bottom. The lift is exactly that measured overrun
            (--opp-lift px, layoutOpportunitySplit), ridden on --opp-rise over
-           0.28 -> 0.52 of the pin. Transform makes each half a containing
+           0.12 -> 0.78 of the 220% scroll-through pin. Transform makes each half a containing
            block: nothing fixed lives inside either (bio modal is body-level,
            marks are eyebrow-absolute). */
         #opportunity .team-half,
@@ -2658,6 +2666,10 @@
           transform: translateY(calc(var(--opp-rise, 0) * -1 * var(--opp-lift, 0px)));
         }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
+        /* Piet 2026-08-16: "the lower section should not be narrower than
+           the upper" — the desktop inner gutter made the band sit inside the
+           team block's edges. */
+        #opportunity .panel__inner { padding-left: 0; padding-right: 0; }
         .audience-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
         .audience-item {
           min-height: 0;
@@ -3476,7 +3488,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-52"></script>
+    <script src="swot-claude.js?v=claude-53"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
