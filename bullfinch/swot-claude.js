@@ -234,11 +234,19 @@
     // that measured overrun (--opp-lift, layoutOpportunitySplit), ridden
     // over 0.28 -> 0.52 of the pin. Lives in THIS writer so onUpdate and
     // onRefresh both re-assert it (ScrollTrigger external-state landmine).
+    var oppWalkEnd = 0.82;
     if (mobileLike && panel.id === "opportunity") {
-      // 0.28->0.52 became 0.12->0.78 with the 220% scroll-through pin: the
-      // walk IS the section now, not a settle at the top of it.
-      panel.style.setProperty("--opp-rise",
-        smooth01(mapRange(p, 0.12, 0.78)).toFixed(4));
+      // 1:1 scroll-through (Piet 2026-08-16, "this is just stuck ... it
+      // doesn't scroll"): after a 35vh intro hold the content moves EXACTLY
+      // the px scrolled — reads as scrolling a longer page, never a park.
+      // Lift 0 (content fits the screen) degrades to a plain settle.
+      var oppT = window.innerHeight + oppLiftPx;
+      var oppIntro = window.innerHeight * 0.35;
+      var oppRise = oppLiftPx > 0
+        ? Math.min(1, Math.max(0, (p * oppT - oppIntro) / oppLiftPx))
+        : smooth01(mapRange(p, 0.12, 0.40));
+      panel.style.setProperty("--opp-rise", oppRise.toFixed(4));
+      oppWalkEnd = oppLiftPx > 0 ? (oppIntro + oppLiftPx) / oppT : 0.50;
     }
 
     // CAPTURE-MODEL choreography (Claude fork): nothing fades, nothing slides.
@@ -279,9 +287,9 @@
       // uncapped tail would put starts past 1.0 and those items would ride
       // out assembled, never un-writing.
       var s0 = mobileLike
-        // Phone scroll-through: exits wait for the walk (ends 0.78), then
-        // cascade through the tail of the 220% pin.
-        ? Math.min(0.82 + exitK * 0.014, 0.95)
+        // Phone scroll-through: exits wait for the measured walk to finish,
+        // then cascade through the viewport-length tail.
+        ? Math.min(oppWalkEnd + 0.02 + exitK * 0.012, 0.96)
         : Math.min(0.60 + exitK * 0.022, 0.92);
       exitK++;
       return smooth01(mapRange(p, s0, s0 + 0.08));
@@ -457,10 +465,12 @@
             // ~21vh after Data completes, zero dead tail into 03.
             ? (mobileLike ? "+=280%" : "+=210%")
             // 03 scroll-through on phone (Piet 2026-08-16 "a LONGER page
-            // that you scroll"): the lift walks the full content past the
-            // viewport, so the pin gets the length that walk needs.
+            // that you scroll" / "it doesn't scroll"): pin length = one
+            // viewport + the MEASURED content overrun, so the walk below can
+            // move 1:1 with the finger. Function, so every refresh re-reads
+            // the current measurement.
             : (panel.id === "opportunity" && mobileLike
-                ? "+=220%"
+                ? function () { return "+=" + Math.round(window.innerHeight + oppLiftPx); }
                 : (mobileLike ? "+=100%" : "+=150%"))),
       pin: true,
       pinSpacing: true,
@@ -677,8 +687,10 @@
   // overrun, measured here, ridden by the --opp-rise writer in
   // applyPanelProgress. Same re-measure events as layoutProductCase.
   var oppPanel = document.getElementById("opportunity");
+  var oppLiftPx = 0;
   function layoutOpportunitySplit() {
     if (!oppPanel || !mobileLike) return;
+    // oppLiftPx (outer) feeds the 03 pin-length function and the 1:1 walk.
     var half = oppPanel.querySelector(".team-half");
     var oppInner = oppPanel.querySelector(".panel__inner");
     if (!half || !oppInner) return;
@@ -686,9 +698,14 @@
     var box = oppPanel.clientHeight -
       (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
     var lift = Math.max(0, half.offsetHeight + oppInner.offsetHeight - box);
+    oppLiftPx = lift;
     oppPanel.style.setProperty("--opp-lift", lift + "px");
   }
   layoutOpportunitySplit();
+  // Re-measure at the START of every ScrollTrigger refresh so the pin-length
+  // function above always reads a current lift (resize order is not
+  // guaranteed between our listener and ST's own).
+  if (window.ScrollTrigger) ScrollTrigger.addEventListener("refreshInit", layoutOpportunitySplit);
   window.addEventListener("resize", layoutOpportunitySplit);
   window.addEventListener("orientationchange", layoutOpportunitySplit);
   window.addEventListener("load", layoutOpportunitySplit);
