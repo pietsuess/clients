@@ -792,8 +792,19 @@
     var cs = getComputedStyle(oppPanel);
     var box = oppPanel.clientHeight -
       (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    // The band's CONTENT height, walked child-to-child. NOT offsetHeight:
+    // .panel__inner is a stretched grid item now, so its box IS the whole
+    // cell and offsetHeight returns the full screen — that read collapsed
+    // `avail` to the 120 floor and shrank the faces to a 2.9 aspect instead
+    // of growing them. Third time this project has been bitten by measuring
+    // a box the layout stretched or shrank; measure content, never the box.
+    var kids = oppInner.children;
+    if (!kids.length) return;
+    var kFirst = kids[0], kLast = kids[kids.length - 1];
+    var bandH = kLast.offsetTop + kLast.offsetHeight - kFirst.offsetTop;
+    if (!(bandH > 0)) return;
     // 16px of air between the faces and the band's top rule.
-    var avail = box - oppInner.offsetHeight - 16;
+    var avail = box - bandH - 16;
     var need = people.clientWidth / Math.max(120, avail);
     // Inline, on the element itself: the 720 block sets the property on
     // .panel__video, so a value written to the panel would lose to it.
