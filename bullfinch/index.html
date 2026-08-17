@@ -2559,7 +2559,13 @@
            the 3-up block), 1.62 desktop -> 2.8 here. */
         #opportunity .team-half {
           grid-template-columns: 1fr;
-          gap: clamp(10px, 1.8vh, 18px);
+          /* ONE gap token for both stops (Piet 2026-08-17: "I just don't want
+             it to be so big and different 03a to 03b"). The space under the
+             headshots is this number in 03a, where it separates them from the
+             team copy, and the same number in 03b, where .panel__inner uses it
+             to seat the applications band right under them instead of at the
+             screen bottom. Responsive, not a fixed px. Dial it here only. */
+          gap: var(--opp-stack-gap, clamp(10px, 1.8vh, 18px));
           align-content: start;
           /* THE OVERLAP BACKSTOP (Piet 2026-08-12: "why can't you keep things
              from overlapping like this"). .team-half is flex: 1 1 auto with
@@ -2675,6 +2681,19 @@
           grid-template-columns: minmax(0, 1fr);
           grid-template-rows: minmax(0, 1fr);
           place-items: stretch;
+          --opp-stack-gap: clamp(10px, 1.8vh, 18px);
+        }
+        /* 03b seats UNDER the held headshots, not at the screen bottom. The
+           faces height is measured (layoutOpportunityFaces writes
+           --opp-faces-h) because it is driven by --team-pane-aspect and the
+           column width, so there is no static number to write here. Same
+           --opp-stack-gap the team copy uses, so the space below the images
+           does not change between the two stops. flex-start replaces the
+           inherited flex-end, which is what parked the band at the bottom and
+           left the hole. */
+        #opportunity .panel__inner {
+          justify-content: flex-start;
+          padding-top: calc(var(--opp-faces-h, 0px) + var(--opp-stack-gap, clamp(10px, 1.8vh, 18px)));
         }
         #opportunity .team-half,
         #opportunity .panel__inner {
@@ -3518,7 +3537,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-59"></script>
+    <script src="swot-claude.js?v=claude-60"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -4764,8 +4783,20 @@
             // too — otherwise the mark runs its whole cycle over the wrong
             // distance and finishes while the panel is still pinned.
             var clipPanel = appClipOn && panel.id === "product";
+            // 03 IS TWO STOPS ON PHONE (2026-08-17), and one shared mark cycle
+            // cannot serve both: TEAM must build and retire inside 03a, THE
+            // APPLICATIONS inside 03b. Each mark is scrubbed over its own
+            // stop's window instead of the whole pin — same markState curve,
+            // same seat, only the window differs. Windows mirror OPP_A / OPP_B
+            // in swot-claude.js. A mark at build 0 has opacity 0, so this is
+            // also what keeps each icon off screen during the other stop.
+            var oppWin = (mobileLike && panel.id === "opportunity")
+              ? (el.closest(".team-half") ? [0.07, 0.55] : [0.59, 0.99])
+              : null;
             var scrub = function (p) {
-              applyMarkState(el, clamp01(p), clipPanel);
+              var q = clamp01(p);
+              if (oppWin) q = clamp01((q - oppWin[0]) / (oppWin[1] - oppWin[0]));
+              applyMarkState(el, q, clipPanel);
             };
             ScrollTrigger.create({
               trigger: panel,
@@ -4775,10 +4806,15 @@
               // #proof does not exist on this page — its 380/220 branch was
               // dead and has been dropped. Still duplicated with
               // swot-claude.js's pin lengths: change BOTH or the mark runs its
-              // cycle over the wrong distance.
+              // cycle over the wrong distance. THIS IS WHY THE APPLICATIONS
+              // ICON VANISHED: 03's phone pin went to 200% and this mirror was
+              // left at 100%, so both marks finished their whole build-and-
+              // disassemble cycle by the halfway point and sat at build 0.
               end: clipPanel
                 ? (mobileLike ? "+=280%" : "+=210%")
-                : (mobileLike ? "+=100%" : "+=150%"),
+                : ((mobileLike && panel.id === "opportunity")
+                    ? "+=200%"
+                    : (mobileLike ? "+=100%" : "+=150%")),
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: function (self) { scrub(self.progress); },

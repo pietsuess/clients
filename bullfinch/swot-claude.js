@@ -351,22 +351,14 @@
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
 
-    // 03a's eyebrow anchor. .section-mark is a SIBLING of .panel__eyebrow
-    // inside .eyebrow-anchor and carries no clip of its own, so without this
-    // the TEAM icon would sit alone on screen through the whole of 03b. The
-    // clip is on the ANCHOR, not on .team-half: the faces are held across
-    // both stops (below) and a container wipe would take them with it.
-    // Negative side outsets so the mark, which overhangs to the right on
-    // phone, is inside the clip box and leaves WITH the label rather than
-    // being cropped early. Same band as the eyebrow's own write/un-write.
-    var teamAnchor = oppTwoPhase && panel.querySelector(".team-half .eyebrow-anchor");
-    if (teamAnchor) {
-      var anchorW =
-        smooth01(mapRange(p, OPP_A.in0 + OPP_A.s[0], OPP_A.in0 + OPP_A.s[0] + OPP_A.win)) *
-        (1 - smooth01(mapRange(p, OPP_A.out0, OPP_A.out0 + OPP_A.outWin)));
-      teamAnchor.style.clipPath =
-        "inset(-40% -12% " + ((1 - anchorW) * 140 - 40).toFixed(2) + "% -12%)";
-    }
+    // NO CLIP ON .eyebrow-anchor. It was here to take the TEAM mark off
+    // screen for 03b, and it CROPPED THE ICON: inset() percentages resolve
+    // against the element's own border box, the anchor is one text line tall,
+    // so -40%/-12% came out around -10px/-7px against a .section-mark that is
+    // a 128px box centred on the line and overhanging it by ~52px each way.
+    // The same percentages are safe on .panel__inner only because that box is
+    // the full screen. The marks now retire themselves per stop instead — see
+    // the per-stop scrub windows in the section-mark script in teaser-dev.html.
 
     // 03 (#opportunity): trees + species data are already done at pin start,
     // so the lower bar (audience grid + partners strip) must not trickle in
@@ -803,12 +795,21 @@
     var kFirst = kids[0], kLast = kids[kids.length - 1];
     var bandH = kLast.offsetTop + kLast.offsetHeight - kFirst.offsetTop;
     if (!(bandH > 0)) return;
-    // 16px of air between the faces and the band's top rule.
-    var avail = box - bandH - 16;
+    // The ONE gap under the images, shared by both stops. Read off the team
+    // half's resolved row-gap so this and --opp-stack-gap can never drift.
+    var half = oppPanel.querySelector(".team-half");
+    var gap = (half && parseFloat(getComputedStyle(half).rowGap)) || 16;
+    var avail = box - bandH - gap;
     var need = people.clientWidth / Math.max(120, avail);
     // Inline, on the element itself: the 720 block sets the property on
     // .panel__video, so a value written to the panel would lose to it.
     people.style.setProperty("--team-pane-aspect", Math.max(1.35, need).toFixed(3));
+    // Read the height BACK after the ratio lands (this forces the reflow) and
+    // publish it: .panel__inner's padding-top is faces + gap, which is what
+    // seats 03b directly under the headshots instead of at the screen bottom.
+    var clipWrap = oppPanel.querySelector(".panel__people-clip");
+    var facesH = (clipWrap || people).offsetHeight;
+    oppPanel.style.setProperty("--opp-faces-h", facesH + "px");
   }
   layoutOpportunityFaces();
   // Re-measured on the same events as the other measured layouts, and paired
