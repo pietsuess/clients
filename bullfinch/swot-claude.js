@@ -351,19 +351,21 @@
       setTextVeilOpacity(veilIn * veilOut * 0.84);
     }
 
-    // 03a's own chrome wipe. The per-element clips cover the copy and the
-    // faces, but .section-mark is a SIBLING of .panel__eyebrow inside
-    // .eyebrow-anchor and carries no clip of its own — without this the TEAM
-    // icon would sit alone on an empty screen through the whole of 03b. Same
-    // language and the same negative outsets as .panel__inner above (the
-    // outsets are why the overhanging mark is never cropped mid-stop), timed
-    // to close AFTER the staggered item exits so it cannot erase them early.
-    var teamHalf = oppTwoPhase && panel.querySelector(".team-half");
-    if (teamHalf) {
-      var halfW = smooth01(mapRange(p, 0.05, 0.10)) *
-        (1 - smooth01(mapRange(p, 0.50, 0.56)));
-      teamHalf.style.clipPath =
-        "inset(-40% -12% " + ((1 - halfW) * 140 - 40).toFixed(2) + "% -12%)";
+    // 03a's eyebrow anchor. .section-mark is a SIBLING of .panel__eyebrow
+    // inside .eyebrow-anchor and carries no clip of its own, so without this
+    // the TEAM icon would sit alone on screen through the whole of 03b. The
+    // clip is on the ANCHOR, not on .team-half: the faces are held across
+    // both stops (below) and a container wipe would take them with it.
+    // Negative side outsets so the mark, which overhangs to the right on
+    // phone, is inside the clip box and leaves WITH the label rather than
+    // being cropped early. Same band as the eyebrow's own write/un-write.
+    var teamAnchor = oppTwoPhase && panel.querySelector(".team-half .eyebrow-anchor");
+    if (teamAnchor) {
+      var anchorW =
+        smooth01(mapRange(p, OPP_A.in0 + OPP_A.s[0], OPP_A.in0 + OPP_A.s[0] + OPP_A.win)) *
+        (1 - smooth01(mapRange(p, OPP_A.out0, OPP_A.out0 + OPP_A.outWin)));
+      teamAnchor.style.clipPath =
+        "inset(-40% -12% " + ((1 - anchorW) * 140 - 40).toFixed(2) + "% -12%)";
     }
 
     // 03 (#opportunity): trees + species data are already done at pin start,
@@ -432,7 +434,16 @@
         var w = e * (1 - itemLeave());
         if (oppTwoPhase) {
           var onTeam = !!(group[gi].closest && group[gi].closest(".team-half"));
-          w = oppBand(group[gi], si, onTeam ? gjA++ : gjB++);
+          w = (WRITE_ORDER[si].sel === ".panel__people-clip")
+            // FACES ARE HELD ACROSS BOTH STOPS (Piet 2026-08-17: "keep their
+            // pictures up for applications since you are not using the op
+            // half"). They write on with 03a's first beat and leave at the
+            // unpin with 03b's chrome — only the team COPY un-writes between
+            // the stops. Nothing moves: the un-written copy keeps its layout
+            // slot, so the faces sit exactly where 03a left them.
+            ? smooth01(mapRange(p, OPP_A.in0, OPP_A.in0 + OPP_A.win)) *
+              (1 - smooth01(mapRange(p, 0.94, 1.00)))
+            : oppBand(group[gi], si, onTeam ? gjA++ : gjB++);
         }
         var hidden = ((1 - w) * 100).toFixed(2) + "%";
         group[gi].style.clipPath = horizontal
@@ -763,6 +774,40 @@
   if (oppPanel) {
     oppPanel.style.setProperty("--opp-lift", "0px");
     oppPanel.style.setProperty("--opp-rise", "0");
+  }
+
+  // FACES-VS-BAND FLOOR (Piet 2026-08-17, with the held faces). The faces stay
+  // up through 03b while the applications band sits at the bottom of the same
+  // grid cell, so on a short phone the two can meet. The dial is the ASPECT,
+  // never max-height: .panel__video's height is width / --team-pane-aspect, so
+  // a height cap on it is the silently-inert trap from 08-16. This is the
+  // smallest aspect (tallest faces) that still clears the measured band, and
+  // it is a FLOOR — 1.35 stands wherever it fits, which is every phone tall
+  // enough to have room, so the approved 03a size is untouched there.
+  function layoutOpportunityFaces() {
+    if (!oppPanel || !mobileLike) return;
+    var oppInner = oppPanel.querySelector(".panel__inner");
+    var people = oppPanel.querySelector(".panel__people");
+    if (!oppInner || !people || !people.clientWidth) return;
+    var cs = getComputedStyle(oppPanel);
+    var box = oppPanel.clientHeight -
+      (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+    // 16px of air between the faces and the band's top rule.
+    var avail = box - oppInner.offsetHeight - 16;
+    var need = people.clientWidth / Math.max(120, avail);
+    // Inline, on the element itself: the 720 block sets the property on
+    // .panel__video, so a value written to the panel would lose to it.
+    people.style.setProperty("--team-pane-aspect", Math.max(1.35, need).toFixed(3));
+  }
+  layoutOpportunityFaces();
+  // Re-measured on the same events as the other measured layouts, and paired
+  // with refreshInit so a ScrollTrigger refresh can never leave a stale ratio.
+  if (window.ScrollTrigger) ScrollTrigger.addEventListener("refreshInit", layoutOpportunityFaces);
+  window.addEventListener("resize", layoutOpportunityFaces);
+  window.addEventListener("orientationchange", layoutOpportunityFaces);
+  window.addEventListener("load", layoutOpportunityFaces);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(layoutOpportunityFaces);
   }
 
   // ===== Nav scroll-spy ==================================================
