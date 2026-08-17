@@ -2682,6 +2682,19 @@
           min-width: 0;
           min-height: 0;
         }
+        /* THE BAND IS AN INVISIBLE CLICK SHIELD WITHOUT THIS (Piet 2026-08-17:
+           "why are the faces not clickable on the next section"). Sharing the
+           cell means .panel__inner is stretched over the WHOLE screen, and it
+           carries z-index 5 while .team-half carries none — so through 03b,
+           with its clip fully open, its empty upper region hit-tests on top of
+           the held headshots and the delegated [data-bio-person] handler never
+           sees them. It has no background there, so nothing looked wrong. On
+           03a the clip is shut, which is why the faces worked on the team stop
+           and died on the applications one. Nothing inside the band is
+           interactive, so the container can simply stop taking taps; the
+           auto below is the guard for anything added to it later. */
+        #opportunity .panel__inner { pointer-events: none; }
+        #opportunity .panel__inner > * { pointer-events: auto; }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
         /* Piet 2026-08-16: "the lower section should not be narrower than
            the upper" — the desktop inner gutter made the band sit inside the
