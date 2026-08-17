@@ -2575,8 +2575,10 @@
         }
         /* 2.8 -> 2.1: the panes were too short for a three-line caption, which
            is what had the names sitting at different heights and running out
-           of their own boxes. */
-        #opportunity .panel__video { --team-pane-aspect: 2.1; }
+           of their own boxes. 2.1 -> 1.35 (Piet 2026-08-16 scroll-through
+           size-up): compression-era shortness kept 03 to one screen, so the
+           walk had nothing to walk; ~270px faces give it a real overrun. */
+        #opportunity .panel__video { --team-pane-aspect: 1.35; }
         /* Height cap on the faces. The aspect is a WIDTH driver, so the 3-up
            block was 171px tall on a 960 screen and 171px on an 852 — it never
            gave anything back on a short phone. 18vh is above the aspect's own
@@ -2624,7 +2626,7 @@
            got. Without it the copy is the same height on a 667 screen as on a
            932, which is most of why the block overran the band. */
         /* Compression-era 11px/1.6vh floor relaxed for scroll-through. */
-        #opportunity .team-half__copy { --t: clamp(12px, min(3.6vw, 2.2vh), 16px); }
+        #opportunity .team-half__copy { --t: clamp(15px, min(3.6vw, 2.2vh), 16px); }
         /* 32px OF DEAD SPACE. .eyebrow-anchor carries margin: 0 0 32px 0 (line
            431) and .eyebrow-anchor .panel__eyebrow zeroes the eyebrow's own
            margin, so the rule below it — which sets margin-bottom on the
@@ -3488,7 +3490,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-54"></script>
+    <script src="swot-claude.js?v=claude-55"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {

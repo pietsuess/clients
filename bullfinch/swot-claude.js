@@ -237,11 +237,11 @@
     var oppWalkEnd = 0.82;
     if (mobileLike && panel.id === "opportunity") {
       // 1:1 scroll-through (Piet 2026-08-16, "this is just stuck ... it
-      // doesn't scroll"): after a 35vh intro hold the content moves EXACTLY
+      // doesn't scroll"): after a 15vh intro hold the content moves EXACTLY
       // the px scrolled — reads as scrolling a longer page, never a park.
       // Lift 0 (content fits the screen) degrades to a plain settle.
       var oppT = window.innerHeight + oppLiftPx;
-      var oppIntro = window.innerHeight * 0.35;
+      var oppIntro = window.innerHeight * 0.15;
       var oppRise = oppLiftPx > 0
         ? Math.min(1, Math.max(0, (p * oppT - oppIntro) / oppLiftPx))
         : smooth01(mapRange(p, 0.12, 0.40));
