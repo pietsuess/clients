@@ -2575,12 +2575,11 @@
         }
         /* 2.8 -> 2.1: the panes were too short for a three-line caption, which
            is what had the names sitting at different heights and running out
-           of their own boxes. DO NOT size up past one screen until the lift
-           measures CONTENT height: layoutOpportunitySplit reads
-           half.offsetHeight, and .team-half is a flex-shrunk min-height:0
-           child, so a 2-screen 03 under-measures the lift and paints the
-           bios straight over THE APPLICATIONS (2026-08-16 rollback). */
-        #opportunity .panel__video { --team-pane-aspect: 2.1; }
+           of their own boxes. 2.1 -> 1.35 (Piet 2026-08-17, "make the images
+           larger, the team"): safe now that 03a owns the whole screen on its
+           own — the faces were only that short to buy room for a band that
+           no longer shares the screen with them. */
+        #opportunity .panel__video { --team-pane-aspect: 1.35; }
         /* Height cap on the faces. The aspect is a WIDTH driver, so the 3-up
            block was 171px tall on a 960 screen and 171px on an 852 — it never
            gave anything back on a short phone. 18vh is above the aspect's own
@@ -2593,9 +2592,11 @@
            query for the same reason. Inert at 700 and above. */
         #opportunity .panel__people {
           /* 18lvh + short-screen steepening was the ONE-SCREEN compression
-             era. Scroll-through (Piet 2026-08-16) lets the section be taller
-             than the screen, so the faces get comfortable room back. */
-          max-height: 30lvh;
+             era, when the faces and the applications band shared a screen.
+             With 03a alone (2026-08-17) the cap is only a backstop for very
+             short phones — 42lvh is above the 1.35 aspect's own height on
+             anything 620+ tall, so it is inert on a normal phone. */
+          max-height: 42lvh;
         }
         /* The ROUND TOPS are in the source PNGs, not in CSS. seth-headshot and
            the other two are cut with ~9% corner radii on transparency, which is
@@ -2655,19 +2656,28 @@
            applications band sits under the URL bar. See the note on .panel. */
         #opportunity { padding: clamp(38px, 5.2vh, 60px) var(--pad-x) clamp(30px, 4.4vh, 48px); }
         #opportunity { padding-bottom: calc(clamp(30px, 4.4vh, 48px) + (100lvh - 100svh)); }
-        /* OVERFLOW LIFT (Piet 2026-08-14: "I didn't want a gap between them.
-           I just wanted to have to scroll down slightly to the applications
-           ... so it sits right below ... but carries on a bit off screen").
-           NO stretched boxes — the halves keep their natural heights, so the
-           applications band starts right under the team block and overruns
-           the panel bottom. The lift is exactly that measured overrun
-           (--opp-lift px, layoutOpportunitySplit), ridden on --opp-rise over
-           0.12 -> 0.78 of the 220% scroll-through pin. Transform makes each half a containing
-           block: nothing fixed lives inside either (bio modal is body-level,
-           marks are eyebrow-absolute). */
+        /* TWO STOPS ON PHONE (Piet 2026-08-17: "make applications a second
+           sub 03 so 03a and 03b team and application and have them animate
+           out and in each"). Both halves share ONE grid cell, so each owns
+           the whole screen in its turn: 03a (team) writes on, holds and
+           un-writes, then 03b (the applications) writes on in the space it
+           left. Nothing has to fit together and nothing has to scroll past
+           the fold, which retires BOTH failed models — the 08-14 overflow
+           lift and the 08-16 1:1 scroll-through (its measured --opp-lift
+           under-read the flex-shrunk .team-half and painted the bios over
+           the band). Choreography is in swot-claude.js applyPanelProgress.
+           Grid, not absolute: no percentage insets to track the URL bar. */
+        #opportunity {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr);
+          place-items: stretch;
+        }
         #opportunity .team-half,
         #opportunity .panel__inner {
-          transform: translateY(calc(var(--opp-rise, 0) * -1 * var(--opp-lift, 0px)));
+          grid-area: 1 / 1;
+          min-width: 0;
+          min-height: 0;
         }
         .ground-heading { flex-direction: column; align-items: flex-start; gap: 4px; }
         /* Piet 2026-08-16: "the lower section should not be narrower than
@@ -3492,7 +3502,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-56"></script>
+    <script src="swot-claude.js?v=claude-57"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {

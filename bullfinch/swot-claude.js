@@ -227,26 +227,52 @@
     var inner = panel.querySelector(".panel__inner");
     var media = panel.querySelector(".panel__video");
 
-    // PHONE 03 OVERFLOW LIFT (Piet 2026-08-14: "scroll down slightly to the
-    // applications ... it sits right below ... carries on a bit off screen
-    // ... not this massive gap"): the halves keep natural heights, the
-    // applications band overruns the panel bottom, and the lift is exactly
-    // that measured overrun (--opp-lift, layoutOpportunitySplit), ridden
-    // over 0.28 -> 0.52 of the pin. Lives in THIS writer so onUpdate and
-    // onRefresh both re-assert it (ScrollTrigger external-state landmine).
+    // PHONE 03 = TWO STOPS (Piet 2026-08-17: "make applications a second sub
+    // 03 so 03a and 03b team and application and have them animate out and in
+    // each"). Both halves share one grid cell on phone (see the 720 block), so
+    // each owns the whole screen in its turn. This retires the two models that
+    // failed before it: the 08-14 overflow lift and the 08-16 1:1 walk, whose
+    // measured --opp-lift under-read the flex-shrunk .team-half and painted
+    // the bios over the band. Nothing translates now — it is all write-on and
+    // un-write, which is the animate-out-in-place language the rest of the
+    // page already speaks.
+    //
+    // Bands are fractions of the flat 200% pin and are ABSOLUTE (oppDelay is
+    // desktop-only below): 03a's first beat at 0.07 is ~14vh in, the same
+    // clearance from 02's verdict that the 0.10 delay used to buy.
+    //   03a  in 0.07-0.32   hold   out 0.38-0.55
+    //   03b  in 0.59-0.83   hold   out 0.88-0.99
+    // `s` is indexed by WRITE_ORDER position; `step` staggers within a group.
+    var oppTwoPhase = mobileLike && panel.id === "opportunity";
+    var OPP_A = {
+      s: [0.02, 0.05, 0.09, null, 0.16, null, null, 0.00],
+      in0: 0.07, step: 0.022, win: 0.09,
+      out0: 0.38, outStep: 0.012, outCap: 0.48, outWin: 0.07
+    };
+    var OPP_B = {
+      s: [0.02, 0.05, null, 0.09, null, null, null, null],
+      in0: 0.59, step: 0.020, win: 0.08,
+      out0: 0.88, outStep: 0.008, outCap: 0.92, outWin: 0.07
+    };
+    // Exit-cascade counters, one per phase, advanced in WRITE_ORDER order so
+    // every scrub numbers the elements identically.
+    var oppAK = 0, oppBK = 0;
+    function oppBand(el, si, gj) {
+      var ph = (el.closest && el.closest(".team-half")) ? OPP_A : OPP_B;
+      var sOff = (ph.s[si] == null) ? ph.s[0] : ph.s[si];
+      var st = ph.in0 + sOff + gj * ph.step;
+      var os = Math.min(
+        ph.out0 + (ph === OPP_A ? oppAK++ : oppBK++) * ph.outStep,
+        ph.outCap
+      );
+      return smooth01(mapRange(p, st, st + ph.win)) *
+        (1 - smooth01(mapRange(p, os, os + ph.outWin)));
+    }
     var oppWalkEnd = 0.82;
     if (mobileLike && panel.id === "opportunity") {
-      // 1:1 scroll-through (Piet 2026-08-16, "this is just stuck ... it
-      // doesn't scroll"): after a 35vh intro hold the content moves EXACTLY
-      // the px scrolled — reads as scrolling a longer page, never a park.
-      // Lift 0 (content fits the screen) degrades to a plain settle.
-      var oppT = window.innerHeight + oppLiftPx;
-      var oppIntro = window.innerHeight * 0.35;
-      var oppRise = oppLiftPx > 0
-        ? Math.min(1, Math.max(0, (p * oppT - oppIntro) / oppLiftPx))
-        : smooth01(mapRange(p, 0.12, 0.40));
-      panel.style.setProperty("--opp-rise", oppRise.toFixed(4));
-      oppWalkEnd = oppLiftPx > 0 ? (oppIntro + oppLiftPx) / oppT : 0.50;
+      // The lift is retired; assert 0 so a stale --opp-rise from an older
+      // cached script can never leave the halves translated.
+      panel.style.setProperty("--opp-rise", "0");
     }
 
     // CAPTURE-MODEL choreography (Claude fork): nothing fades, nothing slides.
@@ -310,11 +336,34 @@
         ? smooth01(mapRange(p, 0.92, 1.00))
         : leave;
       var innerW = smooth01(mapRange(p, 0.02 + oppDelay, 0.12 + oppDelay)) * (1 - innerLeave);
+      if (oppTwoPhase) {
+        // 03b's chrome (the ground-heading rule, the audience cell borders)
+        // opens just before its first beat and wipes LAST, behind the items —
+        // and, critically, it is what keeps the whole applications band off
+        // the screen for the entirety of 03a.
+        innerW = smooth01(mapRange(p, 0.57, 0.63)) *
+          (1 - smooth01(mapRange(p, 0.94, 1.00)));
+      }
       var innerHid = ((1 - innerW) * 140 - 40).toFixed(2);
       inner.style.clipPath = "inset(-40% -12% " + innerHid + "% -12%)";
       var veilIn = smooth01(mapRange(p, 0.02, 0.16));
       var veilOut = smooth01(1 - mapRange(p, 0.92, 1.00));
       setTextVeilOpacity(veilIn * veilOut * 0.84);
+    }
+
+    // 03a's own chrome wipe. The per-element clips cover the copy and the
+    // faces, but .section-mark is a SIBLING of .panel__eyebrow inside
+    // .eyebrow-anchor and carries no clip of its own — without this the TEAM
+    // icon would sit alone on an empty screen through the whole of 03b. Same
+    // language and the same negative outsets as .panel__inner above (the
+    // outsets are why the overhanging mark is never cropped mid-stop), timed
+    // to close AFTER the staggered item exits so it cannot erase them early.
+    var teamHalf = oppTwoPhase && panel.querySelector(".team-half");
+    if (teamHalf) {
+      var halfW = smooth01(mapRange(p, 0.05, 0.10)) *
+        (1 - smooth01(mapRange(p, 0.50, 0.56)));
+      teamHalf.style.clipPath =
+        "inset(-40% -12% " + ((1 - halfW) * 140 - 40).toFixed(2) + "% -12%)";
     }
 
     // 03 (#opportunity): trees + species data are already done at pin start,
@@ -372,11 +421,19 @@
       var spread = (clipPanel && WRITE_ORDER[si].sel === ".panel__evidence p")
         ? [0.0857, 0.3429, 0.60]
         : null;
+      // Phase-local group indices: .panel__eyebrow and .panel__verdict each
+      // match once per half, so the applications copy must count from 0 in
+      // its own phase rather than inheriting the team element's stagger slot.
+      var gjA = 0, gjB = 0;
       for (var gi = 0; gi < group.length; gi++) {
         var gs = spread ? (spread[gi] !== undefined ? spread[gi] : s) : s + gi * writeStagger;
         var gw = spread ? 0.24 : writeWindow;
         var e = smooth01(mapRange(p, gs + oppDelay, gs + oppDelay + gw));
         var w = e * (1 - itemLeave());
+        if (oppTwoPhase) {
+          var onTeam = !!(group[gi].closest && group[gi].closest(".team-half"));
+          w = oppBand(group[gi], si, onTeam ? gjA++ : gjB++);
+        }
         var hidden = ((1 - w) * 100).toFixed(2) + "%";
         group[gi].style.clipPath = horizontal
           ? "inset(0 " + hidden + " 0 0)"
@@ -389,15 +446,28 @@
     // BUILDS logo-by-logo (a detection cascade) instead of one block crop, and
     // lands with the audience cells and the tree data.
     if (fastBar) {
+      // The strip lives in .panel__inner, so on phone it is pure 03b: same
+      // cascade, retimed onto phase B's bands.
       var trustLabel = panel.querySelector(".trust-label");
       if (trustLabel) {
-        var lw = smooth01(mapRange(p, 0.11 + oppDelay, 0.17 + oppDelay)) * (1 - itemLeave());
+        var lw = oppTwoPhase
+          ? smooth01(mapRange(p, OPP_B.in0 + 0.10, OPP_B.in0 + 0.18)) *
+            (1 - smooth01(mapRange(p, OPP_B.out0, OPP_B.out0 + OPP_B.outWin)))
+          : smooth01(mapRange(p, 0.11 + oppDelay, 0.17 + oppDelay)) * (1 - itemLeave());
         trustLabel.style.clipPath = "inset(0 " + ((1 - lw) * 100).toFixed(2) + "% 0 0)";
       }
       var logos = panel.querySelectorAll(".trust-strip > div");
       for (var li = 0; li < logos.length; li++) {
-        var le = smooth01(mapRange(p, 0.13 + oppDelay + li * 0.009, 0.13 + oppDelay + 0.05 + li * 0.009));
-        var lww = le * (1 - itemLeave());
+        var lww;
+        if (oppTwoPhase) {
+          var b0 = OPP_B.in0 + 0.12 + li * 0.009;
+          var bx = Math.min(OPP_B.out0 + 0.01 + li * 0.006, OPP_B.outCap);
+          lww = smooth01(mapRange(p, b0, b0 + 0.06)) *
+            (1 - smooth01(mapRange(p, bx, bx + OPP_B.outWin)));
+        } else {
+          var le = smooth01(mapRange(p, 0.13 + oppDelay + li * 0.009, 0.13 + oppDelay + 0.05 + li * 0.009));
+          lww = le * (1 - itemLeave());
+        }
         logos[li].style.clipPath = "inset(0 0 " + ((1 - lww) * 100).toFixed(2) + "% 0)";
       }
     }
@@ -464,13 +534,12 @@
             // leave fraction is 0.94, so the exit starts ~197vh —
             // ~21vh after Data completes, zero dead tail into 03.
             ? (mobileLike ? "+=280%" : "+=210%")
-            // 03 scroll-through on phone (Piet 2026-08-16 "a LONGER page
-            // that you scroll" / "it doesn't scroll"): pin length = one
-            // viewport + the MEASURED content overrun, so the walk below can
-            // move 1:1 with the finger. Function, so every refresh re-reads
-            // the current measurement.
+            // 03 on phone is TWO STOPS in one pin (Piet 2026-08-17): 03a team
+            // in/hold/out, then 03b applications in/hold/out. Flat 200% — a
+            // measured length is what the retired scroll-through needed, and
+            // its under-read of .team-half is what broke it.
             : (panel.id === "opportunity" && mobileLike
-                ? function () { return "+=" + Math.round(window.innerHeight + oppLiftPx); }
+                ? "+=200%"
                 : (mobileLike ? "+=100%" : "+=150%"))),
       pin: true,
       pinSpacing: true,
@@ -682,35 +751,18 @@
     document.fonts.ready.then(layoutProductCase);
   }
 
-  // 03 overflow lift (Piet 2026-08-14): the applications band sits right
-  // under the team block and overruns the panel bottom; the lift is that
-  // overrun, measured here, ridden by the --opp-rise writer in
-  // applyPanelProgress. Same re-measure events as layoutProductCase.
+  // 03 lift RETIRED (Piet 2026-08-17). The 08-14 overflow lift and the 08-16
+  // 1:1 walk both depended on this measurement, and the measurement is what
+  // broke them: half.offsetHeight reads a flex-shrunk, min-height:0 box, so
+  // once 03's content was taller than a screen the lift came back short and
+  // the bios painted over THE APPLICATIONS. The two halves now stack in one
+  // grid cell and take the screen in turn, so there is no overrun to ride.
+  // Both custom properties are zeroed here rather than deleted so a cached
+  // older stylesheet cannot strand the halves mid-translate.
   var oppPanel = document.getElementById("opportunity");
-  var oppLiftPx = 0;
-  function layoutOpportunitySplit() {
-    if (!oppPanel || !mobileLike) return;
-    // oppLiftPx (outer) feeds the 03 pin-length function and the 1:1 walk.
-    var half = oppPanel.querySelector(".team-half");
-    var oppInner = oppPanel.querySelector(".panel__inner");
-    if (!half || !oppInner) return;
-    var cs = getComputedStyle(oppPanel);
-    var box = oppPanel.clientHeight -
-      (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
-    var lift = Math.max(0, half.offsetHeight + oppInner.offsetHeight - box);
-    oppLiftPx = lift;
-    oppPanel.style.setProperty("--opp-lift", lift + "px");
-  }
-  layoutOpportunitySplit();
-  // Re-measure at the START of every ScrollTrigger refresh so the pin-length
-  // function above always reads a current lift (resize order is not
-  // guaranteed between our listener and ST's own).
-  if (window.ScrollTrigger) ScrollTrigger.addEventListener("refreshInit", layoutOpportunitySplit);
-  window.addEventListener("resize", layoutOpportunitySplit);
-  window.addEventListener("orientationchange", layoutOpportunitySplit);
-  window.addEventListener("load", layoutOpportunitySplit);
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(layoutOpportunitySplit);
+  if (oppPanel) {
+    oppPanel.style.setProperty("--opp-lift", "0px");
+    oppPanel.style.setProperty("--opp-rise", "0");
   }
 
   // ===== Nav scroll-spy ==================================================
