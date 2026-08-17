@@ -3821,12 +3821,21 @@
           // Eased both ends. The wipe used to get its soft start and stop for
           // free from the bar clearing the fold; a linear fade over a short gap
           // reads as a snap at both band edges without this.
+          // ORDER-INDEPENDENT (Piet 2026-08-16: "when I scroll back it is not
+          // going back to the original colour"). The old form committed an
+          // ABSOLUTE stop from every stage's callback, so whichever stage
+          // fired LAST won — and on any refresh all four fire in creation
+          // order with progress 0, leaving the ramp at stop 3 (green) even at
+          // the top of the page. Each stage now owns only its own fraction
+          // and the committed value is the SUM, which no firing order can
+          // corrupt: at the hero all parts are 0 = day beige, past a band its
+          // part is exactly 1.
+          var journeyParts = [0, 0, 0, 0, 0];
           function journey(stop, p) {
             var c = window.bullfinchCanopy;
             if (!c || !c.setJourneyProgress) return;
-            if (p <= 0) { c.setJourneyProgress(stop - 1); return; }
-            if (p >= 1) { c.setJourneyProgress(stop); return; }
-            c.setJourneyProgress(stop - 1 + smootherstep(p));
+            journeyParts[stop] = p <= 0 ? 0 : (p >= 1 ? 1 : smootherstep(p));
+            c.setJourneyProgress(journeyParts[1] + journeyParts[2] + journeyParts[3] + journeyParts[4]);
           }
           function stage(stop, startFn, endFn) {
             ScrollTrigger.create({
