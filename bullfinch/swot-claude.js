@@ -799,17 +799,28 @@
     // half's resolved row-gap so this and --opp-stack-gap can never drift.
     var half = oppPanel.querySelector(".team-half");
     var gap = (half && parseFloat(getComputedStyle(half).rowGap)) || 16;
-    var avail = box - bandH - gap;
+    // Size against the TALLER of the two lower blocks. 03a's lower block is
+    // the team copy, 03b's is the band; sizing to only one of them lets the
+    // other overrun, and centring on each separately would make the headshots
+    // jump between the stops.
+    var copy = oppPanel.querySelector(".team-half__copy");
+    var lower = Math.max(bandH, copy ? copy.offsetHeight : 0);
+    var avail = box - lower - gap;
     var need = people.clientWidth / Math.max(120, avail);
     // Inline, on the element itself: the 720 block sets the property on
     // .panel__video, so a value written to the panel would lose to it.
     people.style.setProperty("--team-pane-aspect", Math.max(1.35, need).toFixed(3));
     // Read the height BACK after the ratio lands (this forces the reflow) and
-    // publish it: .panel__inner's padding-top is faces + gap, which is what
-    // seats 03b directly under the headshots instead of at the screen bottom.
+    // publish it: .panel__inner's padding-top is stack-top + faces + gap,
+    // which seats 03b directly under the headshots, not at the screen bottom.
     var clipWrap = oppPanel.querySelector(".panel__people-clip");
     var facesH = (clipWrap || people).offsetHeight;
     oppPanel.style.setProperty("--opp-faces-h", facesH + "px");
+    // ONE offset for BOTH layers (Piet: "centre the whole contemt on the
+    // page"). Centred on faces + gap + the taller lower block, so the
+    // composition sits centred and the faces never move between the stops.
+    var stackTop = Math.max(0, Math.round((box - (facesH + gap + lower)) / 2));
+    oppPanel.style.setProperty("--opp-stack-top", stackTop + "px");
   }
   layoutOpportunityFaces();
   // Re-measured on the same events as the other measured layouts, and paired

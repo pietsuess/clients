@@ -2566,7 +2566,15 @@
              to seat the applications band right under them instead of at the
              screen bottom. Responsive, not a fixed px. Dial it here only. */
           gap: var(--opp-stack-gap, clamp(10px, 1.8vh, 18px));
+          /* CENTRED AS ONE BLOCK (Piet 2026-08-17: "centre the whole contemt
+             on the page"). Not align-content: center — that would centre 03a
+             on the team copy and 03b on the band, two different heights, and
+             the headshots would JUMP between the stops. layoutOpportunityFaces
+             centres the taller of the two stacks and publishes the one offset
+             both layers use, so the composition is centred and the faces hold
+             their place across the pin. */
           align-content: start;
+          padding-top: var(--opp-stack-top, 0px);
           /* THE OVERLAP BACKSTOP (Piet 2026-08-12: "why can't you keep things
              from overlapping like this"). .team-half is flex: 1 1 auto with
              min-height: 0 (line 621), so the panel shrinks it below its own
@@ -2576,8 +2584,19 @@
              at 500x852: box 443, content 499, 56px painted straight over THE
              APPLICATIONS. The three dials below take that back; this clip is
              the guarantee that it can never paint on the band again whatever
-             the device. */
-          overflow: hidden;
+             the device.
+             RETIRED 2026-08-17 — IT WAS CROPPING THE ANIMATED TEAM ICON.
+             .section-mark is a 128px box hung off the column's right edge
+             (margin-right -0.26 * box = -33.3px), so this clip lands at
+             viewBox unit 74 of the glyph. At rest the people circles reach
+             unit 68 and nothing shows; mid-animation a-move throws each
+             circle 22 * --mo (2.5) = up to 55 units radially, out to ~106,
+             so the build and the disassemble were sliced off at 74 while the
+             static pose looked fine. The overlap it guarded against cannot
+             happen any more: the halves are separate grid layers and
+             layoutOpportunityFaces sizes the faces so faces + gap + the
+             taller lower block always fits the box. */
+          overflow: visible;
         }
         /* 2.8 -> 2.1: the panes were too short for a three-line caption, which
            is what had the names sitting at different heights and running out
@@ -2693,7 +2712,7 @@
            left the hole. */
         #opportunity .panel__inner {
           justify-content: flex-start;
-          padding-top: calc(var(--opp-faces-h, 0px) + var(--opp-stack-gap, clamp(10px, 1.8vh, 18px)));
+          padding-top: calc(var(--opp-stack-top, 0px) + var(--opp-faces-h, 0px) + var(--opp-stack-gap, clamp(10px, 1.8vh, 18px)));
         }
         #opportunity .team-half,
         #opportunity .panel__inner {
@@ -3537,7 +3556,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-60"></script>
+    <script src="swot-claude.js?v=claude-61"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
