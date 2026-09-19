@@ -489,11 +489,6 @@ canvas.spark{display:block;width:100%;height:92px;margin-bottom:12px}
     <div class="sec-num">06 / MATERIAL</div>
     <div>
       <h2 class="sec-title">One material,<br>four scales</h2>
-      <p class="sec-sub">Four panels, <strong>one material</strong> at four magnifications: teal is what the
-        body is carrying, <strong>coral is the part it is not</strong> — drawn in proportion to that gap and
-        nothing else. A matched reading stays teal however intense it gets, settling into a ring with a disc
-        inside it, the mark; <strong>too much running for what carries it goes coral, and nothing running at
-        all goes ash.</strong></p>
     </div>
   </div>
 
@@ -562,8 +557,8 @@ canvas.spark{display:block;width:100%;height:92px;margin-bottom:12px}
         <div class="ch"><span class="cn">04</span><span class="ct">Planet</span><span class="cn" style="margin-left:auto">×10⁶</span></div>
         <canvas id="cPlanet" aria-label="The material distributed over a globe, showing many nervous systems at once"></canvas>
         <div class="ctrl">
-          <div class="ctrl-head"><label class="k" for="mmCrowdScale">Scale</label><span class="v" id="mmCrowdScaleV">10</span></div>
-          <input type="range" id="mmCrowdScale" min="5" max="30" step="1" value="10" aria-label="Scale">
+          <div class="ctrl-head"><label class="k" for="mmCrowdScale">Scale</label><span class="v" id="mmCrowdScaleV">30</span></div>
+          <input type="range" id="mmCrowdScale" min="5" max="30" step="1" value="30" aria-label="Scale">
         </div>
         <div class="ctrl">
           <div class="ctrl-head"><label class="k" for="mmCrowdAlign">Random</label><span class="k" style="margin-left:auto">Aligned</span></div>
@@ -2648,7 +2643,7 @@ canvases.forEach(function(o){
 // the sliders' move away from the middle (0.5 / 0.5) reaches it turned by its
 // own angle (up to CROWD_TURN either way) and scaled by its own gain. Its own
 // clocks and wander, its own starting angles. Drawn flat, no halftone.
-var CROWD_COLS = 10, CROWD_ALIGN = 0, CROWD_ALIGN_MAX = 0.9, CROWD_TURN = Math.PI/3, CROWD_GAIN = [0.4, 1.4], crowd = [], crowdLast = 0;
+var CROWD_COLS = 30, CROWD_ALIGN = 0, CROWD_ALIGN_MAX = 0.9, CROWD_TURN = Math.PI/3, CROWD_GAIN = [0.4, 1.4], crowd = [], crowdLast = 0;
 // Scale: 5 to 30 across. Aligned: each spot pulled up to CROWD_ALIGN_MAX of
 // the way onto the sliders, so a tenth of the scatter always stays
 var crowdScale = document.getElementById('mmCrowdScale'), crowdScaleV = document.getElementById('mmCrowdScaleV');
