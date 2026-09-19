@@ -2475,7 +2475,7 @@ function drawOurs(c, w, h){
   var ox = vx + Math.cos(innerA)*travel, oy = vy + Math.sin(innerA)*travel;
 
   var g = { ax:ax, ay:ay, oR:oR, sx:sx, sy:sy, vR:vR, ox:ox, oy:oy, dr:dr };
-  MM_LIVE = { g:g, outerA:outerA, innerA:innerA };   // the 02 screen's particles gather on this
+  MM_LIVE = { g:g, outerA:outerA, innerA:innerA, v:v };   // the 02 screen's particles gather on this
   var u = Math.min(w, h) / 3.32;
 
   // each disc at its own scale; a disc at no scale is drawn flat, as the
@@ -2547,6 +2547,101 @@ window.mmHome = function(p, t, bound, out){
   out[1] = (g.ay + sn*x + co*y)*maxR - lift;
   return true;
 };
+
+// 03 · PLOT, swapped for one row of candles scrolling left: REGULATION, 0-1.
+// Their Regulation, less however far Activation has run past it, less some of
+// our mark's shake (how hard its numbers swing frame to frame). Flow at the
+// top, Baseline in the middle, Overwhelm and Shut Down at the bottom. A candle
+// is one second: open to close in the body, highest and lowest in the wick.
+// Colour is the state: coral only while Activation leads, so Deep Rest never
+// shows red. Fill is the direction: rose = solid, fell = outline.
+var CANDLE_S = 1, CANDLE_N = 20;
+var LANES = [ { key:'reading', name:'', lo:0, hi:1 } ];
+var SPIN_FULL = 400, SHAPE_KEYS = ['voidR','off','outerR','axisX','axisY','innerP','size'];
+var readPrev = null, readShake = 0;
+function reading(v, dt){
+  if(readPrev && dt > 0){
+    var raw = (Math.abs(v.outerRate - readPrev.outerRate) + Math.abs(v.innerRate - readPrev.innerRate))/dt/900;
+    SHAPE_KEYS.forEach(function(k){ raw += Math.abs(v[k] - readPrev[k])/dt*0.9; });
+    readShake += (Math.min(1, raw) - readShake) * Math.min(1, dt*6);
+  }
+  readPrev = {}; ['outerRate','innerRate'].concat(SHAPE_KEYS).forEach(function(k){ readPrev[k] = v[k]; });
+  // regulation, less however far activation has run past it, less some shake:
+  // Flow 1, Deep Rest .75, Baseline .5, Strain ~.05, Shut Down and Overwhelm 0
+  return Math.max(0, Math.min(1, R - Math.max(0, A - R) - 0.35*readShake));
+}
+LANES.forEach(function(L){ L.hist = []; L.cur = null; });
+var candleT = 0, candleLast = 0;
+function drawCandles(c, w, h){
+  var now = performance.now();
+  var dt = candleLast ? Math.min(0.1, (now - candleLast)/1000) : 0;
+  candleLast = now;
+  if(MM_LIVE && MM_LIVE.v && !RM){
+    candleT += dt;
+    var roll = candleT >= CANDLE_S;
+    if(roll) candleT -= CANDLE_S;
+    var rd = reading(MM_LIVE.v, dt);
+    LANES.forEach(function(L){
+      var x = rd;
+      var lead = Math.max(0, Math.min(1, A - R));   // coral only while activation runs ahead
+      if(!L.cur) L.cur = { o:x, h:x, l:x, c:x, k:lead };
+      L.cur.h = Math.max(L.cur.h, x); L.cur.l = Math.min(L.cur.l, x); L.cur.c = x;
+      L.cur.k = Math.max(L.cur.k, lead);
+      if(roll){
+        L.hist.push(L.cur); if(L.hist.length > CANDLE_N) L.hist.shift();
+        L.cur = { o:x, h:x, l:x, c:x, k:lead };
+      }
+    });
+  }
+  var padL = 30, padR = 14, padT = 26, padB = 24;
+  var ph = h - padT - padB, pw = w - padL - padR;
+  var step = pw / CANDLE_N, bw = Math.max(2, step*0.70);
+  var GREY = 'rgba(255,255,255,0.42)', CORAL_CSS = rgba(CORAL, 1);
+  c.font = '9px "Roboto Mono", monospace';
+  c.textBaseline = 'middle';
+  LANES.forEach(function(L){
+    function Y(x){ return padT + (1 - (Math.max(L.lo, Math.min(L.hi, x)) - L.lo)/(L.hi - L.lo))*ph; }
+    // scale: 0, .5, 1 with faint guides
+    [[0,'0'],[0.5,'.5'],[1,'1']].forEach(function(t){
+      c.strokeStyle = 'rgba(255,255,255,0.055)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(padL, Y(t[0])); c.lineTo(w - padR, Y(t[0])); c.stroke();
+      c.fillStyle = GREY; c.textAlign = 'right'; c.fillText(t[1], padL - 8, Y(t[0]));
+    });
+    c.textAlign = 'left';
+    c.fillStyle = TEAL_CSS;  c.fillText('FLOW', padL + 4, Y(1) - 8);
+    c.fillStyle = CORAL_CSS; c.fillText('OVERWHELM', padL + 4, Y(0) + 8);
+    // name and live number
+    c.fillStyle = GREY; c.fillText('REGULATION', padL, 10);
+    var live = L.cur ? L.cur.c : (L.hist.length ? L.hist[L.hist.length-1].c : 0);
+    c.textAlign = 'right'; c.fillText(live.toFixed(2), w - padR, 10);
+    // time
+    c.textAlign = 'left';  c.fillText('20 S AGO', padL, h - 9);
+    c.textAlign = 'right'; c.fillText('NOW', w - padR, h - 9);
+    c.textAlign = 'left';
+    var all = L.cur ? L.hist.concat([L.cur]) : L.hist;
+    for(var k = 0; k < all.length; k++){
+      var cd = all[k], cx = w - padR - (all.length - 1 - k + 0.5)*step;
+      var yo = Y(cd.o), yc = Y(cd.c), yh = Y(cd.h), yl = Y(cd.l);
+      // colour is the state (coral only while activation leads), fill is the
+      // direction: rose = solid, fell = outline
+      var col = rgba([TEAL[0] + (CORAL[0]-TEAL[0])*cd.k, TEAL[1] + (CORAL[1]-TEAL[1])*cd.k,
+                      TEAL[2] + (CORAL[2]-TEAL[2])*cd.k].map(Math.round), 1);
+      c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(cx, yh); c.lineTo(cx, yl); c.stroke();
+      var bh = Math.max(3, Math.abs(yc - yo)), bt = (yo + yc)/2 - bh/2;
+      if(cd.c >= cd.o) c.fillRect(cx - bw/2, bt, bw, bh);
+      else { c.fillStyle = '#060606'; c.fillRect(cx - bw/2, bt, bw, bh); c.lineWidth = 1.5; c.strokeRect(cx - bw/2 + 0.75, bt + 0.75, bw - 1.5, bh - 1.5); }
+    }
+  });
+  c.textBaseline = 'alphabetic';
+}
+// PARKED 2026-09-19: Piet not sure candles work; 03 is back to their plot.
+// Set CANDLES_ON = true to bring them back.
+var CANDLES_ON = false;
+canvases.forEach(function(o){
+  if(!CANDLES_ON || o.el.id !== 'cPlot') return;
+  o.draw = drawCandles; o.persist = 0; o.chrome = null;
+});
 
 // 04 · PLANET, swapped for a crowd of the mark, 10 across and down to fill the
 // box. Each one is its own mark: its own home spot anywhere on the grid, and
