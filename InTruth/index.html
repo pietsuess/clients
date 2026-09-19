@@ -110,6 +110,22 @@ body{
 #xfade::-webkit-slider-thumb{width:28px; height:28px; margin-top:-13px}
 #xfade::-moz-range-thumb{width:28px; height:28px}
 
+/* hover bubbles */
+#tip{position:fixed; z-index:50; max-width:260px; padding:10px 13px;
+  background:var(--ink); color:var(--cream); border-radius:10px;
+  font-family:var(--ff-mono); font-size:11px; line-height:1.5; letter-spacing:.02em;
+  pointer-events:none; opacity:0; transition:opacity .15s}
+#tip.on{opacity:1}
+#tip::after{content:''; position:absolute; left:var(--tail,24px); top:100%;
+  border:7px solid transparent; border-top-color:var(--ink); margin-left:-7px}
+#tip.below::after{top:auto; bottom:100%; border-top-color:transparent; border-bottom-color:var(--ink)}
+#xfadeV{flex:0 0 auto; width:4ch; text-align:right; cursor:default}
+/* the fold arrow on each card's title: same job as double-clicking the title */
+.fold-btn{float:right; border:0; background:none; padding:0 0 0 8px; margin:0;
+  font-size:11px; line-height:1; color:var(--muted); cursor:pointer}
+.fold-btn:hover{color:var(--ink)}
+.fold-btn::before{content:'\25BE'}
+.card.collapsed .fold-btn::before{content:'\25B8'}
 .orient-btn{
   position:absolute; bottom:4px; right:4px; width:17px; height:17px;
   border:1px solid var(--rule); background:none; color:var(--muted);
@@ -221,6 +237,7 @@ input[type=range]::-moz-range-thumb{
 <div class="xfade">
   <select id="xfA"></select>
   <input type="range" id="xfade" min="0" max="1000" step="1" value="0">
+  <span class="v" id="xfadeV">0.00</span>
   <select id="xfB"></select>
 </div>
 <div id="board">
@@ -280,19 +297,6 @@ input[type=range]::-moz-range-thumb{
     <div class="card-body">
       <div class="row"><span class="k">Radius</span><span class="v" id="outerSizeV"></span></div>
       <input type="range" id="outerSize" min="90" max="160" step="any" value="100">
-    </div>
-  </div>
-
-  <div class="card" id="c_divide" style="left:276px; top:150px">
-    <div class="card-title">Divide</div>
-    <div class="card-body">
-      <div class="row"><span class="k">Count</span><span class="v" id="divideV"></span></div>
-      <input type="range" id="divide" min="0" max="5" step="1" value="0">
-      <div class="seg" id="structure" style="margin-top:15px">
-        <button type="button" data-mode="flower"     aria-pressed="true">Flower of life</button>
-        <button type="button" data-mode="sunflower"  aria-pressed="false">Sunflower</button>
-        <button type="button" data-mode="apollonian" aria-pressed="false">Apollonian</button>
-      </div>
     </div>
   </div>
 
@@ -462,8 +466,7 @@ var RIM       = 0.03;     // the thinnest the outer ring may get beside the cuto
 var HAIRLINE  = 0.007;    // about one screen pixel: the least gap between disc and cutout edge
 
 var DEF = {               // what a disc falls back to with nothing plugged in
-  voidR: 0.6865, off: VOID_OFF, prox: 1, size: 0.4121, outerR: 1,
-  divide: 0, structure: 'flower'
+  voidR: 0.6865, off: VOID_OFF, prox: 1, size: 0.4121, outerR: 1
 };
 
 /* the hole's seat in the body: it never moves, the body turns under it */
@@ -484,8 +487,7 @@ var ringRot  = document.getElementById('ringRot'),
     discRot  = document.getElementById('discRot'),
     prox     = document.getElementById('prox'),
     size     = document.getElementById('size'),
-    voidSize = document.getElementById('voidSize'),
-    divide   = document.getElementById('divide');
+    voidSize = document.getElementById('voidSize');
 
 var ringRotV  = document.getElementById('ringRotV'),
     discRotV  = document.getElementById('discRotV'),
@@ -493,10 +495,8 @@ var ringRotV  = document.getElementById('ringRotV'),
     prox2V    = document.getElementById('prox2V'),
     sizeV     = document.getElementById('sizeV'),
     voidSizeV = document.getElementById('voidSizeV'),
-    divideV   = document.getElementById('divideV'),
     axisV     = document.getElementById('axisV');
 
-var structMode = 'flower';
 
 /* ---------------------------------------------------------------------------
    THE OSCILLATOR. One free-running phase, read as whichever shape is picked,
@@ -621,10 +621,10 @@ var cables = [ {from:'outer', fromIdx:0, to:'image', toIdx:0},
 
 var ACCEPTS = {            // what each card's inputs will take
   outer: ['ringRot','discRot','prox','prox2','voidSize','outerSize','axis','halftone'],
-  inner: ['ringRot','discRot','prox','prox2','size','divide','halftone'],
+  inner: ['ringRot','discRot','prox','prox2','size','halftone'],
   image: ['outer','inner']
 };
-var VARS = ['ringRot','discRot','prox','prox2','size','voidSize','outerSize','divide','halftone'];
+var VARS = ['ringRot','discRot','prox','prox2','size','voidSize','outerSize','halftone'];
 VARS.forEach(function(id){
   // any source can drive any variable, and any other variable (or the axis)
   // can be patched through it to ride along untouched
@@ -676,84 +676,6 @@ function rateFor(disc){
   taps(disc, 'ringRot').forEach(function(c){ r += speed('ringRot', c); });
   taps(disc, 'discRot').forEach(function(c){ r += speed('discRot', c); });
   return r;
-}
-
-/* ---------------------------------------------------------------------------
-   HOW ONE DISC BECOMES MANY. All three are fitted afterwards to sit inside
-   exactly the footprint one disc of radius r would have occupied, so the
-   mark's outer reading never changes as it divides.
-
-   flower     solid dots on the Flower of Life hex lattice, one spacing from
-              their six neighbours, sized to touch rather than overlap so they
-              stay dots. A notch is a whole ring: 1, 7, 19, 37, 61, 91.
-   sunflower  the i-th disc at radius proportional to sqrt(i), each turned
-              137.507 degrees from the last. Fills a disc at any count.
-   apollonian each disc is replaced by two of half its radius, tucked inside
-              its own footprint, so the silhouette holds and detail gets finer.
---------------------------------------------------------------------------- */
-var GOLDEN = Math.PI * (3 - Math.sqrt(5));   // 137.507 degrees
-
-function countFor(k, mode){
-  return mode === 'flower' ? 1 + 3*k*(k+1) : Math.pow(2, k);
-}
-
-function split(n, ratio){
-  var c = [{x:0, y:0}], rad = 1, gen = Math.round(Math.log(n)/Math.LN2);
-  for(var k = 0; k < gen; k++){
-    rad = rad * ratio;
-    var ax = (k % 2 === 0) ? 1 : 0, ay = 1 - ax;
-    var next = [];
-    for(var i = 0; i < c.length; i++){
-      next.push({x: c[i].x - ax*rad, y: c[i].y - ay*rad});
-      next.push({x: c[i].x + ax*rad, y: c[i].y + ay*rad});
-    }
-    c = next;
-  }
-  return { c: c, r: rad };
-}
-
-/* the hex lattice, walked out ring by ring, in units of one lattice spacing */
-function flower(rings){
-  var DIR = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
-  var cells = [[0,0]];
-  for(var k = 1; k <= rings; k++){
-    var q = -k, rr = k;                       // start on one corner of the ring
-    for(var d = 0; d < 6; d++){
-      for(var j = 0; j < k; j++){
-        cells.push([q, rr]);
-        q += DIR[d][0]; rr += DIR[d][1];
-      }
-    }
-  }
-  var c = [];
-  for(var i = 0; i < cells.length; i++){
-    c.push({ x: cells[i][0] + cells[i][1]/2,
-             y: cells[i][1] * Math.sqrt(3)/2 });
-  }
-  return { c: c, r: 0.5 };   // half the lattice spacing, so the dots touch
-}
-
-function cluster(k, r, mode){
-  var n = countFor(k, mode), out;
-  if(mode === 'flower'){
-    out = flower(k);
-  } else if(mode === 'sunflower'){
-    var c = [];
-    for(var i = 0; i < n; i++){
-      var d = Math.sqrt((i + 0.5)/n), a = i * GOLDEN;
-      c.push({x: Math.cos(a)*d, y: Math.sin(a)*d});
-    }
-    out = { c: c, r: 1/Math.sqrt(n) };
-  } else {
-    out = split(n, 0.5);
-  }
-  var bound = 0;
-  for(var j = 0; j < out.c.length; j++){
-    bound = Math.max(bound, Math.sqrt(out.c[j].x*out.c[j].x + out.c[j].y*out.c[j].y) + out.r);
-  }
-  var f = r / bound;
-  for(var m = 0; m < out.c.length; m++){ out.c[m].x *= f; out.c[m].y *= f; }
-  return { c: out.c, r: out.r * f };
 }
 
 /* ------------------------------------------------------------------------ */
@@ -808,31 +730,22 @@ function draw(){
   if(p === null) p = DEF.prox;
   var ts   = taps('inner','size');
   var dr   = ts.length ? val('size', ts[0])/100 : DEF.size;
-  // the divide cable carries both halves: how many, and how they are packed
-  var td   = taps('inner','divide');
-  var k    = td.length ? Math.round(val('divide', td[0])) : DEF.divide;
-  var mode = td.length ? CH.divide[td[0]].struct : DEF.structure;
 
   dr = Math.min(dr, vR - HAIRLINE);       // never as big as the cutout
-  var cl = cluster(k, dr, mode);
-  var n  = cl.c.length;
   var travel = Math.max(0, vR - dr - HAIRLINE) * p;
   var ox = vx + Math.cos(innerA)*travel;
   var oy = vy + Math.sin(innerA)*travel;
 
-  while(discs.children.length > n) discs.removeChild(discs.lastChild);
-  while(discs.children.length < n){
+  if(!discs.children.length){
     discs.appendChild(document.createElementNS('http://www.w3.org/2000/svg','circle'));
   }
   G = { outerOn: outerOn, innerOn: innerOn, ang: outerA, ax: ax, ay: ay,
         s0: s0, vR: vR, oR: oR, dots: [], htO: htO, htI: htI };
-  for(var i = 0; i < n; i++){
-    G.dots.push({ x: ox + cl.c[i].x, y: oy + cl.c[i].y, r: cl.r });
-    var el = discs.children[i];
-    el.setAttribute('cx', (ox + cl.c[i].x).toFixed(4));
-    el.setAttribute('cy', (oy + cl.c[i].y).toFixed(4));
-    el.setAttribute('r', cl.r.toFixed(4));
-  }
+  G.dots.push({ x: ox, y: oy, r: dr });
+  var el = discs.children[0];
+  el.setAttribute('cx', ox.toFixed(4));
+  el.setAttribute('cy', oy.toFixed(4));
+  el.setAttribute('r', dr.toFixed(4));
 }
 
 /* ---------------------------------------------------------------------------
@@ -1001,8 +914,8 @@ function readout(){
   sizeV.textContent     = (val('size')/100).toFixed(2);
   voidSizeV.textContent = (val('voidSize')/100).toFixed(2);
   document.getElementById('outerSizeV').textContent = (val('outerSize')/100).toFixed(2);
-  divideV.textContent   = countFor(Math.round(val('divide')), structMode);
   axisV.textContent     = axisX.toFixed(2) + ' ' + axisY.toFixed(2);
+  document.getElementById('xfadeV').textContent = (+document.getElementById('xfade').value/1000).toFixed(2);
   oscRateV.textContent  = oscPeriod(SEL.osc).toFixed(1) + 'S';
   oscDepthV.textContent = (oscDepth.value/100).toFixed(2);
   oscPhaseV.textContent = (oscPhase.value/100).toFixed(2);
@@ -1045,16 +958,6 @@ structure.addEventListener('click', function(e){
   stash('osc');
 });
 
-var structSeg = document.getElementById('structure');
-structSeg.addEventListener('click', function(e){
-  var b = e.target.closest('button[data-mode]');
-  if(!b) return;
-  structMode = b.dataset.mode;
-  Array.prototype.forEach.call(structSeg.children, function(x){
-    x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
-  });
-  stash('divide');
-});
 
 /* ---------------------------------------------------------------------------
    THE AXIS. Two ways in, both writing the same pair: the pad on its own card,
@@ -1130,7 +1033,7 @@ axisToggle.addEventListener('click', function(){
 --------------------------------------------------------------------------- */
 var CH_CARDS = {
   ringRot:['ringRot'], discRot:['discRot'], prox:['prox'], prox2:['prox2'],
-  size:['size'], voidSize:['voidSize'], outerSize:['outerSize'], divide:['divide'], axis:[],
+  size:['size'], voidSize:['voidSize'], outerSize:['outerSize'], axis:[],
   halftone:['halftone'], osc:['oscRate','oscDepth','oscPhase'], jit:['jitRate','jitDepth']
 };
 var OWNER = {};
@@ -1143,7 +1046,6 @@ function viewOf(id){
   var s = {};
   CH_CARDS[id].forEach(function(k){ s[k] = +document.getElementById(k).value; });
   if(id === 'osc')    s.shape  = oscShape;
-  if(id === 'divide') s.struct = structMode;
   if(id === 'axis'){ s.x = axisX; s.y = axisY; }
   return s;
 }
@@ -1158,7 +1060,6 @@ function show(id){
   var s = CH[id][SEL[id]];
   CH_CARDS[id].forEach(function(k){ document.getElementById(k).value = s[k]; });
   if(id === 'osc'){ oscShape = s.shape; pressed(structure, 'shape', oscShape); }
-  if(id === 'divide'){ structMode = s.struct; pressed(structSeg, 'mode', structMode); }
   if(id === 'axis'){ axisX = s.x; axisY = s.y; placeDot(); }
   pressed(document.getElementById(id + 'Chan'), 'ch', SEL[id]);
 }
@@ -1198,7 +1099,6 @@ function chOf(st){
       one[k] = st.vals && st.vals[k] !== undefined ? +st.vals[k] : CH[id][0][k];
     });
     if(id === 'osc')    one.shape  = st.oscShape || 'sin';
-    if(id === 'divide') one.struct = st.structMode || 'flower';
     if(id === 'axis'){ one.x = st.axisX || 0; one.y = st.axisY || 0; }
     out[id] = (st.ch && st.ch[id]) ? JSON.parse(JSON.stringify(st.ch[id]))
             : [0,1,2,3].map(function(){ return JSON.parse(JSON.stringify(one)); });
@@ -1212,14 +1112,14 @@ var ctx    = canvas.getContext('2d');
 
 var NODES = {
   ringRot:'c_ringRot', discRot:'c_discRot', prox:'c_prox', prox2:'c_prox2', size:'c_size', halftone:'c_halftone',
-  voidSize:'c_voidSize', outerSize:'c_outerSize', divide:'c_divide', axis:'c_axis',
+  voidSize:'c_voidSize', outerSize:'c_outerSize', axis:'c_axis',
   osc:'c_osc', jit:'c_jit', mix1:'c_mix1', mix2:'c_mix2', mix3:'c_mix3',
   outer:'c_outer', inner:'c_inner', image:'c_image'
 };
 var HAS_IN  = { halftone:1, mix1:1, mix2:1, mix3:1, ringRot:1, discRot:1, prox:1, prox2:1, size:1,
-                voidSize:1, outerSize:1, divide:1, outer:1, inner:1, image:1 };
+                voidSize:1, outerSize:1, outer:1, inner:1, image:1 };
 var HAS_OUT = { halftone:1, osc:1, jit:1, mix1:1, mix2:1, mix3:1, ringRot:1, discRot:1, prox:1, prox2:1,
-                size:1, voidSize:1, outerSize:1, divide:1, axis:1, outer:1, inner:1 };
+                size:1, voidSize:1, outerSize:1, axis:1, outer:1, inner:1 };
 
 var CHANNELS = 4;
 var jacks = {};   // id -> {in: [el x4], out: [el x4]}
@@ -1264,12 +1164,22 @@ Object.keys(NODES).forEach(function(id){
     /* cards start collapsed; double-click the TITLE to open and shut them */
     card.classList.add('collapsed');
     card.style.zIndex = 2;
-    card.querySelector('.card-title').addEventListener('dblclick', function(e){
-      e.preventDefault();
+    function fold(){
       var open = card.classList.toggle('collapsed') === false;
+      if(open) everOpened = true;
       card.style.zIndex = open ? 10 : 2;
       paint();
+    }
+    card.querySelector('.card-title').addEventListener('dblclick', function(e){
+      e.preventDefault();
+      fold();
     });
+    var fb = document.createElement('button');
+    fb.type = 'button'; fb.className = 'fold-btn'; fb.setAttribute('aria-label', 'Open or shut');
+    fb.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+    fb.addEventListener('dblclick', function(e){ e.stopPropagation(); e.preventDefault(); });
+    fb.addEventListener('click', function(e){ e.stopPropagation(); fold(); });
+    card.querySelector('.card-title').appendChild(fb);
   }
 });
 
@@ -1539,7 +1449,7 @@ document.addEventListener('pointerup', function(){
 --------------------------------------------------------------------------- */
 var AUTO = [
   ['ringRot','outer'], ['prox','outer'], ['voidSize','outer'], ['outerSize','outer'], ['axis','outer'],
-  ['discRot','inner'], ['prox','inner'], ['size','inner'], ['divide','inner'],
+  ['discRot','inner'], ['prox','inner'], ['size','inner'],
   ['outer','image'], ['inner','image']
 ];
 
@@ -1560,7 +1470,7 @@ function clearPatch(){ cables = []; jackLights(); paint(); }
 
 function snapshot(){
   var st = { cards:{}, cables: cables, vals:{}, solos:{},
-             oscShape: oscShape, structMode: structMode,
+             oscShape: oscShape,
              axisX: axisX, axisY: axisY, axisHidden: axisHidden,
              ch: JSON.parse(JSON.stringify(CH)), sel: JSON.parse(JSON.stringify(SEL)) };
   Object.keys(NODES).forEach(function(id){
@@ -1600,14 +1510,11 @@ function restore(st){
     var el = document.getElementById(k);
     if(el) el.value = st.vals[k];
   });
-  cables = (st.cables || []).slice();
+  cables = (st.cables || []).filter(function(c){ return NODES[c.from] && NODES[c.to]; });
 
   oscShape = st.oscShape || 'sin';
   Array.prototype.forEach.call(document.getElementById('oscShape').children,
     function(x){ x.setAttribute('aria-pressed', x.dataset.shape === oscShape ? 'true' : 'false'); });
-  structMode = st.structMode || 'flower';
-  Array.prototype.forEach.call(structSeg.children,
-    function(x){ x.setAttribute('aria-pressed', x.dataset.mode === structMode ? 'true' : 'false'); });
 
   axisX = st.axisX || 0; axisY = st.axisY || 0; placeDot();
 
@@ -1656,8 +1563,8 @@ function fillList(sel){
 
 /* ---------------------------------------------------------------------------
    THE CROSSFADE. Left end is the left preset exactly, right end the right one.
-   Every slider and the axis blend in between. Cables, oscillator shape and
-   structure can't blend, so they switch at the halfway point. Cards stay put.
+   Every slider and the axis blend in between. Cables and oscillator shape
+   can't blend, so they switch at the halfway point. Cards stay put.
 --------------------------------------------------------------------------- */
 function lerpNum(a, b, t){
   if(a === undefined) return b;
@@ -1688,7 +1595,7 @@ function crossfade(){
   restore({
     cards: snapshot().cards, ch: ch, sel: JSON.parse(JSON.stringify(SEL)),
     cables: near.cables, solos: near.solos, vals: vals,
-    oscShape: near.oscShape, structMode: near.structMode,
+    oscShape: near.oscShape,
     axisX: lerpNum(A.axisX || 0, B.axisX || 0, t),
     axisY: lerpNum(A.axisY || 0, B.axisY || 0, t),
     axisHidden: axisHidden
@@ -1746,13 +1653,6 @@ function unshow(id, n){          // shown number -> the control's own value
   if(id === 'oscRate') return 100 * Math.log(Math.max(n, 1e-6)/0.25) / Math.log(2400);
   if(id === 'jitRate') return 100 * Math.log(Math.max(n, 1e-6)/0.5)  / Math.log(1200);
   if(id === 'halftone') return n;
-  if(id === 'divide'){
-    var best = 0;
-    for(var k = 0; k <= 5; k++){
-      if(Math.abs(countFor(k, structMode) - n) < Math.abs(countFor(best, structMode) - n)) best = k;
-    }
-    return best;
-  }
   return n * 100;
 }
 function numsIn(t){ return (t.match(/-?\d*\.?\d+/g) || []).map(Number); }
@@ -1787,6 +1687,59 @@ document.addEventListener('click', function(e){
   });
   f.addEventListener('blur', function(){ close(true); });
 });
+
+/* hover bubbles: rest on a card or a top-row control and it says what it does.
+   Gone the moment a button goes down, so it never sits over a drag. */
+var TIPS = [["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one, and Depth sets how hard the mix swings what it is plugged into."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
+var tipEl = document.createElement('div'); tipEl.id = 'tip'; document.body.appendChild(tipEl);
+var tipT = null, tipOn = null, everOpened = false;   // the open hint goes after the first card is opened
+function tipFor(el){
+  var sb = el.closest('.solo-btn');
+  if(sb) return [sb, 'Solo. Only this input counts. Press again to use them all.'];
+  var j = el.closest('.jack');
+  if(j){
+    var n = +j.dataset.idx + 1;
+    return [j, j.dataset.side === 'in'
+      ? 'Input ' + n + '. Drag a cable here from an output. It sets channel ' + n + ' of this card.'
+      : 'Output ' + n + '. Drag from here to an input to send channel ' + n + '.'];
+  }
+  var cb = el.closest('.seg.chan button');
+  if(cb) return [cb, 'Pick a channel to set. Each of the four keeps its own settings.'];
+  for(var i = 0; i < TIPS.length; i++){
+    var hit = el.closest(TIPS[i][0]);
+    if(hit) return [hit, TIPS[i][1]];
+  }
+  return null;
+}
+function tipHide(){ clearTimeout(tipT); tipT = null; tipOn = null; tipEl.classList.remove('on'); }
+function tipShow(hit, text){
+  tipEl.textContent = text;
+  if(!everOpened && hit.classList.contains('card') && hit.id !== 'c_image'){
+    ['Each card holds four channels, 1 to 4, each with its own settings. Jack 1 carries channel 1, jack 2 channel 2, and so on. What comes in on input 2 goes out on output 2.',
+     'Double click to open controls'].forEach(function(t){
+      var hint = document.createElement('div');
+      hint.style.marginTop = '6px'; hint.textContent = t;
+      tipEl.appendChild(hint);
+    });
+  }
+  var r = hit.getBoundingClientRect(), W = tipEl.offsetWidth, H = tipEl.offsetHeight;
+  var x = Math.max(8, Math.min(window.innerWidth - W - 8, r.left));
+  var below = r.top - H - 12 < 8;
+  tipEl.classList.toggle('below', below);
+  tipEl.style.left = x + 'px';
+  tipEl.style.top = (below ? r.bottom + 12 : r.top - H - 12) + 'px';
+  tipEl.style.setProperty('--tail', Math.max(14, Math.min(W - 14, r.left + 24 - x)) + 'px');
+  tipEl.classList.add('on');
+}
+document.addEventListener('pointerover', function(e){
+  var f = e.target.closest ? tipFor(e.target) : null;
+  if(!f){ tipHide(); return; }
+  if(tipOn === f[0]) return;
+  tipHide(); tipOn = f[0];
+  tipT = setTimeout(function(){ tipShow(f[0], f[1]); }, 500);
+});
+document.addEventListener('pointerdown', tipHide, true);
+document.addEventListener('scroll', tipHide, true);
 
 requestAnimationFrame(frame);
 </script>
