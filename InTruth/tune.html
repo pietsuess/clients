@@ -96,6 +96,21 @@ body{
   padding:8px 13px; cursor:pointer; min-width:9ch;
 }
 .topbar button:hover{color:var(--ink); border-color:var(--ink)}
+.topbar button[aria-pressed="true"]{color:var(--ink); border-color:var(--ink)}
+/* a switch inside its button: the knob sits right when it is on */
+.topbar button .sw{
+  display:inline-block; width:26px; height:12px; margin-left:10px;
+  vertical-align:-2px; position:relative;
+  border:1px solid currentColor; border-radius:999px;
+}
+.topbar button .sw i{
+  position:absolute; top:1px; left:1px; width:8px; height:8px;
+  border-radius:50%; background:currentColor; transition:left .15s;
+}
+.topbar button[aria-pressed="true"] .sw i{left:15px}
+/* off reads fainter than the rest of the row */
+.topbar button#patchHints[aria-pressed="false"]{color:rgba(20,20,20,.28)}
+.topbar button#patchHints[aria-pressed="false"]:hover{color:rgba(20,20,20,.28)}
 .card.collapsed .solo-btn{display:none}
 
 .xfade{display:flex; gap:14px; align-items:center; width:1180px; margin-bottom:22px}
@@ -244,6 +259,7 @@ input[type=range]::-moz-range-thumb{
   <button type="button" id="patchDel">Delete</button>
   <button type="button" id="patchAuto">Auto patch</button>
   <button type="button" id="patchClear">Clear patch</button>
+  <button type="button" id="patchHints" aria-pressed="true">Hints<span class="sw"><i></i></span></button>
 </div>
 <div class="xfade">
   <select id="xfA"></select>
@@ -361,8 +377,6 @@ input[type=range]::-moz-range-thumb{
       <input type="range" id="mix1L2" min="0" max="100" step="any" value="0">
       <div class="row" style="margin-top:15px"><span class="k">In 4</span><span class="v" id="mix1L3V"></span></div>
       <input type="range" id="mix1L3" min="0" max="100" step="any" value="0">
-      <div class="row" style="margin-top:15px"><span class="k">Depth</span><span class="v" id="mix1DepthV"></span></div>
-      <input type="range" id="mix1Depth" min="0" max="100" step="any" value="35">
     </div>
   </div>
 
@@ -377,8 +391,6 @@ input[type=range]::-moz-range-thumb{
       <input type="range" id="mix2L2" min="0" max="100" step="any" value="0">
       <div class="row" style="margin-top:15px"><span class="k">In 4</span><span class="v" id="mix2L3V"></span></div>
       <input type="range" id="mix2L3" min="0" max="100" step="any" value="0">
-      <div class="row" style="margin-top:15px"><span class="k">Depth</span><span class="v" id="mix2DepthV"></span></div>
-      <input type="range" id="mix2Depth" min="0" max="100" step="any" value="35">
     </div>
   </div>
 
@@ -393,8 +405,6 @@ input[type=range]::-moz-range-thumb{
       <input type="range" id="mix3L2" min="0" max="100" step="any" value="0">
       <div class="row" style="margin-top:15px"><span class="k">In 4</span><span class="v" id="mix3L3V"></span></div>
       <input type="range" id="mix3L3" min="0" max="100" step="any" value="0">
-      <div class="row" style="margin-top:15px"><span class="k">Depth</span><span class="v" id="mix3DepthV"></span></div>
-      <input type="range" id="mix3Depth" min="0" max="100" step="any" value="35">
     </div>
   </div>
 
@@ -594,6 +604,25 @@ function sig(id, c, seen){
   return den > 0 ? num/den : 0.5;
 }
 
+/* how far a source swings the thing it is plugged into, as a share of that
+   thing's range. A mixer never swings anything itself: it carries its sources
+   through, each keeping its own Depth, its In level setting its share. */
+function swing(id, c, seen){
+  if(MIXERS.indexOf(id) < 0) return (sig(id, c) - 0.5) * 2 * depthOf(id, c);
+  seen = seen || {};
+  if(seen[id]) return 0;
+  seen[id] = true;
+  var solo = soloOf(id), num = 0, den = 0;
+  for(var i = 0; i < cables.length; i++){
+    var c2 = cables[i];
+    if(c2.to !== id || SOURCES.indexOf(c2.from) < 0) continue;
+    if(solo >= 0 && c2.toIdx !== solo) continue;
+    var lv = +document.getElementById(id + 'L' + c2.toIdx).value / 100;
+    num += lv * swing(c2.from, c2.fromIdx, seen); den += lv;
+  }
+  return den > 0 ? num/den : 0;
+}
+
 function depthOf(id, c){
   if(CH[id]) return CH[id][c][id + 'Depth'] / 100;
   return document.getElementById(id + 'Depth').value / 100;
@@ -613,7 +642,7 @@ function val(id, c){
     if(cb.to !== id || SOURCES.indexOf(cb.from) < 0) continue;
     if(cb.toIdx !== c) continue;
     if(solo >= 0 && cb.toIdx !== solo) continue;
-    v += (sig(cb.from, cb.fromIdx) - 0.5) * 2 * depthOf(cb.from, cb.fromIdx) * (hi - lo);
+    v += swing(cb.from, cb.fromIdx) * (hi - lo);
   }
   return Math.max(lo, Math.min(hi, v));
 }
@@ -631,8 +660,8 @@ var cables = [ {from:'outer', fromIdx:0, to:'image', toIdx:0},
                {from:'inner', fromIdx:0, to:'image', toIdx:1} ];
 
 var ACCEPTS = {            // what each card's inputs will take
-  outer: ['ringRot','discRot','prox','prox2','voidSize','outerSize','axis','halftone'],
-  inner: ['ringRot','discRot','prox','prox2','size','halftone'],
+  outer: ['ringRot','discRot','prox','prox2','voidSize','outerSize','axis','halftone'].concat(MIXERS),
+  inner: ['ringRot','discRot','prox','prox2','size','halftone'].concat(MIXERS),
   image: ['outer','inner']
 };
 var VARS = ['ringRot','discRot','prox','prox2','size','voidSize','outerSize','halftone'];
@@ -641,8 +670,9 @@ VARS.forEach(function(id){
   // can be patched through it to ride along untouched
   ACCEPTS[id] = SOURCES.concat(VARS.filter(function(x){ return x !== id; }), ['axis']);
 });
-MIXERS.forEach(function(id){              // and mixers take each other, but
-  ACCEPTS[id] = SOURCES.filter(function(x){ return x !== id; });
+MIXERS.forEach(function(id){   // a funnel: it takes anything but itself, and
+  ACCEPTS[id] = SOURCES.filter(function(x){ return x !== id; })
+                       .concat(VARS, ['axis']);
 });
 
 /* a card can solo one of its four inputs, and then only that channel counts */
@@ -677,6 +707,9 @@ function taps(to, from, seen, jack){
     if(jack !== undefined && c.toIdx !== jack) continue;
     if(c.from === from) out.push(c.fromIdx);
     else if(VARS.indexOf(c.from) >= 0) out = out.concat(taps(c.from, from, seen, c.fromIdx));
+    // a mixer is a funnel: whatever lands on any of its ins leaves by its one
+    // out, so follow every cable into it, not just the matching channel
+    else if(MIXERS.indexOf(c.from) >= 0) out = out.concat(taps(c.from, from, seen));
   }
   return out;
 }
@@ -933,8 +966,6 @@ function readout(){
   jitRateV.textContent  = jitPeriod(SEL.jit).toFixed(1) + 'S';
   jitDepthV.textContent = (jitDepth.value/100).toFixed(2);
   MIXERS.forEach(function(m){
-    document.getElementById(m + 'DepthV').textContent =
-      (+document.getElementById(m + 'Depth').value / 100).toFixed(2);
     for(var i = 0; i < 4; i++){
       document.getElementById(m + 'L' + i + 'V').textContent =
         (+document.getElementById(m + 'L' + i).value / 100).toFixed(2);
@@ -1139,7 +1170,11 @@ function makeRow(card, id, side){
   var row = document.createElement('div');
   row.className = 'jack-row ' + side;
   var list = [];
-  for(var i = 0; i < CHANNELS; i++){
+  /* the two discs take everything plugged into them as one, so they hand out
+     one signal: their out row is a single jack. */
+  var n = (side === 'out' && (id === 'outer' || id === 'inner' ||
+                              MIXERS.indexOf(id) >= 0)) ? 1 : CHANNELS;
+  for(var i = 0; i < n; i++){
     var j = document.createElement('div');
     j.className = 'jack ' + side;
     j.dataset.node = id; j.dataset.side = side; j.dataset.idx = i;
@@ -1197,7 +1232,7 @@ Object.keys(NODES).forEach(function(id){
 function jackAt(id, side, idx){
   var row = jacks[id] && jacks[id][side];
   if(!row) return null;
-  var el = row[idx || 0];
+  var el = row[Math.min(idx || 0, row.length - 1)];
   var b = board.getBoundingClientRect(), r = el.getBoundingClientRect();
   return { x: r.left - b.left + r.width/2, y: r.top - b.top + r.height/2 };
 }
@@ -1701,9 +1736,15 @@ document.addEventListener('click', function(e){
 
 /* hover bubbles: rest on a card or a top-row control and it says what it does.
    Gone the moment a button goes down, so it never sits over a drag. */
-var TIPS = [["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one, and Depth sets how hard the mix swings what it is plugged into."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
+var TIPS = [["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
 var tipEl = document.createElement('div'); tipEl.id = 'tip'; document.body.appendChild(tipEl);
-var tipT = null, tipOn = null, everOpened = false;   // the open hint goes after the first card is opened
+var tipT = null, tipOn = null, everOpened = false;
+var hintsOn = true;                       // the Hints button in the top row
+document.getElementById('patchHints').addEventListener('click', function(){
+  hintsOn = !hintsOn;
+  this.setAttribute('aria-pressed', hintsOn ? 'true' : 'false');
+  if(!hintsOn) tipHide();
+});   // the open hint goes after the first card is opened
 function tipFor(el){
   var sb = el.closest('.solo-btn');
   if(sb) return [sb, 'Solo. Only this input counts. Press again to use them all.'];
@@ -1743,6 +1784,7 @@ function tipShow(hit, text){
   tipEl.classList.add('on');
 }
 document.addEventListener('pointerover', function(e){
+  if(!hintsOn){ tipHide(); return; }
   var f = e.target.closest ? tipFor(e.target) : null;
   if(!f){ tipHide(); return; }
   if(tipOn === f[0]) return;
