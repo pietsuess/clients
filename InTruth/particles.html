@@ -1262,6 +1262,7 @@ function voidEdge(dx, dy, cx, cy, r){
    ring and our disc are handed to it as the arrangement.
 --------------------------------------------------------------------------- */
 var MAT = (function(){
+var HOMEONLY = false;   // a retiring grain goes to its home, not to a scatter
 var RCX = 0, RCY = 0;   // where a retired grain is re-placed: its own shape's centre
 var SX = 0, LOCKWARM = 0, BK = 1, HOLD = 1, ESCK = 0, WSC = 1, WRT = 1;   // ESCK: the Spread throw   // HOLD: how much the rim still holds   // BK: how much of their breath is let through   // the field stays teal unless the Colour node says otherwise
 var TEAL = [99,196,194], CORAL = [255,155,138], CREAM = [243,235,234];
@@ -1486,7 +1487,9 @@ function respawn(p, radius, t, bound){
   p.warm = pickWarm();
   // a probability, not a wall: at figure 0.35 exactly half the field was
   // flipping from the arrangement to a random scatter in one step
-  if(bound && Math.random() < Math.min(1, figure*1.35)){
+  // HOMEONLY is the ring: their scatter is a full disc of the bound, so a
+  // retiring ring grain kept being seeded in the hole and the middle filled in
+  if(bound && (HOMEONLY || Math.random() < Math.min(1, figure*1.35))){
     // arriving from somewhere else would draw a spoke across the arrangement
     orderHome(p, t || 0, bound, HOME);
     p.x = HOME[0]; p.y = HOME[1]; p.px = p.x; p.py = p.y;
@@ -1760,6 +1763,7 @@ return { makeGrains: makeGrains, stepGrain: stepGrain, paintField: paintField,
          setHold: function(v){ HOLD = v; },
          setEscape: function(v){ ESCK = v; },
          setRespawnAt: function(x, y){ RCX = x; RCY = y; },
+         setHomeOnly: function(v){ HOMEONLY = !!v; },
          setGust: function(sc, rt){ WSC = sc; WRT = rt; },
          get turbNow(){ return turb; }, get figureNow(){ return figure; },
          setInk: function(t, c){ TEAL[0]=t[0]; TEAL[1]=t[1]; TEAL[2]=t[2];
@@ -1880,6 +1884,18 @@ var PCLK_O = 0, PCLK_I = 0;
    further, so the material slows, stops and comes back on its own and the edge
    reads as a falloff. Their own rim caught anything past it in one step and
    teleported the far ones across the frame, which is the hard line. */
+/* the cutout's side of the same boundary: a grain that wanders into the hole is
+   eased back out. Random takes the home pull off, and without this the ring
+   simply drained into the middle. */
+function voidReturn(p, R, dt, cx, cy){
+  var ex = p.x - cx, ey = p.y - cy;
+  var r = Math.sqrt(ex*ex + ey*ey);
+  var B = R*0.18;
+  if(r > R + B) return;
+  if(r < 1e-6){ ex = R; ey = 0; r = R; }   // dead centre has no direction of its own
+  var push = ((R + B) - r) * Math.min(1, Math.pow(((R + B) - r)/B, 2)) * 3.4 * dt;
+  p.x += (ex/r)*push; p.y += (ey/r)*push;
+}
 function rimReturn(p, R, dt, cx, cy){
   cx = cx || 0; cy = cy || 0;
   var ex = p.x - cx, ey = p.y - cy;
@@ -2006,11 +2022,17 @@ function field(dt){
   if(LASTAO === null) LASTAO = G.ang;
   var dAO = G.ang - LASTAO; LASTAO = G.ang;
   var cO = Math.cos(dAO), sO = Math.sin(dAO);
-  MAT.setRespawnAt(0, 0);      // the ring re-places around the mark's centre
+  MAT.setRespawnAt(0, 0);
+  MAT.setHomeOnly(true);       // the ring re-places in its own band
+  // where the body's turn has carried the cutout's centre
+  var ac = Math.cos(G.ang), as = Math.sin(G.ang);
+  var vex = G.s0.x - G.ax, vey = G.s0.y - G.ay;
+  var VX = G.ax + ac*vex - as*vey, VY = G.ay + as*vex + ac*vey;
   for(var i = 0; i < NDRAW; i++){
     if(!MSET[i].core){
       MAT.stepGrain(MSET[i], dt, FCLK, bound, paceO);
       rimReturn(MSET[i], bound*(1 + spO*0.70), dt);
+      voidReturn(MSET[i], G.vR, dt, VX, VY);
       if(dAO) spin(MSET[i], cO, sO, G.ax, G.ay);
     }
   }
@@ -2031,6 +2053,7 @@ function field(dt){
   var cI = Math.cos(dAI), sI = Math.sin(dAI);
   var dc = G.dots.length ? G.dots[0] : null;
   if(dc) MAT.setRespawnAt(dc.x, dc.y);   // the disc re-places inside itself
+  MAT.setHomeOnly(false);
   for(var i = 0; i < NDRAW; i++){
     if(MSET[i].core){
       MAT.stepGrain(MSET[i], dt, FCLK, dc ? dc.r : bound, paceI);
