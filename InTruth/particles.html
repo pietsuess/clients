@@ -2687,11 +2687,19 @@ function snapshot(){
 function restore(st){
   Object.keys(NODES).filter(S).forEach(dropInstance);
   (st.inst || []).forEach(function(id){ addInstance(K(id), null, id); });
-  if(st.out){                       // an older patch has no list; leave the board
-    SHELF_IDS.forEach(function(id){
-      cardOf(id).classList.toggle('stowed', st.out.indexOf(id) < 0);
+  // an older patch was saved before the drawer and carries no list, so its own
+  // cards were left in the shelf while its cables still ran to them
+  var out = st.out;
+  if(!out){
+    out = Object.keys(st.cards || {});
+    (st.cables || []).forEach(function(c){
+      if(out.indexOf(c.from) < 0) out.push(c.from);
+      if(out.indexOf(c.to)   < 0) out.push(c.to);
     });
   }
+  SHELF_IDS.forEach(function(id){
+    cardOf(id).classList.toggle('stowed', out.indexOf(id) < 0);
+  });
   Object.keys(st.cards || {}).forEach(function(id){
     var c = document.getElementById(NODES[id]);
     if(!c) return;
