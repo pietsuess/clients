@@ -1966,9 +1966,7 @@ function field(dt){
   MAT.setGust(WO ? WO.scale : 1, WO ? WO.rate : 1);
   readingFor(WAMT, 0);
   MAT.setPulse(Math.sin(FCLK * Math.PI*2/11));
-  // the mark is drawn at 0.62 inside its box, so material that leaves the shape
-  // has room on the canvas instead of being cut on the box's corner
-  MAT.setScale(mw/3.32*0.62);
+  MAT.setScale(mw/3.32);                       // their field at our mark's size
   MAT.setInk(rgbOf(inkFor('outer')), rgbOf(inkFor('inner')));
 
   // the two discs own their own grains: the ring's are the plain ones, the inner
