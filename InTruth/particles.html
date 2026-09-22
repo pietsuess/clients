@@ -1504,8 +1504,9 @@ function stepGrain(p, dt, t, bound, pace){
   // Speed against its own 100: everything that moves takes it, so Speed 0 is
   // dead still and only the rotations carry the material
   var kp = Math.min(1, pace / (tempo || 1));
-  p.life -= dt*kp;                 // retirement is paced too, or Speed 0 still churns
-  if(p.life <= 0){ respawn(p, bound*0.94, t, bound); return; }   // retire, so nothing settles
+  // A grain is never retired and never re-placed. Every birth was a teleport,
+  // and the eye read the circle they came from as a crop with material pouring
+  // off it. The fading trail is the tracer; the grain simply keeps going.
   flow(p.x, p.y, t, V);
   p.px = p.x; p.py = p.y;
   var r = Math.sqrt(p.x*p.x + p.y*p.y) + 1e-4, sp;
@@ -1879,6 +1880,14 @@ var SPR_O = 0, SPR_I = 0;   // each shape's Spread, set by field() each frame
    read off these, not off the frame clock, so Speed 0 holds it still and a
    Speed change eases instead of jumping the phase */
 var PCLK_O = 0, PCLK_I = 0;
+var FRESH = [0, 0];
+function seatFresh(p){
+  if(!p.fresh) return;
+  p.fresh = false;
+  if(window.mmHome(p, FCLK, G.oR, FRESH)){
+    p.x = FRESH[0]; p.y = FRESH[1]; p.px = p.x; p.py = p.y;
+  }
+}
 /* The rim is a boundary the grain meets and turns back from, not a crop. It
    starts to give one band short of the radius and stiffens as the grain goes
    further, so the material slows, stops and comes back on its own and the edge
@@ -1975,8 +1984,9 @@ function field(dt){
       MSET[k].core = k < nI;
       MSET[k].hu = k < nI ? Math.sqrt((k + 0.5)/Math.max(1, nI))
                           : Math.sqrt((k - nI + 0.5)/Math.max(1, nR));
-      // a grain that just came in, or just changed shape, is born at its home
-      if(on && (MSET[k].core !== wasCore || !MSET[k].live)) MSET[k].life = 0;
+      // a grain Density has just brought in takes its place at its own home,
+      // with no streak behind it, and that is the only placement left
+      if(on && (MSET[k].core !== wasCore || !MSET[k].live)) MSET[k].fresh = true;
       MSET[k].live = on;
     }
     MCOUNT = nR + '/' + nI;
@@ -2012,6 +2022,7 @@ function field(dt){
   MAT.setHomeOnly(true);       // a retiring grain reappears at its own home
   for(var i = 0; i < NDRAW; i++){
     if(!MSET[i].core){
+      seatFresh(MSET[i]);
       MAT.stepGrain(MSET[i], dt, FCLK, bound, paceO);
       rimReturn(MSET[i], bound*(1 + spO*0.70), dt);
       if(dAO) spin(MSET[i], cO, sO, G.ax, G.ay);
@@ -2036,6 +2047,7 @@ function field(dt){
   if(dc) MAT.setRespawnAt(dc.x, dc.y);   // the disc re-places inside itself
   for(var i = 0; i < NDRAW; i++){
     if(MSET[i].core){
+      seatFresh(MSET[i]);
       MAT.stepGrain(MSET[i], dt, FCLK, dc ? dc.r : bound, paceI);
       if(dc) rimReturn(MSET[i], dc.r*(1 + spI*0.70), dt, dc.x, dc.y);
       if(dAI && dc) spin(MSET[i], cI, sI, dc.x, dc.y);
