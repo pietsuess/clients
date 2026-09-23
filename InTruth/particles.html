@@ -122,6 +122,17 @@ body{
   background:none; border:none; cursor:pointer; padding:0;
 }
 .stow-btn:hover{color:var(--ink)}
+/* the on/off dot: filled is on, hollow is off */
+.byp-btn{
+  position:absolute; right:50px; top:11px; width:16px; height:16px;
+  background:none; border:none; cursor:pointer; padding:0;
+}
+.card:not(:has(.stow-btn)) .byp-btn{right:12px}
+.byp-btn::before{content:''; display:block; width:7px; height:7px; margin:4px auto 0;
+  border-radius:50%; border:1px solid var(--teal-lift); background:var(--teal-lift)}
+.card.off .byp-btn::before{border-color:var(--muted); background:none}
+.byp-btn:hover::before{border-color:var(--ink)}
+.card.off .card-title, .card.off .card-body{opacity:.35}
 #selectBox{
   position:fixed; border:1px solid var(--ink); background:rgba(20,20,20,.06);
   pointer-events:none; z-index:9999; display:none;
@@ -133,6 +144,7 @@ body{
   color:var(--ink); background:none; border:1px solid var(--rule);
   border-radius:999px; padding:8px 13px; min-width:13ch;
 }
+.seg.letters{margin-bottom:11px}
 .card select.path{
   font-family:var(--ff-mono); font-size:11px; letter-spacing:.12em;
   color:var(--ink); background:none; border:1px solid var(--rule);
@@ -520,6 +532,14 @@ input[type=range]::-moz-range-thumb{
     </div>
   </div>
 
+  <div class="card" id="c_split" style="left:264px; top:356px">
+    <div class="card-title">Splitter</div>
+    <div class="card-body">
+      <div class="row"><span class="k">Reaches</span></div>
+      <div class="seg letters"><button type="button" data-ltr="0" aria-pressed="true">A</button><button type="button" data-ltr="1" aria-pressed="false">B</button><button type="button" data-ltr="2" aria-pressed="false">C</button><button type="button" data-ltr="3" aria-pressed="false">D</button></div>
+    </div>
+  </div>
+
   <div class="card" id="c_halftone" style="left:264px; top:470px">
     <div class="card-title">Halftone</div>
     <div class="card-body">
@@ -728,6 +748,10 @@ function jit(id, c){
    however many sources land on it and whatever the levels are.
 --------------------------------------------------------------------------- */
 var MIXERS  = ['mix1', 'mix2', 'mix3'];
+/* the cards switched off. A card that is off drives nothing: every cable into
+   or out of it is passed over as if it had been pulled, and it keeps its
+   settings and its cables for when it is switched back on */
+var OFF = {};
 var SOURCES = ['osc','jit'].concat(MIXERS);   // nodes that emit a 0 to 1 signal
 
 /* seen guards against a mixer feeding itself round a loop. c is the channel,
@@ -741,7 +765,7 @@ function sig(id, c, seen){
   seen[id] = true;
   var solo = soloOf(id), num = 0, den = 0;
   for(var i = 0; i < cables.length; i++){
-    var c = cables[i];
+    var c = cables[i]; if(OFF[c.from] || OFF[c.to]) continue;
     if(c.to !== id) continue;
     if(solo >= 0 && c.toIdx !== solo) continue;
     var lv = +document.getElementById(SID(id, K(id) + 'L' + c.toIdx)).value / 100;
@@ -760,7 +784,7 @@ function swing(id, c, seen){
   seen[id] = true;
   var solo = soloOf(id), num = 0, den = 0;
   for(var i = 0; i < cables.length; i++){
-    var c2 = cables[i];
+    var c2 = cables[i]; if(OFF[c2.from] || OFF[c2.to]) continue;
     if(c2.to !== id || SOURCES.indexOf(K(c2.from)) < 0) continue;
     if(solo >= 0 && c2.toIdx !== solo) continue;
     var lv = +document.getElementById(SID(id, K(id) + 'L' + c2.toIdx)).value / 100;
@@ -774,7 +798,7 @@ function swing(id, c, seen){
 function axisAt(c){
   var base = CH.axis[c], solo = soloOf('axis'), d = [0, 0];
   for(var i = 0; i < cables.length; i++){
-    var cb = cables[i];
+    var cb = cables[i]; if(OFF[cb.from] || OFF[cb.to]) continue;
     if(cb.to !== 'axis' || SOURCES.indexOf(K(cb.from)) < 0) continue;
     if(cb.toIdx > 1) continue;
     if(solo >= 0 && cb.toIdx !== solo) continue;
@@ -800,7 +824,7 @@ function sweep(id, c, seen){
   seen[id] = true;
   var solo = soloOf(id), ns = 0, nd = 0, den = 0;
   for(var i = 0; i < cables.length; i++){
-    var c2 = cables[i];
+    var c2 = cables[i]; if(OFF[c2.from] || OFF[c2.to]) continue;
     if(c2.to !== id || SOURCES.indexOf(K(c2.from)) < 0) continue;
     if(solo >= 0 && c2.toIdx !== solo) continue;
     var lv = +document.getElementById(SID(id, K(id) + 'L' + c2.toIdx)).value / 100;
@@ -832,7 +856,7 @@ function val(id, c){
   var lo = +el.min, hi = +el.max, v = CH[id][c][own];
   var solo = soloOf(id);
   for(var i = 0; i < cables.length; i++){
-    var cb = cables[i];
+    var cb = cables[i]; if(OFF[cb.from] || OFF[cb.to]) continue;
     if(cb.to !== id || SOURCES.indexOf(K(cb.from)) < 0) continue;
     if(cb.toIdx !== c) continue;
     if(solo >= 0 && cb.toIdx !== solo) continue;
@@ -849,7 +873,7 @@ function speed(id, c){ return (val(id, c)/100) * MAX_DPS; }   // degrees per sec
 function setVal(node, k, el, base){
   var lo = +el.min, hi = +el.max, v = base === undefined ? +el.value : base;
   for(var i = 0; i < cables.length; i++){
-    var cb = cables[i];
+    var cb = cables[i]; if(OFF[cb.from] || OFF[cb.to]) continue;
     if(cb.to !== node || cb.toIdx !== k) continue;
     if(SOURCES.indexOf(K(cb.from)) >= 0){
       v = swept(v, lo, hi, cb.from, cb.fromIdx);
@@ -859,6 +883,79 @@ function setVal(node, k, el, base){
     }
   }
   return Math.max(lo, Math.min(hi, v));
+}
+
+/* the same four settings, letter by letter. A plain cable moves all four
+   letters. A Splitter's cable moves only the letters its inputs are switched
+   on to, whether it lands on the jack straight or comes through a mixer. With
+   no splitter in the patch all four read exactly what setVal reads. */
+function setValByGroup(node, k, el, base){
+  var lo = +el.min, hi = +el.max, b = base === undefined ? +el.value : base;
+  var out = [b, b, b, b];
+  for(var i = 0; i < cables.length; i++){
+    var cb = cables[i]; if(OFF[cb.from] || OFF[cb.to]) continue;
+    if(cb.to !== node || cb.toIdx !== k) continue;
+    for(var L = 0; L < 4; L++) out[L] = setStep(out[L], lo, hi, cb.from, cb.fromIdx, L, {});
+  }
+  for(var L = 0; L < 4; L++) out[L] = Math.max(lo, Math.min(hi, out[L]));
+  return out;
+}
+/* one cable's move on one letter: a source swings it, a variable puts it at
+   its own place on its range, a splitter hands on whatever lands on the inputs
+   switched on to this letter and nothing else */
+function setStep(v, lo, hi, from, fromIdx, L, seen){
+  var kf = K(from);
+  if(SOURCES.indexOf(kf) >= 0){
+    var w = sweepL(from, fromIdx, L);
+    return v + ((lo + w.s*(hi - lo)) - v) * w.d;
+  }
+  if(VARS.indexOf(kf) >= 0 && document.getElementById(SID(from, kf))){
+    var e2 = document.getElementById(SID(from, kf)), l2 = +e2.min, h2 = +e2.max;
+    return lo + (val(from, fromIdx) - l2) / (h2 - l2) * (hi - lo);
+  }
+  if(kf === 'split' && !seen[from]){
+    seen[from] = true;
+    for(var j = 0; j < CHANNELS; j++){
+      if(!ltrOf(from, j)[L]) continue;
+      for(var i = 0; i < cables.length; i++){
+        var cu = cables[i]; if(OFF[cu.from] || OFF[cu.to]) continue;
+        if(cu.to === from && cu.toIdx === j) v = setStep(v, lo, hi, cu.from, cu.fromIdx, L, seen);
+      }
+    }
+    seen[from] = false;
+  }
+  return v;
+}
+/* sweep() for one letter. A mixer blends only the inputs that reach that
+   letter: a splitter on one of its ins counts for the letters it is switched
+   on to and is left out of the others' blend, not mixed in as nothing */
+function sweepL(id, c, L, seen){
+  if(MIXERS.indexOf(K(id)) < 0) return { s: sig(id, c), d: depthOf(id, c) };
+  seen = seen || {};
+  if(seen[id]) return { s: 0.5, d: 0 };
+  seen[id] = true;
+  var solo = soloOf(id), ns = 0, nd = 0, den = 0;
+  for(var i = 0; i < cables.length; i++){
+    var c2 = cables[i]; if(OFF[c2.from] || OFF[c2.to]) continue;
+    if(c2.to !== id) continue;
+    if(solo >= 0 && c2.toIdx !== solo) continue;
+    var ws = [];
+    if(SOURCES.indexOf(K(c2.from)) >= 0) ws.push(sweepL(c2.from, c2.fromIdx, L, seen));
+    else if(K(c2.from) === 'split'){
+      for(var j = 0; j < CHANNELS; j++){
+        if(!ltrOf(c2.from, j)[L]) continue;
+        for(var q = 0; q < cables.length; q++){
+          var cu = cables[q]; if(OFF[cu.from] || OFF[cu.to]) continue;
+          if(cu.to === c2.from && cu.toIdx === j && SOURCES.indexOf(K(cu.from)) >= 0)
+            ws.push(sweepL(cu.from, cu.fromIdx, L, seen));
+        }
+      }
+    }
+    if(!ws.length) continue;
+    var lv = +document.getElementById(SID(id, K(id) + 'L' + c2.toIdx)).value / 100;
+    for(var u = 0; u < ws.length; u++){ ns += lv*ws[u].s; nd += lv*ws[u].d; den += lv; }
+  }
+  return den > 0 ? { s: ns/den, d: nd/den } : { s: 0.5, d: 0 };
 }
 
 /* ---------------------------------------------------------------------------
@@ -872,8 +969,8 @@ var cables = [ {from:'outer', fromIdx:0, to:'image', toIdx:0},
                {from:'inner', fromIdx:0, to:'image', toIdx:1} ];
 
 var ACCEPTS = {            // what each card's inputs will take
-  outer: ['ringRot','discRot','prox','prox2','voidSize','outerSize','axis','halftone','spread','weather','colour'].concat(MIXERS),
-  inner: ['ringRot','discRot','prox','prox2','size','halftone','spread','weather','colour'].concat(MIXERS),
+  outer: ['ringRot','discRot','prox','prox2','voidSize','outerSize','axis','halftone','spread','weather','colour','split'].concat(MIXERS),
+  inner: ['ringRot','discRot','prox','prox2','size','halftone','spread','weather','colour','split'].concat(MIXERS),
   image: ['outer','inner'],
   axis: SOURCES.slice()
 };
@@ -881,15 +978,17 @@ var VARS = ['ringRot','discRot','prox','prox2','size','voidSize','outerSize','ha
 VARS.forEach(function(id){
   // any source can drive any variable, and any other variable (or the axis)
   // can be patched through it to ride along untouched
-  ACCEPTS[id] = SOURCES.concat(VARS.filter(function(x){ return x !== id; }), ['axis']);
+  ACCEPTS[id] = SOURCES.concat(VARS.filter(function(x){ return x !== id; }), ['axis', 'split']);
 });
+// the splitter takes what a mixer takes, and its out is accepted by the discs
+ACCEPTS.split = SOURCES.concat(VARS, ['axis']);
 MIXERS.forEach(function(id){   // a funnel: it takes anything but itself, and
   ACCEPTS[id] = SOURCES.filter(function(x){ return x !== id; })
-                       .concat(VARS, ['axis']);
+                       .concat(VARS, ['axis', 'split']);
 });
 // a disc's Density, Speed and Random take anything a variable takes
 ['outerSet','innerSet'].forEach(function(id){
-  ACCEPTS[id] = SOURCES.concat(VARS, ['axis']);
+  ACCEPTS[id] = SOURCES.concat(VARS, ['axis', 'split']);
 });
 
 /* a card can solo one of its four inputs, and then only that channel counts */
@@ -901,7 +1000,7 @@ function soloOf(id){
 function fed(to, from){
   var solo = soloOf(to);
   for(var i = 0; i < cables.length; i++){
-    var c = cables[i];
+    var c = cables[i]; if(OFF[c.from] || OFF[c.to]) continue;
     if(c.to === to && K(c.from) === from && (solo < 0 || c.toIdx === solo)) return true;
   }
   return false;
@@ -912,6 +1011,28 @@ function fed(to, from){
    passes straight through it, unchanged, to wherever that one is cabled, and
    channels stay apart: what comes in on input N only leaves by output N.
    jack, when given, is the one input of 'to' being followed. */
+/* THE SPLITTER. Its four channels are its four inputs: channel 1 is In 1, and
+   the letters pressed on it are the groups of grains that input is allowed to
+   reach. It starts isolated: In 1 reaches A, In 2 reaches B, In 3 C and In 4 D. Its state rides in CH, like every card's. */
+function ltrSeg(id){
+  // initChannels runs before NODES is assigned, so the card is found the same
+  // way it finds it there. Do not tidy this into cardOf()
+  var el = document.getElementById((typeof NODES !== 'undefined' && NODES[id]) || ('c_' + id));
+  return el && el.querySelector('.seg.letters');
+}
+function ltrOf(id, c){
+  var st = CH[id] && CH[id][c];
+  return (st && st.ltr) || [0,1,2,3].map(function(L){ return L === c ? 1 : 0; });
+}
+document.addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('.seg.letters button') : null;
+  if(!b) return;
+  var card = b.closest('.card'), id = card && card.id.slice(2);
+  if(!id) return;
+  e.stopPropagation();
+  b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+  stash(id); paint();
+});
 function taps(to, from, seen, jack){
   var solo = soloOf(to), out = [];
   seen = seen || {};
@@ -919,14 +1040,34 @@ function taps(to, from, seen, jack){
   if(seen[key]) return out;
   seen[key] = true;
   for(var i = 0; i < cables.length; i++){
-    var c = cables[i];
+    var c = cables[i]; if(OFF[c.from] || OFF[c.to]) continue;
     if(c.to !== to || (solo >= 0 && c.toIdx !== solo)) continue;
     if(jack !== undefined && c.toIdx !== jack) continue;
-    if(K(c.from) === from) out.push({ id: c.from, idx: c.fromIdx });
-    else if(VARS.indexOf(K(c.from)) >= 0) out = out.concat(taps(c.from, from, seen, c.fromIdx));
+    // `grp` is the jack this signal landed on at the far end: a shape's grains
+    // are dealt into four lettered groups, and a cable into jack 1 drives the
+    // A grains, jack 2 the B, and so on
+    var g = c.toIdx;
+    if(K(c.from) === from) out.push({ id: c.from, idx: c.fromIdx, grp: g });
+    else if(VARS.indexOf(K(c.from)) >= 0) out = out.concat(taps(c.from, from, seen, c.fromIdx).map(function(t){
+      // a signal that came through a splitter keeps its letter the rest of the
+      // way, whatever it is patched through on the way to a shape
+      return t.ltr ? t : { id: t.id, idx: t.idx, grp: t.grp === undefined ? g : t.grp }; }));
     // a mixer is a funnel: whatever lands on any of its ins leaves by its one
     // out, so follow every cable into it, not just the matching channel
-    else if(MIXERS.indexOf(K(c.from)) >= 0) out = out.concat(taps(c.from, from, seen));
+    else if(MIXERS.indexOf(K(c.from)) >= 0) out = out.concat(taps(c.from, from, seen).map(function(t){
+      return t.ltr ? t : { id: t.id, idx: t.idx, grp: g }; }));
+    else if(K(c.from) === 'split'){
+      // whatever lands on In j leaves once for every letter j is switched on to
+      for(var j = 0; j < CHANNELS; j++){
+        var sp = ltrOf(c.from, j), up = taps(c.from, from, seen, j);
+        for(var u = 0; u < up.length; u++)
+          for(var L = 0; L < CHANNELS; L++)
+            // `ltr` marks a signal that came through a splitter: it speaks to
+            // that letter and no other. Without it a split cable looked like
+            // an ordinary one and was handed to all four groups
+            if(sp[L]) out.push({ id: up[u].id, idx: up[u].idx, grp: L, ltr: 1 });
+      }
+    }
   }
   return out;
 }
@@ -1034,6 +1175,24 @@ function hex2rgb(h){
 }
 var TEAL_RGB = hex2rgb(TEAL), RED_RGB = hex2rgb(RED);
 /* a disc's ink: its own Colour cable, teal at 0 and red at 1 */
+/* the same rule the weather uses, for any variable: one cable drives the whole
+   shape, two or more and each one only reaches the letters it was split to */
+function byGroup(disc, kind, fallback){
+  var t = taps(disc, kind);
+  if(!t.length) return [fallback, fallback, fallback, fallback];
+  var out = [fallback, fallback, fallback, fallback];
+  t.forEach(function(x){
+    var v = val(x.id, x.idx)/100;
+    if(x.ltr) out[x.grp & 3] = v;               // this letter alone
+    else for(var L = 0; L < 4; L++) out[L] = v; // a plain cable, the whole shape
+  });
+  return out;
+}
+function inkAt(m){
+  return 'rgb(' + Math.round(TEAL_RGB[0] + (RED_RGB[0]-TEAL_RGB[0])*m) + ','
+                + Math.round(TEAL_RGB[1] + (RED_RGB[1]-TEAL_RGB[1])*m) + ','
+                + Math.round(TEAL_RGB[2] + (RED_RGB[2]-TEAL_RGB[2])*m) + ')';
+}
 function inkFor(disc){
   var t = taps(disc, 'colour');
   var m = t.length ? val(t[0].id, t[0].idx)/100 : 0;
@@ -1263,12 +1422,28 @@ function wth(k, id, c){
   return k === 'wthAmt' ? setVal(id, c, el, base) : base;
 }
 /* what the weather is doing for a disc: nothing at all unless it is cabled in */
+function oneWeather(t){
+  return { amt: wth('wthAmt', t.id, t.idx)/100,
+           scale: 1 / Math.max(0.05, wth('wthScale', t.id, t.idx)/100),
+           rate: wth('wthRate', t.id, t.idx)/100 };
+}
 function weatherFor(disc){
   var t = taps(disc, 'weather');
+  return t.length ? oneWeather(t[0]) : null;
+}
+/* and the same, letter by letter. One cable blows the whole shape, exactly as
+   before. Two or more, and each one only reaches the letter whose jack it is
+   plugged into, so part of the material can be torn while the rest holds. */
+function weatherByGroup(disc){
+  var t = taps(disc, 'weather');
   if(!t.length) return null;
-  return { amt: wth('wthAmt', t[0].id, t[0].idx)/100,
-           scale: 1 / Math.max(0.05, wth('wthScale', t[0].id, t[0].idx)/100),
-           rate: wth('wthRate', t[0].id, t[0].idx)/100 };
+  var W = [null, null, null, null];
+  t.forEach(function(x){
+    var one = oneWeather(x);
+    if(x.ltr) W[x.grp & 3] = one;               // split: that letter alone
+    else { W[0] = W[1] = W[2] = W[3] = one; }   // plain cable: the whole shape
+  });
+  return W;
 }
 /* The push on one particle, the way the material page does it: the front moves
    the grain itself, no momentum and no offset held to one side, and how hard it
@@ -1714,8 +1889,11 @@ function fieldBuf(c, w, h){
     var a = document.createElement('canvas'); a.width = FW; a.height = FH;
     var o = document.createElement('canvas'); o.width = FW; o.height = FH;
     var octx = o.getContext('2d');
+    // the ink buffer: only drawn into while a shape's letters carry different inks
+    var k = document.createElement('canvas'); k.width = FW; k.height = FH;
     s = { a:a, actx:a.getContext('2d', {willReadFrequently:true}), o:o, octx:octx,
-          img:octx.createImageData(FW, FH), FW:FW, FH:FH };
+          img:octx.createImageData(FW, FH), FW:FW, FH:FH,
+          k:k, kctx:k.getContext('2d', {willReadFrequently:true}), kon:false };
     FIELD_ACC.set(c, s);
   }
   return s;
@@ -1726,10 +1904,13 @@ var TONE_K = 2.6;
    shape is stepped on its own reading, so the painter cannot read the module's
    globals: they hold whichever shape was stepped last, and one disc's Random
    then dimmed and fast-faded the other one out of the picture. */
-function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW){
+var PBK = null;   // the grains sorted into their strokes, reused every frame
+function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW, noFade, inkT, inkW){
   if(teT === undefined) teT = tear;  if(viT === undefined) viT = vitality;
   if(tmT === undefined) tmT = tempo; if(teW === undefined) teW = teT;
   if(viW === undefined) viW = viT;
+  // cg, tg, teT, viT, teW, viW may each be one number or four, one per letter
+  function per(v, L){ return v && v.length ? v[L] : v; }
   var S = fieldBuf(c, w, h), a = S.actx, SC = S.FW / w;
   // The trail lives on the accumulator and is removed as ALPHA, never painted
   // over as near-black: painting the ground in would stack up an opaque box and
@@ -1740,8 +1921,10 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW)
   // held a ghost of the old arrangement and the picture lagged the sliders
   if(fade < 0.045) fade = 0.045;
   a.setTransform(1,0,0,1,0,0);
-  a.globalCompositeOperation = 'destination-out';
-  a.fillStyle = 'rgba(0,0,0,'+fade.toFixed(4)+')'; a.fillRect(0,0,S.FW,S.FH);
+  if(!noFade){                                  // the trail is aged once a frame,
+    a.globalCompositeOperation = 'destination-out';   // not once per letter
+    a.fillStyle = 'rgba(0,0,0,'+fade.toFixed(4)+')'; a.fillRect(0,0,S.FW,S.FH);
+  }
   a.globalCompositeOperation = 'lighter';
   a.setTransform(SC,0,0,SC,0,0);
   a.lineCap = 'round';
@@ -1769,40 +1952,110 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW)
     }
     return W[W.length-1];
   }
+  // Each letter strokes with its own brightness and its own ink. The grains
+  // are sorted into their strokes once a frame, not searched for once per
+  // stroke: four letters would have meant four times the searching
+  var NBK = RB.length*2*4*3;
+  if(!PBK) PBK = [];
+  for(var q=0; q<NBK; q++){ if(!PBK[q]) PBK[q] = []; else PBK[q].length = 0; }
+  for(var i=0;i<set.length;i++){
+    var p = set[i];
+    var far = Math.sqrt(p.x*p.x + p.y*p.y);
+    var bi = 0; while(far > RB[bi]) bi++;
+    if(bi >= RB.length) continue;
+    var vx = (p.x - p.px)*sx, vy = (p.y - p.py)*sy;
+    var v = Math.sqrt(vx*vx + vy*vy);
+    var sb = v < 0.5 ? 0 : (v < 1.4 ? 1 : 2);
+    PBK[((bi*2 + (p.warm?1:0))*4 + ((p.grp||0)&3))*3 + sb].push(p);
+  }
+  // A shape whose letters carry different inks: every stroke also lays its ink
+  // into a buffer of its own and the present takes the colour from there.
+  // Their present can only blend two inks, one per shape
+  var split = false;
+  if(inkT && inkW) for(var L=1; L<4; L++) for(var z=0; z<3; z++)
+    if(inkT[L][z] !== inkT[0][z] || inkW[L][z] !== inkW[0][z]) split = true;
+  var kx = split ? S.kctx : null;
+  if(kx){
+    kx.setTransform(1,0,0,1,0,0);
+    if(!S.kon) kx.clearRect(0,0,S.FW,S.FH);   // nothing left over from an old split
+    kx.globalCompositeOperation = 'source-over';
+    kx.setTransform(SC,0,0,SC,0,0);
+    kx.lineCap = 'round';
+  }
+  S.kon = split;
+  // letters that stroke alike share ONE path, as all four did before there
+  // were letters: separate paths add where they cross, one path does not, so
+  // splitting them for nothing would brighten every crossing
+  function alike(st, withInk){
+    var out = [], used = [false, false, false, false];
+    for(var L=0; L<4; L++){
+      if(used[L]) continue;
+      var g = [L]; used[L] = true;
+      for(var M=L+1; M<4; M++){
+        if(used[M] || st[M].te !== st[L].te || st[M].base !== st[L].base) continue;
+        if(withInk && (st[M].ink[0] !== st[L].ink[0] || st[M].ink[1] !== st[L].ink[1]
+                    || st[M].ink[2] !== st[L].ink[2])) continue;
+        g.push(M); used[M] = true;
+      }
+      out.push(g);
+    }
+    return out;
+  }
+  function pathOf(rb, warm, ls, sb){
+    var P = null;
+    for(var u=0; u<ls.length; u++){
+      var B = PBK[((rb*2 + warm)*4 + ls[u])*3 + sb];
+      for(var n=0; n<B.length; n++){
+        var p = B[n];
+        if(!P) P = new Path2D();
+        P.moveTo(cx + p.px*sx, cy + p.py*sy);
+        P.lineTo(cx + p.x*sx,  cy + p.y*sy);
+      }
+    }
+    return P;
+  }
   for(var rb=0; rb<RB.length; rb++){
+    // Brightness follows LIFE, with a floor: a quiet reading is quiet, not
+    // absent. The top of the range is set by the tone curve, not here.
+    // the weight is read at the band's middle and interpolated, so there is
+    // no step for the eye to read as an edge
+    var mid = rb === 0 ? RB[0]*0.5 : (RB[rb] > 9 ? RB[rb-1]*1.10 : (RB[rb-1]+RB[rb])*0.5);
     for(var warm=0; warm<2; warm++){
-      var SPW = spW(warm ? teW : teT), SPA = spA(warm ? teW : teT);
-      for(var sb=0; sb<3; sb++){
-        a.beginPath();
-        var any = false;
-        for(var i=0;i<set.length;i++){
-          var p = set[i];
-          if((p.warm?1:0) !== warm) continue;
-          var far = Math.sqrt(p.x*p.x + p.y*p.y);
-          var bi = 0; while(far > RB[bi]) bi++;
-          if(bi !== rb) continue;
-          var vx = (p.x - p.px)*sx, vy = (p.y - p.py)*sy;
-          var v = Math.sqrt(vx*vx + vy*vy);
-          if((v < 0.5 ? 0 : (v < 1.4 ? 1 : 2)) !== sb) continue;
-          a.moveTo(cx + p.px*sx, cy + p.py*sy);
-          a.lineTo(cx + p.x*sx,  cy + p.y*sy);
-          any = true;
+      var st = [];
+      for(var L=0; L<4; L++){
+        var te = per(warm ? teW : teT, L), vi = per(warm ? viW : viT, L);
+        st[L] = { te: te, ink: kx ? (warm ? inkW : inkT)[L] : null,
+                  base: (warm ? (0.038 + dr*0.136)*per(cg, L) : (0.043 + coh*0.118)*per(tg, L))
+                      * (0.56 + vi*0.58) * radialW(mid, warm ? RWW : RWC) };
+      }
+      var ga = alike(st, false);
+      for(var gi=0; gi<ga.length; gi++){
+        var s0 = st[ga[gi][0]], SPW = spW(s0.te), SPA = spA(s0.te);
+        for(var sb=0; sb<3; sb++){
+          var P = pathOf(rb, warm, ga[gi], sb);
+          if(!P) continue;
+          a.lineWidth = SPW[sb];
+          a.strokeStyle = (warm ? 'rgba(0,255,0,' : 'rgba(255,0,0,')
+                        + clamp(s0.base*SPA[sb], 0, 1).toFixed(3) + ')';
+          a.stroke(P);
         }
-        if(!any) continue;
-        // Brightness follows LIFE, with a floor: a quiet reading is quiet, not
-        // absent. The top of the range is set by the tone curve, not here.
-        // the weight is read at the band's middle and interpolated, so there is
-        // no step for the eye to read as an edge
-        var mid = rb === 0 ? RB[0]*0.5 : (RB[rb] > 9 ? RB[rb-1]*1.10 : (RB[rb-1]+RB[rb])*0.5);
-        var base = (warm ? (0.038 + dr*0.136)*cg : (0.043 + coh*0.118)*tg)
-                 * (0.56 + (warm ? viW : viT)*0.58) * radialW(mid, warm ? RWW : RWC);
-        a.lineWidth = SPW[sb];
-        a.strokeStyle = (warm ? 'rgba(0,255,0,' : 'rgba(255,0,0,')
-                      + clamp(base*SPA[sb], 0, 1).toFixed(3) + ')';
-        a.stroke();
+      }
+      if(!kx) continue;
+      var gk = alike(st, true);
+      for(var gi=0; gi<gk.length; gi++){
+        var s1 = st[gk[gi][0]], KW = spW(s1.te), KA = spA(s1.te);
+        for(var sb=0; sb<3; sb++){
+          var P = pathOf(rb, warm, gk[gi], sb);
+          if(!P) continue;
+          kx.lineWidth = KW[sb];
+          kx.strokeStyle = 'rgba(' + s1.ink[0] + ',' + s1.ink[1] + ',' + s1.ink[2] + ','
+                         + clamp(s1.base*KA[sb], 0, 1).toFixed(3) + ')';
+          kx.stroke(P);
+        }
       }
     }
   }
+  if(kx) kx.setTransform(1,0,0,1,0,0);
   a.setTransform(1,0,0,1,0,0);
   a.globalCompositeOperation = 'source-over';
 
@@ -1810,6 +2063,7 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW)
   // hue is a blend along the teal-coral line: pure teal resolves to exactly
   // teal, pure coral to exactly coral, an even mix to the ash between them.
   var src = a.getImageData(0,0,S.FW,S.FH).data, dst = S.img.data;
+  var kd = kx ? S.kctx.getImageData(0,0,S.FW,S.FH).data : null;
   for(var i=0;i<src.length;i+=4){
     var al = src[i+3]/255;
     if(al <= 0.004){ dst[i+3]=0; continue; }
@@ -1819,9 +2073,13 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW)
     var tT = eT*eT, tC = eC*eC, sum = tT+tC;
     if(sum <= 0.002){ dst[i+3]=0; continue; }
     var wT = tT/sum, wC = tC/sum;
+    if(kd && kd[i+3] > 0){          // split letters: the ink their strokes laid
+      dst[i] = kd[i]; dst[i+1] = kd[i+1]; dst[i+2] = kd[i+2];
+    } else {
     dst[i]   = TEAL[0]*wT + CORAL[0]*wC;
     dst[i+1] = TEAL[1]*wT + CORAL[1]*wC;
     dst[i+2] = TEAL[2]*wT + CORAL[2]*wC;
+    }
     dst[i+3] = (1-(1-tT)*(1-tC))*255;
   }
   S.octx.putImageData(S.img, 0, 0);
@@ -2137,8 +2395,10 @@ function field(dt){
   // a shape that is not fed the Image draws none of its grains, and the other
   // one carries on: the two flags were only ever read together, so pulling one
   // cable changed nothing
-  var nR = ringOn ? Math.max(0, Math.round(setVal('outerSet', 0, denOuter))) : 0;
-  var nI = discOn ? Math.max(0, Math.round(setVal('innerSet', 0, denInner))) : 0;
+  // each letter has its own count: a plain cable into Density moves all four,
+  // a split one only its own letters
+  var nRL = setValByGroup('outerSet', 0, denOuter).map(function(v){ return ringOn ? Math.max(0, Math.round(v)) : 0; });
+  var nIL = setValByGroup('innerSet', 0, denInner).map(function(v){ return discOn ? Math.max(0, Math.round(v)) : 0; });
   // one pool, made once. Changing a Density only changes how many of it are
   // drawn: rebuilding the set threw every grain back into a random scatter,
   // which is the redraw that filled the frame
@@ -2151,27 +2411,40 @@ function field(dt){
     for(var q = 0; q < MSET.length; q++){
       var hq = Math.sin(q*12.9898 + 4.1414)*43758.5453;
       MSET[q].hu0 = Math.sqrt(hq - Math.floor(hq));
+      // and its letter, A to D, dealt round the pool so the four are threaded
+      // through each other. Nothing about a grain's place says which it is, so
+      // the shape reads as one mass until a force is sent to one letter alone
+      MSET[q].grp = q & 3;
     }
   }
-  if(MCOUNT !== nR + '/' + nI){
+  var MKEY = nRL.join(',') + '/' + nIL.join(',');
+  if(MCOUNT !== MKEY){
     for(var k = 0; k < MSET.length; k++){
-      var wasCore = MSET[k].core, on = k < nI + nR;
+      // grain k is letter k & 3, so "k < count" gives each letter exactly the
+      // share of a count it had when all four read one number
+      var L = MSET[k].grp, wasCore = MSET[k].core, on = k < nIL[L] + nRL[L];
       MSET[k].warm = false;
-      MSET[k].core = k < nI;
+      MSET[k].core = k < nIL[L];
       MSET[k].hu = MSET[k].hu0;
       // a grain Density has just brought in takes its place at its own home,
       // with no streak behind it, and that is the only placement left
       if(on && (MSET[k].core !== wasCore || !MSET[k].live)) MSET[k].fresh = true;
       MSET[k].live = on;
     }
-    MCOUNT = nR + '/' + nI;
+    MCOUNT = MKEY;
   }
-  var NDRAW = Math.min(MSET.length, nI + nR);
+  var NDRAW = 0;
+  for(var L = 0; L < 4; L++) NDRAW = Math.max(NDRAW, nIL[L] + nRL[L]);
+  NDRAW = Math.min(MSET.length, NDRAW);
   var bound = G.oR;
   // each card's Speed is its grains' pace, each card's Random is their turbulence
   // Random is the only thing that breaks a shape: at 0 the grains are held on
   // their home, nothing breathes and nothing wanders
-  var rndO = setVal('outerSet', 2, rndOuter)/100;
+  var rndOL = setValByGroup('outerSet', 2, rndOuter).map(function(v){ return v/100; });
+  var rndO = rndOL[0];
+  // each letter paints off its own reading, the one it moves on
+  var teOL = [], viOL = [];
+  for(var L = 0; L < 4; L++){ readingFor(WAMT, rndOL[L]); teOL[L] = MAT.tear; viOL[L] = MAT.vitality; }
   readingFor(WAMT, rndO);    // this shape's own reading
   // Random blurs the path, it does not let go of it. The pull is held at full
   // strength whatever the reading says, so a grain always rides its seat round
@@ -2196,7 +2469,8 @@ function field(dt){
   // their rim is off for the ring: rimReturn is the boundary now, and theirs
   // caught a grain in one step and threw the far ones across the frame
   MAT.setHold(0);
-  var paceO = setVal('outerSet', 1, spdOuter)/100;
+  var paceOL = setValByGroup('outerSet', 1, spdOuter).map(function(v){ return v/100; });
+  var paceO = (paceOL[0] + paceOL[1] + paceOL[2] + paceOL[3])/4;
   PCLK_O += dt*paceO;
   // the turn carries the material itself. A home that runs away is only chased
   // at a fraction of the gap each frame, so every grain lagged off its radius
@@ -2206,16 +2480,29 @@ function field(dt){
   var cO = Math.cos(dAO), sO = Math.sin(dAO);
   MAT.setRespawnAt(0, 0);
   MAT.setHomeOnly(true);       // a retiring grain reappears at its own home
-  for(var i = 0; i < NDRAW; i++){
-    if(!MSET[i].core){
-      carry(MSET[i], dt, paceO, RND_O, PATH_O);
-      seatFresh(MSET[i]);
-      MAT.stepGrain(MSET[i], dt, FCLK, bound, paceO);
-      rimReturn(MSET[i], bound*(1 + spO*0.70), dt);
-      if(dAO) spin(MSET[i], cO, sO, G.ax, G.ay);
+  // a pass per letter: its own weather is set, then only its own grains step
+  var WGO = weatherByGroup('outer'), SGO = byGroup('outer', 'spread', 0);
+  for(var g = 0; g < 4; g++){
+    var wg = WGO ? WGO[g] : null, ag = wg ? wg.amt : 0;
+    SPR_O = SGO[g];
+    MAT.setGust(wg ? wg.scale : 1, wg ? wg.rate : 1);
+    readingFor(ag, rndOL[g]);
+    MAT.setFigure(1 - 0.85*ag);
+    MAT.setTurb(0.05);
+    for(var i = 0; i < NDRAW; i++){
+      if(MSET[i].live && !MSET[i].core && MSET[i].grp === g){
+        carry(MSET[i], dt, paceOL[g], rndOL[g], PATH_O);
+        seatFresh(MSET[i]);
+        MAT.stepGrain(MSET[i], dt, FCLK, bound, paceOL[g]);
+        rimReturn(MSET[i], bound*(1 + SGO[g]*0.70), dt);
+        if(dAO) spin(MSET[i], cO, sO, G.ax, G.ay);
+      }
     }
   }
-  var rndI = setVal('innerSet', 2, rndInner)/100;
+  var rndIL = setValByGroup('innerSet', 2, rndInner).map(function(v){ return v/100; });
+  var rndI = rndIL[0];
+  var teIL = [], viIL = [];
+  for(var L = 0; L < 4; L++){ readingFor(WAMT, rndIL[L]); teIL[L] = MAT.tear; viIL[L] = MAT.vitality; }
   readingFor(WAMT, rndI);
   MAT.setFigure(1 - 0.85*WAMT);   // as the ring: the wind loosens the grip
   MAT.setTurb(0.05);
@@ -2229,28 +2516,37 @@ function field(dt){
   MAT.setEscape(0);
   SPR_I = spI;
   MAT.setHold(0);   // the disc takes the same soft return as the ring
-  var paceI = setVal('innerSet', 1, spdInner)/100;
+  var paceIL = setValByGroup('innerSet', 1, spdInner).map(function(v){ return v/100; });
+  var paceI = (paceIL[0] + paceIL[1] + paceIL[2] + paceIL[3])/4;
   PCLK_I += dt*paceI;
   if(LASTAI === null) LASTAI = innerA;
   var dAI = innerA - LASTAI; LASTAI = innerA;
   var cI = Math.cos(dAI), sI = Math.sin(dAI);
   var dc = G.dots.length ? G.dots[0] : null;
   if(dc) MAT.setRespawnAt(dc.x, dc.y);   // the disc re-places inside itself
-  for(var i = 0; i < NDRAW; i++){
-    if(MSET[i].core){
-      carry(MSET[i], dt, paceI, RND_I, PATH_I);
-      seatFresh(MSET[i]);
-      MAT.stepGrain(MSET[i], dt, FCLK, dc ? dc.r : bound, paceI);
-      if(dc) rimReturn(MSET[i], dc.r*(1 + spI*0.70), dt, dc.x, dc.y);
-      if(dAI && dc) spin(MSET[i], cI, sI, dc.x, dc.y);
+  var WGI = weatherByGroup('inner'), SGI = byGroup('inner', 'spread', 0);
+  for(var g = 0; g < 4; g++){
+    var wg = WGI ? WGI[g] : null, ag = wg ? wg.amt : 0;
+    SPR_I = SGI[g];
+    MAT.setGust(wg ? wg.scale : 1, wg ? wg.rate : 1);
+    readingFor(ag, rndIL[g]);
+    MAT.setFigure(1 - 0.85*ag);
+    MAT.setTurb(0.05);
+    for(var i = 0; i < NDRAW; i++){
+      if(MSET[i].core && MSET[i].grp === g){
+        carry(MSET[i], dt, paceIL[g], rndIL[g], PATH_I);
+        seatFresh(MSET[i]);
+        MAT.stepGrain(MSET[i], dt, FCLK, dc ? dc.r : bound, paceIL[g]);
+        if(dc) rimReturn(MSET[i], dc.r*(1 + SGI[g]*0.70), dt, dc.x, dc.y);
+        if(dAI && dc) spin(MSET[i], cI, sI, dc.x, dc.y);
+      }
     }
   }
 
   // species is membership, so each card's Colour inks its own grains: the ring's
   // go down the teal channel, the disc's down the coral one
   for(var i = 0; i < NDRAW; i++) MSET[i].warm = MSET[i].core;
-  MDRAW.length = 0;
-  for(var i = 0; i < NDRAW; i++) MDRAW.push(MSET[i]);
+  var CGO = byGroup('outer', 'colour', 0), CGI = byGroup('inner', 'colour', 0);
 
   fldx.setTransform(FIELD_DPR, 0, 0, FIELD_DPR, 0, 0);
   fldx.clearRect(0, 0, cw, chh);
@@ -2264,16 +2560,25 @@ function field(dt){
   // Random dim and fast-fade the ring out
   // each card's Brightness scales its own species' gain: the outer card the
   // teal channel, the inner card the coral one
-  var briO = setVal('outerSet', 3, briOuter)/100;
-  var briI = setVal('innerSet', 3, briInner)/100;
+  var briOL = setValByGroup('outerSet', 3, briOuter), briIL = setValByGroup('innerSet', 3, briInner);
+  var tgL = [], cgL = [];
+  for(var L = 0; L < 4; L++){ tgL[L] = MAT.tealGain*briOL[L]/100; cgL[L] = MAT.coralGain*briIL[L]/100; }
+  // and each letter's own ink, off the Colour it was handed
+  var inkOL = CGO.map(function(m){ return rgbOf(inkAt(m)); });
+  var inkIL = CGI.map(function(m){ return rgbOf(inkAt(m)); });
   // their painter reads brightness out of the READING: teal off regulation,
   // coral off activation, and the trail's fade off both. So Weather at full put
   // regulation at nothing and took the teal out with it. Here the wind only
   // moves material — the ink and the trail are held steady and Brightness is
   // the only thing that sets the level.
-  MAT.paintField(fldx, cw, chh, MDRAW, 1, 1,
-                 MAT.coralGain*briI, MAT.tealGain*briO, MAT.escape,
-                 teO, viO, 0.37, teI, viI);
+  // ONE painting pass. Their painter tone-maps the whole accumulator at the end
+  // of every call, so four calls would colour everything by the last letter's
+  // ink and blit the picture four times. Per-letter colour belongs in the
+  // stroke, not in extra passes.
+  MDRAW.length = 0;
+  for(var i = 0; i < NDRAW; i++) if(MSET[i].live) MDRAW.push(MSET[i]);
+  MAT.paintField(fldx, cw, chh, MDRAW, 1, 1, cgL, tgL, MAT.escape,
+                 teOL, viOL, 0.37, teIL, viIL, false, inkOL, inkIL);
   fldx.globalCompositeOperation = 'source-over';
   fldx.setTransform(1,0,0,1,0,0);
 }
@@ -2397,7 +2702,7 @@ var CH_CARDS = {
   ringRot:['ringRot'], discRot:['discRot'], prox:['prox'], prox2:['prox2'],
   size:['size'], voidSize:['voidSize'], outerSize:['outerSize'], axis:[], spread:['spread'],
   halftone:['halftone'], osc:['oscRate','oscDepth','oscPhase'], jit:['jitRate','jitDepth'],
-  weather:['wthAmt','wthScale','wthRate'], colour:['colour']
+  weather:['wthAmt','wthScale','wthRate'], colour:['colour'], split:[]
 };
 var OWNER = {};
 Object.keys(CH_CARDS).forEach(function(id){
@@ -2415,6 +2720,12 @@ function viewOf(id){
   CH_CARDS[K(id)].forEach(function(k){ s[SID(id,k)] = +document.getElementById(SID(id,k)).value; });
   if(K(id) === 'osc')  s.shape  = segShape(id);
   if(id === 'axis'){ s.x = axisX; s.y = axisY; }
+  if(K(id) === 'split'){
+    var sg = ltrSeg(id);
+    s.ltr = sg ? Array.prototype.map.call(sg.children, function(b){
+      return b.getAttribute('aria-pressed') === 'true' ? 1 : 0; })
+              : [0,1,2,3].map(function(L){ return L === (SEL[id] || 0) ? 1 : 0; });
+  }
   return s;
 }
 function stash(id){ if(CH[id]) CH[id][SEL[id]] = viewOf(id); }
@@ -2432,6 +2743,12 @@ function show(id){
     pressed(shapeSeg(id), 'shape', s.shape);
   }
   if(id === 'axis'){ axisX = s.x; axisY = s.y; placeDot(); }
+  if(K(id) === 'split'){
+    var on = s.ltr || [0,1,2,3].map(function(L){ return L === SEL[id] ? 1 : 0; });
+    var sg2 = ltrSeg(id);
+    if(sg2) Array.prototype.forEach.call(sg2.children, function(x, i){
+      x.setAttribute('aria-pressed', on[i] ? 'true' : 'false'); });
+  }
   pressed(document.getElementById(id + 'Chan'), 'ch', SEL[id]);
 }
 
@@ -2439,6 +2756,9 @@ function initChannels(id){
   CH_CARDS[K(id)].forEach(function(k){ OWNER[SID(id,k)] = id; });
   var v = viewOf(id);
   CH[id] = [0,1,2,3].map(function(){ return JSON.parse(JSON.stringify(v)); });
+  // the splitter starts isolated: In 1 reaches A, In 2 B, In 3 C, In 4 D
+  if(K(id) === 'split') CH[id].forEach(function(st, c){
+    st.ltr = [0,1,2,3].map(function(L){ return L === c ? 1 : 0; }); });
   SEL[id] = 0;
   var row = document.createElement('div');
   row.className = 'seg chan'; row.id = id + 'Chan';
@@ -2497,14 +2817,14 @@ var NODES = {
   voidSize:'c_voidSize', outerSize:'c_outerSize', axis:'c_axis', spread:'c_spread',
   outerSet:'c_outer', innerSet:'c_inner', weather:'c_weather', colour:'c_colour',
   osc:'c_osc', jit:'c_jit', mix1:'c_mix1', mix2:'c_mix2', mix3:'c_mix3',
-  outer:'c_outer', inner:'c_inner', image:'c_image'
+  outer:'c_outer', inner:'c_inner', image:'c_image', split:'c_split'
 };
 var HAS_IN  = { halftone:1, mix1:1, mix2:1, mix3:1, ringRot:1, discRot:1, prox:1, prox2:1, size:1,
                 voidSize:1, outerSize:1, axis:1, spread:1, outer:1, inner:1, image:1,
-                outerSet:1, innerSet:1, weather:1, colour:1 };
+                outerSet:1, innerSet:1, weather:1, colour:1, split:1 };
 var HAS_OUT = { halftone:1, osc:1, jit:1, mix1:1, mix2:1, mix3:1, ringRot:1, discRot:1, prox:1, prox2:1,
                 size:1, voidSize:1, outerSize:1, axis:1, spread:1, outer:1, inner:1, weather:1,
-                colour:1 };
+                colour:1, split:1 };
 
 var CHANNELS = 4;
 var jacks = {};   // id -> {in: [el x4], out: [el x4]}
@@ -2544,6 +2864,17 @@ function initCard(id){
   if(HAS_OUT[K(id)]) jacks[id].out = makeRow(card, id, 'out');
 
   if(id.slice(-3) === 'Set') return;
+  var pb = document.createElement('button');
+  pb.type = 'button'; pb.className = 'byp-btn';
+  pb.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+  pb.addEventListener('dblclick', function(e){ e.stopPropagation(); e.preventDefault(); });
+  pb.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(OFF[id]) delete OFF[id]; else OFF[id] = true;
+    card.classList.toggle('off', !!OFF[id]);
+    paint();
+  });
+  card.appendChild(pb);
   if(K(id) !== 'image'){
     /* the orient toggle, bottom right, swings the rows to top and bottom */
     var ob = document.createElement('button');
@@ -2878,7 +3209,7 @@ function autoPatch(){
 function clearPatch(){ cables = []; jackLights(); paint(); }
 
 function snapshot(){
-  var st = { cards:{}, cables: cables, vals:{}, solos:{},
+  var st = { cards:{}, cables: cables, vals:{}, solos:{}, off: Object.keys(OFF),
              oscShape: oscShape,
              bg: markWrap.classList.contains('dark') ? 'dark' : 'light',
              paths: { outer: pathOuter.value, inner: pathInner.value },
@@ -2936,6 +3267,14 @@ function restore(st){
       x.classList.toggle('active', +x.dataset.idx === st.solos[id]);
     });
   });
+  // the cards switched off. A patch saved before there was a switch has none,
+  // and everything in it comes back on
+  OFF = {};
+  (st.off || []).forEach(function(id){ OFF[id] = true; });
+  Object.keys(NODES).forEach(function(id){
+    var c = document.getElementById(NODES[id]);
+    if(c && id.slice(-3) !== 'Set') c.classList.toggle('off', !!OFF[id]);
+  });
   Object.keys(st.vals || {}).forEach(function(k){
     var el = document.getElementById(k);
     if(el) el.value = st.vals[k];
@@ -2979,6 +3318,7 @@ var STORE = 'intruth-patches';
    browser are put back on every load, so a built-in always returns */
 var BUILT_IN = {"Main":{"cards":{"ringRot":{"left":"0px","top":"0px","collapsed":true,"tb":false},"discRot":{"left":"241.371px","top":"270.859px","collapsed":true,"tb":false},"prox":{"left":"67.2227px","top":"195.203px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"411.41px","top":"330.078px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"373.293px","top":"28.3789px","collapsed":true,"tb":false},"outerSize":{"left":"264px","top":"0px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"0px","top":"300px","collapsed":true,"tb":false},"outerSet":{"left":"676.25px","top":"40px","collapsed":true,"tb":false},"innerSet":{"left":"674.746px","top":"156.746px","collapsed":false,"tb":false},"weather":{"left":"375.746px","top":"110px","collapsed":true,"tb":false},"colour":{"left":"0px","top":"356px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"676.25px","top":"40px","collapsed":true,"tb":false},"inner":{"left":"674.746px","top":"156.746px","collapsed":false,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3}],"vals":{"ringRot":"18","discRot":"145.486111111111","prox":"100","prox2":"100","size":"58","spread":"0","colour":"0","wthAmt":"0","wthScale":"20","wthRate":"300","voidSize":"87","outerSize":"100","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"2582","spdOuter":"44.3948412698413","rndOuter":"0","denInner":"596","spdInner":"400","rndInner":"0","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":18},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":145.486111111111},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":100},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":58},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":87},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":100},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":0},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":0,"wthScale":20,"wthRate":300},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","discRot","prox","size","voidSize","weather"],"inst":[]},"Agitated":{"cards":{"ringRot":{"left":"0px","top":"0px","collapsed":true,"tb":false},"discRot":{"left":"354.461px","top":"296.668px","collapsed":true,"tb":false},"prox":{"left":"144.746px","top":"234px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"502.461px","top":"355.668px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"373.293px","top":"28.3789px","collapsed":true,"tb":false},"outerSize":{"left":"90.3516px","top":"30.7578px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"38.7461px","top":"314px","collapsed":false,"tb":false},"outerSet":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"innerSet":{"left":"675px","top":"157.25px","collapsed":true,"tb":false},"weather":{"left":"375.746px","top":"110.25px","collapsed":false,"tb":false},"colour":{"left":"10.2031px","top":"140.238px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"inner":{"left":"675px","top":"157.25px","collapsed":true,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3},{"from":"outerSize","fromIdx":0,"to":"voidSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"prox","toIdx":0}],"vals":{"ringRot":"18","discRot":"1.11111111111111","prox":"4.19560185185185","prox2":"100","size":"58","spread":"37.8761574074074","colour":"100","wthAmt":"55.7663690476191","wthScale":"20","wthRate":"0","voidSize":"40","outerSize":"160","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"4000","spdOuter":"400","rndOuter":"40.3645833333333","denInner":"1844","spdInner":"163.971560846561","rndInner":"23.0861441798942","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":18},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":1.11111111111111},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":4.19560185185185},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":58},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":40},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":160},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":37.8761574074074},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":55.7663690476191,"wthScale":20,"wthRate":0},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":100},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":[]},"Calm":{"cards":{"ringRot":{"left":"0px","top":"0px","collapsed":true,"tb":false},"discRot":{"left":"354.461px","top":"296.668px","collapsed":true,"tb":false},"prox":{"left":"144.746px","top":"234px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"502px","top":"356.25px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"373.293px","top":"28.3789px","collapsed":true,"tb":false},"outerSize":{"left":"69.8711px","top":"17.125px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"39.25px","top":"314px","collapsed":true,"tb":false},"outerSet":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"innerSet":{"left":"675px","top":"157.25px","collapsed":false,"tb":false},"weather":{"left":"339.762px","top":"110px","collapsed":true,"tb":false},"colour":{"left":"10px","top":"116.359px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"inner":{"left":"675px","top":"157.25px","collapsed":false,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3},{"from":"outerSize","fromIdx":0,"to":"voidSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"prox","toIdx":0},{"from":"spread","fromIdx":0,"to":"inner","toIdx":1},{"from":"spread","fromIdx":0,"to":"outer","toIdx":2}],"vals":{"ringRot":"18","discRot":"1.11111111111111","prox":"4.19560185185185","prox2":"100","size":"19.07","spread":"0","colour":"0","wthAmt":"28.5714285714286","wthScale":"20","wthRate":"55.3447420634921","voidSize":"61.33","outerSize":"90","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"4000","spdOuter":"84.8875661375661","rndOuter":"0","denInner":"1844","spdInner":"85.2017195767196","rndInner":"0","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":18},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":1.11111111111111},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":4.19560185185185},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":19.07},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":61.33},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":90},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":0},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":28.5714285714286,"wthScale":20,"wthRate":55.3447420634921},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":[]},"Nervous":{"cards":{"ringRot":{"left":"300.555px","top":"87.4648px","collapsed":true,"tb":false},"discRot":{"left":"342.945px","top":"211.625px","collapsed":true,"tb":false},"prox":{"left":"67.5977px","top":"232.145px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"502px","top":"356.25px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"374.18px","top":"0px","collapsed":true,"tb":false},"outerSize":{"left":"69.8711px","top":"17.125px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"38.7656px","top":"314px","collapsed":true,"tb":false},"outerSet":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"innerSet":{"left":"674.98px","top":"244.277px","collapsed":true,"tb":false},"weather":{"left":"388.691px","top":"137.48px","collapsed":true,"tb":false},"colour":{"left":"10px","top":"116.359px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"inner":{"left":"674.98px","top":"244.277px","collapsed":true,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3},{"from":"outerSize","fromIdx":0,"to":"voidSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"prox","toIdx":0},{"from":"spread","fromIdx":0,"to":"inner","toIdx":1},{"from":"spread","fromIdx":0,"to":"outer","toIdx":2},{"from":"ringRot","fromIdx":0,"to":"outer","toIdx":3}],"vals":{"ringRot":"-5.60515873015872","discRot":"22.635582010582","prox":"4.19560185185185","prox2":"100","size":"12","spread":"0","colour":"0","wthAmt":"28.5714285714286","wthScale":"20","wthRate":"55.3447420634921","voidSize":"87","outerSize":"90","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"4000","spdOuter":"84.8875661375661","rndOuter":"19.6635251322751","denInner":"1844","spdInner":"0","rndInner":"22.1230158730159","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":-5.60515873015872},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":22.635582010582},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":4.19560185185185},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":12},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":87},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":90},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":0},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":28.5714285714286,"wthScale":20,"wthRate":55.3447420634921},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","ringRot","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":[]},"Collecting":{"cards":{"ringRot":{"left":"300.555px","top":"87.4648px","collapsed":true,"tb":false},"discRot":{"left":"342.945px","top":"211.625px","collapsed":true,"tb":false},"prox":{"left":"67.5977px","top":"232.145px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"502px","top":"356.25px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"374.18px","top":"0px","collapsed":true,"tb":false},"outerSize":{"left":"69.8711px","top":"17.125px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"39px","top":"313.754px","collapsed":false,"tb":false},"outerSet":{"left":"675.758px","top":"40.2383px","collapsed":false,"tb":false},"innerSet":{"left":"674.98px","top":"244.277px","collapsed":false,"tb":false},"weather":{"left":"388.691px","top":"137.48px","collapsed":true,"tb":false},"colour":{"left":"10px","top":"116.359px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"675.758px","top":"40.2383px","collapsed":false,"tb":false},"inner":{"left":"674.98px","top":"244.277px","collapsed":false,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3},{"from":"outerSize","fromIdx":0,"to":"voidSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"prox","toIdx":0},{"from":"spread","fromIdx":0,"to":"inner","toIdx":1},{"from":"spread","fromIdx":0,"to":"outer","toIdx":2},{"from":"ringRot","fromIdx":0,"to":"outer","toIdx":3}],"vals":{"ringRot":"-5.60515873015872","discRot":"22.635582010582","prox":"4.19560185185185","prox2":"100","size":"12","spread":"0","colour":"0","wthAmt":"28.5714285714286","wthScale":"20","wthRate":"55.3447420634921","voidSize":"87","outerSize":"90","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"4000","spdOuter":"84.8875661375661","rndOuter":"38.6367394179894","denInner":"1844","spdInner":"0","rndInner":"40.7738095238095","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":-5.60515873015872},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":22.635582010582},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":4.19560185185185},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":12},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":87},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":90},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":0},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":28.5714285714286,"wthScale":20,"wthRate":55.3447420634921},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","ringRot","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":[]},"Weather":{"cards":{"ringRot":{"left":"300.555px","top":"87.4648px","collapsed":true,"tb":false},"discRot":{"left":"342.945px","top":"211.625px","collapsed":true,"tb":false},"prox":{"left":"67.5977px","top":"232.145px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"502px","top":"356.25px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"374.18px","top":"0px","collapsed":true,"tb":false},"outerSize":{"left":"69.8711px","top":"17.125px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"39px","top":"313.754px","collapsed":false,"tb":false},"outerSet":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"innerSet":{"left":"674.98px","top":"244.277px","collapsed":true,"tb":false},"weather":{"left":"371.898px","top":"146.527px","collapsed":true,"tb":false},"colour":{"left":"10px","top":"116.359px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"675.758px","top":"40.2383px","collapsed":true,"tb":false},"inner":{"left":"674.98px","top":"244.277px","collapsed":true,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3},{"from":"outerSize","fromIdx":0,"to":"voidSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"prox","toIdx":0},{"from":"spread","fromIdx":0,"to":"inner","toIdx":1},{"from":"spread","fromIdx":0,"to":"outer","toIdx":2},{"from":"ringRot","fromIdx":0,"to":"outer","toIdx":3}],"vals":{"ringRot":"-5.60515873015872","discRot":"22.635582010582","prox":"4.19560185185185","prox2":"100","size":"12","spread":"58.1597222222222","colour":"0","wthAmt":"100","wthScale":"44.0013227513228","wthRate":"0","voidSize":"50.87","outerSize":"90","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"4000","spdOuter":"93.75","rndOuter":"0","denInner":"1844","spdInner":"0","rndInner":"0","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":-5.60515873015872},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":22.635582010582},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":4.19560185185185},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":12},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":50.87},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":90},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":58.1597222222222},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":100,"wthScale":44.0013227513228,"wthRate":0},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","ringRot","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":[]},"Nucleating":{"cards":{"ringRot":{"left":"391.766px","top":"0px","collapsed":true,"tb":false},"discRot":{"left":"401.672px","top":"262.91px","collapsed":true,"tb":false},"prox":{"left":"144.746px","top":"234.25px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"578.5px","top":"359.496px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"363.219px","top":"44.7969px","collapsed":true,"tb":false},"outerSize":{"left":"69.8711px","top":"17.125px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"168px","collapsed":true,"tb":false},"spread":{"left":"81.0273px","top":"331.715px","collapsed":true,"tb":false},"outerSet":{"left":"676px","top":"40.7188px","collapsed":true,"tb":false},"innerSet":{"left":"675px","top":"157.238px","collapsed":true,"tb":false},"weather":{"left":"328.531px","top":"130.355px","collapsed":true,"tb":false},"colour":{"left":"10px","top":"116.359px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"224px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"0px","top":"414px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"676px","top":"40.7188px","collapsed":true,"tb":false},"inner":{"left":"675px","top":"157.238px","collapsed":true,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":1},{"from":"weather","fromIdx":0,"to":"outer","toIdx":0},{"from":"weather","fromIdx":0,"to":"inner","toIdx":0},{"from":"voidSize","fromIdx":0,"to":"outer","toIdx":1},{"from":"discRot","fromIdx":0,"to":"size","toIdx":0},{"from":"prox","fromIdx":0,"to":"discRot","toIdx":0},{"from":"size","fromIdx":0,"to":"inner","toIdx":3},{"from":"outerSize","fromIdx":0,"to":"voidSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"colour","fromIdx":0,"to":"prox","toIdx":0},{"from":"spread","fromIdx":0,"to":"inner","toIdx":1},{"from":"spread","fromIdx":0,"to":"outer","toIdx":2},{"from":"ringRot","fromIdx":0,"to":"outer","toIdx":3}],"vals":{"ringRot":"-30.3406084656085","discRot":"54.2162698412698","prox":"100","prox2":"100","size":"58","spread":"22.0031415343915","colour":"0","wthAmt":"28.145667989418","wthScale":"20","wthRate":"55.3447420634921","voidSize":"87","outerSize":"124.513888888889","oscRate":"26","oscDepth":"35","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"720","spdOuter":"84.8875661375661","rndOuter":"5.04298941798942","briOuter":"400","denInner":"834","spdInner":"22.2222222222222","rndInner":"100","briInner":"400","halftone":"5"},"solos":{},"oscShape":"sin","axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":-30.3406084656085},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":54.2162698412698},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":100},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":58},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":87},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":124.513888888889},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":22.0031415343915},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":28.145667989418,"wthScale":20,"wthRate":55.3447420634921},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","ringRot","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":[]}};
 BUILT_IN["mixer set"] = {"cards":{"ringRot":{"left":"53.7031px","top":"183.16px","collapsed":true,"tb":false},"discRot":{"left":"61.2461px","top":"364.957px","collapsed":true,"tb":false},"prox":{"left":"55px","top":"32.25px","collapsed":true,"tb":false},"prox2":{"left":"264px","top":"112px","collapsed":true,"tb":false},"size":{"left":"62px","top":"310.23px","collapsed":true,"tb":false},"halftone":{"left":"264px","top":"470px","collapsed":true,"tb":false},"voidSize":{"left":"52.25px","top":"131.73px","collapsed":true,"tb":false},"outerSize":{"left":"56px","top":"82.25px","collapsed":true,"tb":false},"axis":{"left":"357.906px","top":"161.426px","collapsed":true,"tb":false},"spread":{"left":"0px","top":"300px","collapsed":true,"tb":false},"outerSet":{"left":"676px","top":"40px","collapsed":true,"tb":false},"innerSet":{"left":"677.723px","top":"390.695px","collapsed":true,"tb":false},"weather":{"left":"264px","top":"300px","collapsed":true,"tb":false},"colour":{"left":"0px","top":"356px","collapsed":true,"tb":false},"osc":{"left":"78.7461px","top":"236px","collapsed":true,"tb":false},"jit":{"left":"264px","top":"224px","collapsed":true,"tb":false},"mix1":{"left":"373.555px","top":"24.3555px","collapsed":true,"tb":false},"mix2":{"left":"264px","top":"414px","collapsed":true,"tb":false},"mix3":{"left":"0px","top":"470px","collapsed":true,"tb":false},"outer":{"left":"676px","top":"40px","collapsed":true,"tb":false},"inner":{"left":"677.723px","top":"390.695px","collapsed":true,"tb":false},"image":{"left":"960px","top":"0px","collapsed":false,"tb":false},"mix1~3":{"left":"405.078px","top":"376.059px","collapsed":true,"tb":false},"mix1~4":{"left":"379px","top":"85.7461px","collapsed":true,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"mix1","fromIdx":0,"to":"outer","toIdx":0},{"from":"prox","fromIdx":0,"to":"mix1","toIdx":0},{"from":"outerSize","fromIdx":0,"to":"mix1","toIdx":1},{"from":"voidSize","fromIdx":0,"to":"mix1","toIdx":2},{"from":"ringRot","fromIdx":0,"to":"mix1","toIdx":3},{"from":"mix1~3","fromIdx":0,"to":"inner","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":3},{"from":"size","fromIdx":0,"to":"mix1~3","toIdx":0},{"from":"discRot","fromIdx":0,"to":"mix1~3","toIdx":1},{"from":"mix1~4","fromIdx":0,"to":"outer","toIdx":1},{"from":"axis","fromIdx":0,"to":"mix1~4","toIdx":0}],"vals":{"ringRot":"10.3009259259259","discRot":"0.555555555555556","prox":"100","prox2":"100","size":"58","spread":"0","colour":"0","wthAmt":"0","wthScale":"100","wthRate":"100","voidSize":"52.42","outerSize":"120.596064814815","oscRate":"2.67443783068783","oscDepth":"7.28339947089947","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"2200","spdOuter":"100","rndOuter":"0","briOuter":"100","denInner":"1129","spdInner":"400","rndInner":"0","briInner":"100","halftone":"5","mix1L0~3":"100","mix1L1~3":"0","mix1L2~3":"0","mix1L3~3":"0","mix1L0~4":"100","mix1L1~4":"0","mix1L2~4":"0","mix1L3~4":"0"},"solos":{},"oscShape":"sin","axisX":-0.19951014597623684,"axisY":-0.224043972586947,"axisHidden":true,"ch":{"ringRot":[{"ringRot":10.3009259259259},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":0.555555555555556},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":100},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":58},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":52.42},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":120.596064814815},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":-0.19951014597623684,"y":-0.224043972586947},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":0},{"spread":0},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":1.77331349206349,"oscDepth":54.6006944444444,"oscPhase":0,"shape":"sin"},{"oscRate":2.67443783068783,"oscDepth":7.28339947089947,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"},{"oscRate":26,"oscDepth":35,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":1,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","mix1","ringRot","discRot","prox","size","voidSize","outerSize","axis"],"inst":["mix1~3","mix1~4"]};   // his own, lifted out of the browser store
+BUILT_IN["Activated"] = {"cards":{"ringRot":{"left":"267px","top":"8.12109px","collapsed":false,"tb":false},"discRot":{"left":"277.211px","top":"605.574px","collapsed":true,"tb":false},"prox":{"left":"272px","top":"290px","collapsed":true,"tb":false},"prox2":{"left":"284px","top":"80.7578px","collapsed":true,"tb":false},"size":{"left":"280.211px","top":"554.574px","collapsed":true,"tb":false},"halftone":{"left":"259.152px","top":"529px","collapsed":true,"tb":false},"voidSize":{"left":"267.445px","top":"58.8945px","collapsed":true,"tb":false},"outerSize":{"left":"266.242px","top":"112.242px","collapsed":true,"tb":false},"axis":{"left":"0px","top":"82.8398px","collapsed":true,"tb":false},"spread":{"left":"273px","top":"396px","collapsed":true,"tb":false},"outerSet":{"left":"885px","top":"47px","collapsed":true,"tb":false},"innerSet":{"left":"885.699px","top":"396px","collapsed":true,"tb":false},"weather":{"left":"275px","top":"236px","collapsed":true,"tb":false},"colour":{"left":"276px","top":"342px","collapsed":true,"tb":false},"osc":{"left":"0px","top":"268.602px","collapsed":true,"tb":false},"jit":{"left":"202.906px","top":"505px","collapsed":true,"tb":false},"mix1":{"left":"608.637px","top":"73.3594px","collapsed":true,"tb":false},"mix2":{"left":"256px","top":"477.242px","collapsed":true,"tb":false},"mix3":{"left":"18.0312px","top":"528.359px","collapsed":true,"tb":false},"outer":{"left":"885px","top":"47px","collapsed":true,"tb":false},"inner":{"left":"885.699px","top":"396px","collapsed":true,"tb":false},"image":{"left":"1158.76px","top":"4.83594px","collapsed":false,"tb":false},"mix1~6":{"left":"608.152px","top":"359.121px","collapsed":true,"tb":false},"mix1~7":{"left":"604px","top":"416.121px","collapsed":true,"tb":false},"mix1~8":{"left":"608.152px","top":"24.1172px","collapsed":true,"tb":false}},"cables":[{"from":"outer","fromIdx":0,"to":"image","toIdx":0},{"from":"inner","fromIdx":0,"to":"image","toIdx":3},{"from":"mix1","fromIdx":0,"to":"outer","toIdx":3},{"from":"ringRot","fromIdx":0,"to":"mix1","toIdx":0},{"from":"colour","fromIdx":0,"to":"mix1","toIdx":1},{"from":"osc","fromIdx":0,"to":"outerSize","toIdx":0},{"from":"prox","fromIdx":0,"to":"mix1","toIdx":2},{"from":"osc","fromIdx":1,"to":"size","toIdx":0},{"from":"outerSize","fromIdx":0,"to":"mix1","toIdx":3},{"from":"osc","fromIdx":2,"to":"voidSize","toIdx":0},{"from":"osc","fromIdx":3,"to":"spread","toIdx":0},{"from":"size","fromIdx":0,"to":"mix1~6","toIdx":0},{"from":"weather","fromIdx":0,"to":"mix1~6","toIdx":2},{"from":"mix1~6","fromIdx":0,"to":"inner","toIdx":0},{"from":"colour","fromIdx":0,"to":"mix1~6","toIdx":3},{"from":"discRot","fromIdx":0,"to":"mix1~7","toIdx":0},{"from":"mix1~7","fromIdx":0,"to":"inner","toIdx":1},{"from":"voidSize","fromIdx":0,"to":"mix1~8","toIdx":0},{"from":"weather","fromIdx":0,"to":"mix1~8","toIdx":1},{"from":"mix1~8","fromIdx":0,"to":"outer","toIdx":0},{"from":"spread","fromIdx":0,"to":"mix1~8","toIdx":2},{"from":"prox","fromIdx":0,"to":"mix1~7","toIdx":1},{"from":"spread","fromIdx":1,"to":"mix1~6","toIdx":1}],"vals":{"ringRot":"0","discRot":"0","prox":"0","prox2":"100","size":"34.22","spread":"100","colour":"0","wthAmt":"100","wthScale":"262.997685185185","wthRate":"0","voidSize":"61.32","outerSize":"123.628472222222","oscRate":"37.3387896825397","oscDepth":"100","oscPhase":"0","jitRate":"26","jitDepth":"35","mix1L0":"100","mix1L1":"0","mix1L2":"0","mix1L3":"0","mix2L0":"100","mix2L1":"0","mix2L2":"0","mix2L3":"0","mix3L0":"100","mix3L1":"0","mix3L2":"0","mix3L3":"0","denOuter":"4000","spdOuter":"0","rndOuter":"32.4487433862434","briOuter":"400","denInner":"745","spdInner":"0","rndInner":"3.05472883597884","briInner":"400","halftone":"5","mix1L0~6":"100","mix1L1~6":"0","mix1L2~6":"0","mix1L3~6":"0","mix1L0~7":"100","mix1L1~7":"0","mix1L2~7":"0","mix1L3~7":"0","mix1L0~8":"100","mix1L1~8":"0","mix1L2~8":"0","mix1L3~8":"0"},"solos":{},"oscShape":"sin","bg":"dark","paths":{"outer":"torus","inner":"torus"},"axisX":0,"axisY":0,"axisHidden":true,"ch":{"ringRot":[{"ringRot":0},{"ringRot":18},{"ringRot":18},{"ringRot":18}],"discRot":[{"discRot":0},{"discRot":-11},{"discRot":-11},{"discRot":-11}],"prox":[{"prox":0},{"prox":100},{"prox":100},{"prox":100}],"prox2":[{"prox2":100},{"prox2":100},{"prox2":100},{"prox2":100}],"size":[{"size":34.22},{"size":41.21},{"size":41.21},{"size":41.21}],"voidSize":[{"voidSize":61.32},{"voidSize":68.65},{"voidSize":68.65},{"voidSize":68.65}],"outerSize":[{"outerSize":123.628472222222},{"outerSize":100},{"outerSize":100},{"outerSize":100}],"axis":[{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0},{"x":0,"y":0}],"spread":[{"spread":100},{"spread":100},{"spread":0},{"spread":0}],"halftone":[{"halftone":5},{"halftone":5},{"halftone":5},{"halftone":5}],"osc":[{"oscRate":37.3387896825397,"oscDepth":100,"oscPhase":0,"shape":"sin"},{"oscRate":34.6188822751323,"oscDepth":71.5732473544974,"oscPhase":31.3698743386243,"shape":"sin"},{"oscRate":33.4201388888889,"oscDepth":61.6484788359788,"oscPhase":0,"shape":"sin"},{"oscRate":33.8169642857143,"oscDepth":48.2845568783069,"oscPhase":0,"shape":"sin"}],"jit":[{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35},{"jitRate":26,"jitDepth":35}],"weather":[{"wthAmt":100,"wthScale":262.997685185185,"wthRate":0},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100},{"wthAmt":0,"wthScale":100,"wthRate":100}],"colour":[{"colour":0},{"colour":0},{"colour":0},{"colour":0}]},"sel":{"ringRot":0,"discRot":0,"prox":0,"prox2":0,"size":0,"voidSize":0,"outerSize":0,"axis":0,"spread":0,"halftone":0,"osc":0,"jit":0,"weather":0,"colour":0},"out":["outer","inner","image","osc","mix1","ringRot","discRot","prox","size","voidSize","outerSize","spread","weather","colour"],"inst":["mix1~6","mix1~7","mix1~8"]};   // his own, off the other machine
 
 try {
   var have = JSON.parse(localStorage.getItem(STORE)) || {};
@@ -3044,7 +3384,7 @@ function crossfade(){
     // onto the canvas halfway through a fade
     out: SHELF_IDS.filter(isOut), inst: Object.keys(NODES).filter(S),
     cards: snapshot().cards, ch: ch, sel: JSON.parse(JSON.stringify(SEL)),
-    cables: near.cables, solos: near.solos, vals: vals,
+    cables: near.cables, solos: near.solos, off: near.off, vals: vals,
     oscShape: near.oscShape,
     axisX: lerpNum(A.axisX || 0, B.axisX || 0, t),
     axisY: lerpNum(A.axisY || 0, B.axisY || 0, t),
@@ -3069,11 +3409,14 @@ document.getElementById('patchList').addEventListener('change', function(){
   var name = document.getElementById('patchList').value;
   var o = allPatches();
   if(!o[name]) return;
-  // Loading a patch does not empty the drawer onto the board. What is already
-  // laid out stays laid out, and the only cards it brings out are the ones its
-  // own cables need — otherwise a cable would run to a card in the drawer.
+  // Loading a patch lays out that patch's own cards and nothing else: the ones
+  // it was saved with, plus any its cables run to, so no cable ever runs to a
+  // card in the drawer. Every other card goes back in the drawer. Keeping what
+  // was already out piled every preset loaded onto the board. A patch saved
+  // before the drawer carries no list, and its cables alone decide: its cards
+  // list names every card there was, which is the drawer emptied onto the board
   var st = JSON.parse(JSON.stringify(o[name]));
-  var keep = SHELF_IDS.filter(isOut);
+  var keep = (st.out || []).filter(function(id){ return SHELF_IDS.indexOf(id) >= 0; });
   (st.cables || []).forEach(function(c){
     [c.from, c.to].forEach(function(e){
       var id = e.slice(-3) === 'Set' ? e.slice(0, -3) : e;
@@ -3081,11 +3424,7 @@ document.getElementById('patchList').addEventListener('change', function(){
     });
   });
   st.out = keep;
-  // copies already on the board are kept too, alongside the patch's own
-  var inst = Object.keys(NODES).filter(S);
-  (st.inst || []).forEach(function(id){ if(inst.indexOf(id) < 0) inst.push(id); });
-  st.inst = inst;
-  restore(st);
+  restore(st);                  // and only the patch's own copies come back
 });
 
 document.getElementById('patchDel').addEventListener('click', function(){
@@ -3157,7 +3496,7 @@ document.addEventListener('click', function(e){
 
 /* hover bubbles: rest on a card or a top-row control and it says what it does.
    Gone the moment a button goes down, so it never sits over a drag. */
-var TIPS = [["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], [".card select.path", "The path this shape's grains follow. Toroidal goes round the shape and rolls across its thickness, Spiral creeps outward and starts again inside, Rosette carries a small loop of its own, Wander drifts and never repeats, Curl runs wisps inside wisps."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Gust size how broad the gusts are, Gust speed how long one takes to pass."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
+var TIPS = [[".byp-btn", "Switches the card on and off. Off, it drives nothing, and keeps its settings and its cables."], ["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], ["#c_split", "Sends a signal to some of the grains and not others. Every shape's grains are dealt into four groups, A to D. Each channel is that numbered input, and the letters pressed are the groups it is allowed to reach."], [".card select.path", "The path this shape's grains follow. Toroidal goes round the shape and rolls across its thickness, Spiral creeps outward and starts again inside, Rosette carries a small loop of its own, Wander drifts and never repeats, Curl runs wisps inside wisps."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Gust size how broad the gusts are, Gust speed how long one takes to pass."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
 var tipEl = document.createElement('div'); tipEl.id = 'tip'; document.body.appendChild(tipEl);
 var tipT = null, tipOn = null, everOpened = false;
 var hintsOn = true;                       // the Hints button in the top row
@@ -3232,14 +3571,14 @@ document.addEventListener('scroll', tipHide, true);
 --------------------------------------------------------------------------- */
 var SHELF = [
   ['Shapes',    ['outer','inner','image']],
-  ['Sources',   ['osc','jit','mix1']],
+  ['Sources',   ['osc','jit','mix1','split']],
   ['Variables', ['ringRot','discRot','prox','size','voidSize',
                  'outerSize','axis','halftone','spread','weather','colour']]
 ];
 var GRID_X = 264, GRID_Y = 150, GRID_COLS = 5;
 var SHELF_IDS = ['outer','inner','image','osc','jit','mix1','mix2','mix3',
                  'ringRot','discRot','prox','prox2','size','voidSize',
-                 'outerSize','axis','halftone','spread','weather','colour'];
+                 'outerSize','axis','halftone','spread','weather','colour','split'];
 
 function cardOf(id){ return document.getElementById(NODES[id]); }
 function isOut(id){ return !cardOf(id).classList.contains('stowed'); }
@@ -3353,7 +3692,8 @@ function bringIntoView(c){
 }
 function putBack(id){
   if(S(id)) dropInstance(id);                  // a copy goes away for good
-  else cardOf(id).classList.add('stowed');
+  else { cardOf(id).classList.add('stowed'); cardOf(id).classList.remove('off'); }
+  delete OFF[id];                              // laid again, it comes back on
   cables = cables.filter(function(cb){
     return cb.from !== id && cb.to !== id &&
            cb.to !== id + 'Set' && cb.from !== id + 'Set';
