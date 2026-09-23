@@ -3389,12 +3389,30 @@ function crossfade(){
       return s;
     });
   });
+  // the cards the nearer patch's cables run to come out, at the spot that
+  // patch saved them in. Left in the drawer, their wires were drawn to hidden
+  // cards and shot off the top of the screen. Nothing already out moves
+  var out = SHELF_IDS.filter(isOut), inst = Object.keys(NODES).filter(S);
+  var cards = snapshot().cards;
+  (near.cables || []).forEach(function(c){
+    [c.from, c.to].forEach(function(e){
+      var id = e.slice(-3) === 'Set' ? e.slice(0, -3) : e;
+      if(S(id)){
+        if(inst.indexOf(id) >= 0 || (near.inst || []).indexOf(id) < 0) return;
+        inst.push(id);
+      } else {
+        if(SHELF_IDS.indexOf(id) < 0 || out.indexOf(id) >= 0) return;
+        out.push(id);
+      }
+      if(near.cards && near.cards[id]) cards[id] = near.cards[id];
+    });
+  });
   restore({
-    // the board is left exactly as it is: without these two, restore falls back
-    // to laying out every card the patch mentions and the drawer empties itself
-    // onto the canvas halfway through a fade
-    out: SHELF_IDS.filter(isOut), inst: Object.keys(NODES).filter(S),
-    cards: snapshot().cards, ch: ch, sel: JSON.parse(JSON.stringify(SEL)),
+    // the board is otherwise left exactly as it is: without these two, restore
+    // falls back to laying out every card the patch mentions and the drawer
+    // empties itself onto the canvas halfway through a fade
+    out: out, inst: inst,
+    cards: cards, ch: ch, sel: JSON.parse(JSON.stringify(SEL)),
     cables: near.cables, solos: near.solos, off: near.off, vals: vals,
     oscShape: near.oscShape,
     axisX: lerpNum(A.axisX || 0, B.axisX || 0, t),
