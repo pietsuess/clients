@@ -2957,6 +2957,10 @@ function restore(st){
   axisMark.style.display = axisHidden ? 'none' : '';
   axisToggle.textContent = axisHidden ? 'Show axis' : 'Hide axis';
 
+  // a card the patch put out is not a card he just laid: the teal mark is for
+  // his own press, so a load never arrives wearing it
+  Array.prototype.forEach.call(document.querySelectorAll('.card.justlaid'),
+    function(c){ c.classList.remove('justlaid'); });
   jackLights(); readout(); draw(); paint();
 }
 
