@@ -133,6 +133,11 @@ body{
   color:var(--ink); background:none; border:1px solid var(--rule);
   border-radius:999px; padding:8px 13px; min-width:13ch;
 }
+.card select.path{
+  font-family:var(--ff-mono); font-size:11px; letter-spacing:.12em;
+  color:var(--ink); background:none; border:1px solid var(--rule);
+  border-radius:999px; padding:6px 11px; width:100%; margin-bottom:11px;
+}
 .topbar button{
   font-family:var(--ff-mono); text-transform:uppercase;
   letter-spacing:.15em; font-size:11px; color:var(--muted);
@@ -379,9 +384,9 @@ input[type=range]::-moz-range-thumb{
     <div class="card-body">
       <div class="row"><span class="k">Amount</span><span class="v" id="wthAmtV"></span></div>
       <input type="range" id="wthAmt" min="0" max="100" step="any" value="0">
-      <div class="row"><span class="k">Scale</span><span class="v" id="wthScaleV"></span></div>
+      <div class="row"><span class="k">Gust size</span><span class="v" id="wthScaleV"></span></div>
       <input type="range" id="wthScale" min="20" max="400" step="any" value="100">
-      <div class="row"><span class="k">Rate</span><span class="v" id="wthRateV"></span></div>
+      <div class="row"><span class="k">Gust speed</span><span class="v" id="wthRateV"></span></div>
       <input type="range" id="wthRate" min="0" max="300" step="any" value="100">
     </div>
   </div>
@@ -487,6 +492,7 @@ input[type=range]::-moz-range-thumb{
     <div class="card-title">Outer disc</div>
     <div class="card-body">
       <p class="note" id="outerNote"></p>
+      <select class="path" id="pathOuter"><option value="torus">Toroidal</option><option value="spiral">Spiral</option><option value="rosette">Rosette</option><option value="wander">Wander</option><option value="curl">Curl</option></select>
       <div class="row"><span class="k">Density</span><span class="v" id="denOuterV"></span></div>
       <input type="range" id="denOuter" min="0" max="4000" step="1" value="2200">
       <div class="row"><span class="k">Speed</span><span class="v" id="spdOuterV"></span></div>
@@ -502,6 +508,7 @@ input[type=range]::-moz-range-thumb{
     <div class="card-title">Inner disc</div>
     <div class="card-body">
       <p class="note" id="innerNote"></p>
+      <select class="path" id="pathInner"><option value="torus">Toroidal</option><option value="spiral">Spiral</option><option value="rosette">Rosette</option><option value="wander">Wander</option><option value="curl">Curl</option></select>
       <div class="row"><span class="k">Density</span><span class="v" id="denInnerV"></span></div>
       <input type="range" id="denInner" min="0" max="2000" step="1" value="1000">
       <div class="row"><span class="k">Speed</span><span class="v" id="spdInnerV"></span></div>
@@ -1183,8 +1190,11 @@ function readout(){
   document.getElementById('spreadV').textContent = (val('spread')/100).toFixed(2);
   document.getElementById('colourV').textContent = (val('colour')/100).toFixed(2);
   document.getElementById('wthAmtV').textContent   = (wth('wthAmt')/100).toFixed(2);
-  document.getElementById('wthScaleV').textContent = (wth('wthScale')/100).toFixed(2);
-  document.getElementById('wthRateV').textContent  = (wth('wthRate')/100).toFixed(2);
+  document.getElementById('wthScaleV').textContent = (wth('wthScale')/100).toFixed(2) + '\u00d7';
+  var wrt = wth('wthRate')/100;                 // seconds for one gust to pass:
+  var GUST_S = 2 * Math.PI / 1.46;              // the slowest of gust()'s three rates
+  document.getElementById('wthRateV').textContent  = wrt <= 0.01 ? 'still'
+    : (GUST_S / wrt).toFixed(1) + 'S';
   document.getElementById('denOuterV').textContent = setVal('outerSet', 0, denOuter).toFixed(0);
   document.getElementById('denInnerV').textContent = setVal('innerSet', 0, denInner).toFixed(0);
   document.getElementById('spdOuterV').textContent = (setVal('outerSet', 1, spdOuter)/100).toFixed(2);
@@ -1253,7 +1263,7 @@ function weatherFor(disc){
   var t = taps(disc, 'weather');
   if(!t.length) return null;
   return { amt: wth('wthAmt', t[0].id, t[0].idx)/100,
-           scale: wth('wthScale', t[0].id, t[0].idx)/100,
+           scale: 1 / Math.max(0.05, wth('wthScale', t[0].id, t[0].idx)/100),
            rate: wth('wthRate', t[0].id, t[0].idx)/100 };
 }
 /* The push on one particle, the way the material page does it: the front moves
@@ -1926,6 +1936,87 @@ function bearing(p){
 /* Spread is a seed, not a push. Each grain keeps its own signed share, so at
    Amount up the edge scatters — some grains short of the boundary, some past
    it — instead of every grain being driven out of the centre onto one shell. */
+/* the tube. A grain goes round the shape AND round the thickness, each at its
+   own phase and rate, which is the toroidal path: it weaves through its
+   neighbours instead of holding one radius for ever. The roll is a share of
+   the band either side of the grain's own seat, so the fill stays even. */
+var TUBE = 0.35;
+/* each shape's Random, as GEOMETRY. Random is not a shake: in place it only
+   shortens every streak and the fading trail reads as the material dimming
+   out. It widens the roll across the band and spreads the travel rates, so a
+   grain still rides its path, just a less exact one. */
+var RND_O = 0, RND_I = 0;
+/* Each grain CARRIES its own two phases, round the shape and round the tube,
+   and they are advanced once a frame at its own rate. Multiplying a shared
+   clock by a per-grain rate instead meant any change to that rate — Random,
+   Density, Speed — multiplied the whole accumulated clock and jumped every
+   seat at once, which is the redraw on every adjustment. */
+function carry(p, dt, pace, rnd, kind){
+  if(p.ua === undefined){ p.ua = 0; p.tv = tubePh(p); }
+  p.ua += dt*pace*(0.90 - 0.55*p.hu)*rateOf(p, rnd);
+  p.tv += dt*pace*tubeRate(p);
+  if(kind === 'spiral'){
+    p.sp = (p.sp || 0) + dt*pace*0.22;
+    if(p.hu + p.sp >= 1){ p.sp -= 1; p.fresh = true; }
+  }
+}
+function rateOf(p, rnd){
+  var h = Math.sin(p.ha*73.1591 + 19.271)*39117.2941;
+  return 1 + ((h - Math.floor(h)) - 0.5) * 1.8 * rnd;
+}
+function tubePh(p){
+  var h = Math.sin(p.ha*21.7317 + 4.913)*17321.7123;
+  return (h - Math.floor(h)) * Math.PI*2;
+}
+function tubeRate(p){
+  var h = Math.sin(p.ha*57.1123 + 31.417)*29871.5417;
+  return 0.60 + (h - Math.floor(h))*0.90;
+}
+/* the grain's place across the thickness this instant: its seat, rolled */
+/* Which path a shape's grains follow. Every one is the same two carried
+   phases read a different way: `ua` round the shape, `tv` round the tube.
+   PATH_O / PATH_I are the two dropdowns, read once a frame. */
+var PATH_O = 'torus', PATH_I = 'torus';
+var pathOuter = document.getElementById('pathOuter'),
+    pathInner = document.getElementById('pathInner');
+var SEAT = [0, 0];      // [angle offset, place across the shape]
+function seatOf(p, kind){
+  var tv = p.tv === undefined ? tubePh(p) : p.tv;
+  var room = Math.min(p.hu, 1 - p.hu), amp = TUBE*2*room, a = 0, h;
+  if(kind === 'spiral'){
+    // a slow creep outward. At the far edge the grain starts again at the
+    // inner one, and it is marked fresh so it re-places without a streak
+    h = p.hu + (p.sp || 0);
+  } else if(kind === 'rosette'){
+    // a small loop of its own carried round the shape: petals
+    var rr = amp*0.70 + 0.03;
+    a = rr*Math.sin(tv*3)*1.10;
+    h = p.hu + rr*Math.cos(tv*3);
+  } else if(kind === 'wander'){
+    a = 0.22*Math.sin(tv*0.70 + p.ha*1.7);
+    h = p.hu + amp*Math.sin(tv*0.53 + p.ha*3.1);
+  } else if(kind === 'curl'){
+    // octaves, each finer and weaker: wisps inside wisps
+    a = 0.16*Math.sin(tv + p.ha*2.3) + 0.08*Math.sin(tv*2.7 + p.ha*5.1)
+      + 0.04*Math.sin(tv*6.1 + p.ha*9.7);
+    h = p.hu + amp*(0.55*Math.sin(tv*1.3 + p.ha*4.4)
+                  + 0.30*Math.sin(tv*3.7 + p.ha*7.9)
+                  + 0.15*Math.sin(tv*8.3 + p.ha*11.3));
+  } else {
+    h = p.hu + amp*Math.sin(tv);
+  }
+  SEAT[0] = a;
+  SEAT[1] = h < 0 ? 0 : (h > 1 ? 1 : h);
+  return SEAT;
+}
+function tubeHu(p){
+  // the roll is a share of the room this grain HAS. A fixed swing had to be
+  // folded back at the walls, and a sine dwells at its extremes, so every
+  // grain ended up parked on the inner or the outer edge: a hollow shell with
+  // a bright rim. Random does not widen it, or the shape blows open.
+  var amp = TUBE * 2 * Math.min(p.hu, 1 - p.hu);
+  return p.hu + amp*Math.sin(p.tv === undefined ? tubePh(p) : p.tv);
+}
 function scatterOf(p){
   var h = Math.sin(p.ha*39.3468 + 11.719)*24634.6345;
   return (h - Math.floor(h))*2 - 1;
@@ -1941,6 +2032,11 @@ function seatFresh(p){
   p.fresh = false;
   if(window.mmHome(p, FCLK, G.oR, FRESH)){
     p.x = FRESH[0]; p.y = FRESH[1]; p.px = p.x; p.py = p.y;
+    // and it forgets the home it had. The feed-forward carries a grain by how
+    // far its OWN home moved since last frame, so a grain that just changed
+    // shape was carried the entire way from the old one in a single frame:
+    // that is the spike on every Density change
+    p.hx = undefined; p.hy = undefined;
   }
 }
 /* The rim is a boundary the grain meets and turns back from, not a crop. It
@@ -1962,8 +2058,9 @@ window.mmHome = function(p, t, bound, out){
   if(!G) return false;
   if((p.warm || p.core) && G.dots.length){
     var d = G.dots[0];
-    var an = bearing(p) + innerA - PCLK_I*0.075;
-    var sc = scatterOf(p), db = d.r*p.hu;
+    var st = seatOf(p, PATH_I);
+    var an = bearing(p) + innerA - (p.ua || 0) + st[0];
+    var sc = scatterOf(p), db = d.r*st[1];
     var dr = sc >= 0 ? db + SPR_I*0.60*d.r*sc : db*(1 - SPR_I*(-sc));
     out[0] = d.x + Math.cos(an)*dr;
     out[1] = d.y + Math.sin(an)*dr;
@@ -1973,13 +2070,18 @@ window.mmHome = function(p, t, bound, out){
   // own seat, and then turned about the axis exactly as the SVG body is. Adding
   // the turn to the bearing instead swept the grains past a hole that stayed
   // put, so the band's thickness changed under them and the ring pumped
-  var aa = bearing(p) + PCLK_O*0.05;
+  // Speed carries the grain along its path, always. The seat travels round the
+  // band at its own rate by where it sits across the thickness, so the band
+  // SHEARS: the inner edge laps the outer one and the motion reads per grain
+  // instead of the whole ring turning as one block.
+  var so = seatOf(p, PATH_O);
+  var aa = bearing(p) + (p.ua || 0) + so[0];
   var dx = Math.cos(aa), dy = Math.sin(aa);
   var tin = voidEdge(dx, dy, G.s0.x, G.s0.y, G.vR);
   // the scatter is one length for every grain, in or out, and the cutout does
   // not hold it: a share of the grain's OWN room left the band's inner edge
   // unmoved, since those grains have none, and that bare edge was the hairline
-  var sc = scatterOf(p), base = tin + (G.oR - tin)*p.hu;
+  var sc = scatterOf(p), base = tin + (G.oR - tin)*so[1];
   var rad = base + SPR_O*0.60*G.oR*sc;
   if(rad < 0) rad = 0;
   var hx = dx*rad, hy = dy*rad;
@@ -2031,14 +2133,23 @@ function field(dt){
   // one pool, made once. Changing a Density only changes how many of it are
   // drawn: rebuilding the set threw every grain back into a random scatter,
   // which is the redraw that filled the frame
-  if(!MSET) MSET = MAT.makeGrains(MPOOL, 1.30);
+  if(!MSET){
+    MSET = MAT.makeGrains(MPOOL, 1.30);
+    // where a grain sits across its shape is ITS OWN, decided once. Reading it
+    // off the index against the current count meant every Density change
+    // re-spread every seat, the pull carried each grain to its new radius in
+    // one frame, and the whole field jumped out in radial spikes
+    for(var q = 0; q < MSET.length; q++){
+      var hq = Math.sin(q*12.9898 + 4.1414)*43758.5453;
+      MSET[q].hu0 = Math.sqrt(hq - Math.floor(hq));
+    }
+  }
   if(MCOUNT !== nR + '/' + nI){
     for(var k = 0; k < MSET.length; k++){
       var wasCore = MSET[k].core, on = k < nI + nR;
       MSET[k].warm = false;
       MSET[k].core = k < nI;
-      MSET[k].hu = k < nI ? Math.sqrt((k + 0.5)/Math.max(1, nI))
-                          : Math.sqrt((k - nI + 0.5)/Math.max(1, nR));
+      MSET[k].hu = MSET[k].hu0;
       // a grain Density has just brought in takes its place at its own home,
       // with no streak behind it, and that is the only placement left
       if(on && (MSET[k].core !== wasCore || !MSET[k].live)) MSET[k].fresh = true;
@@ -2053,6 +2164,17 @@ function field(dt){
   // their home, nothing breathes and nothing wanders
   var rndO = setVal('outerSet', 2, rndOuter)/100;
   readingFor(WAMT, rndO);    // this shape's own reading
+  // Random blurs the path, it does not let go of it. The pull is held at full
+  // strength whatever the reading says, so a grain always rides its seat round
+  // the shape and Random only makes that ride less exact.
+  // the WEATHER is what loosens the grip, not Random: at Amount 0 a grain is
+  // held on its path, and as the wind comes up the hold gives way so the gusts
+  // can actually carry it off. Pinned at 1 the pull dragged every grain back
+  // the same frame and the weather did nothing at all.
+  MAT.setFigure(1 - 0.85*WAMT);
+  MAT.setTurb(0.05);         // no in-place fuzz: Random is the path, not a shake
+  RND_O = rndO;
+  PATH_O = pathOuter.value;
   var cohO = MAT.cohesion, drvO = MAT.drive;
   var teO = MAT.tear, viO = MAT.vitality, tmO = MAT.tempo;
   MAT.setBreath(0);          // no breathing, the grains are on their own
@@ -2077,6 +2199,7 @@ function field(dt){
   MAT.setHomeOnly(true);       // a retiring grain reappears at its own home
   for(var i = 0; i < NDRAW; i++){
     if(!MSET[i].core){
+      carry(MSET[i], dt, paceO, RND_O, PATH_O);
       seatFresh(MSET[i]);
       MAT.stepGrain(MSET[i], dt, FCLK, bound, paceO);
       rimReturn(MSET[i], bound*(1 + spO*0.70), dt);
@@ -2085,6 +2208,10 @@ function field(dt){
   }
   var rndI = setVal('innerSet', 2, rndInner)/100;
   readingFor(WAMT, rndI);
+  MAT.setFigure(1 - 0.85*WAMT);   // as the ring: the wind loosens the grip
+  MAT.setTurb(0.05);
+  RND_I = rndI;
+  PATH_I = pathInner.value;
   var drvI = MAT.drive;
   var teI = MAT.tear, viI = MAT.vitality;
   MAT.setBreath(0);
@@ -2102,6 +2229,7 @@ function field(dt){
   if(dc) MAT.setRespawnAt(dc.x, dc.y);   // the disc re-places inside itself
   for(var i = 0; i < NDRAW; i++){
     if(MSET[i].core){
+      carry(MSET[i], dt, paceI, RND_I, PATH_I);
       seatFresh(MSET[i]);
       MAT.stepGrain(MSET[i], dt, FCLK, dc ? dc.r : bound, paceI);
       if(dc) rimReturn(MSET[i], dc.r*(1 + spI*0.70), dt, dc.x, dc.y);
@@ -2738,6 +2866,8 @@ function clearPatch(){ cables = []; jackLights(); paint(); }
 function snapshot(){
   var st = { cards:{}, cables: cables, vals:{}, solos:{},
              oscShape: oscShape,
+             bg: markWrap.classList.contains('dark') ? 'dark' : 'light',
+             paths: { outer: pathOuter.value, inner: pathInner.value },
              axisX: axisX, axisY: axisY, axisHidden: axisHidden,
              ch: JSON.parse(JSON.stringify(CH)), sel: JSON.parse(JSON.stringify(SEL)) };
   Object.keys(NODES).forEach(function(id){
@@ -2798,6 +2928,16 @@ function restore(st){
   });
   cables = (st.cables || []).filter(function(c){ return NODES[c.from] && NODES[c.to]; });
 
+  // the ground travels with the patch. A patch saved before this carries no
+  // ground at all, and those are left exactly as the screen already is
+  // an older patch has no path and stays on the toroidal one
+  pathOuter.value = (st.paths && st.paths.outer) || 'torus';
+  pathInner.value = (st.paths && st.paths.inner) || 'torus';
+  if(st.bg){
+    markWrap.classList.toggle('dark', st.bg === 'dark');
+    Array.prototype.forEach.call(bgSeg.children, function(x){
+      x.setAttribute('aria-pressed', x.dataset.bg === st.bg ? 'true' : 'false'); });
+  }
   oscShape = st.oscShape || 'sin';
   Array.prototype.forEach.call(document.getElementById('oscShape').children,
     function(x){ x.setAttribute('aria-pressed', x.dataset.shape === oscShape ? 'true' : 'false'); });
@@ -2977,7 +3117,7 @@ document.addEventListener('click', function(e){
 
 /* hover bubbles: rest on a card or a top-row control and it says what it does.
    Gone the moment a button goes down, so it never sits over a drag. */
-var TIPS = [["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Scale how big the gusts are, Rate how fast they pass."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
+var TIPS = [["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], [".card select.path", "The path this shape's grains follow. Toroidal goes round the shape and rolls across its thickness, Spiral creeps outward and starts again inside, Rosette carries a small loop of its own, Wander drifts and never repeats, Curl runs wisps inside wisps."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Gust size how broad the gusts are, Gust speed how long one takes to pass."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
 var tipEl = document.createElement('div'); tipEl.id = 'tip'; document.body.appendChild(tipEl);
 var tipT = null, tipOn = null, everOpened = false;
 var hintsOn = true;                       // the Hints button in the top row
