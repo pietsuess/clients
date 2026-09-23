@@ -82,6 +82,9 @@ body{
 .jack.flash-reject{border-color:#c8442f !important; background:#c8442f44 !important}
 
 .card.selected{outline:2px solid var(--ink); outline-offset:2px}
+/* just laid down from the drawer, until it is touched */
+.card.justlaid{outline:2px solid var(--teal-lift); outline-offset:2px}
+.card.justlaid .card-title{color:var(--teal-lift)}
 /* the drawer: every node waits here until it is put on the board */
 #shelf{
   position:fixed; left:0; right:0; bottom:0; z-index:400;
@@ -2455,7 +2458,7 @@ function jackLights(){
 var TOPZ = 20;
 board.addEventListener('pointerdown', function(e){
   var c = e.target.closest ? e.target.closest('.card') : null;
-  if(c) c.style.zIndex = ++TOPZ;
+  if(c){ c.style.zIndex = ++TOPZ; c.classList.remove('justlaid'); }
 }, true);
 
 var pending = null;   // {from, x, y} while a cable is being dragged
@@ -3077,6 +3080,7 @@ function addInstance(kind, spot, wantId){
   });
   card.id = 'c_' + id;
   card.classList.remove('stowed');
+  card.classList.add('justlaid');
   board.appendChild(card);
   NODES[id] = card.id;
   initCard(id);
@@ -3110,6 +3114,7 @@ function putOut(id, spot){
   var c = cardOf(id);
   if(isOut(id)) return;
   c.classList.remove('stowed');
+  c.classList.add('justlaid');
   if(spot){ c.style.left = spot.left + 'px'; c.style.top = spot.top + 'px'; }
   else { var p = freeSpot(); c.style.left = p.left + 'px'; c.style.top = p.top + 'px'; }
   paintShelf(); paint();
