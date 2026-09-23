@@ -764,14 +764,41 @@ function axisAt(c){
     if(cb.to !== 'axis' || SOURCES.indexOf(K(cb.from)) < 0) continue;
     if(cb.toIdx > 1) continue;
     if(solo >= 0 && cb.toIdx !== solo) continue;
-    // the swing is centred on the dot and reaches only as far as the room it
-    // has: at twice the cap it ran past the limit and cap() pinned it there,
-    // which is the dead hold in the middle of the wander
-    d[cb.toIdx] += (swing(cb.from, cb.fromIdx) - 0.5) * 2 *
-                   Math.max(0, AXIS_CAP - Math.abs(cb.toIdx ? base.y : base.x));
+    // Depth is the share of the axis's whole travel, so at 1 the dot crosses
+    // it end to end. It used to run to twice the cap and cap() pinned it there,
+    // which is the dead hold in the middle of the wander.
+    var b = cb.toIdx ? base.y : base.x;
+    d[cb.toIdx] += swept(b, -AXIS_CAP, AXIS_CAP, cb.from, cb.fromIdx) - b;
   }
   var cap = function(v){ return Math.max(-AXIS_CAP, Math.min(AXIS_CAP, v)); };
   return { x: cap(base.x + d[0]), y: cap(base.y + d[1]) };
+}
+
+/* what a source is doing, kept as two numbers: where it sits on its own range,
+   0 to 1, and its Depth as a SHARE OF THE TARGET'S WHOLE SPAN. Depth 1 sweeps
+   the control end to end. Adding a signed swing to the control's own value and
+   clamping meant a slider near either end spent half the cycle pinned, which is
+   why an oscillator into Spread barely read. */
+function sweep(id, c, seen){
+  if(MIXERS.indexOf(K(id)) < 0) return { s: sig(id, c), d: depthOf(id, c) };
+  seen = seen || {};
+  if(seen[id]) return { s: 0.5, d: 0 };
+  seen[id] = true;
+  var solo = soloOf(id), ns = 0, nd = 0, den = 0;
+  for(var i = 0; i < cables.length; i++){
+    var c2 = cables[i];
+    if(c2.to !== id || SOURCES.indexOf(K(c2.from)) < 0) continue;
+    if(solo >= 0 && c2.toIdx !== solo) continue;
+    var lv = +document.getElementById(SID(id, K(id) + 'L' + c2.toIdx)).value / 100;
+    var w = sweep(c2.from, c2.fromIdx, seen);
+    ns += lv * w.s; nd += lv * w.d; den += lv;
+  }
+  return den > 0 ? { s: ns/den, d: nd/den } : { s: 0.5, d: 0 };
+}
+/* the control's place once a source has had its share of it */
+function swept(v, lo, hi, id, c, seen){
+  var w = sweep(id, c, seen);
+  return v + ((lo + w.s*(hi - lo)) - v) * w.d;
 }
 
 function depthOf(id, c){
@@ -795,7 +822,7 @@ function val(id, c){
     if(cb.to !== id || SOURCES.indexOf(K(cb.from)) < 0) continue;
     if(cb.toIdx !== c) continue;
     if(solo >= 0 && cb.toIdx !== solo) continue;
-    v += swing(cb.from, cb.fromIdx) * (hi - lo);
+    v = swept(v, lo, hi, cb.from, cb.fromIdx);
   }
   return Math.max(lo, Math.min(hi, v));
 }
@@ -811,7 +838,7 @@ function setVal(node, k, el, base){
     var cb = cables[i];
     if(cb.to !== node || cb.toIdx !== k) continue;
     if(SOURCES.indexOf(K(cb.from)) >= 0){
-      v += swing(cb.from, cb.fromIdx) * (hi - lo);
+      v = swept(v, lo, hi, cb.from, cb.fromIdx);
     } else if(VARS.indexOf(K(cb.from)) >= 0 && document.getElementById(SID(cb.from, K(cb.from)))){
       var e2 = document.getElementById(SID(cb.from, K(cb.from))), l2 = +e2.min, h2 = +e2.max;
       v = lo + (val(cb.from, cb.fromIdx) - l2) / (h2 - l2) * (hi - lo);
