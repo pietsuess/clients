@@ -1632,8 +1632,18 @@ function stepGrain(p, dt, t, bound, pace){
   // and the arrangement claims what the field has given up
   if(figure > 0.01){
     orderHome(p, t, bound, HOME);
+    // Feed-forward: the grain is carried by however far its OWN home moved
+    // since the last frame, and the pull then closes what is left. The pull
+    // alone only ever takes a fraction of the gap, so anything driving a home
+    // quickly — a fast oscillator — was averaged away to its midpoint and the
+    // shape sat still. A slow home moves almost nothing a frame, so the settled
+    // look is unchanged.
+    if(p.hx !== undefined){ p.x += HOME[0] - p.hx; p.y += HOME[1] - p.hy; }
+    p.hx = HOME[0]; p.hy = HOME[1];
     var kk = Math.min(1, dt*3.4*figure*pw);
     p.x += (HOME[0] - p.x)*kk; p.y += (HOME[1] - p.y)*kk;
+  } else {
+    p.hx = undefined;        // loose: nothing to carry, and no stale jump later
   }
   r = Math.sqrt(p.x*p.x + p.y*p.y);
   if(r > bound && HOLD > 0.01){
