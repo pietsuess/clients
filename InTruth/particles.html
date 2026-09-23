@@ -1602,7 +1602,9 @@ function stepGrain(p, dt, t, bound, pace){
     // place scattered it into yet another uncorrelated per-grain wobble, which
     // is the exact failure this whole pass exists to undo
     var sq = squall(t + p.x*0.85 + p.y*0.55);
-    var ga = gustAmp * sq * 0.34 * pw * kp;
+    // the wind is not the grain's own travel, so Speed does not gate it: at
+    // Speed 0 the material holds its path and the weather still blows it about
+    var ga = gustAmp * sq * 0.34 * pw;
     p.x += GU[0]*ga*dt;
     p.y += GU[1]*ga*dt;
     wx = sq * (0.5 + 0.5*GU[0]);      // the local front, smooth in space
@@ -1652,7 +1654,10 @@ function stepGrain(p, dt, t, bound, pace){
     // quickly — a fast oscillator — was averaged away to its midpoint and the
     // shape sat still. A slow home moves almost nothing a frame, so the settled
     // look is unchanged.
-    if(p.hx !== undefined){ p.x += HOME[0] - p.hx; p.y += HOME[1] - p.hy; }
+    // and the carry is only as strong as the grip. Unscaled, a grain loosened
+    // by the weather was still dragged along its seat's whole move every frame,
+    // so the wind could only ever wobble a path it could not actually bend
+    if(p.hx !== undefined){ p.x += (HOME[0] - p.hx)*figure; p.y += (HOME[1] - p.hy)*figure; }
     p.hx = HOME[0]; p.hy = HOME[1];
     var kk = Math.min(1, dt*3.4*figure*pw);
     p.x += (HOME[0] - p.x)*kk; p.y += (HOME[1] - p.y)*kk;
