@@ -170,7 +170,7 @@ body{
 #xfade::-moz-range-thumb{width:28px; height:28px}
 
 /* hover bubbles */
-#tip{position:fixed; z-index:50; max-width:260px; padding:10px 13px;
+#tip{position:fixed; z-index:100000; max-width:260px; padding:10px 13px;
   background:var(--ink); color:var(--cream); border-radius:10px;
   font-family:var(--ff-mono); font-size:11px; line-height:1.5; letter-spacing:.02em;
   pointer-events:none; opacity:0; transition:opacity .15s}
@@ -2977,7 +2977,7 @@ document.addEventListener('click', function(e){
 
 /* hover bubbles: rest on a card or a top-row control and it says what it does.
    Gone the moment a button goes down, so it never sits over a drag. */
-var TIPS = [["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
+var TIPS = [["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Scale how big the gusts are, Rate how fast they pass."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
 var tipEl = document.createElement('div'); tipEl.id = 'tip'; document.body.appendChild(tipEl);
 var tipT = null, tipOn = null, everOpened = false;
 var hintsOn = true;                       // the Hints button in the top row
@@ -2994,6 +2994,13 @@ function tipFor(el){
     var n = +j.dataset.idx + 1;
     if(j.dataset.node === 'axis' && j.dataset.side === 'in')
       return [j, n === 1 ? 'Input for X position' : 'Input for Y position'];
+    if(K(j.dataset.node).slice(-3) === 'Set'){
+      var which = ['Density', 'Speed', 'Random', 'Brightness'][n - 1];
+      var disc = K(j.dataset.node) === 'innerSet' ? 'inner disc' : 'ring';
+      return [j, j.dataset.side === 'in'
+        ? 'Input for ' + which + '. Drag a cable here to drive ' + which + ' on the ' + disc + '.'
+        : 'Output ' + n + '. Sends ' + which + ' on.'];
+    }
     return [j, j.dataset.side === 'in'
       ? 'Input ' + n + '. Drag a cable here from an output. It sets channel ' + n + ' of this card.'
       : 'Output ' + n + '. Drag from here to an input to send channel ' + n + '.'];
@@ -3057,6 +3064,13 @@ var SHELF_IDS = ['outer','inner','image','osc','jit','mix1','mix2','mix3',
 function cardOf(id){ return document.getElementById(NODES[id]); }
 function isOut(id){ return !cardOf(id).classList.contains('stowed'); }
 
+/* a card laid by name lands in the middle of what is on screen */
+function midSpot(c){
+  var W = c.offsetWidth || 240, H = c.offsetHeight || 56;
+  var vis = bay.clientHeight * 0.55;            // the drawer covers the rest
+  return { left: Math.max(0, Math.round(bay.scrollLeft + (bay.clientWidth - W) / 2)),
+           top:  Math.max(0, Math.round(bay.scrollTop  + (vis - H) / 2)) };
+}
 function freeSpot(){
   var taken = {};
   Object.keys(NODES).forEach(function(id){
@@ -3102,8 +3116,9 @@ function addInstance(kind, spot, wantId){
   b.addEventListener('click', function(e){ e.stopPropagation(); putBack(id); });
   b.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
   t.appendChild(b);
-  var pt = spot || freeSpot();
+  var pt = spot || midSpot(card);
   card.style.left = pt.left + 'px'; card.style.top = pt.top + 'px';
+  card.style.zIndex = ++TOPZ;                   // laid down means on top
   paint(); bringIntoView(card);
   return id;
 }
@@ -3126,7 +3141,8 @@ function putOut(id, spot){
   c.classList.remove('stowed');
   c.classList.add('justlaid');
   if(spot){ c.style.left = spot.left + 'px'; c.style.top = spot.top + 'px'; }
-  else { var p = freeSpot(); c.style.left = p.left + 'px'; c.style.top = p.top + 'px'; }
+  else { var p = midSpot(c); c.style.left = p.left + 'px'; c.style.top = p.top + 'px'; }
+  c.style.zIndex = ++TOPZ;                      // laid down means on top
   paintShelf(); paint();
   bringIntoView(c);
 }
