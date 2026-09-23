@@ -658,8 +658,10 @@ var PH = {};
 function phOf(id){
   return PH[id] || (PH[id] = { op:[0,0,0,0], rc:[-1,-1,-1,-1], rh:[0.5,0.5,0.5,0.5],
                                jp:[0,0,0,0], jc:[0,0,0,0],
+                               j0:[Math.random(),Math.random(),Math.random(),Math.random()],
                                ja:[Math.random(),Math.random(),Math.random(),Math.random()],
-                               jb:[Math.random(),Math.random(),Math.random(),Math.random()] });
+                               jb:[Math.random(),Math.random(),Math.random(),Math.random()],
+                               j3:[Math.random(),Math.random(),Math.random(),Math.random()] });
 }
 
 function oscPeriod(id, c){ return 0.25 * Math.pow(2400, CH[id][c][SID(id,'oscRate')]/100); }
@@ -688,13 +690,22 @@ var jitRateV  = document.getElementById('jitRateV'),
     jitDepthV = document.getElementById('jitDepthV');
 function jitPeriod(id, c){ return 0.5 * Math.pow(1200, CH[id][c][SID(id,'jitRate')]/100); }
 
+/* The wander runs a spline through its random points instead of easing into
+   each one: a cosine ease arrives and leaves at zero speed, so the motion stopped
+   dead at every waypoint. This one carries its speed through. */
 function jit(id, c){
   var H = phOf(id), ph = H.jp[c];
   var cyc = Math.floor(ph);
-  while(H.jc[c] < cyc){ H.ja[c] = H.jb[c]; H.jb[c] = Math.random(); H.jc[c]++; }
+  while(H.jc[c] < cyc){
+    H.j0[c] = H.ja[c]; H.ja[c] = H.jb[c]; H.jb[c] = H.j3[c];
+    H.j3[c] = Math.random(); H.jc[c]++;
+  }
   if(H.jc[c] > cyc){ H.jc[c] = cyc; }
-  var f = ph - cyc, e = 0.5 - 0.5*Math.cos(Math.PI*f);
-  return H.ja[c] + (H.jb[c] - H.ja[c]) * e;
+  var f = ph - cyc, f2 = f*f, f3 = f2*f;
+  var v = 0.5*((2*H.ja[c]) + (H.jb[c] - H.j0[c])*f +
+               (2*H.j0[c] - 5*H.ja[c] + 4*H.jb[c] - H.j3[c])*f2 +
+               (3*H.ja[c] - H.j0[c] - 3*H.jb[c] + H.j3[c])*f3);
+  return Math.max(0, Math.min(1, v));
 }
 
 /* ---------------------------------------------------------------------------
@@ -753,7 +764,11 @@ function axisAt(c){
     if(cb.to !== 'axis' || SOURCES.indexOf(K(cb.from)) < 0) continue;
     if(cb.toIdx > 1) continue;
     if(solo >= 0 && cb.toIdx !== solo) continue;
-    d[cb.toIdx] += swing(cb.from, cb.fromIdx) * AXIS_CAP * 2;
+    // the swing is centred on the dot and reaches only as far as the room it
+    // has: at twice the cap it ran past the limit and cap() pinned it there,
+    // which is the dead hold in the middle of the wander
+    d[cb.toIdx] += (swing(cb.from, cb.fromIdx) - 0.5) * 2 *
+                   Math.max(0, AXIS_CAP - Math.abs(cb.toIdx ? base.y : base.x));
   }
   var cap = function(v){ return Math.max(-AXIS_CAP, Math.min(AXIS_CAP, v)); };
   return { x: cap(base.x + d[0]), y: cap(base.y + d[1]) };
