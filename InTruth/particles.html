@@ -145,7 +145,7 @@ body{
   border-radius:999px; padding:8px 13px; min-width:13ch;
 }
 .seg.letters{margin-bottom:11px}
-.card select.path{
+.card select.path, .card select.wtype{
   font-family:var(--ff-mono); font-size:11px; letter-spacing:.12em;
   color:var(--ink); background:none; border:1px solid var(--rule);
   border-radius:999px; padding:6px 11px; width:100%; margin-bottom:11px;
@@ -394,6 +394,7 @@ input[type=range]::-moz-range-thumb{
   <div class="card" id="c_weather" style="left:264px; top:300px">
     <div class="card-title">Weather</div>
     <div class="card-body">
+      <select class="wtype" id="wthType"><option value="gusts">Gusts</option><option value="gale">Gale</option><option value="whirl">Whirlwind</option><option value="pulse">Pulse</option><option value="eddies">Eddies</option></select>
       <div class="row"><span class="k">Amount</span><span class="v" id="wthAmtV"></span></div>
       <input type="range" id="wthAmt" min="0" max="100" step="any" value="0">
       <div class="row"><span class="k">Gust size</span><span class="v" id="wthScaleV"></span></div>
@@ -1194,6 +1195,20 @@ function hex2rgb(h){
   return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
 }
 var TEAL_RGB = hex2rgb(TEAL), RED_RGB = hex2rgb(RED);
+// the Colour line runs teal, yellow, coral. A straight line from teal to coral
+// went grey in the middle
+var YEL_RGB = hex2rgb('#ffd166');
+function rampRGB(m){
+  m = m < 0 ? 0 : (m > 1 ? 1 : m);
+  var a = m < 0.5 ? TEAL_RGB : YEL_RGB, b = m < 0.5 ? YEL_RGB : RED_RGB, f = m < 0.5 ? m*2 : m*2 - 1;
+  return [a[0] + (b[0]-a[0])*f, a[1] + (b[1]-a[1])*f, a[2] + (b[2]-a[2])*f];
+}
+// the same line in 257 steps, for the present's every pixel
+var RAMP_LUT = (function(){
+  var o = new Float32Array(257*3);
+  for(var k = 0; k <= 256; k++){ var c = rampRGB(k/256); o[k*3] = c[0]; o[k*3+1] = c[1]; o[k*3+2] = c[2]; }
+  return o;
+})();
 /* a disc's ink: its own Colour cable, teal at 0 and red at 1 */
 /* the same rule the weather uses, for any variable: one cable drives the whole
    shape, two or more and each one only reaches the letters it was split to */
@@ -1209,16 +1224,14 @@ function byGroup(disc, kind, fallback){
   return out;
 }
 function inkAt(m){
-  return 'rgb(' + Math.round(TEAL_RGB[0] + (RED_RGB[0]-TEAL_RGB[0])*m) + ','
-                + Math.round(TEAL_RGB[1] + (RED_RGB[1]-TEAL_RGB[1])*m) + ','
-                + Math.round(TEAL_RGB[2] + (RED_RGB[2]-TEAL_RGB[2])*m) + ')';
+  var c = rampRGB(m);
+  return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')';
 }
 function inkFor(disc){
   var t = taps(disc, 'colour');
   var m = t.length ? val(t[0].id, t[0].idx)/100 : 0;
-  return 'rgb(' + Math.round(TEAL_RGB[0] + (RED_RGB[0]-TEAL_RGB[0])*m) + ','
-                + Math.round(TEAL_RGB[1] + (RED_RGB[1]-TEAL_RGB[1])*m) + ','
-                + Math.round(TEAL_RGB[2] + (RED_RGB[2]-TEAL_RGB[2])*m) + ')';
+  var c = rampRGB(m);
+  return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')';
 }
 
 var PRESS_FS = [
@@ -1449,7 +1462,8 @@ function wth(k, id, c){
 function oneWeather(t){
   return { amt: wth('wthAmt', t.id, t.idx)/100,
            scale: 1 / Math.max(0.05, wth('wthScale', t.id, t.idx)/100),
-           rate: wth('wthRate', t.id, t.idx)/100 };
+           rate: wth('wthRate', t.id, t.idx)/100,
+           type: (CH[t.id] && CH[t.id][t.idx] && CH[t.id][t.idx].type) || 'gusts' };
 }
 function weatherFor(disc){
   var t = taps(disc, 'weather');
@@ -1566,7 +1580,7 @@ function voidEdge(dx, dy, cx, cy, r){
 var MAT = (function(){
 var HOMEONLY = false;   // a retiring grain goes to its home, not to a scatter
 var RCX = 0, RCY = 0;   // where a retired grain is re-placed: its own shape's centre
-var SX = 0, LOCKWARM = 0, BK = 1, HOLD = 1, ESCK = 0, WSC = 1, WRT = 1;   // ESCK: the Spread throw   // HOLD: how much the rim still holds   // BK: how much of their breath is let through   // the field stays teal unless the Colour node says otherwise
+var SX = 0, LOCKWARM = 0, BK = 1, HOLD = 1, ESCK = 0, WSC = 1, WRT = 1, WTY = 'gusts';   // ESCK: the Spread throw   // HOLD: how much the rim still holds   // BK: how much of their breath is let through   // the field stays teal unless the Colour node says otherwise
 var TEAL = [99,196,194], CORAL = [255,155,138], CREAM = [243,235,234];
 function rgba(c,a){ return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a.toFixed(3)+')'; }
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
@@ -1620,6 +1634,31 @@ var GU = [0,0];
 function gust(x, y, t, out){
   // the Weather card's Scale and Rate: its spacing in the frame and its clock
   x *= WSC; y *= WSC; t *= WRT;
+  // and its type. Each is scaled to blow about as hard as the gusts, so Amount
+  // means the same whichever is picked
+  if(WTY === 'gale'){            // one strong direction that slowly swings round
+    var th = t*0.9 + 0.35*Math.sin(t*0.53);
+    var rp = 0.75 + 0.25*Math.sin(1.9*(x*Math.sin(th) - y*Math.cos(th)) + t*2.3);
+    out[0] = Math.cos(th)*rp; out[1] = Math.sin(th)*rp;
+    return;
+  }
+  if(WTY === 'whirl'){           // round the centre, speeding up and easing off
+    var r = Math.sqrt(x*x + y*y) + 1e-4, c = 0.55;
+    var sw = 1.35*(0.62 + 0.38*Math.sin(t*1.7)) * 2*r*c/(r*r + c*c);
+    out[0] = -y/r*sw; out[1] = x/r*sw;
+    return;
+  }
+  if(WTY === 'pulse'){           // out from the centre and back, in waves
+    var r2 = Math.sqrt(x*x + y*y) + 1e-4, w = 1.1*Math.sin(t*2.4 - r2*4.5);
+    out[0] = x/r2*w; out[1] = y/r2*w;
+    return;
+  }
+  if(WTY === 'eddies'){          // small tight swirls everywhere, quick
+    var e1 = t*2.9, e2 = t*2.3;
+    out[0] =  1.1*Math.sin(5.2*x + e1)*Math.cos(5.2*y + e2) + 0.45*Math.sin(7.9*x - e2)*Math.cos(7.9*y + e1);
+    out[1] = -1.1*Math.cos(5.2*x + e1)*Math.sin(5.2*y + e2) - 0.45*Math.cos(7.9*x - e2)*Math.sin(7.9*y + e1);
+    return;
+  }
   // three mutually incommensurate rates, so the field never comes back around
   var a = t*3.70, b = t*2.17, d = t*1.46;
   out[0] = Math.sin(2.3*y + a) * Math.cos(1.7*x - b)
@@ -1957,11 +1996,8 @@ function fieldBuf(c, w, h){
     var a = document.createElement('canvas'); a.width = FW; a.height = FH;
     var o = document.createElement('canvas'); o.width = FW; o.height = FH;
     var octx = o.getContext('2d');
-    // the ink buffer: only drawn into while a shape's letters carry different inks
-    var k = document.createElement('canvas'); k.width = FW; k.height = FH;
     s = { a:a, actx:a.getContext('2d', {willReadFrequently:true}), o:o, octx:octx,
-          img:octx.createImageData(FW, FH), FW:FW, FH:FH,
-          k:k, kctx:k.getContext('2d', {willReadFrequently:true}), kon:false };
+          img:octx.createImageData(FW, FH), FW:FW, FH:FH };
     FIELD_ACC.set(c, s);
   }
   return s;
@@ -1988,23 +2024,24 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
   // a floor, so a trail clears in about twenty frames. Without it the buffer
   // held a ghost of the old arrangement and the picture lagged the sliders
   if(fade < 0.045) fade = 0.045;
-  // Trails' Decay: how long the tracers linger, per letter. A pixel cannot
-  // tell which letter painted it, so while the letters' Decays differ each
-  // letter paints into a trail buffer of its own, aged at its own rate, and
-  // the four are added together for the present. With one Decay for all four
-  // there is the one buffer, exactly as before
-  var decs = [0, 1, 2, 3].map(function(L){ var d = per(dec, L); return d > 0 ? d : 1; });
+  // Trails' Decay: how long the tracers linger, per shape and per letter. A
+  // pixel cannot tell who painted it, so while the Decays differ each shape's
+  // letter paints into a trail buffer of its own, the ring's A to D then the
+  // disc's, aged at its own rate, and the eight are added together for the
+  // present. With one Decay for all there is the one buffer, exactly as before
+  var decs = [0, 1, 2, 3, 4, 5, 6, 7].map(function(q){
+    var d = dec && dec.length === 8 ? dec[q] : per(dec, q & 3); return d > 0 ? d : 1; });
   var TL = null;
-  if(decs[1] !== decs[0] || decs[2] !== decs[0] || decs[3] !== decs[0]){
+  if(decs.some(function(d){ return d !== decs[0]; })){
     if(!S.T){
       S.T = [];
-      for(var q=0; q<4; q++){
+      for(var q=0; q<8; q++){
         var tcv = document.createElement('canvas'); tcv.width = S.FW; tcv.height = S.FH;
         S.T.push(tcv.getContext('2d', {willReadFrequently:true}));
       }
     }
-    if(!S.dOn){            // a split begins: the picture so far goes on fading as A's
-      for(var q=0; q<4; q++){
+    if(!S.dOn){            // a split begins: the picture so far goes on fading as the ring's A
+      for(var q=0; q<8; q++){
         S.T[q].setTransform(1,0,0,1,0,0);
         S.T[q].globalCompositeOperation = 'source-over';
         S.T[q].clearRect(0,0,S.FW,S.FH);
@@ -2028,7 +2065,7 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
     S[key] = 0;
   }
   if(TL){
-    for(var q=0; q<4; q++){
+    for(var q=0; q<8; q++){
       if(!noFade) fadeBy(TL[q], 'd'+q, Math.min(1, fade/decs[q]));
       TL[q].globalCompositeOperation = 'lighter';
       TL[q].setTransform(SC,0,0,SC,0,0);
@@ -2078,21 +2115,29 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
     var sb = v < 0.5 ? 0 : (v < 1.4 ? 1 : 2);
     PBK[((bi*2 + (p.warm?1:0))*4 + ((p.grp||0)&3))*3 + sb].push(p);
   }
-  // A shape whose letters carry different inks: every stroke also lays its ink
-  // into a buffer of its own and the present takes the colour from there.
-  // Their present can only blend two inks, one per shape
+  // A shape whose letters carry different inks: every stroke carries where its
+  // ink sits on the Colour line in its blue, laid on and faded with the stroke
+  // itself, so a trail keeps the colour of the letter that drew it and goes
+  // when it goes. The present reads the colour back out of the blue. Their
+  // present can only blend two inks, one per shape. An ink buffer that kept
+  // whichever letter touched a spot last, never faded, turned a red trail teal
+  // wherever a teal grain crossed it
   var split = false;
   if(inkT && inkW) for(var L=1; L<4; L++) for(var z=0; z<3; z++)
     if(inkT[L][z] !== inkT[0][z] || inkW[L][z] !== inkW[0][z]) split = true;
-  var kx = split ? S.kctx : null;
-  if(kx){
-    kx.setTransform(1,0,0,1,0,0);
-    if(!S.kon) kx.clearRect(0,0,S.FW,S.FH);   // nothing left over from an old split
-    kx.globalCompositeOperation = 'source-over';
-    kx.setTransform(SC,0,0,SC,0,0);
-    kx.lineCap = 'round'; kx.lineJoin = 'round';
+  // where an ink sits on the Colour line, 0 teal, 0.5 yellow, 1 coral
+  function mOf(ink){
+    var best = 0, bd = 1e9;       // the nearer of its two stretches, teal-yellow and yellow-coral
+    [[TEAL_RGB, YEL_RGB, 0], [YEL_RGB, RED_RGB, 0.5]].forEach(function(sg){
+      var a = sg[0], b = sg[1], d0 = b[0]-a[0], d1 = b[1]-a[1], d2 = b[2]-a[2];
+      var t = ((ink[0]-a[0])*d0 + (ink[1]-a[1])*d1 + (ink[2]-a[2])*d2) / (d0*d0 + d1*d1 + d2*d2);
+      t = t < 0 ? 0 : (t > 1 ? 1 : t);
+      var e0 = a[0] + d0*t - ink[0], e1 = a[1] + d1*t - ink[1], e2 = a[2] + d2*t - ink[2];
+      var dd = e0*e0 + e1*e1 + e2*e2;
+      if(dd < bd){ bd = dd; best = sg[2] + t*0.5; }
+    });
+    return best;
   }
-  S.kon = split;
   // letters that stroke alike share ONE path, as all four did before there
   // were letters: separate paths add where they cross, one path does not, so
   // splitting them for nothing would brighten every crossing
@@ -2162,21 +2207,22 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
       var st = [];
       for(var L=0; L<4; L++){
         var te = per(warm ? teW : teT, L), vi = per(warm ? viW : viT, L);
-        st[L] = { te: te, ink: kx ? (warm ? inkW : inkT)[L] : null,
+        st[L] = { te: te, ink: split ? (warm ? inkW : inkT)[L] : null,
+                  m: split ? mOf((warm ? inkW : inkT)[L]) : 0,
                   base: (warm ? (0.038 + dr*0.136)*per(cg, L) : (0.043 + coh*0.118)*per(tg, L))
                       * (0.56 + vi*0.58) * radialW(mid, warm ? RWW : RWC) };
       }
-      var ga = alike(st, false);
+      var ga = alike(st, split);   // a different ink is a different blue: its own stroke
       for(var gi=0; gi<ga.length; gi++){
         var s0 = st[ga[gi][0]], SPW = spW(s0.te), SPA = spA(s0.te);
         for(var sb=0; sb<3; sb++){
-          var sty = (warm ? 'rgba(0,255,0,' : 'rgba(255,0,0,')
+          var sty = (warm ? 'rgba(0,255,' : 'rgba(255,0,') + Math.round(127.5*s0.m) + ','
                   + clamp(s0.base*SPA[sb], 0, 1).toFixed(3) + ')';
-          if(TL){                   // split Decay: each letter into its own trail
+          if(TL){                   // split Decay: each shape's letter into its own trail
             for(var u=0; u<ga[gi].length; u++){
               var PL = pathOf(rb, warm, [ga[gi][u]], sb);
               if(!PL) continue;
-              var tx = TL[ga[gi][u]];
+              var tx = TL[warm*4 + ga[gi][u]];
               tx.lineWidth = SPW[sb]; tx.strokeStyle = sty; tx.stroke(PL);
             }
             continue;
@@ -2188,28 +2234,14 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
           a.stroke(P);
         }
       }
-      if(!kx) continue;
-      var gk = alike(st, true);
-      for(var gi=0; gi<gk.length; gi++){
-        var s1 = st[gk[gi][0]], KW = spW(s1.te), KA = spA(s1.te);
-        for(var sb=0; sb<3; sb++){
-          var P = pathOf(rb, warm, gk[gi], sb);
-          if(!P) continue;
-          kx.lineWidth = KW[sb];
-          kx.strokeStyle = 'rgba(' + s1.ink[0] + ',' + s1.ink[1] + ',' + s1.ink[2] + ','
-                         + clamp(s1.base*KA[sb], 0, 1).toFixed(3) + ')';
-          kx.stroke(P);
-        }
-      }
     }
   }
-  if(kx) kx.setTransform(1,0,0,1,0,0);
-  if(TL){      // the four letters' trails, added together into the one the present reads
+  if(TL){      // the eight trails, added together into the one the present reads
     a.setTransform(1,0,0,1,0,0);
     a.globalCompositeOperation = 'source-over';
     a.clearRect(0,0,S.FW,S.FH);
     a.globalCompositeOperation = 'lighter';
-    for(var q=0; q<4; q++){ TL[q].setTransform(1,0,0,1,0,0); a.drawImage(TL[q].canvas, 0, 0); }
+    for(var q=0; q<8; q++){ TL[q].setTransform(1,0,0,1,0,0); a.drawImage(TL[q].canvas, 0, 0); }
   }
   a.setTransform(1,0,0,1,0,0);
   a.globalCompositeOperation = 'source-over';
@@ -2218,7 +2250,7 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
   // hue is a blend along the teal-coral line: pure teal resolves to exactly
   // teal, pure coral to exactly coral, an even mix to the ash between them.
   var src = a.getImageData(0,0,S.FW,S.FH).data, dst = S.img.data;
-  var kd = kx ? S.kctx.getImageData(0,0,S.FW,S.FH).data : null;
+  var mT = mOf(TEAL), mC = mOf(CORAL);   // the ring's ink and the disc's, on the Colour line
   for(var i=0;i<src.length;i+=4){
     var al = src[i+3]/255;
     if(al <= 0.004){ dst[i+3]=0; continue; }
@@ -2228,12 +2260,14 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
     var tT = eT*eT, tC = eC*eC, sum = tT+tC;
     if(sum <= 0.002){ dst[i+3]=0; continue; }
     var wT = tT/sum, wC = tC/sum;
-    if(kd && kd[i+3] > 0){          // split letters: the ink their strokes laid
-      dst[i] = kd[i]; dst[i+1] = kd[i+1]; dst[i+2] = kd[i+2];
-    } else {
-    dst[i]   = TEAL[0]*wT + CORAL[0]*wC;
-    dst[i+1] = TEAL[1]*wT + CORAL[1]*wC;
-    dst[i+2] = TEAL[2]*wT + CORAL[2]*wC;
+    if(split){          // split letters: the colour their own trails carry, out of the blue
+      var mm = src[i+2]*al/255 / (0.5*(dT + dC));
+      if(mm > 1) mm = 1;
+      var q3 = Math.round(mm*256)*3;
+      dst[i] = RAMP_LUT[q3]; dst[i+1] = RAMP_LUT[q3+1]; dst[i+2] = RAMP_LUT[q3+2];
+    } else {            // ring and disc crossing mix along the Colour line, not through grey
+      var q4 = Math.round((mT*wT + mC*wC)*256)*3;
+      dst[i] = RAMP_LUT[q4]; dst[i+1] = RAMP_LUT[q4+1]; dst[i+2] = RAMP_LUT[q4+2];
     }
     dst[i+3] = (1-(1-tT)*(1-tC))*255;
   }
@@ -2252,7 +2286,7 @@ return { makeGrains: makeGrains, stepGrain: stepGrain, paintField: paintField,
          setEscape: function(v){ ESCK = v; },
          setRespawnAt: function(x, y){ RCX = x; RCY = y; },
          setHomeOnly: function(v){ HOMEONLY = !!v; },
-         setGust: function(sc, rt){ WSC = sc; WRT = rt; },
+         setGust: function(sc, rt, ty){ WSC = sc; WRT = rt; WTY = ty || 'gusts'; },
          get turbNow(){ return turb; }, get figureNow(){ return figure; },
          setInk: function(t, c){ TEAL[0]=t[0]; TEAL[1]=t[1]; TEAL[2]=t[2];
                                  CORAL[0]=c[0]; CORAL[1]=c[1]; CORAL[2]=c[2]; },
@@ -2564,7 +2598,7 @@ function field(dt){
 
   var WO = weatherFor('outer') || weatherFor('inner');
   var WAMT = WO ? WO.amt : 0;
-  MAT.setGust(WO ? WO.scale : 1, WO ? WO.rate : 1);
+  MAT.setGust(WO ? WO.scale : 1, WO ? WO.rate : 1, WO ? WO.type : 'gusts');
   readingFor(WAMT, 0);
   MAT.setPulse(Math.sin(FCLK * Math.PI*2/11));
   MAT.setScale(mw/3.32);                       // their field at our mark's size
@@ -2622,9 +2656,14 @@ function field(dt){
   // their home, nothing breathes and nothing wanders
   var rndOL = setValByGroup('outerSet', 2, rndOuter).map(function(v){ return v/100; });
   var rndO = rndOL[0];
-  // each letter paints off its own reading, the one it moves on
+  // the painter reads the weather alone. Random only moves the grains: read
+  // through Random, low regulation drew the slow grains at a third and thinner
+  // and the shape dissolved
+  // and each letter is drawn in its own weather, the one it moves in. One
+  // reading for all four drew a letter at full storm as calm as the first
+  var WGO = weatherByGroup('outer');
   var teOL = [], viOL = [];
-  for(var L = 0; L < 4; L++){ readingFor(WAMT, rndOL[L]); teOL[L] = MAT.tear; viOL[L] = MAT.vitality; }
+  for(var L = 0; L < 4; L++){ readingFor(WGO && WGO[L] ? WGO[L].amt : 0, 0); teOL[L] = MAT.tear; viOL[L] = MAT.vitality; }
   readingFor(WAMT, rndO);    // this shape's own reading
   // Random blurs the path, it does not let go of it. The pull is held at full
   // strength whatever the reading says, so a grain always rides its seat round
@@ -2661,12 +2700,12 @@ function field(dt){
   MAT.setRespawnAt(0, 0);
   MAT.setHomeOnly(true);       // a retiring grain reappears at its own home
   // a pass per letter: its own weather is set, then only its own grains step
-  var WGO = weatherByGroup('outer'), SGO = byGroup('outer', 'spread', 0), PJO = pjByGroup('outer');
+  var SGO = byGroup('outer', 'spread', 0), PJO = pjByGroup('outer');
   for(var g = 0; g < 4; g++){
     var wg = WGO ? WGO[g] : null, ag = wg ? wg.amt : 0;
     SPR_O = SGO[g];
     PJA = PJO[g] ? PJO[g].amt : 0; PJR = PJO[g] ? PJO[g].rate : 0;
-    MAT.setGust(wg ? wg.scale : 1, wg ? wg.rate : 1);
+    MAT.setGust(wg ? wg.scale : 1, wg ? wg.rate : 1, wg ? wg.type : 'gusts');
     readingFor(ag, rndOL[g]);
     MAT.setFigure(1 - 0.85*ag);
     MAT.setTurb(0.05);
@@ -2684,8 +2723,9 @@ function field(dt){
   }
   var rndIL = setValByGroup('innerSet', 2, rndInner).map(function(v){ return v/100; });
   var rndI = rndIL[0];
-  var teIL = [], viIL = [];
-  for(var L = 0; L < 4; L++){ readingFor(WAMT, rndIL[L]); teIL[L] = MAT.tear; viIL[L] = MAT.vitality; }
+  var WGI = weatherByGroup('inner');
+  var teIL = [], viIL = [];   // as the ring: each letter's own weather, never Random
+  for(var L = 0; L < 4; L++){ readingFor(WGI && WGI[L] ? WGI[L].amt : 0, 0); teIL[L] = MAT.tear; viIL[L] = MAT.vitality; }
   readingFor(WAMT, rndI);
   MAT.setFigure(1 - 0.85*WAMT);   // as the ring: the wind loosens the grip
   MAT.setTurb(0.05);
@@ -2707,12 +2747,12 @@ function field(dt){
   var cI = Math.cos(dAI), sI = Math.sin(dAI);
   var dc = G.dots.length ? G.dots[0] : null;
   if(dc) MAT.setRespawnAt(dc.x, dc.y);   // the disc re-places inside itself
-  var WGI = weatherByGroup('inner'), SGI = byGroup('inner', 'spread', 0), PJI = pjByGroup('inner');
+  var SGI = byGroup('inner', 'spread', 0), PJI = pjByGroup('inner');
   for(var g = 0; g < 4; g++){
     var wg = WGI ? WGI[g] : null, ag = wg ? wg.amt : 0;
     SPR_I = SGI[g];
     PJA = PJI[g] ? PJI[g].amt : 0; PJR = PJI[g] ? PJI[g].rate : 0;
-    MAT.setGust(wg ? wg.scale : 1, wg ? wg.rate : 1);
+    MAT.setGust(wg ? wg.scale : 1, wg ? wg.rate : 1, wg ? wg.type : 'gusts');
     readingFor(ag, rndIL[g]);
     MAT.setFigure(1 - 0.85*ag);
     MAT.setTurb(0.05);
@@ -2762,11 +2802,13 @@ function field(dt){
   // of every call, so four calls would colour everything by the last letter's
   // ink and blit the picture four times. Per-letter colour belongs in the
   // stroke, not in extra passes.
-  // Trails: each letter's Streak, and each letter's Decay. A letter's Decay
-  // covers both shapes: the ring's Trails when it has one, else the disc's
+  // Trails: each letter's Streak, and each letter's Decay, shape by shape. A
+  // shape with no Trails of its own takes the other one's Decay, so a single
+  // Trails still covers both. The ring's Decay used to cover the disc's letters
+  // too, and a split into the disc did nothing while the ring had its own
   var STO = stkByGroup('outer'), STI = stkByGroup('inner');
-  var DGO = decByGroup('outer'), DGI = decByGroup('inner');
-  var DEC = [0, 1, 2, 3].map(function(L){ return DGO ? DGO[L] : (DGI ? DGI[L] : 1); });
+  var DGO = decByGroup('outer'), DGI = decByGroup('inner'), ONE = [1, 1, 1, 1];
+  var DEC = (DGO || DGI || ONE).concat(DGI || DGO || ONE);   // the ring's four, then the disc's
   MDRAW.length = 0;
   for(var i = 0; i < NDRAW; i++) if(MSET[i].live) MDRAW.push(MSET[i]);
   MAT.paintField(fldx, cw, chh, MDRAW, 1, 1, cgL, tgL, MAT.escape,
@@ -2912,6 +2954,7 @@ function viewOf(id){
   var s = {};
   CH_CARDS[K(id)].forEach(function(k){ s[SID(id,k)] = +document.getElementById(SID(id,k)).value; });
   if(K(id) === 'osc')  s.shape  = segShape(id);
+  if(K(id) === 'weather'){ var wt = document.getElementById(SID(id,'wthType')); s.type = wt ? wt.value : 'gusts'; }
   if(id === 'axis'){ s.x = axisX; s.y = axisY; }
   if(K(id) === 'split'){
     var sg = ltrSeg(id);
@@ -2936,6 +2979,10 @@ function show(id){
     pressed(shapeSeg(id), 'shape', s.shape);
   }
   if(id === 'axis'){ axisX = s.x; axisY = s.y; placeDot(); }
+  if(K(id) === 'weather'){
+    var wt2 = document.getElementById(SID(id,'wthType'));
+    if(wt2) wt2.value = s.type || 'gusts';     // a patch from before the types blows gusts
+  }
   if(K(id) === 'split'){
     var on = s.ltr || [0,1,2,3].map(function(L){ return L === SEL[id] ? 1 : 0; });
     var sg2 = ltrSeg(id);
@@ -2983,6 +3030,12 @@ Object.keys(CH_CARDS).forEach(initChannels);
 document.addEventListener('input', function(e){
   var o = OWNER[e.target.id];
   if(o) stash(o);
+});
+// the Weather type rides in its channel, the way the sliders do
+document.addEventListener('change', function(e){
+  if(!e.target.classList || !e.target.classList.contains('wtype')) return;
+  var card = e.target.closest('.card');
+  if(card) stash(card.id.slice(2));
 });
 
 /* channels for a saved state; older saves had one set, so it fills all four */
@@ -3719,7 +3772,7 @@ document.addEventListener('click', function(e){
 
 /* hover bubbles: rest on a card or a top-row control and it says what it does.
    Gone the moment a button goes down, so it never sits over a drag. */
-var TIPS = [[".byp-btn", "Switches the card on and off. Off, it drives nothing, and keeps its settings and its cables."], ["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], ["#c_split", "Sends a signal to some of the grains and not others. Every shape's grains are dealt into four groups, A to D. Each channel is that numbered input, and the letters pressed are the groups it is allowed to reach."], [".card select.path", "The path this shape's grains follow. Toroidal goes round the shape and rolls across its thickness, Spiral creeps outward and starts again inside, Rosette carries a small loop of its own, Wander drifts and never repeats, Curl runs wisps inside wisps."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Gust size how broad the gusts are, Gust speed how long one takes to pass."], ["#c_pjit", "Each grain strays off its path on a wobble of its own. Amount is how far it strays, Rate the seconds one sway takes."], ["#c_trails", "The streaks the grains leave. Streak is how long each grain's stroke is, Decay how long the trails linger. A letter's Decay covers it on both shapes."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
+var TIPS = [[".byp-btn", "Switches the card on and off. Off, it drives nothing, and keeps its settings and its cables."], ["#denOuter, #denOuterV, #denInner, #denInnerV", "How many grains are drawn. Few leaves the shape open, many fills it in."], ["#spdOuter, #spdOuterV, #spdInner, #spdInnerV", "How fast the grains move. At 0 they hold still and only the turning shows."], ["#rndOuter, #rndOuterV, #rndInner, #rndInnerV", "How loose the grains are. Low holds the shape, high lets them wander and the edge goes soft."], ["#briOuter, #briOuterV, #briInner, #briInnerV", "How bright that shape’s grains are."], ["#c_split", "Sends a signal to some of the grains and not others. Every shape's grains are dealt into four groups, A to D. Each channel is that numbered input, and the letters pressed are the groups it is allowed to reach."], [".card select.path", "The path this shape's grains follow. Toroidal goes round the shape and rolls across its thickness, Spiral creeps outward and starts again inside, Rosette carries a small loop of its own, Wander drifts and never repeats, Curl runs wisps inside wisps."], [".card select.wtype", "The kind of wind. Gusts are swirling fronts that cross the mark, Gale blows one way and slowly swings round, Whirlwind circles the centre, Pulse blows out from the centre and back in waves, Eddies are small tight swirls everywhere."], ["#c_spread", "Pushes the grains out from the middle of their shape. Each one keeps its own share, so the shape opens unevenly."], ["#c_colour", "Tints a shape. Teal at the left, yellow in the middle, red at the right."], ["#c_weather", "A wind across the whole mark. Amount is how hard it blows, Gust size how broad the gusts are, Gust speed how long one takes to pass."], ["#c_pjit", "Each grain strays off its path on a wobble of its own. Amount is how far it strays, Rate the seconds one sway takes."], ["#c_trails", "The streaks the grains leave. Streak is how long each grain's stroke is, Decay how long the trails linger. A letter's Decay covers it on both shapes."], ["#bgSeg", "Light or dark ground. On dark the grains add up where they cross."], ["#shelfBar", "Opens and shuts the drawer of nodes."], [".chip", "Lays this node on the board. Press again for another one, or drag it where you want it."], [".stow-btn", "Sends the card back to the drawer, and its cables with it."], [".fold-btn", "Opens and shuts the card. Double clicking the title does the same."], [".orient-btn", "Swings the jacks to the top and bottom of the card."], ["#patchHints", "Turns these hints on and off."], ["#patchName", "Type a name here, then Save."], ["#patchSave", "Saves the whole patch under the name typed beside it."], ["#patchList", "Pick a saved patch to load it."], ["#patchDel", "Removes the picked patch."], ["#patchAuto", "Plugs every card into its usual place."], ["#patchClear", "Pulls out every cable."], [".xfade", "Pick two patches, then slide to blend from one into the other."], ["#c_ringRot", "How fast the outer ring turns, in degrees a second. Left of centre turns it backwards."], ["#c_discRot", "How fast the inner disc turns, in degrees a second. Left of centre turns it backwards."], ["#c_prox", "How far off centre. Into the outer disc it moves the cutout. Into the inner disc it moves the disc toward the cutout’s edge."], ["#c_prox2", "A second proximity. Plugged in beside the first, the two average."], ["#c_size", "How big the inner disc is."], ["#c_voidSize", "How big the hole in the ring is."], ["#c_outerSize", "How far the outer edge reaches. The cutout keeps its size, so the ring gets thicker or thinner."], ["#c_axis", "The point the ring turns around. Drag the dot, or press Centre."], ["#c_osc", "Swings whatever it is plugged into. Rate is how long one swing takes, Depth how far, Phase where it starts. The shape buttons pick the swing."], ["#c_jit", "Wanders whatever it is plugged into, at random. Rate is how often it picks a new spot, Depth how far."], ["#c_mix1, #c_mix2, #c_mix3", "Blends up to four signals. Each In sets how much of that one."], ["#c_outer", "The ring. Whatever is plugged in here shapes it."], ["#c_inner", "The disc inside the cutout. Whatever is plugged in here shapes it."], ["#c_halftone", "Prints a disc as dots. Scale is the dot size, and near 0 it is flat."], ["#c_image", "The mark. Plug in the outer and inner discs to show them."]];
 var tipEl = document.createElement('div'); tipEl.id = 'tip'; document.body.appendChild(tipEl);
 var tipT = null, tipOn = null, everOpened = false;
 var hintsOn = true;                       // the Hints button in the top row
@@ -3752,6 +3805,13 @@ function tipFor(el){
   for(var i = 0; i < TIPS.length; i++){
     var hit = el.closest(TIPS[i][0]);
     if(hit) return [hit, TIPS[i][1]];
+  }
+  // a copy wears its original's hint: #c_mix1 never matches c_mix1~5
+  var cc = el.closest('.card');
+  if(cc && cc.id.indexOf('~') >= 0){
+    var base = '#' + cc.id.slice(0, cc.id.indexOf('~'));
+    for(var q = 0; q < TIPS.length; q++)
+      if(TIPS[q][0].split(',').some(function(x){ return x.trim() === base; })) return [cc, TIPS[q][1]];
   }
   return null;
 }
@@ -4024,6 +4084,45 @@ document.addEventListener('keydown', function(e){
   clearSelection();
 });
 
+/* undo: the board as it stood after each change, the last ten of them. Cmd+Z
+   steps back, Shift+Cmd+Z forward. A change is kept once the hand lets go, so
+   one slider drag, one cable or one preset load is one step */
+var UNDO_MAX = 10, undoBack = [], undoFwd = [], undoNow = null, undoT = 0;
+function undoKeep(){
+  undoT = 0;
+  var s = JSON.stringify(snapshot());
+  if(s === undoNow) return;
+  if(undoNow !== null){
+    undoBack.push(undoNow);
+    if(undoBack.length > UNDO_MAX) undoBack.shift();
+  }
+  undoNow = s; undoFwd = [];
+}
+function undoGo(from, to){
+  if(!from.length) return;
+  to.push(undoNow);
+  var st = JSON.parse(from.pop());
+  restore(st);
+  // restore hides the axis, as every loaded patch starts; a step back puts it
+  // back the way it was
+  axisHidden = st.axisHidden !== false;
+  axisMark.style.display = axisHidden ? 'none' : '';
+  axisToggle.textContent = axisHidden ? 'Show axis' : 'Hide axis';
+  clearSelection();
+  undoNow = JSON.stringify(snapshot());
+}
+['pointerup', 'click', 'change', 'keyup', 'focusout'].forEach(function(ev){
+  document.addEventListener(ev, function(){ if(!undoT) undoT = setTimeout(undoKeep, 0); }, true);
+});
+document.addEventListener('keydown', function(e){
+  if(!(e.metaKey || e.ctrlKey) || (e.key || '').toLowerCase() !== 'z') return;
+  var t = e.target;
+  // typing in a text box keeps that box's own undo
+  if(t && ((t.tagName === 'INPUT' && t.type !== 'range') || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  e.preventDefault();
+  if(e.shiftKey) undoGo(undoFwd, undoBack); else undoGo(undoBack, undoFwd);
+});
+undoKeep();
 
 requestAnimationFrame(frame);
 </script>
