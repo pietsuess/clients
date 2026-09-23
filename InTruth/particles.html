@@ -2261,9 +2261,14 @@ function field(dt){
   // teal channel, the inner card the coral one
   var briO = setVal('outerSet', 3, briOuter)/100;
   var briI = setVal('innerSet', 3, briInner)/100;
-  MAT.paintField(fldx, cw, chh, MDRAW, drvI, cohO,
+  // their painter reads brightness out of the READING: teal off regulation,
+  // coral off activation, and the trail's fade off both. So Weather at full put
+  // regulation at nothing and took the teal out with it. Here the wind only
+  // moves material — the ink and the trail are held steady and Brightness is
+  // the only thing that sets the level.
+  MAT.paintField(fldx, cw, chh, MDRAW, 1, 1,
                  MAT.coralGain*briI, MAT.tealGain*briO, MAT.escape,
-                 teO, viO, tmO, teI, viI);
+                 teO, viO, 0.37, teI, viI);
   fldx.globalCompositeOperation = 'source-over';
   fldx.setTransform(1,0,0,1,0,0);
 }
