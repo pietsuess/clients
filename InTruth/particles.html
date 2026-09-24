@@ -215,6 +215,28 @@ body{
 .card.collapsed .card-body{display:none}
 .card.collapsed .card-title{border-bottom:0}
 .card.collapsed .orient-btn{display:none}
+/* minimised: a square as tall as a closed card, its jacks on the same edges,
+   and only its on/off dot and the square that brings it back */
+.mini-btn, .unmini-btn{
+  position:absolute; top:11px; width:16px; height:16px;
+  background:none; border:none; cursor:pointer; padding:0; color:var(--muted);
+}
+.mini-btn{right:70px}
+.card:not(:has(.stow-btn)) .mini-btn{right:32px}
+.mini-btn::before{content:''; display:block; width:8px; height:1px; margin:8px auto 0;
+  background:currentColor}
+.unmini-btn{right:3px; display:none}
+.unmini-btn::before{content:''; display:block; width:7px; height:7px; margin:4px auto 0;
+  border:1px solid currentColor}
+.mini-btn:hover, .unmini-btn:hover{color:var(--ink)}
+.card.mini{width:auto; padding:0}
+.card.mini .card-title{box-sizing:content-box; width:1lh; padding:12px 12px 11px 11px;
+  overflow:hidden; white-space:nowrap; color:transparent; border-bottom:0}
+.card.mini .card-body, .card.mini .fold-btn, .card.mini .stow-btn, .card.mini .orient-btn,
+.card.mini .solo-btn, .card.mini .mini-btn{display:none}
+.card.mini .unmini-btn{display:block}
+.card.mini .byp-btn{right:auto; left:3px}
+.card.mini .jack-row.set, .card.mini.jacks-tb .jack-row{left:0; right:0}
 
 .row{
   display:flex; justify-content:space-between; align-items:baseline;
@@ -3159,6 +3181,7 @@ function initCard(id){
     card.classList.add('collapsed');
     card.style.zIndex = 2;
     function fold(){
+      if(card.classList.contains('mini')) return;   // a square has nothing to open
       var open = card.classList.toggle('collapsed') === false;
       if(open) everOpened = true;
       card.style.zIndex = open ? ++TOPZ : 2;
@@ -3174,6 +3197,37 @@ function initCard(id){
     fb.addEventListener('dblclick', function(e){ e.stopPropagation(); e.preventDefault(); });
     fb.addEventListener('click', function(e){ e.stopPropagation(); fold(); });
     card.querySelector('.card-title').appendChild(fb);
+
+    /* the line left of the dot minimises the card to a square with its jacks,
+       and the square outline on it brings the card back as it was */
+    var mb = document.createElement('button');
+    mb.type = 'button'; mb.className = 'mini-btn';
+    mb.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+    mb.addEventListener('dblclick', function(e){ e.stopPropagation(); e.preventDefault(); });
+    mb.addEventListener('click', function(e){
+      e.stopPropagation();
+      // the square lands where the card's right end was
+      var w0 = card.offsetWidth;
+      card.classList.add('mini');
+      card.style.left = (card.offsetLeft + w0 - card.offsetWidth) + 'px';
+      card.style.zIndex = 2;
+      tipHide(); paint();
+    });
+    card.querySelector('.card-title').appendChild(mb);
+    var ub = document.createElement('button');
+    ub.type = 'button'; ub.className = 'unmini-btn';
+    ub.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
+    ub.addEventListener('dblclick', function(e){ e.stopPropagation(); e.preventDefault(); });
+    ub.addEventListener('click', function(e){
+      e.stopPropagation();
+      // and the card opens back out to the left, its right edge staying put
+      var w0 = card.offsetWidth;
+      card.classList.remove('mini');
+      card.style.left = Math.max(0, card.offsetLeft - (card.offsetWidth - w0)) + 'px';
+      card.style.zIndex = card.classList.contains('collapsed') ? 2 : ++TOPZ;
+      tipHide(); paint();
+    });
+    card.appendChild(ub);
   }
 }
 Object.keys(NODES).forEach(initCard);
@@ -3488,7 +3542,8 @@ function snapshot(){
     var c = document.getElementById(NODES[id]);
     st.cards[id] = { left: c.style.left, top: c.style.top,
                      collapsed: c.classList.contains('collapsed'),
-                     tb: c.classList.contains('jacks-tb') };
+                     tb: c.classList.contains('jacks-tb'),
+                     mini: c.classList.contains('mini') };
     if(c.dataset.soloInput !== undefined) st.solos[id] = +c.dataset.soloInput;
   });
   Array.prototype.forEach.call(document.querySelectorAll('input[type=range]'),
@@ -3521,9 +3576,10 @@ function restore(st){
     c.style.left = d.left; c.style.top = d.top;
     c.classList.toggle('collapsed', !!d.collapsed);
     c.classList.toggle('jacks-tb', !!d.tb);
+    c.classList.toggle('mini', !!d.mini);   // a patch saved before squares has none
     // the Image sits under every other card: it is the only one that never gets
     // an inline z of its own, and at 10 it covered the cards that sit at 2
-    c.style.zIndex = K(id) === 'image' ? 1 : (d.collapsed ? 2 : 10);
+    c.style.zIndex = K(id) === 'image' ? 1 : (d.collapsed || d.mini ? 2 : 10);
     delete c.dataset.soloInput;
     Array.prototype.forEach.call(c.querySelectorAll('.solo-btn'),
       function(x){ x.classList.remove('active'); });
@@ -3858,6 +3914,15 @@ function tipShow(hit, text){
   tipEl.classList.add('on');
 }
 document.addEventListener('pointerover', function(e){
+  // a minimised card says what it is, hints on or off
+  var mt = e.target.closest ? e.target.closest('.card.mini .card-title') : null;
+  if(mt){
+    if(tipOn === mt) return;
+    tipHide(); tipOn = mt;
+    var nm = mt.firstChild.textContent.trim();
+    tipT = setTimeout(function(){ tipShow(mt, nm); }, 500);
+    return;
+  }
   if(!hintsOn){ tipHide(); return; }
   var f = e.target.closest ? tipFor(e.target) : null;
   if(!f){ tipHide(); return; }
