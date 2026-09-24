@@ -2072,6 +2072,26 @@ function paintField(c, w, h, set, dr, coh, cg, tg, esc, teT, viT, tmT, teW, viW,
       TL[q].lineCap = 'round'; TL[q].lineJoin = 'round';
     }
   } else if(!noFade) fadeBy(a, 'd', Math.min(1, fade/decs[0]));
+  // and 8 bits cannot fade to nothing. A pixel so faint that the fade would
+  // take off less than half a step rounds back to itself and stays for ever,
+  // so every place a grain had passed kept a stain, and the eight split
+  // trails' stains added up into a still halo of where the shape had been.
+  // About every half second each trail, one in turn, has the pixels at that
+  // floor cleared, so a trail goes all the way out. The smallest fade laid on
+  // is 0.045, 11 steps of 255, whose floor is 11; clearing up to 12 covers a
+  // browser that rounds a step the other way
+  if(!noFade){
+    var fb = TL || [a];
+    S.fk = (S.fk || 0) + 1;
+    if(S.fk >= 32/fb.length){
+      S.fk = 0;
+      S.fq = ((S.fq || 0) + 1) % fb.length;
+      var fid = fb[S.fq].getImageData(0, 0, S.FW, S.FH), fpx = fid.data;
+      for(var fi = 3; fi < fpx.length; fi += 4)
+        if(fpx[fi] && fpx[fi] <= 12){ fpx[fi-3] = fpx[fi-2] = fpx[fi-1] = fpx[fi] = 0; }
+      fb[S.fq].putImageData(fid, 0, 0);
+    }
+  }
   a.globalCompositeOperation = 'lighter';
   a.setTransform(SC,0,0,SC,0,0);
   a.lineCap = 'round'; a.lineJoin = 'round';   // a bent tail never spikes at its corners
@@ -2572,9 +2592,11 @@ window.mmHome = function(p, t, bound, out){
   if(PJA){ jitOff(p, 0.12*G.oR, JO); out[0] += JO[0]; out[1] += JO[1]; }
   return true;
 };
-/* Weather Amount walks their own named readings: 0 Flow, 33 Baseline,
-   66 Strain, 100 Overwhelm, activation and regulation interpolated between. */
-var WPATH = [[0, 1.00, 1.00], [0.33, 0.50, 0.50], [0.66, 0.65, 0.35], [1, 1.00, 0]];
+/* Weather Amount walks their own named readings: 0 Flow, 50 Strain,
+   100 Overwhelm, activation and regulation interpolated between. Baseline is
+   out: it sits at activation = regulation, so the first third blew nothing.
+   This one is the path that runs; the copy above belongs to dead code. */
+var WPATH = [[0, 1.00, 1.00], [0.50, 0.65, 0.35], [1, 1.00, 0]];
 function readingFor(amt, rnd){
   amt = Math.min(1, Math.max(0, amt));
   var i = 0;
