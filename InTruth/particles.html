@@ -314,7 +314,17 @@ input[type=range]::-moz-range-thumb{
 
 #mark{display:block; width:100%; height:auto; touch-action:none}
 #markWrap{position:relative}
-#markWrap.dark{background:var(--ink)}
+#markWrap.dark{background:#141414}
+/* Dark turns the whole page dark, not just the image: the ground is the
+   image's own dark, the greys and lines are the brand's dark theme */
+:root:has(#markWrap.dark){
+  --cream:#141414; --ink:#f3ebea; --muted:#9c9694;
+  --rule:rgba(255,255,255,.16); color-scheme:dark;
+}
+:root:has(#markWrap.dark) .chip.out{color:rgba(255,255,255,.28); border-color:rgba(255,255,255,.10)}
+:root:has(#markWrap.dark) #selectBox{background:rgba(255,255,255,.06)}
+:root:has(#markWrap.dark) .topbar button#patchHints[aria-pressed="false"],
+:root:has(#markWrap.dark) .topbar button#patchHints[aria-pressed="false"]:hover{color:rgba(255,255,255,.28)}
 .seg.chan{margin-bottom:15px}
 #press{position:absolute; left:0; top:0; width:100%; height:100%;
        pointer-events:none; display:none}
@@ -1025,9 +1035,10 @@ VARS.forEach(function(id){
 });
 // the splitter takes what a mixer takes, and its out is accepted by the discs
 ACCEPTS.split = SOURCES.concat(VARS, ['axis']);
-MIXERS.forEach(function(id){   // a funnel: it takes anything but itself, and
-  ACCEPTS[id] = SOURCES.filter(function(x){ return x !== id; })
-                       .concat(VARS, ['axis', 'split']);
+/* a funnel: it takes anything, other copies of the same mixer too.
+   connect() still refuses a card patched into itself */
+MIXERS.forEach(function(id){
+  ACCEPTS[id] = SOURCES.concat(VARS, ['axis', 'split']);
 });
 // a disc's Density, Speed and Random take anything a variable takes
 ['outerSet','innerSet'].forEach(function(id){
