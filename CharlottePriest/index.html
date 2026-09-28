@@ -8,6 +8,9 @@
   :root { --bg: #fff; --gap: 6px; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); }
+  .head { padding: var(--gap) var(--gap) 0; width: 100%; }
+  .head h1 { color: #00CCCC; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 800; white-space: nowrap; line-height: 1; font-size: 100px; letter-spacing: -.01em; }
+  .head hr { border: 0; border-top: 2px solid #00CCCC; margin-top: var(--gap); }
   .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); padding: var(--gap); width: 100%; }
   .grid button { display: block; aspect-ratio: 1 / 1; border: 0; padding: 0; background: #eee; cursor: zoom-in; overflow: hidden; }
   .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .2s; }
@@ -29,6 +32,7 @@
 </style>
 </head>
 <body>
+<header class="head"><h1 id="title">Charlotte Priest</h1><hr></header>
 <div class="grid" id="grid"></div>
 
 <div class="lb" id="lb">
@@ -40,6 +44,16 @@
 </div>
 
 <script>
+const title = document.getElementById("title");
+function fitTitle() {
+  title.style.fontSize = "100px";
+  const w = title.parentElement.clientWidth - parseFloat(getComputedStyle(title.parentElement).paddingLeft) * 2;
+  title.style.fontSize = (100 * w / title.scrollWidth) + "px";
+}
+fitTitle();
+window.addEventListener("resize", fitTitle);
+document.fonts && document.fonts.ready.then(fitTitle);
+
 const DIR = "Selects/";
 const photos = ["CharlottePriest_DSC03580-3-web.jpg", "CharlottePriest_DSC03600-web.jpg", "CharlottePriest_DSC03602-web.jpg", "CharlottePriest_DSC03620-web.jpg", "CharlottePriest_DSC03627-web.jpg", "CharlottePriest_DSC03641-web.jpg", "CharlottePriest_DSC03656-web.jpg", "CharlottePriest_DSC03670-web.jpg", "CharlottePriest_DSC03710-web.jpg", "CharlottePriest_DSC03720-web.jpg", "CharlottePriest_DSC03729-web.jpg", "CharlottePriest_DSC03732-web.jpg", "CharlottePriest_DSC03738-web.jpg", "CharlottePriest_DSC03771-web.jpg", "CharlottePriest_DSC03815-web.jpg", "CharlottePriest_DSC03827-web.jpg", "CharlottePriest_DSC03842-web.jpg", "CharlottePriest_DSC03872-2-web.jpg", "CharlottePriest_DSC03877-web.jpg", "CharlottePriest_DSC03893-web.jpg", "CharlottePriest_DSC03919-2-web.jpg", "CharlottePriest_DSC03934-2-web.jpg", "CharlottePriest_DSC03937-2-web.jpg", "CharlottePriest_DSC03953-web.jpg", "CharlottePriest_DSC03964-web.jpg", "CharlottePriest_DSC03973-web.jpg", "CharlottePriest_DSC03995-web.jpg", "CharlottePriest_DSC04041-web.jpg", "CharlottePriest_DSC04049-web.jpg", "CharlottePriest_DSC04050-web.jpg", "CharlottePriest_DSC04060-web.jpg", "CharlottePriest_DSC04103-web.jpg", "CharlottePriest_DSC04114-web.jpg", "CharlottePriest_DSC04145-web.jpg", "CharlottePriest_DSC04179-web.jpg", "CharlottePriest_DSC04194-web.jpg", "CharlottePriest_DSC04214-web.jpg", "CharlottePriest_DSC04282-web.jpg", "CharlottePriest_DSC04327-web.jpg", "CharlottePriest_DSC04340-web.jpg", "CharlottePriest_DSC04423-web.jpg", "CharlottePriest_DSC04431-web.jpg", "CharlottePriest_DSC04434-web.jpg", "CharlottePriest_DSC04452-web.jpg", "CharlottePriest_DSC04463-web.jpg", "CharlottePriest_DSC04483-web.jpg", "CharlottePriest_DSC04496-2-web.jpg", "CharlottePriest_DSC04501-web.jpg", "CharlottePriest_DSC04505-web.jpg", "CharlottePriest_DSC04520-web.jpg", "CharlottePriest_DSC04526-web.jpg", "CharlottePriest_DSC04533-2-web.jpg", "CharlottePriest_DSC04539-web.jpg", "CharlottePriest_DSC04543-2-web.jpg", "CharlottePriest_DSC04545-web.jpg", "CharlottePriest_DSC04557-web.jpg", "CharlottePriest_DSC04558-web.jpg", "CharlottePriest_DSC04592-web.jpg", "CharlottePriest_DSC04603-web.jpg", "CharlottePriest_DSC04617-web.jpg", "CharlottePriest_DSC04633-web.jpg", "CharlottePriest_DSC04651-web.jpg", "CharlottePriest_DSC04662-web.jpg", "CharlottePriest_DSC04667-web.jpg", "CharlottePriest_DSC04672-web.jpg", "CharlottePriest_DSC04681-web.jpg", "CharlottePriest_DSC04691-web.jpg", "CharlottePriest_DSC04706-web.jpg", "CharlottePriest_DSC04716-web.jpg", "CharlottePriest_DSC04724-web.jpg", "CharlottePriest_DSC04728-web.jpg"];
 const grid = document.getElementById("grid");
