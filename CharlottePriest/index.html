@@ -35,6 +35,8 @@
   .heart:hover svg { transform: scale(1.12); }
   .heart.on { color: #E0245E; }
   .heart.on svg { fill: currentColor; }
+  .heart.star { color: #F5B301; }
+  .heart.star svg { fill: currentColor; }
   .lb .heart { right: 12px; bottom: 8px; width: 44px; height: 44px; opacity: 1; }
   .lb .name { position: absolute; left: 12px; bottom: 10px; color: #fff; opacity: .6; font: 11px/1 -apple-system, Helvetica, Arial, sans-serif; letter-spacing: .02em; text-shadow: 0 0 3px rgba(0,0,0,.8); pointer-events: none; }
 </style>
@@ -95,7 +97,9 @@ function build() { photos.forEach((name, n) => {
 const HEARTS = "/hearts-api";
 const GALLERY = "CharlottePriest";
 const HEART_SVG = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2.1 0 3.9 1.1 5.1 2.9 1.2-1.8 3-2.9 5.1-2.9 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>';
-const hearted = new Set();
+const STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9z"/></svg>';
+const NEXT = { undefined: "heart", heart: "star", star: null }; // click cycle: off -> heart -> star -> off
+const marks = new Map(); // file -> "heart" | "star"
 const lbHeart = document.getElementById("lbHeart");
 lbHeart.innerHTML = HEART_SVG;
 
@@ -109,18 +113,20 @@ function heartButton(name) {
 }
 function paintHearts() {
   document.querySelectorAll(".heart").forEach(h => {
-    const on = hearted.has(h.dataset.file);
-    h.classList.toggle("on", on);
-    h.setAttribute("aria-pressed", on);
+    const kind = marks.get(h.dataset.file);
+    h.classList.toggle("on", kind === "heart");
+    h.classList.toggle("star", kind === "star");
+    h.innerHTML = kind === "star" ? STAR_SVG : HEART_SVG;
+    h.setAttribute("aria-pressed", !!kind);
   });
 }
 function toggleHeart(file) {
-  const on = !hearted.has(file);
-  on ? hearted.add(file) : hearted.delete(file);
-  paintHearts();
-  fetch(HEARTS + "/heart?g=" + GALLERY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file, on }) })
+  const prev = marks.get(file), kind = NEXT[prev];
+  const set = k => { k ? marks.set(file, k) : marks.delete(file); paintHearts(); };
+  set(kind);
+  fetch(HEARTS + "/heart?g=" + GALLERY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file, kind }) })
     .then(r => { if (!r.ok) throw 0; })
-    .catch(() => { on ? hearted.delete(file) : hearted.add(file); paintHearts(); });
+    .catch(() => set(prev));
 }
 document.addEventListener("click", e => {
   const h = e.target.closest(".heart");
@@ -128,9 +134,9 @@ document.addEventListener("click", e => {
   e.stopPropagation();
   toggleHeart(h.dataset.file);
 }, true);
-fetch(HEARTS + "/hearts?g=" + GALLERY, { cache: "no-store" })
+fetch(HEARTS + "/marks?g=" + GALLERY, { cache: "no-store" })
   .then(r => r.ok ? r.json() : [])
-  .then(list => { list.forEach(f => hearted.add(f)); paintHearts(); })
+  .then(list => { list.forEach(m => marks.set(m.file, m.kind)); paintHearts(); })
   .catch(() => {});
 
 let built = false;
