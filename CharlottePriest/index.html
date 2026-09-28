@@ -9,8 +9,9 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); }
   .head { padding: var(--gap) var(--gap) 0; width: 100%; }
-  .head h1 { color: #00CCCC; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 800; white-space: nowrap; line-height: 1; font-size: 100px; letter-spacing: -.01em; }
-  .head hr { border: 0; border-top: 2px solid #00CCCC; margin-top: var(--gap); }
+  .head h1 { color: #00BFDF; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 800; white-space: nowrap; line-height: 1; text-transform: uppercase; text-align: center; font-size: 100px; letter-spacing: -.01em; }
+  .head h1 span { display: inline-block; }
+  .head hr { border: 0; border-top: 2px solid #00BFDF; margin-top: var(--gap); }
   .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); padding: var(--gap); width: 100%; }
   .grid button { display: block; aspect-ratio: 1 / 1; border: 0; padding: 0; background: #eee; cursor: zoom-in; overflow: hidden; }
   .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .2s; }
@@ -32,7 +33,7 @@
 </style>
 </head>
 <body>
-<header class="head"><h1 id="title">Charlotte Priest</h1><hr></header>
+<header class="head"><h1><span id="title">Charlotte Priest</span></h1><hr></header>
 <div class="grid" id="grid"></div>
 
 <div class="lb" id="lb">
@@ -46,9 +47,9 @@
 <script>
 const title = document.getElementById("title");
 function fitTitle() {
-  title.style.fontSize = "100px";
-  const w = title.parentElement.clientWidth - parseFloat(getComputedStyle(title.parentElement).paddingLeft) * 2;
-  title.style.fontSize = (100 * w / title.scrollWidth) + "px";
+  const h1 = title.parentElement;
+  h1.style.fontSize = "100px";
+  h1.style.fontSize = (100 * h1.clientWidth / title.getBoundingClientRect().width) + "px";
 }
 fitTitle();
 window.addEventListener("resize", fitTitle);
