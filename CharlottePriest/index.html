@@ -13,9 +13,9 @@
   .head h1 span { display: inline-block; }
   .head hr { border: 0; border-top: 2px solid #00BFDF; margin-top: var(--gap); }
   .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); padding: var(--gap); width: 100%; }
-  .grid button { display: block; aspect-ratio: 1 / 1; border: 0; padding: 0; background: #eee; cursor: zoom-in; overflow: hidden; }
+  .grid .thumb { display: block; width: 100%; aspect-ratio: 1 / 1; border: 0; padding: 0; background: #eee; cursor: zoom-in; overflow: hidden; }
   .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .2s; }
-  .grid button:hover img { opacity: .85; }
+  .grid .thumb:hover img { opacity: .85; }
   @media (max-width: 1200px) { .grid { grid-template-columns: repeat(4, 1fr); } }
   @media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 
@@ -29,6 +29,13 @@
   .lb .prev { left: 16px; }
   .lb .next { right: 16px; }
   .lb .close { top: 16px; right: 16px; width: 44px; height: 44px; padding: 8px; }
+  .cell { position: relative; }
+  .heart { position: absolute; right: 6px; bottom: 6px; width: 34px; height: 34px; padding: 6px; border: 0; background: none; cursor: pointer; color: #fff; }
+  .heart svg { width: 100%; height: 100%; display: block; fill: none; stroke: currentColor; stroke-width: 1.8; filter: drop-shadow(0 0 2px rgba(0,0,0,.6)); transition: transform .15s; }
+  .heart:hover svg { transform: scale(1.12); }
+  .heart.on { color: #E0245E; }
+  .heart.on svg { fill: currentColor; }
+  .lb .heart { right: 12px; bottom: 8px; width: 44px; height: 44px; opacity: 1; }
   .lb .name { position: absolute; left: 12px; bottom: 10px; color: #fff; opacity: .6; font: 11px/1 -apple-system, Helvetica, Arial, sans-serif; letter-spacing: .02em; text-shadow: 0 0 3px rgba(0,0,0,.8); pointer-events: none; }
 </style>
 </head>
@@ -39,6 +46,7 @@
 <div class="lb" id="lb">
   <img id="lbImg" alt="">
   <div class="name" id="lbName"></div>
+  <button class="heart" id="lbHeart" aria-label="Favorite"></button>
   <button class="prev" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 4l-8 8 8 8"/></svg></button>
   <button class="next" id="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 4l8 8-8 8"/></svg></button>
   <button class="close" id="close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
@@ -69,6 +77,7 @@ let i = 0;
 
 function build() { photos.forEach((name, n) => {
   const b = document.createElement("button");
+  b.className = "thumb";
   const img = document.createElement("img");
   img.src = src(name);
   img.loading = "lazy";
@@ -76,8 +85,53 @@ function build() { photos.forEach((name, n) => {
   img.alt = "";
   b.appendChild(img);
   b.addEventListener("click", () => openAt(n));
-  grid.appendChild(b);
-}); }
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  cell.append(b, heartButton(name));
+  grid.appendChild(cell);
+}); paintHearts(); }
+
+// Shared hearts: everyone sees the same favorites (Cloudflare worker at /hearts-api).
+const HEARTS = "/hearts-api";
+const GALLERY = "CharlottePriest";
+const HEART_SVG = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2.1 0 3.9 1.1 5.1 2.9 1.2-1.8 3-2.9 5.1-2.9 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>';
+const hearted = new Set();
+const lbHeart = document.getElementById("lbHeart");
+lbHeart.innerHTML = HEART_SVG;
+
+function heartButton(name) {
+  const h = document.createElement("button");
+  h.className = "heart";
+  h.setAttribute("aria-label", "Favorite");
+  h.dataset.file = name;
+  h.innerHTML = HEART_SVG;
+  return h;
+}
+function paintHearts() {
+  document.querySelectorAll(".heart").forEach(h => {
+    const on = hearted.has(h.dataset.file);
+    h.classList.toggle("on", on);
+    h.setAttribute("aria-pressed", on);
+  });
+}
+function toggleHeart(file) {
+  const on = !hearted.has(file);
+  on ? hearted.add(file) : hearted.delete(file);
+  paintHearts();
+  fetch(HEARTS + "/heart?g=" + GALLERY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ file, on }) })
+    .then(r => { if (!r.ok) throw 0; })
+    .catch(() => { on ? hearted.delete(file) : hearted.add(file); paintHearts(); });
+}
+document.addEventListener("click", e => {
+  const h = e.target.closest(".heart");
+  if (!h) return;
+  e.stopPropagation();
+  toggleHeart(h.dataset.file);
+}, true);
+fetch(HEARTS + "/hearts?g=" + GALLERY, { cache: "no-store" })
+  .then(r => r.ok ? r.json() : [])
+  .then(list => { list.forEach(f => hearted.add(f)); paintHearts(); })
+  .catch(() => {});
 
 let built = false;
 const buildOnce = () => { if (!built) { built = true; build(); } };
@@ -91,6 +145,8 @@ fetch("versions.json?t=" + Date.now(), { cache: "no-store" })
 function show() {
   lbImg.src = src(photos[i]);
   document.getElementById("lbName").textContent = photos[i];
+  lbHeart.dataset.file = photos[i];
+  paintHearts();
   [i - 1, i + 1].forEach(k => { const p = new Image(); p.src = src(photos[(k + photos.length) % photos.length]); });
 }
 function openAt(n) { i = n; show(); lb.classList.add("open"); document.body.style.overflow = "hidden"; }
