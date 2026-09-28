@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charlotte Priest</title>
+<style>
+  :root { --bg: #fff; --gap: 6px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); }
+  .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap); padding: var(--gap); width: 100%; }
+  .grid button { display: block; aspect-ratio: 1 / 1; border: 0; padding: 0; background: #eee; cursor: zoom-in; overflow: hidden; }
+  .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .2s; }
+  .grid button:hover img { opacity: .85; }
+  @media (max-width: 1200px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .lb { position: fixed; inset: 0; background: #000; display: none; align-items: center; justify-content: center; z-index: 10; }
+  .lb.open { display: flex; }
+  .lb img { max-width: 100vw; max-height: 100vh; width: auto; height: auto; object-fit: contain; display: block; user-select: none; }
+  .lb button { position: absolute; background: none; border: 0; color: #fff; cursor: pointer; opacity: .7; transition: opacity .2s; }
+  .lb button:hover { opacity: 1; }
+  .lb button svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.5; filter: drop-shadow(0 0 3px rgba(0,0,0,.6)); }
+  .lb .prev, .lb .next { top: 50%; transform: translateY(-50%); width: 56px; height: 56px; padding: 8px; }
+  .lb .prev { left: 16px; }
+  .lb .next { right: 16px; }
+  .lb .close { top: 16px; right: 16px; width: 44px; height: 44px; padding: 8px; }
+</style>
+</head>
+<body>
+<div class="grid" id="grid"></div>
+
+<div class="lb" id="lb">
+  <img id="lbImg" alt="">
+  <button class="prev" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 4l-8 8 8 8"/></svg></button>
+  <button class="next" id="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 4l8 8-8 8"/></svg></button>
+  <button class="close" id="close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+</div>
+
+<script>
+const DIR = "Selects/";
+const photos = ["CharlottePriest_DSC03580-3.jpg", "CharlottePriest_DSC03600.jpg", "CharlottePriest_DSC03602.jpg", "CharlottePriest_DSC03620.jpg", "CharlottePriest_DSC03627.jpg", "CharlottePriest_DSC03641.jpg", "CharlottePriest_DSC03656.jpg", "CharlottePriest_DSC03670.jpg", "CharlottePriest_DSC03710.jpg", "CharlottePriest_DSC03720.jpg", "CharlottePriest_DSC03729.jpg", "CharlottePriest_DSC03732.jpg", "CharlottePriest_DSC03738.jpg", "CharlottePriest_DSC03771.jpg", "CharlottePriest_DSC03815.jpg", "CharlottePriest_DSC03827.jpg", "CharlottePriest_DSC03842.jpg", "CharlottePriest_DSC03872-2.jpg", "CharlottePriest_DSC03877.jpg", "CharlottePriest_DSC03893.jpg", "CharlottePriest_DSC03919-2.jpg", "CharlottePriest_DSC03934-2.jpg", "CharlottePriest_DSC03937-2.jpg", "CharlottePriest_DSC03953.jpg", "CharlottePriest_DSC03964.jpg", "CharlottePriest_DSC03973.jpg", "CharlottePriest_DSC03995.jpg", "CharlottePriest_DSC04041.jpg", "CharlottePriest_DSC04049.jpg", "CharlottePriest_DSC04050.jpg", "CharlottePriest_DSC04060.jpg", "CharlottePriest_DSC04103.jpg", "CharlottePriest_DSC04114.jpg", "CharlottePriest_DSC04145.jpg", "CharlottePriest_DSC04179.jpg", "CharlottePriest_DSC04194.jpg", "CharlottePriest_DSC04214.jpg", "CharlottePriest_DSC04282.jpg", "CharlottePriest_DSC04327.jpg", "CharlottePriest_DSC04340.jpg", "CharlottePriest_DSC04423.jpg", "CharlottePriest_DSC04431.jpg", "CharlottePriest_DSC04434.jpg", "CharlottePriest_DSC04452.jpg", "CharlottePriest_DSC04463-2.jpg", "CharlottePriest_DSC04463.jpg", "CharlottePriest_DSC04483.jpg", "CharlottePriest_DSC04496-2.jpg", "CharlottePriest_DSC04501-web.jpg", "CharlottePriest_DSC04505.jpg", "CharlottePriest_DSC04520.jpg", "CharlottePriest_DSC04526.jpg", "CharlottePriest_DSC04533-2.jpg", "CharlottePriest_DSC04539.jpg", "CharlottePriest_DSC04543-2.jpg", "CharlottePriest_DSC04545.jpg", "CharlottePriest_DSC04557.jpg", "CharlottePriest_DSC04558.jpg", "CharlottePriest_DSC04592.jpg", "CharlottePriest_DSC04603.jpg", "CharlottePriest_DSC04617.jpg", "CharlottePriest_DSC04633.jpg", "CharlottePriest_DSC04641.jpg", "CharlottePriest_DSC04651.jpg", "CharlottePriest_DSC04662.jpg", "CharlottePriest_DSC04667.jpg", "CharlottePriest_DSC04672.jpg", "CharlottePriest_DSC04681.jpg", "CharlottePriest_DSC04691.jpg", "CharlottePriest_DSC04706.jpg", "CharlottePriest_DSC04716.jpg", "CharlottePriest_DSC04724.jpg", "CharlottePriest_DSC04728.jpg"];
+const grid = document.getElementById("grid");
+const lb = document.getElementById("lb");
+const lbImg = document.getElementById("lbImg");
+let i = 0;
+
+photos.forEach((name, n) => {
+  const b = document.createElement("button");
+  const img = document.createElement("img");
+  img.src = DIR + encodeURIComponent(name);
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.alt = "";
+  b.appendChild(img);
+  b.addEventListener("click", () => openAt(n));
+  grid.appendChild(b);
+});
+
+function show() {
+  lbImg.src = DIR + encodeURIComponent(photos[i]);
+  [i - 1, i + 1].forEach(k => { const p = new Image(); p.src = DIR + encodeURIComponent(photos[(k + photos.length) % photos.length]); });
+}
+function openAt(n) { i = n; show(); lb.classList.add("open"); document.body.style.overflow = "hidden"; }
+function close() { lb.classList.remove("open"); document.body.style.overflow = ""; }
+function step(d) { i = (i + d + photos.length) % photos.length; show(); }
+
+document.getElementById("prev").addEventListener("click", e => { e.stopPropagation(); step(-1); });
+document.getElementById("next").addEventListener("click", e => { e.stopPropagation(); step(1); });
+document.getElementById("close").addEventListener("click", close);
+lb.addEventListener("click", e => { if (e.target === lb) close(); });
+document.addEventListener("keydown", e => {
+  if (!lb.classList.contains("open")) return;
+  if (e.key === "ArrowRight") step(1);
+  else if (e.key === "ArrowLeft") step(-1);
+  else if (e.key === "Escape") close();
+});
+let x0 = null;
+lb.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener("touchend", e => {
+  if (x0 === null) return;
+  const dx = e.changedTouches[0].clientX - x0;
+  if (Math.abs(dx) > 40) step(dx < 0 ? 1 : -1);
+  x0 = null;
+});
+</script>
+</body>
+</html>
