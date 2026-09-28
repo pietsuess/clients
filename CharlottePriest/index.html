@@ -12,6 +12,9 @@
   .head h1 { color: #00BFDF; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 800; white-space: nowrap; line-height: 1; text-transform: uppercase; text-align: center; font-size: 100px; letter-spacing: -.01em; }
   .head h1 span { display: inline-block; }
   .head hr { border: 0; border-top: 2px solid #00BFDF; margin-top: var(--gap); }
+  .filters { display: flex; justify-content: center; gap: var(--gap); margin-top: var(--gap); }
+  .filters button { font: 700 14px/1 "Helvetica Neue", Helvetica, Arial, sans-serif; text-transform: uppercase; color: #00BFDF; background: none; border: 0; padding: 6px 12px; cursor: pointer; }
+  .filters button.active { background: #00BFDF; color: #fff; }
   .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); padding: var(--gap); width: 100%; }
   .grid .thumb { display: block; width: 100%; aspect-ratio: 1 / 1; border: 0; padding: 0; background: #eee; cursor: zoom-in; overflow: hidden; }
   .grid img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .2s; }
@@ -42,7 +45,8 @@
 </style>
 </head>
 <body>
-<header class="head"><h1><span id="title">Charlotte Priest</span></h1><hr></header>
+<header class="head"><h1><span id="title">Charlotte Priest</span></h1><hr>
+<nav class="filters" id="filters"><button data-f="star">Show star</button><button data-f="heart">Show heart</button><button data-f="selects">Show selects</button><button data-f="all" class="active">Show all</button></nav><hr></header>
 <div class="grid" id="grid"></div>
 
 <div class="lb" id="lb">
@@ -89,6 +93,7 @@ function build() { photos.forEach((name, n) => {
   b.addEventListener("click", () => openAt(n));
   const cell = document.createElement("div");
   cell.className = "cell";
+  cell.dataset.file = name;
   cell.append(b, heartButton(name));
   grid.appendChild(cell);
 }); paintHearts(); }
@@ -136,7 +141,7 @@ document.addEventListener("click", e => {
 }, true);
 fetch(HEARTS + "/marks?g=" + GALLERY, { cache: "no-store" })
   .then(r => r.ok ? r.json() : [])
-  .then(list => { list.forEach(m => marks.set(m.file, m.kind)); paintHearts(); })
+  .then(list => { list.forEach(m => marks.set(m.file, m.kind)); paintHearts(); applyFilter(); })
   .catch(() => {});
 
 let built = false;
@@ -148,6 +153,18 @@ fetch("versions.json?t=" + Date.now(), { cache: "no-store" })
   .catch(() => {})
   .finally(buildOnce);
 
+// Filter row: star / heart / selects (star or heart) / all. Applied on button press, not on every heart click.
+let filter = "all";
+const visible = name => { const k = marks.get(name); return filter === "all" || (filter === "selects" ? !!k : k === filter); };
+function applyFilter() { document.querySelectorAll(".grid .cell").forEach(c => { c.style.display = visible(c.dataset.file) ? "" : "none"; }); }
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  filter = b.dataset.f;
+  document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("active", x === b));
+  applyFilter();
+});
+
 function show() {
   lbImg.src = src(photos[i]);
   document.getElementById("lbName").textContent = photos[i];
@@ -157,7 +174,12 @@ function show() {
 }
 function openAt(n) { i = n; show(); lb.classList.add("open"); document.body.style.overflow = "hidden"; }
 function close() { lb.classList.remove("open"); document.body.style.overflow = ""; }
-function step(d) { i = (i + d + photos.length) % photos.length; show(); }
+function step(d) {
+  const shown = [...document.querySelectorAll(".grid .cell")].filter(c => c.style.display !== "none").map(c => photos.indexOf(c.dataset.file));
+  const at = shown.indexOf(i);
+  if (at < 0) return;
+  i = shown[(at + d + shown.length) % shown.length]; show();
+}
 
 document.getElementById("prev").addEventListener("click", e => { e.stopPropagation(); step(-1); });
 document.getElementById("next").addEventListener("click", e => { e.stopPropagation(); step(1); });
