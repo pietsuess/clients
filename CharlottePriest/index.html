@@ -171,6 +171,7 @@ function show() {
   lbImg.src = src(photos[i]);
   document.getElementById("lbName").textContent = photos[i];
   lbHeart.dataset.file = photos[i];
+  document.getElementById("dl").style.display = /-full\.jpe?g$/i.test(photos[i]) ? "" : "none"; // button only for full-res files
   paintHearts();
   [i - 1, i + 1].forEach(k => { const p = new Image(); p.src = src(photos[(k + photos.length) % photos.length]); });
 }
