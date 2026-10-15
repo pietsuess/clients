@@ -203,6 +203,11 @@
   // would break across line endings). .ground-heading is covered by its
   // eyebrow/verdict children — no block-level clip on it (nested clips would
   // compose two directions on the same text).
+  // 02's Wear / Walk / Data write-on starts and window (see the spread in
+  // applyPanelProgress). Named because the phone recording keys off them:
+  // it rises only once Walk has finished writing (2026-10-14).
+  var PRODUCT_EVIDENCE_STARTS = [0.0857, 0.3429, 0.60];
+  var PRODUCT_EVIDENCE_WINDOW = 0.24;
   var WRITE_ORDER = [
     { sel: ".panel__eyebrow",     s: 0.05, dir: "x" },
     { sel: ".panel__verdict",     s: 0.10, dir: "y" },
@@ -413,7 +418,7 @@
       // Pulled forward (Piet): the last of the three used to land at 0.60-0.74
       // of a very long pin, well after the device had finished.
       var spread = (clipPanel && WRITE_ORDER[si].sel === ".panel__evidence p")
-        ? [0.0857, 0.3429, 0.60]
+        ? PRODUCT_EVIDENCE_STARTS
         : null;
       // Phase-local group indices: .panel__eyebrow and .panel__verdict each
       // match once per half, so the applications copy must count from 0 in
@@ -421,7 +426,7 @@
       var gjA = 0, gjB = 0;
       for (var gi = 0; gi < group.length; gi++) {
         var gs = spread ? (spread[gi] !== undefined ? spread[gi] : s) : s + gi * writeStagger;
-        var gw = spread ? 0.24 : writeWindow;
+        var gw = spread ? PRODUCT_EVIDENCE_WINDOW : writeWindow;
         var e = smooth01(mapRange(p, gs + oppDelay, gs + oppDelay + gw));
         var w = e * (1 - itemLeave());
         if (oppTwoPhase) {
@@ -670,17 +675,20 @@
   // consumed per frame by setAppClip.
   var productCoverEls = [];
   var productClipH = 0;
-  // Shortfall rise (Piet 2026-08-14: full width on EVERY device, no
-  // narrowing): where the full-width recording + the Data block overrun the
-  // content box (iPhone aspect), the layer rides up by exactly the overrun
-  // as it arrives. 0 on screens where it already fits — nothing moves there.
-  var productClipShortfall = 0;
   function layoutProductCase() {
-    if (!caseModel || !productPanel || !productInner) return;
-    if (!mobileLike) {
-      caseModel.style.height = "";
+    if (!productPanel || !productInner) return;
+    // Phone vs desktop read LIVE (2026-10-14), not the load-time mobileLike:
+    // a window resized across 720px re-measures instead of keeping the other
+    // layout's numbers until a reload.
+    if (!window.matchMedia("(max-width: 720px)").matches) {
+      if (caseModel) caseModel.style.height = "";
       var clipReset = document.querySelector(".app-clip-layer");
-      if (clipReset) clipReset.style.height = "";
+      if (clipReset) {
+        clipReset.style.height = "";
+        clipReset.style.removeProperty("--clip-space");
+      }
+      productCoverEls.forEach(function (c) { c.el.classList.remove("is-covered"); });
+      productCoverEls = [];
       return;
     }
     // Size from STABLE, scroll-independent values: the panel is 100svh and the
@@ -701,7 +709,7 @@
     // top to flush at the copy — same bottom edge as before, ~2vh more art.
     var modelH = panelH - padBottom - textH;
     modelH = Math.max(150, Math.min(modelH, Math.round(panelH * 0.72)));
-    caseModel.style.height = modelH + "px";
+    if (caseModel) caseModel.style.height = modelH + "px";
     // Clip layer runs from the screen top to the TOP OF THE DATA LINE (Piet
     // 2026-08-13: recording almost full screen, Data stays where it is). The
     // Data paragraph's own position never changes — the others are cut by the
@@ -726,12 +734,32 @@
       // The 02 corner mark lifts over the Data block during the clip stage;
       // the CSS lift reads this measured height (see the is-clip-stage rule).
       productPanel.style.setProperty("--data-h", dataPara.offsetHeight + "px");
-      // Video bottom at full width is vw * 1920/1080 from the screen top;
-      // the Data block needs its height + 12px air above the content bottom.
-      // Whatever does not fit is the rise (see setAppClip / --clip-rise).
-      productClipShortfall = Math.max(0,
-        Math.round(window.innerWidth * 1920 / 1080) + 12 +
-        dataPara.offsetHeight - (panelH - padBottom));
+      // FIT (Piet 2026-10-14: "make it fit right"). The recording gets the
+      // space from the screen top down to the top of the lifted corner mark
+      // and is CONTAINED in it (CSS --clip-space): whole, as wide as fits,
+      // narrower on short phones instead of cropped. Replaces the 08-14
+      // full-width rise, which on short phones both narrowed the video AND
+      // pushed it past the top, and never left room for the mark. Nothing
+      // here is typed in: the video's shape is left to object-fit, so a new
+      // recording fits the same way.
+      // The lifted mark is READ, not derived: the clip-stage lift goes on for
+      // one synchronous read with its 420ms slide off (no paint happens in
+      // between), then both are restored after a flush.
+      var clipSpace = target - dataPara.offsetHeight - 12;
+      var cornerMark = productPanel.querySelector(".section-mark--corner");
+      if (cornerMark) {
+        var staged = document.body.classList.contains("is-clip-stage");
+        var markTransition = cornerMark.style.transition;
+        cornerMark.style.transition = "none";
+        document.body.classList.add("is-clip-stage");
+        clipSpace = cornerMark.getBoundingClientRect().top -
+                    productPanel.getBoundingClientRect().top;
+        if (!staged) document.body.classList.remove("is-clip-stage");
+        void cornerMark.offsetHeight;
+        cornerMark.style.transition = markTransition;
+      }
+      clipLayer.style.setProperty("--clip-space",
+        Math.max(0, Math.floor(clipSpace)) + "px");
       productClipH = panelH - padBottom;
       // The covering cut (see setAppClip): each non-Data line hides the frame
       // the video's rising top edge reaches its bottom. Offset sums, not
@@ -913,66 +941,19 @@
   // lands as the next text block begins. Wave 1 intentionally waits until
   // after the "forest data stack" panel instead of running from the hero.
   if (!reduced && window.bullfinchCanopy && window.bullfinchCanopy.setWaveProgress) {
-    var productMedia = document.querySelector(".case-fixed-layer");
-    var casePlaybackFrameSlots = 288 + 136;
-    var caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
-    var caseFadeOutStartProgress = (288 + 96 - 1) / casePlaybackFrameSlots;
-
-    // DEV opt-in (data-app-clip): the device sequence hands its slot to a
-    // screen recording of the app in action. The PNG sequence finishes playing
-    // at 288/424 of the pin (~0.679); the device only starts leaving AFTER that
-    // so the animation is never cut short. The clip then holds until the 02
-    // copy un-writes on its own beat (0.80 -> 1.0), and leaves with it, so the
-    // pin still releases empty — nothing scrolls out.
+    // Wearable render DELETED 2026-10-14 (client ask): the 480-frame Case_anim
+    // canvas, case-animation.js and the whole device fade/playback retime are
+    // gone. The recording now arrives over the band the device used to hold.
     var appClip = appClipOn ? document.getElementById("app-clip") : null;
-    // Dev playback scale. THE BUG Piet kept seeing ("the png seq fades way
-    // too soon"): case-animation.js maps playback over its OWN 424 slots, so
-    // the local casePlaybackFrameSlots retime never reached it — the sequence
-    // was still mid-play (frame ~140 of 288) when the device faded at 0.338.
-    // The scale pre-stretches the progress WE pass in, so frame 288 lands at
-    // ~102vh of the pin (0.283 of 360%), comfortably before the fade-out at
-    // 0.394. Clamped at the last real frame so the tail HOLDS it.
-    var casePlaybackCap = 1;
-    var caseFadeInStartProgress = 0;
-    var casePlaybackStart = 0;
-    var casePlaybackEnd = 1;
-    if (appClip) {
-      casePlaybackFrameSlots = 1185;
-      caseFadeInEndProgress = (40 - 1) / casePlaybackFrameSlots;
-      // The sequence must NOT sit frozen on its last frame (Piet). The fade-out
-      // now runs 0.32 -> 0.38 and lands exactly where playback ends, so the
-      // device is gone AS frame 480 arrives, never held after it.
-      // Fractions rebased to the 210% pin (same absolute scroll distances as
-      // the 360%-era values: ×360/210): only the post-build hold shrank.
-      caseFadeOutStartProgress = 0.5486;
-      // 480-frame re-render, no tail. The device holds off until ~36vh of
-      // the pin, fades up over the next ~25vh, and the sequence plays to
-      // ~137vh — finishing just as its fade-out ends.
-      // MOBILE LEAD-IN CUT (Piet 2026-08-12: "there's too much time before
-      // anything shows up after the device being worn photo is full ... it can
-      // be confusing as to what to do next"). These fractions were tuned
-      // against the 210% DESKTOP pin, where 0.1714 buys a 36vh lead-in. The
-      // mobile pin is 280%, so the same fraction buys 48vh — and on a phone
-      // setGapFocus early-returns a flat 62% with no pan (2026-08-11), so that
-      // band has literally zero motion in it. 12vh of lead-in on mobile, then
-      // the same ~25vh fade the desktop gets.
-      // casePlaybackEnd is deliberately NOT moved with the start: it has to
-      // stay above caseFadeOutStartProgress (0.5486) or the fade-out's
-      // mapRange runs backwards. The sequence just plays over a longer band on
-      // a phone, which is also the pin that has the most room for it.
-      caseFadeInStartProgress = mobileLike ? 0.0429 : 0.1714;
-      caseFadeInEndProgress = mobileLike ? 0.1329 : 0.2914;
-      casePlaybackStart = mobileLike ? 0.0429 : 0.1714;
-      casePlaybackEnd = 0.6514;
-      casePlaybackCap = 479 / 480;
-    }
-
-    function setProductCase(value, playbackProgress) {
-      if (productMedia) productMedia.style.opacity = clamp01(value);
-      if (window.bullfinchCaseAnimation && window.bullfinchCaseAnimation.setScrollProgress) {
-        window.bullfinchCaseAnimation.setScrollProgress(playbackProgress);
-      }
-    }
+    // PHONES (Piet 2026-10-14, "is that all the text I get?"): the recording
+    // covers the copy on a phone, so it rises only when Walk has finished
+    // writing — headline, Wear and Walk are read first, Data writes on below
+    // it. Read from Walk's own band, so retiming the copy moves this too.
+    // The rise is desktop's 0.12-of-210% distance on the 280% phone pin.
+    // Desktop keeps the early arrival: there the copy sits beside it.
+    var walkWritten = PRODUCT_EVIDENCE_STARTS[1] + PRODUCT_EVIDENCE_WINDOW;
+    var clipInStart = mobileLike ? walkWritten : 0.1714;
+    var clipSeat = mobileLike ? walkWritten + 0.12 * 210 / 280 : 0.2914;
 
     // The clip SLIDES UP into the slot the device just left (0.32 -> 0.40,
     // riding the png seq fade-out) and holds while the copy writes on around
@@ -988,17 +969,11 @@
     var appClipPlayed = false;
     function setAppClip(p) {
       if (!appClip) return;
-      var inP = smooth01(mapRange(p, 0.5486, 0.6857));
+      var inP = smooth01(mapRange(p, clipInStart, clipSeat));
       var outP = smooth01(mapRange(p, 0.90, 1.00));
       var travel = (1 - inP) * 116;
-      appClip.style.opacity = p > 0.5486 && p < 1 ? (1 - outP).toFixed(3) : 0;
+      appClip.style.opacity = p > clipInStart && p < 1 ? (1 - outP).toFixed(3) : 0;
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
-      // Shortfall rise: folded into the arrival, so the recording slides up
-      // from below and keeps going past the top by exactly the overrun —
-      // one continuous motion, seated with the Data block clear below it.
-      // 0 where the screen already fits (nothing moves on tall phones).
-      appClip.style.setProperty("--clip-rise",
-        (productClipShortfall * inP).toFixed(1) + "px");
       // NO FADE (Piet 2026-08-13: "the screen should just cover it except
       // for the data row"): each line is cut the frame the video's rising
       // top edge first touches it, and restored the same way scrolling back.
@@ -1007,18 +982,18 @@
       // reads as covering. Same single writer as the slide (onUpdate AND
       // onRefresh), so a refresh can never strand a line. productCoverEls is
       // empty on desktop.
-      var edgeY = productClipH * travel / 100 - productClipShortfall * inP;
-      var coverOn = p > 0.5486 && p < 1;
+      var edgeY = productClipH * travel / 100;
+      var coverOn = p > clipInStart && p < 1;
       for (var ci = 0; ci < productCoverEls.length; ci++) {
         productCoverEls[ci].el.classList.toggle("is-covered",
           coverOn && edgeY <= productCoverEls[ci].bottom);
       }
       if (appClipVideo) {
-        if (p >= 0.6857 && p < 1 && !appClipPlayed) {
+        if (p >= clipSeat && p < 1 && !appClipPlayed) {
           appClipPlayed = true;
           var played = appClipVideo.play();
           if (played && played.catch) played.catch(function () {});
-        } else if (p < 0.5486 && appClipPlayed) {
+        } else if (p < clipInStart && appClipPlayed) {
           appClipVideo.pause();
           appClipVideo.currentTime = 0;
           appClipPlayed = false;
@@ -1058,24 +1033,17 @@
         onRefresh: function (self) { driveProductBand(self.progress || 0); },
       });
       function driveProductBand(p) {
-        var fadeIn = smooth01(mapRange(p, caseFadeInStartProgress, caseFadeInEndProgress));
-        // With the clip in play the device has to be fully gone before the
-        // clip is fully up, or the two are on screen together at half opacity
-        // and the swap reads as a crossfade of two objects rather than a
-        // handoff of one slot.
-        var fadeOut = smooth01(mapRange(p, caseFadeOutStartProgress, appClip ? casePlaybackEnd : 1.00));
-        setProductCase(fadeIn * (1 - fadeOut),
-                       Math.min(casePlaybackCap, mapRange(p, casePlaybackStart, casePlaybackEnd)));
         setAppClip(p);
         // Phone clip stage (Piet 2026-08-13: recording "almost fill the
         // screen... just the last entry data and its text stay over it").
         // Single writer: this function runs from onUpdate AND onRefresh, so
         // the class can never freeze stale. CSS fades eyebrow/verdict/Wear/
         // Walk by OPACITY only — the write-on scrub owns clip-path, opacity
-        // keeps layout, so the Data line never moves. Desktop never gets the
-        // class.
+        // keeps layout, so the Data line never moves. Toggled at every width
+        // (2026-10-14): all is-clip-stage CSS sits in the 720px block, so it
+        // follows the live width instead of the load-time one.
         document.body.classList.toggle("is-clip-stage",
-          mobileLike && p >= 0.5486 && p < 1);
+          p >= clipInStart && p < 1);
         // 02 backdrop tint: ease the scene to light green while the device
         // section holds, back to beige before 03 arrives.
         if (window.bullfinchCanopy.setProductTintProgress) {

@@ -1311,18 +1311,12 @@
         transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
                     visibility 0s linear 0s;
       }
-      /* The page recedes left and dims, exactly as it did for the old team
-         screen. #page's transition is global but inert outside this class:
-         nothing else writes transform or filter to #page itself (pins write
-         to their own spacers inside it). */
-      body.is-form-open #page {
-        transform: translateX(-8%);
-        filter: brightness(0.5);
-      }
-      #page {
-        transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
-                    filter 620ms ease;
-      }
+      /* #page does NOT move or dim while the panel is open (Piet 2026-09-30).
+         The recede was translateX(-8%) + brightness(0.5) on #page; either one
+         makes #page the containing block for the fixed pinned sections inside
+         it, so every pin dropped out and came back on the way in and out of
+         Contact. The panel slides in over the top instead - nothing writes
+         transform or filter to #page. Do not put either back. */
       .form-screen__inner {
         padding: calc(46px + (100lvh - 100svh)) var(--pad-x);
       }
@@ -2406,12 +2400,10 @@
           height: 48lvh;
           left: 50%;
           top: 0;
-          /* --clip-rise (setAppClip): the shortfall rise — on screens where
-             the full-width recording + Data overrun the content box (iPhone
-             aspect) the layer seats past the top by exactly the overrun.
-             0px on screens that fit; the full-width rule itself never bends
-             (Piet 2026-08-14: no narrowing on certain devices). */
-          transform: translateX(-50%) translateY(calc(-1 * var(--clip-rise, 0px)));
+          /* The 08-14 --clip-rise is gone (Piet 2026-10-14): the recording is
+             CONTAINED in --clip-space (layoutProductCase) instead of pushed
+             past the top, so the layer never moves vertically. */
+          transform: translateX(-50%);
           padding: 0;
           /* THE TOP GAP (Piet 2026-08-14, "still wrong" x2): the base layer is
              align-items:center, and the slide has no height of its own — the
@@ -2433,7 +2425,10 @@
            sit BELOW its bottom edge, in the ground space (Piet 2026-08-14;
            see layoutProductCase). */
         .app-clip-layer__box {
-          height: 100%;
+          /* Screen top down to the lifted corner mark, measured per screen
+             by layoutProductCase (2026-10-14). The contained video is as wide
+             as that height allows, centred, never cropped. */
+          height: var(--clip-space, 100%);
           width: 100%;
           aspect-ratio: auto;
           border-radius: 0;
@@ -2838,10 +2833,10 @@
          it rode the section's pre-pin climb. Out here fixed means fixed.
          In-wipe rides the HERO pin (0.30 -> 0.95); out-wipe on 01's pin. -->
     <div class="reveal-media reveal-media--left" data-reveal-media="1" data-reveal-in-pin="hero" data-reveal-from="0.30" data-reveal-to="0.95" data-reveal-out-from="0.88" data-reveal-out-to="1" style="--reveal-image: url('assets/foresters-measuring.jpg')" aria-hidden="true"></div>
-    <div class="reveal-media reveal-media--full" id="gapReveal" style="--reveal-image: url('assets/worn-device-wide.webp')" aria-hidden="true"></div>
-    <div class="case-fixed-layer panel__video panel__model" aria-label="Bullfinch case animation">
-      <canvas id="case-animation" class="panel__model-canvas" width="720" height="720" aria-hidden="true"></canvas>
-    </div>
+    <div class="reveal-media reveal-media--full" id="gapReveal" style="--reveal-image: url('assets/GrahamField_03.jpg')" aria-hidden="true"></div>
+    <!-- Wearable render DELETED 2026-10-14 (client ask): the .case-fixed-layer
+         box, its #case-animation canvas and case-animation.js are gone. The
+         app recording below now owns this slot from the start of 02. -->
     <!-- TEMP. Sits AFTER the case layer on purpose: swot-claude.js resolves the
          device with querySelector(".case-fixed-layer"), so this must never be
          the first match. Own class, no shared class, for the same reason. -->
@@ -3561,11 +3556,10 @@
         };
       })();
     </script>
-    <script src="case-animation.js?v=forest-journey-7"></script>
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-61"></script>
+    <script src="swot-claude.js?v=claude-65"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -4472,8 +4466,14 @@
               // point of the image with the P% point of the box, so putting a
               // subject at f on centre needs P = (f*imgW - boxW/2) /
               // (imgW - boxW): 0.62 on a 393x852 phone, 0.62 on 393x932.
-              // Stable across portrait ratios. No pan here, one value.
-              gapReveal.style.setProperty("--reveal-focus", "62%");
+              // Stable across portrait ratios.
+              // SLIDE LEFT (Piet 2026-10-14: "slide to the left a bit as well
+              // in mobile"): eases 62% -> 52% across the same band desktop
+              // pans, in desktop's direction (focus falling; 62 -> 72 was
+              // the wrong way). Starts AT 62%, so the CSS start value above
+              // still matches and nothing pops.
+              var tp = p * p * (3 - 2 * p);
+              gapReveal.style.setProperty("--reveal-focus", (62 - 10 * tp).toFixed(2) + "%");
               return;
             }
             var t = p * p * (3 - 2 * p);
@@ -5112,6 +5112,107 @@
           if (phoneWidth.addEventListener) phoneWidth.addEventListener("change", onPhoneWidth);
           else if (phoneWidth.addListener) phoneWidth.addListener(onPhoneWidth);
         }
+      })();
+    </script>
+    <script>
+      // SPEED GOVERNOR (Piet 2026-10-14). Replaces the scroll stops, which
+      // were "too stoppy. Can't get past". His spec: "reads whatever speed
+      // you try and scroll at and moderates it ... if I'm a cautious
+      // scroller, I get deliberate well controlled scrolling. If I'm an over
+      // eager flick scroller, it limits the impact". Scrolling up to KNEE
+      // screens a second passes untouched; faster is squeezed and never tops
+      // MAX, up or down.
+      //   Wheel and trackpad: each wheel step is scaled before Lenis reads it.
+      //   Phone: the finger drag is never touched. A glide after the finger
+      //   lifts that would start faster than KNEE is stopped and replaced by
+      //   one thrown at the squeezed speed.
+      (function () {
+        var KNEE = 1, MAX = 1.5;   // screens per second (MAX was 2, Piet: "the hard fast needs to slow down a bit")
+        var root = document.documentElement;
+
+        // Speed in, speed out (px/s): untouched up to the knee, then eased
+        // toward the top speed, which it never reaches.
+        function squeeze(v) {
+          var knee = KNEE * window.innerHeight, top = MAX * window.innerHeight;
+          if (v <= knee) return v;
+          return knee + (top - knee) * Math.tanh((v - knee) / (top - knee));
+        }
+
+        // WHEEL. The speed reading averages about the last 100ms. Lenis reads
+        // event.deltaY in its own listener, which runs after this capture
+        // one, so the step is rewritten on the event itself.
+        var AVG = 0.1, LINE = 100 / 6;   // LINE = Lenis's px per wheel line
+        var wheelRate = 0, wheelT = 0;
+        window.addEventListener("wheel", function (e) {
+          if (e.ctrlKey || !e.deltaY) return;   // pinch zoom, sideways
+          var t = performance.now() / 1000;
+          var step = Math.abs(e.deltaY) * (e.deltaMode === 1 ? LINE : e.deltaMode === 2 ? window.innerHeight : 1);
+          wheelRate *= Math.exp(-(t - wheelT) / AVG);
+          wheelT = t;
+          var v = wheelRate + step / (2 * AVG);
+          wheelRate += step / AVG;
+          var k = squeeze(v) / v;
+          if (k >= 1) return;
+          try {
+            Object.defineProperty(e, "deltaY", { value: e.deltaY * k });
+          } catch (err) {}
+        }, { capture: true, passive: true });
+
+        // PHONE GLIDE. Finger speed over its last 100ms before lifting.
+        // GLIDE_TAU is the fade of a phone's own glide, so a replaced glide
+        // moves like a native one, only slower.
+        var GLIDE_TAU = 0.5;
+        var coarse = window.matchMedia("(pointer: coarse)");
+        // Overflow off on <html> for a few frames is what stops the phone's
+        // own glide. Never <body>: the nav sheet note says toggling <body>
+        // overflow re-measures every pin.
+        var style = document.createElement("style");
+        style.textContent = "html.is-glide-held { overflow: hidden; }";
+        document.head.appendChild(style);
+
+        var trail = [], dragFromY = 0, glideRaf = 0;
+        function stopGlide() {
+          cancelAnimationFrame(glideRaf);
+          glideRaf = 0;
+          root.classList.remove("is-glide-held");
+        }
+        function glide(v) {   // px/s, + = down the page
+          root.classList.add("is-glide-held");
+          var y0 = null, t0 = 0, frames = 0;
+          function frame(now) {
+            if (y0 === null) { y0 = window.scrollY; t0 = now; }
+            var fade = Math.exp(-(now - t0) / 1000 / GLIDE_TAU);
+            window.scrollTo(0, y0 + v * GLIDE_TAU * (1 - fade));
+            if (++frames === 4) root.classList.remove("is-glide-held");
+            if (Math.abs(v) * fade > 10) glideRaf = requestAnimationFrame(frame);
+            else stopGlide();
+          }
+          glideRaf = requestAnimationFrame(frame);
+        }
+
+        window.addEventListener("touchstart", function () {
+          stopGlide();
+          trail.length = 0;
+          dragFromY = window.scrollY;
+        }, { capture: true, passive: true });
+        window.addEventListener("touchmove", function (e) {
+          if (e.touches.length !== 1) { trail.length = 0; return; }
+          var t = performance.now();
+          trail.push({ t: t, y: e.touches[0].clientY });
+          while (trail.length > 2 && t - trail[0].t > 100) trail.shift();
+        }, { capture: true, passive: true });
+        window.addEventListener("touchend", function (e) {
+          if (e.touches.length || trail.length < 2 || !coarse.matches) return;
+          var a = trail[0], b = trail[trail.length - 1];
+          trail.length = 0;
+          // A drag that never moved the page scrolled something else (nav
+          // sheet, a panel). A finger that rested before lifting has no glide.
+          if (Math.abs(window.scrollY - dragFromY) < 2) return;
+          if (performance.now() - b.t > 60 || b.t - a.t < 16) return;
+          var v = (a.y - b.y) / ((b.t - a.t) / 1000);
+          if (Math.abs(v) <= KNEE * window.innerHeight) return;
+          glide(squeeze(Math.abs(v)) * (v > 0 ? 1 : -1));
+        }, { capture: true, passive: true });
       })();
     </script>
     <script>
