@@ -2219,8 +2219,21 @@
   window.addEventListener("resize", measureGroveZone);
 
   document.body.setAttribute("data-tree-pointcloud", "loading");
-  fetch("assets/tree-pointcloud.obj?v=pc9")
-    .then(function (res) { return res.text(); })
+  // Opened from the Drive folder (file://) Chrome blocks the fetch (Piet's
+  // console, 2026-10-15), so there the same text comes from the script copy
+  // assets/tree-pointcloud-obj.js (remake it if the .obj changes). Online
+  // keeps the fetch and never loads the copy.
+  var treeObjText = location.protocol === "file:"
+    ? new Promise(function (resolve, reject) {
+        var tag = document.createElement("script");
+        tag.src = "assets/tree-pointcloud-obj.js?v=pc9";
+        tag.onload = function () { resolve(window.BF_TREE_OBJ); };
+        tag.onerror = function () { reject(new Error("tree-pointcloud-obj.js failed to load")); };
+        document.head.appendChild(tag);
+      })
+    : fetch("assets/tree-pointcloud.obj?v=pc9")
+        .then(function (res) { return res.text(); });
+  treeObjText
     .then(function (text) {
       // Parse raw verts first, then normalize HERE from the measured bounds.
       // The asset is already normalized, but normalizing defensively at load

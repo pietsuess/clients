@@ -496,6 +496,234 @@
   // so its pin is lengthened to make real room rather than squeezing the clip
   // into what was left over.
   var appClipOn = document.body.hasAttribute("data-app-clip");
+  // 02 WIDE STAGE (Piet 2026-10-15). Desktop 02 runs its copy over the same
+  // 210% as before, then PRODUCT_WIDE_EXTRA more of pin where the demo video
+  // opens out wide and plays its wide part. Everything keyed to the copy reads
+  // its old progress through PRODUCT_COPY_SHARE, so no copy distance moves;
+  // the leave-to-03 bands (clip fade, tint out, journey stage 3) ride the END
+  // of the longer pin at their old lengths.
+  // PHONE (Piet 2026-10-15): extra pin on its 280% too, but INSIDE the copy,
+  // at Data done (copy 0.84), the copy held through it. Order (Piet: "put the
+  // text, all the text ... up first, then the tall video, then the mocked up
+  // tall video"): every line is up with no video; then the tall video rises
+  // over it and covers all of it, Data too (PHONE_RISE); it plays
+  // (PHONE_TALL); then the stacked video (PHONE_WIDE). % of screen. The mark
+  // break-up, the leave, the fade and the photo exit all come after, at
+  // their old distances.
+  // teaser-dev.html reads the share as window.bfProductCopyShare.
+  // After the rise (Piet 2026-10-15: "The first video has to come up stop
+  // and play, and after a pause then can be scrolled past, and the next
+  // video comes up at and pauses. They should have different flows"): the
+  // tall video holds (PHONE_HOLD), then rides the scroll up and away
+  // (PHONE_EXIT); halfway out, the stacked video rises on its own ease-out
+  // into the same spot (PHONE_NEXT) and holds while it plays (PHONE_WIDE).
+  var PHONE_RISE = 25, PHONE_HOLD = 100, PHONE_EXIT = 90, PHONE_NEXT = 70, PHONE_WIDE = 100;
+  var PHONE_TALL = PHONE_HOLD + PHONE_EXIT / 2 + PHONE_NEXT;
+  var PRODUCT_WIDE_EXTRA = appClipOn ? (mobileLike ? PHONE_RISE + PHONE_TALL + PHONE_WIDE : 100) : 0;
+  var PRODUCT_COPY_BASE = mobileLike ? 280 : 210;
+  var PRODUCT_PIN = PRODUCT_COPY_BASE + PRODUCT_WIDE_EXTRA;
+  var PRODUCT_COPY_SHARE = PRODUCT_COPY_BASE / PRODUCT_PIN;
+  var PRODUCT_WIDE_COPY_AT = mobileLike ? 0.84 : 1;
+  // Pin fractions: the extra pin starts at HOLD_FROM (desktop: the copy
+  // share); on phone the tall video is seated at RISE_TO and the wide stage
+  // starts at WIDE_FROM (desktop: HOLD_FROM).
+  var PRODUCT_HOLD_FROM = PRODUCT_WIDE_COPY_AT * PRODUCT_COPY_SHARE;
+  var PHONE_RISE_TO = PRODUCT_HOLD_FROM + PHONE_RISE / PRODUCT_PIN;
+  var PRODUCT_WIDE_FROM = PRODUCT_HOLD_FROM + (mobileLike ? (PHONE_RISE + PHONE_TALL) / PRODUCT_PIN : 0);
+  // Phone swap (setAppClip): the tall video's exit, and the stacked still's
+  // rise, which ends at PRODUCT_WIDE_FROM.
+  var PHONE_EXIT_FROM = PHONE_RISE_TO + PHONE_HOLD / PRODUCT_PIN;
+  var PHONE_EXIT_TO = PHONE_EXIT_FROM + PHONE_EXIT / PRODUCT_PIN;
+  var PHONE_NEXT_FROM = PHONE_EXIT_FROM + PHONE_EXIT / 2 / PRODUCT_PIN;
+  window.bfProductCopyShare = PRODUCT_COPY_SHARE;
+  window.bfProductPinPct = PRODUCT_PIN;
+  // 02 pin progress -> copy progress: straight through up to the extra pin,
+  // held through it, then on to 1 at the pin's end. Desktop = min(1, P / share).
+  function productCopyAt(P) {
+    if (P <= PRODUCT_HOLD_FROM) return P / PRODUCT_COPY_SHARE;
+    var past = P - (1 - PRODUCT_COPY_SHARE);
+    return past <= PRODUCT_HOLD_FROM ? PRODUCT_WIDE_COPY_AT : Math.min(1, past / PRODUCT_COPY_SHARE);
+  }
+  window.bfProductCopyAt = productCopyAt;
+  // Whole-pin fraction for a band that must come after the phone's stage:
+  // phone = the same distance from the pin's end as on the old 280%;
+  // desktop = unchanged.
+  window.bfProductLeaveAt = function (f) {
+    return PRODUCT_WIDE_COPY_AT < 1 ? 1 - (1 - f) * PRODUCT_COPY_SHARE : f;
+  };
+  function copyProgress(panel, p) {
+    return panel.id === "product" ? productCopyAt(p) : p;
+  }
+  // 02 AUTO-FINISH (desktop, Piet 2026-10-15: "if we get anywhere on this
+  // scroll we need the animations to finish"). Once you are anywhere in 02,
+  // its build (headline, Wear, Walk, Data, the mark, the recording rising)
+  // plays through to done on its own at the governor's KNEE pace, one screen
+  // a second. Going back up REWINDS it with the scroll (Piet 2026-10-15:
+  // "going back up is messy"; it used to stay built until you were above 02
+  // and then clear on its own over 01): from where you turn up, what is
+  // drawn maps in a straight line down to nothing at the top of 02, so 02 is
+  // empty before you leave it. Turn down again and it plays on to done from
+  // wherever it stood. Every 02 build reads bfProductAuto.lift(p) (going
+  // down = max(scroll, auto)). From Data done (0.84) on the
+  // scroll alone drives, so the 0.86 mark break-up and the 0.94 leave are
+  // untouched. Phone: off (lift returns the scroll as is).
+  var PRODUCT_AUTO = appClipOn && !mobileLike;
+  var PRODUCT_AUTO_FULL = PRODUCT_EVIDENCE_STARTS[2] + PRODUCT_EVIDENCE_WINDOW;
+  var PRODUCT_AUTO_RATE = 1 / 2.1; // copy progress per second = 1 screen/s over the 210% copy pin
+  // back: set while going back up = { s: the copy scroll where you turned
+  // up, d: what 02 was drawn at there }; null going down.
+  var productAuto = { a: 0, target: 0, last: 0, raf: 0, fns: [], back: null, trigger: null, hold: 0, holdS: 0 };
+  var productCopyScrollP = 0;
+  function productAutoStep(now) {
+    var dt = productAuto.last ? Math.min(0.1, (now - productAuto.last) / 1000) : 0;
+    productAuto.last = now;
+    var a = productAuto.a, t = productAuto.target, d = PRODUCT_AUTO_RATE * dt;
+    productAuto.a = a < t ? Math.min(t, a + d) : Math.max(t, a - d);
+    productAutoCarry();
+    for (var i = 0; i < productAuto.fns.length; i++) productAuto.fns[i]();
+    if (productAuto.a !== t) {
+      productAuto.raf = requestAnimationFrame(productAutoStep);
+    } else {
+      productAuto.raf = 0;
+      productAuto.last = 0;
+    }
+  }
+  // The scroll rides the climb (Piet 2026-10-15: "the animation finishing
+  // also needs to take us to the correct scroll position"; the build used to
+  // finish with the scroll left behind, then a long dead scroll to Data
+  // done). While the build plays on to done, the page is carried down with
+  // it, so it ends ON Data done (0.84) and the next scroll goes straight
+  // into the mark break-up and the leave. 02 is pinned, so nothing on screen
+  // moves for it. Only forward, only while climbing, and never against a
+  // scroll already headed further (Lenis's target).
+  function productAutoCarry() {
+    var tr = productAuto.trigger;
+    if (!tr || productAuto.back || productAuto.target !== PRODUCT_AUTO_FULL) return;
+    if (productAuto.a <= productCopyScrollP) return;
+    var y = tr.start + (tr.end - tr.start) * productAuto.a * PRODUCT_COPY_SHARE;
+    var lenis = window.lenis;
+    var heading = lenis && typeof lenis.targetScroll === "number" ? lenis.targetScroll : window.scrollY;
+    if (y <= heading) return;
+    if (lenis && typeof lenis.scrollTo === "function") lenis.scrollTo(y, { immediate: true });
+    else window.scrollTo(0, y);
+  }
+  function productAutoTarget(pCopy) {
+    if (!PRODUCT_AUTO) return;
+    productAuto.target = pCopy > 0 ? PRODUCT_AUTO_FULL : 0;
+    // Also restarts the climb after a turn back down (a stands below the
+    // target with no frame queued).
+    if (productAuto.a !== productAuto.target && !productAuto.raf) {
+      productAuto.raf = requestAnimationFrame(productAutoStep);
+    }
+  }
+  // What 02 is drawn at for a scroll value p. Going down: lifted by the auto
+  // value. Going back up: p from the turn point down to 0 maps in a straight
+  // line from what was drawn there down to 0.
+  function productLiftBase(p) {
+    if (!PRODUCT_AUTO) return p;
+    var b = productAuto.back;
+    if (!b) return Math.max(p, productAuto.a);
+    if (p >= b.s) return Math.max(p, b.d);
+    return b.d > b.s ? b.d * p / b.s : p;
+  }
+  // The copy WAITS going back up out of the wide stage (Piet 2026-10-15:
+  // "the text has to come up a little later as we scroll back up so it
+  // doesn't overlap so much"). hold = 1 keeps 02 un-written while the wide
+  // window shuts; then it lets go at the auto pace, so the copy writes back
+  // on even if you have stopped, and never lags the straight line from the
+  // let-go scroll (holdS) down to the top of 02, so 02 is still empty there.
+  function productHoldCap(p) {
+    var v = productAuto.hold;
+    if (v <= 0) return 0;
+    return productAuto.holdS > 0 ? Math.min(v, p / productAuto.holdS) : v;
+  }
+  function productLift(p) {
+    if (!PRODUCT_AUTO) return p;
+    return Math.max(productLiftBase(p), productHoldCap(p));
+  }
+  window.bfProductAuto = {
+    lift: productLift,
+    onChange: function (fn) { productAuto.fns.push(fn); }
+  };
+  // Which way the copy's scroll is going (onUpdate only: a refresh's
+  // re-measure is not a direction). Turning up stops the auto value and
+  // starts the rewind from here; turning down hands what is drawn now back
+  // to the auto-finish, which plays on to done from there.
+  var productDirP = 0;
+  function productAutoTurn(c) {
+    var turned = false;
+    if (c < productDirP && !productAuto.back) {
+      productAuto.back = { s: productDirP, d: productLiftBase(productDirP) };
+      if (productAuto.raf) cancelAnimationFrame(productAuto.raf);
+      productAuto.raf = 0;
+      productAuto.last = 0;
+      turned = true;
+    } else if (c > productDirP && productAuto.back) {
+      productAuto.a = productLiftBase(productDirP);
+      productAuto.back = null;
+      turned = true;
+    }
+    productDirP = c;
+    // Readers on other triggers (mark, background pan) may already have
+    // drawn this frame on the old rule; redraw them on the new one.
+    if (turned) {
+      for (var i = 0; i < productAuto.fns.length; i++) productAuto.fns[i]();
+    }
+  }
+  function productHoldRedraw() {
+    for (var i = 0; i < productAuto.fns.length; i++) productAuto.fns[i]();
+  }
+  var productHoldRaf = 0, productHoldLast = 0;
+  function productHoldStop() {
+    if (productHoldRaf) cancelAnimationFrame(productHoldRaf);
+    productHoldRaf = 0;
+    productHoldLast = 0;
+  }
+  function productHoldStep(now) {
+    var dt = productHoldLast ? Math.min(0.1, (now - productHoldLast) / 1000) : 0;
+    productHoldLast = now;
+    productAuto.hold = Math.max(0, productAuto.hold - PRODUCT_AUTO_RATE * dt);
+    productHoldRedraw();
+    if (productAuto.hold > 0) productHoldRaf = requestAnimationFrame(productHoldStep);
+    else productHoldStop();
+  }
+  // Called by setWideStage: wait as the window starts to shut on the way up,
+  // let go once it has shut, clear on the way back into the wide stage.
+  function productCopyWait() {
+    if (!PRODUCT_AUTO) return;
+    productHoldStop();
+    productAuto.hold = 1;
+    productAuto.holdS = 0;
+    productHoldRedraw();
+  }
+  function productCopyGo() {
+    if (!PRODUCT_AUTO || productAuto.hold <= 0) return;
+    productHoldStop();
+    productAuto.holdS = productCopyScrollP;
+    if (productAuto.holdS > 0) {
+      productHoldRaf = requestAnimationFrame(productHoldStep);
+    } else {
+      productAuto.hold = 0;
+      productHoldRedraw();
+    }
+  }
+  function productCopyClear() {
+    if (!PRODUCT_AUTO || productAuto.hold <= 0) return;
+    productHoldStop();
+    productAuto.hold = 0;
+    productHoldRedraw();
+  }
+  // What a panel's copy is drawn at: 02's copy share of its pin, lifted by the
+  // auto-finish (which this also tells where the scroll is and, outside a
+  // refresh, which way it is going).
+  function drawProgress(panel, p, refreshing) {
+    var c = copyProgress(panel, p);
+    if (panel.id !== "product") return c;
+    productCopyScrollP = c;
+    if (PRODUCT_AUTO && !refreshing) productAutoTurn(c);
+    if (!productAuto.back) productAutoTarget(c);
+    return productLift(c);
+  }
   var mapPointsOn = document.body.hasAttribute("data-map-points");
   panels.forEach(function (panel, panelIndex) {
     var isFirstPanel = panelIndex === 0;
@@ -541,7 +769,7 @@
             // unchanged (Data still done ~176vh, video seats ~144vh); the
             // leave fraction is 0.94, so the exit starts ~197vh —
             // ~21vh after Data completes, zero dead tail into 03.
-            ? (mobileLike ? "+=280%" : "+=210%")
+            ? "+=" + PRODUCT_PIN + "%"
             // 03 on phone is TWO STOPS in one pin (Piet 2026-08-17): 03a team
             // in/hold/out, then 03b applications in/hold/out. Flat 200% — a
             // measured length is what the retired scroll-through needed, and
@@ -554,7 +782,7 @@
       scrub: true,
       anticipatePin: 1,
       onUpdate: function (self) {
-        applyPanelProgress(panel, self.progress);
+        applyPanelProgress(panel, drawProgress(panel, self.progress));
         // Retire the bouncing scroll cue once section 01 is fully settled:
         // all copy up, veil at full blur, sitting in the 0.66-0.94 HOLD just
         // before the panel begins to leave. One-way (resetSplash clears it).
@@ -570,9 +798,15 @@
       // was last written with STAND. 03 stayed fully written (faces, copy,
       // WHO band) on top of 02. Same shape as the tree-field and map-release
       // onRefresh writers: re-assert the true value for the real position.
-      onRefresh: function (self) { applyPanelProgress(panel, self.progress || 0); },
+      onRefresh: function (self) { applyPanelProgress(panel, drawProgress(panel, self.progress || 0, true)); },
     });
     panelTriggers.push(panelTrigger);
+    if (panel.id === "product" && PRODUCT_AUTO) {
+      productAuto.trigger = panelTrigger;
+      productAuto.fns.push(function () {
+        applyPanelProgress(panel, window.bfProductAuto.lift(productCopyScrollP));
+      });
+    }
   });
 
   // ===== Resize keeps your place =========================================
@@ -675,6 +909,8 @@
   // consumed per frame by setAppClip.
   var productCoverEls = [];
   var productClipH = 0;
+  var productClipTop = 0;
+  var productClipRoll = 0;
   function layoutProductCase() {
     if (!productPanel || !productInner) return;
     // Phone vs desktop read LIVE (2026-10-14), not the load-time mobileLike:
@@ -686,6 +922,7 @@
       if (clipReset) {
         clipReset.style.height = "";
         clipReset.style.removeProperty("--clip-space");
+        clipReset.style.removeProperty("--clip-top");
       }
       productCoverEls.forEach(function (c) { c.el.classList.remove("is-covered"); });
       productCoverEls = [];
@@ -761,12 +998,24 @@
       clipLayer.style.setProperty("--clip-space",
         Math.max(0, Math.floor(clipSpace)) + "px");
       productClipH = panelH - padBottom;
+      // The tall part mid-screen (Piet 2026-10-15: "should be center screen
+      // if there is no text below"): the CSS tall box (--clip-w/--clip-h)
+      // centred in the layer. setAppClip's covering cut adds it, so a line
+      // still goes the frame the video's own top edge reaches it.
+      var tallW = Math.min(clipLayer.clientWidth, Math.max(0, Math.floor(clipSpace)) * 1000 / 1690);
+      productClipTop = Math.max(0, Math.round((productClipH - tallW * 1690 / 1000) / 2));
+      clipLayer.style.setProperty("--clip-top", productClipTop + "px");
+      // How far the tall video travels to leave the top, and the stacked
+      // still to rise from the layer's bottom edge into the spot
+      // (setAppClip): the box's height + the gap above it.
+      productClipRoll = tallW * 1690 / 1000 + productClipTop;
       // The covering cut (see setAppClip): each non-Data line hides the frame
       // the video's rising top edge reaches its bottom. Offset sums, not
       // rects — transforms never move layout, and the sums are viewport-true
       // while the panel is pinned.
       productCoverEls = Array.prototype.slice.call(productPanel.querySelectorAll(
-        ".eyebrow-anchor, .panel__verdict, .panel__evidence p:nth-of-type(1), .panel__evidence p:nth-of-type(2)"
+        // Data too (Piet 2026-10-15: the tall video covers all the text).
+        ".eyebrow-anchor, .panel__verdict, .panel__evidence p:nth-of-type(1), .panel__evidence p:nth-of-type(2), .panel__evidence p:nth-of-type(3)"
       )).map(function (el) {
         var y = el.offsetHeight, n = el;
         while (n && n !== productPanel) { y += n.offsetTop; n = n.offsetParent; }
@@ -967,13 +1216,202 @@
     // below the arrival rewinds it so it replays on re-entry.
     var appClipVideo = appClip ? appClip.querySelector("video") : null;
     var appClipPlayed = false;
-    function setAppClip(p) {
+    // 02 plays the PHONE part only (Piet 2026-10-15): the file cuts from the
+    // tall part (0:32-0:54) to the wide part (0:55-1:37) at 22.0s, so outside
+    // the wide stage the video stops on the last tall frame (21.96s) and holds
+    // it. Checked every frame while it plays (timeupdate fires only about 4
+    // times a second).
+    var CLIP_HOLD_AT = 21.96;
+    var CLIP_WIDE_AT = 22.05;  // first wide frame (the cut is at 22.0s)
+    var CLIP_WINDOW_MS = 520;  // = the desktop .app-clip-layer__box clip-path transition
+    var CLIP_WIPE_FROM = 0.88; // MIRRORS gapCloseTrig in teaser-dev.html: the photo's exit band
+    // Each video starts playing before its absolute landing (Piet
+    // 2026-10-16: "need the video to start before an absolute landing.
+    // Otherwise I'm waiting for it to start and I don't know why"). The tall
+    // one at 85% of its rise ("I'd even move that to 85%"; smooth01 reaches
+    // 0.85 at 0.7556). The stacked one (phone) the moment the tall one is
+    // fully off the top (PHONE_EXIT_TO, its still 95% in): the one video
+    // element cannot leave the tall part any sooner. It rides the rest of
+    // the landing while it plays.
+    var CLIP_PLAY_T = 0.7556;
+    var CLIP_WIDE_ZONE_FROM = mobileLike ? PHONE_EXIT_TO : PRODUCT_WIDE_FROM;
+    var clipWideOn = false;
+    var clipZone = "copy";
+    // The video is on, or heading to, its wide part: from the moment the
+    // wide stage starts until the window has shut again. The hold never
+    // fires while it is set.
+    var clipWidePic = false;
+    var clipWideSeq = 0;
+    var clipHoldLoop = false;
+    // The recording layer is up (setAppClip's own opacity test), so the
+    // scroll prompt never fires from a video still running off screen.
+    var clipShown = false;
+    function holdPhonePart() {
+      if (!clipWidePic && appClipVideo.currentTime >= CLIP_HOLD_AT - 0.02) {
+        appClipVideo.pause();
+        appClipVideo.currentTime = CLIP_HOLD_AT;
+        // End of the narrow part: prompt the scroll (Piet 2026-10-15). The
+        // idle script's wake() takes it off on the first real scroll. Only
+        // the play-through lands here, never the seek back from the wide stage.
+        if (clipShown) document.body.classList.add("is-scroll-prompt");
+      }
+      if (appClipVideo.paused || appClipVideo.ended) { clipHoldLoop = false; return; }
+      requestAnimationFrame(holdPhonePart);
+    }
+    if (appClipVideo) {
+      appClipVideo.addEventListener("playing", function () {
+        if (clipHoldLoop) return;
+        clipHoldLoop = true;
+        requestAnimationFrame(holdPhonePart);
+      });
+      // Phone stats (Piet 2026-10-16): the phone file ends on the map and his
+      // Survey summary image (.app-clip-layer__stats) fades in over it. It
+      // stays up until it has ridden off the bottom on the way up
+      // (setAppClip) or the video is rewound out the top: "don't reset it
+      // till it is off screen again and we come back down to it".
+      appClipVideo.addEventListener("ended", function () {
+        if (mobileLike) appClip.classList.add("is-stats");
+      });
+    }
+    // WIDE STAGE (desktop): the last PRODUCT_WIDE_EXTRA of the 02 pin, after
+    // the copy has un-written. In: the video jumps to its wide part, and on
+    // that frame .is-wide-pic puts the whole frame on the wide picture's area
+    // and .is-wide opens the window to the right over it (CSS clip-path,
+    // CLIP_WINDOW_MS). Out either way: the window shuts over the wide picture
+    // first, THEN the video goes back to the held phone frame and the phone
+    // placement returns, so the picture never slides or zooms (Piet
+    // 2026-10-15: "really weird interaction between paused video narrow and
+    // into wide video, and back"). Scrolling back in replays the wide part.
+    // clipWideSeq drops any step a later toggle has overtaken. Single writer
+    // of .is-wide and .is-wide-pic, called from driveProductBand.
+    function setWideStage(P) {
+      if (!appClip || PRODUCT_COPY_SHARE >= 1) return;
+      // Three zones of the 02 pin: the copy, the wide stage, past it (03).
+      // Phone: "wide" runs on through 02's leave after the stage, so the
+      // stacked video stays up until 02 fades (desktop: its wipe band).
+      var zone = P <= CLIP_WIDE_ZONE_FROM ? "copy" : (P < 1 ? "wide" : "past");
+      if (zone === clipZone) return;
+      var from = clipZone;
+      clipZone = zone;
+      clipWideOn = zone === "wide";
+      if (!appClipVideo) { appClip.classList.toggle("is-wide", zone !== "copy"); return; }
+      var seq = ++clipWideSeq;
+      if (zone === "past") {
+        // Down into 03: the wide picture stays open and wide (the wipe has
+        // taken it), only paused, so coming back up it un-wipes as it was
+        // (Piet 2026-10-15: "coming back up for the crop wipe, it waits then
+        // it jumps").
+        appClipVideo.pause();
+        return;
+      }
+      if (zone === "wide") {
+        productCopyClear();
+        appClipPlayed = true;
+        clipWidePic = true;
+        // Back up from 03 onto a window that never opened (a jump past the
+        // stage): open it with no transition, the wipe is the reveal.
+        var snap = from === "past";
+        // Phone: the stats still up (ended, or riding back in before they
+        // left the screen) stay as they are, nothing seeks or plays.
+        var onStats = appClip.classList.contains("is-stats");
+        var openWindow = function () {
+          if (seq !== clipWideSeq) return;
+          if (snap) appClip.classList.add("is-wide-snap");
+          appClip.classList.add("is-wide-pic", "is-wide");
+          if (snap) {
+            void appClip.offsetWidth;
+            appClip.classList.remove("is-wide-snap");
+          }
+          // Ended, or the stats still up: they stay (play() would restart it).
+          if (!onStats && !appClipVideo.ended) {
+            var resumed = appClipVideo.play();
+            if (resumed && resumed.catch) resumed.catch(function () {});
+          }
+        };
+        // Still on the wide part, or on the stats: back up from 03, or back
+        // in before the stats left the screen. Only once they have ridden off
+        // the bottom does coming back down play the stacked part from its
+        // start (Piet 2026-10-16: "I don't want the video to reset unless I go
+        // up to the previous video").
+        if (onStats || appClipVideo.currentTime >= CLIP_WIDE_AT) {
+          openWindow();
+        } else {
+          appClipVideo.pause();
+          appClipVideo.addEventListener("seeked", openWindow, { once: true });
+          appClipVideo.currentTime = CLIP_WIDE_AT;
+        }
+        return;
+      }
+      // Out the top with the window open: the copy waits until it has shut.
+      var waitCopy = appClip.classList.contains("is-wide-pic");
+      if (waitCopy) productCopyWait();
+      appClip.classList.remove("is-wide");
+      var settle = function () {
+        if (seq !== clipWideSeq) return;
+        if (waitCopy) productCopyGo();
+        clipWidePic = false;
+        if (appClipVideo.currentTime > CLIP_HOLD_AT) {
+          // Phone: the still takes the spot at once, the seek happens off
+          // screen with the rolled-up box.
+          if (mobileLike) appClip.classList.remove("is-wide-pic"); // the stats, if up, ride on down (--clip-next)
+          appClipVideo.pause();
+          appClipVideo.addEventListener("seeked", function () {
+            if (seq === clipWideSeq) appClip.classList.remove("is-wide-pic");
+          }, { once: true });
+          appClipVideo.currentTime = CLIP_HOLD_AT;
+        } else {
+          appClip.classList.remove("is-wide-pic");
+        }
+      };
+      // Phone has no window to shut: straight back to the held tall frame.
+      if (appClip.classList.contains("is-wide-pic") && !mobileLike) setTimeout(settle, CLIP_WINDOW_MS);
+      else settle();
+    }
+    function setAppClip(p, P) {
       if (!appClip) return;
-      var inP = smooth01(mapRange(p, clipInStart, clipSeat));
-      var outP = smooth01(mapRange(p, 0.90, 1.00));
+      // Phone (Piet 2026-10-15): the tall video only rises once all the text
+      // is up, inside the stretch held at Data done, so there it reads the
+      // whole pin; desktop reads the copy as before.
+      var clipUp = mobileLike ? P > PRODUCT_HOLD_FROM : p > clipInStart;
+      // Plays from 85% of the way in (CLIP_PLAY_T), not the absolute landing.
+      var clipSeated = mobileLike
+        ? P >= PRODUCT_HOLD_FROM + CLIP_PLAY_T * (PHONE_RISE_TO - PRODUCT_HOLD_FROM)
+        : p >= clipInStart + CLIP_PLAY_T * (clipSeat - clipInStart);
+      var inP = mobileLike
+        ? smooth01(mapRange(P, PRODUCT_HOLD_FROM, PHONE_RISE_TO))
+        : smooth01(mapRange(p, clipInStart, clipSeat));
+      // The fade rides the END of the whole 02 pin (P) at its old length, so
+      // with the wide stage it is the wide (phone: stacked) video that fades
+      // into 03.
+      var outP = smooth01(mapRange(P, 1 - 0.10 * PRODUCT_COPY_SHARE, 1.00));
       var travel = (1 - inP) * 116;
-      appClip.style.opacity = p > clipInStart && p < 1 ? (1 - outP).toFixed(3) : 0;
+      // Desktop: the wide video CROP-WIPES out into 03 instead (Piet
+      // 2026-10-15: "no FaDE out of the wide on exit, have it crop wipe ...
+      // make it a vertical, not horizontal"): --clip-wipe brings the layer's
+      // top edge down, title and all, on the SAME line and band as the
+      // background photograph's own exit wipe (CLIP_WIPE_FROM -> 1), so the
+      // two go as one. Phone the same (Piet 2026-10-15: "why does the second
+      // video not crop wipe out?"), on the phone photo's own band
+      // (bfProductLeaveAt; desktop it returns CLIP_WIPE_FROM as is).
+      var wipeOut = PRODUCT_COPY_SHARE < 1;
+      appClip.style.opacity = clipUp && P < 1 ? (wipeOut ? 1 : 1 - outP).toFixed(3) : 0;
+      clipShown = clipUp && P < 1;
+      if (wipeOut) appClip.style.setProperty("--clip-wipe", mapRange(P, window.bfProductLeaveAt(CLIP_WIPE_FROM), 1).toFixed(4));
       appClip.style.setProperty("--clip-y", travel.toFixed(2) + "%");
+      // Phone, after the hold (PHONE_HOLD): the tall video rides the scroll
+      // up and off the top (--clip-exit, straight), and from halfway the
+      // stacked part's still (CSS .app-clip-layer__next) rises from the
+      // bottom on its own ease-out into the same spot (--clip-next), so the
+      // two never move as one. Both travel productClipRoll.
+      if (mobileLike) {
+        var exitT = mapRange(P, PHONE_EXIT_FROM, PHONE_EXIT_TO);
+        var nextT = 1 - Math.pow(1 - mapRange(P, PHONE_NEXT_FROM, PRODUCT_WIDE_FROM), 3);
+        appClip.style.setProperty("--clip-exit", (exitT * productClipRoll).toFixed(1) + "px");
+        appClip.style.setProperty("--clip-next", ((1 - nextT) * productClipRoll).toFixed(1) + "px");
+        // Scrolling up, the stats ride this same path down; once they are
+        // fully off the bottom they go, so coming back down starts afresh.
+        if (nextT <= 0) appClip.classList.remove("is-stats");
+      }
       // NO FADE (Piet 2026-08-13: "the screen should just cover it except
       // for the data row"): each line is cut the frame the video's rising
       // top edge first touches it, and restored the same way scrolling back.
@@ -982,21 +1420,22 @@
       // reads as covering. Same single writer as the slide (onUpdate AND
       // onRefresh), so a refresh can never strand a line. productCoverEls is
       // empty on desktop.
-      var edgeY = productClipH * travel / 100;
-      var coverOn = p > clipInStart && p < 1;
+      var edgeY = productClipH * travel / 100 + productClipTop;
+      var coverOn = clipUp && p < 1;
       for (var ci = 0; ci < productCoverEls.length; ci++) {
         productCoverEls[ci].el.classList.toggle("is-covered",
           coverOn && edgeY <= productCoverEls[ci].bottom);
       }
       if (appClipVideo) {
-        if (p >= clipSeat && p < 1 && !appClipPlayed) {
+        if (clipSeated && p < 1 && !appClipPlayed) {
           appClipPlayed = true;
           var played = appClipVideo.play();
           if (played && played.catch) played.catch(function () {});
-        } else if (p < clipInStart && appClipPlayed) {
+        } else if ((mobileLike ? P < PRODUCT_HOLD_FROM : p < clipInStart) && appClipPlayed) {
           appClipVideo.pause();
           appClipVideo.currentTime = 0;
           appClipPlayed = false;
+          appClip.classList.remove("is-stats");
         }
       }
     }
@@ -1032,8 +1471,18 @@
         onUpdate: function (self) { driveProductBand(self.progress); },
         onRefresh: function (self) { driveProductBand(self.progress || 0); },
       });
-      function driveProductBand(p) {
-        setAppClip(p);
+      var lastBandP = 0;
+      if (PRODUCT_AUTO) productAuto.fns.push(function () { driveProductBand(lastBandP); });
+      function driveProductBand(P) {
+        lastBandP = P;
+        // P = the whole 02 pin; pScroll = the copy's own progress (the old
+        // 210% / phone 280%, held through the phone's stage); p = that lifted
+        // by the desktop auto-finish, which the recording's rise reads. The
+        // tint stays on the scroll.
+        var pScroll = productCopyAt(P);
+        var p = window.bfProductAuto.lift(pScroll);
+        setAppClip(p, P);
+        setWideStage(P);
         // Phone clip stage (Piet 2026-08-13: recording "almost fill the
         // screen... just the last entry data and its text stay over it").
         // Single writer: this function runs from onUpdate AND onRefresh, so
@@ -1042,13 +1491,15 @@
         // keeps layout, so the Data line never moves. Toggled at every width
         // (2026-10-14): all is-clip-stage CSS sits in the 720px block, so it
         // follows the live width instead of the load-time one.
+        // Phone (Piet 2026-10-15): off. The video now covers every line,
+        // Data too, so nothing rides above it and the mark keeps its corner.
         document.body.classList.toggle("is-clip-stage",
-          p >= clipInStart && p < 1);
+          !mobileLike && p >= clipInStart && p < 1);
         // 02 backdrop tint: ease the scene to light green while the device
         // section holds, back to beige before 03 arrives.
         if (window.bullfinchCanopy.setProductTintProgress) {
           window.bullfinchCanopy.setProductTintProgress(
-            smooth01(mapRange(p, 0.0, 0.15)) * (1 - smooth01(mapRange(p, 0.85, 1.0)))
+            smooth01(mapRange(pScroll, 0.0, 0.15)) * (1 - smooth01(mapRange(P, 1 - 0.15 * PRODUCT_COPY_SHARE, 1.0)))
           );
         }
       }

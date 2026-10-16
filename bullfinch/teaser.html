@@ -43,7 +43,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..600&family=Inter:wght@400..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400..800&family=Inter:wght@400..700&display=swap"
     />
 
     <link rel="stylesheet" href="styles.css?v=v4-11" />
@@ -767,6 +767,112 @@
         object-fit: cover;
         display: block;
       }
+      /* DEMO VIDEO (Piet 2026-10-15). assets/bullfinch-demo-tall-32-54-wide-
+         55-97.mp4, 1920x1080, made from Material/bullfinch-demo-video-2026-
+         10-05.mov: 0:32-0:54 = the TALL part, 0:55-1:37 = the WIDE part, hard
+         cut at 22.0s. Tall part = Piet's crop (his screenshot: the whole phone
+         screen, buttons to the Camera/Settings bar, ~68px either side), 600x1014,
+         re-centred every frame (the source phone jumps 62px right at 0:46.8)
+         and parked at x 660-1260 / y 33-1047 of the frame. DESKTOP: while 02's
+         copy is up the box shows exactly that window (as tall as before unless
+         it would run into the copy at 41.5vw, 2vw alley kept, then smaller) and
+         the video holds on the last tall frame. Once the copy has un-written,
+         the WIDE STAGE (the extra pin swot-claude.js adds to 02,
+         PRODUCT_WIDE_EXTRA) cuts the video to its wide part and the window
+         OPENS TO THE RIGHT over the whole wide picture, which never moves
+         (left edge and height stay the phone box's; Piet 2026-10-15, was
+         centred). Phone: its own file and box, see PHONE VIDEO in the 720px
+         block. */
+      /* "Bullfinch in action" over the wide picture: desktop only for now. */
+      .app-clip-layer__title { display: none; }
+      /* The stacked part's still for the roll: phone only (PHONE VIDEO,
+         720px block). */
+      .app-clip-layer__next { display: none; }
+      /* Piet's stats image: phone only (PHONE VIDEO, 720px block). */
+      .app-clip-layer__stats { display: none; }
+      @media (min-width: 721px) {
+        .app-clip-layer {
+          --clip-full-h: min(74lvh, 78vh);
+          /* Phone box centre is the old slot's (5vw + half of min(40vw,
+             720px)); its right edge stops 2vw short of the copy at 41.5vw. */
+          --clip-w: min(calc(var(--clip-full-h) * 600 / 1014), calc(2 * (34.5vw - min(20vw, 360px))));
+          --clip-h: calc(var(--clip-w) * 1014 / 600);
+          --clip-left: calc(5vw + (min(40vw, 720px) - var(--clip-w)) / 2);
+          /* Wide picture: same left edge and height as the phone box, so the
+             window only grows to the right; narrower (and so shorter) only if
+             it would run past the page's right padding. */
+          --clip-wide-w: min(calc(var(--clip-h) * 16 / 9), calc(100vw - var(--clip-left) - var(--pad-x)));
+          --clip-wide-h: calc(var(--clip-wide-w) * 9 / 16);
+          /* Full width so nothing clips the window as it opens; the slide sits
+             on the phone box's left edge instead of centred. */
+          left: 0;
+          width: 100vw;
+          max-width: none;
+          justify-content: flex-start;
+          /* Exit into 03 (Piet 2026-10-15: crop wipe, no fade, vertical):
+             --clip-wipe 0 -> 1 from swot-claude.js brings the layer's top
+             edge down, title included, on the same line as the full-bleed
+             background photograph's exit (same top: 0, same band). */
+          clip-path: inset(calc(var(--clip-wipe, 0) * 100%) 0 0 0);
+        }
+        .app-clip-layer__slide { margin-left: var(--clip-left); }
+        /* The box is the wide picture's area; the WINDOW is its clip-path: the
+           phone box (left part, full height) until .is-wide, then the whole
+           wide picture. Only the window moves (Piet 2026-10-15: "just have
+           the window open right ... open to the right"). Square corners (site
+           rule; Piet: the old phone frame's radius has to go). */
+        .app-clip-layer__box {
+          position: relative;
+          height: var(--clip-h);
+          width: var(--clip-wide-w);
+          aspect-ratio: auto;
+          border-radius: 0;
+          clip-path: inset(0 calc(var(--clip-wide-w) - var(--clip-w)) 0 0);
+          transition: clip-path 520ms cubic-bezier(.4, 0, .5, 1); /* = CLIP_WINDOW_MS in swot-claude.js */
+        }
+        .app-clip-layer.is-wide .app-clip-layer__box {
+          clip-path: inset(calc((var(--clip-h) - var(--clip-wide-h)) / 2) 0);
+        }
+        /* "Bullfinch in action" (Piet 2026-10-15): the 02 eyebrow's own style
+           (.panel__eyebrow, as THE BULLFINCH WAY), white, 16px above the wide
+           picture's top-left. Writes on left to right as the window opens and
+           off as it shuts, on the window's own timing. */
+        .app-clip-layer__title {
+          display: block;
+          position: absolute;
+          left: 0;
+          bottom: calc(100% - (var(--clip-h) - var(--clip-wide-h)) / 2);
+          margin-bottom: 16px; /* Piet 2026-10-15: closer (the eyebrow's own gap is 32px) */
+          white-space: nowrap;
+          clip-path: inset(0 100% 0 0);
+          transition: clip-path 520ms cubic-bezier(.4, 0, .5, 1);
+        }
+        .app-clip-layer.is-wide .app-clip-layer__title { clip-path: inset(0); }
+        /* Back up from 03 onto a window that never opened: no transition. */
+        .app-clip-layer.is-wide-snap .app-clip-layer__box,
+        .app-clip-layer.is-wide-snap .app-clip-layer__title { transition: none; }
+        /* Phone part: the whole frame, scaled so the crop's 1014 rows fill the
+           box height and shifted so the crop's top-left corner sits on the
+           box's. Width follows the height through the 16:9 ratio. */
+        .app-clip-layer__video {
+          position: absolute;
+          left: calc(var(--clip-h) * -660 / 1014);
+          top: calc(var(--clip-h) * -33 / 1014);
+          height: calc(var(--clip-h) * 1080 / 1014);
+          width: auto;
+          max-width: none;
+          aspect-ratio: 16 / 9;
+        }
+        /* Wide part: the whole frame on the wide picture's area. Switched with
+           no transition by swot-claude.js, on a frame of the wide part, before
+           the window opens and only after it has shut, so the picture never
+           slides or zooms. */
+        .app-clip-layer.is-wide-pic .app-clip-layer__video {
+          left: 0;
+          top: calc((var(--clip-h) - var(--clip-wide-h)) / 2);
+          height: var(--clip-wide-h);
+        }
+      }
       .app-clip-layer__label {
         font: 600 clamp(13px, 1.05vw, 18px)/1.3 var(--font-mono);
         letter-spacing: .1em;
@@ -1460,6 +1566,40 @@
       body.is-final-contrast .idle-cue { color: #EFE7D3; }
       @media (prefers-reduced-motion: reduce) {
         .idle-cue svg { animation: none; }
+      }
+      /* SCROLL PROMPT (Piet 2026-10-15: "when we get to the end of the narrow
+         video, we need to be prompted to scroll ... flash or light up, and
+         bounce", then "can it go bold and flash too"). swot-claude.js adds
+         body.is-scroll-prompt the moment the 02 recording stops on its last
+         narrow frame (phone too); the first real scroll takes it off (wake(),
+         idle script below). Same object, no 2.6s wait: full strength (idle is
+         0.72), BOLD (word 600 -> 800, so the Geist Mono request in the head
+         runs to 800; arrow stroke 1.7 -> 2.6), arrow bounces 12px every 1.1s
+         (idle 4px / 2.2s), and word + arrow FLASH on that same beat: fully on
+         for the drop, fully off for the way back up. Full strength alone was
+         "basically invisible" on the half-green. -out keeps all of it through
+         the cue's 520ms fade so nothing snaps while it is still on screen. */
+      body.is-scroll-prompt .idle-cue { opacity: 1; transform: translate(-50%, 0); }
+      body.is-scroll-prompt .idle-cue__label,
+      body.is-scroll-prompt-out .idle-cue__label { font-weight: 800; }
+      body.is-scroll-prompt .idle-cue svg,
+      body.is-scroll-prompt-out .idle-cue svg { stroke-width: 2.6; }
+      @media (prefers-reduced-motion: no-preference) {
+        body.is-scroll-prompt .idle-cue__label,
+        body.is-scroll-prompt-out .idle-cue__label { animation: scrollCueFlash 1.1s linear infinite; }
+        body.is-scroll-prompt .idle-cue svg,
+        body.is-scroll-prompt-out .idle-cue svg {
+          animation: scrollCuePrompt 1.1s ease-in-out infinite, scrollCueFlash 1.1s linear infinite;
+        }
+      }
+      @keyframes scrollCuePrompt {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(12px); }
+      }
+      @keyframes scrollCueFlash {
+        0%, 46% { opacity: 1; }
+        52%, 94% { opacity: 0; }
+        100% { opacity: 1; }
       }
 
       /* ===== Hero cue, ungated (DEV) =====================================
@@ -2361,7 +2501,10 @@
 
         /* 02 — the case graphic goes full-bleed across the top (92vw, never
            wider than the screen) and the copy stacks under it. */
-        #product.panel--media { grid-template-columns: 1fr; align-content: end; }
+        /* Copy centred top to bottom (Piet 2026-10-15: "the text before
+           should be positioned better on the page. Not just at the bottom");
+           it was bottom-aligned under the old device render. */
+        #product.panel--media { grid-template-columns: 1fr; align-content: center; }
         /* THE narrow-column bug: the desktop rule caps this column at
            min(760px, 42vw), and 42vw on a phone is ~164px. Moving it to
            grid-column 1 never touched the cap, so every line of 02 was setting
@@ -2370,7 +2513,9 @@
         #product .panel__inner {
           grid-column: 1;
           max-width: none;
-          padding-bottom: clamp(14px, 3vh, 30px);
+          /* None: the block is centred (rule above), well clear of the
+             SCROLL cue (Piet 2026-10-15: "these spacings are wonky"). */
+          padding-bottom: 0;
         }
         /* Full-bleed and taller. The device is the whole argument of this
            section and it was reading as a thumbnail. It still clears the copy
@@ -2424,19 +2569,98 @@
            full width, anchored to the screen top. The Data line is shifted to
            sit BELOW its bottom edge, in the ground space (Piet 2026-08-14;
            see layoutProductCase). */
+        /* PHONE VIDEO (Piet 2026-10-15: "make the tall video fill the upper
+           part of the screen as we did before, and when it is wide ... take
+           the middle third of the live video of walking through the trees
+           and put it above the map lidar view"). Its own file (<source
+           media>): assets/bullfinch-demo-phone-tall-32-54-roll-55-92.mp4,
+           1000x1690 frames on the desktop file's timeline. 0-22.0s = his crop
+           filling the frame; from 22.0s = the walking video's middle 572 rows
+           (808x572, x 6-813 / y 254-825) scaled to 1000x708 over the whole
+           map view scaled to 1000x982, so the stacked part fills the same
+           frame. It ends on the map at 58.8s, where THE STATS (Piet's
+           image, below) fade in over it. The box sits
+           mid-screen (--clip-top, layoutProductCase), as big as the tall
+           part fits in the space from the screen top to the lifted corner
+           mark (--clip-space), and the video fills it.
+           SWAP (Piet 2026-10-15: "The first video has to come up stop and
+           play, and after a pause then can be scrolled past, and the next
+           video comes up at and pauses. They should have different flows so
+           they don't feel like a fixed unit"): after its hold the tall video
+           rides the scroll up off the screen (--clip-exit) and, from halfway,
+           .app-clip-layer__next, the stacked part's first frame as a still,
+           rises on its own ease-out into the same spot (--clip-next; both
+           swot-claude.js setAppClip). Once the tall one is fully off the top
+           (the still 95% in; Piet 2026-10-16: start before the absolute
+           landing) the wide stage seeks the video to that frame and
+           .is-wide-pic puts the video on the still's place with the still
+           off; it rides the rest of the landing while the stacked part
+           plays. */
+        .app-clip-layer {
+          --clip-w: min(100vw, calc(var(--clip-space, 48lvh) * 1000 / 1690));
+          --clip-h: calc(var(--clip-w) * 1690 / 1000);
+          /* Exit into 03 as on desktop (Piet 2026-10-15: "why does the
+             second video not crop wipe out?"): --clip-wipe brings the top
+             edge down on the background photograph's line (fixed, top 0 to
+             the screen bottom, so dvh, not this shorter layer's 100%). */
+          clip-path: inset(calc(var(--clip-wipe, 0) * 100dvh) 0 0 0);
+        }
         .app-clip-layer__box {
-          /* Screen top down to the lifted corner mark, measured per screen
-             by layoutProductCase (2026-10-14). The contained video is as wide
-             as that height allows, centred, never cropped. */
-          height: var(--clip-space, 100%);
-          width: 100%;
+          position: relative;
+          width: var(--clip-w);
+          height: var(--clip-h);
+          margin: var(--clip-top, 0px) auto 0;
           aspect-ratio: auto;
           border-radius: 0;
           background: none;
+          overflow: visible;
         }
         .app-clip-layer__video {
-          object-fit: contain;
-          object-position: top center;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: auto;
+          aspect-ratio: 1000 / 1690;
+          transform: translateY(calc(var(--clip-exit, 0px) * -1));
+        }
+        .app-clip-layer__next {
+          display: block;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          transform: translateY(var(--clip-next, 200%));
+          background: url("assets/bullfinch-demo-phone-roll-55-97-first-frame.jpg") center / 100% 100% no-repeat;
+        }
+        /* The stacked video starts before the still has fully landed and
+           rides the rest of its landing (Piet 2026-10-16). */
+        .app-clip-layer.is-wide-pic .app-clip-layer__video { transform: translateY(var(--clip-next, 0px)); }
+        .app-clip-layer.is-wide-pic .app-clip-layer__next { visibility: hidden; }
+        /* THE STATS (Piet 2026-10-16: "I've given you the end stats in an
+           image file"): his Survey summary column exactly as he made it
+           (assets/bullfinch-demo-video-2026-10-05-endSTATS.jpg, 1373x2393),
+           fitted whole into the spot on his image's own ground. It fades in
+           over the video's last frame when the video ends (.is-stats,
+           swot-claude.js), as the source fades into its dashboard. It rides
+           the stacked spot's own path (--clip-next), so scrolling up it goes
+           down and off the bottom still on the stats, and only once it is off
+           screen does the video start afresh (Piet 2026-10-16). */
+        .app-clip-layer__stats {
+          display: block;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: #111513 url("assets/bullfinch-demo-video-2026-10-05-endSTATS.jpg") center / contain no-repeat;
+          transform: translateY(var(--clip-next, 0px));
+          opacity: 0;
+        }
+        .app-clip-layer.is-stats .app-clip-layer__stats {
+          opacity: 1;
+          transition: opacity 167ms linear;
         }
         /* Data rides ABOVE the clip layer while the clip is up. The layer is
            BODY-LEVEL at z3 and .swot is its own stacking context at z1, so a
@@ -2843,12 +3067,26 @@
     <div class="app-clip-layer" id="app-clip" aria-hidden="true">
       <div class="app-clip-layer__slide">
         <div class="app-clip-layer__box">
-          <!-- Real footage stand-in (Piet 2026-08-09): 0:10-0:20 of
-               Material/Seneca Creek - 1080p 50sec.mp4, muted. swot-claude
-               plays it ONCE when the slide seats at 0.40 of the pin and
-               rewinds it when scrolled back out below the arrival. -->
-          <video class="app-clip-layer__video" src="assets/seneca-creek-10-20.mp4" muted playsinline preload="auto"></video>
+          <!-- Bullfinch's demo video (Piet 2026-10-15): 0:32-0:54 (tall,
+               re-centred to Piet's crop) then 0:55-1:37 (wide) of
+               Material/bullfinch-demo-video-2026-10-05.mov, no sound.
+               Replaces the 08-09 stand-in (assets/seneca-creek-10-20.mp4).
+               swot-claude plays it ONCE when the slide seats, holds it on
+               the last phone frame, plays the wide part in the desktop wide
+               stage, and rewinds it when scrolled back out below the
+               arrival. -->
+          <video class="app-clip-layer__video" muted playsinline preload="auto">
+            <source src="assets/bullfinch-demo-phone-tall-32-54-roll-55-92.mp4" type="video/mp4" media="(max-width: 720px)">
+            <source src="assets/bullfinch-demo-tall-32-54-wide-55-97.mp4" type="video/mp4">
+          </video>
+          <!-- Phone: the stacked part's first frame, rolled in under the
+               tall part (PHONE VIDEO). -->
+          <div class="app-clip-layer__next"></div>
+          <!-- Phone: Piet's Survey summary image, faded in when the video
+               ends (PHONE VIDEO). -->
+          <div class="app-clip-layer__stats"></div>
         </div>
+        <p class="panel__eyebrow app-clip-layer__title">Bullfinch in action</p>
       </div>
     </div>
     <div class="corner-wordmark" aria-hidden="true">bullfinch earth</div>
@@ -3225,7 +3463,7 @@
     <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="theme.js?v=1"></script>
     <script src="scroll.js?v=1"></script>
-    <script src="scene-claude-teaser.js?v=claude-52"></script>
+    <script src="scene-claude-teaser.js?v=claude-53"></script>
     <script>
       // ==================================================================
       // MAP TRAIL - the 01 column graphic. Lifted from map-trail-tester.html
@@ -3559,7 +3797,7 @@
     <!-- field-film.js dropped: it looks up #field-film, which is not on this
          page, and returned immediately. -->
 
-    <script src="swot-claude.js?v=claude-65"></script>
+    <script src="swot-claude.js?v=claude-84"></script>
     <script src="stat-field-claude.js?v=claude-20"></script>
     <script>
       (function () {
@@ -3938,7 +4176,9 @@
           // now (03 pins 12vh before 02 releases), so the stage walks over 02's
           // own leave band instead — same idea, it arrives with 03.
           stage(3,
-            function () { return at(p2, 0.90); },
+            // Same 0.10-of-210% length, kept on the END of 02's pin so it
+            // still arrives with 03 after the desktop wide stage (2026-10-15).
+            function () { return at(p2, 1 - 0.10 * (window.bfProductCopyShare || 1)); },
             function () { return p2.end; });
           // The half-green stage. The nav is fixed and outside #product, so it
           // cannot inherit that section's darkened ink vars — this carries the
@@ -4388,7 +4628,9 @@
           });
           gapCloseTrig = ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return at(p2, 0.88); },
+            // Phone (2026-10-15): after its wide stage, same distance from
+            // the pin's end as before (bfProductLeaveAt). Desktop as was.
+            start: function () { return at(p2, window.bfProductLeaveAt ? window.bfProductLeaveAt(0.88) : 0.88); },
             end: function () { return p2.end; },
             scrub: true,
             invalidateOnRefresh: true,
@@ -4426,25 +4668,42 @@
           function gapStepBand() {
             return gapStepMobile ? [0.0429, 0.1329] : [0.1714, 0.2914];
           }
+          // The step-back is part of 02's AUTO-FINISH (Piet 2026-10-15: "need
+          // the yellow fade over the background image too ... auto finish"):
+          // it reads the same lifted copy progress as the recording it
+          // mirrors, so once you are in 02 it steps back on its own as the
+          // recording rises, and going back up it rewinds with the scroll.
+          // The trigger runs from the pin start, like the pan, so the rewind
+          // is read below the band too. Band fractions are of the COPY
+          // (bfProductCopyShare maps them onto desktop's longer pin; before
+          // this they sat on the whole pin and stepped back late). Phone:
+          // lift is a no-op and the share is 1, so the same band as before.
+          var gapStepScrollP = 0;
+          function stepGap(g) {
+            gapStepScrollP = g;
+            var b = gapStepBand(), auto = window.bfProductAuto;
+            var q = g * b[1];
+            if (auto) q = auto.lift(q);
+            var t = Math.max(0, Math.min(1, (q - b[0]) / (b[1] - b[0])));
+            t = t * t * (3 - 2 * t);
+            setGapOpacity(GAP_OPACITY_IN + (GAP_OPACITY_REST - GAP_OPACITY_IN) * t);
+          }
           ScrollTrigger.create({
             trigger: document.body,
-            start: function () { return at(p2, gapStepBand()[0]); },
-            end: function () { return at(p2, gapStepBand()[1]); },
+            start: function () { return p2.start; },
+            end: function () { return at(p2, gapStepBand()[1] * (window.bfProductCopyShare || 1)); },
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) {
-              var t = self.progress; t = t * t * (3 - 2 * t);
-              setGapOpacity(GAP_OPACITY_IN + (GAP_OPACITY_REST - GAP_OPACITY_IN) * t);
-            },
-            onLeaveBack: function () { setGapOpacity(GAP_OPACITY_IN); },
-            onLeave: function () { setGapOpacity(GAP_OPACITY_REST); },
+            onUpdate: function (self) { stepGap(self.progress); },
+            onLeaveBack: function () { stepGap(0); },
+            onLeave: function () { stepGap(1); },
             // Refresh re-assert (client bug 2026-08-09): spurious leave-backs
             // on refresh reset this to arrival strength while standing past 02.
-            onRefresh: function (self) {
-              var t = self.progress; t = t * t * (3 - 2 * t);
-              setGapOpacity(GAP_OPACITY_IN + (GAP_OPACITY_REST - GAP_OPACITY_IN) * t);
-            },
+            onRefresh: function (self) { stepGap(self.progress); },
           });
+          if (window.bfProductAuto) {
+            window.bfProductAuto.onChange(function () { stepGap(gapStepScrollP); });
+          }
           // Piet: the photograph EASES RIGHT across the wide frame's slack —
           // focus 100% (right crop) -> 0% (left crop) — STARTING the moment
           // the 02 corner icon begins its build (pin start; 2026-08-09, was
@@ -4482,14 +4741,31 @@
           ScrollTrigger.create({
             trigger: document.body,
             start: function () { return p2.start; },
-            end: function () { return at(p2, 0.60); },
+            // 0.60 of the COPY's distance (desktop 02 pin is longer since the
+            // 2026-10-15 wide stage; bfProductCopyShare maps it back).
+            end: function () { return at(p2, 0.60 * (window.bfProductCopyShare || 1)); },
             scrub: true,
             invalidateOnRefresh: true,
-            onUpdate: function (self) { setGapFocus(self.progress); },
-            onLeaveBack: function () { setGapFocus(0); },
-            onLeave: function () { setGapFocus(1); },
-            onRefresh: function (self) { setGapFocus(self.progress); },
+            onUpdate: function (self) { panGap(self.progress); },
+            onLeaveBack: function () { panGap(0); },
+            onLeave: function () { panGap(1); },
+            onRefresh: function (self) { panGap(self.progress); },
           });
+          // The pan is part of 02's AUTO-FINISH (Piet 2026-10-15: "the
+          // background slide has to be part of the finishing animation too"):
+          // it reads the same lifted copy progress as the copy, so once you are
+          // in 02 it slides to its end on its own and, going back up, rewinds
+          // with the scroll like the copy. Pan band = 0 -> 0.60 of the copy.
+          // Phone: lift is a no-op.
+          var gapScrollP = 0;
+          function panGap(g) {
+            gapScrollP = g;
+            var auto = window.bfProductAuto;
+            setGapFocus(auto ? Math.min(1, auto.lift(g * 0.60) / 0.60) : g);
+          }
+          if (window.bfProductAuto) {
+            window.bfProductAuto.onChange(function () { panGap(gapScrollP); });
+          }
           // SCROLL CUE ACROSS THE ARRIVAL BAND (Piet 2026-08-12, same note as
           // the lead-in cut). .idle-cue is an IDLE hint — it needs 2600ms of no
           // scrolling at all, so a reader easing through the photograph-full
@@ -4506,7 +4782,7 @@
           ScrollTrigger.create({
             trigger: document.body,
             start: function () { return p2.start; },
-            end: function () { return at(p2, gapStepBand()[1]); },
+            end: function () { return at(p2, gapStepBand()[1] * (window.bfProductCopyShare || 1)); },
             invalidateOnRefresh: true,
             onToggle: function (self) { setGapCue(self.isActive); },
             onRefresh: function (self) { setGapCue(self.isActive); },
@@ -4533,7 +4809,7 @@
             // a 360% pin. Formation now starts on 02's leave beat (0.95, the
             // same band the recording fades and the copy un-writes) so the
             // rest of the transition begins WITH the fade (Piet 2026-08-09).
-            var formStart = at(p2, 0.94);
+            var formStart = at(p2, window.bfProductLeaveAt ? window.bfProductLeaveAt(0.94) : 0.94);
             var formEnd = at(p3, 0.08);
             var disperseStart = at(p3, 0.76);
             var disperseEnd = self.end;
@@ -4564,7 +4840,7 @@
         ScrollTrigger.create({
           trigger: document.body,
           // Mirrors formStart above (02's leave beat, not the dead pTeam ref).
-          start: function () { return at(p2, 0.94); },
+          start: function () { return at(p2, window.bfProductLeaveAt ? window.bfProductLeaveAt(0.94) : 0.94); },
           endTrigger: closing,
           end: "top 44%",
           scrub: true,
@@ -4821,11 +5097,22 @@
             var oppWin = (mobileLike && panel.id === "opportunity")
               ? (el.closest(".team-half") ? [0.07, 0.55] : [0.59, 0.99])
               : null;
+            var lastP = 0;
             var scrub = function (p) {
+              lastP = p;
               var q = clamp01(p);
               if (oppWin) q = clamp01((q - oppWin[0]) / (oppWin[1] - oppWin[0]));
+              // 02 auto-finish (desktop, 2026-10-15): the mark builds on with
+              // the copy once you are in 02 (swot-claude.js bfProductAuto).
+              // Phone (2026-10-15): the whole pin, read as copy progress, so
+              // the mark holds through the wide stage with the copy.
+              if (clipPanel && mobileLike && window.bfProductCopyAt) q = window.bfProductCopyAt(q);
+              if (clipPanel && window.bfProductAuto) q = window.bfProductAuto.lift(q);
               applyMarkState(el, q, clipPanel);
             };
+            if (clipPanel && window.bfProductAuto) {
+              window.bfProductAuto.onChange(function () { scrub(lastP); });
+            }
             ScrollTrigger.create({
               trigger: panel,
               start: "top top",
@@ -4838,8 +5125,11 @@
               // ICON VANISHED: 03's phone pin went to 200% and this mirror was
               // left at 100%, so both marks finished their whole build-and-
               // disassemble cycle by the halfway point and sat at build 0.
+              // 02 stays +=210% on purpose (2026-10-15): the desktop wide stage
+              // swot-claude.js adds after it has no copy and no mark, so the
+              // mark still leaves with the copy.
               end: clipPanel
-                ? (mobileLike ? "+=280%" : "+=210%")
+                ? (mobileLike ? "+=" + (window.bfProductPinPct || 280) + "%" : "+=210%")
                 : ((mobileLike && panel.id === "opportunity")
                     ? "+=200%"
                     : (mobileLike ? "+=100%" : "+=150%")),
@@ -4964,7 +5254,10 @@
               return trigger.trigger === target && trigger.pin === target;
             });
             if (panelTrigger) {
-              destination = panelTrigger.start + (panelTrigger.end - panelTrigger.start) * 0.68;
+              // 02's pin carries the desktop wide stage at its end (2026-10-15):
+              // aim at 0.68 of its copy, the same spot as before.
+              destination = panelTrigger.start + (panelTrigger.end - panelTrigger.start) * 0.68 *
+                (target.id === "product" ? (window.bfProductCopyShare || 1) : 1);
             } else {
               destination = target.offsetTop + window.innerHeight * 1.36;
             }
@@ -5034,8 +5327,17 @@
             if (atBottom()) return;
             document.body.classList.add("is-idle");
           }
+          var promptOutTimer = null;
           function wake() {
             document.body.classList.remove("is-idle");
+            if (document.body.classList.contains("is-scroll-prompt")) {
+              document.body.classList.remove("is-scroll-prompt");
+              document.body.classList.add("is-scroll-prompt-out");
+              clearTimeout(promptOutTimer);
+              promptOutTimer = setTimeout(function () {
+                document.body.classList.remove("is-scroll-prompt-out");
+              }, 520); // = .idle-cue opacity transition
+            }
             if (idleTimer) clearTimeout(idleTimer);
             idleTimer = setTimeout(goIdle, IDLE_MS);
           }
