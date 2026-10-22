@@ -197,7 +197,7 @@
             <label><span>Email <span class="req">(required)</span></span><input type="email" name="email" autocomplete="email" required></label>
             <label><span>Drop a note to the filmmakers</span><textarea name="note" rows="5"></textarea></label>
             <button class="button" type="submit">Submit</button>
-            <p class="form-thanks" hidden>Thank you!</p>
+            <p class="form-thanks" hidden>Congrats! You are now signed up.</p>
           </form>
         </div>
 
@@ -237,7 +237,38 @@
 </dialog>
 
 <script>
-  document.querySelector('.signup-form').addEventListener('submit', function (e) { e.preventDefault(); });
+  // The mailing list (Piet 10-22): Cloudflare worker intuition-mailing (~/Documents/.fix2/intuition-mailing) into the
+  // D1 table signups. Signed up: the fields empty (Piet 10-22), the button reads SIGNED UP and stops taking clicks, and
+  // Piet's line shows under it. If it does not go through the button comes back as it was, with what was typed.
+  // Each saved sign-up is also emailed to Piet's Gmail through Web3Forms (Piet 10-22: his pietsuess.com key and its
+  // subject pattern); that copy never holds up the sign-up.
+  (function () {
+    var form = document.querySelector('.signup-form'), button = form.querySelector('button'), thanks = form.querySelector('.form-thanks');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (button.disabled) return;
+      button.disabled = true;
+      var f = form.elements;
+      var sent = { fname: f.fname.value, lname: f.lname.value, email: f.email.value, note: f.note.value };
+      fetch('https://intuition-mailing.intuitionfilm.workers.dev/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sent)
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        var name = (sent.fname + ' ' + sent.lname).trim();
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_key: '0f45da86-7dcf-4c66-8881-d7597d02d720', subject: 'New message from ' + location.host + location.pathname,
+            from_name: name, name: name, email: sent.email, message: sent.note })
+        }).catch(function () {});
+        form.reset();
+        button.textContent = 'SIGNED UP';
+        thanks.hidden = false;
+      }).catch(function () { button.disabled = false; });
+    });
+  })();
   document.querySelector('.nav-instagram').addEventListener('click', function (e) { e.preventDefault(); });   // not linked yet (Piet 10-22)
 
   // Events: one entry per event, e.g. { date: '2026-11-14', city: '', venue: '', link: '' } (link optional, on the venue).
