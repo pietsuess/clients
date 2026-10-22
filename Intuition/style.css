@@ -1,0 +1,671 @@
+/* INTUITION site, film format (2026-10-20)
+   One white page that plays like an edit: full-screen shots cut between white title cards,
+   then the team as credits, then an end card with SUPPORT THE FILM and the mailing form.
+   Fonts and text colours from intuitionfilm.com (Squarespace site.css). */
+
+/* INTUITION wordmark: Neutra Text Bold, the film's own font file from 02_Assets/FONTS.
+   Its built-in licence is House Industries desktop only: it needs a web licence before the site goes public. */
+@font-face {
+  font-family: "Neutra Text";
+  src: url("assets/neutra-text-bold-5871e1605afa2.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  --paper: #000;   /* Piet 10-22: black everywhere, no white; text white */
+  --black: hsl(29.47, 47.9%, 23.33%);         /* their --black-hsl, text only */
+  --dark-accent: hsl(56.79, 28.57%, 38.43%);  /* their --darkAccent-hsl */
+  --gutter: 4vw;                               /* their --pagePadding */
+  --heading: "Urbanist", "Helvetica Neue", Arial, sans-serif;   /* Piet 10-21: Urbanist for the nav and the sections */
+  --body: "Urbanist", "Helvetica Neue", Arial, sans-serif;
+  --wordmark: "Neutra Text", "Helvetica Neue", Arial, sans-serif;
+  --quote: "Urbanist", "Helvetica Neue", Arial, sans-serif;
+  /* Headings (Piet 10-21: no text that big): Events, Unlocking our sixth sense, Meet the Team, the names, Join Mailing List */
+  --card-size: clamp(1.4rem, 2.1vw, 3.3rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { background: var(--paper); }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: #fff;
+  font-family: var(--body);
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, video { display: block; max-width: 100%; }
+
+/* Nothing on the page or in the windows selects (Piet 10-22), set on every element so the pop-ups do not depend on
+   inheriting it; the form fields still take typing */
+*, *::before, *::after { -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--heading);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #fff;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-align: justify;
+  text-align-last: left;
+  hyphens: auto;
+  text-wrap: pretty;
+}
+
+a { color: inherit; }
+
+.skip { position: absolute; left: -9999px; top: 0; }
+.skip:focus { left: var(--gutter); top: 1rem; z-index: 30; padding: .5em 1em; background: var(--paper); color: #fff; }
+
+/* Buttons: radius 6.4px, padding 1.3em 2em, no stroke (their primary-button vars) */
+.button {
+  display: inline-block;
+  padding: 1.3em 2em;
+  border: 0;
+  border-radius: 6.4px;
+  background: var(--dark-accent);
+  color: #fff;
+  font-family: var(--body);
+  font-size: clamp(1rem, .9vw, 1.2rem);
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.button:hover { opacity: .85; }
+.js .button.drift:hover { opacity: calc(var(--in, 0) * (1 - var(--out, 0)) * .85); }
+
+/* Corner links: fixed, inverted against whatever sits under them */
+.corners {
+  position: fixed;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: max(18px, 1.6vw) var(--gutter);
+  color: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+.corners a {
+  pointer-events: auto;
+  font-size: clamp(1rem, 1vw, 1.25rem);
+  font-weight: 500;
+  text-decoration: none;
+}
+.corners a:hover { text-decoration: underline; text-underline-offset: .2em; }
+/* Instagram (Piet 10-22): a line icon, the nav's fifth, spaced as the others; not linked yet */
+.nav-instagram { align-self: center; }
+.nav-instagram svg { display: block; width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.nav-instagram .dot { fill: currentColor; stroke: none; }
+
+/* Scroll hint: a thin white arrow at the bottom centre, 4vh up. It fades in once the word has formed (html.held),
+   drifts 8px down and back every 2 s, and fades out as the nav comes in (1 - --nav) */
+.scroll-hint { display: none; }
+.js .scroll-hint {
+  position: fixed;
+  z-index: 20;
+  left: 50%;
+  bottom: 4vh;
+  display: block;
+  color: #fff;
+  opacity: calc(1 - var(--nav, 0));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.scroll-hint svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.5; opacity: 0; }
+.held .scroll-hint svg { animation: hint-in .8s ease-out both, hint-bob 2s ease-in-out infinite; }
+@keyframes hint-in { to { opacity: 1; } }
+@keyframes hint-bob { 50% { transform: translateY(8px); } }
+
+/* Position indicator (made by the script): one dot per part on the right edge, inverted like the corner links;
+   the part on screen lights up */
+.progress {
+  position: fixed;
+  z-index: 20;
+  top: 50%;
+  right: calc(var(--gutter) / 2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transform: translate(50%, -50%);
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+.progress span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: .35;
+  transition: opacity .4s, transform .4s;
+}
+.progress span.is-here { opacity: 1; transform: scale(1.6); }
+/* A click on a dot jumps to its part (Piet 10-22): a 20px hit area round each 6px dot, live once the nav is in */
+.progress span { position: relative; pointer-events: auto; cursor: pointer; }
+.progress span::after { content: ""; position: absolute; inset: -7px; }
+.js:not(.nav-on) .progress span { pointer-events: none; }
+
+/* Sequence. Without JS every shot is a plain full screen.
+   With JS the stage pins and the script plays the scroll timeline (data-tl in index.html): each frame it sets
+   --in (0 to 1 as a thing arrives), --out (0 to 1 as it leaves) and, on shots, --life (0 to 1 across its time on screen).
+   Everything here is driven by those numbers, so it all runs backwards when you scroll up. */
+.shot {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--paper);
+}
+.js .sequence { height: 1282vh; }   /* the script sets the same from the timeline: the last thing in at 1177 + 5 + 100 */
+.js .stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--paper);
+}
+/* Push through: a leaving shot zooms toward you and dissolves into the one beneath it */
+.js .shot {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  visibility: hidden;
+  opacity: calc(1 - var(--out, 0));
+  transform: scale(calc(1 + .3 * var(--out, 0)));
+}
+.js .shot.is-on { visibility: visible; }
+/* Pictures never sit still: a slow push in across their time on screen */
+.js .shot-media > video,
+.js .shot-media > img { transform: scale(calc(1 + .06 * var(--life, 0))); }
+
+/* Text drifts up 4vh as it fades in, and on up as it fades out */
+.js .drift,
+.js .quote > * {
+  opacity: calc(var(--in, 0) * (1 - var(--out, 0)));
+  transform: translateY(calc((1 - var(--in, 0) - var(--out, 0)) * 4vh));
+}
+
+.shot-media > video,
+.shot-media > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--focal, 50% 50%);
+}
+.shot-footage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, .45), rgba(0, 0, 0, 0) 55%);
+  pointer-events: none;
+}
+.shot-title {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 5vh;
+  padding: 0 var(--gutter);
+}
+/* index.html: INTUITION bottom left, the studio graphics bottom right, bottoms level */
+.shot-title:has(.shot-logos) { display: flex; justify-content: space-between; align-items: flex-end; }
+/* "INTUITION" in Neutra Text Bold = 4.788em of ink + 8 gaps x .3em tracking = 7.188em: 25vw / 7.188 = 3.48vw, a quarter of the screen. */
+.wordmark,
+.intro-word {
+  font-family: var(--wordmark);
+  font-weight: 700;
+  font-size: 3.48vw;
+  line-height: .8;
+  white-space: nowrap;
+  color: #fff;
+}
+/* Exit: as you scroll the footage the gaps open to 1.2em (about half the screen wide) while the word fades.
+   --intro is the opening's re-form, 0 to 1. fit-content keeps the smoke filter's box to the word. */
+.wordmark {
+  width: fit-content;
+  letter-spacing: calc(.3em + .9em * var(--out, 0));
+  opacity: calc((1 - var(--out, 0) * var(--out, 0)) * var(--intro, 1));
+}
+/* index.html: INTUITION is INTUITION_WordMark.svg (Piet 10-21) cropped to its ink, 25vw wide, a quarter of the screen;
+   the 3.48vw font-size stays as the opening's unit of size. On the way out each letter moves .9em (76.27 of the SVG's
+   units at 25vw) further from the one before, so the gaps open as they did with the tracking. */
+.wordmark svg,
+.intro-word svg { display: block; width: 25vw; height: auto; overflow: visible; fill: currentColor; }
+.wordmark path { transform: translateX(calc(var(--k) * var(--out, 0) * 76.27px)); }
+.intro-word:has(svg) { padding-left: 0; }
+
+/* Opening: html.intro (set in the head) puts black over the footage. The script fades --black from 1 to 0 over
+   the first 100vh of scroll, and back. */
+.intro .shot-footage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #000;
+  opacity: var(--black, 1);
+}
+.intro .wordmark { --intro: 0; }
+/* The corner links and the dots wait for the first scroll: the script sets --nav (0 to 1 over the first 40vh) and
+   .nav-on once they are more than half in */
+.js .corners,
+.js .progress { opacity: var(--nav, 0); }
+.js:not(.nav-on) .corners a { pointer-events: none; }
+.intro-skip .shot-footage::before,
+.intro-skip .corners,
+.intro-skip .progress,
+.intro-skip .intro-word,
+.intro-skip .intro-specks,
+.intro-skip .wordmark { transition: opacity .4s ease-out; }
+.intro-specks {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.intro-word {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  padding-left: .3em;   /* evens out the trailing letter-spacing so the word sits on centre */
+  letter-spacing: .3em;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Quotes over the pictures: white, centred, two lines each (the <br> in index.html), with an even dim over the
+   picture that comes and goes with them */
+.quote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0 var(--gutter) 8vh;
+  color: #fff;
+  text-align: center;
+}
+.js .quote {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 var(--gutter);
+  pointer-events: none;
+}
+.quote::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, .3);
+}
+.js .quote::before { opacity: calc(var(--in, 0) * (1 - var(--out, 0))); }
+.quote blockquote { margin: 0; }
+.quote p {
+  font-family: var(--quote);
+  font-weight: 300;
+  font-size: clamp(1rem, 2vw, 3.125rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-align-last: center;
+  hyphens: manual;
+  text-wrap: balance;
+}
+/* A heading over a picture (Unlocking our sixth sense): the quotes' font, at the headings' size */
+.quote h2 {
+  margin-bottom: .7em;
+  font-family: var(--quote);
+  font-weight: 300;
+  font-size: var(--card-size);
+  color: inherit;
+  text-align: center;
+}
+.quote figcaption {
+  margin-top: 1.4em;
+  font-family: var(--quote);
+  font-weight: 300;
+  font-size: clamp(1rem, 1.1vw, 1.4rem);
+  letter-spacing: .08em;
+}
+
+/* White title cards */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 3vw;
+  padding: 10vh var(--gutter);
+}
+.card-logline {
+  font-family: var(--quote);
+  font-weight: 300;
+  font-size: clamp(1.2rem, 2.4vw, 3.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--dark-accent);
+  text-align: left;
+  hyphens: manual;
+  text-wrap: balance;
+}
+.card h2 { font-size: var(--card-size); line-height: 1.05; }
+.lead {
+  font-size: clamp(1.2rem, 2vw, 2.8rem);
+  line-height: 1.4;
+  color: #fff;
+}
+
+/* Events: the word at the top, then the month calendar and the list in two halves across the full width */
+.card-events { justify-content: flex-start; }
+.events {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--gutter);
+  align-items: start;
+}
+.event-side { display: grid; gap: 3vw; justify-items: start; }
+.event-none { display: grid; gap: 3vw; justify-items: start; }
+.event-none[hidden], .event-list[hidden] { display: none; }
+.cal-head {
+  display: flex;
+  align-items: center;
+  gap: 1.2vw;
+  margin-bottom: 2vh;
+}
+.cal-month { margin-right: auto; font-size: clamp(1.1rem, 1.3vw, 1.6rem); }
+.cal-step {
+  padding: .4em;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+}
+.cal-step svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.cal-step:hover { opacity: .6; }
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: auto;
+  grid-auto-rows: 8vh;
+}
+.cal-name {
+  padding: 0 .6vw .8vh;
+  font-size: clamp(.9rem, .85vw, 1.1rem);
+  letter-spacing: .08em;
+  color: #fff;
+}
+.cal-day {
+  padding: .6vw;
+  border: 0;
+  border-top: 1px solid hsla(56.79, 28.57%, 38.43%, .25);
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: clamp(.9rem, .9vw, 1.1rem);
+  line-height: 1.2;
+  text-align: left;
+  vertical-align: top;
+}
+.cal-day.has-event {
+  display: block;
+  border-radius: 6.4px;
+  background: var(--dark-accent);
+  color: #fff;
+  cursor: pointer;
+}
+.cal-day.has-event:hover { opacity: .85; }
+.cal-day.is-picked { background: #fff; color: #000; }
+.event-list {
+  width: 100%;
+  max-height: 64vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.event-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr);
+  column-gap: 1.5vw;
+  padding: 1.4vh .6vw;
+  border-top: 1px solid hsla(56.79, 28.57%, 38.43%, .25);
+  font-size: clamp(1rem, 1.1vw, 1.4rem);
+  color: #fff;
+}
+.event-list li.is-picked { background: hsla(56.79, 28.57%, 38.43%, .15); }
+
+/* Donate (Piet 10-21): a card after the sixth sense, the organizations in the film, names only for now, one column each */
+.card-donate { justify-content: flex-start; }
+.donate-list {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 2.6vw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.donate-list li { display: flex; flex-direction: column; align-items: flex-start; gap: 1.5vw; }
+.donate-list h3 { font-size: var(--card-size); line-height: 1; }
+.donate-list p { font-size: clamp(1rem, 1vw, 1.25rem); }   /* as the team bios */
+.donate-more { display: flex; gap: 1.5vw; align-self: center; margin-top: auto; }   /* centred at the card's foot (Piet 10-22) */
+
+/* Team (Piet 10-22): one card, the heading and then each person in from the right; portrait, role and name in three
+   columns (the bios are hidden) */
+.card-team { justify-content: flex-start; }
+.team-row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 2.6vw; }
+.card-team .credit { display: block; }
+.card-team .credit + .credit { margin-top: 0; }
+.card-team .credit img { height: 52vh; aspect-ratio: auto; }
+.card-team .role { margin-top: 2vh; }
+.js .from-right {
+  opacity: calc(var(--in, 0) * (1 - var(--out, 0)));
+  transform: translateX(calc((1 - var(--in, 0)) * 40vw));
+}
+
+/* Credits */
+.credits { padding: 16vh var(--gutter) 10vh; }
+.credits > h2 {
+  margin-bottom: 10vh;
+  font-size: var(--card-size);
+  line-height: 1.05;
+}
+.credit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  column-gap: 2.6vw;
+  align-items: start;
+}
+.credit + .credit { margin-top: 12vh; }
+.credit .portrait { overflow: hidden; }
+.js .credit img { transform: scale(calc(1 + .1 * var(--life, 0))); }
+.credit img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: var(--focal, 50% 50%);
+}
+.role {
+  font-size: clamp(.9rem, .85vw, 1.1rem);
+  letter-spacing: .08em;
+  color: #fff;
+  text-align: left;
+}
+.credit h3 {
+  margin: .15em 0 .5em;
+  font-size: var(--card-size);
+  line-height: 1;
+}
+.bio { columns: 3; column-gap: 2.6vw; }
+.bio p { font-size: clamp(1rem, 1vw, 1.25rem); }
+.bio p + p { margin-top: 1em; }
+
+/* End card */
+.endcard {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8vh;
+  padding: 16vh var(--gutter) 4vh;
+}
+.endcard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: var(--gutter);
+  align-items: start;
+}
+.endcard h2 { font-size: var(--card-size); line-height: 1.05; }
+.endcard-intro {
+  margin-top: 2vw;
+  font-size: clamp(1rem, 1.2vw, 1.5rem);
+}
+.card-join .button-support {
+  margin-top: 3vw;
+  font-size: clamp(1.1rem, 1.3vw, 1.6rem);
+}
+.card-join .endcard-grid { width: 100%; margin: auto 0; }
+/* The foot, at the bottom of the Mailing list card (Piet 10-22): the page ends there, 4vh from the bottom as before */
+.card-join { padding-bottom: 4vh; }
+.endcard-foot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2vw;
+}
+/* The foot (Piet 10-21): the INTUITION wordmark bottom left, 25vw as on the first screen; bottom right the studio
+   graphics in one row as wide, 1.5vw apart, all three at the one scale they share on the film's studio card
+   (2756 + 438 + 2106 px of ink = 22vw). The first screen has the same row bottom right (.shot-logos). */
+.foot-mark { display: block; width: 25vw; height: auto; fill: #fff; }
+.logos { display: flex; align-items: center; gap: 1.5vw; }
+.logos img { height: auto; }
+.logos > a, .logos > a img { display: block; }   /* the first screen's are links (Piet 10-21) */
+.logos > a img { width: 100%; }
+.logos > :nth-child(1) { width: 11.44vw; }
+.logos > :nth-child(2) { width: 1.82vw; }
+.logos > :nth-child(3) { width: 8.74vw; }
+/* the foot's at 70% with 3vw between (Piet 10-22: smaller, more space) */
+.foot-logos { gap: 3vw; }
+.foot-logos > :nth-child(1) { width: 8.01vw; }
+.foot-logos > :nth-child(2) { width: 1.27vw; }
+.foot-logos > :nth-child(3) { width: 6.12vw; }
+
+/* Mailing form: radius 5px, 1px border, padding 8px 15px (their form-field vars) */
+.signup-form { display: grid; gap: 1.4rem; }
+.signup-form fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+.signup-form legend,
+.signup-form label > span {
+  display: block;
+  margin-bottom: .4em;
+  padding: 0;
+  color: #fff;
+}
+.signup-form .req { opacity: .7; }
+.name-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
+.name-row label > span { font-size: .9rem; }
+.signup-form input,
+.signup-form textarea {
+  display: block;
+  width: 100%;
+  padding: 8px 15px;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background: var(--paper);
+  color: #fff;
+  font: inherit;
+}
+.signup-form textarea { resize: vertical; }
+.signup-form .button { justify-self: start; }
+.form-thanks { color: #fff; }
+
+/* The Donate window (Piet 10-22): black, over the page; DEMO, it takes nothing */
+.donate-window {
+  width: min(92vw, 36rem);
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 6.4px;
+  background: #000;
+  color: #fff;
+}
+.donate-window::backdrop { background: rgba(0, 0, 0, .75); }
+.donate-inner { position: relative; padding: 3rem; }
+.donate-shut { position: absolute; top: 1rem; right: 1rem; margin: 0; }
+.donate-close { padding: .2em .4em; border: 0; background: none; color: #fff; font: inherit; font-size: 1.8rem; line-height: 1; cursor: pointer; }
+.donate-form { display: grid; gap: 1.2rem; }
+.donate-window h2 { font-size: var(--card-size); }
+.donate-to { opacity: .7; }
+.amounts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .6rem; align-items: end; }
+.amounts button {
+  padding: .8em 0;
+  border: 1px solid rgba(255, 255, 255, .4);
+  border-radius: 5px;
+  background: none;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.amounts button.is-picked { border-color: var(--dark-accent); background: var(--dark-accent); }
+.donate-form label > span { display: block; margin-bottom: .4em; font-size: .9rem; opacity: .7; }
+.donate-form input {
+  display: block;
+  width: 100%;
+  padding: 8px 15px;
+  border: 1px solid rgba(255, 255, 255, .4);
+  border-radius: 5px;
+  background: none;
+  color: #fff;
+  font: inherit;
+}
+.amount-other input { padding: .8em .6em; }
+.card-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1rem; }
+
+/* Team pop-ups (Piet 10-22): the Donate window's style, about 70% of the screen wide; the portrait in the left third,
+   role, name and write-up (in 2 columns) on the right. Each person's picture and name in the Team card opens it. */
+.card-team .portrait,
+.card-team h3 { cursor: pointer; }
+.team-window { width: 70vw; }
+.team-window .credit { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+.team-window .bio { columns: 2; }
+/* the next arrow (Piet 10-22): the scroll hint's arrow turned right, at the window's right edge half way down */
+.team-next {
+  position: absolute;
+  top: 50%;
+  right: .4rem;
+  padding: .6rem;
+  border: 0;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+.team-next svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.5; }
