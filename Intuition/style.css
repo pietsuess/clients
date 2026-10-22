@@ -669,3 +669,94 @@ a { color: inherit; }
   transform: translateY(-50%);
 }
 .team-next svg { display: block; fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+/* Phones (Piet 10-22: "just build one"): portrait screens up to 700px wide. Desktop above is untouched; each part
+   still fits one screen. The wordmark (and the opening, whose unit is its font-size) across the top, the studio
+   graphics centred at the bottom; the cards' columns stacked; the team as rows, portrait left; the pop-ups 92vw. */
+@media (max-width: 700px) {
+  .button { padding: 1em 1.5em; }
+  .card { padding-bottom: 5vh; gap: 2.5vh; }
+  .card-join { padding-bottom: 4vh; }
+
+  /* the dots: 26px apart, each a 26px target */
+  .progress { gap: 20px; }
+  .progress span::after { inset: -10px; }
+
+  /* First screen (Piet 10-22): INTUITION across the top under the nav, 92vw = the full width less the gutters (25vw x
+     3.68, so 3.48vw x 3.68 for its unit, which the opening scales by); the studio graphics a little smaller, 2x the
+     desktop row (50vw, was 60vw), centred at the very bottom */
+  .wordmark,
+  .intro-word { font-size: 12.8064vw; }
+  .wordmark svg,
+  .intro-word svg { width: 92vw; }
+  .shot-title:has(.shot-logos) {
+    top: 10vh;
+    bottom: 4vh;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;   /* it covers the screen now; only the links take clicks */
+  }
+  .shot-logos { gap: 3vw; pointer-events: auto; }
+  .shot-logos > :nth-child(1) { width: 22.88vw; }
+  .shot-logos > :nth-child(2) { width: 3.64vw; }
+  .shot-logos > :nth-child(3) { width: 17.48vw; }
+
+  /* Quotes: the words wrap on their own instead of at the desktop's line break */
+  .quote br { display: none; }
+  .quote p { font-size: 1.25rem; }
+  .quote figcaption { font-size: 1rem; }
+
+  /* Events: the calendar, then the list under it */
+  .events { grid-template-columns: minmax(0, 1fr); row-gap: 3vh; }
+  .cal-grid { grid-auto-rows: 5.5vh; }
+  .cal-step { padding: .8em; }
+  .event-list { max-height: 26vh; }
+
+  /* Donate: one under the other, the name and its DONATE on one line, the write-up below */
+  .donate-list { grid-template-columns: minmax(0, 1fr); row-gap: 3vh; }
+  .donate-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "name go" "text text";
+    align-items: center;
+    column-gap: 4vw;
+    row-gap: 1vh;
+  }
+  .donate-list h3 { grid-area: name; }
+  .donate-list p { grid-area: text; }
+  .donate-list .button { grid-area: go; }
+  .donate-more { gap: 3vw; }
+
+  /* Team: one person a row, the portrait (3:4) left, role and name right */
+  .team-row { grid-template-columns: minmax(0, 1fr); row-gap: 2.5vh; }
+  .card-team .credit { display: grid; grid-template-columns: 30vw minmax(0, 1fr); column-gap: 5vw; align-items: center; }
+  .card-team .credit img { height: auto; aspect-ratio: 3 / 4; }
+  .card-team .role { margin-top: 0; }
+
+  /* Mailing list: the words, then the form, then the foot */
+  .endcard-grid { grid-template-columns: minmax(0, 1fr); row-gap: 3vh; }
+  .endcard-intro { margin-top: 1.5vh; font-size: .95rem; }
+  .card-join .button-support { margin-top: 2vh; font-size: 1rem; }
+  .signup-form { gap: .9rem; }
+  .signup-form textarea { height: 5.5em; }
+  /* the foot: INTUITION 40vw, the graphics at the same 1.6x */
+  .foot-mark { width: 40vw; }
+  .foot-logos { gap: 4.8vw; }
+  .foot-logos > :nth-child(1) { width: 12.82vw; }
+  .foot-logos > :nth-child(2) { width: 2.03vw; }
+  .foot-logos > :nth-child(3) { width: 9.79vw; }
+
+  /* Pop-ups: 92vw; the team one in one column, its words scrolling inside it under the x, the arrow at its edge */
+  .donate-inner { padding: 1.5rem; }
+  .team-window { width: 92vw; max-height: 88svh; }
+  .team-window .donate-inner { padding: 3rem 2.8rem 1.5rem 1.5rem; }
+  .team-window .credit {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 1.2rem;
+    max-height: calc(88svh - 4.5rem);
+    overflow-y: auto;
+  }
+  .team-window .portrait { width: 45%; }
+  .team-window .bio { columns: 1; }
+}
