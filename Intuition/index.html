@@ -33,12 +33,16 @@
 <a class="skip" href="#page">Skip to Content</a>
 
 <nav class="corners">
+  <span class="nav-stamp-slot" aria-hidden="true"></span>   <!-- the stamp's place (it sits in .nav-stamp-corner) -->
   <a href="https://creative-visions.networkforgood.com/projects/220930-thoughtful-robot-production-s-intuition-film-fundraiser" target="_blank" rel="noopener">Support</a>
   <a href="#events">Events</a>
   <a href="#team">Team</a>
   <a href="#join">Join</a>
   <a class="nav-instagram" href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="dot" cx="17.5" cy="6.5" r="1"/></svg></a>
 </nav>
+<!-- The stamp (Piet 10-22): black on white, upper left in its own slot of the nav, back to the top. Outside the nav so
+     it keeps its own colours (the nav blends with the picture) -->
+<div class="corners nav-stamp-corner"><a class="nav-stamp" href="#"><img src="assets/INTUITION_Stamp-black-on-white.svg" alt="INTUITION" width="144" height="144"></a></div>
 <!-- Scroll hint (Piet 10-21): comes in as the opening ends, goes as the nav comes in -->
 <div class="scroll-hint" aria-hidden="true"><svg viewBox="0 0 28 16" width="28" height="16"><path d="M1 1l13 13L27 1"/></svg></div>
 
@@ -990,6 +994,16 @@
       stir();
     }, { passive: true });
     document.addEventListener('mouseout', function (e) { if (!e.relatedTarget) { mouse = null; stir(); } });
+    // A click on the stamp (Piet 10-22): straight back to the top and the opening plays again, as on arrival
+    var stamp = document.querySelector('.nav-stamp');
+    if (stamp) stamp.addEventListener('click', function (e) {
+      e.preventDefault();
+      cancelAnimationFrame(raf);
+      window.scrollTo(0, 0);
+      tailOn = false; lastR = -1; t0 = 0;
+      root.classList.remove('held');   // the scroll hint comes back once the word has formed
+      raf = requestAnimationFrame(tick);
+    });
     function start() {
       if (started) return;
       started = true;

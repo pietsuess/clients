@@ -112,6 +112,13 @@ a { color: inherit; }
 }
 .corners a:hover { text-decoration: underline; text-underline-offset: .2em; }
 /* Instagram (Piet 10-22): a line icon, the nav's fifth, spaced as the others; not linked yet */
+/* The stamp upper left (Piet 10-22): the Instagram icon's size, its own slot in the nav (.nav-stamp-slot keeps the
+   place); it sits in a copy of the nav box that does not blend, so it stays black on white */
+.nav-stamp-slot { width: 1.3em; font-size: clamp(1rem, 1vw, 1.25rem); }
+.nav-stamp-corner { mix-blend-mode: normal; justify-content: flex-start; }
+.nav-stamp-corner::after { content: "\200b"; font-size: clamp(1rem, 1vw, 1.25rem); font-weight: 500; }   /* the nav's line height */
+.nav-stamp { align-self: center; }
+.nav-stamp img { display: block; width: 1.3em; height: 1.3em; }
 .nav-instagram { align-self: center; }
 .nav-instagram svg { display: block; width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .nav-instagram .dot { fill: currentColor; stroke: none; }
