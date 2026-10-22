@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300;0,500;0,700;1,300&amp;display=swap">
-<link rel="stylesheet" href="style.css?v=29">
+<link rel="stylesheet" href="style.css?v=31">
 <script>
   // A reload (shift-reload too) starts again at the top, so the opening plays (Piet 10-22): the browser does not put
   // the scroll back, and a #part left in the address from before is dropped
@@ -79,7 +79,9 @@
       <!-- Events (Piet 10-21: page 2, right after the opening shot; the word small at the top, a calendar and a list).
            The dates go in EVENTS in the script. Until there are dates the list side shows Piet's line (10-21) and the
            button from "Website Copy & Design _ Intuition Film .pdf", page 3 -->
-      <section class="shot card card-events" id="events" data-tl="355 355 502 552">
+      <section class="shot card card-events shot-media card-loop" id="events" data-tl="355 355 502 552">
+        <!-- Piet 10-22: 04_Exports/LOOPS/INTUITION-SITE_loops-LotusPond.mp4 at 1080, behind the card -->
+        <video src="assets/INTUITION-SITE_loops-LotusPond-1080.mp4" poster="assets/INTUITION-SITE_loops-LotusPond-1080-poster.jpg" width="1920" height="1080" muted loop playsinline preload="none" aria-hidden="true"></video>
         <h2 class="drift" data-tl="390 415 460 485">Events</h2>
         <div class="events">
           <div class="calendar drift" data-tl="396 421 466 491">
@@ -118,7 +120,9 @@
       <!-- Donate (Piet 10-21): the organizations in the film, after the sixth sense, as a card like Events.
            Demo: the write-ups are TEMP (Claude's placeholder words, Piet 10-21: "a temp writeup"), the buttons go
            nowhere until there are links. -->
-      <section class="shot card card-donate" id="donate" data-tl="737 737 859 909">
+      <section class="shot card card-donate shot-media card-loop" id="donate" data-tl="737 737 859 909">
+        <!-- Piet 10-22: 04_Exports/LOOPS/INTUITION-SITE_loops_LeavesFlare.mp4 at 1080, behind the card -->
+        <video src="assets/INTUITION-SITE_loops_LeavesFlare-1080.mp4" poster="assets/INTUITION-SITE_loops_LeavesFlare-1080-poster.jpg" width="1920" height="1080" muted loop playsinline preload="none" aria-hidden="true"></video>
         <h2 class="drift" data-tl="747 772 817 842">Donate</h2>
         <ul class="donate-list drift" data-tl="753 778 823 848">
           <li>
@@ -473,6 +477,9 @@
     });
     var shots = timed.filter(function (x) { return x.shot; });
     shots.forEach(function (x, k) { x.el.style.zIndex = shots.length - k; });   // the leaving shot sits on top
+    // The loops (Piet 10-22) in the other shots: each plays only while its shot is on (and only loads then)
+    var loops = shots.filter(function (x) { return x.el !== shot && x.el.querySelector('video'); })
+      .map(function (x) { return { el: x.el, video: x.el.querySelector('video') }; });
     var end = Math.max.apply(null, timed.map(function (x) { return isFinite(x.d) ? x.d : x.b; })) + 5;   // the pin lets go 5vh after the last thing is in
     seq.style.height = (end + 100) + 'vh';
 
@@ -548,6 +555,11 @@
         if (run && video.paused) { var p = video.play(); if (p && p.catch) p.catch(function () {}); }
         else if (!run && !video.paused) video.pause();
       }
+      loops.forEach(function (x) {
+        var on = x.el.classList.contains('is-on');
+        if (on && x.video.paused) { var p = x.video.play(); if (p && p.catch) p.catch(function () {}); }
+        else if (!on && !x.video.paused) x.video.pause();
+      });
       var y = window.scrollY;
       flow.forEach(function (f) {
         var top = f.top - y, bottom = top + f.h;

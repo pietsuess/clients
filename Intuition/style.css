@@ -214,6 +214,17 @@ a { color: inherit; }
   object-fit: cover;
   object-position: var(--focal, 50% 50%);
 }
+/* Loops behind the Events and Donate cards (Piet 10-22): the video fills the card (as on a picture shot) under a 30%
+   dark layer (the quotes' dim); the card's own pieces sit above both */
+.card-loop > :not(video) { position: relative; z-index: 1; }
+.card-loop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .3);
+  pointer-events: none;
+}
+.card-events.card-loop::after { background: rgba(0, 0, 0, .45); }   /* Events a bit dimmer (Piet 10-22) */
 .shot-footage::after {
   content: "";
   position: absolute;
