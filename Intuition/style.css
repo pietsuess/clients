@@ -502,7 +502,8 @@ a { color: inherit; }
 .team-row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 2.6vw; }
 .card-team .credit { display: block; }
 .card-team .credit + .credit { margin-top: 0; }
-.card-team .credit img { height: 52vh; aspect-ratio: auto; }
+.card-team .portrait { width: 60%; }                            /* Piet 10-23: the photos at 60% (were the full column) */
+.card-team .credit img { height: 31.2vh; aspect-ratio: auto; }   /* 52vh x 60% */
 .card-team .role { margin-top: 2vh; }
 .js .from-right {
   opacity: calc(var(--in, 0) * (1 - var(--out, 0)));
@@ -752,6 +753,7 @@ a { color: inherit; }
   /* Team: one person a row, the portrait (3:4) left, role and name right */
   .team-row { grid-template-columns: minmax(0, 1fr); row-gap: 2.5vh; }
   .card-team .credit { display: grid; grid-template-columns: 30vw minmax(0, 1fr); column-gap: 5vw; align-items: center; }
+  .card-team .portrait { width: auto; }                            /* phones keep the 30vw photo */
   .card-team .credit img { height: auto; aspect-ratio: 3 / 4; }
   .card-team .role { margin-top: 0; }
 
