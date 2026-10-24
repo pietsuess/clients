@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300;0,500;0,700;1,300&amp;display=swap">
-<link rel="stylesheet" href="style.css?v=34">
+<link rel="stylesheet" href="style.css?v=35">
 <script>
   // A reload (shift-reload too) starts again at the top, so the opening plays (Piet 10-22): the browser does not put
   // the scroll back, and a #part left in the address from before is dropped
@@ -106,9 +106,9 @@
       </section>
 
 
-      <section class="shot shot-media" data-tl="502 502 637 662">
-        <!-- 04_Exports/Thumbnails/April 2024/Sydney.06_15_12_09.Still025.jpg -->
-        <img src="assets/sydney-06_15_12_09-still025.jpg" alt="" width="4096" height="1706" style="--focal: 49% 50%">
+      <section class="shot shot-media shot-sixth-sense" data-tl="502 502 637 662">
+        <!-- Piet 10-23: 04_Exports/LOOPS/INTUITION-SITE_loops_Hill.mp4 at 1080 behind "Unlocking our sixth sense" (was the Sydney still) -->
+        <video src="assets/INTUITION-SITE_loops_Hill-1080.mp4" poster="assets/INTUITION-SITE_loops_Hill-1080-poster.jpg" width="1920" height="1080" muted loop playsinline preload="none" aria-hidden="true"></video>
         <!-- Piet 10-21: second over this picture, after the quote, in the quotes' font (it had its own white card).
              Piet 10-23: Yasmeen's quote gone, this comes in where it was; everything after one screen (100vh) sooner -->
         <div class="quote" data-tl="537 562 607 632">
@@ -128,7 +128,9 @@
 
       <!-- Team (Piet 10-22): one black card after Gurudev, its pieces in from the right one after another: the heading,
            then each person (portrait, role, name). The bios stay here, hidden: they do not fit one screen. -->
-      <section class="shot card card-team" id="team" data-tl="772 772 908 933">
+      <section class="shot card card-team shot-media card-loop" id="team" data-tl="772 772 908 933">
+        <!-- Piet 10-23: 04_Exports/LOOPS/INTUITION-SITE_loops_Moss.mp4 at 1080, behind the Team card -->
+        <video src="assets/INTUITION-SITE_loops_Moss-1080.mp4" poster="assets/INTUITION-SITE_loops_Moss-1080-poster.jpg" width="1920" height="1080" muted loop playsinline preload="none" aria-hidden="true"></video>
         <h2 class="from-right" data-tl="782 807 878 903">Meet the Team</h2>
         <div class="team-row">
 
@@ -409,6 +411,23 @@
     // The loops (Piet 10-22) in the other shots: each plays only while its shot is on (and only loads then)
     var loops = shots.filter(function (x) { return x.el !== shot && x.el.querySelector('video'); })
       .map(function (x) { return { el: x.el, video: x.el.querySelector('video') }; });
+    // The Hill loop on phones (Piet 10-23): the view (a third of the frame's width) follows the girl. She stands about
+    // 44% across, walks left to about 34% from 7 s to 10 s and stays there until the 17.4-18.4 s dissolve brings the
+    // opening back; the view goes 41% to 26% with her, and back to 41% across the dissolve, so the loop has no jump
+    var hill = stage.querySelector('.shot-sixth-sense > video'), phone = window.matchMedia('(max-width: 700px)'), panning = false;
+    function pan() {
+      panning = !hill.paused && phone.matches;
+      if (!phone.matches) hill.style.removeProperty('--focal');
+      if (!panning) return;
+      var t = hill.currentTime;
+      hill.style.setProperty('--focal', (41 - 15 * ease(ramp(t, 7, 10)) + 15 * ease(ramp(t, 17.4, 18.4))) + '% 50%');
+      requestAnimationFrame(pan);
+    }
+    function startPan() { if (!panning) pan(); }
+    if (hill) {
+      hill.addEventListener('playing', startPan);
+      if (phone.addEventListener) phone.addEventListener('change', startPan);
+    }
     var end = Math.max.apply(null, timed.map(function (x) { return isFinite(x.d) ? x.d : x.b; })) + 5;   // the pin lets go 5vh after the last thing is in
     seq.style.height = (end + 100) + 'vh';
 
