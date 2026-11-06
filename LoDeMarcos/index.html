@@ -215,7 +215,21 @@
     .top .logo { width: 72px; }
     .btn { padding: 0 24px; }
     .ticks { grid-template-columns: 1fr; }
-    .hero h1 { white-space: normal; font-size: clamp(36px, 10vw, 64px); }
+    .hero h1 { white-space: normal; font-size: 2.2em; }
+    /* A screen taller than the phone shrinks its words and photo together (--fit, set by the script) */
+    .beat .words { font-size: calc(18px * var(--fit, 1)); }
+    .beat h2 { font-size: 1.778em; }
+    .scene.type .beat h2 { font-size: 2.889em; }
+    .scene.type .beat p { font-size: 1.333em; }
+    .beat h3 { font-size: 2.444em; }
+    .beat h4 { font-size: 1em; }
+    .beat .days ul { font-size: 0.833em; }
+    .beat .member { font-size: 1.111em; min-height: 8em; padding: 1.2em 1.3em; }
+    .beat .btn { font-size: 1.111em; min-height: 2.8em; padding: 0 1.2em; }
+    .beat .fly input { font-size: max(16px, 1.111em); min-height: 2.8em; padding: 0.6em 0.8em; }
+    .hero .beat .place { font-size: 1.222em; }
+    .hero .beat .date { font-size: 2.222em; }
+    .beat .card img { max-height: calc(36vh * var(--fit, 1)); }
   }
   /* Help tree in the corner, built like the BTMATS one; hidden on the opening photo like the top bar */
   #chat-btn { position: fixed; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
@@ -322,6 +336,28 @@
           <li>Massage</li>
         </ul>
       </div>
+    </div>
+  </section>
+
+  <section class="scene rooms photos" id="activity-photos">
+    <div class="bg soft"><img src="images/3.1.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="words head">
+      <h2></h2>
+    </div>
+    <div class="track">
+      <figure><img src="images/pexels-dancing-18139175.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/elderly-dancers-in-traditional-dresses-18139175/">Cesar Vargas</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/unsplash-cacao-oJRjlmntoy0.webp" alt=""><figcaption><a href="https://unsplash.com/photos/oJRjlmntoy0">rosario janza</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-surf-lesson-ZjXu4oCLMaU.webp" alt=""><figcaption><a href="https://unsplash.com/photos/ZjXu4oCLMaU">Ale Romo</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/pexels-surf-lesson-19756565.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/woman-learning-surfing-with-instructor-19756565/">Serg Alesenko</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/unsplash-waterfall-oF8CpVXWNyI.webp" alt=""><figcaption><a href="https://unsplash.com/photos/oF8CpVXWNyI">Jeffrey Eisen</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/pexels-waterfall-57650.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/women-near-falls-57650/">Kaique Rocha</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/pexels-biking-5152641.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/person-riding-a-bike-on-dirt-road-5152641/">Maor Attias</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/unsplash-massage-cU53ZFBr3lk.webp" alt=""><figcaption><a href="https://unsplash.com/photos/cU53ZFBr3lk">alan caishan</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+    </div>
+    <div class="strip-nav">
+      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
     </div>
   </section>
 
@@ -560,6 +596,10 @@
       <figure><img src="images/unsplash-VYOJ7y2ifgM.webp" alt=""><figcaption><a href="https://unsplash.com/photos/aerial-view-of-a-winding-river-meeting-the-ocean-beach-VYOJ7y2ifgM">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
       <figure><img src="images/unsplash-ni7yHT3yyRE.webp" alt=""><figcaption><a href="https://unsplash.com/photos/lush-green-jungle-meets-sandy-beach-and-turquoise-water-ni7yHT3yyRE">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
       <figure><img src="images/unsplash-wNboBOSiuvA.webp" alt=""><figcaption><a href="https://unsplash.com/photos/a-small-boat-floats-in-clear-turquoise-ocean-water-wNboBOSiuvA">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-village-street-FM2Ue45HX6s.webp" alt=""><figcaption><a href="https://unsplash.com/photos/FM2Ue45HX6s">Jeffrey Eisen</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/commons-village-street-Calle_de_Sayulita_01.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Calle_de_Sayulita_01.jpg">Luisalvaz</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/commons-huichol-Artesanias_Huicholes.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Artesan%C3%ADas_Huicholes.jpg">Carlos Raúl Camacho Acosta</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/pexels-whale-40257155.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/breaching-humpback-whale-in-puerto-vallarta-40257155/">Javier Ulloa</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
     </div>
     <div class="strip-nav">
       <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
@@ -949,6 +989,37 @@
       tl.to({}, { duration: 0 }, 1);
     }
 
+    // Phones: a screen whose words run taller than the phone shrinks them, and its photo, until all of it fits.
+    const phone = window.matchMedia("(max-width: 700px)");
+    function fitBeats() {
+      document.querySelectorAll(".scene > .beat").forEach((beat) => {
+        beat.style.removeProperty("--fit");
+        if (!phone.matches || !root.classList.contains("motion")) return;
+        const cs = getComputedStyle(beat);
+        const room = beat.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        const fits = () => {
+          let top = Infinity, bottom = -Infinity;
+          for (const el of beat.children) {
+            top = Math.min(top, el.offsetTop);
+            bottom = Math.max(bottom, el.offsetTop + el.offsetHeight);
+          }
+          return bottom - top <= room;
+        };
+        if (fits()) return;
+        let lo = 0.55, hi = 1;
+        for (let k = 0; k < 8; k++) {
+          const mid = (lo + hi) / 2;
+          beat.style.setProperty("--fit", mid);
+          if (fits()) lo = mid; else hi = mid;
+        }
+        beat.style.setProperty("--fit", lo);
+      });
+    }
+    let fitWidth = 0;
+    const refit = () => { if (window.innerWidth !== fitWidth) { fitWidth = window.innerWidth; fitBeats(); } };
+    const loaded = new Promise((done) => (document.readyState === "complete" ? done() : window.addEventListener("load", done, { once: true })));
+    Promise.all([loaded, document.fonts.ready]).then(() => { refit(); window.addEventListener("resize", refit); });
+
     gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
       root.classList.add("motion");
       const lenis = new Lenis();
@@ -983,6 +1054,7 @@
         lenis.destroy();
         mapAt(0);
         root.classList.remove("motion");
+        fitBeats();
       };
     });
   }
