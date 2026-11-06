@@ -260,9 +260,13 @@
     #included .beat { grid-template-columns: 1fr; }
     .team { grid-template-columns: 1fr; }
     .days { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 70vw; overflow-x: auto; }
+    /* The days scroll sideways inside their column; the column itself never runs wider than the screen */
+    .beat > .words { min-width: 0; }
   }
   @media (max-width: 700px) {
     :root { --bar: 72px; }
+    /* Nothing may push the page wider than the phone, so the top bar and every screen stay inside it */
+    html { overflow-x: hidden; }
     .top .reach a[href^="mailto"] { display: none; }
     .top .logo { width: 72px; }
     .btn { padding: 0 24px; }
@@ -280,6 +284,8 @@
     .beat .btn { font-size: 1.111em; min-height: 2.8em; padding: 0 1.2em; }
     .beat .fly input { font-size: max(16px, 1.111em); min-height: 2.8em; padding: 0.6em 0.8em; }
     .hero .beat .place { font-size: 1.222em; }
+    /* Opening lines centered, as on the computer */
+    .hero .beat p { text-align: center; text-align-last: center; }
     .hero .beat .date { font-size: 2.222em; }
     .beat .card img { max-height: calc(36vh * var(--fit, 1)); }
     /* Room kept clear at the foot: the Scroll hint on the opening photo, the help button everywhere else */
