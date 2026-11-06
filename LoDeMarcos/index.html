@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Whispering Springs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Yeseva+One&family=Libre+Baskerville:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<style>
+  @font-face { font-family: "Northwell"; src: url("fonts/Northwell.ttf") format("truetype"); font-display: swap; }
+
+  /* Colours from whisperingsprings.ca */
+  :root {
+    --teal: #7ea8ad;
+    --deep: #4b7b80;
+    --ink: #3c3c3b;
+    --head: #414345;
+    --paper: #f2f1ec;
+    --sand: #e8dbcf;
+    --white: #ffffff;
+    --pad: clamp(20px, 4vw, 72px);
+    --gap: clamp(20px, 2.4vw, 40px);
+    --bar: 88px;
+  }
+  * { box-sizing: border-box; }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  body { margin: 0; background: var(--ink); color: var(--ink); font: 400 20px/1.6 "Libre Baskerville", Arial, sans-serif; }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  p, li, dd { text-align: justify; text-align-last: left; }
+  h1, h2 { font-family: "Yeseva One", Arial, sans-serif; line-height: 1.12; margin: 0 0 0.45em; }
+  h1 { font-weight: 400; font-size: clamp(36px, min(5vw, 7.5vh), 72px); }
+  h2 { font-weight: 700; font-size: clamp(32px, 3.2vw, 56px); }
+  h3 { font-family: "Dancing Script", cursive; font-weight: 400; font-size: clamp(44px, 4vw, 72px); line-height: 1.05; margin: 0 0 0.3em; }
+  h4 { font-size: 18px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 0.7em; }
+  p { margin: 0 0 1em; }
+  p:last-child { margin-bottom: 0; }
+  .owed { color: var(--owed); }
+  :focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 34px; border: 0; border-radius: 28px; background: var(--deep); color: var(--white); font: 700 20px/1 "Libre Baskerville", Arial, sans-serif; text-decoration: none; cursor: pointer; justify-self: start; }
+  .scene.teal .btn { background: var(--paper); color: var(--deep); }
+
+  /* Header: hidden on the opening photo, arrives with the first scroll; soft dark fade, no band */
+  .top { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: var(--bar); display: flex; align-items: center; gap: var(--gap); padding: 0 var(--pad); color: var(--white); background: linear-gradient(to bottom, rgba(16, 18, 18, 0.5), rgba(16, 18, 18, 0)); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35); opacity: 0; transform: translateY(-16px); pointer-events: none; transition: opacity 0.5s ease, transform 0.5s ease; }
+  .top.on { opacity: 1; transform: none; pointer-events: auto; }
+  .top .logo { width: 96px; }
+  .top .reach { margin-left: auto; display: flex; align-items: center; gap: var(--gap); }
+  .top .reach a:not(.btn) { text-decoration: none; }
+
+  /* Scenes: full-screen, pinned and scrubbed when motion is on */
+  .scene { position: relative; overflow: hidden; min-height: 100vh; padding: calc(var(--bar) + var(--pad)) var(--pad) var(--pad); display: grid; gap: var(--gap); align-content: center; color: var(--white); --owed: #bfe3e6; }
+  .scene .bg, .register .bg { position: absolute; inset: 0; z-index: 0; }
+  .scene .bg img, .register .bg img { width: 100%; height: 100%; max-width: none; object-fit: cover; }
+  .scene .bg.soft img { filter: blur(26px) saturate(1.05); transform: scale(1.2); }
+  .scene .shade, .register .shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(16, 18, 18, 0.7), rgba(16, 18, 18, 0.32) 55%, rgba(16, 18, 18, 0.42)); }
+  .beat { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: center; align-content: center; }
+  .beat.low { align-content: end; }
+  .beat .right { grid-column: 2; }
+  .beat .wide { grid-column: 1 / -1; }
+  #included .beat { align-items: start; grid-template-columns: 2fr 1fr; }
+  #included .beat > .words:last-child .ticks { grid-template-columns: 1fr; }
+  #days, #leader, #days .beat, #leader .beat { align-content: start; }
+  .beat.high { align-content: start; }
+
+  /* Words sit straight on the photo; a soft dark halo behind them keeps them readable */
+  .words { position: relative; z-index: 0; font-size: clamp(18px, 1.35vw, 21px); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 2px 18px rgba(0, 0, 0, 0.45); }
+  .words::before { content: ""; position: absolute; z-index: -1; inset: -18% -14%; background: radial-gradient(closest-side, rgba(16, 18, 18, 0.7), rgba(16, 18, 18, 0)); pointer-events: none; }
+  .card { justify-self: center; border-radius: 18px; overflow: hidden; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.4); }
+  .card img { width: auto; max-height: calc(100vh - var(--bar) - 2 * var(--pad) - 40px); }
+
+  .hero .words { display: grid; gap: 18px; grid-column: 1 / -1; justify-items: center; text-align: center; }
+  .hero h1 { margin: 0; font-size: calc((100vw - 2 * var(--pad)) / 16.4); white-space: nowrap; }
+  .hero .btn { justify-self: center; }
+  .hero .place { font-size: clamp(22px, 1.7vw, 28px); margin: 0; }
+  .hero .date { font-size: clamp(40px, 3.4vw, 56px); }
+  .hero .place a { text-decoration: none; }
+  /* Scroll hint: thin line with a dot sliding down, gone once the visitor scrolls */
+  .hint { position: absolute; z-index: 3; left: 50%; bottom: 32px; width: 2px; height: 64px; margin-left: -1px; background: rgba(255, 255, 255, 0.9); filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.75)); transition: opacity 0.5s ease; }
+  .hint b { position: absolute; left: 50%; bottom: 100%; margin-bottom: 14px; transform: translateX(-50%); font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; letter-spacing: 0.12em; color: var(--white); white-space: nowrap; animation: flash 1.2s ease-in-out infinite; }
+  @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+  .hint span { position: absolute; left: -3.5px; top: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--white); animation: hint 1.8s ease-in-out infinite; }
+  @keyframes hint { 0% { transform: translateY(0); opacity: 0; } 20%, 80% { opacity: 1; } 100% { transform: translateY(57px); opacity: 0; } }
+  html.scrolled .hint { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { .hint span, .hint b { animation: none; } }
+
+  .ticks + h4 { margin-top: 1.4em; }
+  .ticks { list-style: none; margin: 1em 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px var(--gap); }
+  .ticks li { position: relative; padding-left: 22px; text-align: left; }
+  .ticks li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 10px; height: 10px; border-radius: 50%; background: var(--teal); }
+  .near { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+  .words .near { margin-top: var(--gap); }
+  dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; }
+  dt, dd { margin: 0; }
+  dd { white-space: nowrap; font-weight: 700; text-align: right; }
+
+  /* Type scenes: sections still waiting on Whispering Springs' words */
+  .scene.type { justify-items: start; }
+  .scene.type .beat { grid-template-columns: 1fr; max-width: none; }
+  .scene.type h2 { font-size: clamp(52px, 7vw, 128px); margin-bottom: 0.25em; }
+  .scene.type p { font-size: clamp(24px, 2vw, 34px); }
+  .scene.type .words { display: grid; gap: var(--gap); }
+  .words input { text-shadow: none; }
+  .scores { display: flex; flex-wrap: wrap; gap: var(--gap) calc(var(--gap) * 2.5); margin: 0; padding: 0; list-style: none; }
+  .scores a { display: grid; gap: 10px; text-decoration: none; }
+  .scores .n { font-family: "Yeseva One", serif; font-size: clamp(56px, 6vw, 112px); line-height: 1; }
+  .scores .n small { font-size: 0.36em; opacity: 0.75; }
+  .scores .site { font-size: clamp(18px, 1.4vw, 24px); }
+
+  /* The days: one column per day */
+  .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
+  .days h4 { margin-bottom: 0.9em; }
+  .days ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5em; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.4; }
+  .days .t { font-weight: 700; white-space: nowrap; }
+  .scene.teal { background: var(--deep); }
+  .scene.ink { background: var(--ink); }
+  .scene.sand { background: var(--sand); color: var(--head); --owed: var(--deep); }
+  .scene.paper { background: var(--paper); color: var(--head); --owed: var(--deep); }
+  .ghost { position: absolute; z-index: 0; left: 4vw; top: 50%; margin-top: -0.55em; font-family: "Dancing Script", cursive; font-size: clamp(180px, 24vw, 460px); line-height: 1.1; white-space: nowrap; opacity: 0.1; pointer-events: none; }
+
+  /* Rooms: photos slide sideways under the words */
+  .rooms .head { position: relative; z-index: 3; max-width: 42vw; }
+  .track { position: relative; z-index: 2; display: flex; align-items: center; gap: var(--gap); overflow-x: auto; min-width: 0; margin: 0 calc(-1 * var(--pad)); padding: 12px var(--pad) 36px; scrollbar-width: none; }
+  .track::-webkit-scrollbar { display: none; }
+  .quotes .track { align-items: flex-start; }
+  #reviews .head { max-width: none; }
+  /* Strip buttons: each strip scrolls on its own; the page scrolls straight past */
+  .strip-nav { position: relative; z-index: 3; display: flex; gap: 12px; justify-content: flex-end; }
+  .strip-nav button { width: 52px; height: 52px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--paper); color: var(--deep); cursor: pointer; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25); }
+  .strip-nav button:disabled { opacity: 0.35; cursor: default; }
+  .strip-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .track figure { flex: none; width: min(38vw, 640px); margin: 0; }
+  .track img { width: 100%; border-radius: 16px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
+
+  /* Lo de Marcos photos: same strip, each photo keeps its shape, credit under each */
+  .photos .track figure { width: auto; }
+  .photos .track img { width: auto; height: min(56vh, 60vw); max-width: none; }
+  .rooms figcaption { width: 0; min-width: 100%; margin-top: 12px; font-size: 13px; letter-spacing: 0.02em; opacity: 0.8; }
+
+  /* Reviews: same strip, a card for each review, words exactly as the site shows them */
+  .quotes .track figure { width: min(30vw, 460px); padding: 28px 30px 26px; border-radius: 16px; background: var(--paper); color: var(--ink); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
+  .quotes blockquote { margin: 0; font-size: clamp(16px, 1.2vw, 19px); line-height: 1.55; text-align: justify; text-align-last: left; }
+  .quotes figcaption { margin-top: 16px; }
+
+  /* Area map: flat map of the coast that tilts into 3D on scroll */
+  .scene.map { padding: 0; background: var(--sand); }
+  .map-box { position: absolute; inset: 0; z-index: 1; }
+  .pin { display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+  .pin .label { padding: 7px 12px 5px; border-radius: 999px; background: var(--paper); color: var(--head); font: 700 13px/1 "Libre Baskerville", Arial, sans-serif; letter-spacing: 0.04em; white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+  .pin .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--deep); border: 3px solid var(--white); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+  .map-box .maplibregl-ctrl-attrib { font-size: 10px; background: rgba(242, 241, 236, 0.8); }
+
+  html.motion .scene { height: 100vh; height: 100svh; min-height: 0; }
+  html.motion .beat { position: absolute; inset: 0; padding: calc(var(--bar) + var(--pad)) var(--pad) var(--pad); }
+  html.motion .scene.rooms { height: auto; min-height: 100vh; min-height: 100svh; }
+
+  /* Find flights: her city and dates, then the button opens Google Flights with them filled in */
+  .fly { grid-template-columns: 2fr 1fr 1fr auto; align-items: end; width: min(1100px, 100%); }
+  .fly .field { margin: 0; }
+
+  /* Register */
+  .register { position: relative; overflow: hidden; padding: calc(var(--bar) + var(--pad)) var(--pad) clamp(64px, 7vw, 120px); background: var(--ink); color: var(--white); }
+  .register > h2, .register > form { position: relative; z-index: 2; }
+  .register h2 { font-size: clamp(40px, 4.5vw, 76px); margin-bottom: 0.4em; }
+  .register form, .register .col { gap: 18px; }
+  .register form { max-width: 1040px; }
+  form { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: start; }
+  .col { display: grid; gap: var(--gap); }
+  fieldset { margin: 0; padding: 18px 22px 22px; border: 0; border-radius: 14px; color: var(--ink); background: var(--white); box-shadow: 0 18px 50px rgba(60, 60, 59, 0.08); }
+  legend { float: left; width: 100%; padding: 0; margin: 0 0 12px; font-size: 19px; font-weight: 700; color: var(--head); }
+  .field { clear: both; margin: 0 0 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; margin: 0 0 6px; font-weight: 700; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea { width: 100%; min-height: 56px; padding: 12px 16px; border: 2px solid var(--deep); border-radius: 10px; background: var(--white); color: var(--ink); font: 400 20px/1.4 "Libre Baskerville", Arial, sans-serif; }
+  textarea { min-height: 88px; resize: vertical; }
+  .register label { font-size: 14px; }
+  .register input[type="text"], .register input[type="email"], .register input[type="tel"], .register select, .register textarea { min-height: 44px; padding: 8px 12px; font-size: 16px; }
+  .register .btn { min-height: 46px; padding: 0 28px; font-size: 17px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; }
+  .check input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--deep); }
+  .check label { margin: 0; font-weight: 400; color: var(--deep); }
+  /* Add Ons: a ticked add on shows its times, the free times in The days */
+  .addon { flex-wrap: wrap; }
+  .addon .when { display: flex; flex-wrap: wrap; gap: 6px 16px; flex-basis: 100%; padding-left: 32px; }
+  .addon > input:not(:checked) ~ .when { display: none; }
+  .addon .when label { display: inline-flex; align-items: center; gap: 6px; }
+  .addon .when input { width: 16px; height: 16px; }
+  .links { clear: both; margin: 14px 0 0; font-size: 14px; }
+  .links a { color: var(--deep); }
+
+  /* Footer */
+  .foot { display: grid; grid-template-columns: auto 1fr 1fr; gap: var(--gap); align-items: start; padding: clamp(22px, 2.4vw, 36px) var(--pad); background: var(--ink); color: var(--white); font-size: 14px; line-height: 1.5; }
+  .foot .logo { width: 170px; }
+  .foot ul { list-style: none; margin: 0; padding: 0; }
+  .foot li { margin: 0 0 0.25em; text-align: left; }
+
+  @media (max-width: 900px) {
+    .beat, form, .foot, .near { grid-template-columns: 1fr; }
+    .beat .right, .beat .wide { grid-column: 1; }
+    .card img { max-height: 36vh; }
+    .rooms .head { max-width: none; }
+    .track figure { width: 72vw; }
+    .quotes .track figure { width: 72vw; }
+    .fly { grid-template-columns: 1fr; }
+    #included .beat { grid-template-columns: 1fr; }
+    .team { grid-template-columns: 1fr; }
+    .days { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 70vw; overflow-x: auto; }
+  }
+  @media (max-width: 700px) {
+    :root { --bar: 72px; }
+    .top .reach a[href^="mailto"] { display: none; }
+    .top .logo { width: 72px; }
+    .btn { padding: 0 24px; }
+    .ticks { grid-template-columns: 1fr; }
+    .hero h1 { white-space: normal; font-size: clamp(36px, 10vw, 64px); }
+  }
+  /* Help tree in the corner, built like the BTMATS one; hidden on the opening photo like the top bar */
+  #chat-btn { position: fixed; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+  html.scrolled #chat-btn { opacity: 1; pointer-events: auto; }
+  #chat-btn:hover { background: var(--white); }
+  #chat-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; }
+  #chat-panel { position: fixed; right: 26px; bottom: 26px; z-index: 95; width: 390px; max-width: calc(100vw - 40px); height: 540px; max-height: calc(100vh - 60px); display: none; flex-direction: column; background: var(--paper); color: var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45); }
+  #chat-panel.open { display: flex; }
+  .chat-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--deep); color: var(--white); }
+  .chat-head .t { font-family: "Yeseva One", serif; font-size: 21px; }
+  .chat-head button { background: none; border: 0; color: rgba(255, 255, 255, 0.75); cursor: pointer; font: 12px/1 "Libre Baskerville", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px; }
+  .chat-head button:hover { color: var(--white); }
+  #chat-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .msg-bot, .msg-user { max-width: 85%; padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.55; text-align: left; text-align-last: left; }
+  .msg-bot { background: var(--white); color: var(--ink); align-self: flex-start; }
+  .msg-bot a { color: var(--deep); }
+  .msg-user { background: var(--deep); color: var(--white); align-self: flex-end; }
+  .chat-opts { display: flex; flex-direction: column; gap: 6px; align-self: stretch; padding-top: 2px; }
+  .chat-opts button { display: flex; align-items: center; gap: 11px; padding: 11px 14px; border: 1px solid rgba(60, 60, 59, 0.2); border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: 13.5px/1.3 "Libre Baskerville", Arial, sans-serif; transition: border-color 0.15s; }
+  .chat-opts button:hover { border-color: var(--deep); }
+  .chat-opts button svg { width: 17px; height: 17px; flex: none; color: var(--deep); stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  /* Photo pop-up: photos in the sideways strips open large over the page */
+  .rooms .track img { cursor: zoom-in; }
+  /* Who leads it: a box for each of the team; a box opens that person's bio */
+  .team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--gap); max-width: 1100px; }
+  .member { --owed: var(--deep); display: flex; align-items: flex-end; min-height: clamp(160px, 18vw, 240px); padding: 24px 26px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink); font: 700 20px/1.3 "Libre Baskerville", Arial, sans-serif; text-align: left; text-shadow: none; cursor: pointer; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
+  #bio-pop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 5vh 5vw; background: rgba(16, 18, 18, 0.92); }
+  #bio-pop.open { display: flex; }
+  #bio-pop .panel { --owed: var(--deep); position: relative; width: min(640px, 100%); max-height: 100%; overflow: auto; padding: 40px 40px 36px; border-radius: 16px; background: var(--paper); color: var(--ink); }
+  #bio-pop h4 { margin: 0 0 14px; }
+  #bio-pop button { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(60, 60, 59, 0.08); color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #bio-pop button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  #photo-pop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 5vh 5vw; background: rgba(16, 18, 18, 0.92); cursor: zoom-out; }
+  #photo-pop.open { display: flex; }
+  #photo-pop img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); cursor: default; }
+  #photo-pop button { position: absolute; top: 18px; right: 18px; width: 48px; height: 48px; border: 0; border-radius: 24px; background: rgba(255, 255, 255, 0.12); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #photo-pop button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="reach">
+    <a class="btn" href="#register">Register</a>
+  </div>
+</header>
+
+<main>
+
+  <section class="scene hero" id="opening">
+    <div class="bg"><img src="images/fundo-parallax.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="hint" aria-hidden="true"><b>Scroll</b><span></span></div>
+    <div class="beat">
+      <div class="words">
+        <h1>Body language wellness retreat</h1>
+        <p class="place date">February 24th-28th 2027</p>
+        <h3>Embodiment by the sea</h3>
+        <p class="place"><a href="#area-map">Wirikuta Hotel Boutique · Lo de Marcos, Nayarit, México</a></p>
+        <a class="btn" href="#register">Register</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene type" id="retreat">
+    <div class="bg"><img src="images/unsplash-EoppqN2Wu5U.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost owed">The retreat</div>
+    <div class="beat">
+      <div class="words">
+        <h3>All levels welcome</h3>
+        <h2>Come as you are</h2>
+        <p>Whether you’re looking to move your body, deepen your practice, try something new, connect with like-minded people or simply unwind by the sea, this retreat is an invitation to nourish your body, mind and spirit.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="included">
+    <div class="bg"><img src="images/banner.jpg" alt=""></div>
+    <div class="shade"></div>
+    <div class="beat">
+      <div class="words">
+        <h2 class="owed">What's included</h2>
+        <ul class="ticks">
+          <li>Swimming</li>
+          <li>100m to the Beach</li>
+          <li>Delicious Meals</li>
+          <li>Morning Yoga Class</li>
+          <li>Afternoon Yoga Class</li>
+          <li>Dance Classes</li>
+          <li>Sacred Cacao</li>
+          <li>Exclusive Rooftop Party</li>
+          <li>Daily Relaxation Time</li>
+          <li>Expert Guidance</li>
+        </ul>
+      </div>
+      <div class="words">
+        <h2>Add Ons</h2>
+        <ul class="ticks">
+          <li>Capoeira</li>
+          <li>Surfing</li>
+          <li>Hiking</li>
+          <li>Biking</li>
+          <li>Massage</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene type" id="days">
+    <div class="bg"><img src="images/unsplash-ni7yHT3yyRE.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost owed">The days</div>
+    <div class="beat">
+      <div class="words">
+        <h2 class="owed">The days</h2>
+        <div class="days">
+          <div>
+            <h4>Wed Feb 24 · Arrival</h4>
+            <ul>
+              <li>Check-in from <span class="t">3:00 p.m.</span></li>
+              <li><span class="t">5:30 p.m.</span> Welcome yoga</li>
+              <li><span class="t">7:00 p.m.</span> Welcome dinner</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Thu Feb 25</h4>
+            <ul>
+              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
+              <li><span class="t">9:00 a.m.</span> Breakfast</li>
+              <li><span class="t">10:30 a.m.</span> Dance class</li>
+              <li><span class="t">1:00 p.m.</span> Lunch</li>
+              <li>Free afternoon for surf lessons, massage, biking or hiking</li>
+              <li><span class="t">5:30 p.m.</span> Sunset yoga</li>
+              <li><span class="t">7:00 p.m.</span> Dinner</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Fri Feb 26</h4>
+            <ul>
+              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
+              <li><span class="t">9:00 a.m.</span> Breakfast</li>
+              <li><span class="t">1:00 p.m.</span> Lunch</li>
+              <li>Free afternoon</li>
+              <li><span class="t">5:30 p.m.</span> Sunset yoga</li>
+              <li><span class="t">7:00 p.m.</span> Dinner</li>
+              <li><span class="t">8:30 p.m.</span> Ecstatic Dance &amp; Cacao</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Sat Feb 27</h4>
+            <ul>
+              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
+              <li><span class="t">9:00 a.m.</span> Breakfast</li>
+              <li>Free day at the beach</li>
+              <li><span class="t">1:00 p.m.</span> Lunch</li>
+              <li><span class="t">5:30 p.m.</span> Sunset yoga</li>
+              <li><span class="t">7:00 p.m.</span> Farewell dinner</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Sun Feb 28 · Departure</h4>
+            <ul>
+              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
+              <li><span class="t">9:00 a.m.</span> Breakfast</li>
+              <li>Check-out by <span class="t">12:00 p.m.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene type" id="leader">
+    <div class="bg"><img src="images/flickr-116291850.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost owed">Who leads it</div>
+    <div class="beat">
+      <div class="words">
+        <h2 class="owed">Who leads it</h2>
+        <div class="team">
+          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="hotel">
+    <div class="bg soft"><img src="images/home.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="beat">
+      <div class="card"><img src="images/home.webp" alt=""></div>
+      <div class="words">
+        <h2>Welcome to Wirikuta Hotel</h2>
+        <h3>your refuge in the heart of Lo De Marcos!</h3>
+        <p>Located in the most vibrant area of the city, our hotel offers a unique experience that blends modern comfort with the rich cultural heritage of the city. Just steps away from markets, plazas, and traditional restaurants, discover the authenticity of Lo De Marcos.</p>
+        <p>Check-in at 3:00 p.m. and check-out at 12:00 p.m.</p>
+        <ul class="ticks">
+          <li>Restaurant</li>
+          <li>Pool</li>
+          <li>Rooftop</li>
+          <li>Wi-Fi</li>
+          <li>Air conditioning</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene rooms" id="rooms">
+    <div class="bg soft"><img src="images/simples.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="words head">
+      <h2>Find the ideal room tailored to your needs!</h2>
+      <p>We offer a variety of accommodations designed for you to enjoy a unique shared experience. Whether it’s double, triple, or quadruple rooms, we have the perfect setup for your trip.</p>
+    </div>
+    <div class="track">
+      <figure><img src="images/1.1.webp" alt=""></figure>
+      <figure><img src="images/simples.webp" alt=""><figcaption>Single Room · 2 adults · 15 m²</figcaption></figure>
+      <figure><img src="images/premium.webp" alt=""><figcaption>Premium Room · 3 adults · 40 m²</figcaption></figure>
+      <figure><img src="images/dos-recamaras.webp" alt=""><figcaption>2 Bedroom Room · 4 adults · 66 m²</figcaption></figure>
+      <figure><img src="images/6.webp" alt=""><figcaption>3 Bedroom Room · 6 adults · 94 m²</figcaption></figure>
+    </div>
+    <div class="strip-nav">
+      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </section>
+
+  <section class="scene rooms photos" id="food-photos">
+    <div class="bg soft"><img src="images/3.1.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="words head">
+      <h2>Food and drink</h2>
+    </div>
+    <div class="track">
+      <figure><img src="images/pexels-aguachile-39440920.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/delicious-fresh-ceviche-with-cucumber-garnish-39440920/">César O&#x27;neill</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/unsplash-aguachile-sDeIcDW0jUs.webp" alt=""><figcaption><a href="https://unsplash.com/photos/sDeIcDW0jUs">Carlos Davila Cepeda</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/commons-aguas-frescas-Aguas_frescas_en_Mercado_Roma.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Aguas_frescas_en_Mercado_Roma.jpg">Lizmich91</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/commons-ceviche-Tostada_de_ceviche_de_camaron.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Tostada_de_ceviche_de_camar%C3%B3n.jpg">Kelpgreen.D</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/unsplash-ceviche-VSb6KDaiga0.webp" alt=""><figcaption><a href="https://unsplash.com/photos/VSb6KDaiga0">Yasmine Duchesne</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-chilaquiles-5sD2TgDZOxA.webp" alt=""><figcaption><a href="https://unsplash.com/photos/5sD2TgDZOxA">Alexandra Mendívil</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-coco-tW0j8n-GIUY.webp" alt=""><figcaption><a href="https://unsplash.com/photos/tW0j8n-GIUY">Xiaoyu Li</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-coctel-de-camaron-Kjwyy77WPtQ.webp" alt=""><figcaption><a href="https://unsplash.com/photos/Kjwyy77WPtQ">Menú Acapulco</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-guacamole-iiMIegrG3Ag.webp" alt=""><figcaption><a href="https://unsplash.com/photos/iiMIegrG3Ag">Zoshua Colah</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/commons-huevos-rancheros-Huevos_rancheros_with_carnitas.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Huevos_rancheros_with_carnitas.jpg">Louiemantia</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/unsplash-mango-vxtBBfMTMZ0.webp" alt=""><figcaption><a href="https://unsplash.com/photos/vxtBBfMTMZ0">Desirae Hayes-Vitor</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/pexels-pescado-zarandeado-15112748.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/pouring-lime-juice-on-roasted-fish-15112748/">Aquino Foto</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/pexels-pescado-zarandeado-19725446.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/fish-on-tray-19725446/">Roken Manases</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/unsplash-tacos-de-camaron-v-UlAEJTSVw.webp" alt=""><figcaption><a href="https://unsplash.com/photos/v-UlAEJTSVw">Daniel Arriola</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/commons-tacos-de-pescado-Tacos_de_pescado_en_Puerto_Morelos.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Tacos_de_pescado_en_Puerto_Morelos.jpg">Wotancito</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/pexels-tortillas-36971424.webp" alt=""><figcaption><a href="https://www.pexels.com/photo/traditional-tortillas-cooking-on-open-flame-36971424/">Alejandro JV</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
+      <figure><img src="images/unsplash-tostada-atun-DBQYSAf0sak.webp" alt=""><figcaption><a href="https://unsplash.com/photos/DBQYSAf0sak">Shelley M</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+    </div>
+    <div class="strip-nav">
+      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </section>
+
+  <section class="scene" id="lo-de-marcos">
+    <div class="bg soft"><img src="images/3.webp" alt=""></div>
+    <div class="bg soft" data-beat="2"><img src="images/3.1.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="beat">
+      <div class="card"><img src="images/3.webp" alt=""></div>
+      <div class="words">
+        <h2>Discover Lo De Marcos from</h2>
+        <h3>Wirikuta Hotel</h3>
+        <p>Surrounded by lush jungle, fruit trees, and peaceful beaches, Wirikuta Hotel is a sanctuary designed for those seeking to disconnect from the noise and reconnect with what truly matters. Here, every sunrise, accompanied by birdsong and the whisper of the sea, invites you to live in harmony with nature. With architecture that honors the environment and an atmosphere of serenity, we offer an authentic, relaxing, and deeply inspiring experience in Lo De Marcos.</p>
+      </div>
+    </div>
+    <div class="beat">
+      <div class="card"><img src="images/3.1.webp" alt=""></div>
+      <div class="words">
+        <h2>Strategically located</h2>
+        <p>Wirikuta Hotel is the perfect retreat for travelers seeking an immersion in the rich local culture. Situated just steps away from traditional markets, art galleries, and historic landmarks, our hotel blends the charm of colonial architecture with modern comfort, ensuring easy access to the authentic experiences that define the city.</p>
+      </div>
+    </div>
+    <div class="beat high">
+      <div class="words wide">
+        <h2 class="owed">Getting there</h2>
+        <p class="owed">Shuttle from the airport</p>
+        <p class="owed">Scheduling a shuttle</p>
+        <div class="near">
+          <div>
+            <h4>Outdoor</h4>
+            <dl>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Lo+de+Marcos+Beach%2C+Lo+de+Marcos%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Lo de Marcos Beach</a></dt><dd>100m</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Lo+de+Marcos+Square%2C+Lo+de+Marcos%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Lo de Marcos Square</a></dt><dd>400m</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=San+Pancho+Nayarit+Market%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">San Pancho Nayarit Market</a></dt><dd>12.7 km</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=San+Francisco+Beach%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">San Francisco Beach</a></dt><dd>12.3 km</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Sayulita+Beach%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Sayulita Beach</a></dt><dd>18.3 km</dd>
+            </dl>
+          </div>
+          <div>
+            <h4>Restaurants</h4>
+            <dl>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Restaurante+Olivia%2C+Lo+de+Marcos%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Restaurante Olivia</a></dt><dd>100m</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Restaurant+Bar+Las+Margaritas%2C+Lo+de+Marcos%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Restaurant Bar Las Margaritas</a></dt><dd>150m</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Cenaduria+Carolina%2C+Lo+de+Marcos%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Cenaduria Carolina</a></dt><dd>350m</dd>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Restaurante+Paraiso%2C+Lo+de+Marcos%2C+Nayarit%2C+Mexico" target="_blank" rel="noopener">Restaurante Paraiso</a></dt><dd>5 km</dd>
+            </dl>
+          </div>
+          <div>
+            <h4>Transportation</h4>
+            <dl>
+              <dt><a href="https://www.google.com/maps/search/?api=1&amp;query=Lic.+Gustavo+Diaz+Ordaz+Airport%2C+Puerto+Vallarta%2C+Mexico" target="_blank" rel="noopener">Lic. Gustavo Diaz Ordaz Airport</a></dt><dd>55 km</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene rooms photos" id="lo-de-marcos-photos">
+    <div class="bg soft"><img src="images/3.1.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="words head">
+      <h2>Lo De Marcos</h2>
+    </div>
+    <div class="track">
+      <figure><img src="images/commons-Bahia_lo_de_Marcos.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Bahia_lo_de_Marcos.jpg">Elbeta</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/commons-Lagooooo.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Lagooooo.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/commons-Letras_en_Lo_de_Marcos.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Letras_en_Lo_de_Marcos.jpg">Navlilia</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/commons-Lo_de_Marcos.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Lo_de_Marcos.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/commons-Playa_Lo_de_Marcos.webp" alt=""><figcaption><a href="https://commons.wikimedia.org/wiki/File:Playa_%22Lo_de_Marcos%22.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
+      <figure><img src="images/flickr-116291850.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116291850">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-116304642.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116304642">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-116311479.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116311479">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-116313658.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116313658">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-116666033.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116666033">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-53752274222.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/200740808@N03/53752274222">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-53753380458.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/200740808@N03/53753380458">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></figcaption></figure>
+      <figure><img src="images/flickr-53753607360.webp" alt=""><figcaption><a href="https://www.flickr.com/photos/200740808@N03/53753607360">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></figcaption></figure>
+      <figure><img src="images/unsplash-5heXU3WTH2E.webp" alt=""><figcaption><a href="https://unsplash.com/photos/people-fishing-on-beach-at-dusk-5heXU3WTH2E">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-AsVDUWF1Uho.webp" alt=""><figcaption><a href="https://unsplash.com/photos/aerial-view-of-lush-green-island-meeting-turquoise-ocean-waters-AsVDUWF1Uho">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-CixIjSm2IyY.webp" alt=""><figcaption><a href="https://unsplash.com/photos/person-in-beach-chair-under-palm-CixIjSm2IyY">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-EoppqN2Wu5U.webp" alt=""><figcaption><a href="https://unsplash.com/photos/aerial-view-of-a-lush-green-coastline-meeting-the-ocean-EoppqN2Wu5U">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-I914gny7T2Y.webp" alt=""><figcaption><a href="https://unsplash.com/photos/silhouette-of-a-person-jumping-on-a-beach-at-sunset-I914gny7T2Y">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-VYOJ7y2ifgM.webp" alt=""><figcaption><a href="https://unsplash.com/photos/aerial-view-of-a-winding-river-meeting-the-ocean-beach-VYOJ7y2ifgM">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-ni7yHT3yyRE.webp" alt=""><figcaption><a href="https://unsplash.com/photos/lush-green-jungle-meets-sandy-beach-and-turquoise-water-ni7yHT3yyRE">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+      <figure><img src="images/unsplash-wNboBOSiuvA.webp" alt=""><figcaption><a href="https://unsplash.com/photos/a-small-boat-floats-in-clear-turquoise-ocean-water-wNboBOSiuvA">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
+    </div>
+    <div class="strip-nav">
+      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </section>
+
+  <section class="scene map" id="area-map">
+    <div class="map-box"></div>
+  </section>
+
+  <section class="scene type" id="flights">
+    <div class="bg"><img src="images/unsplash-AsVDUWF1Uho.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost">Find flights</div>
+    <div class="beat">
+      <div class="words">
+        <h2>Find flights</h2>
+        <form class="fly" id="fly" action="https://www.google.com/travel/flights" method="get" target="_blank" rel="noopener">
+          <div class="field"><label for="fly-from">From</label><input id="fly-from" type="text" autocomplete="address-level2"></div>
+          <div class="field"><label for="fly-out">Depart</label><input id="fly-out" type="date" value="2027-02-24"></div>
+          <div class="field"><label for="fly-back">Return</label><input id="fly-back" type="date" value="2027-02-28"></div>
+          <input type="hidden" name="q">
+          <button class="btn" type="submit">Google Flights</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene type" id="prices">
+    <div class="bg"><img src="images/commons-Bahia_lo_de_Marcos.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost owed">Prices and rooms</div>
+    <div class="beat">
+      <div class="words">
+        <h2 class="owed">Prices and rooms</h2>
+        <p class="owed">Price for each room option</p>
+        <p class="owed">Cancellation and refund terms</p>
+        <a class="btn" href="#register">Register</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene type" id="questions">
+    <div class="bg"><img src="images/flickr-116304642.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost owed">Questions</div>
+    <div class="beat">
+      <div class="words">
+        <h2 class="owed">Questions</h2>
+        <p class="owed">Questions and answers</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene rooms quotes" id="reviews">
+    <div class="bg"><img src="images/unsplash-VYOJ7y2ifgM.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost">Reviews</div>
+    <div class="words head">
+      <h2>Reviews</h2>
+      <ul class="scores">
+        <li><a href="https://www.weddingwire.ca/park-weddings/whispering-springs-wilderness-retreat--e20881/reviews" target="_blank" rel="noopener"><span class="n">5.0<small> / 5</small></span><span class="site">WeddingWire · 17 reviews</span></a></li>
+        <li><a href="https://www.trip.com/hotels/alnwick-haldimand-hotel-detail-109458002/whispering-springs-wilderness-retreat/" target="_blank" rel="noopener"><span class="n">9.7<small> / 10</small></span><span class="site">Trip.com · 60 reviews</span></a></li>
+      </ul>
+    </div>
+    <div class="track">
+      <figure><blockquote>Dark &amp; romantic forest wedding achieved!</blockquote><figcaption>Aruna · 30/09/2026 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>The most perfect venue</blockquote><figcaption>Krista · 29/09/2025 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Mystical, rustic, &amp; serene! Completely captured my wedding vision!</blockquote><figcaption>Cara · 21/10/2024 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Perfect wedding day</blockquote><figcaption>Samantha · 24/08/2023 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Fairytale experience!</blockquote><figcaption>Veronika · 03/07/2023 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Fairytale Wedding, Amazing Staff, and a Relaxed Atmosphere!</blockquote><figcaption>Mariya · 02/07/2023 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Absolutely perfect</blockquote><figcaption>Meaghen · 12/12/2022 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Dream Wedding Venue</blockquote><figcaption>Kathleen · 21/08/2022 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>The Forest Wedding of your Dreams!</blockquote><figcaption>Chelsea · 05/02/2022 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>Our Perfect Wedding Day at Whispering Springs</blockquote><figcaption>Krista · 21/11/2021 · 5.0 / 5 · WeddingWire</figcaption></figure>
+      <figure><blockquote>The place was incredibly cozy and spotless. As it’s glamping, there were inevitably some mosquitoes and spiders, but mosquito repellent was provided inside the tent, which helped a lot. We had our own private campfire, and the view was absolutely breathtaking. Every staff member at the reception was kind and welcoming. We really enjoyed using the pool, hot tub, and sauna. The lighting around the site was beautiful, and the facilities were so well maintained. We were able to create such wonderful memories here.</blockquote><figcaption>Guest User · May 26, 2025 · 8.5 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>Our elopement package at Whispering Springs Wilderness Retreat was absolutely perfect. From the beautiful cottage accommodations and stunning décor to the amazing food and exceptional service, every detail exceeded our expectations. The officiant and photographer were both wonderful and helped make our day truly special and stress-free.  We would highly recommend Whispering Springs Wilderness Retreat to anyone considering a wedding or elopement. It was a magical experience that we will cherish forever.</blockquote><figcaption>Guest User · October 19, 2026 · 10.0 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>Enjoyed our 2 night stay in the A Frame cabin The cabin was so cozy ..it was equipped with all the essentials to barbecue dinner  No need to pack towels or linens  Having our own hot tub was a treat  We treated ourselves to the breakfast that was dropped off in the morning .. highly recommend  A great relaxing weekend</blockquote><figcaption>Guest User · September 30, 2026 · 10.0 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>Easily the most beautiful wedding venue that I have ever seen! Every detail is taken care of. The tents were gorgeous - it definitely felt like a luxury experience!</blockquote><figcaption>Guest User · August 30, 2026 · 10.0 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>We went to celebrate a 5 year anniversary and baby moon. It was so relaxing and wonderful to be in such a peaceful setting. Our tent was “Sous le vent” and we adored it, romantic, peaceful and serene!</blockquote><figcaption>Guest User · August 23, 2026 · 8.0 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>This was my first time staying at the Whispering Springs. It is an absolutely beautiful place with a variety of awesome places to stay in. I stayed in the Willow Rush Safari Tent which was a large tent that also included a deck with chairs &amp; a table, a gazebo with a table and chairs and a BBQ. Also on site was a place to have a fire. Everything was amazing including the employees and owners. They made sure everything was perfect from beginning to end. I will definitely be returning next summer. I would highly recommend Whispering Springs.</blockquote><figcaption>Guest User · August 3, 2026 · 10.0 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>Hello. As we mentioned at check-out, we would like to thank you once again for the service we received during our stay at your resort. The rooms were incredibly comfortable and far exceeded our expectations; we also really appreciated their design and construction. We wish you continued success and hope to see you again very soon.</blockquote><figcaption>Guest User · July 6, 2026 · 10.0 / 10 · Trip.com</figcaption></figure>
+      <figure><blockquote>Amazing stay, who knew glamping would be this good. Attention to detail, knowledge of staff, no faults</blockquote><figcaption>Louise · August 4, 2026 · 10.0 / 10 · Trip.com</figcaption></figure>
+    </div>
+    <div class="strip-nav">
+      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </section>
+
+  <section class="register" id="register">
+    <div class="bg"><img src="images/unsplash-wNboBOSiuvA.webp" alt=""></div>
+    <div class="shade"></div>
+    <h2>Register</h2>
+    <form id="reg">
+      <div class="col">
+        <fieldset>
+          <legend>About you</legend>
+          <div class="field"><label for="f-name">Full name</label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
+          <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
+          <div class="field"><label for="f-phone">Mobile phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" required></div>
+        </fieldset>
+        <fieldset>
+          <legend>Emergency contact</legend>
+          <div class="field"><label for="e-name">Name</label><input id="e-name" name="emergency_name" type="text" required></div>
+          <div class="field"><label for="e-rel">Relationship</label><input id="e-rel" name="emergency_relationship" type="text" required></div>
+          <div class="field"><label for="e-phone">Phone</label><input id="e-phone" name="emergency_phone" type="tel" required></div>
+        </fieldset>
+        <fieldset>
+          <legend>Your room</legend>
+          <div class="field"><label for="room">Room option</label><select id="room" name="room" required><option value="" selected disabled></option></select></div>
+          <div class="field"><label for="mate">If sharing: roommate's name, or blank to be paired</label><input id="mate" name="roommate" type="text"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Add Ons</legend>
+          <div class="field check addon"><input id="a-capoeira" name="addons" value="Capoeira" type="checkbox"><label for="a-capoeira" id="l-capoeira">Capoeira</label><div class="when" role="radiogroup" aria-labelledby="l-capoeira"><label><input type="radio" name="when-capoeira" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-capoeira" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-capoeira" value="Sat free day">Sat free day</label></div></div>
+          <div class="field check addon"><input id="a-surfing" name="addons" value="Surfing" type="checkbox"><label for="a-surfing" id="l-surfing">Surfing</label><div class="when" role="radiogroup" aria-labelledby="l-surfing"><label><input type="radio" name="when-surfing" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-surfing" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-surfing" value="Sat free day">Sat free day</label></div></div>
+          <div class="field check addon"><input id="a-hiking" name="addons" value="Hiking" type="checkbox"><label for="a-hiking" id="l-hiking">Hiking</label><div class="when" role="radiogroup" aria-labelledby="l-hiking"><label><input type="radio" name="when-hiking" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-hiking" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-hiking" value="Sat free day">Sat free day</label></div></div>
+          <div class="field check addon"><input id="a-biking" name="addons" value="Biking" type="checkbox"><label for="a-biking" id="l-biking">Biking</label><div class="when" role="radiogroup" aria-labelledby="l-biking"><label><input type="radio" name="when-biking" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-biking" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-biking" value="Sat free day">Sat free day</label></div></div>
+          <div class="field check addon"><input id="a-massage" name="addons" value="Massage" type="checkbox"><label for="a-massage" id="l-massage">Massage</label><div class="when" role="radiogroup" aria-labelledby="l-massage"><label><input type="radio" name="when-massage" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-massage" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-massage" value="Sat free day">Sat free day</label></div></div>
+        </fieldset>
+      </div>
+      <div class="col">
+        <fieldset>
+          <legend>Food</legend>
+          <div class="field"><label for="food">Dietary needs and allergies</label><textarea id="food" name="food"></textarea></div>
+        </fieldset>
+        <fieldset>
+          <legend>Health and mobility</legend>
+          <div class="field"><label for="health">Anything Whispering Springs should know, including trouble with stairs</label><textarea id="health" name="health"></textarea></div>
+        </fieldset>
+        <fieldset>
+          <legend>Travel</legend>
+          <div class="field"><label for="travel">Arrival and departure flights</label><textarea id="travel" name="travel"></textarea></div>
+        </fieldset>
+        <fieldset>
+          <legend>Agreement</legend>
+          <div class="field check"><input id="agree" name="agree" type="checkbox" required><label for="agree">Terms and cancellation policy</label></div>
+          <p class="links"><a href="https://www.whisperingsprings.ca/terms-and-conditions">Terms &amp; Conditions</a> · <a href="https://www.whisperingsprings.ca/privacy-and-cookies">Privacy &amp; Cookies</a></p>
+        </fieldset>
+        <button class="btn" type="submit">Register</button>
+      </div>
+    </form>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <ul>
+    <li><a href="tel:+19053491009">(905) 349-1009</a></li>
+    <li><a href="mailto:info@whisperingsprings.ca">info@whisperingsprings.ca</a></li>
+    <li>141 Mercer Lane, Grafton, K0K 2G0, CA</li>
+  </ul>
+  <ul>
+    <li><a href="https://www.whisperingsprings.ca/terms-and-conditions">Terms &amp; Conditions</a></li>
+    <li><a href="https://www.whisperingsprings.ca/privacy-and-cookies">Privacy &amp; Cookies</a></li>
+    <li><a href="https://www.whisperingsprings.ca/accessibility-statement">Accessibility Statement</a></li>
+  </ul>
+</footer>
+
+<div id="photo-pop" role="dialog" aria-modal="true" aria-label="Photo">
+  <button type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  <img alt="">
+</div>
+
+<div id="bio-pop" role="dialog" aria-modal="true" aria-label="Bio">
+  <div class="panel" data-lenis-prevent>
+    <button type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+    <h4></h4>
+    <div class="bio"></div>
+  </div>
+</div>
+
+<button id="chat-btn" type="button">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  Have Questions?
+</button>
+<div id="chat-panel" role="dialog" aria-label="Have Questions?">
+  <div class="chat-head">
+    <span class="t">Have Questions?</span>
+    <div>
+      <button id="chat-restart" type="button">Restart</button>
+      <button id="chat-close" type="button">Close</button>
+    </div>
+  </div>
+  <div id="chat-log"></div>
+</div>
+
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script>
+  // Every reload starts at the top, never where the last visit left off.
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  window.scrollTo(0, 0);
+  // Safari can keep the old spot on reload anyway, so the page leaves from the top.
+  window.addEventListener("beforeunload", () => window.scrollTo(0, 0));
+
+  // Payment is not connected yet: Square access from Whispering Springs comes first.
+  document.getElementById("reg").addEventListener("submit", (e) => e.preventDefault());
+
+  // Strips: each scrolls sideways on its own; the buttons move it most of a screen and grey out at the ends.
+  document.querySelectorAll(".scene.rooms").forEach((strip) => {
+    const track = strip.querySelector(".track");
+    const [prev, next] = strip.querySelectorAll(".strip-nav button");
+    const step = (dir) => track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: "smooth" });
+    const ends = () => {
+      prev.disabled = track.scrollLeft <= 2;
+      next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+    };
+    prev.addEventListener("click", () => step(-1));
+    next.addEventListener("click", () => step(1));
+    track.addEventListener("scroll", ends, { passive: true });
+    track.querySelectorAll("img").forEach((img) => img.addEventListener("load", ends));
+    window.addEventListener("resize", ends);
+    window.addEventListener("load", ends);
+    ends();
+    // A sideways swipe moves the strip; an up-down scroll still moves the page.
+    track.addEventListener("wheel", (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.stopPropagation(); }, { passive: true });
+  });
+
+  // Add Ons: a ticked add on asks for its time; untick it and the time clears.
+  document.querySelectorAll("#reg .addon").forEach((row) => {
+    const box = row.querySelector('input[type="checkbox"]');
+    const times = row.querySelectorAll('input[type="radio"]');
+    box.addEventListener("change", () => times.forEach((t) => { t.required = box.checked; if (!box.checked) t.checked = false; }));
+  });
+
+  // Find flights: the search Google Flights gets is written from her city and dates, PVR is always the destination.
+  document.getElementById("fly").addEventListener("submit", (e) => {
+    const f = e.currentTarget;
+    const from = f.querySelector("#fly-from").value.trim();
+    const out = f.querySelector("#fly-out").value;
+    const back = f.querySelector("#fly-back").value;
+    let q = "Flights" + (from ? " from " + from : "") + " to PVR";
+    if (out) q += " on " + out + (back ? " through " + back : "");
+    f.querySelector('input[name="q"]').value = q;
+  });
+
+  // Opening shows only the photo and the scroll hint; the top bar arrives with the first scroll.
+  const topBar = document.querySelector(".top");
+  const onScroll = () => {
+    const on = window.scrollY > 8;
+    topBar.classList.toggle("on", on);
+    document.documentElement.classList.toggle("scrolled", on);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // Area map: open map data in Whispering Springs colours, real height data for the 3D part.
+  const HOTEL = [-105.3554, 20.9579]; // its street, Calle Venustiano Carranza: open map data has no exact door
+  const AREA = [[-105.42, 20.64], [-105.2, 20.99]]; // Puerto Vallarta airport up to Lo de Marcos
+  const DEM = { type: "raster-dem", tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"], encoding: "terrarium", tileSize: 256, maxzoom: 15 };
+  const areaBox = document.querySelector("#area-map .map-box");
+  const mapPad = () => {
+    const bar = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--bar")) || 88;
+    return { top: bar + 40, bottom: 56, left: 40, right: 40 };
+  };
+  const areaMap = window.maplibregl && areaBox ? new maplibregl.Map({
+    container: areaBox,
+    bounds: AREA,
+    fitBoundsOptions: { padding: mapPad() },
+    interactive: false,
+    maxPitch: 70,
+    attributionControl: { compact: false },
+    style: {
+      version: 8,
+      glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+      sources: {
+        omt: { type: "vector", url: "https://tiles.openfreemap.org/planet" },
+        dem: { ...DEM, attribution: "Mexico terrain data source: INEGI, Continental relief, 2016; Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric Administration; global GMTED2010 and SRTM terrain data courtesy of the U.S. Geological Survey" },
+        shade: DEM,
+      },
+      terrain: { source: "dem", exaggeration: 1 },
+      sky: { "sky-color": "#7ea8ad", "horizon-color": "#f2f1ec", "fog-color": "#f2f1ec", "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.5 },
+      layers: [
+        { id: "land", type: "background", paint: { "background-color": "#e8dbcf" } },
+        { id: "wood", type: "fill", source: "omt", "source-layer": "landcover", filter: ["in", ["get", "class"], ["literal", ["wood", "grass", "wetland"]]], paint: { "fill-color": "#4b7b80", "fill-opacity": 0.14 } },
+        { id: "park", type: "fill", source: "omt", "source-layer": "park", paint: { "fill-color": "#4b7b80", "fill-opacity": 0.1 } },
+        { id: "relief", type: "hillshade", source: "shade", paint: { "hillshade-shadow-color": "#3c3c3b", "hillshade-highlight-color": "#f2f1ec", "hillshade-accent-color": "#4b7b80", "hillshade-exaggeration": 0.4 } },
+        { id: "water", type: "fill", source: "omt", "source-layer": "water", paint: { "fill-color": "#7ea8ad" } },
+        { id: "rivers", type: "line", source: "omt", "source-layer": "waterway", paint: { "line-color": "#7ea8ad", "line-width": 1.2 } },
+        { id: "runway", type: "line", source: "omt", "source-layer": "aeroway", filter: ["==", ["geometry-type"], "LineString"], paint: { "line-color": "#f2f1ec", "line-width": ["interpolate", ["linear"], ["zoom"], 9, 1, 14, 8] } },
+        { id: "buildings", type: "fill", source: "omt", "source-layer": "building", minzoom: 13, paint: { "fill-color": "#414345", "fill-opacity": 0.18 } },
+        { id: "roads", type: "line", source: "omt", "source-layer": "transportation", filter: ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary", "minor", "service"]]], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#f2f1ec", "line-width": ["interpolate", ["linear"], ["zoom"], 9, ["match", ["get", "class"], ["motorway", "trunk", "primary"], 1.6, 0.4], 15, ["match", ["get", "class"], ["motorway", "trunk", "primary"], 7, 3]] } },
+        { id: "sea-names", type: "symbol", source: "omt", "source-layer": "water_name", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Italic"], "text-size": 13, "text-letter-spacing": 0.1 }, paint: { "text-color": "#4b7b80" } },
+        { id: "airport", type: "symbol", source: "omt", "source-layer": "aerodrome_label", layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 12, "text-max-width": 9 }, paint: { "text-color": "#414345", "text-halo-color": "#f2f1ec", "text-halo-width": 1.2 } },
+        { id: "towns", type: "symbol", source: "omt", "source-layer": "place", filter: ["in", ["get", "class"], ["literal", ["city", "town", "village"]]], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Bold"], "text-size": ["match", ["get", "class"], "city", 15, 13] }, paint: { "text-color": "#3c3c3b", "text-halo-color": "#f2f1ec", "text-halo-width": 1.4 } },
+      ],
+    },
+  }) : null;
+  let mapKeys = null;
+  function makeMapKeys() {
+    const c = areaMap.cameraForBounds(AREA, { padding: mapPad() });
+    if (!c) return null;
+    const s = maplibregl.LngLat.convert(c.center);
+    return [
+      { lng: s.lng, lat: s.lat, zoom: c.zoom, pitch: 0, bearing: 0 },
+      { lng: s.lng + (HOTEL[0] - s.lng) * 0.55, lat: s.lat + (HOTEL[1] - s.lat) * 0.55, zoom: c.zoom + 1.6, pitch: 55, bearing: 30 },
+      { lng: HOTEL[0], lat: HOTEL[1], zoom: 14.2, pitch: 68, bearing: 70 },
+    ];
+  }
+  // t runs 0 to 1: flat overview, tilt into 3D, then in over Lo de Marcos.
+  function mapAt(t) {
+    if (!areaMap) return;
+    mapKeys = mapKeys || makeMapKeys();
+    if (!mapKeys) return;
+    const seg = t < 0.55 ? 0 : 1;
+    const u = seg ? (t - 0.55) / 0.45 : t / 0.55;
+    const e = u * u * (3 - 2 * u);
+    const a = mapKeys[seg], b = mapKeys[seg + 1];
+    const mix = (k) => a[k] + (b[k] - a[k]) * e;
+    areaMap.jumpTo({ center: [mix("lng"), mix("lat")], zoom: mix("zoom"), pitch: mix("pitch"), bearing: mix("bearing") });
+  }
+  if (areaMap) {
+    areaMap.on("resize", () => { mapKeys = null; });
+    const pin = document.createElement("div");
+    pin.className = "pin";
+    pin.innerHTML = '<span class="label">Wirikuta Hotel</span><span class="dot"></span>';
+    new maplibregl.Marker({ element: pin, anchor: "bottom" }).setLngLat(HOTEL).addTo(areaMap);
+  }
+
+  if (window.gsap && window.ScrollTrigger && window.Lenis) {
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
+    const root = document.documentElement;
+
+    // Everything a scene shows lives inside [0, END]; exits finish before the pin lets go.
+    const END = 0.92;
+
+    // Words arrive with their section: they rise in while it slides up, so no section shows up blank.
+    function arrive(scene, items) {
+      gsap.fromTo(items, { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, stagger: 0.04, ease: "none", scrollTrigger: { trigger: scene, start: "top 90%", end: "top 30%", scrub: true } });
+    }
+
+    function buildScene(scene) {
+      const beats = [...scene.querySelectorAll(":scope > .beat")];
+      const n = beats.length;
+      const L = END / n;
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: { trigger: scene, start: "top top", end: "+=" + n * 100 + "%", pin: true, scrub: true },
+      });
+      scene.querySelectorAll(":scope > .bg img").forEach((img) => {
+        const soft = img.parentElement.classList.contains("soft");
+        tl.fromTo(img, { scale: soft ? 1.2 : 1 }, { scale: soft ? 1.32 : 1.14, duration: 1 }, 0);
+      });
+      scene.querySelectorAll(":scope > .bg[data-beat]").forEach((bg) => {
+        const i = Number(bg.dataset.beat) - 1;
+        tl.fromTo(bg, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 * L }, i * L - 0.15 * L);
+      });
+      const ghost = scene.querySelector(":scope > .ghost");
+      if (ghost) tl.fromTo(ghost, { xPercent: 0 }, { xPercent: -18, duration: 1 }, 0);
+      if (scene.id === "opening") tl.fromTo(scene.querySelector(":scope > .shade"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 * L }, 0.02 * L);
+      beats.forEach((beat, i) => {
+        const items = beat.children;
+        const w0 = i * L;
+        const w1 = w0 + L;
+        // No blank screen between beats: the next one comes in as the one before it finishes leaving.
+        if (i === 0 && scene.id !== "opening") arrive(scene, items);
+        else tl.fromTo(items, { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: 0.2 * L, stagger: 0.04 * L }, i === 0 ? w0 + 0.06 * L : w0 - 0.14 * L);
+        // The last beat leaves just before the pin lets go, so the section never sits blank and nothing scrolls away.
+        const outLen = 0.16 * L + 0.03 * L * (items.length - 1);
+        tl.to(items, { autoAlpha: 0, y: -40, duration: 0.16 * L, stagger: 0.03 * L }, i === n - 1 ? 0.98 - outLen : w1 - 0.3 * L);
+      });
+      tl.to({}, { duration: 0 }, 1);
+    }
+
+    // Strips: the page scrolls straight past; the photos only move on their own scroll and buttons.
+    function buildRooms(scene) {
+      arrive(scene, [...scene.querySelectorAll(":scope > .head, :scope > .track, :scope > .strip-nav")]);
+    }
+
+    // Map: holds flat, tilts into 3D, flies in to Lo de Marcos, holds, then fades before the pin lets go.
+    function buildMap(scene) {
+      const cam = { t: 0 };
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: { trigger: scene, start: "top top", end: () => "+=" + window.innerHeight * 3.5, pin: true, scrub: true, invalidateOnRefresh: true },
+      });
+      tl.fromTo(cam, { t: 0 }, { t: 1, duration: 0.58, onUpdate: () => mapAt(cam.t) }, 0.12);
+      tl.fromTo(scene.querySelector(".map-box"), { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.08 }, END - 0.08);
+      tl.to({}, { duration: 0 }, 1);
+    }
+
+    gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+      root.classList.add("motion");
+      const lenis = new Lenis();
+      lenis.on("scroll", ScrollTrigger.update);
+      const tick = (t) => lenis.raf(t * 1000);
+      gsap.ticker.add(tick);
+      gsap.ticker.lagSmoothing(0);
+
+      const onAnchor = (e) => {
+        const target = document.querySelector(e.currentTarget.getAttribute("href"));
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target);
+      };
+      window.wsScrollTo = (el) => lenis.scrollTo(el);
+      window.wsLenis = lenis;
+      const anchors = document.querySelectorAll('a[href^="#"]');
+      anchors.forEach((a) => a.addEventListener("click", onAnchor));
+
+      // Build in page order so every pin knows the space the pins above it take.
+      document.querySelectorAll(".scene").forEach((scene) => {
+        if (scene.classList.contains("rooms")) buildRooms(scene);
+        else if (scene.classList.contains("map")) { if (areaMap) buildMap(scene); }
+        else buildScene(scene);
+      });
+
+      return () => {
+        anchors.forEach((a) => a.removeEventListener("click", onAnchor));
+        window.wsScrollTo = null;
+        window.wsLenis = null;
+        gsap.ticker.remove(tick);
+        lenis.destroy();
+        mapAt(0);
+        root.classList.remove("motion");
+      };
+    });
+  }
+</script>
+<script>
+  // Help tree: same engine as the BTMATS rent page; every answer comes from this page.
+  (function () {
+    const ICONS = {
+      calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+      pin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+      check: '<polyline points="20 6 9 17 4 12"/>',
+      plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+      heart: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+      sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+      plane: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+      pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+      dots: '<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
+    };
+    const icon = (k) => (ICONS[k] ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + ICONS[k] + "</svg>" : "");
+    const MORE = [["That answers it", "solved"], ["Another question", "start"]];
+    const TREE = {
+      start: {
+        text: "Hello. What can we answer before you register?",
+        opts: [
+          ["When is it?", "when", "calendar"],
+          ["Where is it?", "where", "pin"],
+          ["What's included?", "included", "check"],
+          ["What are the add ons?", "addons", "plus"],
+          ["Do I need experience?", "levels", "heart"],
+          ["What does each day look like?", "days", "sun"],
+          ["How do I get there?", "flights", "plane"],
+          ["How do I register?", "register", "pen"],
+          ["Something else", "other", "dots"],
+        ],
+      },
+      when: { text: "February 24th-28th 2027. Check-in from 3:00 p.m. on Wednesday, February 24, and check-out by 12:00 p.m. on Sunday, February 28.", opts: MORE },
+      where: { text: 'Wirikuta Hotel Boutique · Lo de Marcos, Nayarit, México. The <a href="#area-map">map</a> shows where it is.', opts: MORE },
+      included: { text: "Accommodation within walking distance of the beach, three delicious meals daily, two yoga classes every day, a dance class and an evening of Ecstatic Dance &amp; Cacao. Access to surf lessons, massage, biking and hiking.", opts: MORE },
+      addons: { text: "Capoeira, surfing, hiking, biking and massage.", opts: MORE },
+      levels: { text: "All levels welcome. Come as you are.", opts: MORE },
+      days: { text: 'The <a href="#days">days</a> show each day, from arrival on Wednesday, February 24 to departure on Sunday, February 28.', opts: MORE },
+      flights: { text: 'Fly into Puerto Vallarta (PVR). The Google Flights button in <a href="#flights">Find flights</a> searches flights from your city for February 24 to 28, 2027.', opts: MORE },
+      register: { text: 'Fill in the form in <a href="#register">Register</a>, at the end of the page.', opts: MORE },
+      other: { text: 'Write to us at <a href="mailto:info@whisperingsprings.ca">info@whisperingsprings.ca</a>.', opts: [["Back to the start", "start"]] },
+      solved: { text: "Good.", opts: [["Back to the start", "start"]] },
+    };
+
+    const btn = document.getElementById("chat-btn");
+    const panel = document.getElementById("chat-panel");
+    const log = document.getElementById("chat-log");
+
+    btn.onclick = () => { panel.classList.add("open"); btn.style.display = "none"; if (!log.children.length) go("start"); };
+    document.getElementById("chat-close").onclick = () => { panel.classList.remove("open"); btn.style.display = "flex"; };
+    document.getElementById("chat-restart").onclick = () => { log.innerHTML = ""; go("start"); };
+
+    function bot(html) {
+      const d = document.createElement("div");
+      d.className = "msg-bot";
+      d.innerHTML = html;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+    }
+    function user(text) {
+      const d = document.createElement("div");
+      d.className = "msg-user";
+      d.textContent = text;
+      log.appendChild(d);
+    }
+    function go(key) {
+      const node = TREE[key];
+      bot(node.text);
+      const wrap = document.createElement("div");
+      wrap.className = "chat-opts";
+      node.opts.forEach(([label, next, ic]) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.innerHTML = icon(ic) + "<span></span>";
+        b.querySelector("span").textContent = label;
+        b.onclick = () => { wrap.remove(); user(label); go(next); };
+        wrap.appendChild(b);
+      });
+      log.appendChild(wrap);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // Links to parts of this page glide there, like the page's own links.
+    log.addEventListener("click", (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      const target = a && document.querySelector(a.getAttribute("href"));
+      if (!target || !window.wsScrollTo) return;
+      e.preventDefault();
+      window.wsScrollTo(target);
+    });
+  })();
+</script>
+<script>
+  // Photo pop-up: a click on any strip photo shows it large; the page holds still until it closes.
+  (function () {
+    const pop = document.getElementById("photo-pop");
+    const big = pop.querySelector("img");
+    function open(src) {
+      big.src = src;
+      pop.classList.add("open");
+      if (window.wsLenis) window.wsLenis.stop();
+    }
+    function close() {
+      pop.classList.remove("open");
+      big.removeAttribute("src");
+      if (window.wsLenis) window.wsLenis.start();
+    }
+    document.querySelectorAll(".rooms .track img").forEach((img) => img.addEventListener("click", () => open(img.currentSrc || img.src)));
+    pop.addEventListener("click", (e) => { if (e.target !== big) close(); });
+    ["wheel", "touchmove"].forEach((type) => pop.addEventListener(type, (e) => e.preventDefault(), { passive: false }));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pop.classList.contains("open")) close(); });
+  })();
+
+  // Who leads it: a box opens that person's bio; x, a click outside or Esc closes it, and the page holds still meanwhile.
+  (function () {
+    const pop = document.getElementById("bio-pop");
+    const head = pop.querySelector("h4");
+    const body = pop.querySelector(".bio");
+    function open(member) {
+      head.replaceChildren(member.querySelector(".name").cloneNode(true));
+      body.replaceChildren(...member.querySelector(".bio").cloneNode(true).childNodes);
+      pop.classList.add("open");
+      if (window.wsLenis) window.wsLenis.stop();
+    }
+    function close() {
+      pop.classList.remove("open");
+      if (window.wsLenis) window.wsLenis.start();
+    }
+    document.querySelectorAll(".member").forEach((m) => m.addEventListener("click", () => open(m)));
+    pop.addEventListener("click", (e) => { if (!e.target.closest(".panel") || e.target.closest("button")) close(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pop.classList.contains("open")) close(); });
+  })();
+</script>
+</body>
+</html>
