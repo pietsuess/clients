@@ -116,12 +116,13 @@
   #included .beat { align-items: start; grid-template-columns: 2fr 1fr; }
   #included .beat > .words:last-child .ticks { grid-template-columns: 1fr; }
   #days, #leader, #days .beat, #leader .beat { align-content: start; }
+  #days, html.motion #days .beat { padding-top: var(--bar); } /* with motion on, the beat holds the screen's padding */
   .beat.high { align-content: start; }
 
   /* Words sit straight on the photo; a soft dark halo behind them keeps them readable */
   .words { position: relative; z-index: 0; font-size: clamp(18px, 1.35vw, 21px); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 2px 18px rgba(0, 0, 0, 0.45); }
   .words::before { content: ""; position: absolute; z-index: -1; inset: -18% -14%; background: radial-gradient(closest-side, rgba(16, 18, 18, 0.7), rgba(16, 18, 18, 0)); pointer-events: none; }
-  .card { justify-self: center; border-radius: 18px; overflow: hidden; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.4); }
+  .card { justify-self: center; overflow: hidden; box-shadow: 0 40px 90px rgba(0, 0, 0, 0.4); }
   .card img { width: auto; max-height: calc(100vh - var(--bar) - 2 * var(--pad) - 40px); }
 
   .hero .words { display: grid; gap: 18px; grid-column: 1 / -1; justify-items: center; text-align: center; }
@@ -145,6 +146,13 @@
   .ticks li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 10px; height: 10px; border-radius: 50%; background: var(--teal); }
   .near { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
   .words .near { margin-top: var(--gap); }
+  /* Getting there map: fills the right half of the screen, edge to edge (without motion it sits in the right column; phones put it under the words) */
+  .beat > .near-map { grid-column: 2; align-self: stretch; min-height: 70vh; }
+  html.motion .beat > .near-map { grid-column: auto; position: absolute; top: 0; right: 0; bottom: 0; width: 50%; min-height: 0; } /* auto column: placed against the whole screen, not the right column */
+  @media (max-width: 900px) {
+    .beat > .near-map { grid-column: auto; min-height: 45vh; }
+    html.motion .beat > .near-map { position: relative; width: auto; height: 45vh; }
+  }
   dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; }
   dt, dd { margin: 0; }
   dd { white-space: nowrap; font-weight: 700; text-align: right; }
@@ -167,6 +175,10 @@
   .days h4 { margin-bottom: 0.9em; }
   .days ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5em; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.4; }
   .days .t { font-weight: 700; white-space: nowrap; }
+  /* Edit mode (?edit on a copy opened from the computer): typeable days, Copy button bottom left */
+  #days [contenteditable] { outline: 1px dashed rgba(255, 255, 255, 0.5); outline-offset: 6px; }
+  .edit-copy { position: fixed; left: 26px; bottom: 26px; z-index: 90; }
+  .edit-copy.done { background: #2e7d32; }
   .scene.teal { background: var(--deep); }
   .scene.ink { background: var(--ink); }
   .scene.sand { background: var(--sand); color: var(--head); --owed: var(--deep); }
@@ -177,6 +189,8 @@
   .rooms .head { position: relative; z-index: 3; max-width: 42vw; }
   .track { position: relative; z-index: 2; display: flex; align-items: center; gap: var(--gap); overflow-x: auto; min-width: 0; margin: 0 calc(-1 * var(--pad)); padding: 12px var(--pad) 36px; scrollbar-width: none; }
   .track::-webkit-scrollbar { display: none; }
+  /* Photo strips: photos sit side by side, square corners, no space between */
+  .rooms:not(.quotes) .track { gap: 0; align-items: flex-start; }
   .quotes .track { align-items: flex-start; }
   #reviews .head { max-width: none; }
   /* Strip buttons: each strip scrolls on its own; the page scrolls straight past */
@@ -185,12 +199,47 @@
   .strip-nav button:disabled { opacity: 0.35; cursor: default; }
   .strip-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .track figure { flex: none; width: min(38vw, 640px); margin: 0; }
-  .track img { width: 100%; border-radius: 16px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
+  .track img { width: 100%; }
+  /* Hotel videos: three side by side between the first two screens, edge to edge, no space */
+  .videos { display: flex; }
+  .videos video { flex: 1 1 0; min-width: 0; height: auto; aspect-ratio: 16 / 9; }
+  /* Photo border strips: photos side by side, no space, each keeps its shape, all the same height
+     (17vw is about twice the height at which all 8 Activities photos fit across); the row slides with the mouse */
+  .photo-strip { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .photo-strip::-webkit-scrollbar { display: none; }
+  .photo-strip img { flex: none; width: auto; height: 17vw; }
 
   /* Lo de Marcos photos: same strip, each photo keeps its shape, credit under each */
   .photos .track figure { width: auto; }
   .photos .track img { width: auto; height: min(56vh, 60vw); max-width: none; }
   .rooms figcaption { width: 0; min-width: 100%; margin-top: 12px; font-size: 13px; letter-spacing: 0.02em; opacity: 0.8; }
+
+  /* Hotel screen: big main photo fills the left half; welcome words top right, square photos butting up under them that scroll right; --fit (set by the script) shrinks words and squares together on a short screen */
+  .side { display: flex; flex-direction: column; justify-content: space-between; gap: var(--gap); min-width: 0; }
+  .strip { min-width: 0; }
+  .strip .track { gap: 0; margin: 0 calc(-1 * var(--pad)) 0 0; padding: 0 var(--pad) 0 0; }
+  .strip .track figure { width: calc(20vh * var(--fit, 1)); aspect-ratio: 1; }
+  .strip .track img { height: 100%; object-fit: cover; }
+  .strip .strip-nav { margin-top: 12px; }
+  @media (min-width: 701px) {
+    .beat.fit .words { font-size: calc(clamp(18px, 1.35vw, 21px) * var(--fit, 1)); }
+    /* Heading and text at the other screens' sizes (.scene.type); --fit only shrinks them when they run taller than the screen */
+    .beat.fit h2 { font-size: calc(clamp(52px, 7vw, 128px) * var(--fit, 1)); }
+    .beat.fit p { font-size: calc(clamp(24px, 2vw, 34px) * var(--fit, 1)); }
+    .beat.fit h3 { font-size: calc(clamp(44px, 4vw, 72px) * var(--fit, 1)); }
+    .beat.fit .card img { max-height: calc(38vh * var(--fit, 1)); }
+  }
+  @media (min-width: 901px) {
+    .beat.fit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+    .beat.fit > .card, .beat.fit > .side { align-self: stretch; min-width: 0; }
+    .beat.fit > .card { justify-self: stretch; }
+    .beat.fit .card img { width: 100%; height: 100%; max-height: none; object-fit: cover; }
+    /* The squares fill the room under the words, their bottom level with the main photo's; the arrows sit above them */
+    .beat.fit .strip { flex: 1 1 0; display: flex; flex-direction: column; }
+    .beat.fit .strip .track { flex: 1 1 0; min-height: calc(20vh * var(--fit, 1)); align-items: stretch; }
+    .beat.fit .strip .track figure { width: auto; height: 100%; }
+    .beat.fit .strip .strip-nav { order: -1; margin: 0 0 12px; }
+  }
 
   /* Reviews: same strip, a card for each review, words exactly as the site shows them */
   .quotes .track figure { width: min(30vw, 460px); padding: 28px 30px 26px; border-radius: 16px; background: var(--paper); color: var(--ink); box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
@@ -202,8 +251,7 @@
   .map-box { position: absolute; inset: 0; z-index: 1; }
   .pin { display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
   .pin .label { padding: 7px 12px 5px; border-radius: 999px; background: var(--paper); color: var(--head); font: 700 13px/1 "Libre Baskerville", Arial, sans-serif; letter-spacing: 0.04em; white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
-  .pin .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--deep); border: 3px solid var(--white); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
-  .map-box .maplibregl-ctrl-attrib { font-size: 10px; background: rgba(242, 241, 236, 0.8); }
+  .pin .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--deep); border: 3px solid var(--white); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }  .map-box .maplibregl-ctrl-attrib { font-size: 10px; background: rgba(242, 241, 236, 0.8); }
 
   html.motion .scene { height: 100vh; height: 100svh; min-height: 0; }
   html.motion .beat { position: absolute; inset: 0; padding: calc(var(--bar) + var(--pad)) var(--pad) var(--pad); }
@@ -248,6 +296,11 @@
   .foot .logo { width: 170px; }
   .foot ul { list-style: none; margin: 0; padding: 0; }
   .foot li { margin: 0 0 0.25em; text-align: left; }
+  /* Photo credits the licences ask for (Wikimedia, Flickr): folded behind one small link, click opens the row */
+  .foot .site-credits { grid-column: 1 / -1; font-size: 13px; opacity: 0.8; }
+  .foot .site-credits summary { display: inline-block; list-style: none; cursor: pointer; text-decoration: underline; }
+  .foot .site-credits summary::-webkit-details-marker { display: none; }
+  .foot .credits { display: flex; flex-wrap: wrap; gap: 0 1.4em; margin-top: 0.6em; }
 
   @media (max-width: 900px) {
     .beat, form, .foot, .near { grid-template-columns: 1fr; }
@@ -314,7 +367,7 @@
   .chat-opts button:hover { border-color: var(--deep); }
   .chat-opts button svg { width: 17px; height: 17px; flex: none; color: var(--deep); stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   /* Photo pop-up: photos in the sideways strips open large over the page */
-  .rooms .track img { cursor: zoom-in; }
+  .rooms .track img, .photo-strip img { cursor: zoom-in; }
   /* Who leads it: a box for each of the team; a box opens that person's bio */
   .team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--gap); max-width: 1100px; }
   .member { --owed: var(--deep); display: flex; align-items: flex-end; min-height: clamp(160px, 18vw, 240px); padding: 24px 26px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink); font: 700 20px/1.3 "Libre Baskerville", Arial, sans-serif; text-align: left; text-shadow: none; cursor: pointer; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
@@ -356,6 +409,12 @@
     </div>
   </section>
 
+  <div class="videos">
+    <video src="images/IMG_7947.mp4" width="640" height="360" autoplay muted loop playsinline></video>
+    <video src="images/IMG_8053.mp4" width="640" height="360" autoplay muted loop playsinline></video>
+    <video src="images/IMG_8065.mp4" width="640" height="360" autoplay muted loop playsinline></video>
+  </div>
+
   <section class="scene type" id="retreat">
     <div class="bg"><img src="images/unsplash-EoppqN2Wu5U.webp" alt=""></div>
     <div class="shade"></div>
@@ -369,59 +428,16 @@
     </div>
   </section>
 
-  <section class="scene" id="included">
-    <div class="bg"><img src="images/banner.jpg" alt=""></div>
-    <div class="shade"></div>
-    <div class="beat">
-      <div class="words">
-        <h2 class="owed">What's included</h2>
-        <ul class="ticks">
-          <li>Swimming</li>
-          <li>100m to the Beach</li>
-          <li>Delicious Meals</li>
-          <li>Morning Yoga Class</li>
-          <li>Afternoon Yoga Class</li>
-          <li>Dance Classes</li>
-          <li>Sacred Cacao</li>
-          <li>Exclusive Rooftop Party</li>
-          <li>Daily Relaxation Time</li>
-          <li>Expert Guidance</li>
-        </ul>
-      </div>
-      <div class="words">
-        <h2>Add Ons</h2>
-        <ul class="ticks">
-          <li>Capoeira</li>
-          <li>Surfing</li>
-          <li>Hiking</li>
-          <li>Biking</li>
-          <li>Massage</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="scene rooms photos" id="activity-photos">
-    <div class="bg soft"><img src="images/3.1.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="words head">
-      <h2>Activities</h2>
-    </div>
-    <div class="track">
-      <figure><img src="images/pexels-dancing-18139175.webp" width="2000" height="1429" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/elderly-dancers-in-traditional-dresses-18139175/">Cesar Vargas</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/unsplash-cacao-oJRjlmntoy0.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/oJRjlmntoy0">rosario janza</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-surf-lesson-ZjXu4oCLMaU.webp" width="2000" height="1334" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/ZjXu4oCLMaU">Ale Romo</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/pexels-surf-lesson-19756565.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/woman-learning-surfing-with-instructor-19756565/">Serg Alesenko</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/unsplash-waterfall-oF8CpVXWNyI.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/oF8CpVXWNyI">Jeffrey Eisen</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/pexels-waterfall-57650.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/women-near-falls-57650/">Kaique Rocha</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/pexels-biking-5152641.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/person-riding-a-bike-on-dirt-road-5152641/">Maor Attias</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/unsplash-massage-cU53ZFBr3lk.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/cU53ZFBr3lk">alan caishan</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-    </div>
-    <div class="strip-nav">
-      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
-      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
-    </div>
-  </section>
+  <div class="photo-strip" id="activity-photos">
+    <img src="images/pexels-dancing-18139175.webp" width="2000" height="1429" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-cacao-oJRjlmntoy0.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-surf-lesson-ZjXu4oCLMaU.webp" width="2000" height="1334" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-surf-lesson-19756565.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-waterfall-oF8CpVXWNyI.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-waterfall-57650.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-biking-5152641.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-massage-cU53ZFBr3lk.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+  </div>
 
   <section class="scene type" id="days">
     <div class="bg"><img src="images/unsplash-ni7yHT3yyRE.webp" alt=""></div>
@@ -434,52 +450,66 @@
           <div>
             <h4>Wed Feb 24 · Arrival</h4>
             <ul>
-              <li>Check-in from <span class="t">3:00 p.m.</span></li>
-              <li><span class="t">5:30 p.m.</span> Welcome yoga</li>
-              <li><span class="t">7:00 p.m.</span> Welcome dinner</li>
+              <li>Arrivals / Shuttles</li>
+              <li>Check-ins</li>
+              <li><span class="t">5:30 pm</span> - Orientation</li>
+              <li><span class="t">6:00 pm</span> - Dinner</li>
+              <li><span class="t">7:00 pm</span> - Sunset Beach Gathering</li>
+              <li><span class="t">8:00 pm</span> - Yin Yoga Wind Down</li>
             </ul>
           </div>
           <div>
             <h4>Thu Feb 25</h4>
             <ul>
-              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
-              <li><span class="t">9:00 a.m.</span> Breakfast</li>
-              <li><span class="t">10:30 a.m.</span> Dance class</li>
-              <li><span class="t">1:00 p.m.</span> Lunch</li>
-              <li>Free afternoon for surf lessons, massage, biking or hiking</li>
-              <li><span class="t">5:30 p.m.</span> Sunset yoga</li>
-              <li><span class="t">7:00 p.m.</span> Dinner</li>
+              <li><span class="t">7:00 am</span> - Meditation</li>
+              <li><span class="t">8:00 am</span> - Morning yoga</li>
+              <li><span class="t">10:00 am</span> - Breakfast Social</li>
+              <li>-----</li>
+              <li><span class="t">2:00 pm</span> - Tea Time Snack</li>
+              <li>-----</li>
+              <li><span class="t">5:30 pm</span> - Social</li>
+              <li><span class="t">6:00 pm</span> - Dinner</li>
+              <li><span class="t">7:00 pm</span> - Sunset Beach Gathering</li>
+              <li><span class="t">8:00 pm</span> - Music on the Roof</li>
             </ul>
           </div>
           <div>
             <h4>Fri Feb 26</h4>
             <ul>
-              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
-              <li><span class="t">9:00 a.m.</span> Breakfast</li>
-              <li><span class="t">1:00 p.m.</span> Lunch</li>
-              <li>Free afternoon</li>
-              <li><span class="t">5:30 p.m.</span> Sunset yoga</li>
-              <li><span class="t">7:00 p.m.</span> Dinner</li>
-              <li><span class="t">8:30 p.m.</span> Ecstatic Dance &amp; Cacao</li>
+              <li><span class="t">7:00 am</span> - Meditation</li>
+              <li><span class="t">8:00 am</span> - Morning yoga</li>
+              <li><span class="t">10:00 am</span> - Breakfast Social</li>
+              <li>-----</li>
+              <li><span class="t">2:00 pm</span> - Tea Time Snack</li>
+              <li>-----</li>
+              <li><span class="t">5:30 pm</span> - Social</li>
+              <li><span class="t">6:00 pm</span> - Dinner</li>
+              <li><span class="t">7:00 pm</span> - Beach Sunset Yoga Class</li>
+              <li><span class="t">8:00 pm</span> - Local Show</li>
             </ul>
           </div>
           <div>
             <h4>Sat Feb 27</h4>
             <ul>
-              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
-              <li><span class="t">9:00 a.m.</span> Breakfast</li>
-              <li>Free day at the beach</li>
-              <li><span class="t">1:00 p.m.</span> Lunch</li>
-              <li><span class="t">5:30 p.m.</span> Sunset yoga</li>
-              <li><span class="t">7:00 p.m.</span> Farewell dinner</li>
+              <li><span class="t">7:00 am</span> - Meditation</li>
+              <li><span class="t">8:00 am</span> - Morning yoga</li>
+              <li><span class="t">10:00 am</span> - Breakfast Social</li>
+              <li>-----</li>
+              <li><span class="t">2:00 pm</span> - Tea Time Snack</li>
+              <li>-----</li>
+              <li><span class="t">5:30 pm</span> - Social</li>
+              <li><span class="t">6:00 pm</span> - Dinner</li>
+              <li><span class="t">7:00 pm</span> - Sunset Beach Cacao</li>
+              <li><span class="t">8:00 pm</span> - Rooftop Dance</li>
             </ul>
           </div>
           <div>
             <h4>Sun Feb 28 · Departure</h4>
             <ul>
-              <li><span class="t">7:30 a.m.</span> Morning yoga</li>
-              <li><span class="t">9:00 a.m.</span> Breakfast</li>
-              <li>Check-out by <span class="t">12:00 p.m.</span></li>
+              <li><span class="t">7:00 am</span> - Meditation</li>
+              <li><span class="t">8:00 am</span> - Morning yoga</li>
+              <li><span class="t">10:00 am</span> - Breakfast Social and Close</li>
+              <li>Departures / Shuttles</li>
             </ul>
           </div>
         </div>
@@ -487,93 +517,76 @@
     </div>
   </section>
 
-  <section class="scene type" id="leader">
-    <div class="bg"><img src="images/flickr-116291850.webp" alt=""></div>
+  <div class="photo-strip" id="hotel-photos">
+    <img src="images/maps-hotel-01.webp" width="1022" height="575" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-hotel-03.webp" width="960" height="576" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-hotel-07.webp" width="910" height="657" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-hotel-09.webp" width="1024" height="768" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-hotel-19.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-hotel-20.webp" width="1125" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-hotel-22.webp" width="1200" height="900" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-01.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-04.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-05.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-06.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-08.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-10.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-13.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-14.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-19.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-21.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-23.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-24.webp" width="1080" height="1375" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-28.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-36.webp" width="1125" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-42.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-52.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-53.webp" width="1073" height="1872" alt="" loading="lazy" decoding="async">
+    <img src="images/maps-guest-54.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
+  </div>
+
+  <section class="scene" id="hotel">
+    <div class="bg soft"><img src="images/home.webp" alt=""></div>
     <div class="shade"></div>
-    <div class="ghost owed">Who leads it</div>
-    <div class="beat">
-      <div class="words">
-        <h2 class="owed">Who leads it</h2>
-        <div class="team">
-          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
-          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
-          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+    <div class="beat fit">
+      <div class="card"><img src="images/home.webp" alt=""></div>
+      <div class="side">
+        <div class="words">
+          <h2>Welcome to Wirikuta Hotel</h2>
+          <h3>your refuge in the heart of Lo De Marcos!</h3>
+          <p>Located in the most vibrant area of the city, our hotel offers a unique experience that blends modern comfort with the rich cultural heritage of the city. Just steps away from markets, plazas, and traditional restaurants, discover the authenticity of Lo De Marcos.</p>
+          <p>Check-in at 3:00 p.m. and check-out at 12:00 p.m.</p>
+          <ul class="ticks">
+            <li>Restaurant</li>
+            <li>Pool</li>
+            <li>Rooftop</li>
+            <li>Wi-Fi</li>
+            <li>Air conditioning</li>
+          </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="scene" id="hotel">
-    <div class="bg soft"><img src="images/home.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="beat">
-      <div class="card"><img src="images/home.webp" alt=""></div>
-      <div class="words">
-        <h2>Welcome to Wirikuta Hotel</h2>
-        <h3>your refuge in the heart of Lo De Marcos!</h3>
-        <p>Located in the most vibrant area of the city, our hotel offers a unique experience that blends modern comfort with the rich cultural heritage of the city. Just steps away from markets, plazas, and traditional restaurants, discover the authenticity of Lo De Marcos.</p>
-        <p>Check-in at 3:00 p.m. and check-out at 12:00 p.m.</p>
-        <ul class="ticks">
-          <li>Restaurant</li>
-          <li>Pool</li>
-          <li>Rooftop</li>
-          <li>Wi-Fi</li>
-          <li>Air conditioning</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="scene rooms" id="rooms">
-    <div class="bg soft"><img src="images/simples.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="words head">
-      <h2>Find the ideal room tailored to your needs!</h2>
-      <p>We offer a variety of accommodations designed for you to enjoy a unique shared experience. Whether it’s double, triple, or quadruple rooms, we have the perfect setup for your trip.</p>
-    </div>
-    <div class="track">
-      <figure><img src="images/1.1.webp" width="800" height="534" alt="" loading="lazy" decoding="async"></figure>
-      <figure><img src="images/simples.webp" width="779" height="520" alt="" loading="lazy" decoding="async"><figcaption>Single Room · 2 adults · 15 m²</figcaption></figure>
-      <figure><img src="images/premium.webp" width="779" height="520" alt="" loading="lazy" decoding="async"><figcaption>Premium Room · 3 adults · 40 m²</figcaption></figure>
-      <figure><img src="images/dos-recamaras.webp" width="779" height="520" alt="" loading="lazy" decoding="async"><figcaption>2 Bedroom Room · 4 adults · 66 m²</figcaption></figure>
-      <figure><img src="images/6.webp" width="779" height="520" alt="" loading="lazy" decoding="async"><figcaption>3 Bedroom Room · 6 adults · 94 m²</figcaption></figure>
-    </div>
-    <div class="strip-nav">
-      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
-      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
-    </div>
-  </section>
-
-  <section class="scene rooms photos" id="food-photos">
-    <div class="bg soft"><img src="images/3.1.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="words head">
-      <h2>Food and drink</h2>
-    </div>
-    <div class="track">
-      <figure><img src="images/pexels-aguachile-39440920.webp" width="1589" height="2000" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/delicious-fresh-ceviche-with-cucumber-garnish-39440920/">César O&#x27;neill</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/unsplash-aguachile-sDeIcDW0jUs.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/sDeIcDW0jUs">Carlos Davila Cepeda</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/commons-aguas-frescas-Aguas_frescas_en_Mercado_Roma.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Aguas_frescas_en_Mercado_Roma.jpg">Lizmich91</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/commons-ceviche-Tostada_de_ceviche_de_camaron.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Tostada_de_ceviche_de_camar%C3%B3n.jpg">Kelpgreen.D</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/unsplash-ceviche-VSb6KDaiga0.webp" width="1333" height="2000" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/VSb6KDaiga0">Yasmine Duchesne</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-chilaquiles-5sD2TgDZOxA.webp" width="2000" height="1686" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/5sD2TgDZOxA">Alexandra Mendívil</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-coco-tW0j8n-GIUY.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/tW0j8n-GIUY">Xiaoyu Li</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-coctel-de-camaron-Kjwyy77WPtQ.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/Kjwyy77WPtQ">Menú Acapulco</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-guacamole-iiMIegrG3Ag.webp" width="2000" height="1328" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/iiMIegrG3Ag">Zoshua Colah</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/commons-huevos-rancheros-Huevos_rancheros_with_carnitas.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Huevos_rancheros_with_carnitas.jpg">Louiemantia</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/unsplash-mango-vxtBBfMTMZ0.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/vxtBBfMTMZ0">Desirae Hayes-Vitor</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/pexels-pescado-zarandeado-15112748.webp" width="1597" height="2000" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/pouring-lime-juice-on-roasted-fish-15112748/">Aquino Foto</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/pexels-pescado-zarandeado-19725446.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/fish-on-tray-19725446/">Roken Manases</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/unsplash-tacos-de-camaron-v-UlAEJTSVw.webp" width="2000" height="1601" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/v-UlAEJTSVw">Daniel Arriola</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/commons-tacos-de-pescado-Tacos_de_pescado_en_Puerto_Morelos.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Tacos_de_pescado_en_Puerto_Morelos.jpg">Wotancito</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/pexels-tortillas-36971424.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/traditional-tortillas-cooking-on-open-flame-36971424/">Alejandro JV</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-      <figure><img src="images/unsplash-tostada-atun-DBQYSAf0sak.webp" width="2000" height="1501" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/DBQYSAf0sak">Shelley M</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-    </div>
-    <div class="strip-nav">
-      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
-      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
-    </div>
-  </section>
+  <div class="photo-strip" id="food-photos">
+    <img src="images/pexels-aguachile-39440920.webp" width="1589" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-aguachile-sDeIcDW0jUs.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-aguas-frescas-Aguas_frescas_en_Mercado_Roma.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-ceviche-Tostada_de_ceviche_de_camaron.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-ceviche-VSb6KDaiga0.webp" width="1333" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-chilaquiles-5sD2TgDZOxA.webp" width="2000" height="1686" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-coco-tW0j8n-GIUY.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-coctel-de-camaron-Kjwyy77WPtQ.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-guacamole-iiMIegrG3Ag.webp" width="2000" height="1328" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-huevos-rancheros-Huevos_rancheros_with_carnitas.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-mango-vxtBBfMTMZ0.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-pescado-zarandeado-15112748.webp" width="1597" height="2000" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-pescado-zarandeado-19725446.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-tacos-de-camaron-v-UlAEJTSVw.webp" width="2000" height="1601" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-tacos-de-pescado-Tacos_de_pescado_en_Puerto_Morelos.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-tortillas-36971424.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-tostada-atun-DBQYSAf0sak.webp" width="2000" height="1501" alt="" loading="lazy" decoding="async">
+  </div>
 
   <section class="scene" id="lo-de-marcos">
     <div class="bg soft"><img src="images/3.webp" alt=""></div>
@@ -595,7 +608,7 @@
       </div>
     </div>
     <div class="beat high">
-      <div class="words wide">
+      <div class="words">
         <h2 class="owed">Getting there</h2>
         <p class="owed">Shuttle from the airport</p>
         <p class="owed">Scheduling a shuttle</p>
@@ -627,50 +640,56 @@
           </div>
         </div>
       </div>
+      <div class="near-map"></div>
     </div>
   </section>
 
-  <section class="scene rooms photos" id="lo-de-marcos-photos">
-    <div class="bg soft"><img src="images/3.1.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="words head">
-      <h2>Lo De Marcos</h2>
-    </div>
-    <div class="track">
-      <figure><img src="images/commons-Bahia_lo_de_Marcos.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Bahia_lo_de_Marcos.jpg">Elbeta</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/commons-Lagooooo.webp" width="900" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Lagooooo.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/commons-Letras_en_Lo_de_Marcos.webp" width="1604" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Letras_en_Lo_de_Marcos.jpg">Navlilia</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/commons-Lo_de_Marcos.webp" width="900" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Lo_de_Marcos.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/commons-Playa_Lo_de_Marcos.webp" width="900" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Playa_%22Lo_de_Marcos%22.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/flickr-116291850.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116291850">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-116304642.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116304642">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-116311479.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116311479">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-116313658.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116313658">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-116666033.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/34608250@N00/116666033">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-53752274222.webp" width="1024" height="642" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/200740808@N03/53752274222">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-53753380458.webp" width="1024" height="706" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/200740808@N03/53753380458">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></figcaption></figure>
-      <figure><img src="images/flickr-53753607360.webp" width="1024" height="576" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.flickr.com/photos/200740808@N03/53753607360">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></figcaption></figure>
-      <figure><img src="images/unsplash-5heXU3WTH2E.webp" width="800" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/people-fishing-on-beach-at-dusk-5heXU3WTH2E">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-AsVDUWF1Uho.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/aerial-view-of-lush-green-island-meeting-turquoise-ocean-waters-AsVDUWF1Uho">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-CixIjSm2IyY.webp" width="800" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/person-in-beach-chair-under-palm-CixIjSm2IyY">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-EoppqN2Wu5U.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/aerial-view-of-a-lush-green-coastline-meeting-the-ocean-EoppqN2Wu5U">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-I914gny7T2Y.webp" width="800" height="1200" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/silhouette-of-a-person-jumping-on-a-beach-at-sunset-I914gny7T2Y">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-VYOJ7y2ifgM.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/aerial-view-of-a-winding-river-meeting-the-ocean-beach-VYOJ7y2ifgM">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-ni7yHT3yyRE.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/lush-green-jungle-meets-sandy-beach-and-turquoise-water-ni7yHT3yyRE">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-wNboBOSiuvA.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/a-small-boat-floats-in-clear-turquoise-ocean-water-wNboBOSiuvA">Andrés Beltrán Espinosa</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/unsplash-village-street-FM2Ue45HX6s.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://unsplash.com/photos/FM2Ue45HX6s">Jeffrey Eisen</a> · <a href="https://unsplash.com/license">Unsplash License</a></figcaption></figure>
-      <figure><img src="images/commons-village-street-Calle_de_Sayulita_01.webp" width="2000" height="1502" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Calle_de_Sayulita_01.jpg">Luisalvaz</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/commons-huichol-Artesanias_Huicholes.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async"><figcaption><a href="https://commons.wikimedia.org/wiki/File:Artesan%C3%ADas_Huicholes.jpg">Carlos Raúl Camacho Acosta</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></figcaption></figure>
-      <figure><img src="images/pexels-whale-40257155.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async"><figcaption><a href="https://www.pexels.com/photo/breaching-humpback-whale-in-puerto-vallarta-40257155/">Javier Ulloa</a> · <a href="https://www.pexels.com/license/">Pexels License</a></figcaption></figure>
-    </div>
-    <div class="strip-nav">
-      <button type="button" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg></button>
-      <button type="button" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg></button>
-    </div>
-  </section>
+  <div class="photo-strip" id="lo-de-marcos-photos">
+    <img src="images/commons-Bahia_lo_de_Marcos.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-Lagooooo.webp" width="900" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-Letras_en_Lo_de_Marcos.webp" width="1604" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-Lo_de_Marcos.webp" width="900" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-Playa_Lo_de_Marcos.webp" width="900" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-116291850.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-116304642.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-116311479.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-116313658.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-116666033.webp" width="1600" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-53752274222.webp" width="1024" height="642" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-53753380458.webp" width="1024" height="706" alt="" loading="lazy" decoding="async">
+    <img src="images/flickr-53753607360.webp" width="1024" height="576" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-5heXU3WTH2E.webp" width="800" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-AsVDUWF1Uho.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-CixIjSm2IyY.webp" width="800" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-EoppqN2Wu5U.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-I914gny7T2Y.webp" width="800" height="1200" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-VYOJ7y2ifgM.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-ni7yHT3yyRE.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-wNboBOSiuvA.webp" width="2000" height="1125" alt="" loading="lazy" decoding="async">
+    <img src="images/unsplash-village-street-FM2Ue45HX6s.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-village-street-Calle_de_Sayulita_01.webp" width="2000" height="1502" alt="" loading="lazy" decoding="async">
+    <img src="images/commons-huichol-Artesanias_Huicholes.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
+    <img src="images/pexels-whale-40257155.webp" width="2000" height="1500" alt="" loading="lazy" decoding="async">
+  </div>
 
   <section class="scene map" id="area-map">
     <div class="map-box"></div>
+  </section>
+
+  <section class="scene type" id="leader">
+    <div class="bg"><img src="images/flickr-116291850.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="ghost">Facilitators</div>
+    <div class="beat">
+      <div class="words">
+        <h2>Facilitators</h2>
+        <div class="team">
+          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+          <button type="button" class="member"><span class="name owed">Name</span><span class="bio" hidden><span class="owed">Bio</span></span></button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="scene type" id="flights">
@@ -687,32 +706,6 @@
           <input type="hidden" name="q">
           <button class="btn" type="submit">Google Flights</button>
         </form>
-      </div>
-    </div>
-  </section>
-
-  <section class="scene type" id="prices">
-    <div class="bg"><img src="images/commons-Bahia_lo_de_Marcos.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="ghost owed">Prices and rooms</div>
-    <div class="beat">
-      <div class="words">
-        <h2 class="owed">Prices and rooms</h2>
-        <p class="owed">Price for each room option</p>
-        <p class="owed">Cancellation and refund terms</p>
-        <a class="btn" href="#register">Register</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="scene type" id="questions">
-    <div class="bg"><img src="images/flickr-116304642.webp" alt=""></div>
-    <div class="shade"></div>
-    <div class="ghost owed">Questions</div>
-    <div class="beat">
-      <div class="words">
-        <h2 class="owed">Questions</h2>
-        <p class="owed">Questions and answers</p>
       </div>
     </div>
   </section>
@@ -779,7 +772,6 @@
         </fieldset>
         <fieldset>
           <legend>Add Ons</legend>
-          <div class="field check addon"><input id="a-capoeira" name="addons" value="Capoeira" type="checkbox"><label for="a-capoeira" id="l-capoeira">Capoeira</label><div class="when" role="radiogroup" aria-labelledby="l-capoeira"><label><input type="radio" name="when-capoeira" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-capoeira" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-capoeira" value="Sat free day">Sat free day</label></div></div>
           <div class="field check addon"><input id="a-surfing" name="addons" value="Surfing" type="checkbox"><label for="a-surfing" id="l-surfing">Surfing</label><div class="when" role="radiogroup" aria-labelledby="l-surfing"><label><input type="radio" name="when-surfing" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-surfing" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-surfing" value="Sat free day">Sat free day</label></div></div>
           <div class="field check addon"><input id="a-hiking" name="addons" value="Hiking" type="checkbox"><label for="a-hiking" id="l-hiking">Hiking</label><div class="when" role="radiogroup" aria-labelledby="l-hiking"><label><input type="radio" name="when-hiking" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-hiking" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-hiking" value="Sat free day">Sat free day</label></div></div>
           <div class="field check addon"><input id="a-biking" name="addons" value="Biking" type="checkbox"><label for="a-biking" id="l-biking">Biking</label><div class="when" role="radiogroup" aria-labelledby="l-biking"><label><input type="radio" name="when-biking" value="Thu afternoon">Thu afternoon</label><label><input type="radio" name="when-biking" value="Fri afternoon">Fri afternoon</label><label><input type="radio" name="when-biking" value="Sat free day">Sat free day</label></div></div>
@@ -813,15 +805,34 @@
 
 <footer class="foot">
   <ul>
-    <li><a href="tel:+19053491009">(905) 349-1009</a></li>
-    <li><a href="mailto:info@whisperingsprings.ca">info@whisperingsprings.ca</a></li>
-    <li>141 Mercer Lane, Grafton, K0K 2G0, CA</li>
-  </ul>
-  <ul>
     <li><a href="https://www.whisperingsprings.ca/terms-and-conditions">Terms &amp; Conditions</a></li>
     <li><a href="https://www.whisperingsprings.ca/privacy-and-cookies">Privacy &amp; Cookies</a></li>
     <li><a href="https://www.whisperingsprings.ca/accessibility-statement">Accessibility Statement</a></li>
   </ul>
+  <details class="site-credits">
+  <summary>Site credits</summary>
+  <ul class="credits">
+    <li><a href="https://commons.wikimedia.org/wiki/File:Aguas_frescas_en_Mercado_Roma.jpg">Lizmich91</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Tostada_de_ceviche_de_camar%C3%B3n.jpg">Kelpgreen.D</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Huevos_rancheros_with_carnitas.jpg">Louiemantia</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Tacos_de_pescado_en_Puerto_Morelos.jpg">Wotancito</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Bahia_lo_de_Marcos.jpg">Elbeta</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Lagooooo.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Letras_en_Lo_de_Marcos.jpg">Navlilia</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Lo_de_Marcos.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Playa_%22Lo_de_Marcos%22.jpg">Camila Glez</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+    <li><a href="https://www.flickr.com/photos/34608250@N00/116291850">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/34608250@N00/116304642">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/34608250@N00/116311479">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/34608250@N00/116313658">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/34608250@N00/116666033">Christian Frausto Bernal</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/200740808@N03/53752274222">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/200740808@N03/53753380458">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></li>
+    <li><a href="https://www.flickr.com/photos/200740808@N03/53753607360">Vanabond Tales</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Calle_de_Sayulita_01.jpg">Luisalvaz</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+    <li><a href="https://commons.wikimedia.org/wiki/File:Artesan%C3%ADas_Huicholes.jpg">Carlos Raúl Camacho Acosta</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></li>
+  </ul>
+  </details>
 </footer>
 
 <div id="photo-pop" role="dialog" aria-modal="true" aria-label="Photo">
@@ -857,6 +868,9 @@
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script>
+  // ?edit on a copy opened from the computer (never the live site) holds the page still and makes the days typeable; see the last script.
+  const editDays = new URLSearchParams(location.search).has("edit") && ["", "localhost", "127.0.0.1"].includes(location.hostname);
+
   // Every reload starts at the top, never where the last visit left off.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   if (location.hash) history.replaceState(null, "", location.pathname + location.search);
@@ -868,7 +882,7 @@
   document.getElementById("reg").addEventListener("submit", (e) => e.preventDefault());
 
   // Strips: each scrolls sideways on its own; the buttons move it most of a screen and grey out at the ends.
-  document.querySelectorAll(".scene.rooms").forEach((strip) => {
+  document.querySelectorAll(".scene.rooms, .strip").forEach((strip) => {
     const track = strip.querySelector(".track");
     const [prev, next] = strip.querySelectorAll(".strip-nav button");
     const step = (dir) => track.scrollBy({ left: dir * track.clientWidth * 0.8, behavior: "smooth" });
@@ -886,6 +900,14 @@
     // A sideways swipe moves the strip; an up-down scroll still moves the page.
     track.addEventListener("wheel", (e) => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.stopPropagation(); }, { passive: true });
   });
+
+  // Photo border strips slide with the mouse: the left edge shows the first photo, the right edge the last.
+  // Touch screens swipe them instead.
+  document.querySelectorAll(".photo-strip").forEach((strip) => strip.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse") return;
+    const box = strip.getBoundingClientRect();
+    strip.scrollLeft = (e.clientX - box.left) / box.width * (strip.scrollWidth - strip.clientWidth);
+  }));
 
   // Add Ons: a ticked add on asks for its time; untick it and the time clears.
   document.querySelectorAll("#reg .addon").forEach((row) => {
@@ -988,6 +1010,97 @@
     new maplibregl.Marker({ element: pin, anchor: "bottom" }).setLngLat(HOTEL).addTo(areaMap);
   }
 
+  // Getting there map: Lo de Marcos only, flat, top-down, normal map colours, a pin for each place on his nearby list in its group's colour.
+  // Names show once there is room. The four restaurants open map data and the web lack sit near the hotel, as he asked.
+  const TOWN = [[-105.364, 20.944], [-105.345, 20.962]]; // Lo de Marcos in open map data plus a little margin; zooming out stops here
+  const START = { center: [-105.3544, 20.9575], zoom: 15.75 }; // the view in his 11-09 screenshot: all seven pins and their names
+  const PLACES = [
+    { name: "Wirikuta Hotel", dist: "", kind: "hotel", at: HOTEL },
+    { name: "Lo de Marcos Beach", dist: "100m", kind: "outdoor", at: [-105.3566, 20.958] }, // the beach's nearest point
+    { name: "Lo de Marcos Square", dist: "400m", kind: "outdoor", at: [-105.3533, 20.9565] },
+    { name: "Restaurante Olivia", dist: "100m", kind: "restaurants", at: [-105.3554, 20.9588] }, // near the hotel, real spot unknown
+    { name: "Restaurant Bar Las Margaritas", dist: "150m", kind: "restaurants", at: [-105.354, 20.9579] }, // same
+    { name: "Cenaduria Carolina", dist: "350m", kind: "restaurants", at: [-105.3542, 20.9549] }, // same
+    { name: "Restaurante Paraiso", dist: "5 km", kind: "restaurants", at: [-105.3513, 20.9593] }, // same
+  ];
+  const PIN_COLOURS = { hotel: "#e5483b", outdoor: "#2fa84f", restaurants: "#f28c28" };
+  // A chunky cartoon pin drawn at twice size for sharp screens: round head, point at the bottom, dark outline, white centre
+  function pinImage(colour) {
+    const c = document.createElement("canvas");
+    c.width = 56;
+    c.height = 76;
+    const g = c.getContext("2d");
+    g.beginPath();
+    g.arc(28, 28, 22, Math.PI * 0.8, Math.PI * 2.2);
+    g.lineTo(28, 72);
+    g.closePath();
+    g.fillStyle = colour;
+    g.fill();
+    g.lineJoin = "round";
+    g.lineWidth = 6;
+    g.strokeStyle = "#3c3c3b";
+    g.stroke();
+    g.beginPath();
+    g.arc(28, 28, 8, 0, Math.PI * 2);
+    g.fillStyle = "#ffffff";
+    g.fill();
+    return g.getImageData(0, 0, 56, 76);
+  }
+  const nearBox = document.querySelector(".near-map");
+  const ROADS = ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary", "minor"]]]; // streets only, no lanes
+  // Fat cartoon streets: white with a dark outline (the edge layer is the street plus 4px)
+  const roadWidth = (extra) => ["interpolate", ["exponential", 1.5], ["zoom"],
+    12, ["+", extra, ["match", ["get", "class"], ["motorway", "trunk", "primary"], 4, ["secondary", "tertiary"], 2.5, 1.2]],
+    15, ["+", extra, ["match", ["get", "class"], ["motorway", "trunk", "primary"], 12, ["secondary", "tertiary"], 9, 6]],
+    17, ["+", extra, ["match", ["get", "class"], ["motorway", "trunk", "primary"], 22, ["secondary", "tertiary"], 17, 12]]];
+  const nearMap = window.maplibregl && nearBox ? new maplibregl.Map({
+    container: nearBox,
+    center: START.center,
+    zoom: START.zoom,
+    maxBounds: TOWN,
+    attributionControl: { compact: true }, // folds to its (i) so the Have Questions button does not sit on it
+    scrollZoom: false, // the wheel keeps scrolling the page; + and - zoom
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false,
+    dragPan: !matchMedia("(pointer: coarse)").matches, // on phones one finger keeps scrolling the page, two fingers zoom
+    style: {
+      version: 8,
+      glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+      sources: { omt: { type: "vector", url: "https://tiles.openfreemap.org/planet" } },
+      layers: [
+        // Cartoon colours: warm sand land, bright green, turquoise sea
+        { id: "land", type: "background", paint: { "background-color": "#f5dfa8" } },
+        { id: "green", type: "fill", source: "omt", "source-layer": "landcover", filter: ["in", ["get", "class"], ["literal", ["wood", "grass"]]], paint: { "fill-color": "#8fd16f" } },
+        { id: "parks", type: "fill", source: "omt", "source-layer": "park", paint: { "fill-color": "#7cc95e" } },
+        { id: "water", type: "fill", source: "omt", "source-layer": "water", paint: { "fill-color": "#39c5d8" } },
+        { id: "rivers", type: "line", source: "omt", "source-layer": "waterway", paint: { "line-color": "#39c5d8", "line-width": 2 } },
+        { id: "road-edges", type: "line", source: "omt", "source-layer": "transportation", filter: ROADS, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#3c3c3b", "line-width": roadWidth(4) } },
+        { id: "roads", type: "line", source: "omt", "source-layer": "transportation", filter: ROADS, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": roadWidth(0) } },
+        { id: "towns", type: "symbol", source: "omt", "source-layer": "place", filter: ["in", ["get", "class"], ["literal", ["city", "town", "village"]]], layout: { "text-field": ["get", "name"], "text-font": ["Noto Sans Bold"], "text-size": ["match", ["get", "class"], "city", 17, 15] }, paint: { "text-color": "#3c3c3b", "text-halo-color": "#ffffff", "text-halo-width": 3 } },
+      ],
+    },
+  }) : null;
+  if (nearMap) {
+    const noTitles = () => nearBox.querySelectorAll("[title]").forEach((el) => el.removeAttribute("title")); // no hover boxes on his pages
+    nearMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-left"); // clear of the top bar and the Have Questions button
+    nearMap.touchZoomRotate.disableRotation();
+    noTitles();
+    // The whole right half only arrives with the motion layout, after the map has started, and the map's own size watcher
+    // skips its first look; so this one resizes the map and goes back to the starting view whenever its box changes.
+    new ResizeObserver(() => { nearMap.resize(); nearMap.jumpTo(START); }).observe(nearBox);
+    nearMap.on("load", () => {
+      for (const [kind, colour] of Object.entries(PIN_COLOURS)) nearMap.addImage(kind, pinImage(colour), { pixelRatio: 2 });
+      nearMap.addSource("places", { type: "geojson", data: { type: "FeatureCollection", features: PLACES.map((p, i) => ({ type: "Feature", geometry: { type: "Point", coordinates: p.at }, properties: { name: p.name, dist: p.dist, kind: p.kind, rank: i } })) } });
+      // Pins always show; a name only where it has room. The hotel's layer is on top, so its pin and name come first.
+      const PIN = { "icon-image": ["get", "kind"], "icon-anchor": "bottom", "icon-allow-overlap": true, "text-font": ["Noto Sans Bold"], "text-size": 13, "text-optional": true, "text-max-width": 20, "text-justify": "auto" };
+      const INK = { "text-color": "#2b2b2b", "text-halo-color": "#ffffff", "text-halo-width": 3 };
+      nearMap.addLayer({ id: "places", type: "symbol", source: "places", filter: ["!=", ["get", "kind"], "hotel"], layout: { ...PIN, "symbol-sort-key": ["get", "rank"], "text-field": ["format", ["get", "name"], {}, "\n", {}, ["get", "dist"], { "text-font": ["literal", ["Noto Sans Regular"]] }], "text-variable-anchor-offset": ["left", [1.1, -1.7], "right", [-1.1, -1.7], "top", [0, 0.3]] }, paint: INK });
+      nearMap.addLayer({ id: "hotel", type: "symbol", source: "places", filter: ["==", ["get", "kind"], "hotel"], layout: { ...PIN, "icon-size": 1.25, "text-field": ["get", "name"], "text-variable-anchor-offset": ["left", [1.3, -2.2], "right", [-1.3, -2.2], "top", [0, 0.3]] }, paint: INK });
+      noTitles();
+    });
+  }
+
   if (window.gsap && window.ScrollTrigger && window.Lenis) {
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
@@ -1029,7 +1142,8 @@
         else tl.fromTo(items, { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: 0.2 * L, stagger: 0.04 * L }, i === 0 ? w0 + 0.06 * L : w0 - 0.14 * L);
         // The last beat leaves just before the pin lets go, so the section never sits blank and nothing scrolls away.
         const outLen = 0.16 * L + 0.03 * L * (items.length - 1);
-        tl.to(items, { autoAlpha: 0, y: -40, duration: 0.16 * L, stagger: 0.03 * L }, i === n - 1 ? 0.98 - outLen : w1 - 0.3 * L);
+        // The hotel screen never empties: its photo and words stay and scroll away with the page.
+        if (scene.id !== "hotel") tl.to(items, { autoAlpha: 0, y: -40, duration: 0.16 * L, stagger: 0.03 * L }, i === n - 1 ? 0.98 - outLen : w1 - 0.3 * L);
       });
       tl.to({}, { duration: 0 }, 1);
     }
@@ -1056,16 +1170,17 @@
     function fitBeats() {
       document.querySelectorAll(".scene > .beat").forEach((beat) => {
         beat.style.removeProperty("--fit");
-        if (!phone.matches || !root.classList.contains("motion")) return;
+        if ((!phone.matches && !beat.classList.contains("fit")) || !root.classList.contains("motion")) return;
         const cs = getComputedStyle(beat);
         const room = beat.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
         const fits = () => {
           let top = Infinity, bottom = -Infinity;
           for (const el of beat.children) {
             top = Math.min(top, el.offsetTop);
-            bottom = Math.max(bottom, el.offsetTop + el.offsetHeight);
+            // The hotel's right column stretches to the screen, so measure what it holds.
+            bottom = Math.max(bottom, el.offsetTop + (el.classList.contains("side") ? el.scrollHeight : el.offsetHeight));
           }
-          return bottom - top <= room;
+          return bottom - top <= room + 1; // offsets and heights come in whole pixels, room does not
         };
         if (fits()) return;
         let lo = 0.55, hi = 1;
@@ -1077,8 +1192,12 @@
         beat.style.setProperty("--fit", lo);
       });
     }
-    let fitWidth = 0;
-    const refit = () => { if (window.innerWidth !== fitWidth) { fitWidth = window.innerWidth; fitBeats(); } };
+    let fitWidth = 0, fitHeight = 0;
+    // Phones refit on a width change only (their bars come and go); bigger screens also refit when the window changes height.
+    const refit = () => {
+      const h = phone.matches ? 0 : window.innerHeight;
+      if (window.innerWidth !== fitWidth || h !== fitHeight) { fitWidth = window.innerWidth; fitHeight = h; fitBeats(); }
+    };
     const loaded = new Promise((done) => (document.readyState === "complete" ? done() : window.addEventListener("load", done, { once: true })));
     loaded.then(() => document.fonts.ready).then(() => {
       refit();
@@ -1086,7 +1205,7 @@
       document.fonts.addEventListener("loadingdone", fitBeats);
     });
 
-    gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
+    if (!editDays) gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
       root.classList.add("motion");
       const lenis = new Lenis();
       lenis.on("scroll", ScrollTrigger.update);
@@ -1159,7 +1278,7 @@
       when: { text: "February 24th-28th 2027. Check-in from 3:00 p.m. on Wednesday, February 24, and check-out by 12:00 p.m. on Sunday, February 28.", opts: MORE },
       where: { text: 'Wirikuta Hotel Boutique · Lo de Marcos, Nayarit, México. The <a href="#area-map">map</a> shows where it is.', opts: MORE },
       included: { text: "Accommodation within walking distance of the beach, three delicious meals daily, two yoga classes every day, a dance class and an evening of Ecstatic Dance &amp; Cacao. Access to surf lessons, massage, biking and hiking.", opts: MORE },
-      addons: { text: "Capoeira, surfing, hiking, biking and massage.", opts: MORE },
+      addons: { text: "Surfing, hiking, biking and massage.", opts: MORE },
       levels: { text: "All levels welcome. Come as you are.", opts: MORE },
       days: { text: 'The <a href="#days">days</a> show each day, from arrival on Wednesday, February 24 to departure on Sunday, February 28.', opts: MORE },
       flights: { text: 'Fly into Puerto Vallarta (PVR). The Google Flights button in <a href="#flights">Find flights</a> searches flights from your city for February 24 to 28, 2027.', opts: MORE },
@@ -1231,7 +1350,7 @@
       big.removeAttribute("src");
       if (window.wsLenis) window.wsLenis.start();
     }
-    document.querySelectorAll(".rooms .track img").forEach((img) => img.addEventListener("click", () => open(img.currentSrc || img.src)));
+    document.querySelectorAll(".rooms .track img, .photo-strip img").forEach((img) => img.addEventListener("click", () => open(img.currentSrc || img.src)));
     pop.addEventListener("click", (e) => { if (e.target !== big) close(); });
     ["wheel", "touchmove"].forEach((type) => pop.addEventListener(type, (e) => e.preventDefault(), { passive: false }));
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pop.classList.contains("open")) close(); });
@@ -1255,6 +1374,49 @@
     document.querySelectorAll(".member").forEach((m) => m.addEventListener("click", () => open(m)));
     pop.addEventListener("click", (e) => { if (!e.target.closest(".panel") || e.target.closest("button")) close(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pop.classList.contains("open")) close(); });
+  })();
+</script>
+<script>
+  // Edit mode for the days: each day title and list is typeable, changes stay in this browser
+  // until the page's own days change, and Copy puts the whole schedule on the clipboard.
+  if (editDays) (() => {
+    const days = document.querySelector("#days .days");
+    const KEY = "ws-days-edit";
+    const base = days.innerHTML;
+    try {
+      const saved = JSON.parse(localStorage.getItem(KEY));
+      if (saved && saved.base === base) days.innerHTML = saved.html;
+    } catch (e) {}
+    const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ base, html: days.innerHTML })); } catch (e) {} };
+    days.querySelectorAll("h4, ul").forEach((el) => {
+      el.contentEditable = "true";
+      el.addEventListener("input", save);
+    });
+    days.querySelectorAll("h4").forEach((h) => h.addEventListener("keydown", (e) => { if (e.key === "Enter") e.preventDefault(); }));
+
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "btn edit-copy";
+    copy.textContent = "Copy schedule";
+    copy.addEventListener("click", () => {
+      const text = [...days.children].map((day) =>
+        [day.querySelector("h4"), day.querySelector("ul")].filter(Boolean)
+          .flatMap((el) => el.innerText.split("\n")).map((l) => l.trim()).filter(Boolean).join("\n")
+      ).join("\n\n");
+      const done = () => { copy.classList.add("done"); setTimeout(() => copy.classList.remove("done"), 1200); };
+      const fallback = () => {
+        const t = document.createElement("textarea");
+        t.value = text;
+        document.body.appendChild(t);
+        t.select();
+        try { if (document.execCommand("copy")) done(); } catch (e) {}
+        t.remove();
+      };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+      else fallback();
+    });
+    document.body.appendChild(copy);
+    window.addEventListener("load", () => document.getElementById("days").scrollIntoView());
   })();
 </script>
 </body>
