@@ -6,13 +6,13 @@
 <title>Body language wellness retreat · February 24th-28th 2027 · Lo de Marcos, Nayarit, México | Whispering Springs</title>
 <meta name="description" content="February 24th-28th 2027 · Wirikuta Hotel Boutique · Lo de Marcos, Nayarit, México. Whether you’re looking to move your body, deepen your practice, try something new, connect with like-minded people or simply unwind by the sea, this retreat is an invitation to nourish your body, mind and spirit.">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="https://clients.pietsuess.com/LoDeMarcos/">
+<link rel="canonical" href="https://asyouareretreats.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Whispering Springs">
 <meta property="og:title" content="Body language wellness retreat · Embodiment by the sea">
 <meta property="og:description" content="February 24th-28th 2027 · Wirikuta Hotel Boutique · Lo de Marcos, Nayarit, México">
-<meta property="og:url" content="https://clients.pietsuess.com/LoDeMarcos/">
-<meta property="og:image" content="https://clients.pietsuess.com/LoDeMarcos/images/fundo-parallax.webp">
+<meta property="og:url" content="https://asyouareretreats.com/">
+<meta property="og:image" content="https://asyouareretreats.com/images/fundo-parallax.webp">
 <meta property="og:image:width" content="1920">
 <meta property="og:image:height" content="1028">
 <meta name="twitter:card" content="summary_large_image">
@@ -26,8 +26,8 @@
   "endDate": "2027-02-28",
   "eventStatus": "https://schema.org/EventScheduled",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-  "url": "https://clients.pietsuess.com/LoDeMarcos/",
-  "image": ["https://clients.pietsuess.com/LoDeMarcos/images/fundo-parallax.webp"],
+  "url": "https://asyouareretreats.com/",
+  "image": ["https://asyouareretreats.com/images/fundo-parallax.webp"],
   "location": {
     "@type": "Hotel",
     "name": "Wirikuta Hotel Boutique",
@@ -170,8 +170,9 @@
   .scores .n small { font-size: 0.36em; opacity: 0.75; }
   .scores .site { font-size: clamp(18px, 1.4vw, 24px); }
 
-  /* The days: one column per day */
-  .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); }
+  /* The days: one column per day, each in a see-through box (light tint over the photo, no blur), set a little below the headings */
+  .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); margin-top: 2.5em; }
+  .days > div { padding: 1em 1.1em; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); }
   /* "Building good habits" sits on the heading's line, right of it; drops under it when there is no room */
   .days-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: clamp(20px, 2.5vw, 48px); }
   .days-head h3 { margin: 0; }
@@ -379,6 +380,10 @@
     html.motion .hero > .beat { padding-bottom: calc(var(--pad) + 112px); }
     html.motion .scene:not(.hero) > .beat { padding-bottom: calc(var(--pad) + 56px); }
     #chat-panel { max-height: calc(100svh - 60px); }
+    /* Video bar: the first two videos only, cropped a little at the sides so the bar is twice as tall; photo strips twice as tall */
+    .videos video:nth-of-type(3) { display: none; }
+    .videos video { aspect-ratio: 4 / 3; object-fit: cover; }
+    .photo-strip img { height: 34vw; }
   }
   /* Have Questions sits in the signup screen's bottom right corner, inside #register, so it comes and goes with that screen */
   #chat-btn { position: absolute; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
