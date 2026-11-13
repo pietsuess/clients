@@ -107,8 +107,7 @@
   .scene { position: relative; overflow: hidden; min-height: 100vh; padding: calc(var(--bar) + var(--pad)) var(--pad) var(--pad); display: grid; gap: var(--gap); align-content: center; color: var(--white); --owed: #bfe3e6; }
   .scene .bg, .register .bg { position: absolute; inset: 0; z-index: 0; }
   .scene .bg img, .register .bg img { width: 100%; height: 100%; max-width: none; object-fit: cover; }
-  .scene .bg.soft img { filter: blur(26px) saturate(1.05); transform: scale(1.2); }
-  .scene .shade, .register .shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(16, 18, 18, 0.7), rgba(16, 18, 18, 0.32) 55%, rgba(16, 18, 18, 0.42)); }
+  .scene .bg.soft img { filter: blur(26px) saturate(1.05); transform: scale(1.2); }  .scene .shade, .register .shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(16, 18, 18, 0.7), rgba(16, 18, 18, 0.32) 55%, rgba(16, 18, 18, 0.42)); }
   .beat { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: center; align-content: center; }
   .beat.low { align-content: end; }
   .beat .right { grid-column: 2; }
@@ -395,6 +394,7 @@
     .videos video:nth-of-type(3) { display: none; }
     .videos video { aspect-ratio: 4 / 3; object-fit: cover; }
     .photo-strip img { height: 51vw; }
+    .hero .bg img { object-position: 65% 50%; } /* opening photo: the big pool (61% across the photo) sits mid-screen; the computer keeps it centred as before */
   }
   /* Have Questions sits in the signup screen's bottom right corner, inside #register, so it comes and goes with that screen */
   #chat-btn { position: absolute; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
