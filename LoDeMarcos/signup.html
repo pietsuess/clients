@@ -179,6 +179,17 @@
   .days h4 { margin-bottom: 0.9em; }
   .days ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5em; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.4; }
   .days .t { font-weight: 700; white-space: nowrap; }
+  .days li { text-align: left; } /* schedule lines run plain left, never stretched */
+  /* Days arrow: where the days swipe sideways, a small arrow on the row's right edge nudges right; it fades once Sunday is in view (script at the end), taps pass through it */
+  .days-more { display: none; }
+  @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
+  @media (max-width: 900px) {
+    #days .words > .days, .days-more { grid-area: 2 / 1; }
+    .days-more { display: block; justify-self: end; align-self: center; z-index: 1; width: 30px; height: 30px; margin-top: 2.5em; color: var(--white); filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7)); pointer-events: none; transition: opacity 0.4s; animation: nudge 1.6s ease-in-out infinite; }
+    .days-more.end { opacity: 0; }
+    .days-more svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  }
+  @media (prefers-reduced-motion: reduce) { .days-more { animation: none; } }
   /* Edit mode (?edit on a copy opened from the computer): typeable days, Copy button bottom left */
   #days [contenteditable] { outline: 1px dashed rgba(255, 255, 255, 0.5); outline-offset: 6px; }
   .edit-copy { position: fixed; left: 26px; bottom: 26px; z-index: 90; }
@@ -380,10 +391,10 @@
     html.motion .hero > .beat { padding-bottom: calc(var(--pad) + 112px); }
     html.motion .scene:not(.hero) > .beat { padding-bottom: calc(var(--pad) + 56px); }
     #chat-panel { max-height: calc(100svh - 60px); }
-    /* Video bar: the first two videos only, cropped a little at the sides so the bar is twice as tall; photo strips twice as tall */
+    /* Video bar: the first two videos only, cropped a little at the sides so the bar is twice as tall; photo strips three times as tall (twice, then 1.5 again) */
     .videos video:nth-of-type(3) { display: none; }
     .videos video { aspect-ratio: 4 / 3; object-fit: cover; }
-    .photo-strip img { height: 34vw; }
+    .photo-strip img { height: 51vw; }
   }
   /* Have Questions sits in the signup screen's bottom right corner, inside #register, so it comes and goes with that screen */
   #chat-btn { position: absolute; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
@@ -535,6 +546,7 @@
             </ul>
           </div>
         </div>
+        <span class="days-more" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></span>
       </div>
     </div>
   </section>
@@ -567,7 +579,7 @@
     <img src="images/maps-guest-54.webp" width="1500" height="2000" alt="" loading="lazy" decoding="async">
   </div>
 
-  <div class="photo-strip" id="food-photos">
+  <div class="photo-strip" id="food-photos" data-speed="45">
     <img src="images/pexels-aguachile-39440920.webp" width="1589" height="2000" alt="" loading="lazy" decoding="async">
     <img src="images/unsplash-aguachile-sDeIcDW0jUs.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
     <img src="images/commons-aguas-frescas-Aguas_frescas_en_Mercado_Roma.webp" width="2000" height="1333" alt="" loading="lazy" decoding="async">
@@ -811,7 +823,7 @@
     const strips = [...document.querySelectorAll(".photo-strip")].map((el) => {
       // A second set of the same photos follows the first, so the loop has no seam.
       [...el.children].forEach((img) => { const copy = img.cloneNode(); copy.setAttribute("aria-hidden", "true"); el.append(copy); });
-      const s = { el, pos: 0, set: 0, boost: 0, dir: 1, turn: 1, held: false, seen: false };
+      const s = { el, pos: 0, set: 0, boost: 0, dir: 1, turn: 1, held: false, seen: false, speed: +el.dataset.speed || 30 };
       el.addEventListener("pointermove", (e) => {
         if (e.pointerType !== "mouse") return;
         const r = el.getBoundingClientRect();
@@ -833,7 +845,7 @@
         if (Math.abs(s.el.scrollLeft - s.set) > 2) s.pos = s.el.scrollLeft; // a swipe or trackpad moved it
         const loop = s.el.scrollWidth / 2;
         s.turn += (s.dir - s.turn) * (1 - Math.pow(0.01, dt)); // turns around smoothly, no jolt
-        s.pos += s.turn * (30 + s.boost) * dt; // 30px a second on its own, faster while the mouse moves over it
+        s.pos += s.turn * (s.speed + s.boost) * dt; // 30px a second on its own (data-speed on a strip sets its own: food 45), faster while the mouse moves over it
         if (s.pos >= loop) s.pos -= loop;
         if (s.pos < 0) s.pos += loop;
         s.el.scrollLeft = s.pos;
@@ -1238,6 +1250,16 @@
     window.addEventListener("resize", fitLine);
     window.addEventListener("load", fitLine);
     document.fonts.ready.then(fitLine);
+  })();
+
+  // Days arrow: fades once the days row is swiped to Sunday, comes back if swiped back.
+  (function () {
+    const row = document.querySelector("#days .days"), more = document.querySelector(".days-more");
+    if (!row || !more) return;
+    const check = () => more.classList.toggle("end", row.scrollLeft + row.clientWidth >= row.scrollWidth - 4);
+    row.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    check();
   })();
 </script>
 <script>
