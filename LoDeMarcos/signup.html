@@ -731,12 +731,19 @@
   // Safari can keep the old spot on reload anyway, so the page leaves from the top.
   window.addEventListener("beforeunload", () => window.scrollTo(0, 0));
 
-  // Signup: the box turns to SIGNED UP!, then the page moves on to Find flights.
-  // Saving is not connected yet: the new domain and its database come first.
-  document.getElementById("signup").addEventListener("submit", (e) => {
+  // Signup: the email is saved (asyouareretreats.com, D1), then the box turns to SIGNED UP! and the page moves on to Find flights.
+  // If the save fails the box stays as typed, so it can be sent again.
+  const SAVE = "https://asyouareretreats.com/api/";
+  const send = (what, data) => fetch(SAVE + what, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.ok, () => false);
+  let signing = false;
+  document.getElementById("signup").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = e.currentTarget;
-    if (f.classList.contains("done")) return;
+    if (f.classList.contains("done") || signing) return;
+    signing = true;
+    const saved = await send("signup", { email: f.querySelector("#f-email").value });
+    signing = false;
+    if (!saved) return;
     f.classList.add("done");
     f.querySelector("#f-email").readOnly = true;
     f.querySelector(".signed").textContent = "SIGNED UP!";
@@ -747,16 +754,21 @@
   });
 
   // Have Questions: the corner button opens a box to write a question to us, the sent question shows in the box.
-  // Sending is not connected yet: once the new domain is set up, questions go to info@whisperingsprings.ca.
+  // Questions are saved (asyouareretreats.com, D1); they go on to Hello@AsYouAreRetreats.com once its inbox is set.
   const chatBtn = document.getElementById("chat-btn");
   const chatPanel = document.getElementById("chat-panel");
   const ask = document.getElementById("ask");
   chatBtn.onclick = () => { chatPanel.classList.add("open"); chatBtn.style.display = "none"; if (!chatPanel.classList.contains("sent")) ask.querySelector("#q-text").focus(); };
   document.getElementById("chat-close").onclick = () => { chatPanel.classList.remove("open"); chatBtn.style.display = "flex"; };
-  ask.addEventListener("submit", (e) => {
+  let asking = false;
+  ask.addEventListener("submit", async (e) => {
     e.preventDefault();
     const text = ask.querySelector("#q-text").value.trim();
-    if (!text) return;
+    if (!text || asking) return;
+    asking = true;
+    const saved = await send("question", { email: ask.querySelector("#q-email").value, question: text });
+    asking = false;
+    if (!saved) return;
     const d = document.createElement("div");
     d.className = "msg-user";
     d.textContent = text;
