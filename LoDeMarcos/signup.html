@@ -49,7 +49,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Yeseva+One&family=Libre+Baskerville:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Yeseva+One&family=Averia+Serif+Libre:wght@400;700&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
   @font-face { font-family: "Northwell"; src: url("fonts/Northwell.ttf") format("truetype"); font-display: swap; }
@@ -70,7 +70,7 @@
   * { box-sizing: border-box; }
   html.lenis, html.lenis body { height: auto; }
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
-  body { margin: 0; background: var(--ink); color: var(--ink); font: 400 20px/1.6 "Libre Baskerville", Arial, sans-serif; }
+  body { margin: 0; background: var(--ink); color: var(--ink); font: 400 20px/1.6 "Averia Serif Libre", Arial, sans-serif; }
   img { display: block; max-width: 100%; height: auto; }
   a { color: inherit; }
   p, li, dd { text-align: justify; text-align-last: left; }
@@ -84,7 +84,7 @@
   .owed { color: var(--owed); }
   :focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 34px; border: 0; border-radius: 28px; background: var(--deep); color: var(--white); font: 700 20px/1 "Libre Baskerville", Arial, sans-serif; text-decoration: none; cursor: pointer; justify-self: start; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 34px; border: 0; border-radius: 28px; background: var(--deep); color: var(--white); font: 700 20px/1 "Averia Serif Libre", Arial, sans-serif; text-decoration: none; cursor: pointer; justify-self: start; }
   .scene.teal .btn { background: var(--paper); color: var(--deep); }
 
   /* Header: hidden on the opening photo, arrives with the first scroll; soft dark fade, no band */
@@ -97,6 +97,8 @@
   .insta { position: fixed; top: 8px; right: 8px; z-index: 50; width: 44px; height: 44px; padding: 8px; color: var(--white); filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7)); }
   .insta svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .insta .dot { fill: currentColor; stroke: none; }
+  /* Logo mark top left the whole way down: Logo2's loop only (the viewBox leaves out the lettering), made white, with the Instagram icon's shadow */
+  .mark { position: fixed; top: 16px; left: 16px; z-index: 50; height: 40px; aspect-ratio: 434 / 303; pointer-events: none; filter: brightness(0) invert(1) drop-shadow(0 1px 6px rgba(0, 0, 0, 0.7)); }
 
   /* Scenes: full-screen, pinned and scrubbed when motion is on */
   .scene { position: relative; overflow: hidden; min-height: 100vh; padding: calc(var(--bar) + var(--pad)) var(--pad) var(--pad); display: grid; gap: var(--gap); align-content: center; color: var(--white); --owed: #bfe3e6; }
@@ -125,9 +127,11 @@
   .hero .place { font-size: clamp(22px, 1.7vw, 28px); margin: 0; }
   .hero .date { font-size: clamp(40px, 3.4vw, 56px); }
   .hero .place a { text-decoration: none; }
+  /* Logo above the title: Piet's AsYouAre_Logo2.svg, made all white (his word); the viewBox trims the file's empty margins */
+  .hero .brand { display: block; height: clamp(140px, 30vh, 320px); aspect-ratio: 520 / 466; filter: brightness(0) invert(1); }
   /* Scroll hint: thin line with a dot sliding down, gone once the visitor scrolls */
   .hint { position: absolute; z-index: 3; left: 50%; bottom: 32px; width: 2px; height: 64px; margin-left: -1px; background: rgba(255, 255, 255, 0.9); filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.75)); transition: opacity 0.5s ease; }
-  .hint b { position: absolute; left: 50%; bottom: 100%; margin-bottom: 14px; transform: translateX(-50%); font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; letter-spacing: 0.12em; color: var(--white); white-space: nowrap; animation: flash 1.2s ease-in-out infinite; }
+  .hint b { position: absolute; left: 50%; bottom: 100%; margin-bottom: 14px; transform: translateX(-50%); font: 700 15px/1 "Averia Serif Libre", Arial, sans-serif; letter-spacing: 0.12em; color: var(--white); white-space: nowrap; animation: flash 1.2s ease-in-out infinite; }
   @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
   .hint span { position: absolute; left: -3.5px; top: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--white); animation: hint 1.8s ease-in-out infinite; }
   @keyframes hint { 0% { transform: translateY(0); opacity: 0; } 20%, 80% { opacity: 1; } 100% { transform: translateY(57px); opacity: 0; } }
@@ -267,13 +271,16 @@
   .scene.map { padding: 0; background: var(--sand); }
   .map-box { position: absolute; inset: 0; z-index: 1; }
   .pin { display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
-  .pin .label { padding: 7px 12px 5px; border-radius: 999px; background: var(--paper); color: var(--head); font: 700 13px/1 "Libre Baskerville", Arial, sans-serif; letter-spacing: 0.04em; white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+  .pin .label { padding: 7px 12px 5px; border-radius: 999px; background: var(--paper); color: var(--head); font: 700 13px/1 "Averia Serif Libre", Arial, sans-serif; letter-spacing: 0.04em; white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
   .pin .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--deep); border: 3px solid var(--white); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }  .map-box .maplibregl-ctrl-attrib { font-size: 10px; background: rgba(242, 241, 236, 0.8); }
 
   html.motion .scene { height: 100vh; height: 100svh; min-height: 0; }
   html.motion .beat { position: absolute; inset: 0; padding: calc(var(--bar) + var(--pad)) var(--pad) var(--pad); }
   html.motion .scene.rooms { height: auto; min-height: 100vh; min-height: 100svh; }
 
+  /* Find flights heading: two of Piet's monstera leaves (AsYouAre_MonsterraLeaf.svg as he made it; each viewBox crops out one leaf) right after the words, about letter height */
+  .leaves svg { display: inline-block; width: 0.8em; height: 0.8em; margin-left: 0.15em; }
+  .leaves svg + svg { margin-left: 0.05em; }
   /* Find flights: her city and dates, then the button opens Google Flights with them filled in */
   .fly { grid-template-columns: 2fr 1fr 1fr auto; align-items: end; width: min(1100px, 100%); }
   .fly .field { margin: 0; }
@@ -291,7 +298,7 @@
   .field { clear: both; margin: 0 0 14px; }
   .field:last-child { margin-bottom: 0; }
   label { display: block; margin: 0 0 6px; font-weight: 700; }
-  input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea { width: 100%; min-height: 56px; padding: 12px 16px; border: 2px solid var(--deep); border-radius: 10px; background: var(--white); color: var(--ink); font: 400 20px/1.4 "Libre Baskerville", Arial, sans-serif; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea { width: 100%; min-height: 56px; padding: 12px 16px; border: 2px solid var(--deep); border-radius: 10px; background: var(--white); color: var(--ink); font: 400 20px/1.4 "Averia Serif Libre", Arial, sans-serif; }
   textarea { min-height: 88px; resize: vertical; }
   .register label { font-size: 14px; }
   .register input[type="text"], .register input[type="email"], .register input[type="tel"], .register select, .register textarea, #ask textarea, #ask input { min-height: 44px; padding: 8px 12px; font-size: 16px; }
@@ -307,7 +314,7 @@
   #signup .go, #ask .go { position: absolute; top: 0; right: 0; bottom: 0; width: 48px; display: flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--deep); cursor: pointer; }
   #signup .go svg, #ask .go svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* Signed up: the box turns into its message, then the page moves on to Find flights */
-  #signup .signed { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: var(--deep); color: var(--white); font: 700 16px/1 "Libre Baskerville", Arial, sans-serif; letter-spacing: 0.08em; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+  #signup .signed { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: var(--deep); color: var(--white); font: 700 16px/1 "Averia Serif Libre", Arial, sans-serif; letter-spacing: 0.08em; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
   #signup.done .signed { opacity: 1; }
   #signup.done .go { visibility: hidden; }
   /* Signup page: the opening's button smaller, less rounded and a little lower */
@@ -346,6 +353,8 @@
   .foot .site-credits { text-align: center; }
   .foot .site-credits[open] { flex-basis: 100%; }
   .foot .credits { justify-content: center; }
+  /* The travel agent's own footer line, word for word from movementtravel.com (TICO asks for its name, address, phone and number) */
+  .foot .agent { margin: 0; text-align: center; text-align-last: center; }
   /* Signup page: every headline stays on one line; one too wide for its screen shrinks to fit (script at the end) */
   main h1, main h2, main h3 { white-space: nowrap; min-width: 0; }
   .words { min-width: 0; }
@@ -373,6 +382,8 @@
     .btn { padding: 0 24px; }
     .ticks { grid-template-columns: 1fr; }
     .hero h1 { white-space: normal; font-size: 2.2em; }
+    .hero .brand { height: 10em; } /* shrinks with the words (--fit) */
+    .mark { height: 32px; }
     /* A screen taller than the phone shrinks its words and photo together (--fit, set by the script) */
     .beat .words { font-size: calc(18px * var(--fit, 1)); }
     .beat h2 { font-size: 1.778em; }
@@ -400,7 +411,7 @@
     .hero .bg img { object-position: 65% 50%; } /* opening photo: the big pool (61% across the photo) sits mid-screen; the computer keeps it centred as before */
   }
   /* Have Questions sits in the signup screen's bottom right corner, inside #register, so it comes and goes with that screen */
-  #chat-btn { position: absolute; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Libre Baskerville", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+  #chat-btn { position: absolute; right: 26px; bottom: 26px; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 14px 24px; border: 0; border-radius: 28px; background: var(--paper); color: var(--deep); cursor: pointer; font: 700 15px/1 "Averia Serif Libre", Arial, sans-serif; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
   html.scrolled #chat-btn { opacity: 1; pointer-events: auto; }
   #chat-btn:hover { background: var(--white); }
   #chat-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; }
@@ -408,7 +419,7 @@
   #chat-panel.open { display: flex; }
   .chat-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--deep); color: var(--white); }
   .chat-head .t { font-family: "Yeseva One", serif; font-size: 21px; }
-  .chat-head button { background: none; border: 0; color: rgba(255, 255, 255, 0.75); cursor: pointer; font: 12px/1 "Libre Baskerville", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px; }
+  .chat-head button { background: none; border: 0; color: rgba(255, 255, 255, 0.75); cursor: pointer; font: 12px/1 "Averia Serif Libre", Arial, sans-serif; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px; }
   .chat-head button:hover { color: var(--white); }
   #chat-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
   .msg-bot, .msg-user { max-width: 85%; padding: 11px 15px; border-radius: 14px; font-size: 14px; line-height: 1.55; text-align: left; text-align-last: left; }
@@ -416,7 +427,7 @@
   .msg-bot a { color: var(--deep); }
   .msg-user { background: var(--deep); color: var(--white); align-self: flex-end; }
   .chat-opts { display: flex; flex-direction: column; gap: 6px; align-self: stretch; padding-top: 2px; }
-  .chat-opts button { display: flex; align-items: center; gap: 11px; padding: 11px 14px; border: 1px solid rgba(60, 60, 59, 0.2); border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: 13.5px/1.3 "Libre Baskerville", Arial, sans-serif; transition: border-color 0.15s; }
+  .chat-opts button { display: flex; align-items: center; gap: 11px; padding: 11px 14px; border: 1px solid rgba(60, 60, 59, 0.2); border-radius: 12px; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: 13.5px/1.3 "Averia Serif Libre", Arial, sans-serif; transition: border-color 0.15s; }
   .chat-opts button:hover { border-color: var(--deep); }
   .chat-opts button svg { width: 17px; height: 17px; flex: none; color: var(--deep); stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   /* Have Questions on this page is a box to write a question to us; its Email field and arrow are the signup box's */
@@ -428,7 +439,7 @@
   .rooms .track img, .photo-strip img { cursor: zoom-in; }
   /* Who leads it: a box for each of the team; a box opens that person's bio */
   .team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--gap); max-width: 1100px; }
-  .member { --owed: var(--deep); display: flex; align-items: flex-end; min-height: clamp(160px, 18vw, 240px); padding: 24px 26px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink); font: 700 20px/1.3 "Libre Baskerville", Arial, sans-serif; text-align: left; text-shadow: none; cursor: pointer; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
+  .member { --owed: var(--deep); display: flex; align-items: flex-end; min-height: clamp(160px, 18vw, 240px); padding: 24px 26px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink); font: 700 20px/1.3 "Averia Serif Libre", Arial, sans-serif; text-align: left; text-shadow: none; cursor: pointer; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
   #bio-pop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 5vh 5vw; background: rgba(16, 18, 18, 0.92); }
   #bio-pop.open { display: flex; }
   #bio-pop .panel { --owed: var(--deep); position: relative; width: min(640px, 100%); max-height: 100%; overflow: auto; padding: 40px 40px 36px; border-radius: 16px; background: var(--paper); color: var(--ink); }
@@ -452,6 +463,7 @@
 </script>
 </head>
 <body>
+<svg class="mark" viewBox="369 260 434 303" aria-hidden="true"><image href="images/AsYouAre_Logo2.svg" width="1071.21" height="1024"/></svg>
 <a class="insta" href="https://www.instagram.com/as.you.are.retreats/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="dot" cx="17.5" cy="6.5" r="1"/></svg></a>
 
 <main>
@@ -462,6 +474,7 @@
     <div class="hint" aria-hidden="true"><b>Scroll</b><span></span></div>
     <div class="beat">
       <div class="words">
+        <svg class="brand" viewBox="285 258 520 466" role="img" aria-label="As You Are Retreats"><image href="images/AsYouAre_Logo2.svg" width="1071.21" height="1024"/></svg>
         <h1>Body language wellness retreat</h1>
         <p class="place date">February 24th-28th 2027</p>
         <a class="btn" href="#register">Sign up to be notified when registration opens</a>
@@ -502,7 +515,7 @@
               <li><span class="t">8:00 am</span> - Morning yoga</li>
               <li><span class="t">10:00 am</span> - Breakfast Social</li>
               <li>-----</li>
-              <li><span class="t">2:00 pm</span> - Tea Time Snack</li>
+              <li><span class="t">1:00 pm</span> - Boxed Lunch</li>
               <li>-----</li>
               <li><span class="t">5:30 pm</span> - Social</li>
               <li><span class="t">6:00 pm</span> - Dinner</li>
@@ -517,12 +530,11 @@
               <li><span class="t">8:00 am</span> - Morning yoga</li>
               <li><span class="t">10:00 am</span> - Breakfast Social</li>
               <li>-----</li>
-              <li><span class="t">2:00 pm</span> - Tea Time Snack</li>
+              <li><span class="t">1:00 pm</span> - Boxed Lunch</li>
               <li>-----</li>
               <li><span class="t">5:30 pm</span> - Social</li>
               <li><span class="t">6:00 pm</span> - Dinner</li>
               <li><span class="t">7:00 pm</span> - Beach Sunset Yoga Class</li>
-              <li><span class="t">8:00 pm</span> - Local Show</li>
             </ul>
           </div>
           <div>
@@ -532,12 +544,11 @@
               <li><span class="t">8:00 am</span> - Morning yoga</li>
               <li><span class="t">10:00 am</span> - Breakfast Social</li>
               <li>-----</li>
-              <li><span class="t">2:00 pm</span> - Tea Time Snack</li>
+              <li><span class="t">1:00 pm</span> - Boxed Lunch</li>
               <li>-----</li>
               <li><span class="t">5:30 pm</span> - Social</li>
               <li><span class="t">6:00 pm</span> - Dinner</li>
-              <li><span class="t">7:00 pm</span> - Sunset Beach Cacao</li>
-              <li><span class="t">8:00 pm</span> - Rooftop Dance</li>
+              <li><span class="t">7:00 pm</span> - San Pancho Music Fest</li>
             </ul>
           </div>
           <div>
@@ -686,7 +697,7 @@
     <div class="ghost">Find flights</div>
     <div class="beat">
       <div class="words">
-        <h2>Find flights</h2>
+        <h2>Find flights<span class="leaves" aria-hidden="true"><svg viewBox="730 527 300 299"><image href="images/AsYouAre_MonsterraLeaf.svg" width="1071.21" height="1024"/></svg><svg viewBox="135 698 278 274"><image href="images/AsYouAre_MonsterraLeaf.svg" width="1071.21" height="1024"/></svg></span></h2>
         <form class="fly" id="fly" action="https://www.google.com/travel/flights" method="get" target="_blank" rel="noopener">
           <div class="field"><label for="fly-from">From</label><input id="fly-from" type="text" autocomplete="address-level2"></div>
           <div class="field"><label for="fly-out">Depart</label><input id="fly-out" type="date" value="2027-02-24"></div>
@@ -701,6 +712,7 @@
 </main>
 
 <footer class="foot">
+  <p class="agent">LM Movement Travel Ltd is affiliated with Nexion Travel Group-Canada, 380 Wellington St., Tower B, 6th Floor, London, ON, N6A 5B5, Phone (519) 660-6966, TICO #1549342.</p>
   <details class="site-credits">
   <summary>Site credits</summary>
   <ul class="credits">
