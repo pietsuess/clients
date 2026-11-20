@@ -318,7 +318,7 @@
   input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea { width: 100%; min-height: 56px; padding: 12px 16px; border: 2px solid var(--deep); border-radius: 10px; background: var(--white); color: var(--ink); font: 400 20px/1.4 "Averia Serif Libre", Arial, sans-serif; }
   textarea { min-height: 88px; resize: vertical; }
   .register label { font-size: 14px; }
-  .register input[type="text"], .register input[type="email"], .register input[type="tel"], .register select, .register textarea, #ask textarea, #ask input { min-height: 44px; padding: 8px 12px; font-size: 16px; }
+  .register input[type="text"], .register input[type="email"], .register input[type="tel"], .register input[type="date"], .register select, .register textarea, #ask textarea, #ask input { min-height: 44px; padding: 8px 12px; font-size: 16px; }
   .register .btn { min-height: 46px; padding: 0 28px; font-size: 17px; }
   /* Registration page: the form is taller than a screen, so the photo and its shade stay put behind it as it scrolls by */
   .register { clip-path: inset(0); }
@@ -326,6 +326,15 @@
   /* A question with answers to pick: its words look like a field's label, its answers sit under it */
   .register .q { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
   .register .check + .check { margin-top: 8px; }
+  /* Movement Travel's questions: a heading over a few fields (name, billing address, passport), and their notes under a question */
+  .register fieldset > .q { clear: both; }
+  .register .note { margin: 0 0 8px; font-size: 14px; overflow-wrap: anywhere; }
+  .register ul.note { padding-left: 1.2em; }
+  .register .note a { color: var(--deep); }
+  /* After the save, the thanks line takes the Register button's place (nothing moves) */
+  .register .send { position: relative; }
+  .register .thanks { position: absolute; top: 0; bottom: 0; left: 0; display: flex; align-items: center; margin: 0; white-space: nowrap; font: 700 17px/1 "Averia Serif Libre", Arial, sans-serif; }
+  #reg.done .send .btn { visibility: hidden; }
   /* Signup page: the Register photo fills one screen; a small heading, the email box and its arrow sit centred on it,
      the photo's boat (mid-screen) in the gap between heading and box */
   .register { min-height: 100svh; display: grid; align-content: center; }
@@ -738,12 +747,23 @@
       <div class="col">
         <fieldset>
           <legend>1. Personal Information</legend>
-          <div class="field"><label for="f-name">Full legal name (as shown on passport) *</label><input id="f-name" name="legal_name" type="text" autocomplete="name" required></div>
+          <p class="q">Full Name (Exactly As Shown in Passport)</p>
+          <div class="field"><label for="f-first">First Name *</label><input id="f-first" name="first_name" type="text" autocomplete="given-name" required></div>
+          <div class="field"><label for="f-middle">Middle Name</label><input id="f-middle" name="middle_name" type="text" autocomplete="additional-name"></div>
+          <div class="field"><label for="f-last">Last Name *</label><input id="f-last" name="last_name" type="text" autocomplete="family-name" required></div>
           <div class="field"><label for="f-preferred">Preferred name</label><input id="f-preferred" name="preferred_name" type="text" autocomplete="nickname"></div>
           <div class="field"><label for="f-email">Email address *</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
-          <div class="field"><label for="f-phone">Phone number *</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" required></div>
+          <div class="field"><label for="f-phone">Cell Phone Number *</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" required></div>
+          <div class="field"><label for="f-birth">Date of Birth *</label><input id="f-birth" name="date_of_birth" type="date" autocomplete="bday" required></div>
           <div class="field"><label for="f-country">Country of residence</label><input id="f-country" name="country" type="text" autocomplete="country-name"></div>
-          <div class="field"><label for="e-contact">Emergency contact name and phone number *</label><input id="e-contact" name="emergency_contact" type="text" required></div>
+          <p class="q">Credit Card Billing Address</p>
+          <div class="field"><label for="b-line1">Address Line 1 *</label><input id="b-line1" name="billing_line1" type="text" autocomplete="billing address-line1" required></div>
+          <div class="field"><label for="b-line2">Address Line 2 (Optional)</label><input id="b-line2" name="billing_line2" type="text" autocomplete="billing address-line2"></div>
+          <div class="field"><label for="b-city">City or Town *</label><input id="b-city" name="billing_city" type="text" autocomplete="billing address-level2" required></div>
+          <div class="field"><label for="b-region">State or Province or Region *</label><input id="b-region" name="billing_region" type="text" autocomplete="billing address-level1" required></div>
+          <div class="field"><label for="b-postcode">Zip or Postcode *</label><input id="b-postcode" name="billing_postcode" type="text" autocomplete="billing postal-code" required></div>
+          <div class="field"><label for="b-country">Country *</label><input id="b-country" name="billing_country" type="text" autocomplete="billing country-name" required></div>
+          <div class="field"><label for="e-contact">Emergency Contact *</label><p class="note">Please include: Name, Email, Phone</p><textarea id="e-contact" name="emergency_contact" required></textarea></div>
           <div class="field"><label for="e-rel">Relationship to emergency contact</label><input id="e-rel" name="emergency_relationship" type="text"></div>
         </fieldset>
         <fieldset>
@@ -755,7 +775,7 @@
             <div class="check"><input id="room-3" name="room" value="Shared Room (2 beds)" type="radio"><label for="room-3">Shared Room (2 beds)</label></div>
             <div class="check"><input id="room-4" name="room" value="Open to either" type="radio"><label for="room-4">Open to either</label></div>
           </div>
-          <div class="field"><label for="f-roommate">If sharing, do you have a roommate preference?</label><input id="f-roommate" name="roommate" type="text"></div>
+          <div class="field"><label for="f-companions">Travel Companions</label><p class="note">If you would like to share a room with another guest please provide their name.</p><p class="note">If you are registering and paying for the other guest, please provide the following details for them: Full Name (exactly as shown in passport), Address, Email, Cell Number, Date of Birth, Citizenship, Passport Number &amp; Expiry Date, Allergies &amp; Dietary Restrictions (if any)</p><textarea id="f-companions" name="travel_companions"></textarea></div>
           <div class="field" role="radiogroup" aria-labelledby="share-new-q">
             <p class="q" id="share-new-q">Are you comfortable sharing with someone you haven't met before?</p>
             <div class="check"><input id="share-new-1" name="share_new" value="Yes" type="radio"><label for="share-new-1">Yes</label></div>
@@ -819,6 +839,11 @@
             <div class="check"><input id="mexico-before-1" name="mexico_before" value="Yes" type="radio"><label for="mexico-before-1">Yes</label></div>
             <div class="check"><input id="mexico-before-2" name="mexico_before" value="No, this is my first time!" type="radio"><label for="mexico-before-2">No, this is my first time!</label></div>
           </div>
+          <p class="q">Passport</p>
+          <div class="field"><label for="p-number">Passport Number *</label><input id="p-number" name="passport_number" type="text" autocomplete="off" required></div>
+          <div class="field"><label for="p-issue">Country of Issue *</label><input id="p-issue" name="passport_country" type="text" autocomplete="off" required></div>
+          <div class="field"><label for="p-nationality">Nationality *</label><input id="p-nationality" name="nationality" type="text" autocomplete="off" required></div>
+          <div class="field"><label for="p-expiry">Expiration Date *</label><input id="p-expiry" name="passport_expiry" type="date" required></div>
           <div class="field" role="radiogroup" aria-labelledby="passport-q">
             <p class="q" id="passport-q">Is your passport valid for your travel dates?</p>
             <div class="check"><input id="passport-1" name="passport" value="Yes" type="radio"><label for="passport-1">Yes</label></div>
@@ -840,6 +865,46 @@
           <div class="field">
             <div class="check"><input id="f-insured" name="insurance_condition" value="Yes" type="checkbox" required><label for="f-insured">I will have travel medical insurance for my whole trip (required to book) *</label></div>
             <p class="links">Need insurance? <a href="https://www.manulifetravel.ca/travel-insurance/get-a-quote?lang=en&amp;refCode=NEXILON_NEXT9EV" target="_blank" rel="noopener">Get a quote from Manulife</a></p>
+          </div>
+          <div class="field" role="group" aria-labelledby="mt-insurance-q">
+            <p class="q" id="mt-insurance-q">Travel Insurance *</p>
+            <p class="note">We strongly recommend buying travel insurance for your trip. Movement Travel can offer insurance to residents of Canada and the U.S (excluding some provinces/states). At a minimum, you should have Emergency Medical Insurance &amp; Trip Cancellation Insurance if traveling outside your home province or state. More information about travel insurance can be found here.</p>
+            <p class="note">Without travel insurance, you may be exposed to financial losses, including, but not limited to:</p>
+            <ul class="note"><li>Medical emergencies</li><li>Trip cancellation or interruption</li><li>Trip delays</li><li>Lost or stolen baggage and/or personal belongings</li></ul>
+            <p class="note">Movement Travel and its agents shall not be held liable for any losses, expenses, or damages you incur as a result of your decision not to buy travel insurance from us.</p>
+            <p class="note">To obtain a quote and purchase a policy, please review the relevant section below.</p>
+            <div class="check"><input id="mt-insurance" name="insurance_read" value="I have read this section" type="checkbox" required><label for="mt-insurance">I have read this section</label></div>
+          </div>
+          <div class="field">
+            <p class="q">CANADIAN RESIDENTS</p>
+            <p class="q">MANULIFE TRAVEL INSURANCE</p>
+            <p class="note">Residents of:</p>
+            <ul class="note"><li>Provinces and territories except Quebec or Saskatchewan click here for an online quote</li><li>Quebec or Saskatchewan: complete the Travel Insurance Questionnaire and Movement Travel will refer you to an agent licensed in your province.</li></ul>
+            <p class="note">Premium Protection Plans must be purchased within 72 hours of your first trip payment.</p>
+            <p class="q">Tips for Obtaining Your Quote / Purchasing Your Policy</p>
+            <p class="q">Entering Trip Cost (for Trip Cancellation purposes)</p>
+            <ul class="note"><li>Enter your total non-refundable trip costs (in Canadian dollars)</li><li>Round up to the nearest dollar</li><li>If you don't know your total trip cost at the time of purchase, enter the known amount. This amount can be increased anytime prior to departure but it cannot be decreased.</li></ul>
+            <p class="q">Medical Questionnaire</p>
+            <p class="note">Some plans require a Medical Questionnaire. We cannot advise on the Questionnaire or complete it on your behalf. Any questions should be reviewed with your doctor.</p>
+            <p class="q">Manulife Contact Info</p>
+            <p class="note">If you have any questions about your policy, please contact Manulife at 1 (866) 298-2722 or email travel@manulife.ca</p>
+            <p class="note">This section is for information purposes only, no response required.</p>
+          </div>
+          <div class="field">
+            <p class="q">US RESIDENTS</p>
+            <p class="q">JOHN HANCOCK INSURANCE</p>
+            <p class="note">Residents of:</p>
+            <ul class="note"><li>All states except Florida, Hawaii &amp; New York complete this Travel Insurance Questionnaire</li><li>Hawaii and New York - click here to obtain an online quote and forward the confirmation to your Movement Travel representative once a policy has been purchased</li></ul>
+            <p class="note">Cancel For Any Reason coverage must purchased within 14 days of your initial trip payment.</p>
+            <p class="note">This section is for information purposes only, no response required.</p>
+          </div>
+          <div class="field" role="radiogroup" aria-labelledby="flight-booking-q">
+            <p class="q" id="flight-booking-q">Flight Booking *</p>
+            <p class="note">Movement Travel offers flight booking services for an additional fee:</p>
+            <p class="note">Outside Canada &amp; US - $195 per person</p>
+            <p class="note">Prices are in Canadian Dollars and are subject to sales tax.</p>
+            <div class="check"><input id="flight-booking-1" name="flight_booking" value="Yes" type="radio" required><label for="flight-booking-1">Yes</label></div>
+            <div class="check"><input id="flight-booking-2" name="flight_booking" value="No" type="radio" required><label for="flight-booking-2">No</label></div>
           </div>
           <div class="field" role="radiogroup" aria-labelledby="flights-booked-q">
             <p class="q" id="flights-booked-q">Have you booked your flights?</p>
@@ -868,7 +933,14 @@
         </fieldset>
         <fieldset>
           <legend>8. A Little More About You</legend>
-          <div class="field"><label for="f-heard">How did you hear about this retreat?</label><input id="f-heard" name="heard" type="text"></div>
+          <div class="field" role="radiogroup" aria-labelledby="heard-q">
+            <p class="q" id="heard-q">How Did You Hear About This Retreat? *</p>
+            <div class="check"><input id="heard-1" name="heard" value="Retreat Host" type="radio" required><label for="heard-1">Retreat Host</label></div>
+            <div class="check"><input id="heard-2" name="heard" value="Friend / Family" type="radio" required><label for="heard-2">Friend / Family</label></div>
+            <div class="check"><input id="heard-3" name="heard" value="Movement Travel Website" type="radio" required><label for="heard-3">Movement Travel Website</label></div>
+            <div class="check"><input id="heard-4" name="heard" value="Web Search" type="radio" required><label for="heard-4">Web Search</label></div>
+            <div class="check"><input id="heard-5" name="heard" value="Other" type="radio" required><label for="heard-5">Other</label></div>
+          </div>
           <div class="field"><label for="f-inspired">What inspired you to join us?</label><textarea id="f-inspired" name="inspired"></textarea></div>
           <div class="field"><label for="f-special">What would make this retreat truly special for you?</label><textarea id="f-special" name="special"></textarea></div>
           <div class="field"><label for="f-else">Is there anything else you'd like us to know?</label><textarea id="f-else" name="anything_else"></textarea></div>
@@ -887,8 +959,29 @@
             <div class="check"><input id="photo-sharing-2" name="photo_sharing" value="No" type="radio"><label for="photo-sharing-2">No</label></div>
             <div class="check"><input id="photo-sharing-3" name="photo_sharing" value="Please ask me first" type="radio"><label for="photo-sharing-3">Please ask me first</label></div>
           </div>
+          <div class="field" role="group" aria-labelledby="card-q">
+            <p class="q" id="card-q">Credit Card Authorization *</p>
+            <p class="note">Do you authorize Movement Travel to charge your credit card for the cost of the retreat and any other travel services Movement Travel will be booking on your behalf.</p>
+            <div class="check"><input id="card-1" name="card_authorization" value="Yes" type="checkbox" required><label for="card-1">Yes</label></div>
+          </div>
+          <div class="field" role="group" aria-labelledby="mt-terms-q">
+            <p class="q" id="mt-terms-q">Movement Travel's Terms &amp; Conditions *</p>
+            <p class="note">Please review Movement Travel's Terms &amp; Conditions which are also available on our website - <a href="https://www.movementtravel.com/terms-conditions-booking-sale" target="_blank" rel="noopener">https://www.movementtravel.com/terms-conditions-booking-sale</a>.</p>
+            <div class="check"><input id="mt-terms" name="movement_terms" value="I agree to the Terms &amp; Conditions" type="checkbox" required><label for="mt-terms">I agree to the Terms &amp; Conditions</label></div>
+          </div>
+          <div class="field" role="group" aria-labelledby="host-terms-q">
+            <p class="q" id="host-terms-q">Retreat Host's Terms &amp; Conditions *</p>
+            <p class="note">Please review your Retreat Host's Terms &amp; Conditions</p>
+            <div class="check"><input id="host-terms" name="host_terms" value="I Agree to the Terms &amp; Conditions" type="checkbox" required><label for="host-terms">I Agree to the Terms &amp; Conditions</label></div>
+          </div>
+          <div class="field" role="radiogroup" aria-labelledby="updates-q">
+            <p class="q" id="updates-q">Do You Consent to Receiving Periodic Updates from Movement Travel *</p>
+            <p class="note">We send newsletters 2-3 times per year and you can unsubscribe any time.</p>
+            <div class="check"><input id="updates-1" name="movement_updates" value="Yes" type="radio" required><label for="updates-1">Yes</label></div>
+            <div class="check"><input id="updates-2" name="movement_updates" value="No" type="radio" required><label for="updates-2">No</label></div>
+          </div>
         </fieldset>
-        <button class="btn" type="submit">Register</button>
+        <div class="send"><button class="btn" type="submit">Register</button><p class="thanks" aria-live="polite"></p></div>
       </div>
     </form>
     <button id="chat-btn" type="button">
@@ -978,11 +1071,38 @@
   // Safari can keep the old spot on reload anyway, so the page leaves from the top.
   window.addEventListener("beforeunload", () => window.scrollTo(0, 0));
 
-  // Have Questions saves through asyouareretreats.com (D1).
+  // Have Questions and Register save through asyouareretreats.com (D1).
   const SAVE = "https://asyouareretreats.com/api/";
   const send = (what, data) => fetch(SAVE + what, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.ok, () => false);
-  // Registration: the answers are not saved anywhere yet, so Register keeps them on the page.
-  document.getElementById("reg").addEventListener("submit", (e) => e.preventDefault());
+  // Registration: Register saves the answers (asyouareretreats.com, D1) and emails them to Piet, each question with its answer, in the form's order.
+  // The thanks line takes the button's place only after the save; a failed save leaves the form as filled in.
+  const reg = document.getElementById("reg");
+  const words = (el) => el.textContent.replace(/\s+/g, " ").trim().replace(/\s*\*$/, "");
+  let registering = false;
+  reg.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (registering || reg.classList.contains("done")) return;
+    const answers = [];
+    for (const f of reg.querySelectorAll(".field")) {
+      const inputs = [...f.querySelectorAll("input, textarea, select")];
+      const q = f.querySelector(".q");
+      if (q && inputs.length && inputs.every((i) => i.type === "radio" || i.type === "checkbox")) {
+        answers.push([words(q), inputs.filter((i) => i.checked).map((i) => i.value).join(", ")]);
+      } else {
+        for (const i of inputs) {
+          const label = reg.querySelector(`label[for="${i.id}"]`);
+          answers.push([label ? words(label) : i.name, i.type === "checkbox" ? (i.checked ? i.value : "") : i.value.trim()]);
+        }
+      }
+    }
+    const v = (id) => document.getElementById(id).value.trim();
+    registering = true;
+    const saved = await send("register", { email: v("f-email"), name: [v("f-first"), v("f-middle"), v("f-last")].filter(Boolean).join(" "), answers });
+    registering = false;
+    if (!saved) return;
+    reg.classList.add("done");
+    reg.querySelector(".thanks").textContent = "Thanks, we'll be in touch";
+  });
 
   // Have Questions: the corner button opens a box to write a question to us, the sent question shows in the box.
   // Questions are saved (asyouareretreats.com, D1); they go on to Hello@AsYouAreRetreats.com once its inbox is set.
