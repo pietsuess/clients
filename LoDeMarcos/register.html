@@ -170,7 +170,7 @@
 
   /* The days: one column per day, each in a see-through box (light tint over the photo, no blur), set a little below the headings */
   .days { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); margin-top: 2.5em; }
-  .days > div { padding: 1em 1.1em; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); }
+  .days > div, #prices .sched { padding: 1em 1.1em; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); }
   /* "Building good habits" sits on the heading's line, right of it; drops under it when there is no room */
   .days-head { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: clamp(20px, 2.5vw, 48px); }
   .days-head h3 { margin: 0; }
@@ -178,6 +178,24 @@
   .days ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5em; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.4; }
   .days .t { font-weight: 700; white-space: nowrap; }
   .days li { text-align: left; } /* schedule lines run plain left, never stretched */
+  /* Guest room prices (register page only): built like the days, three room boxes across on bigger screens (phones swipe them like the days), the payment schedule centred in one wide box below them with room after it, the headline close to the boxes; each price large in the headline face, amounts to the right */
+  /* Bigger screens: the three room boxes share five rows (name, price, deposit, second payment, Book now), so every row lines up across them */
+  @media (min-width: 901px) {
+    #prices .days { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, auto); row-gap: 0; }
+    #prices .days > div { display: grid; grid-row: span 5; grid-template-rows: subgrid; }
+  }
+  #prices .days { margin-top: 0; }
+  #prices .sched { margin-bottom: 2em; }
+  #prices .sched h4 { margin: 0 0 0.6em; text-align: center; }
+  #prices .sched ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5em calc(var(--gap) * 1.5); font-size: clamp(15px, 1.1vw, 18px); line-height: 1.4; }
+  #prices .sched li { text-align: center; text-align-last: center; text-wrap: balance; }
+  #prices .name { margin-bottom: 0.9em; }
+  #prices .name h4 { margin: 0; }
+  #prices .name small { display: block; margin-top: 0.3em; font-size: clamp(15px, 1.1vw, 18px); opacity: 0.75; }
+  #prices .price { margin: 0 0 0.6em; font-family: "Yeseva One", serif; font-size: clamp(32px, 3vw, 52px); line-height: 1.1; text-align: left; }
+  #prices .price small { display: block; margin-top: 0.3em; font-family: "Averia Serif Libre", Arial, sans-serif; font-size: clamp(15px, 1.1vw, 18px); opacity: 0.75; }
+  #prices .amt { display: flex; justify-content: space-between; gap: 1em; margin: 0 0 0.5em; font-size: clamp(15px, 1.1vw, 18px); line-height: 1.4; text-align: left; }
+  #prices .btn { margin-top: 1em; }
   /* Days arrow: where the days swipe sideways, a small arrow on the row's right edge nudges right; it fades once Sunday is in view (script at the end), taps pass through it */
   .days-more { display: none; }
   @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(6px); } }
@@ -322,8 +340,8 @@
   #signup .signed { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: var(--deep); color: var(--white); font: 700 16px/1 "Averia Serif Libre", Arial, sans-serif; letter-spacing: 0.08em; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
   #signup.done .signed { opacity: 1; }
   #signup.done .go { visibility: hidden; }
-  /* Signup page: the opening's button smaller, less rounded and a little lower */
-  .hero .btn { min-height: 44px; padding: 0 26px; border-radius: 10px; font-size: 16px; margin-top: 18vh; }
+  /* The opening's Register now button: big, less rounded, a little below the date */
+  .hero .btn { min-height: 64px; padding: 0 44px; border-radius: 10px; font-size: 24px; margin-top: 10vh; }
   /* Nothing flashes on arrival: the opening's words and shade stay hidden until the scroll engine takes them over */
   html.pre .hero > .shade, html.pre .hero .words { visibility: hidden; }
   /* Signup page: "Embodiment by the sea" on one line across the three videos, sized by the script to fill the width */
@@ -404,6 +422,7 @@
     /* Opening lines centered, as on the computer */
     .hero .beat p { text-align: center; text-align-last: center; }
     .hero .beat .date { font-size: 2.222em; }
+    .hero .beat .btn { font-size: 1.444em; min-height: 2.6em; padding: 0 1.4em; }
     .beat .card img { max-height: calc(36vh * var(--fit, 1)); }
     /* Room kept clear at the foot: the Scroll hint on the opening photo, the help button everywhere else */
     html.motion .hero > .beat { padding-bottom: calc(var(--pad) + 112px); }
@@ -482,7 +501,7 @@
         <svg class="brand" viewBox="285 258 520 466" role="img" aria-label="As You Are Retreats"><image href="images/AsYouAre_Logo2.svg" width="1071.21" height="1024"/></svg>
         <h1>Body language wellness retreat</h1>
         <p class="place date">February 24th-28th 2027</p>
-        <a class="btn" href="#register">Sign up to be notified when registration opens</a>
+        <a class="btn" href="#register">Register now</a>
       </div>
     </div>
   </section>
@@ -670,6 +689,47 @@
     <div class="map-box"></div>
   </section>
 
+  <section class="scene type" id="prices">
+    <div class="bg"><img src="images/maps-hotel-09.webp" alt=""></div>
+    <div class="shade"></div>
+    <div class="beat">
+      <div class="words">
+        <h2>Guest Room Prices</h2>
+        <div class="days">
+          <div>
+            <div class="name"><h4>Private Single Room</h4></div>
+            <p class="price">$3,440.68<small>per person</small></p>
+            <p class="amt">Deposit Amount <span class="t">$620.00</span></p>
+            <p class="amt">Additional Payment Amount <span class="t">$2,820.68</span></p>
+            <a class="btn" href="#register" data-room="Private Single Room">Book now</a>
+          </div>
+          <div>
+            <div class="name"><h4>Double Room</h4><small>(couple or friends in 1 bed)</small></div>
+            <p class="price">$2,918.06<small>per person</small></p>
+            <p class="amt">Deposit Amount <span class="t">$620.00</span></p>
+            <p class="amt">Additional Payment Amount <span class="t">$2,298.06</span></p>
+            <a class="btn" href="#register" data-room="Double Room (couple or friends in 1 bed)">Book now</a>
+          </div>
+          <div>
+            <div class="name"><h4>Shared Room</h4><small>(2 beds)</small></div>
+            <p class="price">$2,985.86<small>per person</small></p>
+            <p class="amt">Deposit Amount <span class="t">$620.00</span></p>
+            <p class="amt">Additional Payment Amount <span class="t">$2,365.86</span></p>
+            <a class="btn" href="#register" data-room="Shared Room (2 beds)">Book now</a>
+          </div>
+        </div>
+        <div class="sched">
+          <h4>Guest Payment Schedule</h4>
+          <ul>
+            <li>Deposit - Upon Registration</li>
+            <li>Additional Payments - February 1st, 2027.</li>
+            <li>All prices are per person in CAD and include HST.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="register" id="register">
     <div class="bg"><img src="images/unsplash-wNboBOSiuvA.webp" alt=""></div>
     <div class="shade"></div>
@@ -690,9 +750,10 @@
           <legend>2. Accommodation Preferences</legend>
           <div class="field" role="radiogroup" aria-labelledby="room-q">
             <p class="q" id="room-q">Would you prefer a private or shared room?</p>
-            <div class="check"><input id="room-1" name="room" value="Private room" type="radio"><label for="room-1">Private room</label></div>
-            <div class="check"><input id="room-2" name="room" value="Shared room" type="radio"><label for="room-2">Shared room</label></div>
-            <div class="check"><input id="room-3" name="room" value="Open to either" type="radio"><label for="room-3">Open to either</label></div>
+            <div class="check"><input id="room-1" name="room" value="Private Single Room" type="radio"><label for="room-1">Private Single Room</label></div>
+            <div class="check"><input id="room-2" name="room" value="Double Room (couple or friends in 1 bed)" type="radio"><label for="room-2">Double Room (couple or friends in 1 bed)</label></div>
+            <div class="check"><input id="room-3" name="room" value="Shared Room (2 beds)" type="radio"><label for="room-3">Shared Room (2 beds)</label></div>
+            <div class="check"><input id="room-4" name="room" value="Open to either" type="radio"><label for="room-4">Open to either</label></div>
           </div>
           <div class="field"><label for="f-roommate">If sharing, do you have a roommate preference?</label><input id="f-roommate" name="roommate" type="text"></div>
           <div class="field" role="radiogroup" aria-labelledby="share-new-q">
@@ -1457,6 +1518,13 @@
     document.body.appendChild(copy);
     window.addEventListener("load", () => document.getElementById("days").scrollIntoView());
   })();
+</script>
+<script>
+  // Book now: the room's link scrolls to the form (like every # link here) and ticks that room in it
+  document.querySelectorAll("#prices [data-room]").forEach((a) => a.addEventListener("click", () => {
+    const pick = [...document.querySelectorAll('#reg input[name="room"]')].find((r) => r.value === a.dataset.room);
+    if (pick) pick.checked = true;
+  }));
 </script>
 </body>
 </html>
