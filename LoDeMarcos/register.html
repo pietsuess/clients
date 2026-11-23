@@ -475,17 +475,24 @@
   /* Who leads it: a box for each of the team; a box opens that person's bio */
   .team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap); margin-top: var(--gap); max-width: 1100px; }
   .member { --owed: var(--deep); display: flex; align-items: flex-end; min-height: clamp(160px, 18vw, 240px); padding: 24px 26px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink); font: 700 20px/1.3 "Averia Serif Libre", Arial, sans-serif; text-align: left; text-shadow: none; cursor: pointer; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35); }
-  #bio-pop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 5vh 5vw; background: rgba(16, 18, 18, 0.92); }
-  #bio-pop.open { display: flex; }
-  #bio-pop .panel { --owed: var(--deep); position: relative; width: min(640px, 100%); max-height: 100%; overflow: auto; padding: 40px 40px 36px; border-radius: 16px; background: var(--paper); color: var(--ink); }
-  #bio-pop h4 { margin: 0 0 14px; }
+  #bio-pop, #terms-pop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 5vh 5vw; background: rgba(16, 18, 18, 0.92); }
+  #bio-pop.open, #terms-pop.open { display: flex; }
+  #bio-pop .panel, #terms-pop .panel { --owed: var(--deep); position: relative; width: min(640px, 100%); max-height: 100%; overflow: auto; padding: 40px 40px 36px; border-radius: 16px; background: var(--paper); color: var(--ink); }
+  #bio-pop h4, #terms-pop h4 { margin: 0 0 14px; }
   #bio-pop button { position: absolute; top: 14px; right: 14px; width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(60, 60, 59, 0.08); color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; }
   #bio-pop button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
   #photo-pop { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 5vh 5vw; background: rgba(16, 18, 18, 0.92); cursor: zoom-out; }
   #photo-pop.open { display: flex; }
   #photo-pop img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); cursor: default; }
-  #photo-pop button { position: absolute; top: 18px; right: 18px; width: 48px; height: 48px; border: 0; border-radius: 24px; background: rgba(255, 255, 255, 0.12); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  #photo-pop button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  #photo-pop button, #terms-pop > button { position: absolute; top: 18px; right: 18px; width: 48px; height: 48px; border: 0; border-radius: 24px; background: rgba(255, 255, 255, 0.12); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  #photo-pop button svg, #terms-pop > button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  /* Terms pop-up: the bio pop-up's panel with the photo pop-up's close button; the terms and the waiver scroll inside it */
+  #terms-pop h2 { font-size: 30px; }
+  #terms-pop h2.waiver { margin-top: 56px; }
+  #terms-pop h4 { margin-top: 1.8em; }
+  #terms-pop p { overflow-wrap: anywhere; }
+  #terms-pop ul, #terms-pop ol { padding-left: 1.2em; }
+  .register .note .terms-open { padding: 0; border: 0; background: none; font: inherit; color: var(--deep); text-decoration: underline; cursor: pointer; }
 </style>
 <script>
   // With motion on, the opening shows only its photo until the first scroll; its words are hidden here so they never flash on arrival.
@@ -877,14 +884,8 @@
           <legend>9. Terms and Conditions</legend>
           <div class="field" role="group" aria-labelledby="host-terms-q">
             <p class="q" id="host-terms-q">Retreat Host's Terms &amp; Conditions *</p>
-            <p class="note">Please review your Retreat Host's Terms &amp; Conditions</p>
+            <p class="note">Please review your Retreat Host's <button type="button" class="terms-open">Terms &amp; Conditions</button></p>
             <div class="check"><input id="host-terms" name="host_terms" value="I Agree to the Terms &amp; Conditions" type="checkbox" required><label for="host-terms">I Agree to the Terms &amp; Conditions</label></div>
-          </div>
-          <div class="field" role="radiogroup" aria-labelledby="updates-q">
-            <p class="q" id="updates-q">Do You Consent to Receiving Periodic Updates from Movement Travel *</p>
-            <p class="note">We send newsletters 2-3 times per year and you can unsubscribe any time.</p>
-            <div class="check"><input id="updates-1" name="movement_updates" value="Yes" type="radio" required><label for="updates-1">Yes</label></div>
-            <div class="check"><input id="updates-2" name="movement_updates" value="No" type="radio" required><label for="updates-2">No</label></div>
           </div>
         </fieldset>
         <div class="send"><button class="btn" type="submit">Register</button><p class="thanks" aria-live="polite"></p></div>
@@ -960,6 +961,163 @@
 <div id="photo-pop" role="dialog" aria-modal="true" aria-label="Photo">
   <button type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
   <img alt="">
+</div>
+<div id="terms-pop" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+  <button type="button" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  <div class="panel" data-lenis-prevent>
+    <h2 id="terms-title">AS YOU ARE RETREATS<br>Guest Terms and Conditions</h2>
+    <p>Retreat: As You Are LDM — Body Language<br>Location: Wirikuta Boutique Hotel - Lo de Marcos, Nayarit, Mexico<br>Dates: February 24th, 2027.  - February 28th, 2027.</p>
+    <h4>1. About This Agreement</h4>
+    <p>These Terms and Conditions form a binding agreement between each registered guest (“Guest” or “you”) and Dmitri Veselinovic, Adina Veselinovic and Piet Suess, carrying on business as As You Are Retreats (“As You Are Retreats,” “we,” “us” or “the Organizers”).</p>
+    <p>By registering for the retreat, making a payment or authorizing Movement Travel to make a booking on your behalf, you confirm that you have read, understood and agreed to these Terms and Conditions.</p>
+    <p>All Guests must be at least 18 years old on the retreat start date.</p>
+    <h4>2. Travel Agency and Suppliers</h4>
+    <p>Movement Travel is the travel agency responsible for processing Guest registrations and payments and arranging the travel services included in the retreat package.</p>
+    <p>Movement Travel<br>LM Movement Travel Ltd.<br>Affiliated with Nexion Canada<br>380 Wellington St., Tower B, 6th Floor<br>London, ON<br>N6A 5B5<br>retreatbookings@movementtravel.com<br>TICO #1549342</p>
+    <p>Movement Travel, the hotel, transportation companies, instructors, practitioners and other service providers are independent suppliers. Their own terms and conditions may also apply.</p>
+    <p>If there is a conflict between these Terms and Conditions and a mandatory legal requirement or the terms governing travel services provided by Movement Travel, the mandatory requirement or applicable travel-service term will govern.</p>
+    <h4>3. Retreat Price</h4>
+    <p>The total retreat price is:</p>
+    <p>Private Single Room<br>TOTAL: $3,044.85<br>Double Room (couple or friends in 1 bed)<br>TOTAL: $5,164.70 / $2,582.35</p>
+    <p>Shared Room (2 beds)<br>TOTAL: $5,284.70 / $2,642.35</p>
+    <p>Prices are stated in Canadian dollars and include all applicable taxes and mandatory fees.</p>
+    <p>Any optional activities, purchases or services that are not expressly listed as included are charged separately.</p>
+    <h4>4. What Is Included</h4>
+    <p>The retreat price includes:</p>
+    <ul><li>4 nights of accommodation at Wirikuta</li><li>Breakfast, Optional Boxed Lunch, Dinner</li><li>Scheduled yoga classes + workshops listed in the final itinerary</li><li>Optional group airport transportation between Puerto Vallarta International Airport and the retreat venue.</li><li>Applicable taxes and mandatory fees</li></ul>
+    <p>The final itinerary will be provided before departure. Scheduled activities, instructors, meal times and the order of programming may change where reasonably necessary.</p>
+    <h4>5. What Is Not Included</h4>
+    <p>The retreat price does not include:</p>
+    <ul><li>Flights or other transportation to Mexico</li><li>Passport, visa or entry-document expenses</li><li>Travel medical insurance</li><li>Trip cancellation or interruption insurance</li><li>Alcohol</li><li>Optional activities, excursions or treatments</li><li>Meals, drinks or services not expressly listed as included</li><li>Personal purchases and expenses</li><li>Additional transportation outside the scheduled group transfers</li><li>Medical services, medication or emergency evacuation</li><li>Gratuities</li><li>Costs caused by delayed or cancelled flights, missed transfers, late arrival or early departure</li><li>Any other item not expressly listed as included</li></ul>
+    <h4>6. Registration and Payment Schedule</h4>
+    <p>A non-refundable deposit of 50% per person is required when you register.</p>
+    <p>The remaining payment schedule is:</p>
+    <p>Deposit - Upon Registration<br>Additional Payments - February 1st, 2027.</p>
+    <p>Your registration is not confirmed until Movement Travel has received the required deposit and provided written confirmation.</p>
+    <p>If any payment is not received by its due date, Movement Travel or As You Are Retreats may provide written notice and a reasonable opportunity to make the overdue payment. If payment is still not received, your registration may be cancelled and the Guest cancellation policy will apply.</p>
+    <p>All payment processing, booking confirmations, invoices and receipts will be issued by Movement Travel.</p>
+    <h4>7. Cancellation by a Guest</h4>
+    <p>If you cancel your registration:</p>
+    <ul><li>Your deposit is non-refundable.</li><li>If you cancel more than 15 days before the retreat start date, amounts paid beyond the deposit will be refunded.</li><li>If you cancel 15 days or fewer before the retreat start date, all amounts paid are non-refundable.</li><li>No refund or credit will be provided for late arrival, early departure, missed activities, unused accommodation, missed transfers or any other service you choose not to use.</li></ul>
+    <p>A cancellation is effective only when Movement Travel receives it in writing at retreatbookings@movementtravel.com</p>
+    <p>Any refund owed will be returned to the original payment method, subject to Movement Travel’s processing procedures and applicable law.</p>
+    <p>We strongly recommend purchasing comprehensive trip cancellation and interruption insurance as soon as you register. Personal illness, family emergencies, employment changes, flight disruption and other unexpected circumstances do not change this cancellation policy.</p>
+    <h4>8. Transferring Your Registration</h4>
+    <p>You may request to transfer your registration to another eligible adult.</p>
+    <p>The replacement Guest must:</p>
+    <ul><li>Be at least 18 years old</li><li>Complete all registration forms, waivers and acknowledgements</li><li>Agree to these Terms and Conditions</li><li>Satisfy any entry, insurance, health and participation requirements</li><li>Accept the existing room arrangement</li><li>Pay any supplier, name-change or administrative charges associated with the transfer</li></ul>
+    <p>Transfer requests must be made in writing to Movement Travel and are subject to approval and supplier availability. You remain responsible for all amounts due until the transfer is confirmed in writing.</p>
+    <p>No transfer may be made for resale or commercial purposes.</p>
+    <h4>9. Shared Rooms and Roommates</h4>
+    <p>Guests booking double occupancy are responsible for selecting and registering with their own roommate.</p>
+    <p>Some shared rooms may require two Guests to share one bed. The room and bed configuration will be disclosed before booking.</p>
+    <p>If your intended roommate does not register, cancels, fails to pay or otherwise cannot attend, you must either:</p>
+    <ol><li>Find an eligible replacement roommate by the applicable deadline; or</li><li>Pay the single-occupancy price and any resulting price difference.</li></ol>
+    <p>As You Are Retreats does not guarantee roommate matching and is not responsible for disagreements or incompatibility between roommates.</p>
+    <p>Room changes are subject to hotel availability and may result in additional charges.</p>
+    <h4>10. Changes to the Retreat</h4>
+    <p>We may make reasonable changes to the schedule, instructors, activities, meals, transportation times or other details where necessary for safety, weather, supplier availability or the proper operation of the retreat.</p>
+    <p>These minor changes do not entitle a Guest to a refund.</p>
+    <p>If a material change is required, including a change to the confirmed accommodation:</p>
+    <ol><li>We may first offer comparable or better alternative accommodation or an equivalent replacement service; and</li><li>You may accept the proposed alternative or, if the change materially alters the retreat you purchased, cancel and receive a full refund of the amounts paid.</li></ol>
+    <p>We will inform Guests of material changes as soon as reasonably possible.</p>
+    <h4>11. Cancellation by As You Are Retreats</h4>
+    <p>Guests will receive a full refund of all amounts paid if:</p>
+    <ul><li>As You Are Retreats cancels the retreat;</li><li>The retreat cannot proceed because the Organizers cannot attend and no suitable replacement host is provided;</li><li>The retreat is cancelled because of an action by the Organizers that breaches their agreement with Movement Travel; or</li><li>A travel advisory, severe weather event, natural disaster, supplier default or other unforeseen circumstance prevents the retreat from taking place.</li></ul>
+    <p>Any refund obligation to a Guest is conditional on As You Are Retreats receiving reimbursement from an insurer or supplier.</p>
+    <p>Unless required by law or expressly stated in these Terms, As You Are Retreats is not responsible for reimbursing flights, separately booked accommodation, insurance premiums, lost wages or other personal expenses. Guests should make claims for those losses through their own insurers or service providers.</p>
+    <h4>12. Travel Medical Insurance</h4>
+    <p>Every Guest must obtain and maintain travel medical insurance for the full duration of their trip.</p>
+    <p>The policy must provide coverage for:</p>
+    <ul><li>Emergency medical care in Mexico</li><li>Hospitalization</li><li>Emergency transportation</li><li>Medical evacuation</li><li>Repatriation where applicable</li><li>The activities the Guest intends to participate in</li></ul>
+    <p>Proof of coverage may be required before departure. A Guest who does not provide satisfactory proof of insurance may be unable to participate, and the Guest cancellation policy will apply.</p>
+    <p>Out-of-province medical coverage does not normally cover the price of a cancelled or interrupted trip. Guests are strongly encouraged to purchase separate trip cancellation, trip interruption and baggage coverage immediately after registering.</p>
+    <p>Each Guest is responsible for reviewing all policy terms, exclusions and coverage limits.</p>
+    <h4>13. Passports, Entry Requirements and Travel Arrangements</h4>
+    <p>Each Guest is responsible for:</p>
+    <ul><li>Holding a passport valid for the required period</li><li>Satisfying Mexican entry and immigration requirements</li><li>Obtaining any required visa or travel authorization</li><li>Reviewing vaccination and health guidance</li><li>Arranging flights that work with the published transfer schedule</li><li>Monitoring government travel advisories</li><li>Providing accurate booking information</li></ul>
+    <p>As You Are Retreats and Movement Travel are not responsible if a Guest is delayed, denied boarding, refused entry or unable to travel because of incomplete, inaccurate or invalid documentation.</p>
+    <h4>14. Health and Fitness to Participate</h4>
+    <p>Yoga and meditation activities may involve physical movement, balance, stretching, breathing exercises, heat, outdoor conditions and prolonged periods of sitting or standing.</p>
+    <p>By participating, you confirm that:</p>
+    <ul><li>You are physically and medically able to participate safely;</li><li>You will consult a qualified health professional if you have any concerns;</li><li>You will inform the appropriate instructor of any relevant injury, pregnancy, medical condition, allergy or physical limitation;</li><li>You will follow safety directions and work within your own abilities; and</li><li>You may stop or decline any activity at any time.</li></ul>
+    <p>The retreat, its instructors and its activities do not provide medical diagnosis, treatment, psychotherapy or medical advice.</p>
+    <p>You are responsible for carrying required medications and for informing the Organizers of information reasonably necessary to respond to an emergency.</p>
+    <h4>15. Assumption of Risk</h4>
+    <p>Participation in international travel, yoga, meditation, transportation, hotel activities and optional activities involves inherent and unexpected risks.</p>
+    <p>These risks may include:</p>
+    <ul><li>Slips, trips and falls</li><li>Sprains, strains and other physical injuries</li><li>Adverse reactions to movement or breathing practices</li><li>Food-related illness or allergic reaction</li><li>Insect bites, heat, sun exposure and dehydration</li><li>Swimming pool, ocean and beach hazards</li><li>Transportation accidents</li><li>Theft, loss or damage to personal property</li><li>Infectious illness</li><li>Delayed access to medical care</li><li>Risks arising from weather, local conditions and international travel</li></ul>
+    <p>By registering and participating, you voluntarily accept the ordinary and inherent risks associated with the retreat.</p>
+    <p>A separate participation waiver and release may be required before the retreat. Failure to sign a required waiver may result in cancellation of your registration under the Guest cancellation policy.</p>
+    <h4>16. Guest Conduct</h4>
+    <p>All Guests must comply with:</p>
+    <ul><li>The As You Are Retreats Code of Conduct</li><li>Reasonable safety and operational directions</li><li>Hotel and supplier rules</li><li>Applicable Canadian and Mexican laws</li><li>Requirements intended to protect Guests, staff, local residents and property</li></ul>
+    <p>Conduct that may result in removal includes:</p>
+    <ul><li>Harassment, discrimination, threats or violence</li><li>Sexual harassment or unwanted sexual conduct</li><li>Conduct that creates a safety risk</li><li>Illegal activity</li><li>Serious disruption of the retreat</li><li>Damage to property</li><li>Repeated failure to follow reasonable instructions</li><li>Abusive conduct toward Guests, hosts, hotel staff, instructors or local residents</li><li>Possession or use of illegal substances</li><li>Attending activities while impaired where doing so creates a safety or conduct concern</li></ul>
+    <p>Where reasonably possible, the Guest will be informed of the concern and given an opportunity to correct the behaviour. Immediate removal may occur where required for safety or because of serious misconduct.</p>
+    <p>A Guest who is removed is responsible for arranging and paying for alternative accommodation, transportation and travel. No refund will be provided for unused services following removal.</p>
+    <h4>17. Alcohol</h4>
+    <p>Alcohol is not included in the retreat price.</p>
+    <p>Guests who choose to consume alcohol outside scheduled programming must do so responsibly and in compliance with hotel rules and local law.</p>
+    <p>Alcohol consumption does not excuse unsafe or inappropriate behaviour.</p>
+    <h4>18. Photography and Recording</h4>
+    <p>Photography and filming will be governed by a separate media release.</p>
+    <p>A Guest’s decision not to consent to promotional photography will not affect their ability to participate. Guests must also respect the privacy and media preferences of other participants.</p>
+    <h4>19. Personal Property</h4>
+    <p>Guests are responsible for their passports, money, electronics, luggage and other personal property.</p>
+    <p>As You Are Retreats is not responsible for lost, stolen or damaged property except to the extent caused by its negligence and where liability cannot legally be excluded.</p>
+    <p>Guests should use hotel safes where available and maintain appropriate travel and baggage insurance.</p>
+    <h4>20. Independent Suppliers</h4>
+    <p>Hotels, transportation providers, instructors, practitioners and other suppliers may be independently owned and operated.</p>
+    <p>As You Are Retreats will exercise reasonable care when selecting and coordinating suppliers but does not control every act or omission of an independent supplier.</p>
+    <p>Nothing in this section limits any legal right or remedy that cannot lawfully be limited or excluded.</p>
+    <h4>21. Limitation of Liability</h4>
+    <p>To the fullest extent permitted by law, As You Are Retreats will not be liable for indirect, incidental, special or consequential losses, including lost income, lost enjoyment, additional personal travel expenses or loss of opportunity.</p>
+    <p>Nothing in these Terms excludes or limits liability that cannot legally be excluded, including liability arising from fraud, wilful misconduct or any other liability that applicable law prohibits us from limiting.</p>
+    <p>The detailed release of liability relating to physical activities will be contained in a separate waiver reviewed and signed by each Guest.</p>
+    <h4>22. Emergencies</h4>
+    <p>In an emergency, you authorize the Organizers to contact emergency services and your designated emergency contact.</p>
+    <p>You remain responsible for medical, transportation, evacuation and related expenses. The Organizers cannot guarantee the availability, timing or standard of local medical services.</p>
+    <h4>23. Privacy</h4>
+    <p>As You Are Retreats and Movement Travel may collect personal information reasonably required to:</p>
+    <ul><li>Process registration and payment</li><li>Arrange accommodation, meals and transportation</li><li>Understand dietary, accessibility and participation needs</li><li>Communicate retreat information</li><li>Respond to emergencies</li><li>Meet legal, insurance and supplier requirements</li></ul>
+    <p>Information may be shared with Movement Travel, the hotel, instructors, transportation providers, emergency responders and other suppliers where reasonably necessary to provide the retreat or protect health and safety.</p>
+    <p>Health and emergency information will be limited to those who reasonably require it.</p>
+    <p>For privacy questions, contact hello@asyouareretreats.com.</p>
+    <h4>24. Complaints and Concerns</h4>
+    <p>Guests should raise concerns as soon as possible so there is a reasonable opportunity to address them during the retreat.</p>
+    <p>Before the retreat, contact:</p>
+    <p><strong>As You Are Retreats</strong><br>Email: hello@asyouareretreats.com<br>Address: 141 Cranberry Rd, Salt Spring Island</p>
+    <p>For bookings, payments and travel services, contact:</p>
+    <p>Movement Travel<br>retreatbookings@movementtravel.com<br>Phone: (519) 660-6966<br>TICO #1549342</p>
+    <h4>25. Governing Law</h4>
+    <p>These Terms and Conditions are governed by the laws of Ontario and the federal laws of Canada applicable in Ontario, subject to any mandatory consumer or travel law that applies.</p>
+    <p>The parties submit to the courts located in Toronto, Ontario, except where applicable law requires otherwise.</p>
+    <h4>26. General Terms</h4>
+    <p>If any provision is found to be invalid or unenforceable, the remaining provisions will continue in effect.</p>
+    <p>A failure to enforce a provision on one occasion does not waive the right to enforce it later.</p>
+    <p>These Terms, together with the booking confirmation, published retreat description, applicable Movement Travel terms, Code of Conduct and required waivers, form the agreement with the Guest.</p>
+    <p>No change to these Terms is effective unless confirmed in writing by an authorized representative of As You Are Retreats or Movement Travel, as applicable.</p>
+    <h4>27. Guest Acknowledgement</h4>
+    <p>By registering, I confirm that:</p>
+    <ul><li>I am at least 18 years old.</li><li>I have read and agree to these Terms and Conditions.</li><li>I understand the payment and cancellation terms.</li><li>I understand which services are included and excluded.</li><li>I will obtain the required travel medical insurance.</li><li>I am responsible for my passport, entry requirements and flights.</li><li>I voluntarily accept the inherent risks associated with the retreat.</li><li>I agree to follow the Code of Conduct and reasonable safety directions.</li><li>I understand that additional waivers and forms may be required before participation.</li></ul>
+    <p><strong>Guest’s full legal name:</strong> ______________________________</p>
+    <p><strong>Signature:</strong> __________________________________________</p>
+    <p><strong>Date:</strong> _____________________________</p>
+    <h2 class="waiver">LIABILITY WAIVER</h2>
+    <p>As You Are Retreats<br>Participant Waiver and Acknowledgment of Risk</p>
+    <p>Retreat — As You Are LDM — Body Language<br>Location — Wirikuta Boutique Hotel - Lo de Marcos, Nayarit, Mexico<br>Organizer — Dmitri Veselinovic, Adina Veselinovic + Piet Suess, operating as As You Are Retreats<br>Organizer contact — hello@asyouareretreats.com</p>
+    <h4>1. Activities and risks</h4>
+    <p>I am choosing to participate in the retreat’s scheduled yoga and guided movement sessions. Participation in each activity is voluntary. Risks include muscle or joint strain, aggravation of an existing condition, dizziness, loss of balance, slips and falls, heat exposure, and dehydration. These risks can cause injury or illness, including serious injury. Conditions such as heat, humidity, or uneven or wet surfaces can increase some risks. Access to medical care or emergency transport may take time.</p>
+    <h4>2. My choices during the retreat</h4>
+    <p>I will choose activities and modifications appropriate for me, follow safety instructions, and pause or stop if I feel pain, dizziness, or discomfort. I can rest, modify, or skip an activity at any time. If I am unsure whether an activity is appropriate for me, I will seek advice from a qualified healthcare professional. I will tell the instructor about any relevant limitation or accommodation need before taking part. I understand the sessions are for general wellness and are separate from medical care or treatment.</p>
+    <h4>3. Assumption of risk and limited release</h4>
+    <p>I voluntarily accept the inherent risks described above. To the extent permitted by applicable law, I release the Organizer and its staff and instructors from claims arising solely from the inherent risks of the activities I choose to participate in. This release does not cover claims arising from their negligence or misconduct. I retain all rights and remedies that cannot lawfully be waived.</p>
+    <h4>4. Insurance and emergency assistance</h4>
+    <p>I agree to maintain travel medical insurance for the duration of my trip as required by the retreat Terms and Conditions. I am responsible for checking whether my policy covers the planned activities and emergency transport or evacuation. If I am unable to communicate in an emergency, I authorize the Organizer to request emergency assistance and contact the person I list below.</p>
+    <h4>5. My agreement</h4>
+    <p>I confirm that I am an adult with legal capacity to sign, that I have read and understood this waiver, and that I had an opportunity to ask questions before signing. I agree voluntarily. This waiver accompanies the retreat Terms and Conditions.</p>
+  </div>
 </div>
 
 <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -1454,6 +1612,27 @@
       at = (at + (e.key === "ArrowRight" ? 1 : -1) + list.length) % list.length;
       big.src = list[at].currentSrc || list[at].src;
     });
+  })();
+</script>
+<script>
+  // Terms pop-up: the Retreat Host's "Terms & Conditions" in the form opens the terms and the waiver; the page holds still until it closes.
+  (function () {
+    const pop = document.getElementById("terms-pop");
+    const panel = pop.querySelector(".panel");
+    const opener = document.querySelector(".terms-open");
+    function close() {
+      pop.classList.remove("open");
+      if (window.wsLenis) window.wsLenis.start();
+      opener.focus();
+    }
+    opener.addEventListener("click", () => {
+      pop.classList.add("open");
+      panel.scrollTop = 0;
+      if (window.wsLenis) window.wsLenis.stop();
+      pop.querySelector("button").focus();
+    });
+    pop.addEventListener("click", (e) => { if (!panel.contains(e.target)) close(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pop.classList.contains("open")) close(); });
   })();
 </script>
 <script>
