@@ -307,8 +307,14 @@
 
   /* Register */
   .register { position: relative; overflow: hidden; padding: calc(var(--bar) + var(--pad)) var(--pad) clamp(64px, 7vw, 120px); background: var(--ink); color: var(--white); }
-  .register > h2, .register > form { position: relative; z-index: 2; }
-  .register h2 { font-size: clamp(40px, 4.5vw, 76px); margin-bottom: 0.4em; }
+  /* Register screen: "Mexico retreat" sits right above the photo's boat, the Register now button and terms line right below it (under its shadow),
+     on every screen shape, holding still with the photo as the screen slides in. The photo fills the screen cropped to fit, so a spot y down
+     the photo (1920 x 1080) lands at 50% + (y - 50%) x the photo's shown height, max(screen height, 56.25% of screen width).
+     The boat: top 49.1%, its shadow's bottom 53.9% down. */
+  .register > h2, .register > .col { position: fixed; left: 0; right: 0; z-index: 2; padding: 0 var(--pad); text-align: center; }
+  .register h2 { font-size: clamp(40px, 4.5vw, 76px); margin: 0; }
+  .register > h2 { bottom: calc(50% - (0.491 - 0.5) * max(100%, 56.25vw) + 6px); }
+  .register > .col { top: calc(50% + (0.539 - 0.5) * max(100%, 56.25vw) + 16px); }
   .register form, .register .col { gap: 18px; }
   form { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: start; }
   .col { display: grid; gap: var(--gap); }
@@ -322,7 +328,10 @@
   .register label { font-size: 14px; }
   .register input[type="text"], .register input[type="email"], .register input[type="tel"], .register input[type="date"], .register select, .register textarea, #ask textarea, #ask input { min-height: 44px; padding: 8px 12px; font-size: 16px; }
   .register .btn { min-height: 46px; padding: 0 28px; font-size: 17px; }
-  /* Registration page: the form is taller than a screen, so the photo and its shade stay put behind it as it scrolls by */
+  /* Register screen: its Register now button (to Movement's form) sits centred, at the opening button's size */
+  .register > .col .btn { justify-self: center; min-height: 64px; padding: 0 44px; font-size: 24px; }
+  .register > .col .note { text-align: center; text-align-last: center; }
+  /* Register screen: the photo and its shade stay put as the screen slides in over them (the screen's clip shows them only inside it) */
   .register { clip-path: inset(0); }
   .register .bg, .register .shade { position: fixed; }
   /* A question with answers to pick: its words look like a field's label, its answers sit under it */
@@ -492,7 +501,7 @@
   #terms-pop h4 { margin-top: 1.8em; }
   #terms-pop p { overflow-wrap: anywhere; }
   #terms-pop ul, #terms-pop ol { padding-left: 1.2em; }
-  .register .note .terms-open { padding: 0; border: 0; background: none; font: inherit; color: var(--deep); text-decoration: underline; cursor: pointer; }
+  .register .note .terms-open { padding: 0; border: 0; background: none; font: inherit; color: #0096ff; text-decoration: underline; cursor: pointer; }
 </style>
 <script>
   // With motion on, the opening shows only its photo until the first scroll; its words are hidden here so they never flash on arrival.
@@ -753,144 +762,10 @@
     <div class="bg"><img src="images/unsplash-wNboBOSiuvA.webp" alt=""></div>
     <div class="shade"></div>
     <h2>Mexico retreat</h2>
-    <form id="reg">
-      <div class="col">
-        <fieldset>
-          <legend>1. Personal Information</legend>
-          <p class="q">Full Name (Exactly As Shown in Passport)</p>
-          <div class="field"><label for="f-first">First Name *</label><input id="f-first" name="first_name" type="text" autocomplete="given-name" required></div>
-          <div class="field"><label for="f-last">Last Name *</label><input id="f-last" name="last_name" type="text" autocomplete="family-name" required></div>
-          <div class="field"><label for="f-preferred">Preferred name</label><input id="f-preferred" name="preferred_name" type="text" autocomplete="nickname"></div>
-          <div class="field"><label for="f-email">Email address *</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
-          <div class="field"><label for="f-phone">Cell Phone Number *</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" required></div>
-          <div class="field"><label for="f-birth">Date of Birth *</label><input id="f-birth" name="date_of_birth" type="date" autocomplete="bday" required></div>
-        </fieldset>
-        <fieldset>
-          <legend>2. Accommodation Preferences</legend>
-          <div class="field" role="radiogroup" aria-labelledby="room-q">
-            <p class="q" id="room-q">Would you prefer a private or shared room?</p>
-            <div class="check"><input id="room-1" name="room" value="Private Single Room" type="radio"><label for="room-1">Private Single Room</label></div>
-            <div class="check"><input id="room-2" name="room" value="Double Room (couple or friends in 1 bed)" type="radio"><label for="room-2">Double Room (couple or friends in 1 bed)</label></div>
-            <div class="check"><input id="room-3" name="room" value="Shared Room (2 beds)" type="radio"><label for="room-3">Shared Room (2 beds)</label></div>
-            <div class="check"><input id="room-4" name="room" value="Open to either" type="radio"><label for="room-4">Open to either</label></div>
-          </div>
-          <div class="field"><label for="f-companions">Travel Companions</label><p class="note">If you would like to share a room with another guest please provide their name.</p><p class="note">If you are registering and paying for the other guest, please provide the following details for them: Full Name (exactly as shown in passport), Address, Email, Cell Number, Date of Birth, Citizenship, Passport Number &amp; Expiry Date, Allergies &amp; Dietary Restrictions (if any)</p><textarea id="f-companions" name="travel_companions"></textarea></div>
-          <div class="field" role="radiogroup" aria-labelledby="share-new-q">
-            <p class="q" id="share-new-q">Are you comfortable sharing with someone you haven't met before?</p>
-            <div class="check"><input id="share-new-1" name="share_new" value="Yes" type="radio"><label for="share-new-1">Yes</label></div>
-            <div class="check"><input id="share-new-2" name="share_new" value="No" type="radio"><label for="share-new-2">No</label></div>
-            <div class="check"><input id="share-new-3" name="share_new" value="Prefer to share with someone I know" type="radio"><label for="share-new-3">Prefer to share with someone I know</label></div>
-          </div>
-          <div class="field"><label for="f-requests">Any special accommodation requests?</label><textarea id="f-requests" name="accommodation_requests"></textarea></div>
-        </fieldset>
-        <fieldset>
-          <legend>3. Food &amp; Dietary Requirements</legend>
-          <div class="field" role="radiogroup" aria-labelledby="lunch-q">
-            <p class="q" id="lunch-q">Would you like to add boxed lunches?</p>
-            <div class="check"><input id="lunch-1" name="lunch" value="Yes" type="radio"><label for="lunch-1">Yes</label></div>
-            <div class="check"><input id="lunch-2" name="lunch" value="No" type="radio"><label for="lunch-2">No</label></div>
-          </div>
-          <div class="field" role="radiogroup" aria-labelledby="allergies-q">
-            <p class="q" id="allergies-q">Do you have any food allergies or intolerances?</p>
-            <div class="check"><input id="allergies-1" name="allergies" value="Yes" type="radio"><label for="allergies-1">Yes</label></div>
-            <div class="check"><input id="allergies-2" name="allergies" value="No" type="radio"><label for="allergies-2">No</label></div>
-          </div>
-          <div class="field"><label for="f-allergies">If yes, please list them.</label><textarea id="f-allergies" name="allergies_list"></textarea></div>
-          <div class="field" role="group" aria-labelledby="diet-q">
-            <p class="q" id="diet-q">Do you have any dietary preferences?</p>
-            <div class="check"><input id="diet-1" name="diet" value="Vegetarian" type="checkbox"><label for="diet-1">Vegetarian</label></div>
-            <div class="check"><input id="diet-2" name="diet" value="Vegan" type="checkbox"><label for="diet-2">Vegan</label></div>
-            <div class="check"><input id="diet-3" name="diet" value="Gluten-free" type="checkbox"><label for="diet-3">Gluten-free</label></div>
-            <div class="check"><input id="diet-4" name="diet" value="Dairy-free" type="checkbox"><label for="diet-4">Dairy-free</label></div>
-            <div class="check"><input id="diet-5" name="diet" value="Other" type="checkbox"><label for="diet-5">Other</label></div>
-            <div class="check"><input id="diet-6" name="diet" value="No restrictions" type="checkbox"><label for="diet-6">No restrictions</label></div>
-          </div>
-          <div class="field"><label for="f-food">Anything else we should know about your food preferences?</label><textarea id="f-food" name="food_notes"></textarea></div>
-        </fieldset>
-        <fieldset>
-          <legend>4. Yoga Experience</legend>
-          <div class="field" role="radiogroup" aria-labelledby="yoga-q">
-            <p class="q" id="yoga-q">How would you describe your yoga experience?</p>
-            <div class="check"><input id="yoga-1" name="yoga" value="New to yoga" type="radio"><label for="yoga-1">New to yoga</label></div>
-            <div class="check"><input id="yoga-2" name="yoga" value="Beginner" type="radio"><label for="yoga-2">Beginner</label></div>
-            <div class="check"><input id="yoga-3" name="yoga" value="Intermediate" type="radio"><label for="yoga-3">Intermediate</label></div>
-            <div class="check"><input id="yoga-4" name="yoga" value="Advanced" type="radio"><label for="yoga-4">Advanced</label></div>
-            <div class="check"><input id="yoga-5" name="yoga" value="Experienced practitioner / yoga teacher" type="radio"><label for="yoga-5">Experienced practitioner / yoga teacher</label></div>
-          </div>
-        </fieldset>
-      </div>
-      <div class="col">
-        <fieldset>
-          <legend>5. Health, Mobility &amp; Wellbeing</legend>
-          <div class="field" role="radiogroup" aria-labelledby="injuries-q">
-            <p class="q" id="injuries-q">Do you have any injuries, physical limitations or mobility concerns?</p>
-            <div class="check"><input id="injuries-1" name="injuries" value="Yes" type="radio"><label for="injuries-1">Yes</label></div>
-            <div class="check"><input id="injuries-2" name="injuries" value="No" type="radio"><label for="injuries-2">No</label></div>
-          </div>
-          <div class="field"><label for="f-injuries">If yes, please explain.</label><textarea id="f-injuries" name="injuries_detail"></textarea></div>
-          <div class="field"><label for="f-avoid">Are there any movements or activities you need to avoid?</label><textarea id="f-avoid" name="avoid"></textarea></div>
-          <div class="field"><label for="f-health">Do you have any health considerations or accessibility needs our retreat team should be aware of?</label><textarea id="f-health" name="health"></textarea></div>
-        </fieldset>
-        <fieldset>
-          <legend>6. Travel &amp; Mexico Information</legend>
-          <div class="field" role="radiogroup" aria-labelledby="flight-booking-q">
-            <p class="q" id="flight-booking-q">Flight Booking *</p>
-            <p class="note">Movement Travel offers flight booking services for an additional fee:</p>
-            <p class="note">Outside Canada &amp; US - $195 per person</p>
-            <p class="note">Prices are in Canadian Dollars and are subject to sales tax.</p>
-            <div class="check"><input id="flight-booking-1" name="flight_booking" value="Yes" type="radio" required><label for="flight-booking-1">Yes</label></div>
-            <div class="check"><input id="flight-booking-2" name="flight_booking" value="No" type="radio" required><label for="flight-booking-2">No</label></div>
-          </div>
-          <div class="field" role="radiogroup" aria-labelledby="flights-booked-q">
-            <p class="q" id="flights-booked-q">Have you booked your flights?</p>
-            <div class="check"><input id="flights-booked-1" name="flights_booked" value="Yes" type="radio"><label for="flights-booked-1">Yes</label></div>
-            <div class="check"><input id="flights-booked-2" name="flights_booked" value="No" type="radio"><label for="flights-booked-2">No</label></div>
-            <div class="check"><input id="flights-booked-3" name="flights_booked" value="Planning to" type="radio"><label for="flights-booked-3">Planning to</label></div>
-          </div>
-          <div class="field"><label for="f-flights">Airline and flight details</label><textarea id="f-flights" name="flight_details"></textarea></div>
-          <div class="field"><label for="f-arrival">Arrival date and time</label><input id="f-arrival" name="arrival" type="text"></div>
-          <div class="field"><label for="f-departure">Departure date and time</label><input id="f-departure" name="departure" type="text"></div>
-          <div class="field" role="radiogroup" aria-labelledby="airport-transport-q">
-            <p class="q" id="airport-transport-q">Will you need airport transportation?</p>
-            <div class="check"><input id="airport-transport-1" name="airport_transport" value="Yes" type="radio"><label for="airport-transport-1">Yes</label></div>
-            <div class="check"><input id="airport-transport-2" name="airport_transport" value="No" type="radio"><label for="airport-transport-2">No</label></div>
-            <div class="check"><input id="airport-transport-3" name="airport_transport" value="Not sure yet" type="radio"><label for="airport-transport-3">Not sure yet</label></div>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>7. Activities &amp; Enjoyment</legend>
-          <div class="field" role="radiogroup" aria-labelledby="swimming-q">
-            <p class="q" id="swimming-q">Are you comfortable swimming?</p>
-            <div class="check"><input id="swimming-1" name="swimming" value="Yes" type="radio"><label for="swimming-1">Yes</label></div>
-            <div class="check"><input id="swimming-2" name="swimming" value="Somewhat" type="radio"><label for="swimming-2">Somewhat</label></div>
-            <div class="check"><input id="swimming-3" name="swimming" value="No" type="radio"><label for="swimming-3">No</label></div>
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>8. A Little More About You</legend>
-          <div class="field" role="radiogroup" aria-labelledby="heard-q">
-            <p class="q" id="heard-q">How Did You Hear About This Retreat? *</p>
-            <div class="check"><input id="heard-1" name="heard" value="Retreat Host" type="radio" required><label for="heard-1">Retreat Host</label></div>
-            <div class="check"><input id="heard-2" name="heard" value="Friend / Family" type="radio" required><label for="heard-2">Friend / Family</label></div>
-            <div class="check"><input id="heard-3" name="heard" value="Movement Travel Website" type="radio" required><label for="heard-3">Movement Travel Website</label></div>
-            <div class="check"><input id="heard-4" name="heard" value="Web Search" type="radio" required><label for="heard-4">Web Search</label></div>
-            <div class="check"><input id="heard-5" name="heard" value="Other" type="radio" required><label for="heard-5">Other</label></div>
-          </div>
-          <div class="field"><label for="f-inspired">What inspired you to join us?</label><textarea id="f-inspired" name="inspired"></textarea></div>
-          <div class="field"><label for="f-special">What would make this retreat truly special for you?</label><textarea id="f-special" name="special"></textarea></div>
-          <div class="field"><label for="f-else">Is there anything else you'd like us to know?</label><textarea id="f-else" name="anything_else"></textarea></div>
-        </fieldset>
-        <fieldset>
-          <legend>9. Terms and Conditions</legend>
-          <div class="field" role="group" aria-labelledby="host-terms-q">
-            <p class="q" id="host-terms-q">Retreat Host's Terms &amp; Conditions *</p>
-            <p class="note">Please review your Retreat Host's <button type="button" class="terms-open">Terms &amp; Conditions</button></p>
-            <div class="check"><input id="host-terms" name="host_terms" value="I Agree to the Terms &amp; Conditions" type="checkbox" required><label for="host-terms">I Agree to the Terms &amp; Conditions</label></div>
-          </div>
-        </fieldset>
-        <div class="send"><button class="btn" type="submit">Register</button><p class="thanks" aria-live="polite"></p></div>
-      </div>
-    </form>
+    <div class="col">
+      <a class="btn" href="https://travefy.com/f/6ws9rqea5vyqra2uwxzk5c9tyrg9wdy9lq" target="_blank" rel="noopener">Register now</a>
+      <p class="note">Please review your Retreat Host's <button type="button" class="terms-open">Terms &amp; Conditions</button></p>
+    </div>
     <button id="chat-btn" type="button">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
       Have Questions?
@@ -1132,38 +1007,9 @@
   // Safari can keep the old spot on reload anyway, so the page leaves from the top.
   window.addEventListener("beforeunload", () => window.scrollTo(0, 0));
 
-  // Have Questions and Register save through asyouareretreats.com (D1).
+  // Have Questions saves through asyouareretreats.com (D1).
   const SAVE = "https://asyouareretreats.com/api/";
   const send = (what, data) => fetch(SAVE + what, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }).then((r) => r.ok, () => false);
-  // Registration: Register saves the answers (asyouareretreats.com, D1) and emails them to Piet, each question with its answer, in the form's order.
-  // The thanks line takes the button's place only after the save; a failed save leaves the form as filled in.
-  const reg = document.getElementById("reg");
-  const words = (el) => el.textContent.replace(/\s+/g, " ").trim().replace(/\s*\*$/, "");
-  let registering = false;
-  reg.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (registering || reg.classList.contains("done")) return;
-    const answers = [];
-    for (const f of reg.querySelectorAll(".field")) {
-      const inputs = [...f.querySelectorAll("input, textarea, select")];
-      const q = f.querySelector(".q");
-      if (q && inputs.length && inputs.every((i) => i.type === "radio" || i.type === "checkbox")) {
-        answers.push([words(q), inputs.filter((i) => i.checked).map((i) => i.value).join(", ")]);
-      } else {
-        for (const i of inputs) {
-          const label = reg.querySelector(`label[for="${i.id}"]`);
-          answers.push([label ? words(label) : i.name, i.type === "checkbox" ? (i.checked ? i.value : "") : i.value.trim()]);
-        }
-      }
-    }
-    const v = (id) => document.getElementById(id).value.trim();
-    registering = true;
-    const saved = await send("register", { email: v("f-email"), name: [v("f-first"), v("f-last")].filter(Boolean).join(" "), answers });
-    registering = false;
-    if (!saved) return;
-    reg.classList.add("done");
-    reg.querySelector(".thanks").textContent = "Thanks, we'll be in touch";
-  });
 
   // Have Questions: the corner button opens a box to write a question to us, the sent question shows in the box.
   // Questions are saved (asyouareretreats.com, D1); they go on to Hello@AsYouAreRetreats.com once its inbox is set.
@@ -1720,13 +1566,6 @@
     document.body.appendChild(copy);
     window.addEventListener("load", () => document.getElementById("days").scrollIntoView());
   })();
-</script>
-<script>
-  // Book now: the room's link scrolls to the form (like every # link here) and ticks that room in it
-  document.querySelectorAll("#prices [data-room]").forEach((a) => a.addEventListener("click", () => {
-    const pick = [...document.querySelectorAll('#reg input[name="room"]')].find((r) => r.value === a.dataset.room);
-    if (pick) pick.checked = true;
-  }));
 </script>
 </body>
 </html>
